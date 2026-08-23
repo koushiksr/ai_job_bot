@@ -955,7 +955,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-gray-300">Naukri Login Email</label>
+                      <label className="text-xs font-medium text-gray-300">Portal Login Email</label>
                       <input
                         type="email"
                         value={editingProfile.email || ''}
@@ -969,7 +969,7 @@ export default function Dashboard() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-gray-300">Naukri Password</label>
+                      <label className="text-xs font-medium text-gray-300">Portal Password</label>
                       <input
                         type="password"
                         value={editingProfile.password || ''}
@@ -1030,7 +1030,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-gray-300">Naukri Target Search URL</label>
+                    <label className="text-xs font-medium text-gray-300">Target Search URL</label>
                     <input
                       type="url"
                       value={editingProfile.search_url || ''}
@@ -1040,6 +1040,7 @@ export default function Dashboard() {
                       placeholder="https://www.naukri.com/machine-learning-jobs"
                     />
                   </div>
+
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium text-gray-300">Resume PDF Path or URL</label>

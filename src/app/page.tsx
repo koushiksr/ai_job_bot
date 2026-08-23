@@ -36,13 +36,14 @@ export default function Home() {
     const cleanPwd = password.trim()
 
     // 1. Direct Admin Access Check (Password: admin)
-    if ((cleanEmail === 'admin' || cleanEmail === 'admin@naukribot.com' || cleanEmail === 'admin@naukribot.ai' || cleanEmail === 'admin@admin.com') && cleanPwd === 'admin') {
+    if ((cleanEmail === 'admin' || cleanEmail === 'admin@jobbot.ai' || cleanEmail === 'admin@admin.com') && cleanPwd === 'admin') {
       localStorage.setItem('user_id', 'admin')
-      localStorage.setItem('user_email', 'admin@naukribot.com')
+      localStorage.setItem('user_email', 'admin@jobbot.ai')
       localStorage.setItem('user_role', 'admin')
       window.location.href = '/admin'
       return
     }
+
 
 
     try {
@@ -145,7 +146,7 @@ export default function Home() {
           AI Job Bot
         </h1>
         <p className="text-lg text-gray-400 mb-8 max-w-lg">
-          Automated multi-candidate Naukri job application bot with daily 6 AM & 8 AM scheduling, AI questionnaire answering, and live stats.
+          Automated multi-candidate job application bot with daily 6 AM & 8 AM scheduling, AI questionnaire answering, and live stats.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 items-center md:items-start text-sm text-gray-500 font-medium">
@@ -166,7 +167,7 @@ export default function Home() {
             {isLogin ? 'Sign In to Portal' : 'Create an Account'}
           </h2>
           <p className="text-gray-400 mb-6 text-xs">
-            {isLogin ? 'Use your candidate email & Naukri password, or admin credentials.' : 'Set up your candidate account.'}
+            {isLogin ? 'Use your candidate email & password, or admin credentials.' : 'Set up your candidate account.'}
           </p>
           
           <form onSubmit={handleAuth} className="space-y-4">
@@ -179,7 +180,7 @@ export default function Home() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-black/50 border border-gray-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="admin@naukribot.ai or user email"
+                  placeholder="admin@jobbot.ai or user email"
                   required
                 />
               </div>
@@ -229,15 +230,16 @@ export default function Home() {
                 <div className="space-y-1.5 text-xs">
                   <button
                     type="button"
-                    onClick={() => fillCreds('admin@naukribot.com', 'admin')}
+                    onClick={() => fillCreds('admin@jobbot.ai', 'admin')}
                     className="w-full p-2 bg-black/40 hover:bg-gray-800/60 rounded-lg border border-gray-800 text-left flex items-center justify-between transition-colors group"
                   >
                     <div className="flex items-center gap-2">
                       <Shield className="w-3.5 h-3.5 text-red-400" />
                       <span className="font-semibold text-gray-300 group-hover:text-white">Admin</span>
                     </div>
-                    <span className="text-[10px] font-mono text-gray-500">admin@naukribot.com / admin</span>
+                    <span className="text-[10px] font-mono text-gray-500">admin@jobbot.ai / admin</span>
                   </button>
+
 
                   <button
                     type="button"
