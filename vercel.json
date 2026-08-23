@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "installCommand": "npm install",
+  "env": {
+    "NEXT_PUBLIC_ADMIN_EMAIL": "admin@naukribot.com",
+    "NEXT_PUBLIC_ENGINE_URL": "http://localhost:8000",
+    "NEXT_PUBLIC_API_KEY": "default-secret-key"
+  }
+}
