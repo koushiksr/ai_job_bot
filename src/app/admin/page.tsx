@@ -1,408 +1,861 @@
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react'
-import { supabase } from '@/lib/supabase'
-import { Shield, Users, Database, LogOut, PlayCircle, Edit, ExternalLink, Activity, Terminal, X, History } from 'lucide-react'
+import {
+  Shield,
+  Users,
+  Database,
+  LogOut,
+  PlayCircle,
+  Edit,
+  ExternalLink,
+  Activity,
+  Terminal,
+  X,
+  History,
+  Clock,
+  Calendar,
+  TrendingUp,
+  Sparkles,
+  Plus,
+  Trash2,
+  Save,
+  CheckCircle2,
+  FileJson,
+  Code,
+  FileText,
+  RefreshCw,
+  Search,
+  StopCircle,
+  ToggleLeft,
+  ToggleRight
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 
+const DEFAULT_ENGINE_URL = process.env.NEXT_PUBLIC_ENGINE_URL || 'http://localhost:8000'
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'default-secret-key'
+
 export default function AdminDashboard() {
-  const [user, setUser] = useState<any>(null)
-  const [userList, setUserList] = useState<any[]>([])
-  
-  // Terminal Modal State
+  const [engineUrl, setEngineUrl] = useState<string>(DEFAULT_ENGINE_URL)
+  const [engineStatus, setEngineStatus] = useState<'online' | 'offline' | 'checking'>('checking')
+  const [usersList, setUsersList] = useState<any[]>([])
+  const [loadingUsers, setLoadingUsers] = useState<boolean>(true)
+  const [userSearch, setUserSearch] = useState<string>('')
+
+  // Overview metrics
+  const [overviewMetrics, setOverviewMetrics] = useState({
+    total_profiles: 0,
+    scheduled_profiles_active: 0,
+    applied_today: 0,
+    applied_this_week: 0,
+    applied_this_month: 0,
+    total_applied: 0
+  })
+
+  // Admin Active Tab
+  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'logs'>('candidates')
+
+  // Edit Modal State
+  const [editingUser, setEditingUser] = useState<any | null>(null)
+  const [editTab, setEditTab] = useState<'form' | 'json'>('form')
+  const [editFormData, setEditFormData] = useState<any>({})
+  const [editRawJson, setEditRawJson] = useState<string>('{}')
+  const [editJsonError, setEditJsonError] = useState<string>('')
+  const [savingEdit, setSavingEdit] = useState<boolean>(false)
+  const [editSuccess, setEditSuccess] = useState<string>('')
+
+  // Live Run Terminal Modal
+  const [activeJobUser, setActiveJobUser] = useState<string | null>(null)
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
   const [jobStatus, setJobStatus] = useState<string>('Idle')
-  const [logs, setLogs] = useState<string[]>([])
-  const [showBrowser, setShowBrowser] = useState<boolean>(false)
-  const [userHistories, setUserHistories] = useState<Record<string, any[]>>({})
-  const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>({})
+  const [liveLogs, setLiveLogs] = useState<string[]>([])
+  const [isTerminalOpen, setIsTerminalOpen] = useState<boolean>(false)
   const logsEndRef = useRef<HTMLDivElement>(null)
-  
+
+  // System Logs Tab State
+  const [systemLogs, setSystemLogs] = useState<any[]>([])
+  const [selectedSystemLog, setSelectedSystemLog] = useState<string | null>(null)
+  const [selectedLogContent, setSelectedLogContent] = useState<string[]>([])
+  const [loadingLogContent, setLoadingLogContent] = useState<boolean>(false)
+
+  // 1. Initial Load
   useEffect(() => {
-    // Load expanded state from localStorage
-    const saved = localStorage.getItem('adminExpandedUsers')
-    if (saved) {
-      try { setExpandedUsers(JSON.parse(saved)) } catch(e) {}
-    }
-  }, [])
-  
-  const toggleUserExpanded = (userId: string) => {
-    setExpandedUsers(prev => {
-      const next = { ...prev, [userId]: !prev[userId] }
-      localStorage.setItem('adminExpandedUsers', JSON.stringify(next))
-      return next
-    })
-  }
-  
+    checkEngineHealth()
+    fetchOverviewAndUsers()
+    fetchSystemLogsList()
+  }, [engineUrl])
+
+  // Polling for live terminal
   useEffect(() => {
-    const checkAuth = async () => {
-      const userId = localStorage.getItem('user_id')
-      if (!userId) {
-        // Fallback for local admin access
-        setUser({ email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@naukribot.com' })
-        fetchUsers()
-        return
-      }
-      
+    if (!activeJobId || jobStatus !== 'Running') return
+
+    const interval = setInterval(async () => {
       try {
-        const { data, error } = await supabase.from('profiles').select('*').eq('user_id', userId).single()
-        if (data) {
-          setUser(data)
-        } else {
-          setUser({ email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@naukribot.com' })
-        }
-      } catch {
-        setUser({ email: process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@naukribot.com' })
-      }
-      fetchUsers()
-    }
-    checkAuth()
-  }, [])
-
-
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch(`http://localhost:8000/api/admin/users`, {
-        headers: { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || 'your-secret-api-key' }
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setUserList(data.users)
-        // Fetch last 10 logs for each user
-        const histories: Record<string, any[]> = {}
-        for (const u of data.users) {
-          const { data: logsData } = await supabase
-            .from('job_logs')
-            .select('*')
-            .eq('user_id', u.user_id)
-            .order('created_at', { ascending: false })
-            .limit(10)
-          if (logsData) {
-            histories[u.user_id] = logsData
+        const res = await fetch(`${engineUrl}/api/status/${activeJobId}`, {
+          headers: { 'X-API-Key': API_KEY }
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.status === 'completed') {
+            setJobStatus('Completed')
+            setActiveJobId(null)
+            fetchOverviewAndUsers()
+          } else if (data.status === 'stopped') {
+            setJobStatus('Stopped')
+            setActiveJobId(null)
+            fetchOverviewAndUsers()
+          } else if (data.status === 'failed') {
+            setJobStatus('Error')
+            setActiveJobId(null)
+          }
+          if (data.logs && Array.isArray(data.logs)) {
+            setLiveLogs(data.logs)
           }
         }
-        setUserHistories(histories)
+      } catch {}
+    }, 1500)
+
+    return () => clearInterval(interval)
+  }, [activeJobId, jobStatus, engineUrl])
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [liveLogs])
+
+  const checkEngineHealth = async () => {
+    try {
+      setEngineStatus('checking')
+      const res = await fetch(`${engineUrl}/`, { cache: 'no-store' })
+      if (res.ok) {
+        setEngineStatus('online')
+      } else {
+        setEngineStatus('offline')
+      }
+    } catch {
+      setEngineStatus('offline')
+    }
+  }
+
+  const fetchOverviewAndUsers = async () => {
+    setLoadingUsers(true)
+    try {
+      // 1. Overview metrics
+      const ovRes = await fetch(`${engineUrl}/api/stats/overview`, {
+        headers: { 'X-API-Key': API_KEY }
+      })
+      if (ovRes.ok) {
+        const ovData = await ovRes.json()
+        setOverviewMetrics({
+          total_profiles: ovData.total_profiles || 0,
+          scheduled_profiles_active: ovData.scheduled_profiles_active || 0,
+          applied_today: ovData.metrics?.applied_today || 0,
+          applied_this_week: ovData.metrics?.applied_this_week || 0,
+          applied_this_month: ovData.metrics?.applied_this_month || 0,
+          total_applied: ovData.metrics?.total_applied || 0
+        })
+      }
+
+      // 2. Admin Users list
+      const uRes = await fetch(`${engineUrl}/api/admin/users`, {
+        headers: { 'X-API-Key': API_KEY }
+      })
+      if (uRes.ok) {
+        const uData = await uRes.json()
+        setUsersList(uData.users || [])
       }
     } catch (e) {
-      console.error("Failed to fetch users", e)
+      console.error('Failed to fetch admin users:', e)
+    } finally {
+      setLoadingUsers(false)
+    }
+  }
+
+  const fetchSystemLogsList = async () => {
+    try {
+      const res = await fetch(`${engineUrl}/api/logs`, {
+        headers: { 'X-API-Key': API_KEY }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setSystemLogs(data.logs || [])
+        if (data.logs?.length > 0 && !selectedSystemLog) {
+          loadSystemLogContent(data.logs[0].filename)
+        }
+      }
+    } catch {}
+  }
+
+  const loadSystemLogContent = async (filename: string) => {
+    setSelectedSystemLog(filename)
+    setLoadingLogContent(true)
+    try {
+      const res = await fetch(`${engineUrl}/api/logs/content?filename=${encodeURIComponent(filename)}`, {
+        headers: { 'X-API-Key': API_KEY }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.content && Array.isArray(data.content)) {
+          setSelectedLogContent(data.content)
+        } else if (typeof data === 'object') {
+          setSelectedLogContent([JSON.stringify(data, null, 2)])
+        }
+      }
+    } catch {
+    } finally {
+      setLoadingLogContent(false)
+    }
+  }
+
+  const handleToggleDaily = async (userId: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus
+    setUsersList(prev =>
+      prev.map(u => (u.user_id === userId ? { ...u, enabled_for_daily_run: newStatus } : u))
+    )
+
+    try {
+      await fetch(`${engineUrl}/api/profiles/toggle-daily`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': API_KEY
+        },
+        body: JSON.stringify({ profile_id: userId, enabled: newStatus })
+      })
+    } catch {
+      fetchOverviewAndUsers()
     }
   }
 
   const handleRunBot = async (userId: string) => {
+    setActiveJobUser(userId)
+    setJobStatus('Starting...')
+    setLiveLogs([`🚀 Starting automated bot run for candidate: ${userId}...`])
+    setIsTerminalOpen(true)
+
     try {
-      // 1. Check if user already has an active job
-      const checkRes = await fetch(`http://localhost:8000/api/active-job/${userId}`, {
-        headers: { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || 'your-secret-api-key' }
-      })
-      const checkData = await checkRes.json()
-      
-      if (checkData.active) {
-        // Reconnect to existing job
-        setActiveJobId(checkData.job_id)
-        setJobStatus('Running')
-        return
-      }
-      
-      // 2. Otherwise start a new job
-      setJobStatus('Starting...')
-      setLogs([])
-      setActiveJobId('pending') // Open modal immediately
-      
-      const res = await fetch('http://localhost:8000/api/start-bot', {
+      const res = await fetch(`${engineUrl}/api/start-bot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || 'your-secret-api-key'
+          'X-API-Key': API_KEY
         },
-        body: JSON.stringify({
-          profile_path: userId,
-          headless: false
-        })
+        body: JSON.stringify({ profile_path: userId, headless: false })
       })
       const data = await res.json()
       if (res.ok) {
         setActiveJobId(data.job_id)
         setJobStatus('Running')
       } else {
-        setJobStatus('Error: ' + data.detail)
+        setJobStatus('Error')
+        setLiveLogs(prev => [...prev, `❌ Error: ${data.detail || 'Could not start'}`])
       }
-    } catch (err) {
-      setJobStatus('Failed to connect to backend')
+    } catch (e: any) {
+      setJobStatus('Error')
+      setLiveLogs(prev => [...prev, `❌ Connection error: ${e.message}`])
     }
   }
 
-  // Poll logs for active job
-  useEffect(() => {
-    if (!activeJobId || activeJobId === 'pending' || jobStatus !== 'Running') return
-    
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`http://localhost:8000/api/status/${activeJobId}`, {
-          headers: { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || 'your-secret-api-key' }
-        })
-        const data = await res.json()
-        if (data.logs && data.logs.length > 0) {
-          setLogs(data.logs)
-          logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-        }
-        if (data.status === 'completed' || data.status === 'failed') {
-          setJobStatus(data.status === 'completed' ? 'Finished ✅' : 'Failed ❌')
-          fetchUsers() // refresh stats
-        }
-      } catch (e) {
-        console.error("Polling error", e)
-      }
-    }, 2000)
-    
-    return () => clearInterval(interval)
-  }, [activeJobId, jobStatus])
+  const handleStopBot = async () => {
+    if (!activeJobId) return
+    try {
+      await fetch(`${engineUrl}/api/stop-bot/${activeJobId}`, {
+        method: 'POST',
+        headers: { 'X-API-Key': API_KEY }
+      })
+      setJobStatus('Stopped')
+      setActiveJobId(null)
+      fetchOverviewAndUsers()
+    } catch {}
+  }
 
-  if (!user) return <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">Loading Admin...</div>
+  const handleOpenEditModal = async (u: any) => {
+    setEditingUser(u)
+    setEditSuccess('')
+    setEditJsonError('')
+
+    try {
+      const res = await fetch(`${engineUrl}/api/user/${u.user_id}/profile`, {
+        headers: { 'X-API-Key': API_KEY }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setEditFormData({
+          name: data.name || '',
+          email: data.email || '',
+          password: '',
+          experience: data.experience || 0,
+          current_ctc: data.current_ctc || 0,
+          expected_ctc: data.expected_ctc || 0,
+          search_url: data.search_url || '',
+          resume_file: data.resume_file || ''
+        })
+        setEditRawJson(data.raw_json || '{}')
+      }
+    } catch {}
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingUser) return
+    setSavingEdit(true)
+    setEditSuccess('')
+    setEditJsonError('')
+
+    let payload: any = {}
+    if (editTab === 'json') {
+      try {
+        JSON.parse(editRawJson)
+        payload = { raw_json: editRawJson }
+      } catch (err: any) {
+        setEditJsonError(`Invalid JSON: ${err.message}`)
+        setSavingEdit(false)
+        return
+      }
+    } else {
+      payload = editFormData
+    }
+
+    try {
+      const res = await fetch(`${engineUrl}/api/user/${editingUser.user_id}/profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': API_KEY
+        },
+        body: JSON.stringify(payload)
+      })
+      if (res.ok) {
+        setEditSuccess('Candidate profile saved successfully!')
+        fetchOverviewAndUsers()
+        setTimeout(() => {
+          setEditSuccess('')
+          setEditingUser(null)
+        }, 1200)
+      } else {
+        const d = await res.json()
+        setEditJsonError(`Failed to save: ${d.detail || 'Server error'}`)
+      }
+    } catch (e: any) {
+      setEditJsonError(`Error: ${e.message}`)
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm(`Are you sure you want to delete profile: ${userId}?`)) return
+    try {
+      await fetch(`${engineUrl}/api/profiles/${userId}`, {
+        method: 'DELETE',
+        headers: { 'X-API-Key': API_KEY }
+      })
+      fetchOverviewAndUsers()
+    } catch (e) {
+      alert('Error deleting user')
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.clear()
+    window.location.href = '/'
+  }
+
+  const filteredUsers = usersList.filter(u =>
+    (u.name || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+    (u.email || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+    (u.user_id || '').toLowerCase().includes(userSearch.toLowerCase())
+  )
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12 relative">
-      <header className="flex justify-between items-center mb-12 max-w-6xl mx-auto">
-        <div className="flex items-center gap-3">
-          <Shield className="w-8 h-8 text-red-500" />
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-500 bg-clip-text text-transparent">
-            Admin Console
-          </h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">
-            Go to User Dashboard
-          </Link>
-          <span className="text-sm text-gray-400">Admin: {user.email}</span>
-          <button onClick={() => { localStorage.removeItem('user_id'); window.location.href = '/' }} className="p-2 hover:bg-gray-800 rounded-full transition-colors">
-            <LogOut className="w-5 h-5 text-gray-400" />
-          </button>
-        </div>
-      </header>
-      
-      <main className="max-w-6xl mx-auto space-y-6">
-        
-        {/* System Stats Overview */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="glass-panel p-6 border-red-500/20"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="w-5 h-5 text-blue-400" />
-              <h2 className="font-semibold text-gray-300">Total Users</h2>
+    <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+      {/* Top Admin Header */}
+      <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-40 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 p-[1px] shadow-lg shadow-indigo-500/20">
+              <div className="w-full h-full bg-slate-950 rounded-xl flex items-center justify-center">
+                <Shield className="w-5 h-5 text-indigo-400" />
+              </div>
             </div>
-            <div className="text-4xl font-bold">{userList.length}</div>
-          </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="glass-panel p-6"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <Activity className="w-5 h-5 text-purple-400" />
-              <h2 className="font-semibold text-gray-300">Total Applications</h2>
-            </div>
-            <div className="text-4xl font-bold">
-              {userList.reduce((acc, u) => acc + u.total_applied, 0)}
-            </div>
-          </motion.div>
-        </div>
-
-        {/* User Management Table */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-panel p-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold">User Management</h2>
-            <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  checked={showBrowser}
-                  onChange={(e) => setShowBrowser(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-blue-500 focus:ring-blue-500/50"
-                />
-                Show Browser UI (Debug Mode)
-              </label>
-              <button onClick={fetchUsers} className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                Refresh Data
-              </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-white via-indigo-200 to-purple-400 bg-clip-text text-transparent">
+                  System Admin Controller
+                </h1>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-bold uppercase tracking-wider">
+                  Full Superpowers
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Global Candidate Management, Multi-Bot Scheduler & Real-Time Diagnostics
+              </p>
             </div>
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs text-gray-400 uppercase bg-gray-900/50">
-                <tr>
-                  <th className="px-4 py-3 rounded-tl-lg">Email</th>
-                  <th className="px-4 py-3">Applied Today</th>
-                  <th className="px-4 py-3">Total Applied</th>
-                  <th className="px-4 py-3 rounded-tr-lg text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {userList.length === 0 ? (
-                  <tr><td colSpan={4} className="text-center py-8 text-gray-500">No users found</td></tr>
-                ) : (
-                  userList.map((u, i) => (
-                    <React.Fragment key={u.user_id}>
-                      <tr className="border-b border-gray-800/50 hover:bg-gray-800/20 transition-colors">
-                        <td className="px-4 py-4 font-medium text-gray-200">{u.email}</td>
-                        <td className="px-4 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.applied_today > 0 ? 'bg-green-500/10 text-green-400' : 'bg-gray-800 text-gray-400'}`}>
-                            {u.applied_today}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 font-mono text-gray-400">{u.total_applied}</td>
-                        <td className="px-4 py-4 text-right flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => toggleUserExpanded(u.user_id)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-medium transition-colors"
-                          >
-                            <History className="w-4 h-4" /> {expandedUsers[u.user_id] ? 'Hide History' : 'View History'}
-                          </button>
-                          <button 
-                            onClick={() => handleRunBot(u.user_id)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-medium transition-colors"
-                          >
-                            <PlayCircle className="w-4 h-4" /> Run Bot
-                          </button>
+
+          <div className="flex items-center gap-4">
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border ${
+                engineStatus === 'online'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${engineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+              Engine: {engineStatus.toUpperCase()}
+            </div>
+
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/10 border border-blue-500/30 text-blue-300 hover:bg-blue-500/20 transition-colors"
+            >
+              <Users className="w-3.5 h-3.5" /> Candidate View
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700/60 transition-all text-slate-300"
+            >
+              <LogOut className="w-3.5 h-3.5" /> Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Admin Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+        {/* Global Statistics Grid (Today, Week, Month, Total) */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Total Candidates */}
+          <div className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-800">
+            <div className="flex items-center justify-between mb-2 text-xs font-semibold text-slate-400 uppercase">
+              <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-blue-400" /> Candidates</span>
+              <span className="text-[10px] text-emerald-400 font-mono">{overviewMetrics.scheduled_profiles_active} Active</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{overviewMetrics.total_profiles}</div>
+            <p className="text-xs text-slate-500 mt-1">Total registered profiles</p>
+          </div>
+
+          {/* Today Total */}
+          <div className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-emerald-500/20">
+            <div className="flex items-center justify-between mb-2 text-xs font-semibold text-emerald-400 uppercase">
+              <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Global Today</span>
+              <span className="text-[10px] bg-emerald-500/10 px-1.5 py-0.5 rounded text-emerald-300">24h</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{overviewMetrics.applied_today}</div>
+            <p className="text-xs text-slate-500 mt-1">Applied across all candidates</p>
+          </div>
+
+          {/* This Week Total */}
+          <div className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-blue-500/20">
+            <div className="flex items-center justify-between mb-2 text-xs font-semibold text-blue-400 uppercase">
+              <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> This Week</span>
+              <span className="text-[10px] bg-blue-500/10 px-1.5 py-0.5 rounded text-blue-300">7 Days</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{overviewMetrics.applied_this_week}</div>
+            <p className="text-xs text-slate-500 mt-1">Applied this week</p>
+          </div>
+
+          {/* This Month Total */}
+          <div className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-purple-500/20">
+            <div className="flex items-center justify-between mb-2 text-xs font-semibold text-purple-400 uppercase">
+              <span className="flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> This Month</span>
+              <span className="text-[10px] bg-purple-500/10 px-1.5 py-0.5 rounded text-purple-300">30 Days</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{overviewMetrics.applied_this_month}</div>
+            <p className="text-xs text-slate-500 mt-1">Applied this month</p>
+          </div>
+
+          {/* All-Time Total */}
+          <div className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-amber-500/20">
+            <div className="flex items-center justify-between mb-2 text-xs font-semibold text-amber-400 uppercase">
+              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /> All Time Total</span>
+              <span className="text-[10px] bg-amber-500/10 px-1.5 py-0.5 rounded text-amber-300">Global</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{overviewMetrics.total_applied}</div>
+            <p className="text-xs text-slate-500 mt-1">Lifetime total submissions</p>
+          </div>
+        </section>
+
+        {/* Navigation Tabs */}
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveAdminTab('candidates')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeAdminTab === 'candidates'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
+              }`}
+            >
+              <Users className="w-4 h-4" /> Candidate Profiles ({usersList.length})
+            </button>
+            <button
+              onClick={() => setActiveAdminTab('logs')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeAdminTab === 'logs'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
+              }`}
+            >
+              <FileText className="w-4 h-4" /> System & Candidate Logs
+            </button>
+          </div>
+
+          <button
+            onClick={() => fetchOverviewAndUsers()}
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh Data
+          </button>
+        </div>
+
+        {/* TAB 1: CANDIDATES MANAGEMENT */}
+        {activeAdminTab === 'candidates' && (
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <div className="relative w-full md:w-96">
+                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  placeholder="Search candidates by name, email, or ID..."
+                  value={userSearch}
+                  onChange={e => setUserSearch(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="text-xs text-slate-400">
+                Daily Automatic Schedule: <span className="text-slate-200 font-mono">6:00 AM & 8:00 AM</span>
+              </div>
+            </div>
+
+            {/* Candidates Table */}
+            <div className="rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-300">
+                  <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                    <tr>
+                      <th className="py-3 px-4">Candidate</th>
+                      <th className="py-3 px-4">Experience & CTC</th>
+                      <th className="py-3 px-4 text-center">Today</th>
+                      <th className="py-3 px-4 text-center">This Week</th>
+                      <th className="py-3 px-4 text-center">This Month</th>
+                      <th className="py-3 px-4 text-center">Total</th>
+                      <th className="py-3 px-4 text-center">Auto Schedule</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-12 text-center text-slate-500">
+                          No candidates found.
                         </td>
                       </tr>
-                      {expandedUsers[u.user_id] && (
-                        <tr className="bg-gray-900/30">
-                          <td colSpan={4} className="p-4 border-b border-gray-800/50">
-                            <div className="pl-4 border-l-2 border-blue-500/30">
-                              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-3">Last 10 Applications</h4>
-                              {userHistories[u.user_id]?.length > 0 ? (
-                                <table className="w-full text-left text-xs">
-                                  <thead>
-                                    <tr className="text-gray-500">
-                                      <th className="pb-2 font-medium">Time</th>
-                                      <th className="pb-2 font-medium">Job Title</th>
-                                      <th className="pb-2 font-medium">Company</th>
-                                      <th className="pb-2 font-medium">Status</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {userHistories[u.user_id].map((log: any) => (
-                                      <tr key={log.id} className="text-gray-300 border-t border-gray-800/30">
-                                        <td className="py-2 text-gray-500 whitespace-nowrap">{new Date(log.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
-                                        <td className="py-2">{log.job_title}</td>
-                                        <td className="py-2">{log.company_name}</td>
-                                        <td className="py-2">
-                                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                                            log.status.includes('Success') || log.status.includes('Applied') 
-                                              ? 'bg-green-500/10 text-green-400' 
-                                              : 'bg-red-500/10 text-red-400'
-                                          }`}>
-                                            {log.status}
-                                          </span>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              ) : (
-                                <div className="text-gray-500 text-sm py-2">No history found for this user.</div>
-                              )}
+                    ) : (
+                      filteredUsers.map(u => (
+                        <tr key={u.user_id} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="py-4 px-4">
+                            <div className="font-bold text-white text-sm">{u.name}</div>
+                            <div className="text-slate-400 font-mono text-[11px]">{u.email}</div>
+                          </td>
+                          <td className="py-4 px-4 text-slate-300">
+                            <div>{u.experience} Yrs Experience</div>
+                            <div className="text-slate-500 text-[11px]">Expected: ₹{u.expected_ctc?.toLocaleString()}</div>
+                          </td>
+                          <td className="py-4 px-4 text-center font-mono font-bold text-emerald-400">
+                            {u.applied_today || 0}
+                          </td>
+                          <td className="py-4 px-4 text-center font-mono font-bold text-blue-400">
+                            {u.applied_this_week || 0}
+                          </td>
+                          <td className="py-4 px-4 text-center font-mono font-bold text-purple-400">
+                            {u.applied_this_month || 0}
+                          </td>
+                          <td className="py-4 px-4 text-center font-mono font-bold text-amber-400">
+                            {u.total_applied || 0}
+                          </td>
+                          <td className="py-4 px-4 text-center">
+                            <button
+                              onClick={() => handleToggleDaily(u.user_id, u.enabled_for_daily_run)}
+                              className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-all ${
+                                u.enabled_for_daily_run
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                  : 'bg-slate-800 text-slate-500 border border-slate-700'
+                              }`}
+                            >
+                              {u.enabled_for_daily_run ? 'Active (6 & 8 AM)' : 'Paused'}
+                            </button>
+                          </td>
+                          <td className="py-4 px-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleRunBot(u.user_id)}
+                                title="Run Bot for this candidate"
+                                className="p-2 rounded-lg bg-blue-600/20 text-blue-300 hover:bg-blue-600 hover:text-white transition-all"
+                              >
+                                <PlayCircle className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleOpenEditModal(u)}
+                                title="Edit Profile & JSON"
+                                className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-indigo-600 hover:text-white transition-all"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(u.user_id)}
+                                title="Delete Candidate"
+                                className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:bg-rose-600 hover:text-white transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </td>
                         </tr>
-                      )}
-                    </React.Fragment>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: SYSTEM & CANDIDATE LOGS */}
+        {activeAdminTab === 'logs' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4 space-y-2 max-h-[600px] overflow-y-auto">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-2 mb-3">
+                Log & Report Files
+              </h3>
+              {systemLogs.map(log => (
+                <button
+                  key={log.filename}
+                  onClick={() => loadSystemLogContent(log.filename)}
+                  className={`w-full text-left p-3 rounded-xl text-xs transition-all flex items-center justify-between ${
+                    selectedSystemLog === log.filename
+                      ? 'bg-indigo-600 text-white font-semibold'
+                      : 'bg-slate-950/60 text-slate-300 hover:bg-slate-800 border border-slate-800/50'
+                  }`}
+                >
+                  <span className="truncate">{log.filename}</span>
+                  <span className="text-[10px] opacity-60">{(log.size_bytes / 1024).toFixed(1)} KB</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="md:col-span-2 rounded-2xl bg-[#050811] border border-slate-800 overflow-hidden flex flex-col h-[600px]">
+              <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                <span className="text-xs font-mono text-cyan-400">{selectedSystemLog || 'Select a log file'}</span>
+                <button
+                  onClick={() => selectedSystemLog && loadSystemLogContent(selectedSystemLog)}
+                  className="text-xs text-slate-400 hover:text-white"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="p-4 flex-1 overflow-y-auto font-mono text-xs text-slate-300 space-y-1">
+                {loadingLogContent ? (
+                  <div className="h-full flex items-center justify-center text-slate-500">Loading log content...</div>
+                ) : (
+                  selectedLogContent.map((line, i) => (
+                    <div key={i} className="leading-relaxed whitespace-pre-wrap">
+                      {line}
+                    </div>
                   ))
                 )}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
-        </motion.div>
-        
+        )}
       </main>
 
-      {/* Terminal Modal */}
+      {/* EDIT MODAL (Form + JSON Editor) */}
       <AnimatePresence>
-        {activeJobId && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          >
-            <motion.div 
+        {editingUser && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0a0a0a] border border-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col h-[70vh]"
+              className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
             >
-              <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-[#111]">
+              <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+                <div className="flex items-center gap-2">
+                  <Edit className="w-4 h-4 text-indigo-400" />
+                  <h3 className="font-bold text-sm text-white">Edit Candidate Profile — {editingUser.name}</h3>
+                </div>
+                <button onClick={() => setEditingUser(null)} className="text-slate-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 px-6 pt-4 border-b border-slate-800">
+                <button
+                  onClick={() => setEditTab('form')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                    editTab === 'form' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Visual Form
+                </button>
+                <button
+                  onClick={() => setEditTab('json')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                    editTab === 'json' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Raw JSON Editor
+                </button>
+              </div>
+
+              <div className="p-6 flex-1 overflow-y-auto">
+                {editJsonError && (
+                  <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono">
+                    {editJsonError}
+                  </div>
+                )}
+                {editSuccess && (
+                  <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                    {editSuccess}
+                  </div>
+                )}
+
+                {editTab === 'form' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <label className="block text-slate-400 mb-1">Name</label>
+                      <input
+                        type="text"
+                        value={editFormData.name || ''}
+                        onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-400 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={editFormData.email || ''}
+                        onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-400 mb-1">Password (Leave blank to keep)</label>
+                      <input
+                        type="password"
+                        value={editFormData.password || ''}
+                        onChange={e => setEditFormData({ ...editFormData, password: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-400 mb-1">Experience (Years)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={editFormData.experience || 0}
+                        onChange={e => setEditFormData({ ...editFormData, experience: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-slate-400 mb-1">Search URL</label>
+                      <input
+                        type="text"
+                        value={editFormData.search_url || ''}
+                        onChange={e => setEditFormData({ ...editFormData, search_url: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <textarea
+                    rows={16}
+                    value={editRawJson}
+                    onChange={e => {
+                      setEditRawJson(e.target.value)
+                      setEditJsonError('')
+                    }}
+                    className="w-full bg-[#050811] border border-slate-800 rounded-xl p-4 font-mono text-xs text-cyan-300 focus:outline-none focus:border-indigo-500"
+                    spellCheck={false}
+                  />
+                )}
+              </div>
+
+              <div className="px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3 bg-slate-950">
+                <button
+                  onClick={() => setEditingUser(null)}
+                  className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={savingEdit}
+                  className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                >
+                  <Save className="w-3.5 h-3.5" /> {savingEdit ? 'Saving...' : 'Save Profile'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* LIVE TERMINAL MODAL */}
+      <AnimatePresence>
+        {isTerminalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0b0f19] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl"
+            >
+              <div className="px-6 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Terminal className="w-5 h-5 text-green-400" />
-                  <span className="font-semibold text-gray-200">Admin Bot Terminal</span>
-                  <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                    jobStatus === 'Running' ? 'bg-blue-500/20 text-blue-400' :
-                    jobStatus.includes('Error') || jobStatus.includes('Failed') ? 'bg-red-500/20 text-red-400' :
-                    jobStatus.includes('Finished') ? 'bg-green-500/20 text-green-400' :
-                    'bg-gray-800 text-gray-400'
-                  }`}>
-                    {jobStatus}
+                  <Terminal className="w-4 h-4 text-cyan-400" />
+                  <span className="font-mono text-xs text-white">Live Execution Terminal: {activeJobUser}</span>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                      jobStatus === 'Running' ? 'bg-emerald-500/20 text-emerald-400 animate-pulse' : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    ● {jobStatus}
                   </span>
                 </div>
+
                 <div className="flex items-center gap-2">
                   {jobStatus === 'Running' && (
-                    <button 
-                      onClick={async () => {
-                        if (!activeJobId) return;
-                        await fetch(`http://localhost:8000/api/stop-bot/${activeJobId}`, {
-                          method: 'POST',
-                          headers: { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || 'your-secret-api-key' }
-                        });
-                        setJobStatus('Stopped');
-                      }}
-                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold mr-2 transition-colors"
+                    <button
+                      onClick={handleStopBot}
+                      className="px-3 py-1 rounded-lg text-xs font-bold bg-rose-600 text-white flex items-center gap-1"
                     >
-                      Stop Bot
+                      <StopCircle className="w-3.5 h-3.5" /> Stop
                     </button>
                   )}
-                  <button onClick={() => setActiveJobId(null)} className="p-1 hover:bg-gray-800 rounded-full transition-colors text-gray-400">
+                  <button onClick={() => setIsTerminalOpen(false)} className="text-slate-400 hover:text-white">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
-              
-              <div className="flex-1 bg-[#1a1b26] p-6 overflow-y-auto font-mono text-sm leading-relaxed custom-scrollbar">
-                {logs.length === 0 ? (
-                  <div className="text-gray-500 italic">Awaiting bot output...</div>
-                ) : (
-                  logs.map((log, i) => (
-                    <div key={i} className="mb-2 text-gray-300">
-                      {log.startsWith('[') ? (
-                        <>
-                          <span className="text-blue-400">{log.substring(0, log.indexOf(']') + 1)}</span>
-                          <span className={log.includes('✅') || log.includes('Success') ? 'text-green-400 ml-2' : log.includes('❌') || log.includes('Failed') ? 'text-red-400 ml-2' : 'ml-2'}>
-                            {log.substring(log.indexOf(']') + 1)}
-                          </span>
-                        </>
-                      ) : (
-                        <span className={log.includes('✅') ? 'text-green-400' : log.includes('❌') ? 'text-red-400' : ''}>{log}</span>
-                      )}
-                    </div>
-                  ))
-                )}
+
+              <div className="p-4 flex-1 overflow-y-auto font-mono text-xs bg-[#050811] text-slate-300 space-y-1 min-h-[350px]">
+                {liveLogs.map((log, idx) => (
+                  <div key={idx} className="leading-relaxed whitespace-pre-wrap">
+                    {log}
+                  </div>
+                ))}
                 <div ref={logsEndRef} />
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
-
     </div>
   )
 }
