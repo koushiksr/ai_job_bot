@@ -180,7 +180,7 @@ export default function Dashboard() {
         },
         body: JSON.stringify({
           profile_path: profileId,
-          headless: !showBrowser
+          headless: false
         })
       })
       const data = await res.json()
@@ -215,7 +215,7 @@ export default function Dashboard() {
         },
         body: JSON.stringify({
           profile_path: '0', // 0 triggers batch sequence of active profiles
-          headless: !showBrowser
+          headless: false
         })
       })
       const data = await res.json()

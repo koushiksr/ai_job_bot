@@ -117,7 +117,7 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({
           profile_path: userId,
-          headless: !showBrowser
+          headless: false
         })
       })
       const data = await res.json()
