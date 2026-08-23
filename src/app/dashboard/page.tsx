@@ -628,8 +628,9 @@ export default function UserDashboard() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-1">
-                  Search URL: <span className="text-slate-300">{formData.search_url || 'Default Naukri Search'}</span>
+                  Search URL: <span className="text-slate-300 font-mono text-[11px]">{formData.search_url || 'https://www.naukri.com/mnjuser/recommendedjobs'}</span>
                 </p>
+
               </div>
 
               <div className="flex items-center gap-3 w-full md:w-auto">
@@ -937,15 +938,16 @@ export default function UserDashboard() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Naukri Search URL (with filters)</label>
+                    <label className="block text-xs font-semibold text-slate-300 mb-2">Naukri Search / Recommended Jobs URL (Universal Default: https://www.naukri.com/mnjuser/recommendedjobs)</label>
                     <input
                       type="url"
                       value={formData.search_url}
                       onChange={e => setFormData({ ...formData, search_url: e.target.value })}
-                      placeholder="https://www.naukri.com/machine-learning-jobs?k=machine%20learning"
+                      placeholder="https://www.naukri.com/mnjuser/recommendedjobs"
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
                     />
                   </div>
+
 
                   <div className="md:col-span-2">
                     <label className="block text-xs font-semibold text-slate-300 mb-2">Resume PDF Path or Public URL</label>
