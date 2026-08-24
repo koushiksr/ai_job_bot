@@ -124,7 +124,7 @@ export default function AdminDashboard() {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/tasks/${activeJobId}/logs?since_line=${liveLogs.length}`)
+        const res = await fetch(`/api/tasks/${activeJobId}/logs?since_line=0`)
         if (res.ok) {
           const data = await res.json()
           if (data.status === 'completed') {
@@ -140,14 +140,14 @@ export default function AdminDashboard() {
             setActiveJobId(null)
           }
           if (data.logs && Array.isArray(data.logs) && data.logs.length > 0) {
-            setLiveLogs(prev => [...prev, ...data.logs])
+            setLiveLogs(data.logs)
           }
         }
       } catch {}
     }, 1500)
 
     return () => clearInterval(interval)
-  }, [activeJobId, jobStatus, liveLogs.length])
+  }, [activeJobId, jobStatus])
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
