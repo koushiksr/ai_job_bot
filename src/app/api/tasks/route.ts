@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       headless: headless,
       status: 'pending',
       stop_requested: false,
-      logs: [`[${now.toTimeString().split(' ')[0]}] Task queued in MongoDB Atlas broker.`],
+      logs: [`[${now.toTimeString().split(' ')[0]}] 🚀 Task registered in MongoDB Atlas queue. Waiting for background worker...`],
       created_at: now,
       started_at: null,
       completed_at: null,
@@ -31,28 +31,30 @@ export async function POST(req: NextRequest) {
     }
 
     const db = await getDb()
-    if (db) {
-      // Check if user already has an active pending/running task
-      const existing = await db.collection<any>('tasks').findOne({
-        user_id: userId,
-        status: { $in: ['pending', 'running'] }
-      })
-      if (existing) {
-        return NextResponse.json({
-          job_id: existing._id,
-          status: existing.status,
-          message: 'An application task is already running or pending for this profile.'
-        })
-      }
-
-      await db.collection<any>('tasks').insertOne(taskDoc)
+    if (!db) {
+      return NextResponse.json({ detail: 'MongoDB cluster is unreachable' }, { status: 503 })
     }
+
+    // Check if user already has an active pending/running task
+    const existing = await db.collection<any>('tasks').findOne({
+      user_id: userId,
+      status: { $in: ['pending', 'running'] }
+    })
+    if (existing) {
+      return NextResponse.json({
+        job_id: existing._id,
+        status: existing.status,
+        message: 'An application task is already running or pending for this profile.'
+      })
+    }
+
+    await db.collection<any>('tasks').insertOne(taskDoc)
 
     return NextResponse.json({
       status: 'success',
       job_id: taskId,
       task_id: taskId,
-      message: 'Bot application task enqueued successfully.'
+      message: 'Bot application task enqueued successfully into MongoDB Atlas.'
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Failed to enqueue task' }, { status: 500 })
@@ -63,40 +65,24 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const userId = searchParams.get('user_id')
-    if (!userId) {
-      return NextResponse.json({ detail: 'user_id query param required' }, { status: 400 })
-    }
+    const limit = Math.min(50, parseInt(searchParams.get('limit') || '10', 10))
 
     const db = await getDb()
     if (!db) {
-      return NextResponse.json({ active: false, task: null })
+      return NextResponse.json({ tasks: [] })
     }
 
-    const activeTask = await db.collection('tasks').findOne(
-      { user_id: userId, status: { $in: ['pending', 'running'] } },
-      { sort: { created_at: -1 } }
-    )
+    const query: any = {}
+    if (userId) query.user_id = userId
 
-    if (activeTask) {
-      return NextResponse.json({
-        active: true,
-        job_id: activeTask._id,
-        status: activeTask.status,
-        data: activeTask
-      })
-    }
+    const tasks = await db
+      .collection('tasks')
+      .find(query)
+      .sort({ created_at: -1 })
+      .limit(limit)
+      .toArray()
 
-    const latest = await db.collection('tasks').findOne(
-      { user_id: userId },
-      { sort: { created_at: -1 } }
-    )
-
-    return NextResponse.json({
-      active: false,
-      job_id: latest?._id || null,
-      status: latest?.status || 'idle',
-      data: latest || null
-    })
+    return NextResponse.json({ tasks })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
