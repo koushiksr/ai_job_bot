@@ -30,7 +30,9 @@ import {
   ToggleLeft,
   ToggleRight,
   Wifi,
-  WifiOff
+  WifiOff,
+  Upload,
+  Download
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -61,6 +63,8 @@ export default function AdminDashboard() {
   const [editJsonError, setEditJsonError] = useState<string>('')
   const [savingEdit, setSavingEdit] = useState<boolean>(false)
   const [editSuccess, setEditSuccess] = useState<string>('')
+  const [adminUploadingResume, setAdminUploadingResume] = useState<boolean>(false)
+  const [adminResumeSuccess, setAdminResumeSuccess] = useState<string>('')
 
   // Live Run Terminal Modal
   const [activeJobUser, setActiveJobUser] = useState<string | null>(null)
@@ -249,6 +253,54 @@ export default function AdminDashboard() {
       }
     } catch {} finally {
       setLoadingLogContent(false)
+    }
+  }
+
+  const handleAdminResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editingUser) return
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Please select a valid PDF file.')
+      return
+    }
+
+    setAdminUploadingResume(true)
+    setAdminResumeSuccess('')
+
+    try {
+      const reader = new FileReader()
+      reader.onload = async () => {
+        const base64Str = (reader.result as string).split(',')[1]
+        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '')
+        if (!cleanName.endsWith('.pdf')) cleanName += '.pdf'
+
+        const res = await fetch('/api/profile/resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: editingUser.user_id,
+            filename: cleanName,
+            file_base64: base64Str,
+            file_size_bytes: file.size
+          })
+        })
+
+        if (res.ok) {
+          setAdminResumeSuccess(`Resume "${cleanName}" (${Math.round(file.size / 1024)} KB) uploaded & saved to MongoDB Atlas!`)
+          setTimeout(() => setAdminResumeSuccess(''), 4500)
+          fetchOverviewAndUsers()
+        } else {
+          const err = await res.json()
+          alert(`Upload failed: ${err.detail || 'Server error'}`)
+        }
+        setAdminUploadingResume(false)
+      }
+      reader.readAsDataURL(file)
+    } catch (err: any) {
+      alert(`Error uploading file: ${err.message}`)
+      setAdminUploadingResume(false)
     }
   }
 
@@ -717,6 +769,41 @@ export default function AdminDashboard() {
                         onChange={e => setEditFormData({ ...editFormData, search_url: e.target.value })}
                         className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono"
                       />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-slate-400 mb-1">Candidate Resume PDF (MongoDB Atlas Cloud)</label>
+                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-indigo-400" />
+                          <span className="text-xs font-mono text-slate-200">{editingUser.resume_filename || `${editingUser.user_id}_Resume.pdf`}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`/api/profile/resume?user_id=${editingUser.user_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700"
+                          >
+                            <Download className="w-3 h-3" /> Preview
+                          </a>
+                          <label className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer shadow-md">
+                            <Upload className="w-3 h-3" />
+                            <span>{adminUploadingResume ? 'Uploading...' : 'Upload PDF'}</span>
+                            <input
+                              type="file"
+                              accept=".pdf"
+                              onChange={handleAdminResumeUpload}
+                              disabled={adminUploadingResume}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                      {adminResumeSuccess && (
+                        <p className="text-[11px] text-emerald-400 mt-1.5 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" /> {adminResumeSuccess}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ) : (

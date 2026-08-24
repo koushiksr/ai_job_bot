@@ -36,3 +36,61 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const data = await req.json()
+    const { user_id, filename, file_base64, file_size_bytes } = data
+
+    if (!user_id || !file_base64) {
+      return NextResponse.json({ detail: 'user_id and file_base64 are required' }, { status: 400 })
+    }
+
+    const db = await getDb()
+    if (!db) {
+      return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
+    }
+
+    const cleanFilename = filename || `${user_id}_Resume.pdf`
+    const size = file_size_bytes || Buffer.from(file_base64, 'base64').length
+
+    // 1. Store binary PDF in dedicated 'resumes' collection
+    await db.collection('resumes').updateOne(
+      { user_id },
+      {
+        $set: {
+          user_id,
+          filename: cleanFilename,
+          content_type: 'application/pdf',
+          file_size_bytes: size,
+          file_base64,
+          updated_at: new Date()
+        }
+      },
+      { upsert: true }
+    )
+
+    // 2. Update profile metadata
+    await db.collection('profiles').updateOne(
+      { user_id },
+      {
+        $set: {
+          resume_filename: cleanFilename,
+          resume_size_bytes: size,
+          has_resume: true,
+          updated_at: new Date()
+        }
+      },
+      { upsert: true }
+    )
+
+    return NextResponse.json({
+      status: 'success',
+      message: 'Resume PDF uploaded and saved to MongoDB Atlas',
+      filename: cleanFilename,
+      size_bytes: size
+    })
+  } catch (err: any) {
+    return NextResponse.json({ detail: err.message }, { status: 500 })
+  }
+}

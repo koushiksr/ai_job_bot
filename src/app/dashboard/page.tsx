@@ -29,7 +29,10 @@ import {
   FileJson,
   Code,
   Wifi,
-  WifiOff
+  WifiOff,
+  Upload,
+  Download,
+  FileCheck
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -83,6 +86,9 @@ export default function UserDashboard() {
   const [jsonError, setJsonError] = useState<string>('')
   const [savingProfile, setSavingProfile] = useState<boolean>(false)
   const [saveSuccess, setSaveSuccess] = useState<string>('')
+  const [uploadingResume, setUploadingResume] = useState<boolean>(false)
+  const [resumeFilename, setResumeFilename] = useState<string>('')
+  const [resumeUploadSuccess, setResumeUploadSuccess] = useState<string>('')
 
   // Next Scheduled Run Countdown (Daily at 6:00 AM & 8:00 AM IST)
   useEffect(() => {
@@ -200,6 +206,7 @@ export default function UserDashboard() {
       if (res.ok) {
         const data = await res.json()
         setCandidateProfile(data)
+        setResumeFilename(data.resume_filename || data.resume_file || '')
         setFormData({
           name: data.name || '',
           email: data.email || '',
@@ -208,7 +215,7 @@ export default function UserDashboard() {
           current_ctc: data.current_ctc || 0,
           expected_ctc: data.expected_ctc || 0,
           search_url: data.search_url || '',
-          resume_file: data.resume_file || ''
+          resume_file: data.resume_filename || data.resume_file || ''
         })
         setRawJsonStr(data.raw_json || '{}')
       }
@@ -216,6 +223,55 @@ export default function UserDashboard() {
       console.error('Failed to load profile:', e)
     } finally {
       setLoadingProfile(false)
+    }
+  }
+
+  const handleResumeFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Please select a valid PDF file (.pdf).')
+      return
+    }
+
+    setUploadingResume(true)
+    setResumeUploadSuccess('')
+
+    try {
+      const reader = new FileReader()
+      reader.onload = async () => {
+        const base64Str = (reader.result as string).split(',')[1]
+        // Clean candidate prefix so recruiters see clean professional name
+        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '')
+        if (!cleanName.endsWith('.pdf')) cleanName += '.pdf'
+
+        const res = await fetch('/api/profile/resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            filename: cleanName,
+            file_base64: base64Str,
+            file_size_bytes: file.size
+          })
+        })
+
+        if (res.ok) {
+          setResumeFilename(cleanName)
+          setResumeUploadSuccess(`Resume "${cleanName}" (${Math.round(file.size / 1024)} KB) uploaded & saved directly to MongoDB Atlas!`)
+          setTimeout(() => setResumeUploadSuccess(''), 4500)
+          loadUserData(userId)
+        } else {
+          const err = await res.json()
+          alert(`Upload failed: ${err.detail || 'Server error'}`)
+        }
+        setUploadingResume(false)
+      }
+      reader.readAsDataURL(file)
+    } catch (err: any) {
+      alert(`Error uploading file: ${err.message}`)
+      setUploadingResume(false)
     }
   }
 
@@ -1009,14 +1065,55 @@ export default function UserDashboard() {
 
 
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Resume PDF Path or Public URL</label>
-                    <input
-                      type="text"
-                      value={formData.resume_file}
-                      onChange={e => setFormData({ ...formData, resume_file: e.target.value })}
-                      placeholder="data/resumes/my_resume.pdf"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                    />
+                    <label className="block text-xs font-semibold text-slate-300 mb-2">Candidate Resume PDF (Stored in MongoDB Atlas Cloud Database)</label>
+                    <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white font-mono">{resumeFilename || `${userId}_Resume.pdf`}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              Active in Cloud
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            Recruiters on Naukri will receive this clean custom PDF document.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 w-full md:w-auto">
+                        <a
+                          href={`/api/profile/resume?user_id=${userId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" /> Preview PDF
+                        </a>
+
+                        <label className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-md shadow-blue-500/20 transition-all">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>{uploadingResume ? 'Uploading...' : 'Upload New PDF'}</span>
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={handleResumeFileUpload}
+                            disabled={uploadingResume}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    {resumeUploadSuccess && (
+                      <div className="mt-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span>{resumeUploadSuccess}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
