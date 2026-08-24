@@ -63,14 +63,8 @@ export default function UserDashboard() {
   const [historyTotalPages, setHistoryTotalPages] = useState<number>(1)
   const [historyTotalCount, setHistoryTotalCount] = useState<number>(0)
 
-  // Bot Run State
-  const [activeJobId, setActiveJobId] = useState<string | null>(null)
-  const [jobStatus, setJobStatus] = useState<'Idle' | 'Starting...' | 'Running' | 'Completed' | 'Stopped' | 'Error'>('Idle')
-  const [liveLogs, setLiveLogs] = useState<string[]>([])
+  // Automated Schedule State
   const [countdownText, setCountdownText] = useState<string>('Calculating...')
-  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
-  const logsEndRef = useRef<HTMLDivElement>(null)
-  const terminalContainerRef = useRef<HTMLDivElement>(null)
 
   // Profile Form & JSON Editor State
   const [formData, setFormData] = useState({
@@ -131,17 +125,7 @@ export default function UserDashboard() {
     return () => clearInterval(timer)
   }, [])
 
-  // Active Task Stopwatch Timer
-  useEffect(() => {
-    if (jobStatus !== 'Running' && jobStatus !== 'Starting...') {
-      setElapsedSeconds(0)
-      return
-    }
-    const timer = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1)
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [jobStatus])
+
 
   // 1. Authenticate & Initialize — load data directly from cloud broker
   useEffect(() => {
@@ -160,50 +144,7 @@ export default function UserDashboard() {
 
     loadUserData(storedUid)
     loadUserHistory(storedUid, 1, '', 'all')
-    checkActiveJob(storedUid)
   }, [])
-
-  // Optimized Polling for active job status & full logs
-  useEffect(() => {
-    if (!activeJobId || (jobStatus !== 'Running' && jobStatus !== 'Starting...')) return
-
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/tasks/${activeJobId}/logs?since_line=0`)
-        if (res.ok) {
-          const data = await res.json()
-          if (data.status === 'completed') {
-            setJobStatus('Completed')
-            setActiveJobId(null)
-            loadUserHistory(userId, historyPage, historySearch, historyFilter)
-          } else if (data.status === 'stopped') {
-            setJobStatus('Stopped')
-            setActiveJobId(null)
-            loadUserHistory(userId, historyPage, historySearch, historyFilter)
-          } else if (data.status === 'failed') {
-            setJobStatus('Error')
-            setActiveJobId(null)
-          }
-
-          if (data.logs && Array.isArray(data.logs) && data.logs.length > 0) {
-            setLiveLogs(data.logs)
-          }
-        }
-      } catch {}
-    }, 1500)
-
-    return () => clearInterval(interval)
-  }, [activeJobId, jobStatus, userId, historyPage, historySearch, historyFilter])
-
-  // Auto-scroll logs terminal directly to latest line
-  useEffect(() => {
-    if (terminalContainerRef.current) {
-      terminalContainerRef.current.scrollTop = terminalContainerRef.current.scrollHeight
-    }
-    if (logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }
-  }, [liveLogs])
 
   const loadUserData = async (uid: string) => {
     setLoadingProfile(true)
@@ -300,74 +241,7 @@ export default function UserDashboard() {
     }
   }
 
-  const checkActiveJob = async (uid: string) => {
-    try {
-      const res = await fetch(`/api/tasks?user_id=${uid}`)
-      if (res.ok) {
-        const data = await res.json()
-        if (data.active && data.job_id) {
-          setActiveJobId(data.job_id)
-          setJobStatus('Running')
-          if (data.data?.logs) {
-            setLiveLogs(data.data.logs)
-          }
-        }
-      }
-    } catch {}
-  }
 
-
-  const handleStartBot = async () => {
-    setJobStatus('Starting...')
-    setLiveLogs(['[00:00:00] 🚀 Dispatching job application request to cloud task queue...'])
-
-    try {
-      const res = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          headless: false,
-          action: 'run_bot'
-        })
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setActiveJobId(data.job_id)
-        setJobStatus('Running')
-        setLiveLogs(prev => [...prev, `[00:00:01] 📡 Task ${data.job_id} registered. Worker is picking up execution...`])
-      } else {
-        setJobStatus('Error')
-        setLiveLogs(prev => [...prev, `❌ Error enqueuing task: ${data.detail || data.message || 'Unknown error'}`])
-      }
-    } catch (err: any) {
-      setJobStatus('Error')
-      setLiveLogs(prev => [
-        ...prev,
-        '❌ Connection Failed: Could not connect to cloud broker API.',
-        err.message
-      ])
-    }
-  }
-
-  const handleStopBot = async () => {
-    const currentId = activeJobId
-    setJobStatus('Stopped')
-    setActiveJobId(null)
-    setLiveLogs(prev => [...prev, `[${new Date().toTimeString().split(' ')[0]}] 🛑 Application run stopped.`])
-
-    if (!currentId) return
-    try {
-      await fetch(`/api/tasks/${currentId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'stop' })
-      })
-      loadUserHistory(userId, historyPage, historySearch, historyFilter)
-    } catch (e) {
-      console.error('Failed to stop bot:', e)
-    }
-  }
 
   const handleSaveFormProfile = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -66,16 +66,7 @@ export default function AdminDashboard() {
   const [adminUploadingResume, setAdminUploadingResume] = useState<boolean>(false)
   const [adminResumeSuccess, setAdminResumeSuccess] = useState<string>('')
 
-  // Live Run Terminal Modal
-  const [activeJobUser, setActiveJobUser] = useState<string | null>(null)
-  const [activeJobId, setActiveJobId] = useState<string | null>(null)
-  const [jobStatus, setJobStatus] = useState<string>('Idle')
-  const [liveLogs, setLiveLogs] = useState<string[]>([])
-  const [isTerminalOpen, setIsTerminalOpen] = useState<boolean>(false)
-  const logsEndRef = useRef<HTMLDivElement>(null)
-  const terminalContainerRef = useRef<HTMLDivElement>(null)
-
-  // System Logs Tab State
+  // System Logs & Reports State
   const [systemLogs, setSystemLogs] = useState<any[]>([])
   const [selectedSystemLog, setSelectedSystemLog] = useState<string | null>(null)
   const [selectedLogContent, setSelectedLogContent] = useState<string[]>([])
@@ -123,91 +114,7 @@ export default function AdminDashboard() {
     fetchOverviewAndUsers()
   }, [])
 
-  // Polling for live terminal
-  useEffect(() => {
-    if (!activeJobId || jobStatus !== 'Running') return
 
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/tasks/${activeJobId}/logs?since_line=0`)
-        if (res.ok) {
-          const data = await res.json()
-          if (data.status === 'completed') {
-            setJobStatus('Completed')
-            setActiveJobId(null)
-            fetchOverviewAndUsers()
-          } else if (data.status === 'stopped') {
-            setJobStatus('Stopped')
-            setActiveJobId(null)
-            fetchOverviewAndUsers()
-          } else if (data.status === 'failed') {
-            setJobStatus('Error')
-            setActiveJobId(null)
-          }
-          if (data.logs && Array.isArray(data.logs) && data.logs.length > 0) {
-            setLiveLogs(data.logs)
-          }
-        }
-      } catch {}
-    }, 1500)
-
-    return () => clearInterval(interval)
-  }, [activeJobId, jobStatus])
-
-  useEffect(() => {
-    if (terminalContainerRef.current) {
-      terminalContainerRef.current.scrollTop = terminalContainerRef.current.scrollHeight
-    }
-    if (logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }
-  }, [liveLogs])
-
-  const handleRunBot = async (targetUserId: string) => {
-    setActiveJobUser(targetUserId)
-    setJobStatus('Starting...')
-    setLiveLogs([`[00:00:00] 🚀 Dispatching automated bot run for candidate: ${targetUserId} to cloud queue...`])
-    setIsTerminalOpen(true)
-
-    try {
-      const res = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: targetUserId, headless: false, action: 'run_bot' })
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setActiveJobId(data.job_id)
-        setJobStatus('Running')
-        setLiveLogs(prev => [...prev, `[00:00:01] 📡 Task ${data.job_id} registered. Worker is executing...`])
-      } else {
-        setJobStatus('Error')
-        setLiveLogs(prev => [...prev, `❌ Error: ${data.detail || data.message || 'Could not start'}`])
-      }
-    } catch (e: any) {
-      setJobStatus('Error')
-      setLiveLogs(prev => [...prev, `❌ Connection error: ${e.message}`])
-    }
-  }
-
-  const handleStopBot = async () => {
-    const currentId = activeJobId
-    setJobStatus('Stopped')
-    setActiveJobId(null)
-    setLiveLogs(prev => [...prev, `[${new Date().toTimeString().split(' ')[0]}] 🛑 Application run stopped.`])
-
-    if (!currentId) return
-    try {
-      await fetch(`/api/tasks/${currentId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'stop' })
-      })
-      fetchOverviewAndUsers()
-    } catch (e) {
-      console.error('Failed to stop bot:', e)
-    }
-  }
 
   const handleOpenEditModal = async (u: any) => {
     setEditingUser(u)
@@ -253,11 +160,12 @@ export default function AdminDashboard() {
     setSelectedSystemLog(filename)
     setLoadingLogContent(true)
     try {
-      const res = await fetch(`/api/tasks?user_id=${filename}`)
+      const res = await fetch(`/api/history?user_id=${filename}&limit=30`)
       if (res.ok) {
         const data = await res.json()
-        if (data.data?.logs) {
-          setSelectedLogContent(data.data.logs)
+        if (data.jobs && Array.isArray(data.jobs)) {
+          const lines = data.jobs.map((j: any) => `[${j.date}] ✅ Applied to: ${j.title} at ${j.company} (${j.location || 'India'})`)
+          setSelectedLogContent(lines.length ? lines : ['No application history found for this candidate yet.'])
         }
       }
     } catch {} finally {
@@ -599,18 +507,11 @@ export default function AdminDashboard() {
                           <td className="py-4 px-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button
-                                onClick={() => handleRunBot(u.user_id)}
-                                title="Run Bot for this candidate"
-                                className="p-2 rounded-lg bg-blue-600/20 text-blue-300 hover:bg-blue-600 hover:text-white transition-all"
-                              >
-                                <PlayCircle className="w-4 h-4" />
-                              </button>
-                              <button
                                 onClick={() => handleOpenEditModal(u)}
-                                title="Edit Profile & JSON"
-                                className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-indigo-600 hover:text-white transition-all"
+                                title="Edit Profile, Resume & JSON"
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-indigo-600 hover:text-white transition-all text-xs font-medium"
                               >
-                                <Edit className="w-4 h-4" />
+                                <Edit className="w-3.5 h-3.5" /> Edit Profile
                               </button>
                               <button
                                 onClick={() => handleDeleteUser(u.user_id)}
@@ -849,56 +750,6 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
-      {/* LIVE TERMINAL MODAL */}
-      <AnimatePresence>
-        {isTerminalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0b0f19] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl"
-            >
-              <div className="px-6 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Terminal className="w-4 h-4 text-cyan-400" />
-                  <span className="font-mono text-xs text-white">Live Execution Terminal: {activeJobUser}</span>
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                      jobStatus === 'Running' ? 'bg-emerald-500/20 text-emerald-400 animate-pulse' : 'bg-slate-800 text-slate-400'
-                    }`}
-                  >
-                    ● {jobStatus}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {jobStatus === 'Running' && (
-                    <button
-                      onClick={handleStopBot}
-                      className="px-3 py-1 rounded-lg text-xs font-bold bg-rose-600 text-white flex items-center gap-1"
-                    >
-                      <StopCircle className="w-3.5 h-3.5" /> Stop
-                    </button>
-                  )}
-                  <button onClick={() => setIsTerminalOpen(false)} className="text-slate-400 hover:text-white">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div ref={terminalContainerRef} className="p-4 flex-1 overflow-y-auto font-mono text-xs bg-[#050811] text-slate-300 space-y-1 min-h-[350px] scroll-smooth">
-                {liveLogs.map((log, idx) => (
-                  <div key={idx} className="leading-relaxed whitespace-pre-wrap">
-                    {log}
-                  </div>
-                ))}
-                <div ref={logsEndRef} />
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
