@@ -34,14 +34,8 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { bootstrapEngineUrl, discoverEngineUrl, saveActiveEngineUrl } from '@/lib/engineDiscovery'
-
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'default-secret-key'
 
 export default function AdminDashboard() {
-  const [engineUrl, setEngineUrl] = useState<string>('')
-  const [engineUrlLabel, setEngineUrlLabel] = useState<string>('...')
-  const [engineStatus, setEngineStatus] = useState<'online' | 'offline' | 'checking'>('checking')
   const [usersList, setUsersList] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState<boolean>(true)
   const [userSearch, setUserSearch] = useState<string>('')
@@ -121,8 +115,6 @@ export default function AdminDashboard() {
 
   // 1. Initial Load — fetch directly from cloud broker
   useEffect(() => {
-    setEngineStatus('online')
-    setEngineUrlLabel('Cloud Broker')
     fetchOverviewAndUsers()
   }, [])
 
@@ -307,9 +299,8 @@ export default function AdminDashboard() {
   const handleDeleteUser = async (userId: string) => {
     if (!confirm(`Are you sure you want to delete profile: ${userId}?`)) return
     try {
-      await fetch(`${engineUrl}/api/profiles/${userId}`, {
-        method: 'DELETE',
-        headers: { 'X-API-Key': API_KEY }
+      await fetch(`/api/profile?user_id=${encodeURIComponent(userId)}`, {
+        method: 'DELETE'
       })
       fetchOverviewAndUsers()
     } catch (e) {
@@ -355,15 +346,9 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border ${
-                engineStatus === 'online'
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-              }`}
-            >
-              <span className={`w-2 h-2 rounded-full ${engineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
-              Engine: {engineStatus.toUpperCase()}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Cloud Broker Active
             </div>
 
             <Link

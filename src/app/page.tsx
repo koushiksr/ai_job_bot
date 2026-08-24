@@ -1,10 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Bot, Briefcase, ChevronRight, Mail, Lock, Loader2, Shield, User, Key, Wifi, WifiOff } from 'lucide-react'
-import { bootstrapEngineUrl, discoverEngineUrl, saveActiveEngineUrl } from '@/lib/engineDiscovery'
+import { Bot, Briefcase, ChevronRight, Mail, Lock, Loader2, Shield, User, Key } from 'lucide-react'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -13,26 +11,6 @@ export default function Home() {
   const [isLogin, setIsLogin] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [isLocalEnv, setIsLocalEnv] = useState(false)
-  const [discoveredUrl, setDiscoveredUrl] = useState<string | null>(null)
-  const [engineStatus, setEngineStatus] = useState<'checking' | 'online' | 'offline'>('checking')
-
-  // Detect environment and probe reachable engine URL on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname
-      setIsLocalEnv(host === 'localhost' || host === '127.0.0.1')
-    }
-
-    bootstrapEngineUrl().then(url => {
-      if (url) {
-        setDiscoveredUrl(url)
-        setEngineStatus('online')
-      } else {
-        setEngineStatus('offline')
-      }
-    })
-  }, [])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,7 +21,7 @@ export default function Home() {
     const cleanEmail = email.trim().toLowerCase()
     const cleanPwd = password.trim()
 
-    // 1. Direct Admin Access Check (Password: admin)
+    // Direct Admin check
     if ((cleanEmail === 'admin' || cleanEmail === 'admin@jobbot.ai' || cleanEmail === 'admin@admin.com') && cleanPwd === 'admin') {
       localStorage.setItem('user_id', 'admin')
       localStorage.setItem('user_email', 'admin@jobbot.ai')
@@ -53,80 +31,28 @@ export default function Home() {
     }
 
     try {
-      if (isLogin) {
-        // 1. Try Internal MongoDB Cloud API Login
-        try {
-          const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: cleanEmail, password: cleanPwd })
-          })
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password: cleanPwd })
+      })
 
-          if (res.ok) {
-            const data = await res.json()
-            localStorage.setItem('user_id', data.user_id)
-            localStorage.setItem('user_email', data.email)
-            localStorage.setItem('user_role', data.role)
-            if (data.role === 'admin') {
-              window.location.href = '/admin'
-            } else {
-              window.location.href = '/dashboard'
-            }
-            return
-          } else if (res.status === 401) {
-            const errData = await res.json().catch(() => ({}))
-            throw new Error(errData.detail || 'Invalid email or Naukri password.')
-          }
-        } catch (fetchErr: any) {
-          if (fetchErr.message && fetchErr.message.includes('Invalid email or Naukri password')) {
-            throw fetchErr
-          }
-          console.warn('API login failed, trying fallback:', fetchErr)
+      if (res.ok) {
+        const data = await res.json()
+        localStorage.setItem('user_id', data.user_id)
+        localStorage.setItem('user_email', data.email)
+        localStorage.setItem('user_role', data.role)
+        if (data.role === 'admin') {
+          window.location.href = '/admin'
+        } else {
+          window.location.href = '/dashboard'
         }
-
-        // 2. Fallback to Supabase Login (if configured)
-        try {
-          const { data, error: sbError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('email', cleanEmail)
-            .eq('password', cleanPwd)
-            .single()
-
-          if (data) {
-            localStorage.setItem('user_id', data.user_id)
-            localStorage.setItem('user_email', data.email)
-            window.location.href = '/dashboard'
-            return
-          }
-        } catch {
-          // Supabase not reachable
-        }
-
-        throw new Error('Invalid email or Naukri password. Check your profile credentials.')
       } else {
-        // Sign Up Flow
-        const userId = crypto.randomUUID()
-        const { error } = await supabase.from('profiles').insert([{ 
-          user_id: userId, 
-          email: email, 
-          password: password, 
-          name: email.split('@')[0],
-          is_active: true,
-          bot_config: {}
-        }])
-        
-        if (error) {
-            if (error.code === '23505') throw new Error('Email already exists')
-            throw error
-        }
-        
-        localStorage.setItem('user_id', userId)
-        localStorage.setItem('user_email', email)
-        window.location.href = '/dashboard'
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.detail || 'Invalid email or Naukri password.')
       }
     } catch (err: any) {
-      setError(err.message || 'Authentication error')
+      setError(err.message || 'Authentication error. Please check your credentials.')
     } finally {
       setLoading(false)
     }
@@ -158,13 +84,13 @@ export default function Home() {
           AI Job Bot
         </h1>
         <p className="text-lg text-gray-400 mb-8 max-w-lg">
-          Automated multi-candidate job application bot with daily 6 AM & 8 AM scheduling, AI questionnaire answering, and live stats.
+          Cloud-native multi-candidate job automation broker with real-time queue management, SHA-256 caching, and AI questionnaire answering.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 items-center md:items-start text-sm text-gray-500 font-medium">
-          <div className="flex items-center gap-2"><Briefcase className="w-4 h-4 text-blue-400"/> Multi-Profile Management</div>
+          <div className="flex items-center gap-2"><Briefcase className="w-4 h-4 text-blue-400"/> Multi-Candidate Cloud Queue</div>
           <div className="hidden sm:block text-gray-700">•</div>
-          <div className="flex items-center gap-2"><Bot className="w-4 h-4 text-purple-400"/> Python 3.13 & uv Engine</div>
+          <div className="flex items-center gap-2"><Bot className="w-4 h-4 text-purple-400"/> MongoDB Atlas Broker</div>
         </div>
       </motion.div>
       
@@ -179,65 +105,68 @@ export default function Home() {
             <h2 className="text-2xl font-bold">
               {isLogin ? 'Sign In to Portal' : 'Create an Account'}
             </h2>
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border ${
-              engineStatus === 'online'
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : engineStatus === 'checking'
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${
-                engineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : engineStatus === 'checking' ? 'bg-amber-400 animate-pulse' : 'bg-rose-400'
-              }`} />
-              {engineStatus === 'online' ? (discoveredUrl?.includes('ts.net') || discoveredUrl?.includes('trycloudflare.com') ? 'Global Engine' : 'Local Engine') : engineStatus === 'checking' ? 'Connecting...' : 'Engine Offline'}
-            </div>
+            <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Cloud Online
+            </span>
           </div>
-          <p className="text-gray-400 mb-6 text-xs">
-            {isLogin ? 'Use your candidate email & password, or admin credentials.' : 'Set up your candidate account.'}
+          <p className="text-sm text-gray-400 mb-6">
+            Log in using your Naukri candidate credentials
           </p>
-          
+
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs mb-4">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs mb-4">
+              {success}
+            </div>
+          )}
+
           <form onSubmit={handleAuth} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-300">Email Address or Username</label>
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 mb-1">Candidate Email / User</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 w-4 h-4 text-gray-500" />
+                <Mail className="w-4 h-4 text-gray-500 absolute left-3 top-3.5" />
                 <input 
                   type="text" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-black/50 border border-gray-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="admin@jobbot.ai or user email"
+                  className="w-full bg-black/40 border border-gray-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-gray-600 transition-all outline-none"
+                  placeholder="e.g. koushiksr1999@gmail.com"
                   required
                 />
               </div>
             </div>
-            
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-300">Password</label>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 mb-1">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-4 h-4 text-gray-500" />
+                <Lock className="w-4 h-4 text-gray-500 absolute left-3 top-3.5" />
                 <input 
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-black/50 border border-gray-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="Password"
+                  className="w-full bg-black/40 border border-gray-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-gray-600 transition-all outline-none"
+                  placeholder="Naukri password or admin"
                   required
                 />
               </div>
             </div>
 
-            {error && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs">{error}</div>}
-            {success && <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs">{success}</div>}
-
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl py-3 mt-2 transition-all flex items-center justify-center gap-2 text-xs shadow-lg shadow-blue-600/20 disabled:opacity-50"
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl text-sm transition-all shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
                 <>
-                  {isLogin ? 'Sign In' : 'Sign Up'}
+                  Sign In
                   <ChevronRight className="w-4 h-4" />
                 </>
               )}
@@ -294,4 +223,3 @@ export default function Home() {
     </div>
   )
 }
-

@@ -33,13 +33,8 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { bootstrapEngineUrl, discoverEngineUrl, saveActiveEngineUrl } from '@/lib/engineDiscovery'
-
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'default-secret-key'
 
 export default function UserDashboard() {
-  const [engineUrlLabel, setEngineUrlLabel] = useState<string>('Cloud Broker')
-  const [engineStatus, setEngineStatus] = useState<'online' | 'offline' | 'checking'>('online')
   const [userId, setUserId] = useState<string>('')
   const [userEmail, setUserEmail] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
@@ -416,61 +411,6 @@ export default function UserDashboard() {
           </div>
         </div>
       </header>
-
-      {/* Engine Offline / Checking Banner */}
-      <AnimatePresence>
-        {engineStatus !== 'online' && (
-          <motion.div
-            initial={{ opacity: 0, y: -16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.3 }}
-            className={`w-full border-b backdrop-blur-sm px-6 py-3 ${
-              engineStatus === 'checking'
-                ? 'bg-amber-950/60 border-amber-500/30'
-                : 'bg-rose-950/80 border-rose-500/40'
-            }`}
-          >
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-start gap-3">
-                {engineStatus === 'checking'
-                  ? <RefreshCw className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5 animate-spin" />
-                  : <WifiOff className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
-                }
-                <div>
-                  {engineStatus === 'checking' ? (
-                    <>
-                      <p className="text-sm font-semibold text-amber-200">Scanning for engine...</p>
-                      <p className="text-xs text-amber-300/80 mt-0.5">
-                        Probing all known URLs: <code className="text-amber-100 font-mono text-[11px]">{process.env.NEXT_PUBLIC_ENGINE_URL || 'N/A'}</code>,{' '}
-                        <code className="text-amber-100 font-mono text-[11px]">localhost:8000</code>, Cloudflare tunnel…
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm font-semibold text-rose-200">Engine Offline — No data available</p>
-                      <p className="text-xs text-rose-300/80 mt-0.5">
-                        None of the known engine URLs responded. Start it with:{' '}
-                        <code className="bg-rose-900/60 text-rose-100 px-1.5 py-0.5 rounded text-[11px]">Start_Background.bat</code>
-                        {' '}or{' '}
-                        <code className="bg-rose-900/60 text-rose-100 px-1.5 py-0.5 rounded text-[11px]">uv run run.py --all</code>
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
-              {engineStatus === 'offline' && (
-                <button
-                  onClick={() => loadUserData(userId)}
-                  className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 transition-all whitespace-nowrap"
-                >
-                  <Wifi className="w-3.5 h-3.5" /> Reconnect
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
