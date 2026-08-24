@@ -67,7 +67,6 @@ export default function UserDashboard() {
     current_ctc: 0,
     expected_ctc: 0,
     search_url: '',
-    resume_file: '',
     skills_str: '',
     locations_str: '',
     notice_period: 'Immediate / 15 Days',
@@ -156,14 +155,13 @@ export default function UserDashboard() {
           current_ctc: pData.current_ctc || 0,
           expected_ctc: pData.expected_ctc || 0,
           search_url: pData.search_url || '',
-          resume_file: pData.resume_file || '',
           skills_str: Array.isArray(skillsArr) ? skillsArr.join(', ') : '',
           locations_str: Array.isArray(locArr) ? locArr.join(', ') : '',
           notice_period: answers['What is your notice period?'] || answers['notice_period'] || 'Immediate / 15 Days',
           career_break: answers['Are you on a career break?'] || 'No',
           relocate: answers['Are you willing to relocate to Bangalore?'] || answers['willing_to_relocate'] || 'Yes'
         })
-        setResumeFilename(pData.resume_filename || pData.resume_file || '')
+        setResumeFilename(pData.resume_filename || (pData.name ? `${pData.name.replace(/[^a-zA-Z0-9]+/g, '_')}_Resume.pdf` : `${uid}_Resume.pdf`))
         setRawJsonStr(pData.raw_json || JSON.stringify(pData, null, 2))
       }
 

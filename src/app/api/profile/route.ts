@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
           search_url: seed.search_url,
           job_filters: seed.job_filters,
           predefined_answers: seed.predefined_answers || {},
-          resume_file: seed.resume_file
+          resume_filename: seed.resume_filename
         }
       }
     }
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       search_url: profile.search_url || '',
       job_filters: profile.job_filters || {},
       predefined_answers: profile.predefined_answers || {},
-      resume_file: profile.resume_file || '',
+      resume_filename: profile.resume_filename || (profile.name ? `${profile.name.replace(/[^a-zA-Z0-9]+/g, '_')}_Resume.pdf` : `${userId}_Resume.pdf`),
       raw_json: JSON.stringify(profile, null, 2),
       version_hash: versionHash
     }
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       job_filters: body.job_filters !== undefined ? body.job_filters : (parsedRaw.job_filters || existing?.job_filters || {}),
       predefined_answers: body.predefined_answers !== undefined ? body.predefined_answers : (parsedRaw.predefined_answers || existing?.predefined_answers || {}),
       skills: body.skills !== undefined ? body.skills : (parsedRaw.skills || existing?.skills || []),
-      resume_file: body.resume_file || parsedRaw.resume_file || existing?.resume_file || '',
+      resume_filename: body.resume_filename || parsedRaw.resume_filename || existing?.resume_filename || (existing?.name ? `${existing.name.replace(/[^a-zA-Z0-9]+/g, '_')}_Resume.pdf` : `${userId}_Resume.pdf`),
       updated_at: now
     }
 
@@ -132,7 +132,10 @@ export async function POST(req: NextRequest) {
     if (db) {
       await db.collection('profiles').updateOne(
         { user_id: userId },
-        { $set: updateDoc },
+        { 
+          $set: updateDoc,
+          $unset: { resume_file: "" }
+        },
         { upsert: true }
       )
     }

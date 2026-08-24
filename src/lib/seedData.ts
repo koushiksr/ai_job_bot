@@ -22,7 +22,7 @@ export interface CandidateSeed {
     remote_only?: boolean
   }
   predefined_answers?: Record<string, string>
-  resume_file: string
+  resume_filename: string
   stats: {
     today: number
     this_week: number
@@ -63,7 +63,7 @@ export const SEED_CANDIDATES: Record<string, CandidateSeed> = {
       'What is your expected CTC?': '16 LPA',
       'Are you willing to relocate to Bangalore?': 'Yes'
     },
-    resume_file: 'data/cache/resumes/candidate1_koushiksr.pdf',
+    resume_filename: 'Koushik_S_R_Resume.pdf',
     stats: {
       today: 12,
       this_week: 64,
@@ -134,7 +134,7 @@ export const SEED_CANDIDATES: Record<string, CandidateSeed> = {
       'What is your expected CTC?': '8 LPA',
       'Are you comfortable working in Bangalore?': 'Yes'
     },
-    resume_file: 'data/cache/resumes/candidate2_rakshitha_D_L.pdf',
+    resume_filename: 'Rakshitha_D_L_Resume.pdf',
     stats: {
       today: 8,
       this_week: 42,
@@ -200,7 +200,7 @@ export async function ensureDbSeeded(db: any) {
             search_url: candidate.search_url,
             job_filters: candidate.job_filters,
             predefined_answers: candidate.predefined_answers || {},
-            resume_file: candidate.resume_file,
+            resume_filename: candidate.resume_filename,
             updated_at: new Date()
           }
         },
