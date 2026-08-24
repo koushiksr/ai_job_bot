@@ -32,7 +32,14 @@ import {
   Wifi,
   WifiOff,
   Upload,
-  Download
+  Download,
+  Eye,
+  EyeOff,
+  Sliders,
+  HelpCircle,
+  Briefcase,
+  User,
+  MapPin
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -58,7 +65,21 @@ export default function AdminDashboard() {
   // Edit Modal State
   const [editingUser, setEditingUser] = useState<any | null>(null)
   const [editTab, setEditTab] = useState<'form' | 'json'>('form')
-  const [editFormData, setEditFormData] = useState<any>({})
+  const [editFormData, setEditFormData] = useState<any>({
+    name: '',
+    email: '',
+    password: '',
+    experience: 0,
+    current_ctc: 0,
+    expected_ctc: 0,
+    search_url: '',
+    skills_str: '',
+    locations_str: '',
+    notice_period: 'Immediate / 15 Days',
+    career_break: 'No',
+    relocate: 'Yes'
+  })
+  const [showEditPassword, setShowEditPassword] = useState<boolean>(false)
   const [editRawJson, setEditRawJson] = useState<string>('{}')
   const [editJsonError, setEditJsonError] = useState<string>('')
   const [savingEdit, setSavingEdit] = useState<boolean>(false)
@@ -114,17 +135,20 @@ export default function AdminDashboard() {
     fetchOverviewAndUsers()
   }, [])
 
-
-
   const handleOpenEditModal = async (u: any) => {
     setEditingUser(u)
     setEditSuccess('')
     setEditJsonError('')
+    setShowEditPassword(false)
 
     try {
       const res = await fetch(`/api/profile?user_id=${u.user_id}`)
       if (res.ok) {
         const data = await res.json()
+        const skillsArr = data.skills || data.job_filters?.keywords || []
+        const locArr = data.job_filters?.location || []
+        const answers = data.predefined_answers || {}
+
         setEditFormData({
           name: data.name || '',
           email: data.email || '',
@@ -133,9 +157,13 @@ export default function AdminDashboard() {
           current_ctc: data.current_ctc || 0,
           expected_ctc: data.expected_ctc || 0,
           search_url: data.search_url || '',
-          resume_file: data.resume_file || ''
+          skills_str: Array.isArray(skillsArr) ? skillsArr.join(', ') : '',
+          locations_str: Array.isArray(locArr) ? locArr.join(', ') : '',
+          notice_period: answers['What is your notice period?'] || answers['notice_period'] || 'Immediate / 15 Days',
+          career_break: answers['Are you on a career break?'] || 'No',
+          relocate: answers['Are you willing to relocate to Bangalore?'] || answers['willing_to_relocate'] || 'Yes'
         })
-        setEditRawJson(data.raw_json || '{}')
+        setEditRawJson(data.raw_json || JSON.stringify(data, null, 2))
       }
     } catch {}
   }
@@ -190,7 +218,7 @@ export default function AdminDashboard() {
       const reader = new FileReader()
       reader.onload = async () => {
         const base64Str = (reader.result as string).split(',')[1]
-        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '')
+        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '').trim()
         if (!cleanName.endsWith('.pdf')) cleanName += '.pdf'
 
         const res = await fetch('/api/profile/resume', {
@@ -205,7 +233,9 @@ export default function AdminDashboard() {
         })
 
         if (res.ok) {
-          setAdminResumeSuccess(`Resume "${cleanName}" (${Math.round(file.size / 1024)} KB) uploaded & saved to MongoDB Atlas!`)
+          const data = await res.json()
+          setEditingUser({ ...editingUser, resume_filename: data.filename })
+          setAdminResumeSuccess(`Resume "${data.filename}" (${Math.round(file.size / 1024)} KB) uploaded & saved to MongoDB Atlas!`)
           setTimeout(() => setAdminResumeSuccess(''), 4500)
           fetchOverviewAndUsers()
         } else {
@@ -230,15 +260,42 @@ export default function AdminDashboard() {
     let payload: any = {}
     if (editTab === 'json') {
       try {
-        JSON.parse(editRawJson)
-        payload = { raw_json: editRawJson }
+        const parsed = JSON.parse(editRawJson)
+        payload = { raw_json: editRawJson, ...parsed }
       } catch (err: any) {
         setEditJsonError(`Invalid JSON: ${err.message}`)
         setSavingEdit(false)
         return
       }
     } else {
-      payload = editFormData
+      const skills = (editFormData.skills_str || '').split(',').map((s: string) => s.trim()).filter(Boolean)
+      const locations = (editFormData.locations_str || '').split(',').map((s: string) => s.trim()).filter(Boolean)
+      const predefined_answers = {
+        'What is your notice period?': editFormData.notice_period || 'Immediate / 15 Days',
+        'Are you on a career break?': editFormData.career_break || 'No',
+        'Are you willing to relocate to Bangalore?': editFormData.relocate || 'Yes',
+        'Are you comfortable working from office / hybrid?': 'Yes',
+        'What is your current CTC?': `${editFormData.current_ctc ? Math.round(editFormData.current_ctc / 100000) : 0} LPA`,
+        'What is your expected CTC?': `${editFormData.expected_ctc ? Math.round(editFormData.expected_ctc / 100000) : 0} LPA`
+      }
+      const job_filters = {
+        location: locations.length ? locations : ['Bangalore', 'Bengaluru', 'Remote', 'Hybrid'],
+        keywords: skills,
+        must_have_keywords: skills.slice(0, 1)
+      }
+
+      payload = {
+        name: editFormData.name,
+        email: editFormData.email,
+        ...(editFormData.password ? { password: editFormData.password } : {}),
+        experience: editFormData.experience,
+        current_ctc: editFormData.current_ctc,
+        expected_ctc: editFormData.expected_ctc,
+        search_url: editFormData.search_url,
+        skills,
+        job_filters,
+        predefined_answers
+      }
     }
 
     try {
@@ -633,70 +690,190 @@ export default function AdminDashboard() {
                 )}
 
                 {editTab === 'form' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <label className="block text-slate-400 mb-1">Name</label>
-                      <input
-                        type="text"
-                        value={editFormData.name || ''}
-                        onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
-                      />
+                  <div className="space-y-4 text-xs">
+                    {/* Card 1: Account Credentials */}
+                    <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-3">
+                      <h4 className="font-bold text-indigo-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5" /> Account & Login Credentials
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-slate-400 mb-1">Full Name</label>
+                          <input
+                            type="text"
+                            value={editFormData.name || ''}
+                            onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Naukri Email</label>
+                          <input
+                            type="email"
+                            value={editFormData.email || ''}
+                            onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Password</label>
+                          <div className="relative">
+                            <input
+                              type={showEditPassword ? 'text' : 'password'}
+                              placeholder="Leave blank to keep"
+                              value={editFormData.password || ''}
+                              onChange={e => setEditFormData({ ...editFormData, password: e.target.value })}
+                              className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-2.5 pr-8 py-2.5 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowEditPassword(!showEditPassword)}
+                              className="absolute right-2.5 top-2.5 text-slate-500 hover:text-slate-300"
+                            >
+                              {showEditPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-slate-400 mb-1">Email</label>
-                      <input
-                        type="email"
-                        value={editFormData.email || ''}
-                        onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
-                      />
+
+                    {/* Card 2: Professional Experience & Compensation */}
+                    <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-3">
+                      <h4 className="font-bold text-purple-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                        <Briefcase className="w-3.5 h-3.5" /> Experience & Compensation
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-slate-400 mb-1">Experience (Years)</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={editFormData.experience || 0}
+                            onChange={e => setEditFormData({ ...editFormData, experience: parseFloat(e.target.value) || 0 })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Current Annual CTC (₹)</label>
+                          <input
+                            type="number"
+                            value={editFormData.current_ctc || 0}
+                            onChange={e => setEditFormData({ ...editFormData, current_ctc: parseInt(e.target.value) || 0 })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Expected Annual CTC (₹)</label>
+                          <input
+                            type="number"
+                            value={editFormData.expected_ctc || 0}
+                            onChange={e => setEditFormData({ ...editFormData, expected_ctc: parseInt(e.target.value) || 0 })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500 font-mono"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-slate-400 mb-1">Password (Leave blank to keep)</label>
-                      <input
-                        type="password"
-                        value={editFormData.password || ''}
-                        onChange={e => setEditFormData({ ...editFormData, password: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
-                      />
+
+                    {/* Card 3: Skills, Keywords & Locations */}
+                    <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-3">
+                      <h4 className="font-bold text-cyan-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                        <Sliders className="w-3.5 h-3.5" /> Target Skills, Keywords & Locations
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-slate-400 mb-1">Primary Skills (Comma-separated)</label>
+                          <input
+                            type="text"
+                            placeholder="Python, FastAPI, Django, AI, LLM"
+                            value={editFormData.skills_str || ''}
+                            onChange={e => setEditFormData({ ...editFormData, skills_str: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Preferred Locations (Comma-separated)</label>
+                          <input
+                            type="text"
+                            placeholder="Bangalore, Bengaluru, Remote, Hybrid"
+                            value={editFormData.locations_str || ''}
+                            onChange={e => setEditFormData({ ...editFormData, locations_str: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-slate-400 mb-1">Naukri Recommended / Search URL</label>
+                          <input
+                            type="text"
+                            value={editFormData.search_url || ''}
+                            onChange={e => setEditFormData({ ...editFormData, search_url: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white font-mono focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-slate-400 mb-1">Experience (Years)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={editFormData.experience || 0}
-                        onChange={e => setEditFormData({ ...editFormData, experience: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
-                      />
+
+                    {/* Card 4: Predefined Answers */}
+                    <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-3">
+                      <h4 className="font-bold text-emerald-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                        <HelpCircle className="w-3.5 h-3.5" /> Predefined Recruiter Questionnaire Answers
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-slate-400 mb-1">Notice Period</label>
+                          <input
+                            type="text"
+                            value={editFormData.notice_period || ''}
+                            onChange={e => setEditFormData({ ...editFormData, notice_period: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Career Break?</label>
+                          <select
+                            value={editFormData.career_break || 'No'}
+                            onChange={e => setEditFormData({ ...editFormData, career_break: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                          >
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-slate-400 mb-1">Willing to Relocate?</label>
+                          <select
+                            value={editFormData.relocate || 'Yes'}
+                            onChange={e => setEditFormData({ ...editFormData, relocate: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                          >
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-slate-400 mb-1">Search URL</label>
-                      <input
-                        type="text"
-                        value={editFormData.search_url || ''}
-                        onChange={e => setEditFormData({ ...editFormData, search_url: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-slate-400 mb-1">Candidate Resume PDF (MongoDB Atlas Cloud)</label>
-                      <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3">
+
+                    {/* Card 5: Resume PDF */}
+                    <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-3">
+                      <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5" /> Candidate Resume PDF (Cloud Synchronized)
+                      </h4>
+                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-indigo-400" />
-                          <span className="text-xs font-mono text-slate-200">{editingUser.resume_filename || `${editingUser.user_id}_Resume.pdf`}</span>
+                          <span className="text-xs font-mono text-slate-200">
+                            {editingUser.resume_filename || `${editingUser.user_id}_Resume.pdf`}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <a
                             href={`/api/profile/resume?user_id=${editingUser.user_id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
                           >
                             <Download className="w-3 h-3" /> Preview
                           </a>
-                          <label className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer shadow-md">
+                          <label className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer shadow-md transition-all">
                             <Upload className="w-3 h-3" />
                             <span>{adminUploadingResume ? 'Uploading...' : 'Upload PDF'}</span>
                             <input
@@ -718,7 +895,7 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <textarea
-                    rows={16}
+                    rows={18}
                     value={editRawJson}
                     onChange={e => {
                       setEditRawJson(e.target.value)
