@@ -73,6 +73,7 @@ export default function AdminDashboard() {
   const [liveLogs, setLiveLogs] = useState<string[]>([])
   const [isTerminalOpen, setIsTerminalOpen] = useState<boolean>(false)
   const logsEndRef = useRef<HTMLDivElement>(null)
+  const terminalContainerRef = useRef<HTMLDivElement>(null)
 
   // System Logs Tab State
   const [systemLogs, setSystemLogs] = useState<any[]>([])
@@ -154,7 +155,12 @@ export default function AdminDashboard() {
   }, [activeJobId, jobStatus])
 
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (terminalContainerRef.current) {
+      terminalContainerRef.current.scrollTop = terminalContainerRef.current.scrollHeight
+    }
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
   }, [liveLogs])
 
   const handleRunBot = async (targetUserId: string) => {
@@ -878,7 +884,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="p-4 flex-1 overflow-y-auto font-mono text-xs bg-[#050811] text-slate-300 space-y-1 min-h-[350px]">
+              <div ref={terminalContainerRef} className="p-4 flex-1 overflow-y-auto font-mono text-xs bg-[#050811] text-slate-300 space-y-1 min-h-[350px] scroll-smooth">
                 {liveLogs.map((log, idx) => (
                   <div key={idx} className="leading-relaxed whitespace-pre-wrap">
                     {log}

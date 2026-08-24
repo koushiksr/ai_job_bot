@@ -70,6 +70,7 @@ export default function UserDashboard() {
   const [countdownText, setCountdownText] = useState<string>('Calculating...')
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
   const logsEndRef = useRef<HTMLDivElement>(null)
+  const terminalContainerRef = useRef<HTMLDivElement>(null)
 
   // Profile Form & JSON Editor State
   const [formData, setFormData] = useState({
@@ -194,9 +195,14 @@ export default function UserDashboard() {
     return () => clearInterval(interval)
   }, [activeJobId, jobStatus, userId, historyPage, historySearch, historyFilter])
 
-  // Auto-scroll logs terminal
+  // Auto-scroll logs terminal directly to latest line
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (terminalContainerRef.current) {
+      terminalContainerRef.current.scrollTop = terminalContainerRef.current.scrollHeight
+    }
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
   }, [liveLogs])
 
   const loadUserData = async (uid: string) => {
@@ -763,7 +769,7 @@ export default function UserDashboard() {
                 </div>
               </div>
 
-              <div className="p-4 h-96 overflow-y-auto font-mono text-xs space-y-1 bg-[#050811] text-slate-300">
+              <div ref={terminalContainerRef} className="p-4 h-96 overflow-y-auto font-mono text-xs space-y-1 bg-[#050811] text-slate-300 scroll-smooth">
                 {liveLogs.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-slate-600">
                     Press &quot;Start Automatic Job Apply&quot; to begin scanning and applying to jobs.

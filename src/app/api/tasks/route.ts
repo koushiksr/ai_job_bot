@@ -82,7 +82,15 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .toArray()
 
-    return NextResponse.json({ tasks })
+    const activeTask = tasks.find((t: any) => t.status === 'pending' || t.status === 'running')
+
+    return NextResponse.json({
+      active: !!activeTask,
+      job_id: activeTask?._id || null,
+      status: activeTask?.status || 'idle',
+      data: activeTask || null,
+      tasks
+    })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
