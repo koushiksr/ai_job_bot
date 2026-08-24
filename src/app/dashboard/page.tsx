@@ -1,60 +1,53 @@
 'use client'
 
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Briefcase,
-  PlayCircle,
   Clock,
   Calendar,
   Settings,
-  Terminal,
-  Activity,
   TrendingUp,
   FileText,
   RefreshCw,
   Search,
   ExternalLink,
   Shield,
-  Sliders,
   CheckCircle2,
-  XCircle,
-  ChevronRight,
   LogOut,
   Save,
-  X,
-  AlertCircle,
   User,
   Sparkles,
-  StopCircle,
   FileJson,
-  Code,
-  Wifi,
-  WifiOff,
   Upload,
   Download,
-  FileCheck
+  Eye,
+  EyeOff,
+  Building2,
+  MapPin,
+  Check
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
   const [userEmail, setUserEmail] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
-  const [candidateProfile, setCandidateProfile] = useState<any>(null)
   const [loadingProfile, setLoadingProfile] = useState<boolean>(true)
 
-  // Navigation tab (History & Profile Management for Candidates)
+  // Navigation tabs
   const [activeTab, setActiveTab] = useState<'history' | 'profile'>('history')
   const [profileSubTab, setProfileSubTab] = useState<'form' | 'json'>('form')
 
-  // Metrics State (Today, Week, Month, Total)
+  // Metrics State
   const [metrics, setMetrics] = useState({
     today: 0,
     this_week: 0,
     this_month: 0,
     total_applied: 0
   })
+
+  // History State
   const [historyJobs, setHistoryJobs] = useState<any[]>([])
   const [loadingHistory, setLoadingHistory] = useState<boolean>(true)
   const [historySearch, setHistorySearch] = useState<string>('')
@@ -63,10 +56,10 @@ export default function UserDashboard() {
   const [historyTotalPages, setHistoryTotalPages] = useState<number>(1)
   const [historyTotalCount, setHistoryTotalCount] = useState<number>(0)
 
-  // Automated Schedule State
+  // Automated Schedule Countdown
   const [countdownText, setCountdownText] = useState<string>('Calculating...')
 
-  // Profile Form & JSON Editor State
+  // Profile Form & JSON State
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -77,41 +70,38 @@ export default function UserDashboard() {
     search_url: '',
     resume_file: ''
   })
+  const [showPassword, setShowPassword] = useState<boolean>(false)
   const [rawJsonStr, setRawJsonStr] = useState<string>('{\n}')
   const [jsonError, setJsonError] = useState<string>('')
   const [savingProfile, setSavingProfile] = useState<boolean>(false)
   const [saveSuccess, setSaveSuccess] = useState<string>('')
   const [uploadingResume, setUploadingResume] = useState<boolean>(false)
   const [resumeFilename, setResumeFilename] = useState<string>('')
-  const [resumeUploadSuccess, setResumeUploadSuccess] = useState<string>('')
+  const [resumeSuccess, setResumeSuccess] = useState<string>('')
 
-  // Next Scheduled Run Countdown (Daily at 6:00 AM & 8:00 AM IST)
+  // Compute Daily 6 AM & 8 AM IST Countdown
   useEffect(() => {
     const computeCountdown = () => {
       const now = new Date()
-      // IST is UTC+5:30
-      const istOffsetMs = 5.5 * 60 * 60 * 1000
-      const istNow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + istOffsetMs)
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000
+      const istTime = new Date(utcMs + 5.5 * 3600000)
 
-      const year = istNow.getFullYear()
-      const month = istNow.getMonth()
-      const date = istNow.getDate()
+      const target6 = new Date(istTime)
+      target6.setHours(6, 0, 0, 0)
+      const target8 = new Date(istTime)
+      target8.setHours(8, 0, 0, 0)
 
-      const run1 = new Date(year, month, date, 6, 0, 0)
-      const run2 = new Date(year, month, date, 8, 0, 0)
-      const runNextDay = new Date(year, month, date + 1, 6, 0, 0)
-
-      let target = run1
-      if (istNow < run1) {
-        target = run1
-      } else if (istNow < run2) {
-        target = run2
+      let target: Date
+      if (istTime < target6) {
+        target = target6
+      } else if (istTime < target8) {
+        target = target8
       } else {
-        target = runNextDay
+        target = new Date(target6)
+        target.setDate(target.getDate() + 1)
       }
 
-      const diffMs = target.getTime() - istNow.getTime()
-      const diffSecs = Math.max(0, Math.floor(diffMs / 1000))
+      const diffSecs = Math.max(0, Math.floor((target.getTime() - istTime.getTime()) / 1000))
       const hours = Math.floor(diffSecs / 3600)
       const minutes = Math.floor((diffSecs % 3600) / 60)
       const seconds = diffSecs % 60
@@ -125,9 +115,7 @@ export default function UserDashboard() {
     return () => clearInterval(timer)
   }, [])
 
-
-
-  // 1. Authenticate & Initialize — load data directly from cloud broker
+  // Initial Load on Mount
   useEffect(() => {
     const storedUid = localStorage.getItem('user_id')
     const storedEmail = localStorage.getItem('user_email')
@@ -149,86 +137,53 @@ export default function UserDashboard() {
   const loadUserData = async (uid: string) => {
     setLoadingProfile(true)
     try {
-      const res = await fetch(`/api/profile?user_id=${uid}`)
-      if (res.ok) {
-        const data = await res.json()
-        setCandidateProfile(data)
-        setResumeFilename(data.resume_filename || data.resume_file || '')
+      const pRes = await fetch(`/api/profile?user_id=${uid}`)
+      if (pRes.ok) {
+        const pData = await pRes.json()
         setFormData({
-          name: data.name || '',
-          email: data.email || '',
+          name: pData.name || '',
+          email: pData.email || '',
           password: '',
-          experience: data.experience || 0,
-          current_ctc: data.current_ctc || 0,
-          expected_ctc: data.expected_ctc || 0,
-          search_url: data.search_url || '',
-          resume_file: data.resume_filename || data.resume_file || ''
+          experience: pData.experience || 0,
+          current_ctc: pData.current_ctc || 0,
+          expected_ctc: pData.expected_ctc || 0,
+          search_url: pData.search_url || '',
+          resume_file: pData.resume_file || ''
         })
-        setRawJsonStr(data.raw_json || '{}')
+        setResumeFilename(pData.resume_file || '')
+        setRawJsonStr(pData.raw_json || JSON.stringify(pData, null, 2))
+      }
+
+      const sRes = await fetch(`/api/stats?user_id=${uid}`)
+      if (sRes.ok) {
+        const sData = await sRes.json()
+        setMetrics({
+          today: sData.today || 0,
+          this_week: sData.this_week || 0,
+          this_month: sData.this_month || 0,
+          total_applied: sData.total_applied || 0
+        })
       }
     } catch (e) {
-      console.error('Failed to load profile:', e)
+      console.error('Failed to load user data:', e)
     } finally {
       setLoadingProfile(false)
     }
   }
 
-  const handleResumeFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (!file.name.toLowerCase().endsWith('.pdf')) {
-      alert('Please select a valid PDF file (.pdf).')
-      return
-    }
-
-    setUploadingResume(true)
-    setResumeUploadSuccess('')
-
-    try {
-      const reader = new FileReader()
-      reader.onload = async () => {
-        const base64Str = (reader.result as string).split(',')[1]
-        // Clean candidate prefix so recruiters see clean professional name
-        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '')
-        if (!cleanName.endsWith('.pdf')) cleanName += '.pdf'
-
-        const res = await fetch('/api/profile/resume', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: userId,
-            filename: cleanName,
-            file_base64: base64Str,
-            file_size_bytes: file.size
-          })
-        })
-
-        if (res.ok) {
-          setResumeFilename(cleanName)
-          setResumeUploadSuccess(`Resume "${cleanName}" (${Math.round(file.size / 1024)} KB) uploaded & saved directly to MongoDB Atlas!`)
-          setTimeout(() => setResumeUploadSuccess(''), 4500)
-          loadUserData(userId)
-        } else {
-          const err = await res.json()
-          alert(`Upload failed: ${err.detail || 'Server error'}`)
-        }
-        setUploadingResume(false)
-      }
-      reader.readAsDataURL(file)
-    } catch (err: any) {
-      alert(`Error uploading file: ${err.message}`)
-      setUploadingResume(false)
-    }
-  }
-
-  const loadUserHistory = async (uid: string, page = 1, search = '', dateFilter = 'all') => {
+  const loadUserHistory = async (uid: string, page = 1, search = '', date = 'all') => {
     setLoadingHistory(true)
     try {
-      const res = await fetch(`/api/history?user_id=${uid}&page=${page}&limit=20&search=${encodeURIComponent(search)}&date=${dateFilter}`)
+      const q = new URLSearchParams({
+        user_id: uid,
+        page: page.toString(),
+        limit: '20',
+        search: search,
+        date: date
+      })
+      const res = await fetch(`/api/history?${q.toString()}`)
       if (res.ok) {
         const data = await res.json()
-        setMetrics(data.stats || { today: 0, this_week: 0, this_month: 0, total_applied: 0 })
         setHistoryJobs(data.jobs || [])
         setHistoryPage(data.page || 1)
         setHistoryTotalPages(data.pages || 1)
@@ -240,8 +195,6 @@ export default function UserDashboard() {
       setLoadingHistory(false)
     }
   }
-
-
 
   const handleSaveFormProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -255,70 +208,106 @@ export default function UserDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          ...formData
+          name: formData.name,
+          email: formData.email,
+          ...(formData.password ? { password: formData.password } : {}),
+          experience: formData.experience,
+          current_ctc: formData.current_ctc,
+          expected_ctc: formData.expected_ctc,
+          search_url: formData.search_url
         })
       })
+
       if (res.ok) {
-        const data = await res.json()
-        setSaveSuccess('Profile saved successfully in cloud database!')
-        setTimeout(() => setSaveSuccess(''), 3500)
+        setSaveSuccess('Profile preferences saved successfully!')
         loadUserData(userId)
+        setTimeout(() => setSaveSuccess(''), 4000)
       } else {
-        const errData = await res.json()
-        alert(`Failed to save: ${errData.detail || 'Server error'}`)
+        const data = await res.json()
+        setJsonError(data.detail || 'Failed to save profile.')
       }
     } catch (err: any) {
-      alert(`Error saving profile: ${err.message}`)
+      setJsonError(err.message || 'Error saving profile.')
     } finally {
       setSavingProfile(false)
     }
   }
 
-  const handleSaveJsonProfile = async () => {
+  const handleSaveRawJson = async () => {
     setSavingProfile(true)
     setSaveSuccess('')
     setJsonError('')
 
-    let parsed: any
     try {
-      parsed = JSON.parse(rawJsonStr)
-    } catch (err: any) {
-      setJsonError(`Invalid JSON Syntax: ${err.message}`)
-      setSavingProfile(false)
-      return
-    }
-
-    try {
+      const parsed = JSON.parse(rawJsonStr)
       const res = await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
+          raw_json: rawJsonStr,
           ...parsed
         })
       })
+
       if (res.ok) {
-        setSaveSuccess('Profile JSON saved and synchronized!')
-        setTimeout(() => setSaveSuccess(''), 3500)
+        setSaveSuccess('JSON configuration saved to cloud database!')
         loadUserData(userId)
+        setTimeout(() => setSaveSuccess(''), 4000)
       } else {
-        const errData = await res.json()
-        setJsonError(`Failed to save: ${errData.detail || 'Server error'}`)
+        const data = await res.json()
+        setJsonError(data.detail || 'Failed to save JSON.')
       }
-    } catch (err: any) {
-      setJsonError(`Error: ${err.message}`)
+    } catch (e: any) {
+      setJsonError(`Invalid JSON syntax: ${e.message}`)
     } finally {
       setSavingProfile(false)
     }
   }
 
-  const handleFormatJson = () => {
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Please select a valid PDF file.')
+      return
+    }
+
+    setUploadingResume(true)
+    setResumeSuccess('')
+
     try {
-      const parsed = JSON.parse(rawJsonStr)
-      setRawJsonStr(JSON.stringify(parsed, null, 2))
-      setJsonError('')
-    } catch (e: any) {
-      setJsonError(`Cannot format: ${e.message}`)
+      const reader = new FileReader()
+      reader.onload = async () => {
+        const base64Str = (reader.result as string).split(',')[1]
+        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '')
+        if (!cleanName.endsWith('.pdf')) cleanName += '.pdf'
+
+        const res = await fetch('/api/profile/resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            filename: cleanName,
+            pdf_base64: base64Str
+          })
+        })
+
+        if (res.ok) {
+          const data = await res.json()
+          setResumeFilename(data.filename)
+          setResumeSuccess('Resume PDF updated in MongoDB Atlas!')
+          setTimeout(() => setResumeSuccess(''), 4000)
+        } else {
+          alert('Failed to upload resume.')
+        }
+        setUploadingResume(false)
+      }
+      reader.readAsDataURL(file)
+    } catch {
+      alert('Error reading resume file.')
+      setUploadingResume(false)
     }
   }
 
@@ -327,97 +316,83 @@ export default function UserDashboard() {
     window.location.href = '/'
   }
 
-  // Filter history jobs
-  const filteredJobs = historyJobs.filter(job => {
-    const matchesSearch =
-      (job.company || '').toLowerCase().includes(historySearch.toLowerCase()) ||
-      (job.role || '').toLowerCase().includes(historySearch.toLowerCase()) ||
-      (job.location || '').toLowerCase().includes(historySearch.toLowerCase())
-
-    if (!matchesSearch) return false
-
-    if (historyFilter === 'all') return true
-
-    const now = new Date()
-    const jobDate = new Date(job.date)
-    const diffHours = (now.getTime() - jobDate.getTime()) / (1000 * 60 * 60)
-
-    if (historyFilter === 'today') return diffHours <= 24
-    if (historyFilter === 'week') return diffHours <= 24 * 7
-    if (historyFilter === 'month') return diffHours <= 24 * 30
-    return true
-  })
-
   return (
-    <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white">
-      {/* Top Navigation Bar */}
-      <header className="border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-xl sticky top-0 z-40 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-40 bg-[#0c1017]/90 backdrop-blur-xl border-b border-slate-800/80 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-[1px] shadow-lg shadow-blue-500/20">
-              <div className="w-full h-full bg-slate-950 rounded-xl flex items-center justify-center">
-                <Briefcase className="w-5 h-5 text-cyan-400" />
-              </div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 font-bold text-white text-base">
+              {formData.name ? formData.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                  AI Job Automation
+                <h1 className="text-base font-bold text-white">
+                  {formData.name || 'Candidate Dashboard'}
                 </h1>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 font-semibold uppercase tracking-wider">
-                  Candidate Portal
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 font-semibold uppercase">
+                  Active
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Logged in as <span className="text-slate-200 font-medium">{formData.name || userId}</span> ({userEmail})
+              <p className="text-xs text-slate-400 font-mono">
+                {formData.email || userEmail}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Cloud Queue Status Badge */}
-            <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-500/10"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Cloud Queue · Active
-            </div>
-
-            {/* Admin Switch if Admin */}
+          <div className="flex items-center gap-3">
             {userRole === 'admin' && (
               <Link
                 href="/admin"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 transition-all"
               >
-                <Shield className="w-3.5 h-3.5 text-indigo-400" /> Switch to Admin
+                <Shield className="w-3.5 h-3.5 text-indigo-400" /> Admin Portal
               </Link>
             )}
 
-            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700/60 transition-all text-slate-300"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-rose-500/10 hover:text-rose-400 border border-slate-800 transition-all text-slate-300"
             >
-              <LogOut className="w-3.5 h-3.5" /> Logout
+              <LogOut className="w-3.5 h-3.5" /> Log Out
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Container */}
+      {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
-        {/* 4 Metric Cards (Today, This Week, This Month, Total) */}
+        
+        {/* Next Scheduled Run & Status Banner */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border border-blue-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg shadow-blue-500/5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold text-blue-300 uppercase tracking-wider block">
+                Next Automated Application Run
+              </span>
+              <span className="text-sm font-bold text-white font-mono">
+                {countdownText}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-xs px-3 py-1.5 rounded-xl font-medium bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Automated Server Engine Ready
+            </span>
+          </div>
+        </div>
+
+        {/* 4 Large Clean Metric Cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Today */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-emerald-500/20 hover:border-emerald-500/40 transition-all relative overflow-hidden group shadow-lg shadow-emerald-500/5"
-          >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-emerald-400 tracking-wider uppercase flex items-center gap-1.5">
+          <div className="p-5 rounded-2xl bg-[#0c1017] border border-emerald-500/20 hover:border-emerald-500/40 transition-all shadow-lg shadow-emerald-500/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" /> Today
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-medium">
@@ -428,18 +403,12 @@ export default function UserDashboard() {
               {metrics.today}
             </div>
             <p className="text-xs text-slate-400 mt-1">Applications submitted today</p>
-          </motion.div>
+          </div>
 
           {/* This Week */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-blue-500/20 hover:border-blue-500/40 transition-all relative overflow-hidden group shadow-lg shadow-blue-500/5"
-          >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all pointer-events-none" />
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-blue-400 tracking-wider uppercase flex items-center gap-1.5">
+          <div className="p-5 rounded-2xl bg-[#0c1017] border border-blue-500/20 hover:border-blue-500/40 transition-all shadow-lg shadow-blue-500/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" /> This Week
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20 font-medium">
@@ -450,18 +419,12 @@ export default function UserDashboard() {
               {metrics.this_week}
             </div>
             <p className="text-xs text-slate-400 mt-1">Applications this week</p>
-          </motion.div>
+          </div>
 
           {/* This Month */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-purple-500/20 hover:border-purple-500/40 transition-all relative overflow-hidden group shadow-lg shadow-purple-500/5"
-          >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all pointer-events-none" />
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-purple-400 tracking-wider uppercase flex items-center gap-1.5">
+          <div className="p-5 rounded-2xl bg-[#0c1017] border border-purple-500/20 hover:border-purple-500/40 transition-all shadow-lg shadow-purple-500/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5" /> This Month
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 font-medium">
@@ -472,19 +435,13 @@ export default function UserDashboard() {
               {metrics.this_month}
             </div>
             <p className="text-xs text-slate-400 mt-1">Applications this month</p>
-          </motion.div>
+          </div>
 
-          {/* Till Now Total */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-amber-500/20 hover:border-amber-500/40 transition-all relative overflow-hidden group shadow-lg shadow-amber-500/5"
-          >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-amber-400 tracking-wider uppercase flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Till Now Total
+          {/* Lifetime Total */}
+          <div className="p-5 rounded-2xl bg-[#0c1017] border border-amber-500/20 hover:border-amber-500/40 transition-all shadow-lg shadow-amber-500/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" /> Total Applied
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-medium">
                 All-Time
@@ -494,91 +451,63 @@ export default function UserDashboard() {
               {metrics.total_applied}
             </div>
             <p className="text-xs text-slate-400 mt-1">Total lifetime applications</p>
-          </motion.div>
+          </div>
         </section>
 
-        {/* Automated Schedule & Bot Engine Status Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border border-blue-500/20 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-[11px] font-semibold text-blue-300 uppercase tracking-wider block">Next Automated Scheduled Run</span>
-                <span className="text-sm font-bold text-white font-mono">{countdownText}</span>
-              </div>
-            </div>
-            <span className="text-[10px] px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 font-medium">
-              Daily 6 AM & 8 AM IST
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900/60 to-slate-950/60 border border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-                <Shield className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Automation Server Engine</span>
-                <span className="text-sm font-bold text-emerald-400 font-mono">
-                  Managed & Hosted on Server
-                </span>
-              </div>
-            </div>
-            <span className="text-[10px] px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Active & Automated
-            </span>
-          </div>
-        </div>
-
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
               activeTab === 'history'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
+                : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
             }`}
           >
             <Briefcase className="w-4 h-4" /> Job Applications & History ({historyTotalCount || historyJobs.length})
           </button>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
               activeTab === 'profile'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
+                : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
             }`}
           >
-            <Settings className="w-4 h-4" /> Candidate Profile & Resume
+            <User className="w-4 h-4" /> Candidate Profile & Resume
           </button>
         </div>
 
-        {/* TAB 2: JOB APPLYING HISTORY */}
+        {/* TAB 1: JOB APPLYING HISTORY */}
         {activeTab === 'history' && (
           <div className="space-y-4">
             {/* Search & Filter Header */}
-            <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="relative w-full md:w-80">
                 <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input
                   type="text"
-                  placeholder="Search company, title, or location..."
+                  placeholder="Search company, job role, location..."
                   value={historySearch}
                   onChange={e => {
                     setHistorySearch(e.target.value)
                     loadUserHistory(userId, 1, e.target.value, historyFilter)
                   }}
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               {/* Time Pill Filters */}
               <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
                 {(['all', 'today', 'week', 'month'] as const).map(f => {
-                  const label = f === 'all' ? `All (${metrics.total_applied})` : f === 'today' ? `Today (${metrics.today})` : f === 'week' ? `This Week (${metrics.this_week})` : `This Month (${metrics.this_month})`
+                  const label =
+                    f === 'all'
+                      ? `All (${metrics.total_applied})`
+                      : f === 'today'
+                      ? `Today (${metrics.today})`
+                      : f === 'week'
+                      ? `This Week (${metrics.this_week})`
+                      : `This Month (${metrics.this_month})`
                   const active = historyFilter === f
                   return (
                     <button
@@ -587,7 +516,7 @@ export default function UserDashboard() {
                         setHistoryFilter(f)
                         loadUserHistory(userId, 1, historySearch, f)
                       }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                         active
                           ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                           : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
@@ -600,69 +529,69 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            {/* History Table */}
-            <div className="rounded-2xl bg-slate-900/60 border border-slate-800/80 overflow-hidden">
+            {/* Applications Table */}
+            <div className="rounded-2xl bg-[#0c1017] border border-slate-800 overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                  <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
                     <tr>
-                      <th className="py-3 px-4">Company</th>
-                      <th className="py-3 px-4">Job Role / Title</th>
-                      <th className="py-3 px-4">Location</th>
-                      <th className="py-3 px-4">Date & Time</th>
-                      <th className="py-3 px-4">Match Score</th>
-                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3.5 px-4">Company</th>
+                      <th className="py-3.5 px-4">Job Role / Title</th>
+                      <th className="py-3.5 px-4">Location</th>
+                      <th className="py-3.5 px-4">Date Applied</th>
+                      <th className="py-3.5 px-4 text-right">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/50">
                     {loadingHistory ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
+                        <td colSpan={5} className="py-12 text-center text-slate-400">
                           <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-blue-400" />
-                          Loading application history from cloud database...
+                          Loading applications from MongoDB Atlas...
                         </td>
                       </tr>
                     ) : historyJobs.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-500">
-                          No applied jobs found matching your filter.
+                        <td colSpan={5} className="py-12 text-center text-slate-500">
+                          No applied jobs found matching your criteria.
                         </td>
                       </tr>
                     ) : (
                       historyJobs.map((job, idx) => (
                         <tr key={job.id || idx} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="py-3.5 px-4 font-semibold text-white">
-                            {job.company || 'Direct Employer'}
+                          <td className="py-4 px-4 font-bold text-white flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[11px] text-blue-400 font-bold shrink-0">
+                              <Building2 className="w-3.5 h-3.5" />
+                            </div>
+                            <span>{job.company || 'Direct Employer'}</span>
                           </td>
-                          <td className="py-3.5 px-4 text-slate-200">
+                          <td className="py-4 px-4 text-slate-200">
                             {job.url ? (
-                              <a href={job.url} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 inline-flex items-center gap-1">
-                                {job.title || 'Job Opening'} <ExternalLink className="w-3 h-3 text-slate-500" />
+                              <a
+                                href={job.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-blue-400 font-medium inline-flex items-center gap-1.5 group"
+                              >
+                                {job.title || 'Job Opening'}
+                                <ExternalLink className="w-3 h-3 text-slate-500 group-hover:text-blue-400 transition-colors" />
                               </a>
                             ) : (
-                              job.title || 'Job Opening'
+                              <span className="font-medium">{job.title || 'Job Opening'}</span>
                             )}
                           </td>
-                          <td className="py-3.5 px-4 text-slate-400">
-                            {job.location || 'India'}
-                          </td>
-                          <td className="py-3.5 px-4 text-slate-400 font-mono">
-                            {job.date || 'Recently'}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono text-[11px]">
-                              {job.score ? `${job.score}%` : 'Auto'}
+                          <td className="py-4 px-4 text-slate-400">
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-slate-500" />
+                              {job.location || 'India'}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                              job.status === 'applied' || job.status === 'success'
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                : job.status === 'external'
-                                ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                            }`}>
-                              <CheckCircle2 className="w-3 h-3" /> {(job.status || 'applied').toUpperCase()}
+                          <td className="py-4 px-4 text-slate-400 font-mono">
+                            {job.date || 'Recently'}
+                          </td>
+                          <td className="py-4 px-4 text-right">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              <CheckCircle2 className="w-3 h-3" /> APPLIED
                             </span>
                           </td>
                         </tr>
@@ -672,8 +601,8 @@ export default function UserDashboard() {
                 </table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="bg-slate-950/80 px-4 py-3 border-t border-slate-800 flex items-center justify-between">
+              {/* Pagination */}
+              <div className="bg-slate-950 px-4 py-3 border-t border-slate-800 flex items-center justify-between">
                 <span className="text-xs text-slate-400">
                   Showing {historyJobs.length > 0 ? (historyPage - 1) * 20 + 1 : 0} to{' '}
                   {Math.min(historyPage * 20, historyTotalCount)} of {historyTotalCount} applications
@@ -682,7 +611,7 @@ export default function UserDashboard() {
                   <button
                     onClick={() => loadUserHistory(userId, historyPage - 1, historySearch, historyFilter)}
                     disabled={historyPage <= 1 || loadingHistory}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all"
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all"
                   >
                     Previous
                   </button>
@@ -692,7 +621,7 @@ export default function UserDashboard() {
                   <button
                     onClick={() => loadUserHistory(userId, historyPage + 1, historySearch, historyFilter)}
                     disabled={historyPage >= historyTotalPages || loadingHistory}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all"
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all"
                   >
                     Next
                   </button>
@@ -702,10 +631,10 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* TAB 3: EDIT PROFILE & JSON */}
+        {/* TAB 2: CANDIDATE PROFILE & RESUME */}
         {activeTab === 'profile' && (
           <div className="space-y-6">
-            {/* Sub Tabs: Form vs JSON */}
+            {/* Sub-tab Switcher */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <button
@@ -716,7 +645,7 @@ export default function UserDashboard() {
                       : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
                   }`}
                 >
-                  <User className="w-3.5 h-3.5" /> Visual Form View
+                  <User className="w-3.5 h-3.5" /> Structured Form
                 </button>
                 <button
                   onClick={() => setProfileSubTab('json')}
@@ -731,82 +660,115 @@ export default function UserDashboard() {
               </div>
 
               {saveSuccess && (
-                <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/30">
+                <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-xl border border-emerald-500/30 font-medium animate-fadeIn">
                   <CheckCircle2 className="w-3.5 h-3.5" /> {saveSuccess}
                 </div>
               )}
             </div>
 
-            {/* FORM VIEW */}
+            {/* Structured Form View */}
             {profileSubTab === 'form' && (
-              <form onSubmit={handleSaveFormProfile} className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Candidate Full Name</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      required
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
+              <form onSubmit={handleSaveFormProfile} className="space-y-6">
+                {/* Card 1: Account Credentials */}
+                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
+                  <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+                    <User className="w-4 h-4" /> Naukri Account & Identity
+                  </h3>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Naukri Login Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={e => setFormData({ ...formData, email: e.target.value })}
-                      required
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Candidate Full Name</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        required
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Naukri Login Password</label>
-                    <input
-                      type="password"
-                      placeholder="Leave blank to keep unchanged"
-                      value={formData.password}
-                      onChange={e => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Naukri Login Email</label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        required
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Total Experience (Years)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={formData.experience}
-                      onChange={e => setFormData({ ...formData, experience: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                    />
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Naukri Login Password</label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="Leave blank to keep unchanged"
+                          value={formData.password}
+                          onChange={e => setFormData({ ...formData, password: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-10 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
                   </div>
+                </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Current Annual CTC (₹ INR)</label>
-                    <input
-                      type="number"
-                      value={formData.current_ctc}
-                      onChange={e => setFormData({ ...formData, current_ctc: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                    />
+                {/* Card 2: Professional Experience & Salary */}
+                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
+                  <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" /> Professional Experience & Salary
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Total Experience (Years)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={formData.experience}
+                        onChange={e => setFormData({ ...formData, experience: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Current Annual CTC (₹ INR)</label>
+                      <input
+                        type="number"
+                        value={formData.current_ctc}
+                        onChange={e => setFormData({ ...formData, current_ctc: parseInt(e.target.value) || 0 })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Expected Annual CTC (₹ INR)</label>
+                      <input
+                        type="number"
+                        value={formData.expected_ctc}
+                        onChange={e => setFormData({ ...formData, expected_ctc: parseInt(e.target.value) || 0 })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                      />
+                    </div>
                   </div>
+                </div>
 
+                {/* Card 3: Job Search URL */}
+                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-3 shadow-xl">
+                  <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                    <Search className="w-4 h-4" /> Naukri Search URL
+                  </h3>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Expected Annual CTC (₹ INR)</label>
-                    <input
-                      type="number"
-                      value={formData.expected_ctc}
-                      onChange={e => setFormData({ ...formData, expected_ctc: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Naukri Search / Recommended Jobs URL (Universal Default: https://www.naukri.com/mnjuser/recommendedjobs)</label>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                      Target Search URL (Default: <code className="text-slate-400 bg-slate-900 px-1 py-0.5 rounded">https://www.naukri.com/mnjuser/recommendedjobs</code>)
+                    </label>
                     <input
                       type="url"
                       value={formData.search_url}
@@ -815,108 +777,90 @@ export default function UserDashboard() {
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
                     />
                   </div>
+                </div>
 
+                {/* Card 4: Resume PDF in MongoDB Atlas */}
+                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
+                  <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <FileText className="w-4 h-4" /> Candidate Resume PDF (Cloud Synchronized)
+                  </h3>
 
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-300 mb-2">Candidate Resume PDF (Stored in MongoDB Atlas Cloud Database)</label>
-                    <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                          <FileText className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-white font-mono">{resumeFilename || `${userId}_Resume.pdf`}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                              Active in Cloud
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
-                            Recruiters on Naukri will receive this clean custom PDF document.
-                          </p>
-                        </div>
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                        <FileText className="w-6 h-6" />
                       </div>
-
-                      <div className="flex items-center gap-2 w-full md:w-auto">
-                        <a
-                          href={`/api/profile/resume?user_id=${userId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition-colors"
-                        >
-                          <Download className="w-3.5 h-3.5" /> Preview PDF
-                        </a>
-
-                        <label className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-md shadow-blue-500/20 transition-all">
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>{uploadingResume ? 'Uploading...' : 'Upload New PDF'}</span>
-                          <input
-                            type="file"
-                            accept=".pdf"
-                            onChange={handleResumeFileUpload}
-                            disabled={uploadingResume}
-                            className="hidden"
-                          />
-                        </label>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-white font-mono">
+                            {resumeFilename || `${userId}_Resume.pdf`}
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            Active in MongoDB Atlas
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Recruiters receive this clean custom PDF document during job applications.
+                        </p>
                       </div>
                     </div>
 
-                    {resumeUploadSuccess && (
-                      <div className="mt-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>{resumeUploadSuccess}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                      <a
+                        href={`/api/profile/resume?user_id=${userId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" /> Preview PDF
+                      </a>
+
+                      <label className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-md shadow-blue-500/20 transition-all">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{uploadingResume ? 'Uploading...' : 'Upload New PDF'}</span>
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={handleResumeUpload}
+                          disabled={uploadingResume}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
                   </div>
+
+                  {resumeSuccess && (
+                    <div className="text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> {resumeSuccess}
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                {/* Save Button */}
+                <div className="flex items-center justify-end gap-3 pt-2">
                   <button
                     type="submit"
                     disabled={savingProfile}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 transition-all"
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white shadow-lg shadow-blue-500/25 transition-all"
                   >
-                    <Save className="w-4 h-4" /> {savingProfile ? 'Saving...' : 'Save Profile Changes'}
+                    <Save className="w-4 h-4" />
+                    {savingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
                   </button>
                 </div>
               </form>
             )}
 
-            {/* RAW JSON EDITOR VIEW */}
+            {/* Raw JSON Editor */}
             {profileSubTab === 'json' && (
-              <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-4">
+              <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Code className="w-4 h-4 text-cyan-400" /> Full Profile Configuration JSON
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      Directly edit your bot filters, question cache, search URLs, and credentials in JSON format.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleFormatJson}
-                      className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-                    >
-                      Format JSON
-                    </button>
-                    <button
-                      onClick={handleSaveJsonProfile}
-                      disabled={savingProfile}
-                      className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 transition-all"
-                    >
-                      <Save className="w-3.5 h-3.5" /> {savingProfile ? 'Saving...' : 'Save JSON'}
-                    </button>
-                  </div>
+                  <span className="text-xs font-mono text-slate-400">
+                    MongoDB Atlas Raw Profile Document (JSON)
+                  </span>
+                  {jsonError && (
+                    <span className="text-xs text-rose-400 font-semibold">{jsonError}</span>
+                  )}
                 </div>
-
-                {jsonError && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono">
-                    {jsonError}
-                  </div>
-                )}
 
                 <textarea
                   rows={20}
@@ -925,9 +869,19 @@ export default function UserDashboard() {
                     setRawJsonStr(e.target.value)
                     setJsonError('')
                   }}
-                  className="w-full bg-[#050811] border border-slate-800 rounded-xl p-4 font-mono text-xs text-cyan-300 focus:outline-none focus:border-blue-500 leading-relaxed shadow-inner"
+                  className="w-full bg-[#050811] border border-slate-800 rounded-xl p-4 font-mono text-xs text-cyan-300 focus:outline-none focus:border-blue-500"
                   spellCheck={false}
                 />
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleSaveRawJson}
+                    disabled={savingProfile}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                  >
+                    <Save className="w-4 h-4" /> {savingProfile ? 'Saving...' : 'Save JSON'}
+                  </button>
+                </div>
               </div>
             )}
           </div>
