@@ -191,15 +191,18 @@ export default function AdminDashboard() {
   }
 
   const handleStopBot = async () => {
-    if (!activeJobId) return
+    const currentId = activeJobId
+    setJobStatus('Stopped')
+    setActiveJobId(null)
+    setLiveLogs(prev => [...prev, `[${new Date().toTimeString().split(' ')[0]}] 🛑 Application run stopped.`])
+
+    if (!currentId) return
     try {
-      await fetch(`/api/tasks/${activeJobId}`, {
+      await fetch(`/api/tasks/${currentId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'stop' })
       })
-      setJobStatus('Stopped')
-      setActiveJobId(null)
       fetchOverviewAndUsers()
     } catch (e) {
       console.error('Failed to stop bot:', e)

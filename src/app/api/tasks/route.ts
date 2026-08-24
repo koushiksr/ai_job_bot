@@ -35,18 +35,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'MongoDB cluster is unreachable' }, { status: 503 })
     }
 
-    // Check if user already has an active pending/running task
-    const existing = await db.collection<any>('tasks').findOne({
-      user_id: userId,
-      status: { $in: ['pending', 'running'] }
-    })
-    if (existing) {
-      return NextResponse.json({
-        job_id: existing._id,
-        status: existing.status,
-        message: 'An application task is already running or pending for this profile.'
-      })
-    }
+    // Always terminate any lingering/old tasks for this profile to ensure clean run isolation
+    await db.collection<any>('tasks').updateMany(
+      {
+        user_id: userId,
+        status: { $in: ['pending', 'running'] }
+      },
+      {
+        $set: {
+          status: 'stopped',
+          stop_requested: true,
+          completed_at: now
+        }
+      }
+    )
 
     await db.collection<any>('tasks').insertOne(taskDoc)
 
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest) {
       status: 'success',
       job_id: taskId,
       task_id: taskId,
-      message: 'Bot application task enqueued successfully into MongoDB Atlas.'
+      message: 'Fresh bot application task enqueued successfully into MongoDB Atlas.'
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Failed to enqueue task' }, { status: 500 })

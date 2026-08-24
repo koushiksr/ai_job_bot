@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -30,14 +30,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     if (body.action === 'stop') {
+      const now = new Date()
       await db.collection<any>('tasks').updateOne(
         { _id: id },
         {
-          $set: { stop_requested: true },
-          $push: { logs: `[${new Date().toTimeString().split(' ')[0]}] 🛑 Stop requested from user dashboard.` } as any
+          $set: {
+            status: 'stopped',
+            stop_requested: true,
+            completed_at: now
+          },
+          $push: { logs: `[${now.toTimeString().split(' ')[0]}] 🛑 Application run stopped by user.` } as any
         }
       )
-      return NextResponse.json({ status: 'stopping', message: 'Stop signal sent to bot worker.' })
+      return NextResponse.json({ status: 'stopped', message: 'Bot task stopped successfully.' })
     }
 
     return NextResponse.json({ message: 'No action taken' })
