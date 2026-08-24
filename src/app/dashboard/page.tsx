@@ -44,8 +44,8 @@ export default function UserDashboard() {
   const [candidateProfile, setCandidateProfile] = useState<any>(null)
   const [loadingProfile, setLoadingProfile] = useState<boolean>(true)
 
-  // Navigation tab
-  const [activeTab, setActiveTab] = useState<'runner' | 'history' | 'profile'>('runner')
+  // Navigation tab (History & Profile Management for Candidates)
+  const [activeTab, setActiveTab] = useState<'history' | 'profile'>('history')
   const [profileSubTab, setProfileSubTab] = useState<'form' | 'json'>('form')
 
   // Metrics State (Today, Week, Month, Total)
@@ -623,18 +623,43 @@ export default function UserDashboard() {
           </motion.div>
         </section>
 
+        {/* Automated Schedule & Bot Engine Status Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border border-blue-500/20 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-semibold text-blue-300 uppercase tracking-wider block">Next Automated Scheduled Run</span>
+                <span className="text-sm font-bold text-white font-mono">{countdownText}</span>
+              </div>
+            </div>
+            <span className="text-[10px] px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 font-medium">
+              Daily 6 AM & 8 AM IST
+            </span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900/60 to-slate-950/60 border border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Automation Server Engine</span>
+                <span className="text-sm font-bold text-emerald-400 font-mono">
+                  Managed & Hosted on Server
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Active & Automated
+            </span>
+          </div>
+        </div>
+
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
-          <button
-            onClick={() => setActiveTab('runner')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
-              activeTab === 'runner'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
-            }`}
-          >
-            <PlayCircle className="w-4 h-4" /> Bot Runner & Live Logs
-          </button>
           <button
             onClick={() => setActiveTab('history')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
@@ -643,7 +668,7 @@ export default function UserDashboard() {
                 : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
             }`}
           >
-            <Briefcase className="w-4 h-4" /> Job Applying History ({historyJobs.length})
+            <Briefcase className="w-4 h-4" /> Job Applications & History ({historyTotalCount || historyJobs.length})
           </button>
           <button
             onClick={() => setActiveTab('profile')}
@@ -653,164 +678,9 @@ export default function UserDashboard() {
                 : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
             }`}
           >
-            <Settings className="w-4 h-4" /> Edit Profile & JSON
+            <Settings className="w-4 h-4" /> Candidate Profile & Resume
           </button>
         </div>
-
-        {/* TAB 1: BOT RUNNER & LIVE LOGS */}
-        {activeTab === 'runner' && (
-          <div className="space-y-6">
-            {/* Automated Schedule & Active Execution Countdown Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border border-blue-500/20 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-semibold text-blue-300 uppercase tracking-wider block">Next Scheduled Automated Run</span>
-                    <span className="text-sm font-bold text-white font-mono">{countdownText}</span>
-                  </div>
-                </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 font-medium">
-                  Daily 6 AM & 8 AM IST
-                </span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900/60 to-slate-950/60 border border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-xl border ${jobStatus === 'Running' || jobStatus === 'Starting...' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
-                    <Activity className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Session Duration & Status</span>
-                    <span className="text-sm font-bold text-slate-200 font-mono">
-                      {jobStatus === 'Running' || jobStatus === 'Starting...' ? (
-                        <>Active: {Math.floor(elapsedSeconds / 60).toString().padStart(2, '0')}:{(elapsedSeconds % 60).toString().padStart(2, '0')} <span className="text-xs text-slate-400 font-normal">(Max: 5m 00s)</span></>
-                      ) : (
-                        'Ready on Standby'
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <span className={`text-[10px] px-2.5 py-1 rounded-full font-medium border ${jobStatus === 'Running' || jobStatus === 'Starting...' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
-                  {jobStatus === 'Running' ? 'Executing' : jobStatus === 'Starting...' ? 'Queueing' : 'Idle'}
-                </span>
-              </div>
-            </div>
-
-            {/* Action Bar */}
-            <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-bold text-white">Automated Job Application Engine</h2>
-                  <span
-                    className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase ${
-                      jobStatus === 'Running'
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse'
-                        : jobStatus === 'Completed'
-                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
-                        : jobStatus === 'Error'
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                        : 'bg-slate-800 text-slate-400'
-                    }`}
-                  >
-                    ● {jobStatus}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 mt-1">
-                  Search URL: <span className="text-slate-300 font-mono text-[11px]">{formData.search_url || 'https://www.naukri.com/mnjuser/recommendedjobs'}</span>
-                </p>
-
-              </div>
-
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <div className="flex items-center gap-2 text-xs text-blue-300 bg-blue-950/40 px-3.5 py-2 rounded-xl border border-blue-800/50">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-semibold">Desktop Headed Window</span>
-                </div>
-
-                {jobStatus === 'Running' ? (
-                  <button
-                    onClick={handleStopBot}
-                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/25 transition-all"
-                  >
-                    <StopCircle className="w-4 h-4" /> Stop Bot
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleStartBot}
-                    disabled={jobStatus === 'Starting...'}
-                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white shadow-lg shadow-blue-500/25 transition-all"
-                  >
-                    <PlayCircle className="w-4 h-4" /> Start Automatic Job Apply
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Live Terminal Log Stream */}
-            <div className="rounded-2xl bg-[#0b0f19] border border-slate-800/90 overflow-hidden shadow-2xl">
-              <div className="bg-slate-950/80 px-4 py-3 border-b border-slate-800/80 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Terminal className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-mono text-slate-300">Live Bot Console Stream — {userId}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => checkActiveJob(userId)}
-                    className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800"
-                  >
-                    <RefreshCw className="w-3 h-3" /> Refresh
-                  </button>
-                  <button
-                    onClick={() => setLiveLogs([])}
-                    className="text-xs text-slate-400 hover:text-slate-200 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-
-              <div ref={terminalContainerRef} className="p-4 h-96 overflow-y-auto font-mono text-xs space-y-1 bg-[#050811] text-slate-300 scroll-smooth">
-                {liveLogs.length === 0 ? (
-                  <div className="h-full flex items-center justify-center text-slate-600">
-                    Press &quot;Start Automatic Job Apply&quot; to begin scanning and applying to jobs.
-                  </div>
-                ) : (
-                  liveLogs.map((log, idx) => {
-                    let color = 'text-slate-300'
-                    if (log.includes('✅') || log.includes('Applied') || log.includes('SUCCESS')) {
-                      color = 'text-emerald-400 font-semibold'
-                    } else if (log.includes('❌') || log.includes('Error') || log.includes('FAIL')) {
-                      color = 'text-rose-400 font-semibold'
-                    } else if (log.includes('⚠️') || log.includes('Skipping')) {
-                      color = 'text-amber-300'
-                    } else if (log.includes('🚀') || log.includes('STARTING') || log.includes('💡')) {
-                      color = 'text-cyan-400'
-                    }
-                    return (
-                      <div key={idx} className={`${color} leading-relaxed whitespace-pre-wrap`}>
-                        {log}
-                      </div>
-                    )
-                  })
-                )}
-
-                {/* Worker Standby Indicator & Timeout Warning */}
-                {(jobStatus === 'Running' || jobStatus === 'Starting...') && elapsedSeconds > 20 && liveLogs.length <= 2 && (
-                  <div className="p-3 my-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between animate-fadeIn">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-amber-400 animate-spin" />
-                      <span>Task is registered in cloud queue. Waiting for local Python worker to claim (<code className="text-amber-100 bg-amber-950/60 px-1.5 py-0.5 rounded font-mono">START.bat</code>).</span>
-                    </div>
-                  </div>
-                )}
-                <div ref={logsEndRef} />
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* TAB 2: JOB APPLYING HISTORY */}
         {activeTab === 'history' && (
