@@ -27,16 +27,19 @@ import {
   Sparkles,
   StopCircle,
   FileJson,
-  Code
+  Code,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { bootstrapEngineUrl, discoverEngineUrl, saveActiveEngineUrl } from '@/lib/engineDiscovery'
 
-const DEFAULT_ENGINE_URL = process.env.NEXT_PUBLIC_ENGINE_URL || 'http://localhost:8000'
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'default-secret-key'
 
 export default function UserDashboard() {
-  const [engineUrl, setEngineUrl] = useState<string>(DEFAULT_ENGINE_URL)
+  const [engineUrl, setEngineUrl] = useState<string>('')
+  const [engineUrlLabel, setEngineUrlLabel] = useState<string>('...')
   const [engineStatus, setEngineStatus] = useState<'online' | 'offline' | 'checking'>('checking')
   const [userId, setUserId] = useState<string>('')
   const [userEmail, setUserEmail] = useState<string>('')
@@ -83,7 +86,7 @@ export default function UserDashboard() {
   const [savingProfile, setSavingProfile] = useState<boolean>(false)
   const [saveSuccess, setSaveSuccess] = useState<string>('')
 
-  // 1. Authenticate & Initialize
+  // 1. Authenticate & Initialize — discover best engine URL first
   useEffect(() => {
     const storedUid = localStorage.getItem('user_id')
     const storedEmail = localStorage.getItem('user_email')
@@ -98,11 +101,30 @@ export default function UserDashboard() {
     setUserEmail(storedEmail || '')
     setUserRole(storedRole || 'user')
 
-    checkEngineHealth()
-    loadUserData(storedUid)
-    loadUserHistory(storedUid)
-    checkActiveJob(storedUid)
-  }, [engineUrl])
+    // Discover best available engine URL (probes all candidates in parallel)
+    setEngineStatus('checking')
+    bootstrapEngineUrl().then(url => {
+      if (url) {
+        setEngineUrl(url)
+        setEngineStatus('online')
+        // Show a friendly label based on URL type
+        if (url.includes('trycloudflare.com') || url.includes('ts.net') || url.startsWith('https://')) {
+          setEngineUrlLabel('Tunnel')
+        } else {
+          setEngineUrlLabel('Local')
+        }
+        loadUserData(storedUid, url)
+        loadUserHistory(storedUid, url)
+        checkActiveJob(storedUid, url)
+      } else {
+        setEngineStatus('offline')
+        setEngineUrlLabel('Offline')
+        setLoadingProfile(false)
+        setLoadingHistory(false)
+      }
+    })
+  }, []) // runs once on mount — URL is discovered dynamically
+
 
   // Polling for active job status & logs
   useEffect(() => {
@@ -144,24 +166,52 @@ export default function UserDashboard() {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [liveLogs])
 
-  const checkEngineHealth = async () => {
+  const checkEngineHealth = async (url?: string): Promise<'online' | 'offline'> => {
+    const target = url || engineUrl
+    if (!target) return 'offline'
     try {
       setEngineStatus('checking')
-      const res = await fetch(`${engineUrl}/`, { cache: 'no-store' })
+      const res = await fetch(`${target}/`, { cache: 'no-store' })
       if (res.ok) {
         setEngineStatus('online')
+        return 'online'
       } else {
         setEngineStatus('offline')
+        return 'offline'
       }
     } catch {
       setEngineStatus('offline')
+      return 'offline'
     }
   }
 
-  const loadUserData = async (uid: string) => {
+  /** Re-run full multi-URL discovery and reload data if something comes online */
+  const handleRetryDiscovery = async () => {
+    setEngineStatus('checking')
+    const url = await discoverEngineUrl()
+    if (url) {
+      saveActiveEngineUrl(url)
+      setEngineUrl(url)
+      setEngineStatus('online')
+      if (url.includes('trycloudflare.com') || url.includes('ts.net') || url.startsWith('https://')) {
+        setEngineUrlLabel('Tunnel')
+      } else {
+        setEngineUrlLabel('Local')
+      }
+      loadUserData(userId, url)
+      loadUserHistory(userId, url)
+      checkActiveJob(userId, url)
+    } else {
+      setEngineStatus('offline')
+      setEngineUrlLabel('Offline')
+    }
+  }
+
+  const loadUserData = async (uid: string, url?: string) => {
+    const base = url || engineUrl
     setLoadingProfile(true)
     try {
-      const res = await fetch(`${engineUrl}/api/user/${uid}/profile`, {
+      const res = await fetch(`${base}/api/user/${uid}/profile`, {
         headers: { 'X-API-Key': API_KEY }
       })
       if (res.ok) {
@@ -186,10 +236,11 @@ export default function UserDashboard() {
     }
   }
 
-  const loadUserHistory = async (uid: string) => {
+  const loadUserHistory = async (uid: string, url?: string) => {
+    const base = url || engineUrl
     setLoadingHistory(true)
     try {
-      const res = await fetch(`${engineUrl}/api/user/${uid}/history`, {
+      const res = await fetch(`${base}/api/user/${uid}/history`, {
         headers: { 'X-API-Key': API_KEY }
       })
       if (res.ok) {
@@ -204,9 +255,10 @@ export default function UserDashboard() {
     }
   }
 
-  const checkActiveJob = async (uid: string) => {
+  const checkActiveJob = async (uid: string, url?: string) => {
+    const base = url || engineUrl
     try {
-      const res = await fetch(`${engineUrl}/api/active-job/${uid}`, {
+      const res = await fetch(`${base}/api/active-job/${uid}`, {
         headers: { 'X-API-Key': API_KEY }
       })
       if (res.ok) {
@@ -218,18 +270,18 @@ export default function UserDashboard() {
             setLiveLogs(data.data.logs)
           }
         } else {
-          // Fetch past candidate log file lines
-          loadStaticLogs(uid)
+          loadStaticLogs(uid, base)
         }
       }
     } catch {
-      loadStaticLogs(uid)
+      loadStaticLogs(uid, base)
     }
   }
 
-  const loadStaticLogs = async (uid: string) => {
+  const loadStaticLogs = async (uid: string, url?: string) => {
+    const base = url || engineUrl
     try {
-      const res = await fetch(`${engineUrl}/api/user/${uid}/logs`, {
+      const res = await fetch(`${base}/api/user/${uid}/logs`, {
         headers: { 'X-API-Key': API_KEY }
       })
       if (res.ok) {
@@ -436,13 +488,15 @@ export default function UserDashboard() {
 
           <div className="flex items-center gap-4">
             {/* Engine Status Badge */}
-            <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border ${
+            <button
+              onClick={engineStatus === 'offline' ? handleRetryDiscovery : undefined}
+              title={engineUrl || 'Discovering engine...'}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                 engineStatus === 'online'
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-500/10'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-500/10 cursor-default'
                   : engineStatus === 'checking'
-                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                  : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-default'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20 cursor-pointer'
               }`}
             >
               <span
@@ -450,12 +504,16 @@ export default function UserDashboard() {
                   engineStatus === 'online'
                     ? 'bg-emerald-400 animate-pulse'
                     : engineStatus === 'checking'
-                    ? 'bg-amber-400'
+                    ? 'bg-amber-400 animate-pulse'
                     : 'bg-rose-400'
                 }`}
               />
-              Engine: {engineStatus.toUpperCase()}
-            </div>
+              {engineStatus === 'online'
+                ? `Engine · ${engineUrlLabel}`
+                : engineStatus === 'checking'
+                ? 'Engine · Scanning...'
+                : 'Engine · Offline'}
+            </button>
 
             {/* Admin Switch if Admin */}
             {userRole === 'admin' && (
@@ -477,6 +535,61 @@ export default function UserDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Engine Offline / Checking Banner */}
+      <AnimatePresence>
+        {engineStatus !== 'online' && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.3 }}
+            className={`w-full border-b backdrop-blur-sm px-6 py-3 ${
+              engineStatus === 'checking'
+                ? 'bg-amber-950/60 border-amber-500/30'
+                : 'bg-rose-950/80 border-rose-500/40'
+            }`}
+          >
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                {engineStatus === 'checking'
+                  ? <RefreshCw className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5 animate-spin" />
+                  : <WifiOff className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
+                }
+                <div>
+                  {engineStatus === 'checking' ? (
+                    <>
+                      <p className="text-sm font-semibold text-amber-200">Scanning for engine...</p>
+                      <p className="text-xs text-amber-300/80 mt-0.5">
+                        Probing all known URLs: <code className="text-amber-100 font-mono text-[11px]">{process.env.NEXT_PUBLIC_ENGINE_URL || 'N/A'}</code>,{' '}
+                        <code className="text-amber-100 font-mono text-[11px]">localhost:8000</code>, Cloudflare tunnel…
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-semibold text-rose-200">Engine Offline — No data available</p>
+                      <p className="text-xs text-rose-300/80 mt-0.5">
+                        None of the known engine URLs responded. Start it with:{' '}
+                        <code className="bg-rose-900/60 text-rose-100 px-1.5 py-0.5 rounded text-[11px]">Start_Background.bat</code>
+                        {' '}or{' '}
+                        <code className="bg-rose-900/60 text-rose-100 px-1.5 py-0.5 rounded text-[11px]">uv run run.py --all</code>
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+              {engineStatus === 'offline' && (
+                <button
+                  onClick={handleRetryDiscovery}
+                  className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 transition-all whitespace-nowrap"
+                >
+                  <Wifi className="w-3.5 h-3.5" /> Scan All URLs
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">

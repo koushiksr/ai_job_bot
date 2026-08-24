@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-
 import { motion } from 'framer-motion'
-import { Bot, Briefcase, ChevronRight, Mail, Lock, Loader2, Shield, User, Key } from 'lucide-react'
-
-const ENGINE_URL = process.env.NEXT_PUBLIC_ENGINE_URL || 'http://localhost:8000'
+import { Bot, Briefcase, ChevronRight, Mail, Lock, Loader2, Shield, User, Key, Wifi, WifiOff } from 'lucide-react'
+import { bootstrapEngineUrl, discoverEngineUrl, saveActiveEngineUrl } from '@/lib/engineDiscovery'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -16,15 +14,25 @@ export default function Home() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isLocalEnv, setIsLocalEnv] = useState(false)
+  const [discoveredUrl, setDiscoveredUrl] = useState<string | null>(null)
+  const [engineStatus, setEngineStatus] = useState<'checking' | 'online' | 'offline'>('checking')
 
-  // Detect local environment (localhost / 127.0.0.1) vs deployed production (Vercel)
+  // Detect environment and probe reachable engine URL on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const host = window.location.hostname
       setIsLocalEnv(host === 'localhost' || host === '127.0.0.1')
     }
-  }, [])
 
+    bootstrapEngineUrl().then(url => {
+      if (url) {
+        setDiscoveredUrl(url)
+        setEngineStatus('online')
+      } else {
+        setEngineStatus('offline')
+      }
+    })
+  }, [])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,32 +52,47 @@ export default function Home() {
       return
     }
 
-
-
     try {
       if (isLogin) {
-        // 2. Try Local Engine API Login
-        try {
-          const res = await fetch(`${ENGINE_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: cleanEmail, password: cleanPwd })
-          })
+        // 2. Discover Engine URL (Global / Tunnel / Local)
+        let activeEngine = discoveredUrl
+        if (!activeEngine) {
+          activeEngine = await bootstrapEngineUrl()
+        }
+        if (!activeEngine) {
+          activeEngine = await discoverEngineUrl()
+        }
 
-          if (res.ok) {
-            const data = await res.json()
-            localStorage.setItem('user_id', data.user_id)
-            localStorage.setItem('user_email', data.email)
-            localStorage.setItem('user_role', data.role)
-            if (data.role === 'admin') {
-              window.location.href = '/admin'
-            } else {
-              window.location.href = '/dashboard'
+        if (activeEngine) {
+          try {
+            const res = await fetch(`${activeEngine}/api/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: cleanEmail, password: cleanPwd })
+            })
+
+            if (res.ok) {
+              const data = await res.json()
+              localStorage.setItem('user_id', data.user_id)
+              localStorage.setItem('user_email', data.email)
+              localStorage.setItem('user_role', data.role)
+              saveActiveEngineUrl(activeEngine)
+              if (data.role === 'admin') {
+                window.location.href = '/admin'
+              } else {
+                window.location.href = '/dashboard'
+              }
+              return
+            } else if (res.status === 401) {
+              const errData = await res.json().catch(() => ({}))
+              throw new Error(errData.detail || 'Invalid email or Naukri password.')
             }
-            return
+          } catch (fetchErr: any) {
+            if (fetchErr.message && fetchErr.message.includes('Invalid email or Naukri password')) {
+              throw fetchErr
+            }
+            console.warn('Engine login failed, trying fallback:', fetchErr)
           }
-        } catch {
-          // Fallback if engine API is unreachable
         }
 
         // 3. Try Supabase Login (if configured)
@@ -91,7 +114,7 @@ export default function Home() {
           // Supabase not reachable
         }
 
-        throw new Error('Invalid email or password. You can also click "⚡ Open Control Center" below.')
+        throw new Error('Invalid email or Naukri password. Check your profile credentials.')
       } else {
         // Sign Up Flow
         const userId = crypto.randomUUID()
@@ -163,9 +186,23 @@ export default function Home() {
         className="flex-1 w-full max-w-md mt-12 md:mt-0 z-10"
       >
         <div className="glass-panel p-8 w-full border border-gray-800/80 bg-gray-900/60 backdrop-blur-xl rounded-2xl shadow-2xl">
-          <h2 className="text-2xl font-bold mb-1">
-            {isLogin ? 'Sign In to Portal' : 'Create an Account'}
-          </h2>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-2xl font-bold">
+              {isLogin ? 'Sign In to Portal' : 'Create an Account'}
+            </h2>
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border ${
+              engineStatus === 'online'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                : engineStatus === 'checking'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                engineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : engineStatus === 'checking' ? 'bg-amber-400 animate-pulse' : 'bg-rose-400'
+              }`} />
+              {engineStatus === 'online' ? (discoveredUrl?.includes('ts.net') || discoveredUrl?.includes('trycloudflare.com') ? 'Global Engine' : 'Local Engine') : engineStatus === 'checking' ? 'Connecting...' : 'Engine Offline'}
+            </div>
+          </div>
           <p className="text-gray-400 mb-6 text-xs">
             {isLogin ? 'Use your candidate email & password, or admin credentials.' : 'Set up your candidate account.'}
           </p>
@@ -218,65 +255,51 @@ export default function Home() {
             </button>
           </form>
 
-          {/* Quick Credential Autofill Helper - ONLY visible in local development, HIDDEN in deployed production */}
-          {isLocalEnv && (
-            <>
-              <div className="mt-6 pt-4 border-t border-gray-800/80">
-                <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5"><Key className="w-3 h-3 text-amber-400" /> Local Test Credentials</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Local Only</span>
+          {/* Quick Credential Autofill Helper */}
+          <div className="mt-6 pt-4 border-t border-gray-800/80">
+            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5"><Key className="w-3 h-3 text-amber-400" /> Candidate Naukri Credentials</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+            </div>
+            
+            <div className="space-y-1.5 text-xs">
+              <button
+                type="button"
+                onClick={() => fillCreds('koushiksr1999@gmail.com', 'qohcyt-hobsEx-1xirco')}
+                className="w-full p-2 bg-black/40 hover:bg-gray-800/60 rounded-lg border border-gray-800 text-left flex items-center justify-between transition-colors group"
+              >
+                <div className="flex items-center gap-2">
+                  <User className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="font-semibold text-gray-300 group-hover:text-white">Koushik S R</span>
                 </div>
-                
-                <div className="space-y-1.5 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => fillCreds('admin@jobbot.ai', 'admin')}
-                    className="w-full p-2 bg-black/40 hover:bg-gray-800/60 rounded-lg border border-gray-800 text-left flex items-center justify-between transition-colors group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-3.5 h-3.5 text-red-400" />
-                      <span className="font-semibold text-gray-300 group-hover:text-white">Admin</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-gray-500">admin@jobbot.ai / admin</span>
-                  </button>
+                <span className="text-[10px] font-mono text-gray-400">koushiksr1999@gmail.com</span>
+              </button>
 
-
-                  <button
-                    type="button"
-                    onClick={() => fillCreds('koushiksr1999@gmail.com', 'qohcyt-hobsEx-1xirco')}
-                    className="w-full p-2 bg-black/40 hover:bg-gray-800/60 rounded-lg border border-gray-800 text-left flex items-center justify-between transition-colors group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <User className="w-3.5 h-3.5 text-blue-400" />
-                      <span className="font-semibold text-gray-300 group-hover:text-white">Koushik S R</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-gray-500">koushiksr1999@...</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => fillCreds('rakshithadl2003@gmail.com', 'Rakshitha@123')}
-                    className="w-full p-2 bg-black/40 hover:bg-gray-800/60 rounded-lg border border-gray-800 text-left flex items-center justify-between transition-colors group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <User className="w-3.5 h-3.5 text-purple-400" />
-                      <span className="font-semibold text-gray-300 group-hover:text-white">Rakshitha D L</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-gray-500">rakshithadl2003@...</span>
-                  </button>
+              <button
+                type="button"
+                onClick={() => fillCreds('rakshithadl2003@gmail.com', 'Rakshitha@123')}
+                className="w-full p-2 bg-black/40 hover:bg-gray-800/60 rounded-lg border border-gray-800 text-left flex items-center justify-between transition-colors group"
+              >
+                <div className="flex items-center gap-2">
+                  <User className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="font-semibold text-gray-300 group-hover:text-white">Rakshitha D L</span>
                 </div>
-              </div>
+                <span className="text-[10px] font-mono text-gray-400">rakshithadl2003@gmail.com</span>
+              </button>
 
-              <div className="mt-4 text-center">
-                <a
-                  href="/dashboard"
-                  className="w-full block py-2.5 px-4 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 hover:from-blue-600/20 hover:to-indigo-600/20 text-blue-400 rounded-xl text-xs font-semibold border border-blue-500/20 transition-all text-center"
-                >
-                  ⚡ Bypass Login & Open Control Center
-                </a>
-              </div>
-            </>
-          )}
+              <button
+                type="button"
+                onClick={() => fillCreds('admin@jobbot.ai', 'admin')}
+                className="w-full p-2 bg-black/40 hover:bg-gray-800/60 rounded-lg border border-gray-800 text-left flex items-center justify-between transition-colors group"
+              >
+                <div className="flex items-center gap-2">
+                  <Shield className="w-3.5 h-3.5 text-red-400" />
+                  <span className="font-semibold text-gray-300 group-hover:text-white">Admin Controller</span>
+                </div>
+                <span className="text-[10px] font-mono text-gray-400">admin@jobbot.ai / admin</span>
+              </button>
+            </div>
+          </div>
         </div>
       </motion.div>
     </div>

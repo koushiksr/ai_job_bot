@@ -28,16 +28,19 @@ import {
   Search,
   StopCircle,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { bootstrapEngineUrl, discoverEngineUrl, saveActiveEngineUrl } from '@/lib/engineDiscovery'
 
-const DEFAULT_ENGINE_URL = process.env.NEXT_PUBLIC_ENGINE_URL || 'http://localhost:8000'
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'default-secret-key'
 
 export default function AdminDashboard() {
-  const [engineUrl, setEngineUrl] = useState<string>(DEFAULT_ENGINE_URL)
+  const [engineUrl, setEngineUrl] = useState<string>('')
+  const [engineUrlLabel, setEngineUrlLabel] = useState<string>('...')
   const [engineStatus, setEngineStatus] = useState<'online' | 'offline' | 'checking'>('checking')
   const [usersList, setUsersList] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState<boolean>(true)
@@ -79,12 +82,22 @@ export default function AdminDashboard() {
   const [selectedLogContent, setSelectedLogContent] = useState<string[]>([])
   const [loadingLogContent, setLoadingLogContent] = useState<boolean>(false)
 
-  // 1. Initial Load
+  // 1. Initial Load — discover best engine URL first
   useEffect(() => {
-    checkEngineHealth()
-    fetchOverviewAndUsers()
-    fetchSystemLogsList()
-  }, [engineUrl])
+    setEngineStatus('checking')
+    bootstrapEngineUrl().then(url => {
+      if (url) {
+        setEngineUrl(url)
+        setEngineStatus('online')
+        setEngineUrlLabel(url.startsWith('https://') ? 'Tunnel' : 'Local')
+        fetchOverviewAndUsers(url)
+        fetchSystemLogsList(url)
+      } else {
+        setEngineStatus('offline')
+        setEngineUrlLabel('Offline')
+      }
+    })
+  }, []) // runs once on mount
 
   // Polling for live terminal
   useEffect(() => {
@@ -123,25 +136,47 @@ export default function AdminDashboard() {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [liveLogs])
 
-  const checkEngineHealth = async () => {
+  const checkEngineHealth = async (url?: string): Promise<'online' | 'offline'> => {
+    const target = url || engineUrl
+    if (!target) return 'offline'
     try {
       setEngineStatus('checking')
-      const res = await fetch(`${engineUrl}/`, { cache: 'no-store' })
+      const res = await fetch(`${target}/`, { cache: 'no-store' })
       if (res.ok) {
         setEngineStatus('online')
+        return 'online'
       } else {
         setEngineStatus('offline')
+        return 'offline'
       }
     } catch {
       setEngineStatus('offline')
+      return 'offline'
     }
   }
 
-  const fetchOverviewAndUsers = async () => {
+  const handleRetryDiscovery = async () => {
+    setEngineStatus('checking')
+    const url = await discoverEngineUrl()
+    if (url) {
+      saveActiveEngineUrl(url)
+      setEngineUrl(url)
+      setEngineStatus('online')
+      setEngineUrlLabel(url.startsWith('https://') ? 'Tunnel' : 'Local')
+      fetchOverviewAndUsers(url)
+      fetchSystemLogsList(url)
+    } else {
+      setEngineStatus('offline')
+      setEngineUrlLabel('Offline')
+    }
+  }
+
+  const fetchOverviewAndUsers = async (url?: string) => {
+    const base = url || engineUrl
     setLoadingUsers(true)
     try {
       // 1. Overview metrics
-      const ovRes = await fetch(`${engineUrl}/api/stats/overview`, {
+      const ovRes = await fetch(`${base}/api/stats/overview`, {
         headers: { 'X-API-Key': API_KEY }
       })
       if (ovRes.ok) {
@@ -157,7 +192,7 @@ export default function AdminDashboard() {
       }
 
       // 2. Admin Users list
-      const uRes = await fetch(`${engineUrl}/api/admin/users`, {
+      const uRes = await fetch(`${base}/api/admin/users`, {
         headers: { 'X-API-Key': API_KEY }
       })
       if (uRes.ok) {
@@ -171,9 +206,10 @@ export default function AdminDashboard() {
     }
   }
 
-  const fetchSystemLogsList = async () => {
+  const fetchSystemLogsList = async (url?: string) => {
+    const base = url || engineUrl
     try {
-      const res = await fetch(`${engineUrl}/api/logs`, {
+      const res = await fetch(`${base}/api/logs`, {
         headers: { 'X-API-Key': API_KEY }
       })
       if (res.ok) {
