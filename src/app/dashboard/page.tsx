@@ -5,7 +5,6 @@ import {
   Briefcase,
   Clock,
   Calendar,
-  Settings,
   TrendingUp,
   FileText,
   RefreshCw,
@@ -24,9 +23,9 @@ import {
   EyeOff,
   Building2,
   MapPin,
-  Check
+  Sliders,
+  HelpCircle
 } from 'lucide-react'
-import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 export default function UserDashboard() {
@@ -68,7 +67,12 @@ export default function UserDashboard() {
     current_ctc: 0,
     expected_ctc: 0,
     search_url: '',
-    resume_file: ''
+    resume_file: '',
+    skills_str: '',
+    locations_str: '',
+    notice_period: 'Immediate / 15 Days',
+    career_break: 'No',
+    relocate: 'Yes'
   })
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [rawJsonStr, setRawJsonStr] = useState<string>('{\n}')
@@ -140,6 +144,10 @@ export default function UserDashboard() {
       const pRes = await fetch(`/api/profile?user_id=${uid}`)
       if (pRes.ok) {
         const pData = await pRes.json()
+        const skillsArr = pData.skills || pData.job_filters?.keywords || []
+        const locArr = pData.job_filters?.location || []
+        const answers = pData.predefined_answers || {}
+
         setFormData({
           name: pData.name || '',
           email: pData.email || '',
@@ -148,9 +156,14 @@ export default function UserDashboard() {
           current_ctc: pData.current_ctc || 0,
           expected_ctc: pData.expected_ctc || 0,
           search_url: pData.search_url || '',
-          resume_file: pData.resume_file || ''
+          resume_file: pData.resume_file || '',
+          skills_str: Array.isArray(skillsArr) ? skillsArr.join(', ') : '',
+          locations_str: Array.isArray(locArr) ? locArr.join(', ') : '',
+          notice_period: answers['What is your notice period?'] || answers['notice_period'] || 'Immediate / 15 Days',
+          career_break: answers['Are you on a career break?'] || 'No',
+          relocate: answers['Are you willing to relocate to Bangalore?'] || answers['willing_to_relocate'] || 'Yes'
         })
-        setResumeFilename(pData.resume_file || '')
+        setResumeFilename(pData.resume_filename || pData.resume_file || '')
         setRawJsonStr(pData.raw_json || JSON.stringify(pData, null, 2))
       }
 
@@ -202,6 +215,22 @@ export default function UserDashboard() {
     setSaveSuccess('')
     setJsonError('')
 
+    const skills = formData.skills_str.split(',').map(s => s.trim()).filter(Boolean)
+    const locations = formData.locations_str.split(',').map(s => s.trim()).filter(Boolean)
+    const predefined_answers = {
+      'What is your notice period?': formData.notice_period,
+      'Are you on a career break?': formData.career_break,
+      'Are you willing to relocate to Bangalore?': formData.relocate,
+      'Are you comfortable working from office / hybrid?': 'Yes',
+      'What is your current CTC?': `${formData.current_ctc ? Math.round(formData.current_ctc / 100000) : 0} LPA`,
+      'What is your expected CTC?': `${formData.expected_ctc ? Math.round(formData.expected_ctc / 100000) : 0} LPA`
+    }
+    const job_filters = {
+      location: locations.length ? locations : ['Bangalore', 'Bengaluru', 'Remote', 'Hybrid'],
+      keywords: skills,
+      must_have_keywords: skills.slice(0, 1)
+    }
+
     try {
       const res = await fetch('/api/profile', {
         method: 'POST',
@@ -214,12 +243,15 @@ export default function UserDashboard() {
           experience: formData.experience,
           current_ctc: formData.current_ctc,
           expected_ctc: formData.expected_ctc,
-          search_url: formData.search_url
+          search_url: formData.search_url,
+          skills: skills,
+          job_filters: job_filters,
+          predefined_answers: predefined_answers
         })
       })
 
       if (res.ok) {
-        setSaveSuccess('Profile preferences saved successfully!')
+        setSaveSuccess('Candidate preferences and profile saved successfully!')
         loadUserData(userId)
         setTimeout(() => setSaveSuccess(''), 4000)
       } else {
@@ -251,7 +283,7 @@ export default function UserDashboard() {
       })
 
       if (res.ok) {
-        setSaveSuccess('JSON configuration saved to cloud database!')
+        setSaveSuccess('JSON configuration updated in MongoDB Atlas!')
         loadUserData(userId)
         setTimeout(() => setSaveSuccess(''), 4000)
       } else {
@@ -297,7 +329,7 @@ export default function UserDashboard() {
         if (res.ok) {
           const data = await res.json()
           setResumeFilename(data.filename)
-          setResumeSuccess('Resume PDF updated in MongoDB Atlas!')
+          setResumeSuccess('Resume PDF stored directly in MongoDB Atlas!')
           setTimeout(() => setResumeSuccess(''), 4000)
         } else {
           alert('Failed to upload resume.')
@@ -474,7 +506,7 @@ export default function UserDashboard() {
                 : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
             }`}
           >
-            <User className="w-4 h-4" /> Candidate Profile & Resume
+            <User className="w-4 h-4" /> Candidate Profile & Filters
           </button>
         </div>
 
@@ -672,7 +704,7 @@ export default function UserDashboard() {
                 {/* Card 1: Account Credentials */}
                 <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
                   <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
-                    <User className="w-4 h-4" /> Naukri Account & Identity
+                    <User className="w-4 h-4" /> Naukri Account Credentials & Identity
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -723,7 +755,7 @@ export default function UserDashboard() {
                 {/* Card 2: Professional Experience & Salary */}
                 <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
                   <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
-                    <Briefcase className="w-4 h-4" /> Professional Experience & Salary
+                    <Briefcase className="w-4 h-4" /> Professional Experience & Compensation
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -760,14 +792,39 @@ export default function UserDashboard() {
                   </div>
                 </div>
 
-                {/* Card 3: Job Search URL */}
-                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-3 shadow-xl">
+                {/* Card 3: Skills, Job Keywords & Locations */}
+                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
                   <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-                    <Search className="w-4 h-4" /> Naukri Search URL
+                    <Sliders className="w-4 h-4" /> Target Skills, Keywords & Locations
                   </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Primary Skills & Keywords (Comma-separated)</label>
+                      <input
+                        type="text"
+                        placeholder="Python, FastAPI, Django, AI, LLM, Machine Learning"
+                        value={formData.skills_str}
+                        onChange={e => setFormData({ ...formData, skills_str: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Preferred Locations (Comma-separated)</label>
+                      <input
+                        type="text"
+                        placeholder="Bangalore, Bengaluru, Remote, Hybrid"
+                        value={formData.locations_str}
+                        onChange={e => setFormData({ ...formData, locations_str: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                      Target Search URL (Default: <code className="text-slate-400 bg-slate-900 px-1 py-0.5 rounded">https://www.naukri.com/mnjuser/recommendedjobs</code>)
+                      Naukri Recommended / Search URL (Default: <code className="text-slate-400 bg-slate-900 px-1 py-0.5 rounded">https://www.naukri.com/mnjuser/recommendedjobs</code>)
                     </label>
                     <input
                       type="url"
@@ -779,7 +836,51 @@ export default function UserDashboard() {
                   </div>
                 </div>
 
-                {/* Card 4: Resume PDF in MongoDB Atlas */}
+                {/* Card 4: Predefined Recruiter Questionnaire Answers */}
+                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
+                  <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4" /> Predefined Recruiter Answers
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Notice Period</label>
+                      <input
+                        type="text"
+                        placeholder="Immediate / 15 Days"
+                        value={formData.notice_period}
+                        onChange={e => setFormData({ ...formData, notice_period: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Career Break?</label>
+                      <select
+                        value={formData.career_break}
+                        onChange={e => setFormData({ ...formData, career_break: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Willing to Relocate?</label>
+                      <select
+                        value={formData.relocate}
+                        onChange={e => setFormData({ ...formData, relocate: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 5: Resume PDF in MongoDB Atlas */}
                 <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
                   <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
                     <FileText className="w-4 h-4" /> Candidate Resume PDF (Cloud Synchronized)
@@ -863,7 +964,7 @@ export default function UserDashboard() {
                 </div>
 
                 <textarea
-                  rows={20}
+                  rows={22}
                   value={rawJsonStr}
                   onChange={e => {
                     setRawJsonStr(e.target.value)

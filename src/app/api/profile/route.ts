@@ -86,22 +86,44 @@ export async function POST(req: NextRequest) {
     const db = await getDb()
     const now = new Date()
 
+    let existing: any = null
+    if (db) {
+      existing = await db.collection('profiles').findOne({ user_id: userId })
+    }
+
+    // If raw_json was provided directly, parse and merge
+    let parsedRaw: any = {}
+    if (body.raw_json && typeof body.raw_json === 'string') {
+      try {
+        parsedRaw = JSON.parse(body.raw_json)
+      } catch {}
+    }
+
     const updateDoc: any = {
       user_id: userId,
-      name: body.name || '',
-      email: body.email || '',
-      experience: Number(body.experience) || 0,
-      current_ctc: Number(body.current_ctc) || 0,
-      expected_ctc: Number(body.expected_ctc) || 0,
-      search_url: body.search_url || '',
-      job_filters: body.job_filters || {},
-      predefined_answers: body.predefined_answers || {},
-      resume_file: body.resume_file || '',
+      name: body.name !== undefined ? body.name : (parsedRaw.name || existing?.name || ''),
+      email: body.email !== undefined ? body.email : (parsedRaw.email || existing?.email || ''),
+      experience: body.experience !== undefined ? Number(body.experience) : (parsedRaw.experience !== undefined ? Number(parsedRaw.experience) : (existing?.experience || 0)),
+      current_ctc: body.current_ctc !== undefined ? Number(body.current_ctc) : (parsedRaw.current_ctc !== undefined ? Number(parsedRaw.current_ctc) : (existing?.current_ctc || 0)),
+      expected_ctc: body.expected_ctc !== undefined ? Number(body.expected_ctc) : (parsedRaw.expected_ctc !== undefined ? Number(parsedRaw.expected_ctc) : (existing?.expected_ctc || 0)),
+      search_url: body.search_url !== undefined ? body.search_url : (parsedRaw.search_url || existing?.search_url || ''),
+      job_filters: body.job_filters !== undefined ? body.job_filters : (parsedRaw.job_filters || existing?.job_filters || {}),
+      predefined_answers: body.predefined_answers !== undefined ? body.predefined_answers : (parsedRaw.predefined_answers || existing?.predefined_answers || {}),
+      skills: body.skills !== undefined ? body.skills : (parsedRaw.skills || existing?.skills || []),
+      resume_file: body.resume_file || parsedRaw.resume_file || existing?.resume_file || '',
       updated_at: now
     }
 
-    if (body.password) {
-      updateDoc.password = body.password
+    if (body.password || parsedRaw.password) {
+      updateDoc.password = body.password || parsedRaw.password
+    } else if (existing?.password) {
+      updateDoc.password = existing.password
+    }
+
+    if (body.enabled_for_daily_run !== undefined) {
+      updateDoc.enabled_for_daily_run = Boolean(body.enabled_for_daily_run)
+    } else if (existing?.enabled_for_daily_run !== undefined) {
+      updateDoc.enabled_for_daily_run = existing.enabled_for_daily_run
     }
 
     const versionHash = crypto.createHash('sha256').update(JSON.stringify(updateDoc)).digest('hex').substring(0, 16)
