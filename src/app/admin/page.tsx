@@ -82,22 +82,49 @@ export default function AdminDashboard() {
   const [selectedLogContent, setSelectedLogContent] = useState<string[]>([])
   const [loadingLogContent, setLoadingLogContent] = useState<boolean>(false)
 
-  // 1. Initial Load — discover best engine URL first
-  useEffect(() => {
-    setEngineStatus('checking')
-    bootstrapEngineUrl().then(url => {
-      if (url) {
-        setEngineUrl(url)
-        setEngineStatus('online')
-        setEngineUrlLabel(url.startsWith('https://') ? 'Tunnel' : 'Local')
-        fetchOverviewAndUsers(url)
-        fetchSystemLogsList(url)
-      } else {
-        setEngineStatus('offline')
-        setEngineUrlLabel('Offline')
+  const fetchOverviewAndUsers = async () => {
+    setLoadingUsers(true)
+    try {
+      const uRes = await fetch('/api/admin/users')
+      if (uRes.ok) {
+        const uData = await uRes.json()
+        const users = uData.users || []
+        setUsersList(users)
+
+        let total = 0
+        let today = 0
+        let week = 0
+        let month = 0
+
+        users.forEach((u: any) => {
+          total += u.total_applied || 0
+          today += u.applied_today || 0
+          week += u.applied_this_week || 0
+          month += u.applied_this_month || 0
+        })
+
+        setOverviewMetrics({
+          total_profiles: users.length,
+          scheduled_profiles_active: users.length,
+          applied_today: today,
+          applied_this_week: week,
+          applied_this_month: month,
+          total_applied: total
+        })
       }
-    })
-  }, []) // runs once on mount
+    } catch (e) {
+      console.error('Failed to fetch admin users:', e)
+    } finally {
+      setLoadingUsers(false)
+    }
+  }
+
+  // 1. Initial Load — fetch directly from cloud broker
+  useEffect(() => {
+    setEngineStatus('online')
+    setEngineUrlLabel('Cloud Broker')
+    fetchOverviewAndUsers()
+  }, [])
 
   // Polling for live terminal
   useEffect(() => {
@@ -105,9 +132,7 @@ export default function AdminDashboard() {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${engineUrl}/api/status/${activeJobId}`, {
-          headers: { 'X-API-Key': API_KEY }
-        })
+        const res = await fetch(`/api/tasks/${activeJobId}/logs?since_line=${liveLogs.length}`)
         if (res.ok) {
           const data = await res.json()
           if (data.status === 'completed') {
@@ -122,169 +147,40 @@ export default function AdminDashboard() {
             setJobStatus('Error')
             setActiveJobId(null)
           }
-          if (data.logs && Array.isArray(data.logs)) {
-            setLiveLogs(data.logs)
+          if (data.logs && Array.isArray(data.logs) && data.logs.length > 0) {
+            setLiveLogs(prev => [...prev, ...data.logs])
           }
         }
       } catch {}
     }, 1500)
 
     return () => clearInterval(interval)
-  }, [activeJobId, jobStatus, engineUrl])
+  }, [activeJobId, jobStatus, liveLogs.length])
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [liveLogs])
 
-  const checkEngineHealth = async (url?: string): Promise<'online' | 'offline'> => {
-    const target = url || engineUrl
-    if (!target) return 'offline'
-    try {
-      setEngineStatus('checking')
-      const res = await fetch(`${target}/`, { cache: 'no-store' })
-      if (res.ok) {
-        setEngineStatus('online')
-        return 'online'
-      } else {
-        setEngineStatus('offline')
-        return 'offline'
-      }
-    } catch {
-      setEngineStatus('offline')
-      return 'offline'
-    }
-  }
-
-  const handleRetryDiscovery = async () => {
-    setEngineStatus('checking')
-    const url = await discoverEngineUrl()
-    if (url) {
-      saveActiveEngineUrl(url)
-      setEngineUrl(url)
-      setEngineStatus('online')
-      setEngineUrlLabel(url.startsWith('https://') ? 'Tunnel' : 'Local')
-      fetchOverviewAndUsers(url)
-      fetchSystemLogsList(url)
-    } else {
-      setEngineStatus('offline')
-      setEngineUrlLabel('Offline')
-    }
-  }
-
-  const fetchOverviewAndUsers = async (url?: string) => {
-    const base = url || engineUrl
-    setLoadingUsers(true)
-    try {
-      // 1. Overview metrics
-      const ovRes = await fetch(`${base}/api/stats/overview`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
-      if (ovRes.ok) {
-        const ovData = await ovRes.json()
-        setOverviewMetrics({
-          total_profiles: ovData.total_profiles || 0,
-          scheduled_profiles_active: ovData.scheduled_profiles_active || 0,
-          applied_today: ovData.metrics?.applied_today || 0,
-          applied_this_week: ovData.metrics?.applied_this_week || 0,
-          applied_this_month: ovData.metrics?.applied_this_month || 0,
-          total_applied: ovData.metrics?.total_applied || 0
-        })
-      }
-
-      // 2. Admin Users list
-      const uRes = await fetch(`${base}/api/admin/users`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
-      if (uRes.ok) {
-        const uData = await uRes.json()
-        setUsersList(uData.users || [])
-      }
-    } catch (e) {
-      console.error('Failed to fetch admin users:', e)
-    } finally {
-      setLoadingUsers(false)
-    }
-  }
-
-  const fetchSystemLogsList = async (url?: string) => {
-    const base = url || engineUrl
-    try {
-      const res = await fetch(`${base}/api/logs`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setSystemLogs(data.logs || [])
-        if (data.logs?.length > 0 && !selectedSystemLog) {
-          loadSystemLogContent(data.logs[0].filename)
-        }
-      }
-    } catch {}
-  }
-
-  const loadSystemLogContent = async (filename: string) => {
-    setSelectedSystemLog(filename)
-    setLoadingLogContent(true)
-    try {
-      const res = await fetch(`${engineUrl}/api/logs/content?filename=${encodeURIComponent(filename)}`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
-      if (res.ok) {
-        const data = await res.json()
-        if (data.content && Array.isArray(data.content)) {
-          setSelectedLogContent(data.content)
-        } else if (typeof data === 'object') {
-          setSelectedLogContent([JSON.stringify(data, null, 2)])
-        }
-      }
-    } catch {
-    } finally {
-      setLoadingLogContent(false)
-    }
-  }
-
-  const handleToggleDaily = async (userId: string, currentStatus: boolean) => {
-    const newStatus = !currentStatus
-    setUsersList(prev =>
-      prev.map(u => (u.user_id === userId ? { ...u, enabled_for_daily_run: newStatus } : u))
-    )
-
-    try {
-      await fetch(`${engineUrl}/api/profiles/toggle-daily`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': API_KEY
-        },
-        body: JSON.stringify({ profile_id: userId, enabled: newStatus })
-      })
-    } catch {
-      fetchOverviewAndUsers()
-    }
-  }
-
-  const handleRunBot = async (userId: string) => {
-    setActiveJobUser(userId)
+  const handleRunBot = async (targetUserId: string) => {
+    setActiveJobUser(targetUserId)
     setJobStatus('Starting...')
-    setLiveLogs([`🚀 Starting automated bot run for candidate: ${userId}...`])
+    setLiveLogs([`[00:00:00] 🚀 Dispatching automated bot run for candidate: ${targetUserId} to cloud queue...`])
     setIsTerminalOpen(true)
 
     try {
-      const res = await fetch(`${engineUrl}/api/start-bot`, {
+      const res = await fetch('/api/tasks', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': API_KEY
-        },
-        body: JSON.stringify({ profile_path: userId, headless: false })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: targetUserId, headless: false, action: 'run_bot' })
       })
       const data = await res.json()
       if (res.ok) {
         setActiveJobId(data.job_id)
         setJobStatus('Running')
+        setLiveLogs(prev => [...prev, `[00:00:01] 📡 Task ${data.job_id} registered. Worker is executing...`])
       } else {
         setJobStatus('Error')
-        setLiveLogs(prev => [...prev, `❌ Error: ${data.detail || 'Could not start'}`])
+        setLiveLogs(prev => [...prev, `❌ Error: ${data.detail || data.message || 'Could not start'}`])
       }
     } catch (e: any) {
       setJobStatus('Error')
@@ -295,14 +191,17 @@ export default function AdminDashboard() {
   const handleStopBot = async () => {
     if (!activeJobId) return
     try {
-      await fetch(`${engineUrl}/api/stop-bot/${activeJobId}`, {
-        method: 'POST',
-        headers: { 'X-API-Key': API_KEY }
+      await fetch(`/api/tasks/${activeJobId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stop' })
       })
       setJobStatus('Stopped')
       setActiveJobId(null)
       fetchOverviewAndUsers()
-    } catch {}
+    } catch (e) {
+      console.error('Failed to stop bot:', e)
+    }
   }
 
   const handleOpenEditModal = async (u: any) => {
@@ -311,9 +210,7 @@ export default function AdminDashboard() {
     setEditJsonError('')
 
     try {
-      const res = await fetch(`${engineUrl}/api/user/${u.user_id}/profile`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
+      const res = await fetch(`/api/profile?user_id=${u.user_id}`)
       if (res.ok) {
         const data = await res.json()
         setEditFormData({
@@ -329,6 +226,38 @@ export default function AdminDashboard() {
         setEditRawJson(data.raw_json || '{}')
       }
     } catch {}
+  }
+
+  const handleToggleDaily = async (userId: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus
+    setUsersList(prev =>
+      prev.map(u => (u.user_id === userId ? { ...u, enabled_for_daily_run: newStatus } : u))
+    )
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, enabled_for_daily_run: newStatus })
+      })
+    } catch {
+      fetchOverviewAndUsers()
+    }
+  }
+
+  const loadSystemLogContent = async (filename: string) => {
+    setSelectedSystemLog(filename)
+    setLoadingLogContent(true)
+    try {
+      const res = await fetch(`/api/tasks?user_id=${filename}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.data?.logs) {
+          setSelectedLogContent(data.data.logs)
+        }
+      }
+    } catch {} finally {
+      setLoadingLogContent(false)
+    }
   }
 
   const handleSaveEdit = async () => {
@@ -352,16 +281,13 @@ export default function AdminDashboard() {
     }
 
     try {
-      const res = await fetch(`${engineUrl}/api/user/${editingUser.user_id}/profile`, {
+      const res = await fetch('/api/profile', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': API_KEY
-        },
-        body: JSON.stringify(payload)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: editingUser.user_id, ...payload })
       })
       if (res.ok) {
-        setEditSuccess('Candidate profile saved successfully!')
+        setEditSuccess('Candidate profile saved successfully in cloud database!')
         fetchOverviewAndUsers()
         setTimeout(() => {
           setEditSuccess('')

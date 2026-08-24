@@ -54,48 +54,37 @@ export default function Home() {
 
     try {
       if (isLogin) {
-        // 2. Discover Engine URL (Global / Tunnel / Local)
-        let activeEngine = discoveredUrl
-        if (!activeEngine) {
-          activeEngine = await bootstrapEngineUrl()
-        }
-        if (!activeEngine) {
-          activeEngine = await discoverEngineUrl()
-        }
+        // 1. Try Internal MongoDB Cloud API Login
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: cleanEmail, password: cleanPwd })
+          })
 
-        if (activeEngine) {
-          try {
-            const res = await fetch(`${activeEngine}/api/auth/login`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: cleanEmail, password: cleanPwd })
-            })
-
-            if (res.ok) {
-              const data = await res.json()
-              localStorage.setItem('user_id', data.user_id)
-              localStorage.setItem('user_email', data.email)
-              localStorage.setItem('user_role', data.role)
-              saveActiveEngineUrl(activeEngine)
-              if (data.role === 'admin') {
-                window.location.href = '/admin'
-              } else {
-                window.location.href = '/dashboard'
-              }
-              return
-            } else if (res.status === 401) {
-              const errData = await res.json().catch(() => ({}))
-              throw new Error(errData.detail || 'Invalid email or Naukri password.')
+          if (res.ok) {
+            const data = await res.json()
+            localStorage.setItem('user_id', data.user_id)
+            localStorage.setItem('user_email', data.email)
+            localStorage.setItem('user_role', data.role)
+            if (data.role === 'admin') {
+              window.location.href = '/admin'
+            } else {
+              window.location.href = '/dashboard'
             }
-          } catch (fetchErr: any) {
-            if (fetchErr.message && fetchErr.message.includes('Invalid email or Naukri password')) {
-              throw fetchErr
-            }
-            console.warn('Engine login failed, trying fallback:', fetchErr)
+            return
+          } else if (res.status === 401) {
+            const errData = await res.json().catch(() => ({}))
+            throw new Error(errData.detail || 'Invalid email or Naukri password.')
           }
+        } catch (fetchErr: any) {
+          if (fetchErr.message && fetchErr.message.includes('Invalid email or Naukri password')) {
+            throw fetchErr
+          }
+          console.warn('API login failed, trying fallback:', fetchErr)
         }
 
-        // 3. Try Supabase Login (if configured)
+        // 2. Fallback to Supabase Login (if configured)
         try {
           const { data, error: sbError } = await supabase
             .from('profiles')

@@ -38,9 +38,8 @@ import { bootstrapEngineUrl, discoverEngineUrl, saveActiveEngineUrl } from '@/li
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'default-secret-key'
 
 export default function UserDashboard() {
-  const [engineUrl, setEngineUrl] = useState<string>('')
-  const [engineUrlLabel, setEngineUrlLabel] = useState<string>('...')
-  const [engineStatus, setEngineStatus] = useState<'online' | 'offline' | 'checking'>('checking')
+  const [engineUrlLabel, setEngineUrlLabel] = useState<string>('Cloud Broker')
+  const [engineStatus, setEngineStatus] = useState<'online' | 'offline' | 'checking'>('online')
   const [userId, setUserId] = useState<string>('')
   const [userEmail, setUserEmail] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
@@ -62,6 +61,9 @@ export default function UserDashboard() {
   const [loadingHistory, setLoadingHistory] = useState<boolean>(true)
   const [historySearch, setHistorySearch] = useState<string>('')
   const [historyFilter, setHistoryFilter] = useState<'all' | 'today' | 'week' | 'month'>('all')
+  const [historyPage, setHistoryPage] = useState<number>(1)
+  const [historyTotalPages, setHistoryTotalPages] = useState<number>(1)
+  const [historyTotalCount, setHistoryTotalCount] = useState<number>(0)
 
   // Bot Run State
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
@@ -86,7 +88,7 @@ export default function UserDashboard() {
   const [savingProfile, setSavingProfile] = useState<boolean>(false)
   const [saveSuccess, setSaveSuccess] = useState<string>('')
 
-  // 1. Authenticate & Initialize — discover best engine URL first
+  // 1. Authenticate & Initialize — load data directly from cloud broker
   useEffect(() => {
     const storedUid = localStorage.getItem('user_id')
     const storedEmail = localStorage.getItem('user_email')
@@ -101,119 +103,52 @@ export default function UserDashboard() {
     setUserEmail(storedEmail || '')
     setUserRole(storedRole || 'user')
 
-    // Discover best available engine URL (probes all candidates in parallel)
-    setEngineStatus('checking')
-    bootstrapEngineUrl().then(url => {
-      if (url) {
-        setEngineUrl(url)
-        setEngineStatus('online')
-        // Show a friendly label based on URL type
-        if (url.includes('trycloudflare.com') || url.includes('ts.net') || url.startsWith('https://')) {
-          setEngineUrlLabel('Tunnel')
-        } else {
-          setEngineUrlLabel('Local')
-        }
-        loadUserData(storedUid, url)
-        loadUserHistory(storedUid, url)
-        checkActiveJob(storedUid, url)
-      } else {
-        setEngineStatus('offline')
-        setEngineUrlLabel('Offline')
-        setLoadingProfile(false)
-        setLoadingHistory(false)
-      }
-    })
-  }, []) // runs once on mount — URL is discovered dynamically
+    loadUserData(storedUid)
+    loadUserHistory(storedUid, 1, '', 'all')
+    checkActiveJob(storedUid)
+  }, [])
 
-
-  // Polling for active job status & logs
+  // Optimized Delta Polling for active job status & logs
   useEffect(() => {
     if (!activeJobId || jobStatus !== 'Running') return
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${engineUrl}/api/status/${activeJobId}`, {
-          headers: { 'X-API-Key': API_KEY }
-        })
+        const res = await fetch(`/api/tasks/${activeJobId}/logs?since_line=${liveLogs.length}`)
         if (res.ok) {
           const data = await res.json()
           if (data.status === 'completed') {
             setJobStatus('Completed')
             setActiveJobId(null)
-            loadUserHistory(userId)
+            loadUserHistory(userId, historyPage, historySearch, historyFilter)
           } else if (data.status === 'stopped') {
             setJobStatus('Stopped')
             setActiveJobId(null)
-            loadUserHistory(userId)
+            loadUserHistory(userId, historyPage, historySearch, historyFilter)
           } else if (data.status === 'failed') {
             setJobStatus('Error')
             setActiveJobId(null)
           }
-          if (data.logs && Array.isArray(data.logs)) {
-            setLiveLogs(data.logs)
+
+          if (data.logs && Array.isArray(data.logs) && data.logs.length > 0) {
+            setLiveLogs(prev => [...prev, ...data.logs])
           }
         }
-      } catch {
-        // Fallback
-      }
+      } catch {}
     }, 1500)
 
     return () => clearInterval(interval)
-  }, [activeJobId, jobStatus, engineUrl, userId])
+  }, [activeJobId, jobStatus, liveLogs.length, userId, historyPage, historySearch, historyFilter])
 
   // Auto-scroll logs terminal
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [liveLogs])
 
-  const checkEngineHealth = async (url?: string): Promise<'online' | 'offline'> => {
-    const target = url || engineUrl
-    if (!target) return 'offline'
-    try {
-      setEngineStatus('checking')
-      const res = await fetch(`${target}/`, { cache: 'no-store' })
-      if (res.ok) {
-        setEngineStatus('online')
-        return 'online'
-      } else {
-        setEngineStatus('offline')
-        return 'offline'
-      }
-    } catch {
-      setEngineStatus('offline')
-      return 'offline'
-    }
-  }
-
-  /** Re-run full multi-URL discovery and reload data if something comes online */
-  const handleRetryDiscovery = async () => {
-    setEngineStatus('checking')
-    const url = await discoverEngineUrl()
-    if (url) {
-      saveActiveEngineUrl(url)
-      setEngineUrl(url)
-      setEngineStatus('online')
-      if (url.includes('trycloudflare.com') || url.includes('ts.net') || url.startsWith('https://')) {
-        setEngineUrlLabel('Tunnel')
-      } else {
-        setEngineUrlLabel('Local')
-      }
-      loadUserData(userId, url)
-      loadUserHistory(userId, url)
-      checkActiveJob(userId, url)
-    } else {
-      setEngineStatus('offline')
-      setEngineUrlLabel('Offline')
-    }
-  }
-
-  const loadUserData = async (uid: string, url?: string) => {
-    const base = url || engineUrl
+  const loadUserData = async (uid: string) => {
     setLoadingProfile(true)
     try {
-      const res = await fetch(`${base}/api/user/${uid}/profile`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
+      const res = await fetch(`/api/profile?user_id=${uid}`)
       if (res.ok) {
         const data = await res.json()
         setCandidateProfile(data)
@@ -236,17 +171,17 @@ export default function UserDashboard() {
     }
   }
 
-  const loadUserHistory = async (uid: string, url?: string) => {
-    const base = url || engineUrl
+  const loadUserHistory = async (uid: string, page = 1, search = '', dateFilter = 'all') => {
     setLoadingHistory(true)
     try {
-      const res = await fetch(`${base}/api/user/${uid}/history`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
+      const res = await fetch(`/api/history?user_id=${uid}&page=${page}&limit=20&search=${encodeURIComponent(search)}&date=${dateFilter}`)
       if (res.ok) {
         const data = await res.json()
         setMetrics(data.stats || { today: 0, this_week: 0, this_month: 0, total_applied: 0 })
         setHistoryJobs(data.jobs || [])
+        setHistoryPage(data.page || 1)
+        setHistoryTotalPages(data.pages || 1)
+        setHistoryTotalCount(data.total || 0)
       }
     } catch (e) {
       console.error('Failed to load history:', e)
@@ -255,12 +190,9 @@ export default function UserDashboard() {
     }
   }
 
-  const checkActiveJob = async (uid: string, url?: string) => {
-    const base = url || engineUrl
+  const checkActiveJob = async (uid: string) => {
     try {
-      const res = await fetch(`${base}/api/active-job/${uid}`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
+      const res = await fetch(`/api/tasks?user_id=${uid}`)
       if (res.ok) {
         const data = await res.json()
         if (data.active && data.job_id) {
@@ -269,60 +201,41 @@ export default function UserDashboard() {
           if (data.data?.logs) {
             setLiveLogs(data.data.logs)
           }
-        } else {
-          loadStaticLogs(uid, base)
-        }
-      }
-    } catch {
-      loadStaticLogs(uid, base)
-    }
-  }
-
-  const loadStaticLogs = async (uid: string, url?: string) => {
-    const base = url || engineUrl
-    try {
-      const res = await fetch(`${base}/api/user/${uid}/logs`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
-      if (res.ok) {
-        const data = await res.json()
-        if (data.logs && data.logs.length > 0) {
-          setLiveLogs(data.logs)
         }
       }
     } catch {}
   }
 
+
   const handleStartBot = async () => {
     setJobStatus('Starting...')
-    setLiveLogs(['🚀 Initializing automated application session...'])
+    setLiveLogs(['[00:00:00] 🚀 Dispatching job application request to cloud task queue...'])
 
     try {
-      const res = await fetch(`${engineUrl}/api/start-bot`, {
+      const res = await fetch('/api/tasks', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': API_KEY
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          profile_path: userId,
-          headless: headlessMode
+          user_id: userId,
+          headless: headlessMode,
+          action: 'run_bot'
         })
       })
       const data = await res.json()
       if (res.ok) {
         setActiveJobId(data.job_id)
         setJobStatus('Running')
+        setLiveLogs(prev => [...prev, `[00:00:01] 📡 Task ${data.job_id} registered. Worker is picking up execution...`])
       } else {
         setJobStatus('Error')
-        setLiveLogs(prev => [...prev, `❌ Error starting bot: ${data.detail || 'Unknown error'}`])
+        setLiveLogs(prev => [...prev, `❌ Error enqueuing task: ${data.detail || data.message || 'Unknown error'}`])
       }
     } catch (err: any) {
       setJobStatus('Error')
       setLiveLogs(prev => [
         ...prev,
-        '❌ Connection Failed: Engine backend is unreachable.',
-        'Please ensure your bot engine is running.'
+        '❌ Connection Failed: Could not connect to cloud broker API.',
+        err.message
       ])
     }
   }
@@ -330,13 +243,14 @@ export default function UserDashboard() {
   const handleStopBot = async () => {
     if (!activeJobId) return
     try {
-      await fetch(`${engineUrl}/api/stop-bot/${activeJobId}`, {
-        method: 'POST',
-        headers: { 'X-API-Key': API_KEY }
+      await fetch(`/api/tasks/${activeJobId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stop' })
       })
       setJobStatus('Stopped')
       setActiveJobId(null)
-      loadUserHistory(userId)
+      loadUserHistory(userId, historyPage, historySearch, historyFilter)
     } catch (e) {
       console.error('Failed to stop bot:', e)
     }
@@ -349,20 +263,19 @@ export default function UserDashboard() {
     setJsonError('')
 
     try {
-      const res = await fetch(`${engineUrl}/api/user/${userId}/profile`, {
+      const res = await fetch('/api/profile', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': API_KEY
-        },
-        body: JSON.stringify(formData)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          ...formData
+        })
       })
       if (res.ok) {
         const data = await res.json()
-        setCandidateProfile(data.profile)
-        setRawJsonStr(JSON.stringify(data.profile, null, 2))
-        setSaveSuccess('Profile saved successfully!')
+        setSaveSuccess('Profile saved successfully in cloud database!')
         setTimeout(() => setSaveSuccess(''), 3500)
+        loadUserData(userId)
       } else {
         const errData = await res.json()
         alert(`Failed to save: ${errData.detail || 'Server error'}`)
@@ -379,7 +292,6 @@ export default function UserDashboard() {
     setSaveSuccess('')
     setJsonError('')
 
-    // 1. Validate JSON syntax
     let parsed: any
     try {
       parsed = JSON.parse(rawJsonStr)
@@ -390,29 +302,18 @@ export default function UserDashboard() {
     }
 
     try {
-      const res = await fetch(`${engineUrl}/api/user/${userId}/profile`, {
+      const res = await fetch('/api/profile', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': API_KEY
-        },
-        body: JSON.stringify({ raw_json: rawJsonStr })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          ...parsed
+        })
       })
       if (res.ok) {
-        const data = await res.json()
-        setCandidateProfile(data.profile)
-        setFormData({
-          name: data.profile.CANDIDATE_NAME || '',
-          email: data.profile.EMAIL || '',
-          password: '',
-          experience: data.profile.MY_EXPERIENCE || 0,
-          current_ctc: data.profile.CURRENT_CTC_ANNUAL || 0,
-          expected_ctc: data.profile.EXPECTED_CTC_ANNUAL || 0,
-          search_url: data.profile.SEARCH_URL || '',
-          resume_file: data.profile.RESUME_FILE || ''
-        })
         setSaveSuccess('Profile JSON saved and synchronized!')
         setTimeout(() => setSaveSuccess(''), 3500)
+        loadUserData(userId)
       } else {
         const errData = await res.json()
         setJsonError(`Failed to save: ${errData.detail || 'Server error'}`)
@@ -487,33 +388,13 @@ export default function UserDashboard() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Engine Status Badge */}
-            <button
-              onClick={engineStatus === 'offline' ? handleRetryDiscovery : undefined}
-              title={engineUrl || 'Discovering engine...'}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                engineStatus === 'online'
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-500/10 cursor-default'
-                  : engineStatus === 'checking'
-                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-default'
-                  : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20 cursor-pointer'
-              }`}
+            {/* Cloud Queue Status Badge */}
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-500/10"
             >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  engineStatus === 'online'
-                    ? 'bg-emerald-400 animate-pulse'
-                    : engineStatus === 'checking'
-                    ? 'bg-amber-400 animate-pulse'
-                    : 'bg-rose-400'
-                }`}
-              />
-              {engineStatus === 'online'
-                ? `Engine · ${engineUrlLabel}`
-                : engineStatus === 'checking'
-                ? 'Engine · Scanning...'
-                : 'Engine · Offline'}
-            </button>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Cloud Queue · Active
+            </div>
 
             {/* Admin Switch if Admin */}
             {userRole === 'admin' && (
@@ -580,10 +461,10 @@ export default function UserDashboard() {
               </div>
               {engineStatus === 'offline' && (
                 <button
-                  onClick={handleRetryDiscovery}
+                  onClick={() => loadUserData(userId)}
                   className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 transition-all whitespace-nowrap"
                 >
-                  <Wifi className="w-3.5 h-3.5" /> Scan All URLs
+                  <Wifi className="w-3.5 h-3.5" /> Reconnect
                 </button>
               )}
             </div>
@@ -786,7 +667,7 @@ export default function UserDashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => loadStaticLogs(userId)}
+                    onClick={() => checkActiveJob(userId)}
                     className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800"
                   >
                     <RefreshCw className="w-3 h-3" /> Refresh
@@ -841,53 +722,36 @@ export default function UserDashboard() {
                   type="text"
                   placeholder="Search company, title, or location..."
                   value={historySearch}
-                  onChange={e => setHistorySearch(e.target.value)}
+                  onChange={e => {
+                    setHistorySearch(e.target.value)
+                    loadUserHistory(userId, 1, e.target.value, historyFilter)
+                  }}
                   className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               {/* Time Pill Filters */}
               <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
-                <button
-                  onClick={() => setHistoryFilter('all')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                    historyFilter === 'all'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  All ({historyJobs.length})
-                </button>
-                <button
-                  onClick={() => setHistoryFilter('today')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                    historyFilter === 'today'
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  Today ({metrics.today})
-                </button>
-                <button
-                  onClick={() => setHistoryFilter('week')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                    historyFilter === 'week'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  This Week ({metrics.this_week})
-                </button>
-                <button
-                  onClick={() => setHistoryFilter('month')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                    historyFilter === 'month'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  This Month ({metrics.this_month})
-                </button>
+                {(['all', 'today', 'week', 'month'] as const).map(f => {
+                  const label = f === 'all' ? `All (${metrics.total_applied})` : f === 'today' ? `Today (${metrics.today})` : f === 'week' ? `This Week (${metrics.this_week})` : `This Month (${metrics.this_month})`
+                  const active = historyFilter === f
+                  return (
+                    <button
+                      key={f}
+                      onClick={() => {
+                        setHistoryFilter(f)
+                        loadUserHistory(userId, 1, historySearch, f)
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                        active
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -901,25 +765,38 @@ export default function UserDashboard() {
                       <th className="py-3 px-4">Job Role / Title</th>
                       <th className="py-3 px-4">Location</th>
                       <th className="py-3 px-4">Date & Time</th>
-                      <th className="py-3 px-4">QA Answered</th>
+                      <th className="py-3 px-4">Match Score</th>
                       <th className="py-3 px-4">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/50">
-                    {filteredJobs.length === 0 ? (
+                    {loadingHistory ? (
+                      <tr>
+                        <td colSpan={6} className="py-12 text-center text-slate-400">
+                          <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-blue-400" />
+                          Loading application history from cloud database...
+                        </td>
+                      </tr>
+                    ) : historyJobs.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="py-12 text-center text-slate-500">
                           No applied jobs found matching your filter.
                         </td>
                       </tr>
                     ) : (
-                      filteredJobs.map((job, idx) => (
-                        <tr key={idx} className="hover:bg-slate-800/30 transition-colors">
+                      historyJobs.map((job, idx) => (
+                        <tr key={job.id || idx} className="hover:bg-slate-800/30 transition-colors">
                           <td className="py-3.5 px-4 font-semibold text-white">
                             {job.company || 'Direct Employer'}
                           </td>
                           <td className="py-3.5 px-4 text-slate-200">
-                            {job.role || 'Software Engineer'}
+                            {job.url ? (
+                              <a href={job.url} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 inline-flex items-center gap-1">
+                                {job.title || 'Job Opening'} <ExternalLink className="w-3 h-3 text-slate-500" />
+                              </a>
+                            ) : (
+                              job.title || 'Job Opening'
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-slate-400">
                             {job.location || 'India'}
@@ -929,12 +806,18 @@ export default function UserDashboard() {
                           </td>
                           <td className="py-3.5 px-4">
                             <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono text-[11px]">
-                              {job.questions_answered || '0'} questions
+                              {job.score ? `${job.score}%` : 'Auto'}
                             </span>
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                              <CheckCircle2 className="w-3 h-3" /> APPLIED
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                              job.status === 'applied' || job.status === 'success'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                : job.status === 'external'
+                                ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                            }`}>
+                              <CheckCircle2 className="w-3 h-3" /> {(job.status || 'applied').toUpperCase()}
                             </span>
                           </td>
                         </tr>
@@ -942,6 +825,33 @@ export default function UserDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="bg-slate-950/80 px-4 py-3 border-t border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-400">
+                  Showing {historyJobs.length > 0 ? (historyPage - 1) * 20 + 1 : 0} to{' '}
+                  {Math.min(historyPage * 20, historyTotalCount)} of {historyTotalCount} applications
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => loadUserHistory(userId, historyPage - 1, historySearch, historyFilter)}
+                    disabled={historyPage <= 1 || loadingHistory}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-xs text-slate-400 font-mono px-2">
+                    Page {historyPage} of {historyTotalPages}
+                  </span>
+                  <button
+                    onClick={() => loadUserHistory(userId, historyPage + 1, historySearch, historyFilter)}
+                    disabled={historyPage >= historyTotalPages || loadingHistory}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-all"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </div>
           </div>
