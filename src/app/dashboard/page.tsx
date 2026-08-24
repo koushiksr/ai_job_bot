@@ -65,6 +65,8 @@ export default function UserDashboard() {
   const [jobStatus, setJobStatus] = useState<'Idle' | 'Starting...' | 'Running' | 'Completed' | 'Stopped' | 'Error'>('Idle')
   const [liveLogs, setLiveLogs] = useState<string[]>([])
   const [headlessMode, setHeadlessMode] = useState<boolean>(false)
+  const [countdownText, setCountdownText] = useState<string>('Calculating...')
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
   const logsEndRef = useRef<HTMLDivElement>(null)
 
   // Profile Form & JSON Editor State
@@ -82,6 +84,58 @@ export default function UserDashboard() {
   const [jsonError, setJsonError] = useState<string>('')
   const [savingProfile, setSavingProfile] = useState<boolean>(false)
   const [saveSuccess, setSaveSuccess] = useState<string>('')
+
+  // Next Scheduled Run Countdown (Daily at 6:00 AM & 8:00 AM IST)
+  useEffect(() => {
+    const computeCountdown = () => {
+      const now = new Date()
+      // IST is UTC+5:30
+      const istOffsetMs = 5.5 * 60 * 60 * 1000
+      const istNow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + istOffsetMs)
+
+      const year = istNow.getFullYear()
+      const month = istNow.getMonth()
+      const date = istNow.getDate()
+
+      const run1 = new Date(year, month, date, 6, 0, 0)
+      const run2 = new Date(year, month, date, 8, 0, 0)
+      const runNextDay = new Date(year, month, date + 1, 6, 0, 0)
+
+      let target = run1
+      if (istNow < run1) {
+        target = run1
+      } else if (istNow < run2) {
+        target = run2
+      } else {
+        target = runNextDay
+      }
+
+      const diffMs = target.getTime() - istNow.getTime()
+      const diffSecs = Math.max(0, Math.floor(diffMs / 1000))
+      const hours = Math.floor(diffSecs / 3600)
+      const minutes = Math.floor((diffSecs % 3600) / 60)
+      const seconds = diffSecs % 60
+
+      const targetTimeStr = target.getHours() === 6 ? '06:00 AM IST' : '08:00 AM IST'
+      setCountdownText(`${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s (${targetTimeStr})`)
+    }
+
+    computeCountdown()
+    const timer = setInterval(computeCountdown, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  // Active Task Stopwatch Timer
+  useEffect(() => {
+    if (jobStatus !== 'Running' && jobStatus !== 'Starting...') {
+      setElapsedSeconds(0)
+      return
+    }
+    const timer = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [jobStatus])
 
   // 1. Authenticate & Initialize — load data directly from cloud broker
   useEffect(() => {
@@ -103,13 +157,13 @@ export default function UserDashboard() {
     checkActiveJob(storedUid)
   }, [])
 
-  // Optimized Delta Polling for active job status & logs
+  // Optimized Polling for active job status & full logs
   useEffect(() => {
-    if (!activeJobId || jobStatus !== 'Running') return
+    if (!activeJobId || (jobStatus !== 'Running' && jobStatus !== 'Starting...')) return
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/tasks/${activeJobId}/logs?since_line=${liveLogs.length}`)
+        const res = await fetch(`/api/tasks/${activeJobId}/logs?since_line=0`)
         if (res.ok) {
           const data = await res.json()
           if (data.status === 'completed') {
@@ -126,14 +180,14 @@ export default function UserDashboard() {
           }
 
           if (data.logs && Array.isArray(data.logs) && data.logs.length > 0) {
-            setLiveLogs(prev => [...prev, ...data.logs])
+            setLiveLogs(data.logs)
           }
         }
       } catch {}
     }, 1500)
 
     return () => clearInterval(interval)
-  }, [activeJobId, jobStatus, liveLogs.length, userId, historyPage, historySearch, historyFilter])
+  }, [activeJobId, jobStatus, userId, historyPage, historySearch, historyFilter])
 
   // Auto-scroll logs terminal
   useEffect(() => {
@@ -542,6 +596,45 @@ export default function UserDashboard() {
         {/* TAB 1: BOT RUNNER & LIVE LOGS */}
         {activeTab === 'runner' && (
           <div className="space-y-6">
+            {/* Automated Schedule & Active Execution Countdown Bar */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border border-blue-500/20 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-semibold text-blue-300 uppercase tracking-wider block">Next Scheduled Automated Run</span>
+                    <span className="text-sm font-bold text-white font-mono">{countdownText}</span>
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 font-medium">
+                  Daily 6 AM & 8 AM IST
+                </span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900/60 to-slate-950/60 border border-slate-800 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2.5 rounded-xl border ${jobStatus === 'Running' || jobStatus === 'Starting...' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Session Duration & Status</span>
+                    <span className="text-sm font-bold text-slate-200 font-mono">
+                      {jobStatus === 'Running' || jobStatus === 'Starting...' ? (
+                        <>Active: {Math.floor(elapsedSeconds / 60).toString().padStart(2, '0')}:{(elapsedSeconds % 60).toString().padStart(2, '0')} <span className="text-xs text-slate-400 font-normal">(Max: 5m 00s)</span></>
+                      ) : (
+                        'Ready on Standby'
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <span className={`text-[10px] px-2.5 py-1 rounded-full font-medium border ${jobStatus === 'Running' || jobStatus === 'Starting...' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+                  {jobStatus === 'Running' ? 'Executing' : jobStatus === 'Starting...' ? 'Queueing' : 'Idle'}
+                </span>
+              </div>
+            </div>
+
             {/* Action Bar */}
             <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
@@ -644,6 +737,16 @@ export default function UserDashboard() {
                       </div>
                     )
                   })
+                )}
+
+                {/* Worker Standby Indicator & Timeout Warning */}
+                {(jobStatus === 'Running' || jobStatus === 'Starting...') && elapsedSeconds > 20 && liveLogs.length <= 2 && (
+                  <div className="p-3 my-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between animate-fadeIn">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-amber-400 animate-spin" />
+                      <span>Task is registered in cloud queue. Waiting for local Python worker to claim (<code className="text-amber-100 bg-amber-950/60 px-1.5 py-0.5 rounded font-mono">START.bat</code>).</span>
+                    </div>
+                  </div>
                 )}
                 <div ref={logsEndRef} />
               </div>
