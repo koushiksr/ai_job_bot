@@ -6,37 +6,28 @@ import {
   Clock,
   Calendar,
   TrendingUp,
-  FileText,
   RefreshCw,
   Search,
   ExternalLink,
   Shield,
   CheckCircle2,
   LogOut,
-  Save,
   User,
   Sparkles,
-  FileJson,
-  Upload,
-  Download,
-  Eye,
-  EyeOff,
   Building2,
-  MapPin,
-  Sliders,
-  HelpCircle
+  MapPin
 } from 'lucide-react'
 import Link from 'next/link'
+import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
   const [userEmail, setUserEmail] = useState<string>('')
+  const [userName, setUserName] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
-  const [loadingProfile, setLoadingProfile] = useState<boolean>(true)
 
-  // Navigation tabs
+  // Navigation tab
   const [activeTab, setActiveTab] = useState<'history' | 'profile'>('history')
-  const [profileSubTab, setProfileSubTab] = useState<'form' | 'json'>('form')
 
   // Metrics State
   const [metrics, setMetrics] = useState({
@@ -57,31 +48,6 @@ export default function UserDashboard() {
 
   // Automated Schedule Countdown
   const [countdownText, setCountdownText] = useState<string>('Calculating...')
-
-  // Profile Form & JSON State
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    experience: 0,
-    current_ctc: 0,
-    expected_ctc: 0,
-    search_url: '',
-    skills_str: '',
-    locations_str: '',
-    notice_period: 'Immediate / 15 Days',
-    career_break: 'No',
-    relocate: 'Yes'
-  })
-  const [showPassword, setShowPassword] = useState<boolean>(false)
-  const [rawJsonStr, setRawJsonStr] = useState<string>('{\n}')
-  const [jsonError, setJsonError] = useState<string>('')
-  const [savingProfile, setSavingProfile] = useState<boolean>(false)
-  const [saveSuccess, setSaveSuccess] = useState<string>('')
-  const [uploadingResume, setUploadingResume] = useState<boolean>(false)
-  const [resumeFilename, setResumeFilename] = useState<string>('')
-  const [resumeSuccess, setResumeSuccess] = useState<string>('')
-  const [resumeError, setResumeError] = useState<string>('')
 
   // Compute Daily 6 AM & 8 AM IST Countdown
   useEffect(() => {
@@ -139,31 +105,11 @@ export default function UserDashboard() {
   }, [])
 
   const loadUserData = async (uid: string) => {
-    setLoadingProfile(true)
     try {
       const pRes = await fetch(`/api/profile?user_id=${uid}`)
       if (pRes.ok) {
         const pData = await pRes.json()
-        const skillsArr = pData.skills || pData.job_filters?.keywords || []
-        const locArr = pData.job_filters?.location || []
-        const answers = pData.predefined_answers || {}
-
-        setFormData({
-          name: pData.name || '',
-          email: pData.email || '',
-          password: '',
-          experience: pData.experience || 0,
-          current_ctc: pData.current_ctc || 0,
-          expected_ctc: pData.expected_ctc || 0,
-          search_url: pData.search_url || '',
-          skills_str: Array.isArray(skillsArr) ? skillsArr.join(', ') : '',
-          locations_str: Array.isArray(locArr) ? locArr.join(', ') : '',
-          notice_period: answers['What is your notice period?'] || answers['notice_period'] || 'Immediate / 15 Days',
-          career_break: answers['Are you on a career break?'] || 'No',
-          relocate: answers['Are you willing to relocate to Bangalore?'] || answers['willing_to_relocate'] || 'Yes'
-        })
-        setResumeFilename(pData.resume_filename || (pData.name ? `${pData.name.replace(/[^a-zA-Z0-9]+/g, '_')}_Resume.pdf` : `${uid}_Resume.pdf`))
-        setRawJsonStr(pData.raw_json || JSON.stringify(pData, null, 2))
+        setUserName(pData.name || '')
       }
 
       const sRes = await fetch(`/api/stats?user_id=${uid}`)
@@ -178,8 +124,6 @@ export default function UserDashboard() {
       }
     } catch (e) {
       console.error('Failed to load user data:', e)
-    } finally {
-      setLoadingProfile(false)
     }
   }
 
@@ -208,145 +152,6 @@ export default function UserDashboard() {
     }
   }
 
-  const handleSaveFormProfile = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSavingProfile(true)
-    setSaveSuccess('')
-    setJsonError('')
-
-    const skills = formData.skills_str.split(',').map(s => s.trim()).filter(Boolean)
-    const locations = formData.locations_str.split(',').map(s => s.trim()).filter(Boolean)
-    const predefined_answers = {
-      'What is your notice period?': formData.notice_period,
-      'Are you on a career break?': formData.career_break,
-      'Are you willing to relocate to Bangalore?': formData.relocate,
-      'Are you comfortable working from office / hybrid?': 'Yes',
-      'What is your current CTC?': `${formData.current_ctc ? Math.round(formData.current_ctc / 100000) : 0} LPA`,
-      'What is your expected CTC?': `${formData.expected_ctc ? Math.round(formData.expected_ctc / 100000) : 0} LPA`
-    }
-    const job_filters = {
-      location: locations.length ? locations : ['Bangalore', 'Bengaluru', 'Remote', 'Hybrid'],
-      keywords: skills,
-      must_have_keywords: skills.slice(0, 1)
-    }
-
-    try {
-      const res = await fetch('/api/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          name: formData.name,
-          email: formData.email,
-          ...(formData.password ? { password: formData.password } : {}),
-          experience: formData.experience,
-          current_ctc: formData.current_ctc,
-          expected_ctc: formData.expected_ctc,
-          search_url: formData.search_url,
-          skills: skills,
-          job_filters: job_filters,
-          predefined_answers: predefined_answers
-        })
-      })
-
-      if (res.ok) {
-        setSaveSuccess('Candidate preferences and profile saved successfully!')
-        loadUserData(userId)
-        setTimeout(() => setSaveSuccess(''), 4000)
-      } else {
-        const data = await res.json()
-        setJsonError(data.detail || 'Failed to save profile.')
-      }
-    } catch (err: any) {
-      setJsonError(err.message || 'Error saving profile.')
-    } finally {
-      setSavingProfile(false)
-    }
-  }
-
-  const handleSaveRawJson = async () => {
-    setSavingProfile(true)
-    setSaveSuccess('')
-    setJsonError('')
-
-    try {
-      const parsed = JSON.parse(rawJsonStr)
-      const res = await fetch('/api/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          raw_json: rawJsonStr,
-          ...parsed
-        })
-      })
-
-      if (res.ok) {
-        setSaveSuccess('JSON configuration updated in MongoDB Atlas!')
-        loadUserData(userId)
-        setTimeout(() => setSaveSuccess(''), 4000)
-      } else {
-        const data = await res.json()
-        setJsonError(data.detail || 'Failed to save JSON.')
-      }
-    } catch (e: any) {
-      setJsonError(`Invalid JSON syntax: ${e.message}`)
-    } finally {
-      setSavingProfile(false)
-    }
-  }
-
-  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (!file.name.toLowerCase().endsWith('.pdf')) {
-      alert('Please select a valid PDF file.')
-      return
-    }
-
-    setUploadingResume(true)
-    setResumeSuccess('')
-    setResumeError('')
-
-    try {
-      const reader = new FileReader()
-      reader.onload = async () => {
-        const base64Str = (reader.result as string).split(',')[1]
-        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '').trim()
-        if (!cleanName.endsWith('.pdf')) cleanName += '.pdf'
-
-        const res = await fetch('/api/profile/resume', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: userId,
-            filename: cleanName,
-            file_base64: base64Str,
-            file_size_bytes: file.size
-          })
-        })
-
-        if (res.ok) {
-          const data = await res.json()
-          setResumeFilename(data.filename)
-          setResumeSuccess(`Resume "${data.filename}" (${Math.round(file.size / 1024)} KB) uploaded & saved to MongoDB Atlas!`)
-          setTimeout(() => setResumeSuccess(''), 5000)
-          loadUserData(userId)
-        } else {
-          const err = await res.json().catch(() => ({}))
-          setResumeError(err.detail || 'Failed to upload resume to server.')
-          setTimeout(() => setResumeError(''), 5000)
-        }
-        setUploadingResume(false)
-      }
-      reader.readAsDataURL(file)
-    } catch (err: any) {
-      setResumeError(`Error reading resume file: ${err.message}`)
-      setUploadingResume(false)
-    }
-  }
-
   const handleLogout = () => {
     localStorage.clear()
     window.location.href = '/'
@@ -359,19 +164,19 @@ export default function UserDashboard() {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 font-bold text-white text-base">
-              {formData.name ? formData.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+              {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-bold text-white">
-                  {formData.name || 'Candidate Dashboard'}
+                  {userName || 'Candidate Dashboard'}
                 </h1>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 font-semibold uppercase">
                   Active
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-mono">
-                {formData.email || userEmail}
+                {userEmail}
               </p>
             </div>
           </div>
@@ -510,7 +315,7 @@ export default function UserDashboard() {
                 : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
             }`}
           >
-            <User className="w-4 h-4" /> Candidate Profile & Filters
+            <User className="w-4 h-4" /> Candidate Profile & Resume
           </button>
         </div>
 
@@ -667,335 +472,13 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* TAB 2: CANDIDATE PROFILE & RESUME */}
+        {/* TAB 2: CANDIDATE PROFILE & RESUME (Shared Unified Component) */}
         {activeTab === 'profile' && (
-          <div className="space-y-6">
-            {/* Sub-tab Switcher */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setProfileSubTab('form')}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    profileSubTab === 'form'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  <User className="w-3.5 h-3.5" /> Structured Form
-                </button>
-                <button
-                  onClick={() => setProfileSubTab('json')}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    profileSubTab === 'json'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  <FileJson className="w-3.5 h-3.5" /> Raw JSON Editor
-                </button>
-              </div>
-
-              {saveSuccess && (
-                <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-xl border border-emerald-500/30 font-medium animate-fadeIn">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> {saveSuccess}
-                </div>
-              )}
-            </div>
-
-            {/* Structured Form View */}
-            {profileSubTab === 'form' && (
-              <form onSubmit={handleSaveFormProfile} className="space-y-6">
-                {/* Card 1: Account Credentials */}
-                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
-                  <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
-                    <User className="w-4 h-4" /> Naukri Account Credentials & Identity
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Candidate Full Name</label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        required
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Naukri Login Email</label>
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        required
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Naukri Login Password</label>
-                      <div className="relative">
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="Leave blank to keep unchanged"
-                          value={formData.password}
-                          onChange={e => setFormData({ ...formData, password: e.target.value })}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-10 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 2: Professional Experience & Salary */}
-                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
-                  <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
-                    <Briefcase className="w-4 h-4" /> Professional Experience & Compensation
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Total Experience (Years)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={formData.experience}
-                        onChange={e => setFormData({ ...formData, experience: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Current Annual CTC (₹ INR)</label>
-                      <input
-                        type="number"
-                        value={formData.current_ctc}
-                        onChange={e => setFormData({ ...formData, current_ctc: parseInt(e.target.value) || 0 })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Expected Annual CTC (₹ INR)</label>
-                      <input
-                        type="number"
-                        value={formData.expected_ctc}
-                        onChange={e => setFormData({ ...formData, expected_ctc: parseInt(e.target.value) || 0 })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 3: Skills, Job Keywords & Locations */}
-                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
-                  <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-                    <Sliders className="w-4 h-4" /> Target Skills, Keywords & Locations
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Primary Skills & Keywords (Comma-separated)</label>
-                      <input
-                        type="text"
-                        placeholder="Python, FastAPI, Django, AI, LLM, Machine Learning"
-                        value={formData.skills_str}
-                        onChange={e => setFormData({ ...formData, skills_str: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Preferred Locations (Comma-separated)</label>
-                      <input
-                        type="text"
-                        placeholder="Bangalore, Bengaluru, Remote, Hybrid"
-                        value={formData.locations_str}
-                        onChange={e => setFormData({ ...formData, locations_str: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                      Naukri Recommended / Search URL (Default: <code className="text-slate-400 bg-slate-900 px-1 py-0.5 rounded">https://www.naukri.com/mnjuser/recommendedjobs</code>)
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.search_url}
-                      onChange={e => setFormData({ ...formData, search_url: e.target.value })}
-                      placeholder="https://www.naukri.com/mnjuser/recommendedjobs"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                    />
-                  </div>
-                </div>
-
-                {/* Card 4: Predefined Recruiter Questionnaire Answers */}
-                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
-                  <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-                    <HelpCircle className="w-4 h-4" /> Predefined Recruiter Answers
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Notice Period</label>
-                      <input
-                        type="text"
-                        placeholder="Immediate / 15 Days"
-                        value={formData.notice_period}
-                        onChange={e => setFormData({ ...formData, notice_period: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Career Break?</label>
-                      <select
-                        value={formData.career_break}
-                        onChange={e => setFormData({ ...formData, career_break: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">Willing to Relocate?</label>
-                      <select
-                        value={formData.relocate}
-                        onChange={e => setFormData({ ...formData, relocate: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 5: Resume PDF in MongoDB Atlas */}
-                <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
-                  <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                    <FileText className="w-4 h-4" /> Candidate Resume PDF (Cloud Synchronized)
-                  </h3>
-
-                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                        <FileText className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-white font-mono">
-                            {resumeFilename || `${userId}_Resume.pdf`}
-                          </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                            Active in MongoDB Atlas
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          Recruiters receive this clean custom PDF document during job applications.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 w-full md:w-auto">
-                      <a
-                        href={`/api/profile/resume?user_id=${userId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition-colors"
-                      >
-                        <Download className="w-3.5 h-3.5" /> Preview PDF
-                      </a>
-
-                      <label className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-md shadow-blue-500/20 transition-all">
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>{uploadingResume ? 'Uploading...' : 'Upload New PDF'}</span>
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          onChange={handleResumeUpload}
-                          disabled={uploadingResume}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  {resumeSuccess && (
-                    <div className="text-xs text-emerald-400 flex items-center gap-1.5 font-medium animate-fadeIn">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> {resumeSuccess}
-                    </div>
-                  )}
-
-                  {resumeError && (
-                    <div className="text-xs text-rose-400 flex items-center gap-1.5 font-medium animate-fadeIn">
-                      <span className="w-2 h-2 rounded-full bg-rose-400" /> {resumeError}
-                    </div>
-                  )}
-                </div>
-
-                {/* Save Button */}
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <button
-                    type="submit"
-                    disabled={savingProfile}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white shadow-lg shadow-blue-500/25 transition-all"
-                  >
-                    <Save className="w-4 h-4" />
-                    {savingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Raw JSON Editor */}
-            {profileSubTab === 'json' && (
-              <div className="p-6 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-slate-400">
-                    MongoDB Atlas Raw Profile Document (JSON)
-                  </span>
-                  {jsonError && (
-                    <span className="text-xs text-rose-400 font-semibold">{jsonError}</span>
-                  )}
-                </div>
-
-                <textarea
-                  rows={22}
-                  value={rawJsonStr}
-                  onChange={e => {
-                    setRawJsonStr(e.target.value)
-                    setJsonError('')
-                  }}
-                  className="w-full bg-[#050811] border border-slate-800 rounded-xl p-4 font-mono text-xs text-cyan-300 focus:outline-none focus:border-blue-500"
-                  spellCheck={false}
-                />
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleSaveRawJson}
-                    disabled={savingProfile}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20"
-                  >
-                    <Save className="w-4 h-4" /> {savingProfile ? 'Saving...' : 'Save JSON'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <CandidateProfileEditor
+            userId={userId}
+            isAdmin={false}
+            onSaveSuccess={() => loadUserData(userId)}
+          />
         )}
       </main>
     </div>

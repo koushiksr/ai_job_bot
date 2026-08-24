@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
     }
 
-    let cleanFilename = filename.replace(/^candidate\d*[\s_]*/i, '').trim()
+    let cleanFilename = filename.trim()
     if (!cleanFilename.toLowerCase().endsWith('.pdf')) {
       cleanFilename += '.pdf'
     }
