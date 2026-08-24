@@ -64,7 +64,6 @@ export default function UserDashboard() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
   const [jobStatus, setJobStatus] = useState<'Idle' | 'Starting...' | 'Running' | 'Completed' | 'Stopped' | 'Error'>('Idle')
   const [liveLogs, setLiveLogs] = useState<string[]>([])
-  const [headlessMode, setHeadlessMode] = useState<boolean>(false)
   const [countdownText, setCountdownText] = useState<string>('Calculating...')
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
   const logsEndRef = useRef<HTMLDivElement>(null)
@@ -266,7 +265,7 @@ export default function UserDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          headless: headlessMode,
+          headless: false,
           action: 'run_bot'
         })
       })
@@ -661,16 +660,10 @@ export default function UserDashboard() {
               </div>
 
               <div className="flex items-center gap-3 w-full md:w-auto">
-                {/* Headless toggle */}
-                <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer bg-slate-800/60 px-3 py-2 rounded-xl border border-slate-700/60">
-                  <input
-                    type="checkbox"
-                    checked={headlessMode}
-                    onChange={e => setHeadlessMode(e.target.checked)}
-                    className="rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0"
-                  />
-                  <span>Run Headless (Hidden Browser)</span>
-                </label>
+                <div className="flex items-center gap-2 text-xs text-blue-300 bg-blue-950/40 px-3.5 py-2 rounded-xl border border-blue-800/50">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-semibold">Desktop Headed Window</span>
+                </div>
 
                 {jobStatus === 'Running' ? (
                   <button
