@@ -40,10 +40,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json()
-    const { user_id, filename, file_base64, file_size_bytes } = data
+    const user_id = data.user_id
+    const file_base64 = data.file_base64 || data.pdf_base64 || data.base64
+    const filename = data.filename || data.resume_filename || `${user_id}_Resume.pdf`
+    const file_size_bytes = data.file_size_bytes
 
     if (!user_id || !file_base64) {
-      return NextResponse.json({ detail: 'user_id and file_base64 are required' }, { status: 400 })
+      return NextResponse.json({ detail: 'user_id and file_base64/pdf_base64 are required' }, { status: 400 })
     }
 
     const db = await getDb()
@@ -51,7 +54,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
     }
 
-    const cleanFilename = filename || `${user_id}_Resume.pdf`
+    let cleanFilename = filename.replace(/^candidate\d*[\s_]*/i, '').trim()
+    if (!cleanFilename.toLowerCase().endsWith('.pdf')) {
+      cleanFilename += '.pdf'
+    }
+
     const size = file_size_bytes || Buffer.from(file_base64, 'base64').length
 
     // 1. Store binary PDF in dedicated 'resumes' collection

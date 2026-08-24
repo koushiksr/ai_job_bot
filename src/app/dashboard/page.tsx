@@ -81,6 +81,7 @@ export default function UserDashboard() {
   const [uploadingResume, setUploadingResume] = useState<boolean>(false)
   const [resumeFilename, setResumeFilename] = useState<string>('')
   const [resumeSuccess, setResumeSuccess] = useState<string>('')
+  const [resumeError, setResumeError] = useState<string>('')
 
   // Compute Daily 6 AM & 8 AM IST Countdown
   useEffect(() => {
@@ -306,12 +307,13 @@ export default function UserDashboard() {
 
     setUploadingResume(true)
     setResumeSuccess('')
+    setResumeError('')
 
     try {
       const reader = new FileReader()
       reader.onload = async () => {
         const base64Str = (reader.result as string).split(',')[1]
-        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '')
+        let cleanName = file.name.replace(/^candidate\d*[\s_]*/i, '').trim()
         if (!cleanName.endsWith('.pdf')) cleanName += '.pdf'
 
         const res = await fetch('/api/profile/resume', {
@@ -320,23 +322,27 @@ export default function UserDashboard() {
           body: JSON.stringify({
             user_id: userId,
             filename: cleanName,
-            pdf_base64: base64Str
+            file_base64: base64Str,
+            file_size_bytes: file.size
           })
         })
 
         if (res.ok) {
           const data = await res.json()
           setResumeFilename(data.filename)
-          setResumeSuccess('Resume PDF stored directly in MongoDB Atlas!')
-          setTimeout(() => setResumeSuccess(''), 4000)
+          setResumeSuccess(`Resume "${data.filename}" (${Math.round(file.size / 1024)} KB) uploaded & saved to MongoDB Atlas!`)
+          setTimeout(() => setResumeSuccess(''), 5000)
+          loadUserData(userId)
         } else {
-          alert('Failed to upload resume.')
+          const err = await res.json().catch(() => ({}))
+          setResumeError(err.detail || 'Failed to upload resume to server.')
+          setTimeout(() => setResumeError(''), 5000)
         }
         setUploadingResume(false)
       }
       reader.readAsDataURL(file)
-    } catch {
-      alert('Error reading resume file.')
+    } catch (err: any) {
+      setResumeError(`Error reading resume file: ${err.message}`)
       setUploadingResume(false)
     }
   }
@@ -929,8 +935,14 @@ export default function UserDashboard() {
                   </div>
 
                   {resumeSuccess && (
-                    <div className="text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
+                    <div className="text-xs text-emerald-400 flex items-center gap-1.5 font-medium animate-fadeIn">
                       <CheckCircle2 className="w-3.5 h-3.5" /> {resumeSuccess}
+                    </div>
+                  )}
+
+                  {resumeError && (
+                    <div className="text-xs text-rose-400 flex items-center gap-1.5 font-medium animate-fadeIn">
+                      <span className="w-2 h-2 rounded-full bg-rose-400" /> {resumeError}
                     </div>
                   )}
                 </div>
