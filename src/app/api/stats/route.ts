@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
-import { SEED_CANDIDATES, ensureDbSeeded } from '@/lib/seedData'
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,31 +10,21 @@ export async function GET(req: NextRequest) {
     }
 
     const db = await getDb()
-    if (db) {
-      await ensureDbSeeded(db)
-      const statsDoc = await db.collection('user_stats').findOne({ user_id: userId })
-      if (statsDoc) {
-        const now = new Date()
-        const todayStr = now.toISOString().split('T')[0]
-        const todayCount = statsDoc?.last_date === todayStr ? (statsDoc?.today || 0) : (statsDoc?.today || 0)
-
-        return NextResponse.json({
-          today: todayCount,
-          this_week: statsDoc?.this_week || 0,
-          this_month: statsDoc?.this_month || 0,
-          total_applied: statsDoc?.total_applied || 0
-        })
-      }
+    if (!db) {
+      return NextResponse.json({ today: 0, this_week: 0, this_month: 0, total_applied: 0 })
     }
 
-    // Default Seed Fallback
-    const seed = SEED_CANDIDATES[userId]
-    if (seed) {
+    const statsDoc = await db.collection('user_stats').findOne({ user_id: userId })
+    if (statsDoc) {
+      const now = new Date()
+      const todayStr = now.toISOString().split('T')[0]
+      const todayCount = statsDoc?.last_date === todayStr ? (statsDoc?.today || 0) : 0
+
       return NextResponse.json({
-        today: seed.stats.today,
-        this_week: seed.stats.this_week,
-        this_month: seed.stats.this_month,
-        total_applied: seed.stats.total_applied
+        today: todayCount,
+        this_week: statsDoc?.this_week || 0,
+        this_month: statsDoc?.this_month || 0,
+        total_applied: statsDoc?.total_applied || 0
       })
     }
 

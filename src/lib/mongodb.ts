@@ -6,11 +6,7 @@
 
 import { MongoClient, Db } from 'mongodb'
 
-const DEFAULT_URI = 'mongodb+srv://koushik:koushik@employeedatabase.uqho6xi.mongodb.net/?retryWrites=true&w=majority'
-const uri = (process.env.MONGODB_URI && !process.env.MONGODB_URI.includes('<db_password>'))
-  ? process.env.MONGODB_URI
-  : DEFAULT_URI
-
+const uri = process.env.MONGODB_URI || ''
 const dbName = process.env.MONGODB_DB_NAME || 'ai_job_bot'
 
 interface GlobalWithMongo {
@@ -27,6 +23,7 @@ export function isMongoConfigured(): boolean {
 
 export function getMongoClientPromise(): Promise<MongoClient> | null {
   if (!isMongoConfigured()) {
+    console.error('[MongoDB] MONGODB_URI is not configured. Set it in .env.local or Vercel environment variables.')
     return null
   }
 

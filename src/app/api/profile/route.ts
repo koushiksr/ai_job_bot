@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
-import { SEED_CANDIDATES, ensureDbSeeded } from '@/lib/seedData'
 import crypto from 'crypto'
 
 export async function GET(req: NextRequest) {
@@ -12,34 +11,13 @@ export async function GET(req: NextRequest) {
     }
 
     const ifNoneMatch = req.headers.get('if-none-match')
-    let profile: any = null
 
     const db = await getDb()
-    if (db) {
-      await ensureDbSeeded(db)
-      profile = await db.collection('profiles').findOne({ user_id: userId })
+    if (!db) {
+      return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
     }
 
-    // Fallback to seed if not in database
-    if (!profile) {
-      const seed = SEED_CANDIDATES[userId]
-      if (seed) {
-        profile = {
-          user_id: seed.user_id,
-          name: seed.name,
-          email: seed.email,
-          password: seed.password,
-          experience: seed.experience,
-          current_ctc: seed.current_ctc,
-          expected_ctc: seed.expected_ctc,
-          search_url: seed.search_url,
-          job_filters: seed.job_filters,
-          predefined_answers: seed.predefined_answers || {},
-          resume_filename: seed.resume_filename
-        }
-      }
-    }
-
+    const profile = await db.collection('profiles').findOne({ user_id: userId })
     if (!profile) {
       return NextResponse.json({ detail: 'Profile not found' }, { status: 404 })
     }
@@ -59,9 +37,11 @@ export async function GET(req: NextRequest) {
       current_ctc: profile.current_ctc || 0,
       expected_ctc: profile.expected_ctc || 0,
       search_url: profile.search_url || '',
+      skills: profile.skills || [],
       job_filters: profile.job_filters || {},
       predefined_answers: profile.predefined_answers || {},
       resume_filename: profile.resume_filename || `${userId}_Resume.pdf`,
+      enabled_for_daily_run: profile.enabled_for_daily_run !== false,
       raw_json: JSON.stringify(profile, null, 2),
       version_hash: versionHash
     }
@@ -84,12 +64,12 @@ export async function POST(req: NextRequest) {
     }
 
     const db = await getDb()
-    const now = new Date()
-
-    let existing: any = null
-    if (db) {
-      existing = await db.collection('profiles').findOne({ user_id: userId })
+    if (!db) {
+      return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
     }
+
+    const now = new Date()
+    const existing = await db.collection('profiles').findOne({ user_id: userId })
 
     // If raw_json was provided directly, parse and merge
     let parsedRaw: any = {}
@@ -129,16 +109,11 @@ export async function POST(req: NextRequest) {
     const versionHash = crypto.createHash('sha256').update(JSON.stringify(updateDoc)).digest('hex').substring(0, 16)
     updateDoc.version_hash = versionHash
 
-    if (db) {
-      await db.collection('profiles').updateOne(
-        { user_id: userId },
-        { 
-          $set: updateDoc,
-          $unset: { resume_file: "" }
-        },
-        { upsert: true }
-      )
-    }
+    await db.collection('profiles').updateOne(
+      { user_id: userId },
+      { $set: updateDoc },
+      { upsert: true }
+    )
 
     return NextResponse.json({
       status: 'success',
