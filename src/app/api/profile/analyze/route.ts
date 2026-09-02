@@ -21,40 +21,42 @@ export async function POST(req: NextRequest) {
     const db = await getDb()
     if (!db) return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
 
-    // Fetch existing profile just to append it as context
+    // Check if a profile already exists in MongoDB
     const existingProfile = await db.collection('profiles').findOne({ user_id })
     if (existingProfile) {
+      // If we are editing, we don't need to parse the PDF again. Just use the cache.
       const { _id, user_id: _, ...profileData } = existingProfile
       existingProfileJson = JSON.stringify(profileData)
-    }
-
-    // ALWAYS parse the PDF so the LLM can extract new things (like missing companies)
-    let pdfBase64 = file_base64
-    if (!pdfBase64) {
-      const resume = await db.collection('resumes').findOne({ user_id })
-      if (!resume || !resume.file_base64) {
-        return NextResponse.json({ detail: `No resume found in database for user "${user_id}". Please upload one first.` }, { status: 404 })
+      resumeText = `EXISTING PROFILE DATA:\n${existingProfileJson}`
+      console.log(`[ANALYZE] Found existing profile for ${user_id}. Reusing JSON data instead of parsing PDF.`)
+    } else {
+      let pdfBase64 = file_base64
+      if (!pdfBase64) {
+        const resume = await db.collection('resumes').findOne({ user_id })
+        if (!resume || !resume.file_base64) {
+          return NextResponse.json({ detail: `No resume found in database for user "${user_id}". Please upload one first.` }, { status: 404 })
+        }
+        pdfBase64 = resume.file_base64
       }
-      pdfBase64 = resume.file_base64
-    }
 
-    console.log(`[ANALYZE] Parsing PDF for ${user_id}...`)
-    try {
-      const { PDFExtract } = await import('pdf.js-extract')
-      const pdfExtract = new PDFExtract()
-      
-      const pdfBuffer = Buffer.from(pdfBase64, 'base64')
-      const data = await pdfExtract.extractBuffer(pdfBuffer, {})
-      
-      resumeText = data.pages
-        .map((page: any) => page.content.map((item: any) => item.str).join(' '))
-        .join('\n')
+      console.log(`[ANALYZE] Parsing PDF for ${user_id}...`)
+      try {
+        const { PDFExtract } = await import('pdf.js-extract')
+        const pdfExtract = new PDFExtract()
+        
+        const pdfBuffer = Buffer.from(pdfBase64, 'base64')
+        const data = await pdfExtract.extractBuffer(pdfBuffer, {})
+        
+        resumeText = data.pages
+          .map((page: any) => page.content.map((item: any) => item.str).join(' '))
+          .join('\n')
 
-      if (!resumeText || resumeText.trim().length < 50) {
-        throw new Error('Parsed text is too short or empty.')
+        if (!resumeText || resumeText.trim().length < 50) {
+          throw new Error('Parsed text is too short or empty.')
+        }
+      } catch (err: any) {
+        return NextResponse.json({ detail: `Failed to parse PDF resume: ${err.message}` }, { status: 400 })
       }
-    } catch (err: any) {
-      return NextResponse.json({ detail: `Failed to parse PDF resume: ${err.message}` }, { status: 400 })
     }
 
     // Call Groq LLM
