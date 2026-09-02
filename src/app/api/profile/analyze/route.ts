@@ -29,6 +29,15 @@ export async function POST(req: NextRequest) {
       pdfBase64 = resume.file_base64
     }
 
+    // Load existing profile to preserve user edits, but STRIP employment data to prevent context poisoning
+    let existingProfileJson = ""
+    const existingProfile = await db.collection('profiles').findOne({ user_id })
+    if (existingProfile) {
+      const { _id, user_id: _, employment_history, current_company, avoid_companies, ...profileData } = existingProfile
+      // We explicitly remove employment_history and current_company so the LLM is forced to re-extract them fresh from the PDF.
+      existingProfileJson = JSON.stringify(profileData)
+    }
+
       console.log(`[ANALYZE] Parsing PDF for ${user_id}...`)
       try {
         const { PDFExtract } = await import('pdf.js-extract')
@@ -116,7 +125,11 @@ Keyword rules:
 
 Incorporate custom user instructions only if they do not contradict the candidate data.`
 
-    const userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}\n\nOutput only valid JSON matching the schema.`
+    let userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}`
+    if (existingProfileJson) {
+      userMessage += `\n\nPreviously Saved Profile Data (use this as a baseline to preserve the user's edits, but ALWAYS extract missing companies/roles from the resume):\n${existingProfileJson}`
+    }
+    userMessage += `\n\nOutput only valid JSON matching the schema.`
 
     let resultText = '{}';
     try {
