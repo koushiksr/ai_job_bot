@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
     } catch (err: any) {
       console.warn(`[ANALYZE] pdf.js-extract failed (${err.message}), falling back to pdf-parse...`)
       try {
-        const pdfParse = (await import('pdf-parse')).default
+        const pdfParseModule: any = await import('pdf-parse')
+        const pdfParse = pdfParseModule.default || pdfParseModule
         const pdfBuffer = Buffer.from(pdfBase64, 'base64')
         const parsedData = await pdfParse(pdfBuffer)
         resumeText = parsedData.text
