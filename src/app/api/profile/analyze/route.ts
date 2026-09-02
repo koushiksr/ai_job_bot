@@ -86,9 +86,9 @@ Schema requirements:
 }
 
 Important Rules:
-1. "avoid_companies" MUST contain the names of ALL companies the candidate has currently or previously worked for, to prevent applying back to them.
+1. CRITICAL: "avoid_companies" MUST contain the names of ALL employers the candidate has currently or previously worked for. Scan the Experience section carefully! You MUST extract these to prevent the bot from applying back to them. (e.g. if they worked at Google and Meta, output ["Google", "Meta"]).
 2. "roles" MUST contain all possible job titles the candidate is suited for (e.g., ["Software Engineer", "Frontend Developer", "React Developer"]).
-3. "keywords" MUST be split into highly specific, single-term keywords to maximize search chances (e.g., instead of "MERN Stack", use ["MongoDB", "Express", "React", "Node.js"]).
+3. CRITICAL: Both "keywords" and "must_have_keywords" MUST be split into highly specific, SINGLE-WORD tech stack terms to maximize search chances. DO NOT group words! For example: Instead of "Forcepoint DLP", output ["Forcepoint", "DLP"]. Instead of "Email Security", output ["Email", "Security"].
 4. Incorporate any custom instructions provided by the user.`
 
     const userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}\n\nOutput only valid JSON matching the schema.`
