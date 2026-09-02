@@ -71,6 +71,8 @@ Schema requirements:
   "experience": 0, // Number in years (e.g. 3.5)
   "current_ctc": 0, // Suggest a reasonable current CTC in INR (e.g. 1200000) based on experience if not mentioned
   "expected_ctc": 0, // Suggest an expected CTC (+30% of current) if not mentioned
+  "current_company": "Name of the candidate's current or most recent company (e.g. LTIMINDTREE)",
+  "current_location": "Name of the candidate's current city (e.g. Bengaluru)",
   "search_url": "https://www.naukri.com/mnjuser/recommendedjobs",
   "skills": ["List", "Of", "Top", "Skills"],
   "job_filters": {
@@ -84,7 +86,12 @@ Schema requirements:
   "predefined_answers": {
     "What is your notice period?": "Immediate / 15 Days",
     "Are you on a career break?": "No",
-    "Are you willing to relocate to Bangalore?": "Yes"
+    "Are you willing to relocate to Bangalore?": "Yes",
+    "Current Company (payroll)?": "Extract their most recent company name here (e.g. LTIMINDTREE)",
+    "Total years of experience?": "Extract total years of experience as string (e.g. 4)",
+    "Current location?": "Extract current city",
+    "Preferred location?": "Extract preferred city or Remote",
+    "Any active backlogs?": "No"
   }
 }
 
