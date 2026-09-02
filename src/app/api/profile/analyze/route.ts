@@ -25,9 +25,8 @@ export async function POST(req: NextRequest) {
     const existingProfile = await db.collection('profiles').findOne({ user_id })
     if (existingProfile) {
       // If we are editing, we don't need to parse the PDF again! We just use their existing profile data.
-      delete existingProfile._id
-      delete existingProfile.user_id
-      existingProfileJson = JSON.stringify(existingProfile)
+      const { _id, user_id: _, ...profileData } = existingProfile
+      existingProfileJson = JSON.stringify(profileData)
       resumeText = `EXISTING PROFILE DATA:\n${existingProfileJson}`
       console.log(`[ANALYZE] Found existing profile for ${user_id}. Reusing JSON data instead of parsing PDF.`)
     } else {
@@ -43,7 +42,10 @@ export async function POST(req: NextRequest) {
 
       console.log(`[ANALYZE] Parsing new PDF for ${user_id}...`)
       try {
-        const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default || require('pdf-parse/lib/pdf-parse.js')
+        // @ts-ignore
+        const pdfParseModule = await import('pdf-parse')
+        const pdfParse = pdfParseModule.default || pdfParseModule
+        
         const pdfBuffer = Buffer.from(pdfBase64, 'base64')
         const data = await pdfParse(pdfBuffer)
         resumeText = data.text
