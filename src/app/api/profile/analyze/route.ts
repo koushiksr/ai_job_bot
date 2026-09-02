@@ -70,7 +70,13 @@ export async function POST(req: NextRequest) {
           throw new Error('Parsed text from fallback is too short or empty.')
         }
       } catch (fallbackErr: any) {
-        return NextResponse.json({ detail: `Failed to parse PDF resume with all parsers. Primary: ${err.message}, Fallback: ${fallbackErr.message}` }, { status: 400 })
+        let errorMsg = fallbackErr.message || String(fallbackErr);
+        if (errorMsg.includes('Invalid XRef stream header') || errorMsg.includes('Invalid PDF structure')) {
+          return NextResponse.json({ 
+            detail: `CRITICAL ERROR: The PDF file is completely corrupted, password-protected, or not a true PDF (e.g., a Word doc renamed to .pdf). Please open your resume in Google Docs/Word, go to File -> Download -> PDF Document, and upload that fresh copy.` 
+          }, { status: 400 })
+        }
+        return NextResponse.json({ detail: `Failed to parse PDF resume. The file may be corrupted. Primary: ${err.message}, Fallback: ${errorMsg}` }, { status: 400 })
       }
     }
 
