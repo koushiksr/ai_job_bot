@@ -16,28 +16,14 @@ export async function POST(req: NextRequest) {
     }
 
     let resumeText = ""
-    let existingProfileJson = ""
-
-    const db = await getDb()
-    if (!db) return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
-
-    // Check if a profile already exists in MongoDB
-    const existingProfile = await db.collection('profiles').findOne({ user_id })
-    if (existingProfile) {
-      // If we are editing, we don't need to parse the PDF again. Just use the cache.
-      const { _id, user_id: _, ...profileData } = existingProfile
-      existingProfileJson = JSON.stringify(profileData)
-      resumeText = `EXISTING PROFILE DATA:\n${existingProfileJson}`
-      console.log(`[ANALYZE] Found existing profile for ${user_id}. Reusing JSON data instead of parsing PDF.`)
-    } else {
-      let pdfBase64 = file_base64
-      if (!pdfBase64) {
-        const resume = await db.collection('resumes').findOne({ user_id })
-        if (!resume || !resume.file_base64) {
-          return NextResponse.json({ detail: `No resume found in database for user "${user_id}". Please upload one first.` }, { status: 404 })
-        }
-        pdfBase64 = resume.file_base64
+    let pdfBase64 = file_base64
+    if (!pdfBase64) {
+      const resume = await db.collection('resumes').findOne({ user_id })
+      if (!resume || !resume.file_base64) {
+        return NextResponse.json({ detail: `No resume found in database for user "${user_id}". Please upload one first.` }, { status: 404 })
       }
+      pdfBase64 = resume.file_base64
+    }
 
       console.log(`[ANALYZE] Parsing PDF for ${user_id}...`)
       try {
@@ -54,9 +40,8 @@ export async function POST(req: NextRequest) {
         if (!resumeText || resumeText.trim().length < 50) {
           throw new Error('Parsed text is too short or empty.')
         }
-      } catch (err: any) {
-        return NextResponse.json({ detail: `Failed to parse PDF resume: ${err.message}` }, { status: 400 })
-      }
+    } catch (err: any) {
+      return NextResponse.json({ detail: `Failed to parse PDF resume: ${err.message}` }, { status: 400 })
     }
 
     // Call Groq LLM
@@ -67,17 +52,15 @@ Return ONLY valid JSON. Do not include markdown, backticks, or reasoning.
 IMPORTANT EMPLOYMENT RULES:
 1. Extract EVERY employer from the candidate's work experience.
 2. For each employer extract:
-   - company
+   - company (normalized name)
+   - company_source (MUST be copied exactly from the WORK EXPERIENCE section)
    - job_title
    - start_date
    - end_date
    - is_current
-3. A company is current ONLY when its end date is "Present", "Current", or equivalent, OR the source explicitly identifies it as the current job.
-4. If no job says Present/Current, select the job with the latest end date.
+3. company_source MUST be exactly as written in the resume (Do not abbreviate or normalize).
+4. A company is current ONLY when its end date is "Present", "Current", or equivalent.
 5. NEVER determine the current company based on where words such as "currently" appear inside job descriptions.
-6. "avoid_companies" MUST contain ALL companies from employment_history.
-7. current_company MUST exactly match the company marked as is_current.
-8. Preserve company names exactly as written in the source.
 
 Schema:
 {
@@ -90,6 +73,7 @@ Schema:
   "employment_history": [
     {
       "company": "",
+      "company_source": "",
       "job_title": "",
       "start_date": "",
       "end_date": "",
@@ -198,21 +182,32 @@ Incorporate custom user instructions only if they do not contradict the candidat
     // ------------------------------------
 
     const employmentHistory = Array.isArray(resultJson.employment_history)
-      ? resultJson.employment_history
+      ? resultJson.employment_history.map((job: any) => ({
+          ...job,
+          company: job.company_source || job.company
+        }))
       : []
 
     const normalize = (value: string = '') => String(value).trim().toLowerCase()
 
-    // Find job explicitly marked as current
-    const currentJob = employmentHistory.find(
-      (job: any) =>
-        job.is_current === true ||
-        ['present', 'current', 'ongoing'].includes(normalize(job.end_date))
-    ) || employmentHistory[0]
+    function getCurrentJob(jobs: any[]) {
+      const presentJob = jobs.find(job => {
+        const endDate = normalize(job.end_date)
+        return ['present', 'current', 'ongoing', 'now'].includes(endDate)
+      })
+      if (presentJob) return presentJob
+
+      return [...jobs].sort((a, b) => {
+        const dateA = new Date(a.end_date || a.start_date || 0).getTime()
+        const dateB = new Date(b.end_date || b.start_date || 0).getTime()
+        return dateB - dateA
+      })[0]
+    }
+
+    const currentJob = getCurrentJob(employmentHistory)
 
     if (currentJob?.company) {
       resultJson.current_company = currentJob.company
-
       resultJson.predefined_answers = {
         ...(resultJson.predefined_answers || {}),
         'Current Company (payroll)?': currentJob.company
@@ -228,6 +223,9 @@ Incorporate custom user instructions only if they do not contradict the candidat
       ...(resultJson.job_filters || {}),
       avoid_companies: companies
     }
+
+    // Final overwrite to ensure the LLM's hallucinated is_current field doesn't break things
+    resultJson.employment_history = employmentHistory
 
     return NextResponse.json({
       status: 'success',
