@@ -54,7 +54,19 @@ export async function POST(req: NextRequest) {
           throw new Error('Parsed text is too short or empty.')
         }
     } catch (err: any) {
-      return NextResponse.json({ detail: `Failed to parse PDF resume: ${err.message}` }, { status: 400 })
+      console.warn(`[ANALYZE] pdf.js-extract failed (${err.message}), falling back to pdf-parse...`)
+      try {
+        const pdfParse = (await import('pdf-parse')).default
+        const pdfBuffer = Buffer.from(pdfBase64, 'base64')
+        const parsedData = await pdfParse(pdfBuffer)
+        resumeText = parsedData.text
+        
+        if (!resumeText || resumeText.trim().length < 50) {
+          throw new Error('Parsed text from fallback is too short or empty.')
+        }
+      } catch (fallbackErr: any) {
+        return NextResponse.json({ detail: `Failed to parse PDF resume with all parsers. Primary: ${err.message}, Fallback: ${fallbackErr.message}` }, { status: 400 })
+      }
     }
 
     // Call Groq LLM
