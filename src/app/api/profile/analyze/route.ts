@@ -17,6 +17,10 @@ export async function POST(req: NextRequest) {
 
     let resumeText = ""
     let pdfBase64 = file_base64
+    
+    const db = await getDb()
+    if (!db) return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
+
     if (!pdfBase64) {
       const resume = await db.collection('resumes').findOne({ user_id })
       if (!resume || !resume.file_base64) {
