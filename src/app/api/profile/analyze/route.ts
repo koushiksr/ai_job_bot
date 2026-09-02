@@ -87,7 +87,7 @@ Schema requirements:
 }
 
 Important Rules:
-1. CRITICAL: "avoid_companies" MUST contain the names of ALL employers the candidate has currently or previously worked for. Scan the Experience section carefully! You MUST extract these to prevent the bot from applying back to them. (e.g. if they worked at Google and Meta, output ["Google", "Meta"]).
+1. CRITICAL: "avoid_companies" MUST contain the names of ALL employers the candidate has currently or previously worked for. Scan the text carefully for labels like "COMPANY:", "Employer:", or "Organization:". For example, if you see "COMPANY: ACCENTURE", you MUST add "ACCENTURE" to this array.
 2. "roles" MUST contain all possible job titles the candidate is suited for (e.g., ["Software Engineer", "Frontend Developer", "React Developer"]).
 3. CRITICAL: Both "keywords" and "must_have_keywords" MUST be split into highly specific, SINGLE-WORD tech stack terms to maximize search chances. DO NOT group words! For example: Instead of "Forcepoint DLP", output ["Forcepoint", "DLP"]. Instead of "Email Security", output ["Email", "Security"].
 4. Incorporate any custom instructions provided by the user.`
@@ -101,7 +101,7 @@ Important Rules:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
         ],
-        model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
+        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
         temperature: 0.1,
         response_format: { type: 'json_object' }
       });
