@@ -65,14 +65,14 @@ Do NOT include any markdown formatting, backticks, or extra text. Output ONLY ra
 
 Schema requirements:
 {
+  "reasoning_chain": "ACT AS A REACT AGENT: First, list every single company the candidate worked for in chronological order, extracting the exact Start and End dates for each. Second, explicitly identify which company has an end date of 'Present', 'Current', or the most recent year (e.g. 2026). Third, evaluate all keywords. Do this before outputting any other fields.",
   "name": "Extract candidate name",
   "email": "Extract candidate email",
   "password": "", // Leave empty
   "experience": 0, // Number in years (e.g. 3.5)
   "current_ctc": 0, // Suggest a reasonable current CTC in INR (e.g. 1200000) based on experience if not mentioned
   "expected_ctc": 0, // Suggest an expected CTC (+30% of current) if not mentioned
-  "reasoning_current_company": "List each company and its employment dates. Identify the one with 'present' or the most recent year. Ignore the word 'Currently' if it appears in older job descriptions.",
-  "current_company": "Name of the candidate's current or most recent company",
+  "current_company": "Name of the candidate's current or most recent company (extracted from the reasoning_chain)",
   "current_location": "Name of the candidate's current city (e.g. Bengaluru)",
   "search_url": "https://www.naukri.com/mnjuser/recommendedjobs",
   "skills": ["List", "Of", "Top", "Skills"],
@@ -81,7 +81,6 @@ Schema requirements:
     "roles": ["List", "Of", "All", "Possible", "Target", "Job", "Roles"],
     "keywords": ["Extensively", "Split", "Individual", "Keywords", "To", "Maximize", "Search", "Matches"],
     "must_have_keywords": ["TopSkill1"],
-    "reasoning_employers": "Identify every employer/company mentioned in the resume here first.",
     "avoid_companies": ["List", "Of", "Every", "Current", "And", "Past", "Company", "They", "Worked", "For"]
   },
   "predefined_answers": {
@@ -97,17 +96,13 @@ Schema requirements:
 }
 
 Important Rules:
-1. CRITICAL: "avoid_companies" MUST contain the names of ALL employers the candidate has currently or previously worked for. Scan the text carefully for labels like "COMPANY:", "Employer:", or "Organization:". For example, if you see "COMPANY: ACCENTURE", you MUST add "ACCENTURE" to this array.
-2. CRITICAL: For "current_company", you MUST look at the employment dates (Month/Year). Find the job that says "Present", "Current", or has the most recent year (e.g., "2024", "2026"). Do not get confused by the order of jobs in the text.
+1. CRITICAL: "avoid_companies" MUST contain the names of ALL employers the candidate has currently or previously worked for. 
+2. CRITICAL: For "current_company", you MUST rely on the dates you extracted in your "reasoning_chain". Find the job that says "Present", "Current", or has the most recent year. Ignore stray words like "Currently" in older job descriptions.
 3. "roles" MUST contain all possible job titles the candidate is suited for (e.g., ["Software Engineer", "Frontend Developer", "React Developer"]).
-4. CRITICAL: Both "keywords" and "must_have_keywords" MUST be split into highly specific, SINGLE-WORD tech stack terms to maximize search chances. DO NOT group words! For example: Instead of "Forcepoint DLP", output ["Forcepoint", "DLP"]. Instead of "Email Security", output ["Email", "Security"].
+4. CRITICAL: Both "keywords" and "must_have_keywords" MUST be split into highly specific, SINGLE-WORD tech stack terms. DO NOT group words! For example: Instead of "Forcepoint DLP", output ["Forcepoint", "DLP"].
 5. Incorporate any custom instructions provided by the user.`
 
-    let userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}`
-    if (existingProfileJson) {
-      userMessage += `\n\nPreviously Saved Profile Data (use this as a baseline, but update it with the new instructions and make sure you extract missing companies/roles from the resume):\n${existingProfileJson}`
-    }
-    userMessage += `\n\nOutput only valid JSON matching the schema.`
+    const userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}\n\nOutput only valid JSON matching the schema.`
 
     let resultText = '{}';
     try {
