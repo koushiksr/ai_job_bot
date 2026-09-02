@@ -45,6 +45,9 @@ export async function GET(req: NextRequest) {
       expected_ctc: profile.expected_ctc || 0,
       search_url: profile.search_url || '',
       skills: profile.skills || [],
+      current_company: profile.current_company || '',
+      current_location: profile.current_location || '',
+      employment_history: profile.employment_history || [],
       job_filters: profile.job_filters,
       predefined_answers: profile.predefined_answers || {},
       resume_filename: profile.resume_filename || `${userId}_Resume.pdf`,
@@ -97,6 +100,9 @@ export async function POST(req: NextRequest) {
       job_filters: body.job_filters !== undefined ? body.job_filters : (parsedRaw.job_filters || existing?.job_filters || {}),
       predefined_answers: body.predefined_answers !== undefined ? body.predefined_answers : (parsedRaw.predefined_answers || existing?.predefined_answers || {}),
       skills: body.skills !== undefined ? body.skills : (parsedRaw.skills || existing?.skills || []),
+      current_company: body.current_company !== undefined ? body.current_company : (parsedRaw.current_company || existing?.current_company || ''),
+      current_location: body.current_location !== undefined ? body.current_location : (parsedRaw.current_location || existing?.current_location || ''),
+      employment_history: body.employment_history !== undefined ? body.employment_history : (parsedRaw.employment_history || existing?.employment_history || []),
       resume_filename: body.resume_filename || parsedRaw.resume_filename || existing?.resume_filename || `${userId}_Resume.pdf`,
       updated_at: now
     }
