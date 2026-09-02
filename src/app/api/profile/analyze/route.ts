@@ -42,8 +42,7 @@ export async function POST(req: NextRequest) {
 
       console.log(`[ANALYZE] Parsing new PDF for ${user_id}...`)
       try {
-        // @ts-ignore
-        const pdfParseModule = await import('pdf-parse')
+        const pdfParseModule = (await import('pdf-parse')) as any
         const pdfParse = pdfParseModule.default || pdfParseModule
         
         const pdfBuffer = Buffer.from(pdfBase64, 'base64')
