@@ -60,47 +60,73 @@ export async function POST(req: NextRequest) {
     }
 
     // Call Groq LLM
-    const systemPrompt = `You are an expert technical recruiter AI. Your job is to extract candidate information from their resume text and output a strictly valid JSON object matching our exact schema.
-Do NOT include any markdown formatting, backticks, or extra text. Output ONLY raw JSON.
+    const systemPrompt = `You are an expert technical recruiter AI. Your job is to extract candidate information from their resume text.
 
-Schema requirements:
+Return ONLY valid JSON. Do not include markdown, backticks, or reasoning.
+
+IMPORTANT EMPLOYMENT RULES:
+1. Extract EVERY employer from the candidate's work experience.
+2. For each employer extract:
+   - company
+   - job_title
+   - start_date
+   - end_date
+   - is_current
+3. A company is current ONLY when its end date is "Present", "Current", or equivalent, OR the source explicitly identifies it as the current job.
+4. If no job says Present/Current, select the job with the latest end date.
+5. NEVER determine the current company based on where words such as "currently" appear inside job descriptions.
+6. "avoid_companies" MUST contain ALL companies from employment_history.
+7. current_company MUST exactly match the company marked as is_current.
+8. Preserve company names exactly as written in the source.
+
+Schema:
 {
-  "reasoning_chain": "ACT AS A REACT AGENT: First, list every single company the candidate worked for in chronological order, extracting the exact Start and End dates for each. Second, explicitly identify which company has an end date of 'Present', 'Current', or the most recent year (e.g. 2026). Third, evaluate all keywords. Do this before outputting any other fields.",
-  "name": "Extract candidate name",
-  "email": "Extract candidate email",
-  "password": "", // Leave empty
-  "experience": 0, // Number in years (e.g. 3.5)
-  "current_ctc": 0, // Suggest a reasonable current CTC in INR (e.g. 1200000) based on experience if not mentioned
-  "expected_ctc": 0, // Suggest an expected CTC (+30% of current) if not mentioned
-  "current_company": "Name of the candidate's current or most recent company (extracted from the reasoning_chain)",
-  "current_location": "Name of the candidate's current city (e.g. Bengaluru)",
+  "name": "",
+  "email": "",
+  "password": "",
+  "experience": 0,
+  "current_ctc": 0,
+  "expected_ctc": 0,
+  "employment_history": [
+    {
+      "company": "",
+      "job_title": "",
+      "start_date": "",
+      "end_date": "",
+      "is_current": false
+    }
+  ],
+  "current_company": "",
+  "current_location": "",
   "search_url": "https://www.naukri.com/mnjuser/recommendedjobs",
-  "skills": ["List", "Of", "Top", "Skills"],
+  "skills": [],
   "job_filters": {
-    "location": ["Bangalore", "Remote"],
-    "roles": ["List", "Of", "All", "Possible", "Target", "Job", "Roles"],
-    "keywords": ["Extensively", "Split", "Individual", "Keywords", "To", "Maximize", "Search", "Matches"],
-    "must_have_keywords": ["TopSkill1"],
-    "avoid_companies": ["List", "Of", "Every", "Current", "And", "Past", "Company", "They", "Worked", "For"]
+    "location": [],
+    "roles": [],
+    "keywords": [],
+    "must_have_keywords": [],
+    "avoid_companies": []
   },
   "predefined_answers": {
-    "What is your notice period?": "Immediate / 15 Days",
+    "What is your notice period?": "",
     "Are you on a career break?": "No",
-    "Are you willing to relocate to Bangalore?": "Yes",
-    "Current Company (payroll)?": "Extract their most recent company name here",
-    "Total years of experience?": "Extract total years of experience as string (e.g. 4)",
-    "Current location?": "Extract current city",
-    "Preferred location?": "Extract preferred city or Remote",
+    "Are you willing to relocate to Bangalore?": "",
+    "Current Company (payroll)?": "",
+    "Total years of experience?": "",
+    "Current location?": "",
+    "Preferred location?": "",
     "Any active backlogs?": "No"
   }
 }
 
-Important Rules:
-1. CRITICAL: "avoid_companies" MUST contain the names of ALL employers the candidate has currently or previously worked for. 
-2. CRITICAL: For "current_company", you MUST rely on the dates you extracted in your "reasoning_chain". Find the job that says "Present", "Current", or has the most recent year. Ignore stray words like "Currently" in older job descriptions.
-3. "roles" MUST contain all possible job titles the candidate is suited for (e.g., ["Software Engineer", "Frontend Developer", "React Developer"]).
-4. CRITICAL: Both "keywords" and "must_have_keywords" MUST be split into highly specific, SINGLE-WORD tech stack terms. DO NOT group words! For example: Instead of "Forcepoint DLP", output ["Forcepoint", "DLP"].
-5. Incorporate any custom instructions provided by the user.`
+Keyword rules:
+- keywords must contain individual searchable technology terms.
+- Do not invent skills not supported by the source.
+- roles should contain realistic job titles matching the candidate's experience.
+- avoid_companies must contain every unique employer.
+- predefined_answers["Current Company (payroll)?"] must equal current_company.
+
+Incorporate custom user instructions only if they do not contradict the candidate data.`
 
     const userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}\n\nOutput only valid JSON matching the schema.`
 
@@ -159,13 +185,48 @@ Important Rules:
       resultText = openRouterData.choices?.[0]?.message?.content || '{}';
     }
     
-    let resultJson = {}
+    let resultJson: any = {}
     try {
       resultJson = JSON.parse(resultText)
     } catch (e) {
-      // Cleanup backticks if LLM disobeyed
-      const cleaned = resultText.replace(/```json/g, '').replace(/```/g, '').trim()
+      const cleaned = resultText.replace(/```json/gi, '').replace(/```/g, '').trim()
       resultJson = JSON.parse(cleaned)
+    }
+
+    // ------------------------------------
+    // Deterministic employment validation
+    // ------------------------------------
+
+    const employmentHistory = Array.isArray(resultJson.employment_history)
+      ? resultJson.employment_history
+      : []
+
+    const normalize = (value: string = '') => String(value).trim().toLowerCase()
+
+    // Find job explicitly marked as current
+    const currentJob = employmentHistory.find(
+      (job: any) =>
+        job.is_current === true ||
+        ['present', 'current', 'ongoing'].includes(normalize(job.end_date))
+    ) || employmentHistory[0]
+
+    if (currentJob?.company) {
+      resultJson.current_company = currentJob.company
+
+      resultJson.predefined_answers = {
+        ...(resultJson.predefined_answers || {}),
+        'Current Company (payroll)?': currentJob.company
+      }
+    }
+
+    // Build avoid_companies directly from employment history
+    const companies = [
+      ...new Set(employmentHistory.map((job: any) => job.company).filter(Boolean))
+    ] as string[]
+
+    resultJson.job_filters = {
+      ...(resultJson.job_filters || {}),
+      avoid_companies: companies
     }
 
     return NextResponse.json({
