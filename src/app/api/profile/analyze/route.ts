@@ -97,9 +97,10 @@ Schema requirements:
 
 Important Rules:
 1. CRITICAL: "avoid_companies" MUST contain the names of ALL employers the candidate has currently or previously worked for. Scan the text carefully for labels like "COMPANY:", "Employer:", or "Organization:". For example, if you see "COMPANY: ACCENTURE", you MUST add "ACCENTURE" to this array.
-2. "roles" MUST contain all possible job titles the candidate is suited for (e.g., ["Software Engineer", "Frontend Developer", "React Developer"]).
-3. CRITICAL: Both "keywords" and "must_have_keywords" MUST be split into highly specific, SINGLE-WORD tech stack terms to maximize search chances. DO NOT group words! For example: Instead of "Forcepoint DLP", output ["Forcepoint", "DLP"]. Instead of "Email Security", output ["Email", "Security"].
-4. Incorporate any custom instructions provided by the user.`
+2. CRITICAL: For "current_company", you MUST look at the employment dates (Month/Year). Find the job that says "Present", "Current", or has the most recent year (e.g., "2024", "2026"). Do not get confused by the order of jobs in the text.
+3. "roles" MUST contain all possible job titles the candidate is suited for (e.g., ["Software Engineer", "Frontend Developer", "React Developer"]).
+4. CRITICAL: Both "keywords" and "must_have_keywords" MUST be split into highly specific, SINGLE-WORD tech stack terms to maximize search chances. DO NOT group words! For example: Instead of "Forcepoint DLP", output ["Forcepoint", "DLP"]. Instead of "Email Security", output ["Email", "Security"].
+5. Incorporate any custom instructions provided by the user.`
 
     let userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}`
     if (existingProfileJson) {
