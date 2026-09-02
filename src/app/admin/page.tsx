@@ -298,8 +298,16 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="text-xs text-slate-400">
-                Auto-scheduled runs: <span className="text-emerald-400 font-semibold">Daily at 06:00 AM & 08:00 AM IST</span>
+              <div className="flex items-center gap-4">
+                <div className="text-xs text-slate-400 hidden lg:block">
+                  Auto-scheduled runs: <span className="text-emerald-400 font-semibold">Daily at 06:00 AM & 08:00 AM IST</span>
+                </div>
+                <button
+                  onClick={() => setEditingUser({ isNew: true, user_id: '' })}
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-500/25"
+                >
+                  <User className="w-4 h-4" /> Create Candidate
+                </button>
               </div>
             </div>
 
@@ -479,7 +487,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-2">
                   <Edit className="w-4 h-4 text-indigo-400" />
                   <h3 className="font-bold text-sm text-white">
-                    Edit Candidate Profile — {editingUser.name || editingUser.user_id}
+                    {editingUser.isNew ? 'Create New Candidate Profile' : `Edit Candidate Profile — ${editingUser.name || editingUser.user_id}`}
                   </h3>
                 </div>
                 <button
@@ -493,9 +501,11 @@ export default function AdminDashboard() {
               <div className="p-6 flex-1 overflow-y-auto">
                 <CandidateProfileEditor
                   userId={editingUser.user_id}
+                  isNew={editingUser.isNew}
                   isAdmin={true}
                   onSaveSuccess={() => {
                     fetchOverviewAndUsers()
+                    setEditingUser(null)
                   }}
                 />
               </div>

@@ -29,6 +29,13 @@ export async function GET(req: NextRequest) {
       return new NextResponse(null, { status: 304 })
     }
 
+    if (!profile.job_filters) {
+      profile.job_filters = {}
+    }
+    if (!profile.job_filters.avoid_companies) {
+      profile.job_filters.avoid_companies = []
+    }
+
     const responseData = {
       user_id: profile.user_id,
       name: profile.name || '',
@@ -38,7 +45,7 @@ export async function GET(req: NextRequest) {
       expected_ctc: profile.expected_ctc || 0,
       search_url: profile.search_url || '',
       skills: profile.skills || [],
-      job_filters: profile.job_filters || {},
+      job_filters: profile.job_filters,
       predefined_answers: profile.predefined_answers || {},
       resume_filename: profile.resume_filename || `${userId}_Resume.pdf`,
       enabled_for_daily_run: profile.enabled_for_daily_run !== false,
