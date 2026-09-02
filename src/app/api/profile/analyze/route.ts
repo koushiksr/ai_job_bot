@@ -54,13 +54,17 @@ export async function POST(req: NextRequest) {
           throw new Error('Parsed text is too short or empty.')
         }
     } catch (err: any) {
-      console.warn(`[ANALYZE] pdf.js-extract failed (${err.message}), falling back to pdf-parse...`)
+      console.warn(`[ANALYZE] pdf.js-extract failed (${err.message}), falling back to pdf2json...`)
       try {
-        const pdfParseModule: any = await import('pdf-parse')
-        const pdfParse = pdfParseModule.default || pdfParseModule
+        const PDFParser = (await import('pdf2json')).default
+        const pdfParser = new (PDFParser as any)(null, 1);
         const pdfBuffer = Buffer.from(pdfBase64, 'base64')
-        const parsedData = await pdfParse(pdfBuffer)
-        resumeText = parsedData.text
+        
+        resumeText = await new Promise((resolve, reject) => {
+          pdfParser.on("pdfParser_dataError", (errData: any) => reject(new Error(errData.parserError)));
+          pdfParser.on("pdfParser_dataReady", () => resolve(pdfParser.getRawTextContent()));
+          pdfParser.parseBuffer(pdfBuffer);
+        });
         
         if (!resumeText || resumeText.trim().length < 50) {
           throw new Error('Parsed text from fallback is too short or empty.')
