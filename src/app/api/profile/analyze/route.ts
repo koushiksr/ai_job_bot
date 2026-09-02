@@ -40,15 +40,18 @@ export async function POST(req: NextRequest) {
 
     console.log(`[ANALYZE] Parsing PDF for ${user_id}...`)
     try {
-      const pdfParseModule = (await import('pdf-parse')) as any
-      const pdfParse = pdfParseModule.default || pdfParseModule
+      const { PDFExtract } = await import('pdf.js-extract')
+      const pdfExtract = new PDFExtract()
       
       const pdfBuffer = Buffer.from(pdfBase64, 'base64')
-      const data = await pdfParse(pdfBuffer)
-      resumeText = data.text
+      const data = await pdfExtract.extractBuffer(pdfBuffer, {})
+      
+      resumeText = data.pages
+        .map((page: any) => page.content.map((item: any) => item.str).join(' '))
+        .join('\n')
 
       if (!resumeText || resumeText.trim().length < 50) {
-        throw new Error('Parsed text is too short or empty. Ensure this is a valid text-based PDF.')
+        throw new Error('Parsed text is too short or empty.')
       }
     } catch (err: any) {
       return NextResponse.json({ detail: `Failed to parse PDF resume: ${err.message}` }, { status: 400 })
