@@ -73,7 +73,8 @@ Schema requirements:
   "skills": ["List", "Of", "Top", "Skills"],
   "job_filters": {
     "location": ["Bangalore", "Remote"],
-    "keywords": ["Skill1", "Skill2"],
+    "roles": ["List", "Of", "All", "Possible", "Target", "Job", "Roles"],
+    "keywords": ["Extensively", "Split", "Individual", "Keywords", "To", "Maximize", "Search", "Matches"],
     "must_have_keywords": ["TopSkill1"],
     "avoid_companies": ["List", "Of", "Every", "Current", "And", "Past", "Company", "They", "Worked", "For"]
   },
@@ -86,7 +87,9 @@ Schema requirements:
 
 Important Rules:
 1. "avoid_companies" MUST contain the names of ALL companies the candidate has currently or previously worked for, to prevent applying back to them.
-2. Incorporate any custom instructions provided by the user.`
+2. "roles" MUST contain all possible job titles the candidate is suited for (e.g., ["Software Engineer", "Frontend Developer", "React Developer"]).
+3. "keywords" MUST be split into highly specific, single-term keywords to maximize search chances (e.g., instead of "MERN Stack", use ["MongoDB", "Express", "React", "Node.js"]).
+4. Incorporate any custom instructions provided by the user.`
 
     const userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}\n\nOutput only valid JSON matching the schema.`
 

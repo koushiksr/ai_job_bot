@@ -142,10 +142,7 @@ export default function CandidateProfileEditor({
       return
     }
     
-    if (!aiPrompt.trim()) {
-      setJsonError('Please enter your Target Job Title and Instructions for the AI.')
-      return
-    }
+
     
     setIsAnalyzing(true)
     setJsonError('')
@@ -309,7 +306,7 @@ export default function CandidateProfileEditor({
           <div className="relative">
             {showAiPrompt && (
               <div className="absolute bottom-full right-0 mb-3 w-80 p-4 bg-slate-900 border border-indigo-500/50 rounded-xl shadow-2xl z-10 animate-fadeIn">
-                <label className="block text-xs font-bold text-slate-300 mb-1">Target Job Title & Instructions (Required)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Target Job Title & Instructions (Optional)</label>
                 <p className="text-[10px] text-slate-400 mb-2 leading-relaxed">
                   <strong>Example:</strong> "Target Job: Senior Python Developer. I am looking for remote roles only. My expected CTC is 18 LPA. Please do not apply to any crypto or Web3 companies. I have a 30-day notice period."
                 </p>
