@@ -65,15 +65,13 @@ Return ONLY valid JSON. Do not include markdown, backticks, or reasoning.
 IMPORTANT EMPLOYMENT RULES:
 1. Extract EVERY employer from the candidate's work experience.
 2. For each employer extract:
-   - company (normalized name)
-   - company_source (MUST be copied exactly from the WORK EXPERIENCE section)
+   - company (Clean, short normalized name ONLY, e.g., "Capgemini")
    - job_title
    - start_date
    - end_date
    - is_current
-3. company_source MUST be exactly as written in the resume (Do not abbreviate or normalize).
-4. A company is current ONLY when its end date is "Present", "Current", or equivalent.
-5. NEVER determine the current company based on where words such as "currently" appear inside job descriptions.
+3. A company is current ONLY when its end date is "Present", "Current", or equivalent.
+4. NEVER determine the current company based on where words such as "currently" appear inside job descriptions.
 
 Schema:
 {
@@ -86,7 +84,6 @@ Schema:
   "employment_history": [
     {
       "company": "",
-      "company_source": "",
       "job_title": "",
       "start_date": "",
       "end_date": "",
@@ -199,10 +196,7 @@ Incorporate custom user instructions only if they do not contradict the candidat
     // ------------------------------------
 
     const employmentHistory = Array.isArray(resultJson.employment_history)
-      ? resultJson.employment_history.map((job: any) => ({
-          ...job,
-          company: job.company_source || job.company
-        }))
+      ? resultJson.employment_history
       : []
 
     const normalize = (value: string = '') => String(value).trim().toLowerCase()
