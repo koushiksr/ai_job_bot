@@ -21,40 +21,37 @@ export async function POST(req: NextRequest) {
     const db = await getDb()
     if (!db) return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
 
-    // Check if a profile already exists in MongoDB
+    // Fetch existing profile just to append it as context
     const existingProfile = await db.collection('profiles').findOne({ user_id })
     if (existingProfile) {
-      // If we are editing, we don't need to parse the PDF again! We just use their existing profile data.
       const { _id, user_id: _, ...profileData } = existingProfile
       existingProfileJson = JSON.stringify(profileData)
-      resumeText = `EXISTING PROFILE DATA:\n${existingProfileJson}`
-      console.log(`[ANALYZE] Found existing profile for ${user_id}. Reusing JSON data instead of parsing PDF.`)
-    } else {
-      // If no profile exists, they are uploading a new resume. We parse the PDF using lightweight pdf-parse.
-      let pdfBase64 = file_base64
-      if (!pdfBase64) {
-        const resume = await db.collection('resumes').findOne({ user_id })
-        if (!resume || !resume.file_base64) {
-          return NextResponse.json({ detail: `No resume found in database for user "${user_id}". Please upload one first.` }, { status: 404 })
-        }
-        pdfBase64 = resume.file_base64
-      }
+    }
 
-      console.log(`[ANALYZE] Parsing new PDF for ${user_id}...`)
-      try {
-        const pdfParseModule = (await import('pdf-parse')) as any
-        const pdfParse = pdfParseModule.default || pdfParseModule
-        
-        const pdfBuffer = Buffer.from(pdfBase64, 'base64')
-        const data = await pdfParse(pdfBuffer)
-        resumeText = data.text
-
-        if (!resumeText || resumeText.trim().length < 50) {
-          throw new Error('Parsed text is too short or empty. Ensure this is a valid text-based PDF.')
-        }
-      } catch (err: any) {
-        return NextResponse.json({ detail: `Failed to parse PDF resume: ${err.message}` }, { status: 400 })
+    // ALWAYS parse the PDF so the LLM can extract new things (like missing companies)
+    let pdfBase64 = file_base64
+    if (!pdfBase64) {
+      const resume = await db.collection('resumes').findOne({ user_id })
+      if (!resume || !resume.file_base64) {
+        return NextResponse.json({ detail: `No resume found in database for user "${user_id}". Please upload one first.` }, { status: 404 })
       }
+      pdfBase64 = resume.file_base64
+    }
+
+    console.log(`[ANALYZE] Parsing PDF for ${user_id}...`)
+    try {
+      const pdfParseModule = (await import('pdf-parse')) as any
+      const pdfParse = pdfParseModule.default || pdfParseModule
+      
+      const pdfBuffer = Buffer.from(pdfBase64, 'base64')
+      const data = await pdfParse(pdfBuffer)
+      resumeText = data.text
+
+      if (!resumeText || resumeText.trim().length < 50) {
+        throw new Error('Parsed text is too short or empty. Ensure this is a valid text-based PDF.')
+      }
+    } catch (err: any) {
+      return NextResponse.json({ detail: `Failed to parse PDF resume: ${err.message}` }, { status: 400 })
     }
 
     // Call Groq LLM
@@ -92,7 +89,11 @@ Important Rules:
 3. CRITICAL: Both "keywords" and "must_have_keywords" MUST be split into highly specific, SINGLE-WORD tech stack terms to maximize search chances. DO NOT group words! For example: Instead of "Forcepoint DLP", output ["Forcepoint", "DLP"]. Instead of "Email Security", output ["Email", "Security"].
 4. Incorporate any custom instructions provided by the user.`
 
-    const userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}\n\nOutput only valid JSON matching the schema.`
+    let userMessage = `Candidate Resume Text:\n${resumeText}\n\nCustom User Instructions:\n${custom_prompt || "No custom instructions."}`
+    if (existingProfileJson) {
+      userMessage += `\n\nPreviously Saved Profile Data (use this as a baseline, but update it with the new instructions and make sure you extract missing companies/roles from the resume):\n${existingProfileJson}`
+    }
+    userMessage += `\n\nOutput only valid JSON matching the schema.`
 
     let resultText = '{}';
     try {
