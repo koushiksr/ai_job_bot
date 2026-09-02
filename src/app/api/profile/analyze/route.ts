@@ -76,6 +76,7 @@ Schema requirements:
     "roles": ["List", "Of", "All", "Possible", "Target", "Job", "Roles"],
     "keywords": ["Extensively", "Split", "Individual", "Keywords", "To", "Maximize", "Search", "Matches"],
     "must_have_keywords": ["TopSkill1"],
+    "reasoning_employers": "Identify every employer/company mentioned in the resume here first.",
     "avoid_companies": ["List", "Of", "Every", "Current", "And", "Past", "Company", "They", "Worked", "For"]
   },
   "predefined_answers": {
