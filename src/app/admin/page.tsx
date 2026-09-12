@@ -234,24 +234,24 @@ export default function AdminDashboard() {
   )
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
       {/* Admin Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#0c1017]/90 backdrop-blur-xl border-b border-slate-800/80 px-6 py-4">
+      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 font-bold text-white text-base">
-              <Shield className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-medium text-white text-sm">
+              <Shield className="w-4 h-4 text-zinc-300" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-white">
+                <h1 className="text-sm font-semibold text-white">
                   Multi-Candidate Administration
                 </h1>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-semibold uppercase">
+                <span className="text-[9px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono uppercase">
                   Central Hub
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-mono">
+              <p className="text-[11px] text-zinc-500 font-mono">
                 MongoDB Atlas Cloud Synchronized
               </p>
             </div>
@@ -260,13 +260,13 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             <button
               onClick={fetchOverviewAndUsers}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 transition-all text-slate-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300"
             >
               <RefreshCw className="w-3.5 h-3.5" /> Refresh
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-rose-500/10 hover:text-rose-400 border border-slate-800 transition-all text-slate-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white"
             >
               <LogOut className="w-3.5 h-3.5" /> Log Out
             </button>
@@ -278,129 +278,129 @@ export default function AdminDashboard() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
         {/* 5 Clean Overview Cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="p-5 rounded-2xl bg-[#0c1017] border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5" /> Candidates
+          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-zinc-400" /> Candidates
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-medium">
+              <span className="text-[10px] font-mono text-zinc-500">
                 {overviewMetrics.scheduled_profiles_active} Active
               </span>
             </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {overviewMetrics.total_profiles}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Configured candidate profiles</p>
+            <p className="text-[11px] text-zinc-500">Configured profiles</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#0c1017] border border-purple-500/20 shadow-lg shadow-purple-500/5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Crown className="w-3.5 h-3.5" /> VIP Privilege
+          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <Crown className="w-3.5 h-3.5 text-zinc-400" /> VIP Privilege
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 font-medium">
+              <span className="text-[10px] font-mono text-zinc-500">
                 Free Pass
               </span>
             </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {overviewMetrics.vip_profiles_count}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Candidates with free lifetime bypass</p>
+            <p className="text-[11px] text-zinc-500">Lifetime bypass</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#0c1017] border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" /> Today Applied
+          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-zinc-400" /> Today Applied
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-medium">
-                Last 24h
+              <span className="text-[10px] font-mono text-zinc-500">
+                24h
               </span>
             </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {overviewMetrics.applied_today}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Applications submitted today</p>
+            <p className="text-[11px] text-zinc-500">Submitted today</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#0c1017] border border-blue-500/20 shadow-lg shadow-blue-500/5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" /> This Week
+          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-zinc-400" /> This Week
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20 font-medium">
-                Last 7 Days
+              <span className="text-[10px] font-mono text-zinc-500">
+                7d
               </span>
             </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {overviewMetrics.applied_this_week}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Applications this week</p>
+            <p className="text-[11px] text-zinc-500">Submitted this week</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#0c1017] border border-amber-500/20 shadow-lg shadow-amber-500/5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Total Applied
+          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> Total Applied
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-medium">
+              <span className="text-[10px] font-mono text-zinc-500">
                 All-Time
               </span>
             </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {overviewMetrics.total_applied}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Lifetime applications</p>
+            <p className="text-[11px] text-zinc-500">Lifetime verified</p>
           </div>
         </section>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-3 flex-wrap">
+        <div className="flex items-center gap-2 border-b border-zinc-900 pb-3 flex-wrap">
           <button
             onClick={() => setActiveAdminTab('candidates')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
               activeAdminTab === 'candidates'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <Users className="w-4 h-4" /> Candidate Profiles ({filteredUsers.length})
+            <Users className="w-3.5 h-3.5" /> Candidate Profiles ({filteredUsers.length})
           </button>
           <button
             onClick={() => {
               setActiveAdminTab('payments')
               fetchPayments()
             }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
               activeAdminTab === 'payments'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <CreditCard className="w-4 h-4" /> Payments & Subscriptions ({paymentsList.length})
+            <CreditCard className="w-3.5 h-3.5" /> Payments ({paymentsList.length})
           </button>
           <button
             onClick={() => {
               setActiveAdminTab('enterprise_leads')
               fetchEnterpriseLeads()
             }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
               activeAdminTab === 'enterprise_leads'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <Building2 className="w-4 h-4" /> Enterprise Leads ({enterpriseLeads.length})
+            <Building2 className="w-3.5 h-3.5" /> Enterprise Leads ({enterpriseLeads.length})
           </button>
           <button
             onClick={() => setActiveAdminTab('logs')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
               activeAdminTab === 'logs'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <FileText className="w-4 h-4" /> Application Activity Logs
+            <History className="w-3.5 h-3.5" /> System Logs & Activity
           </button>
         </div>
 
@@ -408,7 +408,7 @@ export default function AdminDashboard() {
         {activeAdminTab === 'candidates' && (
           <div className="space-y-4">
             {/* Search Header */}
-            <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="relative w-full md:w-96">
                 <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input
@@ -434,7 +434,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Candidates Table */}
-            <div className="rounded-2xl bg-[#0c1017] border border-slate-800 overflow-hidden shadow-xl">
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-300">
                   <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
@@ -575,7 +575,7 @@ export default function AdminDashboard() {
           <div className="space-y-6">
             {/* Quick Metrics Bar */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Transactions</div>
                   <div className="text-2xl font-extrabold text-white mt-1">{paymentsList.length}</div>
@@ -584,7 +584,7 @@ export default function AdminDashboard() {
                   <CreditCard className="w-5 h-5" />
                 </div>
               </div>
-              <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Paid Subscribers</div>
                   <div className="text-2xl font-extrabold text-emerald-400 mt-1">
@@ -595,7 +595,7 @@ export default function AdminDashboard() {
                   <Sparkles className="w-5 h-5" />
                 </div>
               </div>
-              <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">VIP Free Passes</div>
                   <div className="text-2xl font-extrabold text-amber-400 mt-1">{overviewMetrics.vip_profiles_count}</div>
@@ -607,7 +607,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Payments Table */}
-            <div className="rounded-2xl bg-[#0c1017] border border-slate-800 overflow-hidden shadow-xl">
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
               <div className="px-5 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm text-white flex items-center gap-2">
@@ -706,7 +706,7 @@ export default function AdminDashboard() {
         {/* TAB: ENTERPRISE & BULK LEADS */}
         {activeAdminTab === 'enterprise_leads' && (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-indigo-400" />
@@ -725,7 +725,7 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <div className="rounded-2xl bg-[#0c1017] border border-slate-800 overflow-hidden shadow-xl">
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-300">
                   <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
@@ -827,7 +827,7 @@ export default function AdminDashboard() {
         {/* TAB 3: SYSTEM LOGS & ACTIVITY */}
         {activeAdminTab === 'logs' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-2xl bg-[#0c1017] border border-slate-800 p-4 space-y-2 h-[600px] overflow-y-auto">
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 p-4 space-y-2 h-[600px] overflow-y-auto">
               <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
                 Select Candidate Activity
               </h3>

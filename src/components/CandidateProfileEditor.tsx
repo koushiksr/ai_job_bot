@@ -264,47 +264,47 @@ export default function CandidateProfileEditor({
   return (
     <div className="space-y-6">
       {/* Header status */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-md">
-            <FileJson className="w-3.5 h-3.5" /> Advanced Profile Editor
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 border border-zinc-800 text-zinc-200">
+            <FileJson className="w-3.5 h-3.5 text-zinc-400" /> Advanced Profile Editor
           </div>
         </div>
 
         {saveSuccess && (
-          <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-xl border border-emerald-500/30 font-medium animate-fadeIn">
+          <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-zinc-950 px-3 py-1.5 rounded-lg border border-zinc-800 font-medium">
             <CheckCircle2 className="w-3.5 h-3.5" /> {saveSuccess}
           </div>
         )}
       </div>
 
       {isNew && (
-        <div className="p-5 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-3 shadow-xl">
-          <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
-            <User className="w-4 h-4" /> New Candidate Identity
+        <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
+          <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+            <User className="w-4 h-4 text-zinc-400" /> New Candidate Identity
           </h3>
           <div>
-            <label className="block text-slate-300 font-semibold mb-1.5">Candidate Unique ID (e.g. candidate4_john_doe)</label>
+            <label className="block text-zinc-400 text-xs font-medium mb-1">Candidate Unique ID (e.g. candidate4_john_doe)</label>
             <input
               type="text"
               value={newUserId}
               onChange={e => setNewUserId(e.target.value)}
               required
               placeholder="No spaces, use underscores"
-              className="w-full bg-slate-950 border border-blue-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-blue-500 font-mono text-sm"
+              className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-zinc-500 font-mono text-xs"
             />
           </div>
         </div>
       )}
 
       {/* RAW JSON EDITOR VIEW */}
-      <div className="p-5 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
+      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-mono text-slate-400 font-bold uppercase tracking-wider">
+          <span className="text-xs font-mono text-zinc-400 font-medium uppercase tracking-wider">
             Candidate Profile Document (JSON)
           </span>
           {jsonError && (
-            <span className="text-xs text-rose-400 font-semibold">{jsonError}</span>
+            <span className="text-xs text-red-400 font-medium">{jsonError}</span>
           )}
         </div>
 
@@ -315,28 +315,28 @@ export default function CandidateProfileEditor({
             setRawJsonStr(e.target.value)
             setJsonError('')
           }}
-          className="w-full bg-[#050811] border border-slate-800 rounded-xl p-5 font-mono text-sm text-sky-300 focus:outline-none focus:border-blue-500 leading-relaxed shadow-inner"
+          className="w-full bg-black border border-zinc-800 rounded-xl p-4 font-mono text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 leading-relaxed"
           spellCheck={false}
         />
 
         <div className="flex justify-end gap-3">
           <div className="relative">
             {showAiPrompt && (
-              <div className="absolute bottom-full right-0 mb-3 w-80 p-4 bg-slate-900 border border-blue-500/50 rounded-xl shadow-2xl z-10 animate-fadeIn">
-                <label className="block text-xs font-bold text-slate-300 mb-1">Target Job Title & Instructions (Optional)</label>
-                <p className="text-[10px] text-slate-400 mb-2 leading-relaxed">
-                  <strong>Example:</strong> "Target Job: Senior Python Developer. I am looking for remote roles only. My expected CTC is 18 LPA. Please do not apply to any crypto or Web3 companies. I have a 30-day notice period."
+              <div className="absolute bottom-full right-0 mb-3 w-80 p-4 bg-[#09090b] border border-zinc-700 rounded-xl shadow-2xl z-10">
+                <label className="block text-xs font-medium text-zinc-200 mb-1">Target Job Title & Instructions (Optional)</label>
+                <p className="text-[10px] text-zinc-400 mb-2 leading-relaxed">
+                  <strong>Example:</strong> "Target Job: Senior Python Developer. Remote roles only. Expected CTC is 18 LPA. Notice period 30 days."
                 </p>
                 <textarea
                   rows={4}
                   value={aiPrompt}
                   onChange={e => setAiPrompt(e.target.value)}
-                  placeholder="Enter your target job title and specific instructions for the AI to follow when generating your profile..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mb-3"
+                  placeholder="Enter your target job title and instructions..."
+                  className="w-full bg-black border border-zinc-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-zinc-500 mb-3 resize-none"
                 />
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setShowAiPrompt(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors">Cancel</button>
-                  <button onClick={handleAiAutoFill} disabled={isAnalyzing} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors">
+                  <button onClick={() => setShowAiPrompt(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-colors">Cancel</button>
+                  <button onClick={handleAiAutoFill} disabled={isAnalyzing} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors">
                     {isAnalyzing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                     {isAnalyzing ? 'Analyzing...' : 'Auto-Fill'}
                   </button>
@@ -347,48 +347,46 @@ export default function CandidateProfileEditor({
             <button
               onClick={() => setShowAiPrompt(!showAiPrompt)}
               disabled={savingProfile || isAnalyzing}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-blue-900/40 hover:bg-blue-600 text-sky-300 hover:text-white border border-blue-500/30 hover:border-blue-500 shadow-lg transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors cursor-pointer"
             >
-              <Sparkles className="w-4 h-4" /> ✨ Auto-Fill with AI
+              <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> Auto-Fill with AI
             </button>
           </div>
 
           <button
             onClick={handleSaveJson}
             disabled={savingProfile || isAnalyzing}
-            className={`flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-bold ${
-              isAdmin ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-blue-600 hover:bg-blue-500'
-            } text-white shadow-lg transition-all`}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors cursor-pointer"
           >
-            <Save className="w-4 h-4" /> {savingProfile ? 'Saving...' : 'Save Configuration'}
+            <Save className="w-3.5 h-3.5" /> {savingProfile ? 'Saving...' : 'Save Configuration'}
           </button>
         </div>
       </div>
 
       {/* Resume PDF Section */}
-      <div className="p-5 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-3 shadow-xl">
-        <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
-          <FileText className="w-4 h-4" /> Candidate Resume PDF (Cloud Synchronized)
+      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3">
+        <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+          <FileText className="w-4 h-4 text-zinc-400" /> Candidate Resume PDF
         </h3>
 
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="p-4 rounded-xl bg-black border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sky-400">
-              <FileText className="w-6 h-6" />
+            <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400">
+              <FileText className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white font-mono">
+                <span className="text-xs font-mono font-medium text-white">
                   {resumeFilename || (effectiveUserId ? `${effectiveUserId}_Resume.pdf` : 'Candidate_Resume.pdf')}
                 </span>
                 {(resumeFilename || !isNew) && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                    Active in Cloud
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 font-mono">
+                    Cloud Synced
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Recruiters receive this exact document during automated job applications.
+              <p className="text-[11px] text-zinc-500 mt-0.5">
+                Recruiters receive this exact document during automated applications.
               </p>
             </div>
           </div>
@@ -399,17 +397,15 @@ export default function CandidateProfileEditor({
                 href={`/api/profile/resume?user_id=${encodeURIComponent(effectiveUserId)}&t=${resumeVersion}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-colors"
               >
                 <Download className="w-3.5 h-3.5" /> Preview PDF
               </a>
             )}
 
-            <label className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold ${
-              isAdmin ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-blue-600 hover:bg-blue-500'
-            } text-white cursor-pointer shadow-md transition-all`}>
+            <label className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black cursor-pointer transition-colors">
               <Upload className="w-3.5 h-3.5" />
-              <span>{uploadingResume ? 'Uploading...' : 'Upload New PDF'}</span>
+              <span>{uploadingResume ? 'Uploading...' : 'Upload PDF'}</span>
               <input
                 type="file"
                 accept=".pdf"
@@ -422,18 +418,17 @@ export default function CandidateProfileEditor({
         </div>
 
         {resumeSuccess && (
-          <div className="text-xs text-emerald-400 flex items-center gap-1.5 font-medium animate-fadeIn">
+          <div className="text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
             <CheckCircle2 className="w-3.5 h-3.5" /> {resumeSuccess}
           </div>
         )}
 
         {resumeError && (
-          <div className="text-xs text-rose-400 flex items-center gap-1.5 font-medium animate-fadeIn">
-            <span className="w-2 h-2 rounded-full bg-rose-400" /> {resumeError}
+          <div className="text-xs text-red-400 flex items-center gap-1.5 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400" /> {resumeError}
           </div>
         )}
       </div>
-
     </div>
   )
 }
