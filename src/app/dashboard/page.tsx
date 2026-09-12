@@ -507,9 +507,21 @@ export default function UserDashboard() {
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2 flex-wrap">
-                  <span>Schedule: <strong className="text-zinc-300">Daily 06:00 & 08:00 AM IST</strong></span>
-                  <span className="text-zinc-600 hidden sm:inline">•</span>
-                  <span>Next Run: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
+                  {isProfessional ? (
+                    <>
+                      <span>Schedule: <strong className="text-zinc-300">Dual Precision Runs · 06:00 &amp; 08:00 AM IST</strong></span>
+                      <span className="text-zinc-600 hidden sm:inline">•</span>
+                      <span className="text-violet-300 font-medium">+ Unlimited On-Demand</span>
+                      <span className="text-zinc-600 hidden sm:inline">•</span>
+                      <span>Next: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Schedule: <strong className="text-zinc-300">Daily Morning Scan</strong></span>
+                      <span className="text-zinc-600 hidden sm:inline">•</span>
+                      <span>Next Run: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -679,10 +691,14 @@ export default function UserDashboard() {
             >
               <div className="flex items-center gap-2 truncate">
                 <Zap className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                <span className="truncate">Trigger: <strong className="text-zinc-300">Daily Dual</strong></span>
+                {isProfessional ? (
+                  <span className="truncate">Trigger: <strong className="text-zinc-300">Dual + On-Demand</strong></span>
+                ) : (
+                  <span className="truncate">Trigger: <strong className="text-zinc-300">Daily</strong></span>
+                )}
               </div>
               {isProfessional ? (
-                <span className="text-[9px] font-mono text-violet-300 shrink-0">TURBO ACTIVE</span>
+                <span className="text-[9px] font-mono text-violet-300 shrink-0">MULTI-RUN</span>
               ) : (
                 <span className="text-[9px] font-mono text-violet-400 flex items-center gap-0.5 shrink-0 group-hover:underline">
                   <Lock className="w-2.5 h-2.5" /> TURBO: PRO
