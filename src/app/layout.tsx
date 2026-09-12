@@ -17,12 +17,12 @@ export const metadata: Metadata = {
   description: "Intelligent automated job application engine for modern professionals.",
   icons: {
     icon: [
-      { url: "/jobflux-logo.svg?v=3", type: "image/svg+xml" },
-      { url: "/icon.svg?v=3", type: "image/svg+xml" },
-      { url: "/favicon.ico?v=3", sizes: "any" }
+      { url: "/icon.svg?v=4", type: "image/svg+xml" },
+      { url: "/jobflux-logo.svg?v=4", type: "image/svg+xml" },
+      { url: "/favicon.svg?v=4", type: "image/svg+xml" },
     ],
-    shortcut: "/jobflux-logo.svg?v=3",
-    apple: "/jobflux-logo.svg?v=3",
+    shortcut: "/icon.svg?v=4",
+    apple: "/icon.svg?v=4",
   }
 };
 

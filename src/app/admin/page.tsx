@@ -35,6 +35,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
+import JobFluxLogo from '@/components/JobFluxLogo'
 
 export default function AdminDashboard() {
   const [usersList, setUsersList] = useState<any[]>([])
@@ -430,9 +431,19 @@ export default function AdminDashboard() {
 
   if (authChecking) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-zinc-400 font-mono text-xs gap-3">
-        <RefreshCw className="w-5 h-5 animate-spin text-zinc-300" />
-        <span>Verifying administrator privileges...</span>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-zinc-400 font-mono text-xs gap-4 relative overflow-hidden select-none">
+        <div className="absolute w-[400px] h-[400px] rounded-full bg-violet-600/10 blur-[100px] pointer-events-none" />
+        <div className="relative flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl border border-violet-500/30 animate-radar-pulse absolute inset-0 -m-1" />
+          <JobFluxLogo size="lg" showText={false} />
+        </div>
+        <div className="flex flex-col items-center gap-2 z-10">
+          <span className="text-zinc-200 font-medium tracking-tight text-sm">Verifying Administrator Privileges</span>
+          <div className="w-36 h-[2px] bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden relative">
+            <div className="w-20 h-full bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep" />
+          </div>
+          <span className="text-[10px] text-zinc-500 font-mono">technohmsit@gmail.com</span>
+        </div>
       </div>
     )
   }
@@ -446,41 +457,39 @@ export default function AdminDashboard() {
       {/* Admin Top Navbar */}
       <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-medium text-white text-sm">
-              <Shield className="w-4 h-4 text-zinc-300" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm font-semibold text-white">
-                  Multi-Candidate Administration
-                </h1>
-                <span className="text-[9px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono uppercase">
-                  Central Hub
-                </span>
-              </div>
-              <p className="text-[11px] text-zinc-500 font-mono">
-                MongoDB Atlas Cloud Synchronized
-              </p>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="hover:opacity-90 transition-opacity">
+              <JobFluxLogo size="sm" showText={true} />
+            </Link>
+
+            <div className="h-5 w-px bg-zinc-800 hidden sm:block" />
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-violet-300 font-mono uppercase font-semibold">
+                Super Admin Hub
+              </span>
+              <span className="text-[11px] text-zinc-500 font-mono hidden md:inline">
+                MongoDB Atlas Synchronized
+              </span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsHelpOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer"
             >
               <Mail className="w-3.5 h-3.5 text-violet-400" /> Help Desk
             </button>
             <button
               onClick={fetchOverviewAndUsers}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" /> Refresh
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" /> Log Out
             </button>
@@ -490,6 +499,26 @@ export default function AdminDashboard() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+        {/* Real-time Cluster Radar Telemetry Bar */}
+        <div className="px-4 py-2.5 rounded-xl bg-[#09090b] border border-zinc-800/90 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs relative overflow-hidden card-featured-glow">
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="text-zinc-200 font-medium">Cluster Active & Synchronized</span>
+            <span className="text-zinc-600 hidden sm:inline">·</span>
+            <span className="text-zinc-400 font-mono text-[11px] hidden sm:inline">Scheduled Runs: Daily 06:00 & 08:00 AM IST</span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-400">
+            <span>Primary Admin: <strong className="text-violet-300">technohmsit@gmail.com</strong></span>
+            <span className="text-zinc-700">|</span>
+            <span className="text-emerald-400 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Live
+            </span>
+          </div>
+        </div>
         {/* 5 Clean Overview Cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">

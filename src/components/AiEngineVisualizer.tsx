@@ -168,6 +168,8 @@ export default function AiEngineVisualizer() {
 
   return (
     <div className="w-full max-w-6xl mx-auto rounded-2xl bg-[#09090b] border border-zinc-800 shadow-2xl overflow-hidden relative text-zinc-100">
+      {/* Autonomous Laser Beam Sweep */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep z-20 pointer-events-none" />
       
       {/* Subtle top ambient purple aura */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />

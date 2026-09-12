@@ -262,10 +262,17 @@ export default function Home() {
             className="flex-1 w-full text-center lg:text-left space-y-7"
           >
             <div>
-              {/* Minimalist Top Tag */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                <span>Autonomous Application Engine</span>
+              {/* Sleek Autonomous Radar Pill */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-violet-500/30 text-zinc-300 text-xs font-mono mb-5 relative overflow-hidden backdrop-blur-md shadow-[0_0_20px_rgba(168,85,247,0.12)]">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
+                </span>
+                <span className="text-zinc-200">Autonomous Radar Active</span>
+                <span className="text-zinc-600">·</span>
+                <span className="text-violet-400 font-medium">Dual Runs (06:00 & 08:00 AM IST)</span>
+                {/* Laser scanline */}
+                <div className="absolute inset-x-0 bottom-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/90 to-transparent animate-laser-sweep" />
               </div>
               
               <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-white leading-[1.1]">
@@ -280,16 +287,16 @@ export default function Home() {
 
             {/* Benefit Badges in Monochromatic Glass Style */}
             <div className="flex flex-wrap gap-2.5 items-center justify-center lg:justify-start text-xs text-zinc-300">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800">
-                <Clock className="w-3.5 h-3.5 text-zinc-400" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
+                <Clock className="w-3.5 h-3.5 text-violet-400" />
                 <span>Dual Morning Runs (6 & 8 AM IST)</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800">
-                <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>1-Day Free Trial (₹0)</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800">
-                <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
+                <ShieldCheck className="w-3.5 h-3.5 text-zinc-300" />
                 <span>Direct Recruiter Delivery</span>
               </div>
             </div>
@@ -299,7 +306,7 @@ export default function Home() {
               {existingUser ? (
                 <Link
                   href={existingUser.role === 'admin' ? '/admin' : '/dashboard'}
-                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/5"
                 >
                   <span>Open {existingUser.role === 'admin' ? 'Admin Portal' : 'Dashboard'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -307,7 +314,7 @@ export default function Home() {
               ) : (
                 <button
                   onClick={() => { setAuthMode('trial'); setError('') }}
-                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-white/5"
                 >
                   <span>Start 1-Day Free Trial</span>
                   <ArrowRight className="w-4 h-4" />
@@ -332,7 +339,9 @@ export default function Home() {
             className="w-full lg:w-[420px] shrink-0"
           >
             {existingUser ? (
-              <div className="p-7 w-full border border-zinc-800 bg-[#09090b] rounded-2xl shadow-xl space-y-5 text-center">
+              <div className="p-7 w-full border border-zinc-800 bg-[#09090b] rounded-2xl shadow-xl space-y-5 text-center relative overflow-hidden card-featured-glow">
+                {/* Laser beam sweep accent */}
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
                 <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center mx-auto">
                   <User className="w-6 h-6 text-zinc-400" />
                 </div>
@@ -365,7 +374,9 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="p-7 w-full border border-zinc-800 bg-[#09090b] rounded-2xl shadow-xl space-y-5">
+              <div className="p-7 w-full border border-zinc-800 bg-[#09090b] rounded-2xl shadow-xl space-y-5 relative overflow-hidden card-featured-glow">
+                {/* Laser beam sweep accent */}
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
                 
                 {/* Auth0-Style Segmented Control */}
                 <div className="flex items-center bg-black p-1 rounded-lg border border-zinc-800">

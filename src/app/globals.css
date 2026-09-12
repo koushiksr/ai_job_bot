@@ -75,3 +75,34 @@ input[type="range"] {
 ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
 }
+
+/* Sleek Autonomous Laser Beam Sweep (Matches JobFlux Engine Status) */
+@keyframes laserSweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-laser-sweep {
+  animation: laserSweep 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Radar Sonar Wave Pulse */
+@keyframes radarPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  70% { transform: scale(1.5); opacity: 0; }
+  100% { transform: scale(0.95); opacity: 0; }
+}
+
+.animate-radar-pulse {
+  animation: radarPulse 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Gentle Levitation Floating */
+@keyframes floatSmooth {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-float-smooth {
+  animation: floatSmooth 4s ease-in-out infinite;
+}

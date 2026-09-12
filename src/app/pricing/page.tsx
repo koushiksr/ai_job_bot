@@ -454,12 +454,17 @@ export default function PricingPage() {
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-2xl p-6 flex flex-col justify-between border transition-all ${
+                className={`relative rounded-2xl p-6 flex flex-col justify-between border transition-all overflow-hidden ${
                   isFeatured
                     ? 'bg-[#0c0c0f] border-zinc-700 shadow-2xl card-featured-glow z-10'
                     : 'bg-[#09090b] border-zinc-800/90 hover:border-zinc-700'
                 }`}
               >
+                {/* Laser beam sweep accent for featured plan */}
+                {isFeatured && (
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep pointer-events-none" />
+                )}
+
                 {/* Header Info */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">

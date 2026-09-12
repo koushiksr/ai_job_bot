@@ -459,7 +459,10 @@ export default function UserDashboard() {
         )}
 
         {/* Autonomous AI Engine Cockpit Card */}
-        <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
+        <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4 relative overflow-hidden card-featured-glow">
+          {/* Laser beam sweep accent */}
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             
             <div className="flex items-center gap-3.5">
@@ -468,6 +471,7 @@ export default function UserDashboard() {
                   <Cpu className="w-5 h-5" />
                 </div>
                 <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
                 </span>
               </div>
@@ -477,7 +481,7 @@ export default function UserDashboard() {
                     Autonomous Engine Cockpit
                   </h2>
                   <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-emerald-400 font-mono flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                     Daemon Active
                   </span>
                 </div>
@@ -493,11 +497,11 @@ export default function UserDashboard() {
               <button
                 onClick={handleTriggerOnDemandScout}
                 disabled={isTriggeringScout}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
               >
                 {isTriggeringScout ? (
                   <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-zinc-400" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-violet-400" />
                     <span>Scouting Openings...</span>
                   </>
                 ) : (
@@ -509,6 +513,43 @@ export default function UserDashboard() {
               </button>
             </div>
           </div>
+
+          {/* Active Radar Telemetry Animation (Visible during Scouting / Active Tasks) */}
+          {isTriggeringScout && (
+            <div className="p-4 rounded-xl bg-zinc-950/95 border border-violet-500/40 relative overflow-hidden space-y-3 shadow-lg shadow-violet-950/20">
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep pointer-events-none" />
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+                    <div className="absolute inset-0 rounded-full border border-violet-500/30 animate-radar-pulse" />
+                    <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8 drop-shadow-[0_0_12px_rgba(168,85,247,0.5)]">
+                      <polygon points="42,5 17,21 28,24" fill="#c084fc" />
+                      <polygon points="42,5 28,24 31,34" fill="#7c3aed" />
+                      <line x1="42" y1="5" x2="28" y2="24" stroke="#ffffff" strokeWidth="1.2" opacity="0.9" />
+                      <circle cx="42" cy="5" r="2" fill="#ffffff" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-white">
+                        Autonomous Scout Executing
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-violet-950/80 border border-violet-700/60 text-violet-300 animate-pulse">
+                        RADAR SWEEP ACTIVE
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      Targeting recruiter feeds, auto-formulating screening Q&As, and submitting verified applications...
+                    </p>
+                  </div>
+                </div>
+
+                <div className="w-full sm:w-44 h-2 bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden relative shrink-0">
+                  <div className="w-20 h-full bg-gradient-to-r from-violet-600 via-purple-400 to-violet-600 rounded-full animate-laser-sweep" />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Feedback Toast */}
           {taskFeedback && (
