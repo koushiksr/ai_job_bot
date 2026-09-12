@@ -27,6 +27,11 @@ export async function GET(req: NextRequest) {
         current_ctc: p.current_ctc || 0,
         expected_ctc: p.expected_ctc || 0,
         enabled_for_daily_run: p.enabled_for_daily_run !== false,
+        plan: p.plan || 'trial',
+        plan_name: p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '1-Day Free Trial'),
+        plan_expires_at: p.plan_expires_at || p.trial_expires_at || null,
+        trial_expires_at: p.trial_expires_at || null,
+        is_vip: Boolean(p.is_vip || p.vip_access || p.free_privilege),
         total_applied: s.total_applied || 0,
         applied_today: s.today || 0,
         applied_this_week: s.this_week || 0,
@@ -40,3 +45,46 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
 }
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const db = await getDb()
+    if (!db) {
+      return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
+    }
+
+    const body = await req.json()
+    const { user_id, is_vip, plan, enabled_for_daily_run, extend_days } = body
+
+    if (!user_id) {
+      return NextResponse.json({ detail: 'user_id is required' }, { status: 400 })
+    }
+
+    const updates: any = { updated_at: new Date() }
+    if (typeof is_vip === 'boolean') {
+      updates.is_vip = is_vip
+      updates.vip_access = is_vip
+      updates.free_privilege = is_vip
+    }
+    if (typeof enabled_for_daily_run === 'boolean') {
+      updates.enabled_for_daily_run = enabled_for_daily_run
+    }
+    if (plan) {
+      updates.plan = plan
+      updates.plan_name = `JobFlux ${plan.toUpperCase()}`
+      if (extend_days) {
+        updates.plan_expires_at = new Date(Date.now() + extend_days * 24 * 60 * 60 * 1000)
+      }
+    }
+
+    await db.collection('profiles').updateOne(
+      { user_id },
+      { $set: updates }
+    )
+
+    return NextResponse.json({ success: true, message: 'Candidate updated successfully', updates })
+  } catch (err: any) {
+    return NextResponse.json({ detail: err.message }, { status: 500 })
+  }
+}
+

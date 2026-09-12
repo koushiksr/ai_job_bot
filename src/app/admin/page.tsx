@@ -22,7 +22,10 @@ import {
   ToggleRight,
   FileText,
   User,
-  Briefcase
+  Briefcase,
+  CreditCard,
+  Star,
+  Crown
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -33,10 +36,15 @@ export default function AdminDashboard() {
   const [loadingUsers, setLoadingUsers] = useState<boolean>(true)
   const [userSearch, setUserSearch] = useState<string>('')
 
+  // Payments State
+  const [paymentsList, setPaymentsList] = useState<any[]>([])
+  const [loadingPayments, setLoadingPayments] = useState<boolean>(false)
+
   // Overview metrics
   const [overviewMetrics, setOverviewMetrics] = useState({
     total_profiles: 0,
     scheduled_profiles_active: 0,
+    vip_profiles_count: 0,
     applied_today: 0,
     applied_this_week: 0,
     applied_this_month: 0,
@@ -44,7 +52,7 @@ export default function AdminDashboard() {
   })
 
   // Admin Active Tab
-  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'logs'>('candidates')
+  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'payments' | 'logs'>('candidates')
 
   // Edit Modal State
   const [editingUser, setEditingUser] = useState<any | null>(null)
@@ -78,6 +86,7 @@ export default function AdminDashboard() {
         setOverviewMetrics({
           total_profiles: users.length,
           scheduled_profiles_active: users.filter((u: any) => u.enabled_for_daily_run !== false).length,
+          vip_profiles_count: users.filter((u: any) => u.is_vip).length,
           applied_today: today,
           applied_this_week: week,
           applied_this_month: month,
@@ -91,9 +100,25 @@ export default function AdminDashboard() {
     }
   }
 
+  const fetchPayments = async () => {
+    setLoadingPayments(true)
+    try {
+      const res = await fetch('/api/admin/payments')
+      if (res.ok) {
+        const data = await res.json()
+        setPaymentsList(data.payments || [])
+      }
+    } catch (e) {
+      console.error('Failed to fetch payments:', e)
+    } finally {
+      setLoadingPayments(false)
+    }
+  }
+
   // Initial Load
   useEffect(() => {
     fetchOverviewAndUsers()
+    fetchPayments()
   }, [])
 
   const handleToggleDaily = async (userId: string, currentStatus: boolean) => {
@@ -107,6 +132,23 @@ export default function AdminDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, enabled_for_daily_run: newStatus })
       })
+    } catch {
+      fetchOverviewAndUsers()
+    }
+  }
+
+  const handleToggleVip = async (userId: string, currentVip: boolean) => {
+    const newVip = !currentVip
+    setUsersList(prev =>
+      prev.map(u => (u.user_id === userId ? { ...u, is_vip: newVip } : u))
+    )
+    try {
+      await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, is_vip: newVip })
+      })
+      fetchOverviewAndUsers()
     } catch {
       fetchOverviewAndUsers()
     }
@@ -195,12 +237,12 @@ export default function AdminDashboard() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
-        {/* 4 Large Clean Overview Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 5 Clean Overview Cards */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="p-5 rounded-2xl bg-[#0c1017] border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5" /> Total Candidates
+                <Users className="w-3.5 h-3.5" /> Candidates
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-medium">
                 {overviewMetrics.scheduled_profiles_active} Active
@@ -210,6 +252,21 @@ export default function AdminDashboard() {
               {overviewMetrics.total_profiles}
             </div>
             <p className="text-xs text-slate-400 mt-1">Configured candidate profiles</p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#0c1017] border border-purple-500/20 shadow-lg shadow-purple-500/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Crown className="w-3.5 h-3.5" /> VIP Privilege
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 font-medium">
+                Free Pass
+              </span>
+            </div>
+            <div className="text-3xl font-extrabold text-white tracking-tight">
+              {overviewMetrics.vip_profiles_count}
+            </div>
+            <p className="text-xs text-slate-400 mt-1">Candidates with free lifetime bypass</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-[#0c1017] border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
@@ -224,7 +281,7 @@ export default function AdminDashboard() {
             <div className="text-3xl font-extrabold text-white tracking-tight">
               {overviewMetrics.applied_today}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Total applications submitted today</p>
+            <p className="text-xs text-slate-400 mt-1">Applications submitted today</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-[#0c1017] border border-blue-500/20 shadow-lg shadow-blue-500/5">
@@ -239,7 +296,7 @@ export default function AdminDashboard() {
             <div className="text-3xl font-extrabold text-white tracking-tight">
               {overviewMetrics.applied_this_week}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Total applications this week</p>
+            <p className="text-xs text-slate-400 mt-1">Applications this week</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-[#0c1017] border border-amber-500/20 shadow-lg shadow-amber-500/5">
@@ -254,12 +311,12 @@ export default function AdminDashboard() {
             <div className="text-3xl font-extrabold text-white tracking-tight">
               {overviewMetrics.total_applied}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Total lifetime applications across all candidates</p>
+            <p className="text-xs text-slate-400 mt-1">Lifetime applications</p>
           </div>
         </section>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+        <div className="flex items-center gap-2 border-b border-slate-800 pb-3 flex-wrap">
           <button
             onClick={() => setActiveAdminTab('candidates')}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
@@ -269,6 +326,19 @@ export default function AdminDashboard() {
             }`}
           >
             <Users className="w-4 h-4" /> Candidate Profiles ({filteredUsers.length})
+          </button>
+          <button
+            onClick={() => {
+              setActiveAdminTab('payments')
+              fetchPayments()
+            }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+              activeAdminTab === 'payments'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                : 'text-slate-400 hover:text-white bg-slate-900/50 hover:bg-slate-900 border border-slate-800'
+            }`}
+          >
+            <CreditCard className="w-4 h-4" /> Payments & Subscriptions ({paymentsList.length})
           </button>
           <button
             onClick={() => setActiveAdminTab('logs')}
@@ -319,6 +389,7 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="py-3.5 px-4">Candidate</th>
                       <th className="py-3.5 px-4">Naukri Email</th>
+                      <th className="py-3.5 px-4">Plan & Access</th>
                       <th className="py-3.5 px-4 text-center">Auto-Apply</th>
                       <th className="py-3.5 px-4 text-center">Today</th>
                       <th className="py-3.5 px-4 text-center">Total Applied</th>
@@ -328,14 +399,14 @@ export default function AdminDashboard() {
                   <tbody className="divide-y divide-slate-800/50">
                     {loadingUsers ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
                           <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                           Loading candidate profiles...
                         </td>
                       </tr>
                     ) : filteredUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-500">
+                        <td colSpan={7} className="py-12 text-center text-slate-500">
                           No candidate profiles match your search query.
                         </td>
                       </tr>
@@ -353,6 +424,37 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-4 px-4 text-slate-300 font-mono">
                             {u.email}
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex flex-col items-start gap-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                  u.plan === 'elite' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30' :
+                                  u.plan === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
+                                  u.plan === 'starter' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
+                                  'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
+                                }`}>
+                                  {u.plan || 'trial'}
+                                </span>
+                                {u.is_vip && (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                    VIP PASS
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleToggleVip(u.user_id, !!u.is_vip)}
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                                  u.is_vip
+                                    ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
+                                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
+                                }`}
+                                title={u.is_vip ? "Click to Revoke VIP Free Pass" : "Click to Grant Lifetime VIP Free Pass"}
+                              >
+                                <Crown className="w-3 h-3 text-amber-400" />
+                                {u.is_vip ? 'Revoke VIP' : 'Grant VIP Pass'}
+                              </button>
+                            </div>
                           </td>
                           <td className="py-4 px-4 text-center">
                             <button
@@ -416,7 +518,140 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 2: SYSTEM LOGS & ACTIVITY */}
+        {/* TAB 2: PAYMENTS & SUBSCRIPTIONS */}
+        {activeAdminTab === 'payments' && (
+          <div className="space-y-6">
+            {/* Quick Metrics Bar */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Transactions</div>
+                  <div className="text-2xl font-extrabold text-white mt-1">{paymentsList.length}</div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Paid Subscribers</div>
+                  <div className="text-2xl font-extrabold text-emerald-400 mt-1">
+                    {new Set(paymentsList.map(p => p.user_id || p.email)).size}
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#0c1017] border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">VIP Free Passes</div>
+                  <div className="text-2xl font-extrabold text-amber-400 mt-1">{overviewMetrics.vip_profiles_count}</div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <Crown className="w-5 h-5" />
+                </div>
+              </div>
+            </div>
+
+            {/* Payments Table */}
+            <div className="rounded-2xl bg-[#0c1017] border border-slate-800 overflow-hidden shadow-xl">
+              <div className="px-5 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-indigo-400" />
+                    Verified Razorpay Transactions
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Real-time payment verification records and active plan subscriptions.
+                  </p>
+                </div>
+                <button
+                  onClick={fetchPayments}
+                  disabled={loadingPayments}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold transition-all"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingPayments ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-300">
+                  <thead className="bg-slate-950/70 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                    <tr>
+                      <th className="py-3.5 px-4">Candidate / User</th>
+                      <th className="py-3.5 px-4">Plan Purchased</th>
+                      <th className="py-3.5 px-4">Amount</th>
+                      <th className="py-3.5 px-4">Razorpay Payment ID</th>
+                      <th className="py-3.5 px-4">Order ID</th>
+                      <th className="py-3.5 px-4">Verified Date</th>
+                      <th className="py-3.5 px-4 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/50">
+                    {loadingPayments ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                          <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
+                          Loading Razorpay transactions...
+                        </td>
+                      </tr>
+                    ) : paymentsList.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-500">
+                          <CreditCard className="w-8 h-8 mx-auto text-slate-600 mb-2" />
+                          No Razorpay payments recorded in the database yet.
+                          <div className="text-[11px] text-slate-600 mt-1">
+                            When users upgrade their plan via Razorpay checkout, their verified orders will appear here automatically.
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      paymentsList.map((p, idx) => (
+                        <tr key={p.id || idx} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-white">{p.email || p.user_id}</div>
+                            <div className="text-[11px] text-slate-500 font-mono">{p.user_id}</div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              p.plan_id === 'elite' ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30' :
+                              p.plan_id === 'pro' ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30' :
+                              'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+                            }`}>
+                              {p.plan_id || 'Starter'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-emerald-400 font-mono text-sm">
+                            {p.amount || '₹499'}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-[11px] text-cyan-400">
+                            {p.payment_id}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
+                            {p.order_id}
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-400 text-[11px]">
+                            {p.verified_at ? new Date(p.verified_at).toLocaleString() : 'N/A'}
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              SUCCESS
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: SYSTEM LOGS & ACTIVITY */}
         {activeAdminTab === 'logs' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="rounded-2xl bg-[#0c1017] border border-slate-800 p-4 space-y-2 h-[600px] overflow-y-auto">
