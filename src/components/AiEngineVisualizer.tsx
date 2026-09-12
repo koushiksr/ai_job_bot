@@ -303,7 +303,7 @@ export default function AiEngineVisualizer() {
             </div>
 
             {/* Terminal Lines */}
-            <div className="space-y-2.5 mt-3 text-[11px] text-zinc-400">
+            <div className="space-y-2 mt-3 text-[11px] text-zinc-400 min-h-[190px]">
               {activeRole.logs.map((log, i) => (
                 <div key={i} className="flex items-start gap-2 leading-relaxed">
                   <span className="text-zinc-600 shrink-0 select-none">›</span>
@@ -316,9 +316,9 @@ export default function AiEngineVisualizer() {
           </div>
 
           {/* Recruiter Response Toast Alert */}
-          <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-[11px] flex items-center gap-2.5 text-zinc-300 font-sans">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
-            <span>{activeRole.recruiterMessage}</span>
+          <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-[11px] flex items-center gap-2.5 text-zinc-300 font-sans min-h-[46px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
+            <span className="line-clamp-2">{activeRole.recruiterMessage}</span>
           </div>
         </div>
 
@@ -326,7 +326,7 @@ export default function AiEngineVisualizer() {
         <div className="lg:col-span-7 space-y-3.5 flex flex-col justify-between">
           
           {/* Target Opportunity Header Card */}
-          <div className="p-4 sm:p-5 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between gap-4">
+          <div className="p-4 sm:p-5 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between gap-4 min-h-[82px]">
             <div className="flex items-center gap-3.5">
               <div className="w-11 h-11 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-base shrink-0">
                 {activeRole.logoText}
@@ -353,7 +353,7 @@ export default function AiEngineVisualizer() {
           {/* AI Decision Actions Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             {/* Matched Skill Matrix */}
-            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-2">
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-2 min-h-[105px]">
               <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono flex items-center gap-1.5">
                 <Layers className="w-3 h-3 text-zinc-400" /> Matched Skills
               </span>
@@ -370,13 +370,13 @@ export default function AiEngineVisualizer() {
             </div>
 
             {/* Contextual Screening Q&A */}
-            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1">
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1 min-h-[105px]">
               <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono flex items-center gap-1.5">
                 <Cpu className="w-3 h-3 text-zinc-400" /> Tailored Screening Response
               </span>
               <div className="text-[11px] leading-relaxed">
                 <span className="text-zinc-500 block text-[10px]">Q: {activeRole.screeningQuestion}</span>
-                <span className="text-zinc-200 font-medium block mt-0.5">
+                <span className="text-zinc-200 font-medium block mt-0.5 line-clamp-3">
                   A: {activeRole.aiAnswer}
                 </span>
               </div>

@@ -48,14 +48,14 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#070b14] overflow-hidden cursor-pointer select-none"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black overflow-hidden cursor-pointer select-none"
         >
           {/* Subtle Ambient Radial Glow */}
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: [0.8, 1.2, 1], opacity: [0.2, 0.45, 0.3] }}
+            animate={{ scale: [0.8, 1.2, 1], opacity: [0.15, 0.3, 0.2] }}
             transition={{ duration: 1.5, ease: 'easeOut' }}
-            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-blue-600/20 via-sky-500/25 to-indigo-600/10 blur-[100px] pointer-events-none"
+            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-violet-600/15 via-purple-500/10 to-transparent blur-[120px] pointer-events-none"
           />
 
           {/* Central Animated Emblem */}
@@ -69,9 +69,9 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
               {/* Outer Pulse Ring */}
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: [0.9, 1.35, 1.1], opacity: [0.6, 0, 0] }}
+                animate={{ scale: [0.9, 1.35, 1.1], opacity: [0.4, 0, 0] }}
                 transition={{ duration: 1.2, repeat: Infinity, ease: 'easeOut' }}
-                className="absolute inset-0 rounded-2xl border-2 border-sky-400/40"
+                className="absolute inset-0 rounded-2xl border border-violet-500/30"
               />
 
               {/* Story-driven Emblem SVG with animated elements */}
@@ -79,23 +79,28 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                 viewBox="0 0 48 48"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-full drop-shadow-[0_0_25px_rgba(56,189,248,0.4)]"
+                className="w-full h-full drop-shadow-[0_0_30px_rgba(168,85,247,0.25)]"
               >
                 <defs>
                   <linearGradient id="splashCaseGrad" x1="6" y1="15" x2="42" y2="43" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#1e293b" stopOpacity="0.95" />
-                    <stop offset="100%" stopColor="#0f172a" stopOpacity="0.98" />
+                    <stop offset="0%" stopColor="#18181b" />
+                    <stop offset="100%" stopColor="#09090b" />
                   </linearGradient>
 
                   <linearGradient id="splashJetTop" x1="16" y1="6" x2="44" y2="22" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#bae6fd" />
-                    <stop offset="35%" stopColor="#38bdf8" />
-                    <stop offset="100%" stopColor="#2563eb" />
+                    <stop offset="0%" stopColor="#ffffff" />
+                    <stop offset="40%" stopColor="#c084fc" />
+                    <stop offset="100%" stopColor="#7c3aed" />
                   </linearGradient>
 
                   <linearGradient id="splashJetBtm" x1="25" y1="10" x2="36" y2="32" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#1d4ed8" />
-                    <stop offset="100%" stopColor="#1e3a8a" />
+                    <stop offset="0%" stopColor="#6d28d9" />
+                    <stop offset="100%" stopColor="#4c1d95" />
+                  </linearGradient>
+
+                  <linearGradient id="splashHandle" x1="19" y1="8" x2="29" y2="14" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#71717a" />
+                    <stop offset="100%" stopColor="#3f3f46" />
                   </linearGradient>
 
                   <filter id="splashGlow" x="25" y="0" width="23" height="23" filterUnits="userSpaceOnUse">
@@ -110,8 +115,8 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
                   d="M 18.5 15 C 18.5 10 29.5 10 29.5 15"
-                  stroke="#94a3b8"
-                  strokeWidth="2.8"
+                  stroke="url(#splashHandle)"
+                  strokeWidth="2.6"
                   strokeLinecap="round"
                   fill="none"
                 />
@@ -127,14 +132,13 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   height="26"
                   rx="6"
                   fill="url(#splashCaseGrad)"
-                  stroke="#38bdf8"
-                  strokeWidth="2"
-                  strokeOpacity="0.85"
+                  stroke="#27272a"
+                  strokeWidth="1.6"
                 />
 
                 {/* Seam & Latch */}
-                <line x1="5" y1="24" x2="43" y2="24" stroke="#334155" strokeWidth="1.5" strokeDasharray="2.5 2" />
-                <rect x="21.5" y="22" width="5" height="4" rx="1.2" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
+                <line x1="5" y1="24" x2="43" y2="24" stroke="#27272a" strokeWidth="1.2" strokeDasharray="2.5 2" />
+                <rect x="21.5" y="22" width="5" height="4" rx="1.2" fill="#27272a" stroke="#3f3f46" strokeWidth="1" />
 
                 {/* Propulsion Velocity Trails */}
                 <motion.line
@@ -145,8 +149,8 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   y1="32"
                   x2="21"
                   y2="27"
-                  stroke="#38bdf8"
-                  strokeWidth="2.2"
+                  stroke="#a855f7"
+                  strokeWidth="2"
                   strokeLinecap="round"
                 />
                 <motion.line
@@ -157,8 +161,8 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   y1="37"
                   x2="17"
                   y2="32.5"
-                  stroke="#60a5fa"
-                  strokeWidth="2"
+                  stroke="#c084fc"
+                  strokeWidth="1.6"
                   strokeLinecap="round"
                 />
 
@@ -170,7 +174,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                 >
                   <polygon points="42,5 17,21 28,24" fill="url(#splashJetTop)" />
                   <polygon points="42,5 28,24 31,34" fill="url(#splashJetBtm)" />
-                  <line x1="42" y1="5" x2="28" y2="24" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" opacity="0.95" />
+                  <line x1="42" y1="5" x2="28" y2="24" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
                 </motion.g>
 
                 {/* AI Autonomous Beacon Star Burst */}
@@ -181,7 +185,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   transition={{ duration: 0.5, delay: 0.5, ease: 'backOut' }}
                 >
                   <path d="M 43 1 Q 43 5 47 5 Q 43 5 43 9 Q 43 5 39 5 Q 43 5 43 1 Z" fill="#ffffff" />
-                  <circle cx="43" cy="5" r="1.3" fill="#38bdf8" />
+                  <circle cx="43" cy="5" r="1.5" fill="#c084fc" />
                 </motion.g>
               </svg>
             </motion.div>
@@ -195,30 +199,30 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
             >
               <div className="flex items-center gap-2">
                 <span className="text-3xl md:text-4xl font-extrabold tracking-tight text-white font-sans">
-                  Job<span className="text-sky-400">Flux</span>
+                  JobFlux
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-md font-mono font-bold uppercase bg-blue-500/15 border border-blue-500/30 text-sky-400 shadow-sm">
+                <span className="text-xs px-2 py-0.5 rounded-md font-mono font-medium uppercase bg-zinc-900 border border-zinc-800 text-zinc-400 shadow-sm">
                   AI
                 </span>
               </div>
 
               {/* Status Laser Beam */}
               <div className="mt-4 flex flex-col items-center gap-2">
-                <div className="w-36 h-[2px] bg-slate-800 rounded-full overflow-hidden relative">
+                <div className="w-36 h-[2px] bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden relative">
                   <motion.div
                     initial={{ x: '-100%' }}
                     animate={{ x: '100%' }}
                     transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
-                    className="w-20 h-full bg-gradient-to-r from-transparent via-sky-400 to-transparent"
+                    className="w-20 h-full bg-gradient-to-r from-transparent via-violet-400 to-transparent"
                   />
                 </div>
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 0.7 }}
                   transition={{ duration: 0.4, delay: 0.6 }}
-                  className="text-[10px] font-mono tracking-widest uppercase text-slate-400"
+                  className="text-[10px] font-mono tracking-widest uppercase text-zinc-500"
                 >
-                  Autonomous Engine Ready
+                  Autonomous Engine Initialized
                 </motion.span>
               </div>
             </motion.div>
@@ -229,7 +233,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.4 }}
             transition={{ duration: 0.5, delay: 0.9 }}
-            className="absolute bottom-8 text-[11px] text-slate-500 font-mono tracking-wider"
+            className="absolute bottom-8 text-[11px] text-zinc-600 font-mono tracking-wider"
           >
             Click anywhere to enter
           </motion.span>

@@ -47,25 +47,6 @@ export default function UserDashboard() {
   // Help Modal State
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
 
-  // Account Security & Telemetry State
-  const [telemetry, setTelemetry] = useState<{
-    lastLoginAt: string | null
-    lastLoginIp: string | null
-    loginCount: number
-    lastProfileUpdatedAt: string | null
-    lastResumeUpdatedAt: string | null
-    resumeFilename: string | null
-    onDemandRunCount: number
-  }>({
-    lastLoginAt: null,
-    lastLoginIp: null,
-    loginCount: 0,
-    lastProfileUpdatedAt: null,
-    lastResumeUpdatedAt: null,
-    resumeFilename: null,
-    onDemandRunCount: 0
-  })
-
   // Metrics State
   const [metrics, setMetrics] = useState({
     today: 0,
@@ -280,15 +261,6 @@ export default function UserDashboard() {
         setUserName(pData.name || '')
         const planFromProfile = pData.plan || (typeof window !== 'undefined' ? localStorage.getItem('user_plan') : null) || 'trial'
         setUserPlan(planFromProfile)
-        setTelemetry({
-          lastLoginAt: pData.last_login_at || null,
-          lastLoginIp: pData.last_login_ip || null,
-          loginCount: pData.login_count || 0,
-          lastProfileUpdatedAt: pData.last_profile_updated_at || null,
-          lastResumeUpdatedAt: pData.last_resume_updated_at || null,
-          resumeFilename: pData.resume_filename || null,
-          onDemandRunCount: pData.on_demand_run_count || 0
-        })
       }
 
       const sRes = await fetch(`/api/stats?user_id=${uid}`)
@@ -577,87 +549,6 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Security, Activity & Telemetry Status Card */}
-        <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-violet-400">
-                <Shield className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold text-white">Account Security & Activity Telemetry</h3>
-                <p className="text-[11px] text-zinc-500">Real-time session monitoring & profile sync audit</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setIsHelpOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer w-fit"
-            >
-              <Mail className="w-3 h-3 text-violet-400" />
-              <span>Contact Support (technohmsit@gmail.com)</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            {/* Session / Login */}
-            <div className="p-3 rounded-lg bg-black border border-zinc-800 space-y-1">
-              <div className="flex items-center justify-between text-zinc-400 text-[11px]">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-emerald-400" /> Last Sign In
-                </span>
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-emerald-300">
-                  {telemetry.loginCount || 1} logins
-                </span>
-              </div>
-              <div className="font-mono text-white text-xs">
-                {telemetry.lastLoginAt ? formatTimestamp(telemetry.lastLoginAt) : 'Active Verified Session'}
-              </div>
-              <div className="text-[10px] text-zinc-500 font-mono truncate" title={telemetry.lastLoginIp || '127.0.0.1'}>
-                IP: {telemetry.lastLoginIp || 'Protected SSL'}
-              </div>
-            </div>
-
-            {/* Profile Sync */}
-            <div className="p-3 rounded-lg bg-black border border-zinc-800 space-y-1">
-              <div className="flex items-center justify-between text-zinc-400 text-[11px]">
-                <span className="flex items-center gap-1">
-                  <FileCheck className="w-3 h-3 text-purple-400" /> Profile Criteria
-                </span>
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-purple-300">
-                  Cloud Synced
-                </span>
-              </div>
-              <div className="font-mono text-white text-xs">
-                {telemetry.lastProfileUpdatedAt ? formatTimestamp(telemetry.lastProfileUpdatedAt) : 'Profile Configured'}
-              </div>
-              <div className="text-[10px] text-zinc-500">
-                Scheduled: Daily at 06:00 & 08:00 AM IST
-              </div>
-            </div>
-
-            {/* Active Resume */}
-            <div className="p-3 rounded-lg bg-black border border-zinc-800 space-y-1">
-              <div className="flex items-center justify-between text-zinc-400 text-[11px]">
-                <span className="flex items-center gap-1">
-                  <FileText className="w-3 h-3 text-cyan-400" /> Active Resume PDF
-                </span>
-                <button
-                  onClick={() => setActiveTab('profile')}
-                  className="text-[10px] text-violet-400 hover:underline cursor-pointer"
-                >
-                  Upload New
-                </button>
-              </div>
-              <div className="font-mono text-white text-xs truncate" title={telemetry.resumeFilename || `${userId}_Resume.pdf`}>
-                {telemetry.resumeFilename || `${userId}_Resume.pdf`}
-              </div>
-              <div className="text-[10px] text-zinc-500 font-mono">
-                {telemetry.lastResumeUpdatedAt ? `Updated: ${formatTimestamp(telemetry.lastResumeUpdatedAt)}` : 'ATS Binary Ready'}
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* 4 Clean Auth0-Style Metric Cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
@@ -665,12 +556,12 @@ export default function UserDashboard() {
               <span className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-zinc-400" /> Today
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">24h</span>
+              <span className="text-[10px] font-mono text-zinc-500">24h Quota</span>
             </div>
             <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {metrics.today}
             </div>
-            <p className="text-[11px] text-zinc-500">Applications submitted</p>
+            <p className="text-[11px] text-zinc-500">Applications delivered today</p>
           </div>
 
           <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
@@ -678,12 +569,12 @@ export default function UserDashboard() {
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-zinc-400" /> This Week
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">7d</span>
+              <span className="text-[10px] font-mono text-zinc-500">7 Days</span>
             </div>
             <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {metrics.this_week}
             </div>
-            <p className="text-[11px] text-zinc-500">Applications submitted</p>
+            <p className="text-[11px] text-zinc-500">Verified recruiter deliveries</p>
           </div>
 
           <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
@@ -691,12 +582,12 @@ export default function UserDashboard() {
               <span className="flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-zinc-400" /> This Month
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">30d</span>
+              <span className="text-[10px] font-mono text-zinc-500">30 Days</span>
             </div>
             <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {metrics.this_month}
             </div>
-            <p className="text-[11px] text-zinc-500">Applications submitted</p>
+            <p className="text-[11px] text-zinc-500">Candidate outreach volume</p>
           </div>
 
           <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
@@ -704,12 +595,14 @@ export default function UserDashboard() {
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> Total Applications
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">All-Time</span>
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                100% Verified
+              </span>
             </div>
             <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {metrics.total_applied}
             </div>
-            <p className="text-[11px] text-zinc-500">Verified deliveries</p>
+            <p className="text-[11px] text-zinc-500">Cumulative verified submissions</p>
           </div>
         </section>
 
