@@ -136,3 +136,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL(`/?error=${msg}`, req.url))
   }
 }
+

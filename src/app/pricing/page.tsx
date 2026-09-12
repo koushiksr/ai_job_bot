@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Script from 'next/script'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Zap, Sparkles, Shield, Clock, ArrowRight, X, CreditCard, ChevronRight } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
@@ -116,12 +117,88 @@ export default function PricingPage() {
 
     setActivating(true)
     try {
-      // Simulate plan activation in MongoDB / API
-      await new Promise(r => setTimeout(r, 1200))
-      setPaymentStep('success')
-    } catch {
-      alert('Failed to activate plan. Please try again.')
-    } finally {
+      const storedUid = typeof window !== 'undefined' ? localStorage.getItem('user_id') : ''
+
+      // 1. Create Razorpay order on backend
+      const orderRes = await fetch('/api/payment/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan_id: selectedPlan.id,
+          user_id: storedUid || undefined,
+          email: candidateEmail
+        })
+      })
+
+      const orderData = await orderRes.json()
+      if (!orderRes.ok) {
+        throw new Error(orderData.detail || 'Failed to initiate payment')
+      }
+
+      // 2. Launch Razorpay Checkout Modal
+      if (typeof window === 'undefined' || !(window as any).Razorpay) {
+        throw new Error('Razorpay gateway is still loading. Please refresh and try again.')
+      }
+
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'JobFlux AI',
+        description: selectedPlan.name,
+        image: '/favicon.svg',
+        order_id: orderData.order_id,
+        prefill: {
+          email: candidateEmail,
+          name: typeof window !== 'undefined' ? localStorage.getItem('user_id')?.replace(/_/g, ' ') || '' : ''
+        },
+        theme: {
+          color: '#2563eb'
+        },
+        handler: async (response: any) => {
+          try {
+            // 3. Verify cryptographic payment signature on backend
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                plan_id: selectedPlan.id,
+                user_id: storedUid || undefined,
+                email: candidateEmail
+              })
+            })
+
+            const verifyData = await verifyRes.json()
+            if (verifyRes.ok) {
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('user_plan', selectedPlan.id)
+              }
+              setPaymentStep('success')
+            } else {
+              alert(verifyData.detail || 'Payment verification failed.')
+            }
+          } catch (vErr: any) {
+            alert(`Payment verification error: ${vErr.message}`)
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setActivating(false)
+          }
+        }
+      }
+
+      const rzp = new (window as any).Razorpay(options)
+      rzp.on('payment.failed', (response: any) => {
+        alert(`Payment failed: ${response.error?.description || response.error?.reason || 'Unknown error'}`)
+        setActivating(false)
+      })
+      rzp.open()
+    } catch (err: any) {
+      alert(err.message || 'Payment error')
       setActivating(false)
     }
   }
@@ -376,6 +453,9 @@ export default function PricingPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Official Razorpay Checkout Script */}
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
     </div>
   )
 }
