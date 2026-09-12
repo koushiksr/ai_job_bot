@@ -487,17 +487,17 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* Autonomous AI Engine Cockpit Card */}
-        <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4 relative overflow-hidden card-featured-glow">
-          {/* Laser beam sweep accent */}
+        {/* Unified Mission Control Card (Cockpit + Live Metrics + Telemetry Strip) */}
+        <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden card-featured-glow relative">
+          {/* Subtle top laser scan accent */}
           <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
 
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            
+          {/* Section 1: Cockpit Header & Trigger */}
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-950/50">
             <div className="flex items-center gap-3.5">
-              <div className="relative">
+              <div className="relative shrink-0">
                 <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
-                  <Cpu className="w-5 h-5" />
+                  <Cpu className="w-5 h-5 text-violet-400" />
                 </div>
                 <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -517,7 +517,7 @@ export default function UserDashboard() {
                 <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2 flex-wrap">
                   {isProfessional ? (
                     <>
-                      <span>Schedule: <strong className="text-zinc-300">Dual Precision Runs · 06:00 &amp; 08:00 AM IST</strong></span>
+                      <span>Schedule: <strong className="text-zinc-300">Dual Precision · 06:00 &amp; 08:00 AM IST</strong></span>
                       <span className="text-zinc-600 hidden sm:inline">•</span>
                       <span className="text-violet-300 font-medium">+ Unlimited On-Demand</span>
                       <span className="text-zinc-600 hidden sm:inline">•</span>
@@ -534,21 +534,21 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
+            <div className="w-full sm:w-auto">
               {isProfessional ? (
                 <button
                   onClick={handleTriggerOnDemandScout}
                   disabled={isTriggeringScout}
-                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
+                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
                 >
                   {isTriggeringScout ? (
                     <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-violet-400" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-zinc-900" />
                       <span>Scouting Openings...</span>
                     </>
                   ) : (
                     <>
-                      <Zap className="w-3.5 h-3.5 text-zinc-400" />
+                      <Zap className="w-3.5 h-3.5 text-zinc-900" />
                       <span>Trigger On-Demand Run</span>
                     </>
                   )}
@@ -559,9 +559,8 @@ export default function UserDashboard() {
                     setProModalFeature('Instant On-Demand Turbo Scout')
                     setShowProModal(true)
                   }}
-                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-gradient-to-r from-violet-950/40 via-zinc-900 to-violet-950/40 hover:from-violet-900/50 hover:to-zinc-800 border border-violet-500/40 text-violet-200 text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.15)] group relative overflow-hidden"
+                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-violet-500/40 text-violet-200 text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.1)] group"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/10 to-transparent animate-laser-sweep pointer-events-none" />
                   <Lock className="w-3.5 h-3.5 text-violet-400 group-hover:scale-110 transition-transform" />
                   <span>Trigger On-Demand Run</span>
                   <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-violet-900/80 border border-violet-600/50 text-white font-semibold">
@@ -574,8 +573,7 @@ export default function UserDashboard() {
 
           {/* Active Radar Telemetry Animation (Visible during Scouting — PRO only) */}
           {isTriggeringScout && isProfessional && (
-            <div className="p-4 rounded-xl bg-zinc-950/95 border border-violet-500/40 relative overflow-hidden space-y-3 shadow-lg shadow-violet-950/20">
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep pointer-events-none" />
+            <div className="p-4 bg-zinc-950/95 border-t border-b border-violet-500/40 relative overflow-hidden space-y-3">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
@@ -589,9 +587,7 @@ export default function UserDashboard() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-white">
-                        Autonomous Scout Executing
-                      </span>
+                      <span className="text-xs font-semibold text-white">Autonomous Scout Executing</span>
                       <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-violet-950/80 border border-violet-700/60 text-violet-300 animate-pulse">
                         RADAR SWEEP ACTIVE
                       </span>
@@ -601,7 +597,6 @@ export default function UserDashboard() {
                     </p>
                   </div>
                 </div>
-
                 <div className="w-full sm:w-44 h-2 bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden relative shrink-0">
                   <div className="w-20 h-full bg-gradient-to-r from-violet-600 via-purple-400 to-violet-600 rounded-full animate-laser-sweep" />
                 </div>
@@ -609,9 +604,9 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {/* Feedback Toast — only shown to Professional users running on-demand scans */}
+          {/* Feedback Toast */}
           {taskFeedback && isProfessional && (
-            <div className={`p-3 rounded-lg text-xs flex items-center justify-between border ${
+            <div className={`p-3 text-xs flex items-center justify-between border-t border-b ${
               taskFeedback.type === 'success'
                 ? 'bg-zinc-950 border-emerald-500/30 text-emerald-300'
                 : taskFeedback.type === 'error'
@@ -631,158 +626,77 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {/* Protocols: 4-Cell Enterprise Telemetry Matrix */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-3 border-t border-zinc-800/80 text-[11px] text-zinc-400">
-            <div className="flex items-center gap-2 bg-black px-3.5 py-2 rounded-lg border border-zinc-800/80">
-              <Shield className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-              <span>Pacing: <strong className="text-zinc-300">Human Emulation (4s-8s)</strong></span>
+          {/* Section 2: Integrated 4 Metrics Bar */}
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-zinc-800/80 border-t border-zinc-800/80 bg-black/30">
+            <div className="p-3.5 sm:p-4 space-y-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400">
+                <span className="text-[11px] flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-zinc-500" /> Today</span>
+                <span className="text-[10px] font-mono text-zinc-500">24h</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono">{metrics.today}</div>
+              <p className="text-[10px] text-zinc-500">Delivered today</p>
             </div>
 
-            <div
-              onClick={() => {
-                if (!isProfessional) {
-                  setProModalFeature('Neural LLM Screening Tailor')
-                  setShowProModal(true)
-                }
-              }}
-              className={`flex items-center justify-between gap-1.5 bg-black px-3.5 py-2 rounded-lg border transition-colors ${
-                isProfessional ? 'border-zinc-800/80' : 'border-violet-500/30 hover:border-violet-500/60 cursor-pointer group'
-              }`}
-            >
-              <div className="flex items-center gap-2 truncate">
-                <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                <span className="truncate">Screening: <strong className="text-zinc-300">Contextual</strong></span>
+            <div className="p-3.5 sm:p-4 space-y-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400">
+                <span className="text-[11px] flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-zinc-500" /> This Week</span>
+                <span className="text-[10px] font-mono text-zinc-500">7d</span>
               </div>
-              {isProfessional ? (
-                <span className="text-[9px] font-mono text-emerald-400 shrink-0">NEURAL ACTIVE</span>
-              ) : (
-                <span className="text-[9px] font-mono text-violet-400 flex items-center gap-0.5 shrink-0 group-hover:underline">
-                  <Lock className="w-2.5 h-2.5" /> NEURAL: PRO
-                </span>
-              )}
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono">{metrics.this_week}</div>
+              <p className="text-[10px] text-zinc-500">7-day outreach</p>
             </div>
 
-            <div
-              onClick={() => {
-                if (!isProfessional) {
-                  setProModalFeature('Zero-Queue Recruiter Fast-Path')
-                  setShowProModal(true)
-                }
-              }}
-              className={`flex items-center justify-between gap-1.5 bg-black px-3.5 py-2 rounded-lg border transition-colors ${
-                isProfessional ? 'border-zinc-800/80' : 'border-violet-500/30 hover:border-violet-500/60 cursor-pointer group'
-              }`}
-            >
-              <div className="flex items-center gap-2 truncate">
-                <TrendingUp className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                <span className="truncate">Delivery: <strong className="text-zinc-300">Recruiter ATS</strong></span>
+            <div className="p-3.5 sm:p-4 space-y-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400">
+                <span className="text-[11px] flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-zinc-500" /> This Month</span>
+                <span className="text-[10px] font-mono text-zinc-500">30d</span>
               </div>
-              {isProfessional ? (
-                <span className="text-[9px] font-mono text-emerald-400 shrink-0">FAST-PATH</span>
-              ) : (
-                <span className="text-[9px] font-mono text-violet-400 flex items-center gap-0.5 shrink-0 group-hover:underline">
-                  <Lock className="w-2.5 h-2.5" /> FAST-PATH: PRO
-                </span>
-              )}
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono">{metrics.this_month}</div>
+              <p className="text-[10px] text-zinc-500">Monthly volume</p>
             </div>
 
-            <div
-              onClick={() => {
-                if (!isProfessional) {
-                  setProModalFeature('Instant On-Demand Turbo Trigger')
-                  setShowProModal(true)
-                }
-              }}
-              className={`flex items-center justify-between gap-1.5 bg-black px-3.5 py-2 rounded-lg border transition-colors ${
-                isProfessional ? 'border-zinc-800/80' : 'border-violet-500/30 hover:border-violet-500/60 cursor-pointer group'
-              }`}
-            >
-              <div className="flex items-center gap-2 truncate">
-                <Zap className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                {isProfessional ? (
-                  <span className="truncate">Trigger: <strong className="text-zinc-300">Dual + On-Demand</strong></span>
-                ) : (
-                  <span className="truncate">Trigger: <strong className="text-zinc-300">Daily</strong></span>
-                )}
+            <div className="p-3.5 sm:p-4 space-y-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400">
+                <span className="text-[11px] flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-zinc-500" /> Total Verified</span>
+                <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">100%</span>
               </div>
-              {isProfessional ? (
-                <span className="text-[9px] font-mono text-violet-300 shrink-0">MULTI-RUN</span>
-              ) : (
-                <span className="text-[9px] font-mono text-violet-400 flex items-center gap-0.5 shrink-0 group-hover:underline">
-                  <Lock className="w-2.5 h-2.5" /> TURBO: PRO
-                </span>
-              )}
+              <div className="text-xl sm:text-2xl font-bold text-white font-mono">{metrics.total_applied}</div>
+              <p className="text-[10px] text-zinc-500">All-time submissions</p>
             </div>
+          </div>
+
+          {/* Section 3: Clean Telemetry Protocol Strip */}
+          <div className="px-4 py-2.5 bg-black border-t border-zinc-800/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-zinc-400">
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span>Pacing: <strong className="text-zinc-300">Human (4s-8s)</strong></span>
+              </span>
+              <span className="text-zinc-800 hidden sm:inline">|</span>
+              <button
+                onClick={() => { if (!isProfessional) { setProModalFeature('Neural LLM Screening Tailor'); setShowProModal(true) } }}
+                className="flex items-center gap-1.5 hover:text-zinc-200 transition-colors cursor-pointer"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span>Screening: <strong className="text-zinc-300">Contextual AI</strong></span>
+                {!isProfessional && <span className="text-[9px] font-mono text-violet-400 ml-0.5">🔒 PRO</span>}
+              </button>
+              <span className="text-zinc-800 hidden sm:inline">|</span>
+              <button
+                onClick={() => { if (!isProfessional) { setProModalFeature('Zero-Queue Recruiter Fast-Path'); setShowProModal(true) } }}
+                className="flex items-center gap-1.5 hover:text-zinc-200 transition-colors cursor-pointer"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span>Delivery: <strong className="text-zinc-300">Recruiter ATS</strong></span>
+                {!isProfessional && <span className="text-[9px] font-mono text-violet-400 ml-0.5">🔒 PRO</span>}
+              </button>
+            </div>
+
+            <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">
+              Dual Automated Morning Sync
+            </span>
           </div>
         </div>
-
-        {/* Neural ATS Recruiter Readiness Diagnostic Widget */}
-        <NeuralAtsDiagnosticCard
-          isProfessional={isProfessional}
-          skillsCount={8}
-          resumeUploaded={true}
-          onUnlockClick={(feat) => {
-            setProModalFeature(feat || 'Professional Suite')
-            setShowProModal(true)
-          }}
-        />
-
-        {/* 4 Clean Auth0-Style Metric Cards */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          <div className="p-3.5 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
-            <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
-                <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> Today
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500">24h</span>
-            </div>
-            <div className="text-xl sm:text-3xl font-semibold text-white font-mono">
-              {metrics.today}
-            </div>
-            <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">Applications today</p>
-          </div>
-
-          <div className="p-3.5 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
-            <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
-                <Calendar className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> This Week
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500">7d</span>
-            </div>
-            <div className="text-xl sm:text-3xl font-semibold text-white font-mono">
-              {metrics.this_week}
-            </div>
-            <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">7-day deliveries</p>
-          </div>
-
-          <div className="p-3.5 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
-            <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
-                <TrendingUp className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> This Month
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500">30d</span>
-            </div>
-            <div className="text-xl sm:text-3xl font-semibold text-white font-mono">
-              {metrics.this_month}
-            </div>
-            <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">Monthly outreach</p>
-          </div>
-
-          <div className="p-3.5 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
-            <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs truncate">
-                <Sparkles className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> Total
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
-                Verified
-              </span>
-            </div>
-            <div className="text-xl sm:text-3xl font-semibold text-white font-mono">
-              {metrics.total_applied}
-            </div>
-            <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">Total submissions</p>
-          </div>
-        </section>
 
         {/* Tab Navigation with Mobile Horizontal Swipe */}
         <div className="flex items-center gap-1.5 sm:gap-2 border-b border-zinc-900 pb-2 sm:pb-3 overflow-x-auto scrollbar-none flex-nowrap -mx-1 px-1">
@@ -1164,6 +1078,17 @@ export default function UserDashboard() {
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
+
+            {/* Neural ATS Recruiter Readiness Diagnostic Widget */}
+            <NeuralAtsDiagnosticCard
+              isProfessional={isProfessional}
+              skillsCount={8}
+              resumeUploaded={true}
+              onUnlockClick={(feat) => {
+                setProModalFeature(feat || 'Professional Suite')
+                setShowProModal(true)
+              }}
+            />
 
             <CandidateProfileEditor
               userId={userId}
