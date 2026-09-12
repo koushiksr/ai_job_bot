@@ -253,7 +253,8 @@ export default function Home() {
                   onClick={() => { setAuthMode('trial'); setError('') }}
                   className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-all shadow-sm cursor-pointer shrink-0"
                 >
-                  Start Free Trial
+                  <span className="hidden sm:inline">Start Free Trial</span>
+                  <span className="sm:hidden">Try Free</span>
                 </button>
               </>
             )}

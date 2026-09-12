@@ -19,7 +19,8 @@ import {
   Headset,
   Loader2,
   Sliders,
-  Sparkles
+  Sparkles,
+  LogOut
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
@@ -316,23 +317,23 @@ export default function PricingPage() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-spotlight pointer-events-none" />
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-zinc-900 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
+      <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <JobFluxLogo size="sm" />
           </Link>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-4">
             <button
               onClick={() => setIsHelpOpen(true)}
-              className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex items-center gap-1"
+              className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex items-center gap-1 shrink-0"
             >
-              <Mail className="w-3 h-3 text-violet-400" />
-              <span>Help & Support</span>
+              <Mail className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+              <span className="hidden sm:inline">Help & Support</span>
             </button>
 
             {isLoggedIn ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
                   <div className="w-4 h-4 rounded-full bg-zinc-800 text-zinc-300 font-medium flex items-center justify-center text-[10px]">
                     {(currentUserEmail || currentUserId || 'U')[0].toUpperCase()}
@@ -343,7 +344,7 @@ export default function PricingPage() {
                 </div>
                 <Link
                   href="/dashboard"
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-zinc-200 text-black transition-colors flex items-center gap-1.5"
+                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors flex items-center gap-1.5 shrink-0"
                 >
                   <span>Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -353,24 +354,26 @@ export default function PricingPage() {
                     localStorage.clear()
                     window.location.href = '/'
                   }}
-                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer"
+                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer flex items-center gap-1 shrink-0"
                 >
-                  Sign Out
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Sign Out</span>
                 </button>
               </div>
             ) : (
               <>
                 <Link
                   href="/"
-                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium"
+                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/?mode=trial"
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors"
+                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
                 >
-                  Start Free Trial
+                  <span className="hidden sm:inline">Start Free Trial</span>
+                  <span className="sm:hidden">Try Free</span>
                 </Link>
               </>
             )}

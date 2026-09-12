@@ -376,10 +376,10 @@ export default function CandidateProfileEditor({
           spellCheck={false}
         />
 
-        <div className="flex justify-end gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row justify-end gap-2.5 sm:gap-3">
+          <div className="relative w-full sm:w-auto">
             {showAiPrompt && (
-              <div className="absolute bottom-full right-0 mb-3 w-80 p-4 bg-[#09090b] border border-zinc-700 rounded-xl shadow-2xl z-10">
+              <div className="absolute bottom-full right-0 mb-3 w-[calc(100vw-48px)] sm:w-80 max-w-sm p-4 bg-[#09090b] border border-zinc-700 rounded-xl shadow-2xl z-10">
                 <label className="block text-xs font-medium text-zinc-200 mb-1">Target Job Title & Instructions (Optional)</label>
                 <p className="text-[10px] text-zinc-400 mb-2 leading-relaxed">
                   <strong>Example:</strong> "Target Job: Senior Python Developer. Remote roles only. Expected CTC is 18 LPA. Notice period 30 days."
@@ -392,8 +392,8 @@ export default function CandidateProfileEditor({
                   className="w-full bg-black border border-zinc-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-zinc-500 mb-3 resize-none"
                 />
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setShowAiPrompt(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-colors">Cancel</button>
-                  <button onClick={handleAiAutoFill} disabled={isAnalyzing} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors">
+                  <button onClick={() => setShowAiPrompt(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-colors cursor-pointer">Cancel</button>
+                  <button onClick={handleAiAutoFill} disabled={isAnalyzing} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors cursor-pointer">
                     {isAnalyzing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                     {isAnalyzing ? 'Analyzing...' : 'Auto-Fill'}
                   </button>
@@ -404,7 +404,7 @@ export default function CandidateProfileEditor({
             <button
               onClick={() => setShowAiPrompt(!showAiPrompt)}
               disabled={savingProfile || isAnalyzing}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> Auto-Fill with AI
             </button>
@@ -413,7 +413,7 @@ export default function CandidateProfileEditor({
           <button
             onClick={handleSaveJson}
             disabled={savingProfile || isAnalyzing}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors cursor-pointer shadow-sm"
           >
             <Save className="w-3.5 h-3.5" /> {savingProfile ? 'Saving...' : 'Save Configuration'}
           </button>
@@ -421,23 +421,23 @@ export default function CandidateProfileEditor({
       </div>
 
       {/* Resume PDF Section */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3">
         <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
           <FileText className="w-4 h-4 text-zinc-400" /> Candidate Resume PDF
         </h3>
 
-        <div className="p-4 rounded-xl bg-black border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-black border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400">
+            <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 shrink-0">
               <FileText className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-medium text-white">
+                <span className="text-xs font-mono font-medium text-white truncate max-w-[200px] sm:max-w-none">
                   {resumeFilename || (effectiveUserId ? `${effectiveUserId}_Resume.pdf` : 'Candidate_Resume.pdf')}
                 </span>
                 {(resumeFilename || !isNew) && (
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 font-mono">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 font-mono shrink-0">
                     Cloud Synced
                   </span>
                 )}
@@ -448,19 +448,19 @@ export default function CandidateProfileEditor({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             {effectiveUserId && (
               <a
                 href={`/api/profile/resume?user_id=${encodeURIComponent(effectiveUserId)}&t=${resumeVersion}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-colors"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-colors"
               >
                 <Download className="w-3.5 h-3.5" /> Preview PDF
               </a>
             )}
 
-            <label className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black cursor-pointer transition-colors">
+            <label className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black cursor-pointer transition-colors shadow-sm">
               <Upload className="w-3.5 h-3.5" />
               <span>{uploadingResume ? 'Uploading...' : 'Upload PDF'}</span>
               <input

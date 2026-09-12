@@ -455,18 +455,18 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
       {/* Admin Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="hover:opacity-90 transition-opacity">
+      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+            <Link href="/" className="hover:opacity-90 transition-opacity shrink-0">
               <JobFluxLogo size="sm" showText={true} />
             </Link>
 
             <div className="h-5 w-px bg-zinc-800 hidden sm:block" />
 
             <div className="flex items-center gap-2">
-              <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-violet-300 font-mono uppercase font-semibold">
-                Super Admin Hub
+              <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-violet-300 font-mono uppercase font-semibold hidden xs:inline">
+                Super Admin
               </span>
               <span className="text-[11px] text-zinc-500 font-mono hidden md:inline">
                 MongoDB Atlas Synchronized
@@ -474,24 +474,30 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => setIsHelpOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer shrink-0"
+              title="Help Desk"
             >
-              <Mail className="w-3.5 h-3.5 text-violet-400" /> Help Desk
+              <Mail className="w-3.5 h-3.5 text-violet-400" />
+              <span className="hidden sm:inline">Help Desk</span>
             </button>
             <button
               onClick={fetchOverviewAndUsers}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer shrink-0"
+              title="Refresh"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> Refresh
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Refresh</span>
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer shrink-0"
+              title="Log Out"
             >
-              <LogOut className="w-3.5 h-3.5" /> Log Out
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Log Out</span>
             </button>
           </div>
         </div>

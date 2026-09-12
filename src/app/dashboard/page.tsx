@@ -25,7 +25,8 @@ import {
   MessageSquare,
   X,
   Lock,
-  Crown
+  Crown,
+  ChevronDown
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
@@ -51,6 +52,7 @@ export default function UserDashboard() {
 
   // Help Modal State
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false)
 
   // Metrics State
   const [metrics, setMetrics] = useState({
@@ -379,54 +381,52 @@ export default function UserDashboard() {
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3 sm:px-6 py-2.5 sm:py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3.5 sm:px-6 py-2.5 sm:py-3.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           
-          {/* Brand Logo & Candidate Identity */}
-          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+          {/* Left: Brand Logo & Desktop Candidate Identity */}
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <Link href="/" className="flex items-center hover:opacity-90 transition-opacity shrink-0">
               <JobFluxLogo size="sm" showText={true} />
             </Link>
 
-            <div className="h-5 sm:h-6 w-px bg-zinc-800 hidden sm:block shrink-0" />
-
-            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-medium text-white text-[11px] sm:text-xs shrink-0">
+            {/* Desktop Only: Divider + Candidate Details */}
+            <div className="hidden md:flex items-center gap-3 border-l border-zinc-800 pl-3.5">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-semibold text-white text-xs shrink-0">
                 {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <h1 className="text-xs sm:text-sm font-semibold text-white truncate max-w-[110px] sm:max-w-none">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xs font-semibold text-white truncate max-w-[140px]">
                     {userName || 'Candidate'}
                   </h1>
-                  <span className="text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono uppercase shrink-0">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono uppercase">
                     {userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
                   </span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-zinc-500 font-mono truncate max-w-[130px] sm:max-w-none hidden xs:block">
+                <p className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]">
                   {userEmail}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Right Desktop Actions (Clean & Spaced Out) */}
+          <div className="hidden md:flex items-center gap-2.5 shrink-0">
             <button
               onClick={() => setIsHelpOpen(true)}
-              title="Help & Support"
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
             >
               <Mail className="w-3.5 h-3.5 text-violet-400" /> 
-              <span className="hidden md:inline">Help & Support</span>
+              <span>Help & Support</span>
             </button>
 
             <Link
               href="/pricing"
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
             >
               <Sparkles className="w-3.5 h-3.5" /> 
-              <span>Upgrade</span>
+              <span>Upgrade Plan</span>
             </Link>
 
             {userRole === 'admin' && (
@@ -434,52 +434,149 @@ export default function UserDashboard() {
                 href="/admin"
                 className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition-colors"
               >
-                <Shield className="w-3.5 h-3.5 text-zinc-400" /> <span className="hidden sm:inline">Admin</span>
+                <Shield className="w-3.5 h-3.5 text-zinc-400" /> <span>Admin</span>
               </Link>
             )}
 
             <button
               onClick={handleLogout}
-              title="Sign out"
-              className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
             >
-              <LogOut className="w-3.5 h-3.5" /> <span className="hidden md:inline">Log Out</span>
+              <LogOut className="w-3.5 h-3.5" /> <span>Sign Out</span>
+            </button>
+          </div>
+
+          {/* Right Mobile Actions: Clean, Smart & Uncluttered */}
+          <div className="flex md:hidden items-center gap-2 shrink-0">
+            <Link
+              href="/pricing"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-black shrink-0 shadow-sm"
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>Upgrade</span>
+            </Link>
+
+            <button
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all text-white cursor-pointer"
+              aria-label="Toggle profile menu"
+            >
+              <span className="w-6 h-6 rounded-md bg-zinc-800 border border-zinc-700/60 flex items-center justify-center font-bold text-[10px] text-white">
+                {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
             </button>
           </div>
         </div>
       </header>
+
+      {/* Floating Mobile Popover Sheet with Backdrop (Zero Header Layout Shifts) */}
+      {isMobileNavOpen && (
+        <div className="md:hidden">
+          {/* Dark Translucent Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-in fade-in duration-150"
+            onClick={() => setIsMobileNavOpen(false)}
+          />
+
+          {/* Floating Action Sheet */}
+          <div className="fixed top-14 right-3 left-3 max-w-sm ml-auto z-50 p-4 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 rounded-2xl shadow-2xl shadow-black/80 space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
+            {/* Candidate Identity Card */}
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0">
+                  {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-white truncate max-w-[140px]">{userName || 'Candidate'}</span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono uppercase">
+                      {userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 font-mono truncate mt-0.5">{userEmail}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsMobileNavOpen(false)}
+                className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Quick Actions List */}
+            <div className="space-y-1 text-xs">
+              <button
+                onClick={() => { setIsHelpOpen(true); setIsMobileNavOpen(false) }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
+              >
+                <Mail className="w-4 h-4 text-violet-400 shrink-0" />
+                <span>Help & Support Center</span>
+              </button>
+
+              <Link
+                href="/pricing"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Compare Pricing & Plans</span>
+              </Link>
+
+              {userRole === 'admin' && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                >
+                  <Shield className="w-4 h-4 text-violet-400 shrink-0" />
+                  <span>Admin Control Center</span>
+                </Link>
+              )}
+
+              <button
+                onClick={() => { setIsMobileNavOpen(false); handleLogout() }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-950/20 transition-colors cursor-pointer text-left pt-2.5 border-t border-zinc-800/80"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                <span>Sign Out of Account</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
         
         {/* Launch Special Banner for Free Trial Users */}
         {userPlan === 'trial' && (
-          <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-[#09090b] to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-[#09090b] to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-zinc-300">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-zinc-300">
                 <Sparkles className="w-4 h-4 text-violet-400" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-white">
                     {metrics.total_applied >= 15
-                      ? 'Free Trial Application Quota Completed (15/15)'
-                      : metrics.total_applied >= 8
-                      ? `Free Trial Quota: ${metrics.total_applied}/15 Dispatched`
-                      : '1-Day Free Trial Active · 15 Verified Submissions Included'}
+                      ? 'Free Trial Quota Reached (15/15)'
+                      : `Free Trial Active · ${metrics.total_applied}/15 Dispatched`}
                   </span>
                   <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-400">
-                    {metrics.total_applied >= 15 ? 'QUOTA EXHAUSTED' : 'SPECIAL OFFER'}
+                    {metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Unlock <strong className="text-white">1,800+ automated applications</strong>, dual morning precision runs, and direct recruiter links on the Professional Plan.
+                <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
+                  Unlock <strong className="text-white">1,800+ applications</strong>, dual morning scans & recruiter fast-path on Professional.
                 </p>
               </div>
             </div>
             <Link
               href="/pricing"
-              className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center gap-1.5 shadow-sm"
+              className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
             >
               <span>Upgrade Plan</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -699,13 +796,13 @@ export default function UserDashboard() {
         </div>
 
         {/* Tab Navigation with Mobile Horizontal Swipe */}
-        <div className="flex items-center gap-1.5 sm:gap-2 border-b border-zinc-900 pb-2 sm:pb-3 overflow-x-auto scrollbar-none flex-nowrap -mx-1 px-1">
+        <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-zinc-950/90 border border-zinc-800/80 rounded-xl overflow-x-auto scrollbar-none flex-nowrap">
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'history'
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
           >
             <Briefcase className="w-3.5 h-3.5 shrink-0" />
@@ -713,10 +810,10 @@ export default function UserDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'profile'
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
           >
             <User className="w-3.5 h-3.5 shrink-0" />
@@ -727,10 +824,10 @@ export default function UserDashboard() {
               setActiveTab('queries')
               loadUserTickets(userId)
             }}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'queries'
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5 text-violet-400 shrink-0" />
@@ -743,10 +840,10 @@ export default function UserDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('resume_builder')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               activeTab === 'resume_builder'
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-violet-400 shrink-0" />
@@ -917,9 +1014,10 @@ export default function UserDashboard() {
               </div>
             )}
 
-            {/* Applications Table */}
+            {/* Applications Table (Desktop) & Cards (Mobile) */}
             <div className="rounded-xl bg-[#09090b] border border-zinc-800 overflow-hidden">
-              <div className="overflow-x-auto">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs text-zinc-300">
                   <thead className="bg-black text-zinc-500 uppercase text-[10px] tracking-wider border-b border-zinc-800">
                     <tr>
@@ -1017,6 +1115,65 @@ export default function UserDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card List View (md:hidden) */}
+              <div className="md:hidden divide-y divide-zinc-800/60">
+                {loadingHistory ? (
+                  <div className="py-10 text-center text-zinc-500 text-xs">
+                    <RefreshCw className="w-4 h-4 mx-auto animate-spin mb-2 text-zinc-400" />
+                    Loading applications...
+                  </div>
+                ) : historyJobs.length === 0 ? (
+                  <div className="py-12 px-4 text-center space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
+                      <Cpu className="w-5 h-5 text-violet-400" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-semibold text-white">
+                        {historySearch ? 'No Applications Match Search' : 'Autonomous Engine Standing By'}
+                      </h4>
+                      <p className="text-[11px] text-zinc-400">
+                        {historySearch
+                          ? `No previous job applications match "${historySearch}".`
+                          : 'Morning sweeps run at 06:00 AM IST. Verified applications will appear here.'}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  historyJobs.map((job, idx) => (
+                    <div
+                      key={job.id || idx}
+                      onClick={() => setSelectedJobAudit(job)}
+                      className="p-3.5 hover:bg-zinc-900/40 active:bg-zinc-900/70 transition-colors cursor-pointer space-y-2"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 shrink-0">
+                            <Building2 className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-semibold text-white truncate">
+                              {job.company || 'Direct Employer'}
+                            </h4>
+                            <p className="text-[11px] text-zinc-400 truncate">
+                              {job.title || 'Job Opening'}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 shrink-0">
+                          <CheckCircle2 className="w-2.5 h-2.5" /> APPLIED
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono pt-1">
+                        <span>{formatJobDate(job)}</span>
+                        <span className="text-violet-400 flex items-center gap-0.5 font-medium">
+                          Audit Receipt &rarr;
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Pagination */}
@@ -1259,11 +1416,11 @@ export default function UserDashboard() {
         {/* AI Application Audit Receipt Modal */}
         {selectedJobAudit && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-black/80 backdrop-blur-sm"
             onClick={() => setSelectedJobAudit(null)}
           >
             <div
-              className="w-full max-w-lg bg-[#09090b] border border-zinc-800 rounded-2xl p-6 shadow-2xl space-y-5"
+              className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#09090b] border border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
