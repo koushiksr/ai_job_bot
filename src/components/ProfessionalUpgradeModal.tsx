@@ -38,7 +38,7 @@ export default function ProfessionalUpgradeModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-2xl bg-[#09090b] border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden card-featured-glow text-zinc-100"
+          className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-[#09090b] border border-zinc-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl card-featured-glow text-zinc-100"
         >
           {/* Laser beam sweep accent */}
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep pointer-events-none" />
