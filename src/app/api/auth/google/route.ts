@@ -3,15 +3,59 @@ import { getDb } from '@/lib/mongodb'
 
 export const dynamic = 'force-dynamic'
 
+export async function GET() {
+  try {
+    const db = await getDb()
+    if (!db) {
+      return NextResponse.json({ accounts: [] }, { status: 200 })
+    }
+    const profiles = await db.collection('profiles')
+      .find({}, { projection: { user_id: 1, email: 1, name: 1, plan: 1, _id: 0 } })
+      .limit(10)
+      .toArray()
+
+    return NextResponse.json({
+      accounts: profiles
+        .filter(p => p.email)
+        .map(p => ({
+          user_id: p.user_id,
+          email: p.email,
+          name: p.name || p.user_id.replace(/^candidate\d+_/, '').replace(/_/g, ' '),
+          plan: p.plan || 'trial'
+        }))
+    })
+  } catch (err: any) {
+    return NextResponse.json({ accounts: [] }, { status: 200 })
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const emailClean = (body.email || '').trim().toLowerCase()
-    const name = (body.name || '').trim()
+    let emailClean = (body.email || '').trim().toLowerCase()
+    let name = (body.name || '').trim()
+
+    // Support Google Identity Services (GIS) JWT ID token
+    if (body.credential) {
+      try {
+        const parts = body.credential.split('.')
+        if (parts.length === 3) {
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'))
+          if (payload.email) {
+            emailClean = payload.email.trim().toLowerCase()
+          }
+          if (payload.name && !name) {
+            name = payload.name.trim()
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse Google JWT credential:', e)
+      }
+    }
 
     if (!emailClean) {
       return NextResponse.json(
-        { detail: 'Google email is required.' },
+        { detail: 'Google account email is required.' },
         { status: 400 }
       )
     }
