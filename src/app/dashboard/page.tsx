@@ -88,6 +88,22 @@ export default function UserDashboard() {
 
   // Initial Load on Mount
   useEffect(() => {
+    // Check if redirected from Google OAuth callback
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search)
+      if (p.get('auth') === 'google' && p.get('user_id')) {
+        const gUid = p.get('user_id')!
+        const gEmail = p.get('email') || ''
+        const gRole = p.get('role') || 'user'
+        const gPlan = p.get('plan') || 'trial'
+        localStorage.setItem('user_id', gUid)
+        localStorage.setItem('user_email', gEmail)
+        localStorage.setItem('user_role', gRole)
+        localStorage.setItem('user_plan', gPlan)
+        window.history.replaceState({}, document.title, '/dashboard')
+      }
+    }
+
     const storedUid = localStorage.getItem('user_id')
     const storedEmail = localStorage.getItem('user_email')
     const storedRole = localStorage.getItem('user_role')

@@ -7,12 +7,10 @@ import { motion } from 'framer-motion'
 import { ChevronRight, Mail, Lock, Loader2, Sparkles, User, Zap, Gift, Clock, ArrowRight } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxSplash from '@/components/JobFluxSplash'
-import GoogleAccountChooserModal from '@/components/GoogleAccountChooserModal'
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true)
   const [authMode, setAuthMode] = useState<'signin' | 'trial'>('signin')
-  const [showGoogleChooser, setShowGoogleChooser] = useState(false)
   
   // Form fields
   const [name, setName] = useState('')
@@ -21,12 +19,16 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Check URL parameters for trial mode
+  // Check URL parameters for trial mode or errors
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search)
       if (p.get('mode') === 'trial') {
         setAuthMode('trial')
+      }
+      const errParam = p.get('error')
+      if (errParam) {
+        setError(decodeURIComponent(errParam))
       }
     }
   }, [])
@@ -129,57 +131,11 @@ export default function Home() {
   }, [])
 
   const handleGoogleAuth = () => {
-    setError('')
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-    if (clientId && (window as any).google?.accounts?.id) {
-      try {
-        (window as any).google.accounts.id.prompt((notification: any) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            setShowGoogleChooser(true)
-          }
-        })
-        return
-      } catch (e) {
-        console.warn('Google prompt fallback to chooser modal:', e)
-      }
-    }
-    // Open authentic Google Account Chooser
-    setShowGoogleChooser(true)
-  }
-
-  const handleSelectGoogleAccount = async (account: { email: string; name: string }) => {
     setLoading(true)
     setError('')
-    try {
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: account.email.trim().toLowerCase(), name: account.name })
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        localStorage.setItem('user_id', data.user_id)
-        localStorage.setItem('user_email', data.email)
-        localStorage.setItem('user_role', data.role || 'user')
-        localStorage.setItem('user_plan', data.plan || 'trial')
-        setShowGoogleChooser(false)
-        if (data.role === 'admin') {
-          window.location.href = '/admin'
-        } else {
-          window.location.href = '/dashboard'
-        }
-      } else {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.detail || 'Google sign-in failed.')
-      }
-    } catch (e: any) {
-      setError(e.message || 'Google sign-in error')
-      throw e
-    } finally {
-      setLoading(false)
-    }
+    window.location.href = '/api/auth/google/signin'
   }
+
 
   return (
     <>
@@ -397,13 +353,6 @@ export default function Home() {
           </div>
         </motion.div>
       </div>
-
-      {/* Google Account Chooser Modal */}
-      <GoogleAccountChooserModal
-        isOpen={showGoogleChooser}
-        onClose={() => setShowGoogleChooser(false)}
-        onSelect={handleSelectGoogleAccount}
-      />
 
       {/* Google Identity Services SDK Script */}
       <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
