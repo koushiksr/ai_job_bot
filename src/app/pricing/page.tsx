@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Zap, Sparkles, Shield, Clock, ArrowRight, X, CreditCard, ChevronRight } from 'lucide-react'
+import { Check, Zap, Sparkles, Shield, Clock, ArrowRight, X, CreditCard, ChevronRight, User } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 
 interface Plan {
@@ -86,16 +86,36 @@ export default function PricingPage() {
   const [candidateEmail, setCandidateEmail] = useState('')
   const [paymentStep, setPaymentStep] = useState<'details' | 'success'>('details')
   const [activating, setActivating] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [currentUserEmail, setCurrentUserEmail] = useState('')
+  const [currentUserId, setCurrentUserId] = useState('')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('user_email') || ''
+      const uid = localStorage.getItem('user_id') || ''
+      if (email || uid) {
+        setIsLoggedIn(true)
+        setCurrentUserEmail(email)
+        setCurrentUserId(uid)
+        setCandidateEmail(email)
+      }
+    }
+  }, [])
 
   const handleOpenPlanModal = (plan: Plan) => {
     if (plan.id === 'trial') {
-      window.location.href = '/?mode=trial'
+      if (isLoggedIn) {
+        window.location.href = '/dashboard'
+      } else {
+        window.location.href = '/?mode=trial'
+      }
       return
     }
     setSelectedPlan(plan)
     setPaymentStep('details')
     const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : ''
-    setCandidateEmail(storedEmail)
+    setCandidateEmail(storedEmail || currentUserEmail)
   }
 
   const handleActivatePlan = async (e: React.FormEvent) => {
@@ -199,19 +219,41 @@ export default function PricingPage() {
             <JobFluxLogo size="sm" />
           </Link>
 
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-xs text-slate-400 hover:text-white transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/?mode=trial"
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-600/20"
-            >
-              Start 1-Day Free Trial
-            </Link>
+          <div className="flex items-center gap-3">
+            {isLoggedIn ? (
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+                  <div className="w-5 h-5 rounded-md bg-blue-600 text-white font-bold flex items-center justify-center text-[10px]">
+                    {(currentUserEmail || currentUserId || 'U')[0].toUpperCase()}
+                  </div>
+                  <span className="text-slate-300 font-mono text-[11px] max-w-[160px] truncate">
+                    {currentUserEmail || currentUserId}
+                  </span>
+                </div>
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-600/20 flex items-center gap-1.5"
+                >
+                  <span>Go to Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/"
+                  className="text-xs text-slate-400 hover:text-white transition-colors font-medium px-2 py-1"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/?mode=trial"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-600/20"
+                >
+                  Start 1-Day Free Trial
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -296,7 +338,7 @@ export default function PricingPage() {
                       : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
                   }`}
                 >
-                  <span>{plan.cta}</span>
+                  <span>{plan.id === 'trial' && isLoggedIn ? 'Active on Dashboard' : plan.cta}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
