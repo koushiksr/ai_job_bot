@@ -6,6 +6,7 @@ import Script from 'next/script'
 import { motion } from 'framer-motion'
 import {
   ChevronRight,
+  ChevronDown,
   Mail,
   Lock,
   Loader2,
@@ -163,11 +164,11 @@ export default function Home() {
       
       <div className="min-h-screen flex flex-col relative overflow-hidden bg-[#080c14] text-slate-100 selection:bg-blue-600 selection:text-white">
         
-        {/* Subtle, standard clean background highlight */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(37,99,235,0.12),rgba(255,255,255,0))] pointer-events-none" />
+        {/* Subtle background ambient radial light */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(37,99,235,0.14),rgba(255,255,255,0))] pointer-events-none" />
 
         {/* Top Navbar */}
-        <header className="w-full max-w-7xl mx-auto px-6 py-5 flex items-center justify-between z-20">
+        <header className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between z-20">
           <Link href="/" className="flex items-center gap-2">
             <JobFluxLogo size="sm" />
           </Link>
@@ -175,7 +176,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/10 border border-amber-500/25 text-amber-300 hover:bg-amber-500/20 transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/10 border border-amber-500/25 text-amber-300 hover:bg-amber-500/20 transition-all shadow-sm"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>1 Month @ ₹499</span>
@@ -184,7 +185,7 @@ export default function Home() {
               href="/pricing"
               className="text-xs text-slate-400 hover:text-white transition-colors font-medium px-2.5 py-1.5 hidden sm:inline-block"
             >
-              Pricing
+              Pricing Plans
             </Link>
             <button
               onClick={() => { setAuthMode('trial'); setError('') }}
@@ -195,50 +196,67 @@ export default function Home() {
           </div>
         </header>
         
-        {/* Main Hero Section (2-Columns: Left Visualizer & Copy, Right Form Card) */}
-        <main className="w-full max-w-7xl mx-auto px-6 py-8 md:py-12 flex-1 flex flex-col lg:flex-row items-start justify-between gap-12 z-10">
+        {/* Main Hero Section (Clean Above-The-Fold 2-Column Presentation) */}
+        <main className="w-full max-w-7xl mx-auto px-6 py-10 md:py-16 flex-1 flex flex-col lg:flex-row items-center justify-between gap-12 z-10">
           
-          {/* Left Column: Value Prop + Live Engine Simulation */}
+          {/* Left Column: Value Prop, Badges & Direct Actions */}
           <motion.div 
             initial={{ opacity: 0, x: -24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="flex-1 w-full text-center lg:text-left space-y-6"
+            className="flex-1 w-full text-center lg:text-left space-y-7"
           >
             <div>
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-blue-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold mb-4 shadow-md shadow-amber-500/10">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                <span>🔥 Launch Special: 1 Full Month of Auto-Apply for only ₹499!</span>
+                <span>🔥 Limited Time Launch Special: 1 Full Month for only ₹499!</span>
               </div>
               
-              <h1 className="text-3xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.2]">
-                AI Applies to Verified Jobs on Your Behalf — <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-indigo-300">Every Single Day.</span>
+              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+                AI Applies to Jobs on Your Behalf — <br className="hidden sm:inline" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-indigo-300">
+                  Every Single Day.
+                </span>
               </h1>
               
-              <p className="text-sm sm:text-base text-slate-400 mt-3 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Set your target role, city, and salary once. JobFlux AI continuously scans hiring feeds, answers recruiter screening questions with AI reasoning, and submits verified applications twice every morning.
+              <p className="text-base sm:text-lg text-slate-400 mt-5 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Set your target role, preferred city, and compensation once. JobFlux AI continuously scans hiring feeds, answers recruiter screening questions with AI reasoning, and submits verified applications twice every morning while you sleep.
               </p>
             </div>
 
-            {/* Live Interactive AI Engine Demonstration */}
-            <div className="pt-2 w-full h-[450px] shrink-0 overflow-hidden">
-              <AiEngineVisualizer />
-            </div>
-
             {/* Benefit Badges */}
-            <div className="flex flex-wrap gap-2.5 items-center justify-center lg:justify-start text-xs text-slate-300 font-medium pt-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
-                <Zap className="w-3.5 h-3.5 text-sky-400" />
+            <div className="flex flex-wrap gap-2.5 items-center justify-center lg:justify-start text-xs text-slate-300 font-medium">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
+                <Zap className="w-4 h-4 text-sky-400" />
                 <span>Dual Daily Runs (6 AM & 8 AM IST)</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
-                <Gift className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
+                <Gift className="w-4 h-4 text-emerald-400" />
                 <span>1-Day Free Trial (Zero Risk)</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 font-semibold shadow-sm">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 font-semibold shadow-sm">
+                <Clock className="w-4 h-4 text-amber-400" />
                 <span>Save 20+ Hours Weekly</span>
               </div>
+            </div>
+
+            {/* Primary Action Buttons & Scroll Indicator */}
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+              <button
+                onClick={() => { setAuthMode('trial'); setError('') }}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-blue-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <span>Start 1-Day Free Trial (₹0)</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <a
+                href="#ai-engine-showcase"
+                className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-semibold text-xs sm:text-sm border border-slate-800 transition-all flex items-center justify-center gap-2"
+              >
+                <span>Watch Live AI Tour</span>
+                <ChevronDown className="w-4 h-4 text-sky-400 animate-bounce" />
+              </a>
             </div>
           </motion.div>
           
@@ -247,16 +265,16 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.15 }}
-            className="w-full lg:w-[420px] shrink-0 sticky top-24"
+            className="w-full lg:w-[440px] shrink-0"
           >
-            <div className="p-8 w-full border border-slate-800 bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl">
+            <div className="p-8 w-full border border-slate-800 bg-slate-900/90 backdrop-blur-xl rounded-3xl shadow-2xl">
               
               {/* Tab Switcher: Sign In vs 1-Day Free Trial */}
               <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 mb-5">
                 <button
                   type="button"
                   onClick={() => { setAuthMode('signin'); setError('') }}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                     authMode === 'signin'
                       ? 'bg-slate-800 text-white shadow-sm'
                       : 'text-slate-400 hover:text-white'
@@ -267,7 +285,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => { setAuthMode('trial'); setError('') }}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                     authMode === 'trial'
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'text-slate-400 hover:text-white'
@@ -404,57 +422,72 @@ export default function Home() {
           </motion.div>
         </main>
 
-        {/* Section 2: How the AI Autonomous Pipeline Works */}
-        <section className="w-full max-w-7xl mx-auto px-6 py-16 border-t border-slate-800/60 z-10 space-y-12">
+        {/* Section 2: EXPANSIVE CREATIVE AI ENGINE SHOWCASE (Scroll to see) */}
+        <section id="ai-engine-showcase" className="w-full max-w-7xl mx-auto px-6 py-20 border-t border-slate-800/60 z-10 space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-sky-400 bg-blue-500/10 border border-blue-500/25 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> High-Standard AI Architecture
+              <Sparkles className="w-3.5 h-3.5" /> Interactive Platform Simulation
             </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              How JobFlux AI Lands You Recruiter Callbacks
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+              Watch JobFlux Autonomous AI in Action
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
-              Eliminate the frustration of spending 4 hours every evening filling identical forms. The AI handles the entire application cycle autonomously.
+              Explore how our autonomous radar sweeps job portals, computes neural skill fit, solves employer screening questionnaires, and delivers verified applications early each morning.
+            </p>
+          </div>
+
+          {/* Full Width Creative Visualizer Cockpit */}
+          <AiEngineVisualizer />
+        </section>
+
+        {/* Section 3: 3-Pillar Autonomous Architecture */}
+        <section className="w-full max-w-7xl mx-auto px-6 py-16 border-t border-slate-800/60 z-10 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Why Candidates Secure Callbacks with JobFlux
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
+              Stop spending hours every night manually clicking apply. Let high-throughput AI do the heavy lifting.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 */}
-            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-3 hover:border-slate-700 transition-all">
+            <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-3 hover:border-slate-700 transition-all">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-sky-400 font-bold">
                 <Search className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-white">1. Intelligent Job Radar</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Scans fresh verified openings across top company portals every morning. It filters out spam, agencies, and salary mismatches, targeting only the highest-paying, relevant positions.
+                Continuously tracks verified openings across top company portals every morning. Filters out spam and low-reputation recruiters, focusing only on high-paying matching roles.
               </p>
             </div>
 
             {/* Card 2 */}
-            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-3 hover:border-slate-700 transition-all">
+            <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-3 hover:border-slate-700 transition-all">
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 font-bold">
                 <Cpu className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-white">2. Contextual Screening Q&A</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                When recruiters ask tricky questions like notice period, relocation, CTC expectations, and technical stack depth, the AI generates accurate, pre-aligned responses instantly.
+                When recruiters prompt for notice period, relocation preferences, CTC expectations, and technical stack depth, the AI generates accurate, pre-aligned answers instantly.
               </p>
             </div>
 
             {/* Card 3 */}
-            <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-3 hover:border-slate-700 transition-all">
+            <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-3 hover:border-slate-700 transition-all">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
                 <Send className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-white">3. Early Morning Delivery</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Submissions run daily at 06:00 AM & 08:00 AM IST. Your profile sits directly at the top of the recruiter's inbox when they arrive at work, resulting in 8.4x higher view rates.
+                Executes daily at 06:00 AM & 08:00 AM IST. Your profile sits directly at the top of the recruiter's inbox before hundreds of manual applicants begin applying.
               </p>
             </div>
           </div>
 
           {/* Social Proof & Metrics Bar */}
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-950/20 via-slate-900/60 to-purple-950/20 border border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-950/20 via-slate-900/60 to-purple-950/20 border border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
               <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono">600+</div>
               <div className="text-[11px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">Monthly Applications</div>
