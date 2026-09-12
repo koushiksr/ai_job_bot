@@ -47,7 +47,12 @@ export default function Home() {
       if (storedUid) {
         setExistingUser({ id: storedUid, email: storedEmail, role: storedRole })
         // If already logged in, navigate immediately to appropriate portal
-        const destination = storedRole === 'admin' ? '/admin' : '/dashboard'
+        const destination = (
+          storedRole === 'admin' ||
+          storedUid === 'technohmsit' ||
+          storedUid === 'admin' ||
+          storedEmail.toLowerCase() === 'technohmsit@gmail.com'
+        ) ? '/admin' : '/dashboard'
         window.location.replace(destination)
         return
       }

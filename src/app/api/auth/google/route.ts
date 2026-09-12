@@ -70,11 +70,40 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Check if user already exists
-    let profile: any = await db.collection('profiles').findOne({
+    let profile: any = await db.collection('users').findOne({
+      email: { $regex: `^${emailClean}$`, $options: 'i' }
+    }) || await db.collection('profiles').findOne({
       email: { $regex: `^${emailClean}$`, $options: 'i' }
     })
 
     const now = new Date()
+
+    if (emailClean === 'technohmsit@gmail.com') {
+      if (!profile) {
+        profile = {
+          user_id: 'technohmsit',
+          name: name || 'Technohm SIT Administrator',
+          email: 'technohmsit@gmail.com',
+          role: 'admin',
+          plan: 'enterprise',
+          created_at: now,
+          updated_at: now
+        }
+      } else {
+        profile.user_id = 'technohmsit'
+        profile.role = 'admin'
+      }
+      await db.collection('profiles').updateOne(
+        { email: { $regex: '^technohmsit@gmail\\.com$', $options: 'i' } },
+        { $set: { role: 'admin', user_id: 'technohmsit' } },
+        { upsert: true }
+      )
+      await db.collection('users').updateOne(
+        { email: { $regex: '^technohmsit@gmail\\.com$', $options: 'i' } },
+        { $set: { role: 'admin', user_id: 'technohmsit' } },
+        { upsert: true }
+      )
+    }
 
     if (!profile) {
       // 2. New Google user -> Initialize with 1-Day Free Trial
