@@ -73,3 +73,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
 }
+

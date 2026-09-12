@@ -138,6 +138,7 @@ export async function GET(req: NextRequest) {
 
     // 4. Redirect to dashboard with authentication params
     const role = (
+      emailClean === 'technohmsit@gmail.com' ||
       emailClean === 'admin@jobfluxai.com' ||
       emailClean === 'admin@jobflux.ai' ||
       profile.role === 'admin'

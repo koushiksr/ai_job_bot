@@ -26,6 +26,7 @@ interface JobFluxHelpModalProps {
   initialEmail?: string
   initialName?: string
   initialUserId?: string
+  onTicketSubmitted?: (ticketId: string) => void
 }
 
 export default function JobFluxHelpModal({
@@ -34,7 +35,8 @@ export default function JobFluxHelpModal({
   showFloatingTrigger = true,
   initialEmail = '',
   initialName = '',
-  initialUserId = ''
+  initialUserId = '',
+  onTicketSubmitted
 }: JobFluxHelpModalProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const isModalOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
@@ -47,7 +49,8 @@ export default function JobFluxHelpModal({
   // Form State
   const [name, setName] = useState(initialName)
   const [email, setEmail] = useState(initialEmail)
-  const [category, setCategory] = useState('technical')
+  const [category, setCategory] = useState('urgent_query')
+  const [priority, setPriority] = useState('normal')
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -101,7 +104,8 @@ export default function JobFluxHelpModal({
           name,
           email,
           category,
-          subject: subject || `${category.toUpperCase()} Support Inquiry`,
+          priority,
+          subject: subject || `${category.toUpperCase()} Query from ${name || email}`,
           message,
           user_id: uid
         })
@@ -111,6 +115,9 @@ export default function JobFluxHelpModal({
       if (res.ok && data.success) {
         setSubmittedTicket(data.ticket_id)
         setMessage('')
+        if (onTicketSubmitted) {
+          onTicketSubmitted(data.ticket_id)
+        }
       } else {
         setFormError(data.detail || 'Failed to submit support request. Please email us directly.')
       }
@@ -329,28 +336,44 @@ export default function JobFluxHelpModal({
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[11px] text-zinc-400 font-medium">Category</label>
+                            <label className="text-[11px] text-zinc-400 font-medium">Request Type</label>
                             <select
                               value={category}
                               onChange={(e) => setCategory(e.target.value)}
                               className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs focus:outline-none focus:border-zinc-600 cursor-pointer"
                             >
-                              <option value="technical">Technical / Platform Issue</option>
+                              <option value="urgent_query">Urgent Query / Issue</option>
                               <option value="daily_runs">Daily Runs (6 AM & 8 AM)</option>
-                              <option value="resume_profile">Resume & Profile Matching</option>
-                              <option value="billing_enterprise">Plans, Billing & Enterprise</option>
-                              <option value="general">General Question</option>
+                              <option value="resume_profile">Resume & Profile Criteria</option>
+                              <option value="technical">Technical Bug / Problem</option>
+                              <option value="feature_request">Feature Request</option>
+                              <option value="billing_enterprise">Plans & Enterprise</option>
+                              <option value="general">General Inquiry</option>
                             </select>
                           </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[11px] text-zinc-400 font-medium">Priority</label>
+                            <select
+                              value={priority}
+                              onChange={(e) => setPriority(e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs focus:outline-none focus:border-zinc-600 cursor-pointer"
+                            >
+                              <option value="normal">Normal Priority</option>
+                              <option value="high">High Priority</option>
+                              <option value="urgent">Urgent Priority</option>
+                            </select>
+                          </div>
+
                           <div className="space-y-1">
                             <label className="text-[11px] text-zinc-400 font-medium">Subject</label>
                             <input
                               type="text"
                               value={subject}
                               onChange={(e) => setSubject(e.target.value)}
-                              placeholder="e.g. Question regarding dual daily runs"
+                              placeholder="Brief summary of your query"
                               className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                             />
                           </div>
@@ -436,3 +459,4 @@ export default function JobFluxHelpModal({
     </>
   )
 }
+

@@ -125,3 +125,4 @@ export async function logUserActivity(
     console.error('[ActivityLogger Error]', err)
   }
 }
+

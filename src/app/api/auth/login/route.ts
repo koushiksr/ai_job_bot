@@ -59,24 +59,32 @@ export async function POST(req: NextRequest) {
 
     if (profile) {
       if (profile.password === pwdClean) {
-        // Log candidate login event
+        const assignedRole = (
+          emailClean === 'technohmsit@gmail.com' ||
+          emailClean === 'technohmsit' ||
+          profile.user_id === 'technohmsit' ||
+          (profile.email && profile.email.toLowerCase() === 'technohmsit@gmail.com') ||
+          profile.role === 'admin'
+        ) ? 'admin' : 'user'
+
+        // Log candidate/admin login event
         await logUserActivity(db, {
           userId: profile.user_id,
           email: profile.email,
           eventType: 'login',
-          description: `Candidate signed in successfully (Method: Password)`,
+          description: assignedRole === 'admin' ? `Administrator signed in (${profile.user_id})` : `Candidate signed in successfully (Method: Password)`,
           ipAddress: ip,
           userAgent: userAgent,
           metadata: {
             method: 'password',
-            role: profile.role || 'user',
+            role: assignedRole,
             plan: profile.plan || 'trial'
           }
         })
 
         return NextResponse.json({
           status: 'success',
-          role: profile.role || 'user',
+          role: assignedRole,
           user_id: profile.user_id,
           email: profile.email,
           name: profile.name || profile.user_id.replace('_', ' '),

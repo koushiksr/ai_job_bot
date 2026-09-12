@@ -22,6 +22,7 @@ import {
   FileCheck,
   FileText,
   Mail,
+  MessageSquare,
   X
 } from 'lucide-react'
 import Link from 'next/link'
@@ -37,7 +38,11 @@ export default function UserDashboard() {
   const [userPlan, setUserPlan] = useState<string>('trial')
 
   // Navigation tab
-  const [activeTab, setActiveTab] = useState<'history' | 'profile'>('history')
+  const [activeTab, setActiveTab] = useState<'history' | 'profile' | 'queries'>('history')
+
+  // Candidate Queries & Support Inquiries State
+  const [userTickets, setUserTickets] = useState<any[]>([])
+  const [loadingUserTickets, setLoadingUserTickets] = useState<boolean>(false)
 
   // Help Modal State
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
@@ -165,6 +170,7 @@ export default function UserDashboard() {
 
     loadUserData(storedUid)
     loadUserHistory(storedUid, 1, '', 'all')
+    loadUserTickets(storedUid)
     checkActiveTask(storedUid)
   }, [])
 
@@ -297,6 +303,22 @@ export default function UserDashboard() {
       }
     } catch (e) {
       console.error('Failed to load user data:', e)
+    }
+  }
+
+  const loadUserTickets = async (uid: string) => {
+    if (!uid) return
+    setLoadingUserTickets(true)
+    try {
+      const res = await fetch(`/api/support?user_id=${encodeURIComponent(uid)}&limit=50`)
+      if (res.ok) {
+        const data = await res.json()
+        setUserTickets(data.tickets || [])
+      }
+    } catch (e) {
+      console.error('Failed to load user queries:', e)
+    } finally {
+      setLoadingUserTickets(false)
     }
   }
 
@@ -713,6 +735,25 @@ export default function UserDashboard() {
           >
             <User className="w-3.5 h-3.5" /> Candidate Profile & Resume
           </button>
+          <button
+            onClick={() => {
+              setActiveTab('queries')
+              loadUserTickets(userId)
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+              activeTab === 'queries'
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-violet-400" />
+            <span>My Requests & Inquiries</span>
+            {userTickets.length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
+                {userTickets.length}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* TAB 1: JOB APPLYING HISTORY */}
@@ -877,6 +918,150 @@ export default function UserDashboard() {
           />
         )}
 
+        {/* TAB 3: CANDIDATE REQUESTS & SUPPORT INQUIRIES */}
+        {activeTab === 'queries' && (
+          <div className="space-y-4">
+            {/* Header / Summary Card */}
+            <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-violet-400 shrink-0">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">My Support Requests & Inquiries</h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Direct communications with JobFlux Administrator (<span className="text-violet-300 font-mono">technohmsit@gmail.com</span>).
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => loadUserTickets(userId)}
+                  className="px-3 py-1.5 rounded-lg bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
+                  title="Refresh my requests"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingUserTickets ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </button>
+                <button
+                  onClick={() => setIsHelpOpen(true)}
+                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Submit New Query</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Queries List */}
+            {loadingUserTickets ? (
+              <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 text-center text-zinc-400">
+                <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-violet-400" />
+                <span>Loading your inquiries...</span>
+              </div>
+            ) : userTickets.length === 0 ? (
+              <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 text-center space-y-3">
+                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 mx-auto flex items-center justify-center text-zinc-500">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-white">No Inquiries Submitted</h4>
+                  <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1">
+                    Have questions about your daily auto-runs, need profile optimization, or experiencing issues? Submit a request and our administrator will assist you directly.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsHelpOpen(true)}
+                  className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all cursor-pointer"
+                >
+                  Submit a Query
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {userTickets.map((t) => (
+                  <div
+                    key={t.ticket_id || t.id}
+                    className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 space-y-3 transition-colors hover:border-zinc-700"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-zinc-800/80">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-xs font-semibold text-white">
+                          #{t.ticket_id}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider ${
+                          t.priority === 'urgent'
+                            ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                            : t.priority === 'high'
+                            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                            : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                        }`}>
+                          {t.priority || 'normal'}
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-black border border-zinc-800 text-zinc-400">
+                          {t.category?.replace('_', ' ') || 'General'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
+                          t.status === 'resolved'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                            : t.status === 'in_progress'
+                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                            : t.status === 'closed'
+                            ? 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                        }`}>
+                          {t.status === 'resolved' && <CheckCircle2 className="w-3 h-3" />}
+                          {t.status === 'in_progress' && <RefreshCw className="w-3 h-3 animate-spin" />}
+                          {t.status?.replace('_', ' ') || 'Open'}
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-500">
+                          {formatTimestamp(t.created_at)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs font-semibold text-white mb-1">{t.subject}</h4>
+                      <p className="text-xs text-zinc-300 leading-relaxed bg-black/60 p-3 rounded-lg border border-zinc-800/80">
+                        {t.message}
+                      </p>
+                    </div>
+
+                    {/* Admin Response Box */}
+                    {t.admin_response ? (
+                      <div className="p-3 rounded-lg bg-violet-950/20 border border-violet-800/40 space-y-1">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="font-semibold text-violet-300 flex items-center gap-1.5">
+                            <Shield className="w-3 h-3 text-violet-400" />
+                            Administrator Response (technohmsit@gmail.com)
+                          </span>
+                          {t.resolved_at && (
+                            <span className="text-[10px] font-mono text-violet-400">
+                              {formatTimestamp(t.resolved_at)}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-zinc-200 whitespace-pre-wrap font-sans leading-relaxed">
+                          {t.admin_response}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-zinc-500 flex items-center gap-1.5">
+                        <Clock className="w-3 h-3 text-zinc-500" />
+                        <span>Awaiting Administrator review. Updates will appear here and in your inbox.</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* AI Application Audit Receipt Modal */}
         {selectedJobAudit && (
           <div
@@ -993,6 +1178,7 @@ export default function UserDashboard() {
         initialEmail={userEmail}
         initialName={userName}
         initialUserId={userId}
+        onTicketSubmitted={() => loadUserTickets(userId)}
       />
     </div>
   )

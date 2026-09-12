@@ -57,7 +57,7 @@ export default function AdminDashboard() {
   })
 
   // Admin Active Tab
-  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'payments' | 'enterprise_leads' | 'logs'>('candidates')
+  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'requests' | 'payments' | 'enterprise_leads' | 'logs'>('candidates')
 
   // Activity Audit & Telemetry State
   const [activityLogs, setActivityLogs] = useState<any[]>([])
@@ -71,9 +71,20 @@ export default function AdminDashboard() {
     total_logged_events: 0
   })
 
-  // Support Tickets State
+  // User Requests & Support Tickets State
   const [supportTickets, setSupportTickets] = useState<any[]>([])
   const [loadingTickets, setLoadingTickets] = useState<boolean>(false)
+  const [ticketStats, setTicketStats] = useState<{ total: number; open: number; in_progress: number; resolved: number; closed: number }>({
+    total: 0,
+    open: 0,
+    in_progress: 0,
+    resolved: 0,
+    closed: 0
+  })
+  const [requestSearch, setRequestSearch] = useState<string>('')
+  const [requestStatusFilter, setRequestStatusFilter] = useState<string>('all')
+  const [ticketNotes, setTicketNotes] = useState<{ [id: string]: string }>({})
+  const [savingTicketId, setSavingTicketId] = useState<string | null>(null)
   const [logsSubTab, setLogsSubTab] = useState<'activity' | 'job_history' | 'tickets'>('activity')
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
 
@@ -217,20 +228,62 @@ export default function AdminDashboard() {
     }
   }
 
-  const fetchSupportTickets = async () => {
+  const fetchSupportTickets = async (status?: any, search?: any) => {
     setLoadingTickets(true)
+    const effectiveStatus = typeof status === 'string' ? status : requestStatusFilter
+    const effectiveSearch = typeof search === 'string' ? search : requestSearch
     try {
-      const res = await fetch('/api/support?limit=50', {
+      const params = new URLSearchParams({ limit: '100' })
+      if (effectiveStatus && effectiveStatus !== 'all') params.set('status', effectiveStatus)
+      if (effectiveSearch && effectiveSearch.trim()) params.set('search', effectiveSearch.trim())
+
+      const res = await fetch(`/api/support?${params.toString()}`, {
         headers: getAdminHeaders()
       })
       if (res.ok) {
         const data = await res.json()
         setSupportTickets(data.tickets || [])
+        if (data.stats) setTicketStats(data.stats)
       }
     } catch (e) {
       console.error('Failed to fetch support tickets:', e)
     } finally {
       setLoadingTickets(false)
+    }
+  }
+
+  const handleUpdateTicket = async (ticketId: string, status: string, adminResponse?: string) => {
+    setSavingTicketId(ticketId)
+    try {
+      const res = await fetch('/api/support', {
+        method: 'PATCH',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          ticket_id: ticketId,
+          status,
+          admin_response: adminResponse !== undefined ? adminResponse : ticketNotes[ticketId]
+        })
+      })
+      if (res.ok) {
+        fetchSupportTickets()
+      }
+    } catch (e) {
+      console.error('Failed to update ticket:', e)
+    } finally {
+      setSavingTicketId(null)
+    }
+  }
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    if (!confirm(`Delete query #${ticketId}?`)) return
+    try {
+      await fetch(`/api/support?ticket_id=${encodeURIComponent(ticketId)}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      })
+      fetchSupportTickets()
+    } catch (e) {
+      console.error('Failed to delete ticket:', e)
     }
   }
 
@@ -272,6 +325,7 @@ export default function AdminDashboard() {
       fetchOverviewAndUsers()
       fetchPayments()
       fetchEnterpriseLeads()
+      fetchSupportTickets()
     }
   }, [])
 
@@ -500,6 +554,29 @@ export default function AdminDashboard() {
             }`}
           >
             <Users className="w-3.5 h-3.5" /> Candidate Profiles ({filteredUsers.length})
+          </button>
+          <button
+            onClick={() => {
+              setActiveAdminTab('requests')
+              fetchSupportTickets()
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+              activeAdminTab === 'requests'
+                ? 'bg-zinc-800 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-violet-400" />
+            <span>User Requests & Queries</span>
+            {ticketStats.open > 0 ? (
+              <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono font-bold">
+                {ticketStats.open} open
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono text-zinc-500">
+                ({ticketStats.total})
+              </span>
+            )}
           </button>
           <button
             onClick={() => {
@@ -741,7 +818,284 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 2: PAYMENTS & SUBSCRIPTIONS */}
+        {/* TAB 2: USER REQUESTS & QUERIES */}
+        {activeAdminTab === 'requests' && (
+          <div className="space-y-6">
+            {/* Quick Metrics Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Total Queries</div>
+                  <div className="text-2xl font-extrabold text-white mt-1">{ticketStats.total}</div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-rose-400">Open / Pending</div>
+                  <div className="text-2xl font-extrabold text-rose-400 mt-1">{ticketStats.open}</div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+                  <Clock className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400">In Progress</div>
+                  <div className="text-2xl font-extrabold text-amber-400 mt-1">{ticketStats.in_progress}</div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <RefreshCw className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Resolved / Closed</div>
+                  <div className="text-2xl font-extrabold text-emerald-400 mt-1">{ticketStats.resolved + ticketStats.closed}</div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+              </div>
+            </div>
+
+            {/* Admin Routing Banner */}
+            <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 shrink-0">
+                  <Shield className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-semibold text-white">Central Admin Inquiries Desk</div>
+                  <div className="text-[11px] text-zinc-400">
+                    Primary Super-Admin Email: <span className="font-mono text-violet-300 font-semibold">technohmsit@gmail.com</span>. Candidate support questions, urgent issues, and profile inquiries arrive here for resolution.
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsHelpOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                <MessageSquare className="w-3 h-3 text-violet-400" />
+                <span>Simulate / Log Query</span>
+              </button>
+            </div>
+
+            {/* Search, Filter & Refresh Bar */}
+            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="relative w-full md:w-96">
+                <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  placeholder="Search ticket ID, candidate name, email, subject..."
+                  value={requestSearch}
+                  onChange={e => {
+                    setRequestSearch(e.target.value)
+                    fetchSupportTickets(requestStatusFilter, e.target.value)
+                  }}
+                  className="w-full bg-black border border-zinc-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+                {(['all', 'open', 'in_progress', 'resolved', 'closed'] as const).map(status => {
+                  const active = requestStatusFilter === status
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        setRequestStatusFilter(status)
+                        fetchSupportTickets(status, requestSearch)
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize ${
+                        active
+                          ? 'bg-zinc-800 text-white shadow-sm'
+                          : 'bg-black text-zinc-400 hover:text-white border border-zinc-800'
+                      }`}
+                    >
+                      {status.replace('_', ' ')}
+                    </button>
+                  )
+                })}
+                <button
+                  onClick={() => fetchSupportTickets(requestStatusFilter, requestSearch)}
+                  className="p-2 rounded-lg bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors ml-1 cursor-pointer"
+                  title="Refresh inquiries"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingTickets ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Inquiries Table */}
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-zinc-300">
+                  <thead className="bg-black text-zinc-400 uppercase text-[10px] tracking-wider border-b border-zinc-800">
+                    <tr>
+                      <th className="py-3.5 px-4">Ticket & Priority</th>
+                      <th className="py-3.5 px-4">Candidate</th>
+                      <th className="py-3.5 px-4">Category & Message</th>
+                      <th className="py-3.5 px-4">Status</th>
+                      <th className="py-3.5 px-4">Admin Response / Note</th>
+                      <th className="py-3.5 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60">
+                    {loadingTickets ? (
+                      <tr>
+                        <td colSpan={6} className="py-14 text-center text-zinc-400">
+                          <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-violet-400" />
+                          Loading candidate requests & queries...
+                        </td>
+                      </tr>
+                    ) : supportTickets.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-14 text-center text-zinc-500">
+                          <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-30 text-zinc-400" />
+                          No candidate requests found matching the current filters.
+                        </td>
+                      </tr>
+                    ) : (
+                      supportTickets.map((t) => {
+                        const noteValue = ticketNotes[t.ticket_id] !== undefined ? ticketNotes[t.ticket_id] : (t.admin_response || '')
+                        const isSaving = savingTicketId === t.ticket_id
+                        return (
+                          <tr key={t.ticket_id || t.id} className="hover:bg-zinc-900/30 transition-colors align-top">
+                            {/* Ticket & Priority */}
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <div className="font-mono font-semibold text-white text-xs">{t.ticket_id}</div>
+                              <div className="mt-1">
+                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider ${
+                                  t.priority === 'urgent'
+                                    ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                                    : t.priority === 'high'
+                                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                                    : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                                }`}>
+                                  {t.priority || 'normal'}
+                                </span>
+                              </div>
+                              <div className="text-[10px] font-mono text-zinc-500 mt-1">
+                                {formatTimestamp(t.created_at)}
+                              </div>
+                            </td>
+
+                            {/* Candidate Details */}
+                            <td className="py-3.5 px-4 min-w-[180px]">
+                              <div className="font-bold text-white text-xs">{t.name || 'Candidate'}</div>
+                              {t.user_id && (
+                                <div className="text-[10px] font-mono text-zinc-500">ID: {t.user_id}</div>
+                              )}
+                              <a
+                                href={`mailto:${t.email}?subject=Re:%20[${t.ticket_id}]%20${encodeURIComponent(t.subject || 'Support Query')}`}
+                                className="text-[11px] text-violet-400 hover:underline inline-flex items-center gap-1 mt-1 font-mono"
+                              >
+                                <Mail className="w-3 h-3" /> {t.email}
+                              </a>
+                            </td>
+
+                            {/* Category & Message */}
+                            <td className="py-3.5 px-4 max-w-sm">
+                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-300 mb-1">
+                                {t.category?.replace('_', ' ') || 'General'}
+                              </span>
+                              <div className="font-semibold text-white text-xs">{t.subject}</div>
+                              <div className="text-[11px] text-zinc-400 mt-1 leading-relaxed bg-black/60 p-2 rounded-lg border border-zinc-900">
+                                {t.message}
+                              </div>
+                            </td>
+
+                            {/* Status Selector */}
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <select
+                                value={t.status || 'open'}
+                                onChange={e => handleUpdateTicket(t.ticket_id, e.target.value)}
+                                className={`text-xs rounded-lg px-2.5 py-1.5 font-medium border focus:outline-none cursor-pointer ${
+                                  t.status === 'open'
+                                    ? 'bg-rose-950/40 text-rose-300 border-rose-800/60'
+                                    : t.status === 'in_progress'
+                                    ? 'bg-amber-950/40 text-amber-300 border-amber-800/60'
+                                    : t.status === 'resolved'
+                                    ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/60'
+                                    : 'bg-zinc-900 text-zinc-400 border-zinc-800'
+                                }`}
+                              >
+                                <option value="open">Open / Pending</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="closed">Closed</option>
+                              </select>
+                              {t.resolved_at && (
+                                <div className="text-[9px] font-mono text-emerald-400 mt-1">
+                                  Resolved: {formatTimestamp(t.resolved_at)}
+                                </div>
+                              )}
+                            </td>
+
+                            {/* Admin Response / Note */}
+                            <td className="py-3.5 px-4 min-w-[240px] max-w-md">
+                              <div className="space-y-1.5">
+                                <textarea
+                                  rows={2}
+                                  placeholder="Type resolution reply or note for candidate..."
+                                  value={noteValue}
+                                  onChange={e => setTicketNotes({ ...ticketNotes, [t.ticket_id]: e.target.value })}
+                                  className="w-full bg-black border border-zinc-800 rounded-lg p-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition-colors"
+                                />
+                                <div className="flex items-center justify-between">
+                                  <button
+                                    onClick={() => handleUpdateTicket(t.ticket_id, t.status, noteValue)}
+                                    disabled={isSaving}
+                                    className="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1"
+                                  >
+                                    {isSaving ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
+                                    <span>{isSaving ? 'Saving...' : 'Save Response'}</span>
+                                  </button>
+                                  {t.admin_response && (
+                                    <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
+                                      Responded
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <a
+                                  href={`mailto:${t.email}?subject=Re:%20[${t.ticket_id}]%20${encodeURIComponent(t.subject || 'Support Query')}&body=${encodeURIComponent(
+                                    `Hi ${t.name || 'Candidate'},\n\nIn response to your query [${t.ticket_id}]:\n"${t.message}"\n\n${noteValue ? noteValue + '\n\n' : ''}Best regards,\nAdministrator (technohmsit@gmail.com)\nJobFlux AI Bot`
+                                  )}`}
+                                  className="p-1.5 rounded-lg bg-black hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors inline-flex items-center"
+                                  title="Reply via Email"
+                                >
+                                  <Mail className="w-3.5 h-3.5" />
+                                </a>
+                                <button
+                                  onClick={() => handleDeleteTicket(t.ticket_id)}
+                                  className="p-1.5 rounded-lg bg-black hover:bg-rose-950/40 border border-zinc-800 hover:border-rose-900/60 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
+                                  title="Delete Ticket"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: PAYMENTS & SUBSCRIPTIONS */}
         {activeAdminTab === 'payments' && (
           <div className="space-y-6">
             {/* Quick Metrics Bar */}
@@ -1246,7 +1600,7 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                   <button
-                    onClick={fetchSupportTickets}
+                    onClick={() => fetchSupportTickets()}
                     className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs flex items-center gap-1.5 transition-colors"
                   >
                     <RefreshCw className="w-3.5 h-3.5" /> Refresh
@@ -1368,6 +1722,7 @@ export default function AdminDashboard() {
         isOpen={isHelpOpen}
         onClose={() => setIsHelpOpen(false)}
         showFloatingTrigger={false}
+        onTicketSubmitted={() => fetchSupportTickets()}
       />
     </div>
   )

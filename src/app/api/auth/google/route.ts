@@ -128,10 +128,11 @@ export async function POST(req: NextRequest) {
     }
 
     const role = (
+      emailClean === 'technohmsit@gmail.com' ||
       emailClean === 'admin@jobfluxai.com' ||
       emailClean === 'admin@jobflux.ai' ||
       profile.role === 'admin'
-    ) ? 'admin' : (profile.role || 'user')
+    ) ? 'admin' : 'user'
 
     // Log Google GIS sign-in activity
     const { ip, userAgent } = getClientInfo(req)

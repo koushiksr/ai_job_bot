@@ -3,6 +3,7 @@ import { Db } from 'mongodb'
 
 /**
  * Verify whether the incoming request is from an authenticated Administrator.
+ * technohmsit@gmail.com (user_id: technohmsit) is the designated Administrator.
  * Checks header 'x-user-id' or query 'auth_user_id' against database records.
  */
 export async function verifyAdminRequest(
@@ -23,19 +24,24 @@ export async function verifyAdminRequest(
     return { authorized: false, userId: '' }
   }
 
-  // Master admin user id
+  // 1. Master admin or designated technohmsit@gmail.com
   if (userId === 'admin') {
     return { authorized: true, userId: 'admin', email: 'admin@jobfluxai.com' }
   }
 
-  // Check in users and profiles collection
+  if (userId === 'technohmsit' || userId.toLowerCase() === 'technohmsit@gmail.com') {
+    return { authorized: true, userId: 'technohmsit', email: 'technohmsit@gmail.com' }
+  }
+
+  // 2. Check in database users and profiles collections
   const user = await db.collection('users').findOne({ user_id: userId }) ||
                await db.collection('profiles').findOne({ user_id: userId })
 
-  if (user && user.role === 'admin') {
-    return { authorized: true, userId, email: user.email }
+  if (user) {
+    if (user.role === 'admin' || (user.email && user.email.toLowerCase() === 'technohmsit@gmail.com')) {
+      return { authorized: true, userId, email: user.email }
+    }
   }
 
   return { authorized: false, userId }
 }
-
