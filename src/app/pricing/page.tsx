@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Zap, Sparkles, Shield, Clock, ArrowRight, X, CreditCard, ChevronRight, User } from 'lucide-react'
+import { Check, Zap, Sparkles, Shield, Clock, ArrowRight, X, CreditCard, ChevronRight, User, Sliders, Calculator, TrendingUp } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 
 interface Plan {
@@ -89,6 +89,9 @@ export default function PricingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentUserEmail, setCurrentUserEmail] = useState('')
   const [currentUserId, setCurrentUserId] = useState('')
+
+  // Interactive ROI & Time Saved Calculator State
+  const [calcAppsPerWeek, setCalcAppsPerWeek] = useState<number>(35)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -345,6 +348,109 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
+
+        {/* Interactive "Hours & Money Saved" ROI Calculator */}
+        <section className="p-8 md:p-10 rounded-3xl bg-gradient-to-br from-[#0c1017] via-slate-900/80 to-[#0c1017] border border-blue-500/30 shadow-2xl space-y-8 max-w-5xl mx-auto">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-sky-400 bg-blue-500/10 border border-blue-500/30 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+              <Calculator className="w-3.5 h-3.5" /> Interactive ROI & Effort Calculator
+            </span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              See How Much Time & Energy You Save with JobFlux AI
+            </h2>
+            <p className="text-xs md:text-sm text-slate-400 max-w-2xl mx-auto">
+              Drag the slider to match your weekly application target and discover how our autonomous bot pays for itself 10x over.
+            </p>
+          </div>
+
+          {/* Slider Control */}
+          <div className="max-w-xl mx-auto space-y-3 bg-slate-950/60 p-6 rounded-2xl border border-slate-800">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-blue-400" />
+                <span>Your Weekly Application Target:</span>
+              </label>
+              <span className="px-3 py-1 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs font-mono font-bold">
+                {calcAppsPerWeek} jobs / week
+              </span>
+            </div>
+            
+            <input
+              type="range"
+              min="10"
+              max="100"
+              step="5"
+              value={calcAppsPerWeek}
+              onChange={(e) => setCalcAppsPerWeek(parseInt(e.target.value))}
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            />
+
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>10 / week (Casual)</span>
+              <span>50 / week (Active)</span>
+              <span>100 / week (Aggressive)</span>
+            </div>
+          </div>
+
+          {/* 3 Value Metrics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-5 rounded-2xl bg-slate-950/70 border border-blue-500/20 space-y-2 text-center hover:border-blue-500/40 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-sky-400 flex items-center justify-center font-bold mx-auto">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div className="text-3xl font-extrabold text-white font-mono">
+                ~{Math.round((calcAppsPerWeek * 6 / 60) * 4.3)} hrs
+              </div>
+              <div className="text-xs font-bold text-slate-200">Reclaimed Every Month</div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Time freed up for interview preparation, system design prep, and resting instead of manual form filling.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-950/70 border border-purple-500/20 space-y-2 text-center hover:border-purple-500/40 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold mx-auto">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div className="text-3xl font-extrabold text-white font-mono">
+                ~{Math.round(calcAppsPerWeek * 16 * 4.3).toLocaleString()}+
+              </div>
+              <div className="text-xs font-bold text-slate-200">Repetitive Clicks Saved</div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Zero tedious resume re-uploads or manual dropdown selections for notice period, location, and CTC.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-950/70 border border-emerald-500/20 space-y-2 text-center hover:border-emerald-500/40 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold mx-auto">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div className="text-3xl font-extrabold text-emerald-400 font-mono">
+                ₹16.60 / day
+              </div>
+              <div className="text-xs font-bold text-slate-200">Effective Daily Investment</div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                A placement agency charges ₹5,000–₹15,000. JobFlux AI delivers twice daily for less than the price of a chai.
+              </p>
+            </div>
+          </div>
+
+          {/* Quick CTA inside calculator */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-900/20 via-indigo-900/20 to-purple-900/20 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
+              <div className="text-xs text-slate-300">
+                <span className="font-bold text-white">Ready to automate your job search pipeline?</span> Lock in 1 Full Month of daily autonomous applications for only <strong className="text-emerald-400">₹499</strong>.
+              </div>
+            </div>
+            <button
+              onClick={() => handleOpenPlanModal(PLANS[1])}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all shrink-0 flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Get Started at ₹499</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </section>
 
         {/* Why JobFlux AI Comparison */}
         <section className="p-8 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-6">
