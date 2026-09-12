@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Zap, Sparkles, Shield, Clock, ArrowRight, X, CreditCard, ChevronRight, User, Sliders, Calculator, TrendingUp } from 'lucide-react'
+import { Check, Zap, Sparkles, Shield, Clock, ArrowRight, X, CreditCard, ChevronRight, User, Sliders, Calculator, TrendingUp, Building2, Users, FolderKanban, CheckCheck, Phone, Mail, Send, Headset, Loader2 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 
 interface Plan {
@@ -93,6 +93,43 @@ export default function PricingPage() {
   // Interactive ROI & Time Saved Calculator State
   const [calcAppsPerWeek, setCalcAppsPerWeek] = useState<number>(35)
 
+  // Enterprise & Bulk Inquiry Modal State
+  const [showEnterpriseModal, setShowEnterpriseModal] = useState(false)
+  const [enterpriseForm, setEnterpriseForm] = useState({
+    name: '',
+    email: '',
+    company: '',
+    seats: '25-50 Candidates',
+    phone: '',
+    notes: ''
+  })
+  const [enterpriseSubmitting, setEnterpriseSubmitting] = useState(false)
+  const [enterpriseSuccess, setEnterpriseSuccess] = useState(false)
+  const [enterpriseError, setEnterpriseError] = useState('')
+
+  const handleEnterpriseSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setEnterpriseSubmitting(true)
+    setEnterpriseError('')
+    try {
+      const res = await fetch('/api/enterprise/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(enterpriseForm)
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setEnterpriseSuccess(true)
+      } else {
+        setEnterpriseError(data.detail || 'Failed to submit inquiry')
+      }
+    } catch (err: any) {
+      setEnterpriseError(err.message || 'Submission error')
+    } finally {
+      setEnterpriseSubmitting(false)
+    }
+  }
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const email = localStorage.getItem('user_email') || ''
@@ -102,6 +139,11 @@ export default function PricingPage() {
         setCurrentUserEmail(email)
         setCurrentUserId(uid)
         setCandidateEmail(email)
+        setEnterpriseForm(prev => ({
+          ...prev,
+          email: prev.email || email,
+          name: prev.name || (uid.replace(/_/g, ' ') || '')
+        }))
       }
     }
   }, [])
@@ -349,6 +391,88 @@ export default function PricingPage() {
           ))}
         </div>
 
+        {/* Enterprise & Institutional Bulk Teams Plan */}
+        <div className="max-w-5xl mx-auto rounded-3xl bg-gradient-to-r from-blue-950/40 via-indigo-950/50 to-slate-900/80 border border-indigo-500/40 p-8 md:p-10 shadow-2xl relative overflow-hidden space-y-6">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-3 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold">
+                <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                <span>🏢 Enterprise, Staffing Agencies & Colleges</span>
+              </div>
+              <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                Bulk Candidate Licensing & Grouped Data Access
+              </h3>
+              <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
+                Managing multiple job seekers? Group candidates into cohorts, track aggregated application velocity, monitor recruiter callbacks, and deploy autonomous automation across your entire agency talent pool.
+              </p>
+            </div>
+
+            <div className="shrink-0 w-full sm:w-auto text-left lg:text-right space-y-3">
+              <div>
+                <div className="text-2xl md:text-3xl font-extrabold text-white">Custom Volume Rates</div>
+                <span className="text-xs text-indigo-400 font-semibold">Tiered pricing for 10 to 500+ candidates</span>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEnterpriseModal(true)
+                  setEnterpriseSuccess(false)
+                }}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 hover:from-indigo-500 hover:via-blue-500 hover:to-cyan-500 text-white font-bold text-xs shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Contact Enterprise Sales</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="h-px bg-slate-800/80" />
+
+          {/* 4 Pillars of Enterprise Plan */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
+              <div className="flex items-center gap-2 text-indigo-400 font-bold">
+                <FolderKanban className="w-4 h-4" />
+                <span>Candidate Grouping</span>
+              </div>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Organize candidates by batch, client, or skill set (e.g. &apos;2026 Batch CS&apos;, &apos;Java Cohort&apos;).
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
+              <div className="flex items-center gap-2 text-sky-400 font-bold">
+                <Users className="w-4 h-4" />
+                <span>Multi-User Telemetry</span>
+              </div>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Supervise applied openings, match scores, and ATS delivery receipts for all candidates from one hub.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                <Zap className="w-4 h-4" />
+                <span>Dedicated Automation</span>
+              </div>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Dedicated worker threads ensuring all cohort candidates execute early morning applications on time.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5">
+              <div className="flex items-center gap-2 text-amber-400 font-bold">
+                <Headset className="w-4 h-4" />
+                <span>Priority Account Manager</span>
+              </div>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Direct WhatsApp and Slack support channel with dedicated onboarding assistance.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Interactive "Hours & Money Saved" ROI Calculator */}
         <section className="p-8 md:p-10 rounded-3xl bg-gradient-to-br from-[#0c1017] via-slate-900/80 to-[#0c1017] border border-blue-500/30 shadow-2xl space-y-8 max-w-5xl mx-auto">
           <div className="text-center space-y-3">
@@ -589,6 +713,170 @@ export default function PricingPage() {
                     <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Enterprise & Bulk Licensing Inquiry Modal */}
+      <AnimatePresence>
+        {showEnterpriseModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowEnterpriseModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-lg bg-[#0c1017] border border-indigo-500/40 rounded-3xl p-6 shadow-2xl space-y-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white">Enterprise & Bulk Inquiries</h3>
+                    <p className="text-xs text-slate-400">Custom volume licensing for staffing & colleges</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowEnterpriseModal(false)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {enterpriseSuccess ? (
+                <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+                    <CheckCheck className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-base font-bold text-white">Inquiry Received Successfully!</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
+                    Thank you for reaching out. Our enterprise team will review your requirements and reach out via email/phone within <strong>4 business hours</strong> with custom volume pricing.
+                  </p>
+                  <div className="pt-2 text-xs text-slate-400 flex items-center justify-center gap-2">
+                    <Mail className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Direct Enterprise Desk: <strong>enterprise@jobfluxai.com</strong></span>
+                  </div>
+                  <div className="pt-4">
+                    <button
+                      onClick={() => setShowEnterpriseModal(false)}
+                      className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-all cursor-pointer"
+                    >
+                      Close Window
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleEnterpriseSubmit} className="space-y-4">
+                  {enterpriseError && (
+                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">
+                      {enterpriseError}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-300 block mb-1">Contact Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={enterpriseForm.name}
+                        onChange={(e) => setEnterpriseForm({ ...enterpriseForm, name: e.target.value })}
+                        placeholder="e.g. Ramesh Kumar"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-300 block mb-1">Work / Corporate Email *</label>
+                      <input
+                        type="email"
+                        required
+                        value={enterpriseForm.email}
+                        onChange={(e) => setEnterpriseForm({ ...enterpriseForm, email: e.target.value })}
+                        placeholder="name@company.com"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-300 block mb-1">Company / Institution *</label>
+                      <input
+                        type="text"
+                        required
+                        value={enterpriseForm.company}
+                        onChange={(e) => setEnterpriseForm({ ...enterpriseForm, company: e.target.value })}
+                        placeholder="e.g. Apex Staffing Solutions"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-300 block mb-1">Candidate Seats / Volume *</label>
+                      <select
+                        value={enterpriseForm.seats}
+                        onChange={(e) => setEnterpriseForm({ ...enterpriseForm, seats: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      >
+                        <option value="10-25 Candidates">10 – 25 Candidates (Starter Team)</option>
+                        <option value="25-50 Candidates">25 – 50 Candidates (Growth Agency)</option>
+                        <option value="50-100 Candidates">50 – 100 Candidates (Mid-Tier Cohort)</option>
+                        <option value="100-250 Candidates">100 – 250 Candidates (College Batch)</option>
+                        <option value="250-500+ Candidates">250 – 500+ Candidates (Large Enterprise)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Phone / WhatsApp Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={enterpriseForm.phone}
+                      onChange={(e) => setEnterpriseForm({ ...enterpriseForm, phone: e.target.value })}
+                      placeholder="+91 98765 43210"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Cohort Requirements / Notes (Optional)</label>
+                    <textarea
+                      rows={3}
+                      value={enterpriseForm.notes}
+                      onChange={(e) => setEnterpriseForm({ ...enterpriseForm, notes: e.target.value })}
+                      placeholder="Tell us about your candidate batch, target roles, or any specific ATS requirements..."
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={enterpriseSubmitting}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    >
+                      {enterpriseSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-white" />
+                          <span>Sending Inquiry...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Submit Enterprise Inquiry & Request Quote</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               )}
             </motion.div>
           </div>
