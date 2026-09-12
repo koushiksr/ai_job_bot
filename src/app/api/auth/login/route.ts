@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
+import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const emailClean = (body.email || '').trim().toLowerCase()
     const pwdClean = (body.password || '').trim()
+    const { ip, userAgent } = getClientInfo(req)
+
+    const db = await getDb()
 
     // 1. Admin login check
     if (
@@ -18,6 +22,18 @@ export async function POST(req: NextRequest) {
       ) &&
       pwdClean === 'admin'
     ) {
+      if (db) {
+        await logUserActivity(db, {
+          userId: 'admin',
+          email: emailClean.includes('@') ? emailClean : 'admin@jobfluxai.com',
+          eventType: 'login',
+          description: 'Administrator signed in to central control hub',
+          ipAddress: ip,
+          userAgent: userAgent,
+          metadata: { method: 'admin_password', role: 'admin' }
+        })
+      }
+
       return NextResponse.json({
         status: 'success',
         role: 'admin',
@@ -27,8 +43,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // 2. Authenticate against cloud profiles collection
-    const db = await getDb()
+    // 2. Authenticate against cloud users & profiles collections
     if (!db) {
       return NextResponse.json(
         { detail: 'Database unavailable. Please try again later.' },
@@ -44,6 +59,21 @@ export async function POST(req: NextRequest) {
 
     if (profile) {
       if (profile.password === pwdClean) {
+        // Log candidate login event
+        await logUserActivity(db, {
+          userId: profile.user_id,
+          email: profile.email,
+          eventType: 'login',
+          description: `Candidate signed in successfully (Method: Password)`,
+          ipAddress: ip,
+          userAgent: userAgent,
+          metadata: {
+            method: 'password',
+            role: profile.role || 'user',
+            plan: profile.plan || 'trial'
+          }
+        })
+
         return NextResponse.json({
           status: 'success',
           role: profile.role || 'user',

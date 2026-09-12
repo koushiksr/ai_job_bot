@@ -22,11 +22,13 @@ import {
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxSplash from '@/components/JobFluxSplash'
 import AiEngineVisualizer from '@/components/AiEngineVisualizer'
+import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true)
   const [authMode, setAuthMode] = useState<'signin' | 'trial'>('signin')
   const [existingUser, setExistingUser] = useState<{ id: string; email: string; role: string } | null>(null)
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
   
   // Form fields
   const [name, setName] = useState('')
@@ -192,6 +194,14 @@ export default function Home() {
             >
               Pricing
             </Link>
+
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex items-center gap-1"
+            >
+              <Mail className="w-3 h-3 text-violet-400" />
+              <span>Help & Support</span>
+            </button>
 
             {existingUser ? (
               <div className="flex items-center gap-3">
@@ -597,6 +607,13 @@ export default function Home() {
             </div>
           </div>
         </footer>
+
+        {/* Universal JobFlux Help & Support Center */}
+        <JobFluxHelpModal
+          isOpen={isHelpOpen}
+          onClose={() => setIsHelpOpen(false)}
+          showFloatingTrigger={true}
+        />
       </div>
 
       {/* Google Identity Services SDK Script */}

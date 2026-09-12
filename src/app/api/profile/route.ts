@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import crypto from 'crypto'
+import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 
 export async function GET(req: NextRequest) {
   try {
@@ -52,6 +53,15 @@ export async function GET(req: NextRequest) {
       predefined_answers: profile.predefined_answers || {},
       resume_filename: profile.resume_filename || `${userId}_Resume.pdf`,
       enabled_for_daily_run: profile.enabled_for_daily_run !== false,
+      last_login_at: profile.last_login_at || null,
+      last_login_ip: profile.last_login_ip || null,
+      login_count: profile.login_count || 0,
+      last_profile_updated_at: profile.last_profile_updated_at || profile.updated_at || null,
+      profile_update_count: profile.profile_update_count || 0,
+      last_resume_updated_at: profile.last_resume_updated_at || null,
+      resume_upload_count: profile.resume_upload_count || 0,
+      last_scout_run_at: profile.last_scout_run_at || null,
+      on_demand_run_count: profile.on_demand_run_count || 0,
       raw_json: JSON.stringify(profile, null, 2),
       version_hash: versionHash
     }
@@ -132,6 +142,23 @@ export async function POST(req: NextRequest) {
       { $set: updateDoc },
       { upsert: true }
     )
+
+    // Log profile update activity
+    const { ip, userAgent } = getClientInfo(req)
+    await logUserActivity(db, {
+      userId: userId,
+      email: updateDoc.email,
+      eventType: 'profile_update',
+      description: 'Candidate profile criteria and preferences updated',
+      ipAddress: ip,
+      userAgent: userAgent,
+      metadata: {
+        skills_count: Array.isArray(updateDoc.skills) ? updateDoc.skills.length : 0,
+        experience: updateDoc.experience,
+        daily_run_enabled: updateDoc.enabled_for_daily_run,
+        current_location: updateDoc.current_location
+      }
+    })
 
     return NextResponse.json({
       status: 'success',

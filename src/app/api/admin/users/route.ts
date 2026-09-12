@@ -46,7 +46,17 @@ export async function GET(req: NextRequest) {
         applied_today: s.today || 0,
         applied_this_week: s.this_week || 0,
         applied_this_month: s.this_month || 0,
-        last_active: s.last_applied_at || p.updated_at || null
+        last_active: s.last_applied_at || p.updated_at || null,
+        login_count: p.login_count || 0,
+        last_login_at: p.last_login_at || null,
+        last_login_ip: p.last_login_ip || null,
+        profile_update_count: p.profile_update_count || 0,
+        last_profile_updated_at: p.last_profile_updated_at || p.updated_at || null,
+        resume_upload_count: p.resume_upload_count || 0,
+        last_resume_updated_at: p.last_resume_updated_at || null,
+        resume_filename: p.resume_filename || null,
+        on_demand_run_count: p.on_demand_run_count || 0,
+        last_scout_run_at: p.last_scout_run_at || null
       }
     })
 

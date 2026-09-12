@@ -22,6 +22,7 @@ import {
   Sparkles
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
+import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 
 interface Plan {
   id: string
@@ -128,6 +129,7 @@ export default function PricingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentUserEmail, setCurrentUserEmail] = useState('')
   const [currentUserId, setCurrentUserId] = useState('')
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
 
   // Enterprise & Bulk Inquiry Modal State
   const [showEnterpriseModal, setShowEnterpriseModal] = useState(false)
@@ -312,6 +314,14 @@ export default function PricingPage() {
           </Link>
 
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex items-center gap-1"
+            >
+              <Mail className="w-3 h-3 text-violet-400" />
+              <span>Help & Support</span>
+            </button>
+
             {isLoggedIn ? (
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
@@ -860,6 +870,15 @@ export default function PricingPage() {
 
       {/* Official Razorpay Checkout Script */}
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
+
+      {/* Universal JobFlux Help & Support Center */}
+      <JobFluxHelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        showFloatingTrigger={true}
+        initialEmail={currentUserEmail}
+        initialUserId={currentUserId}
+      />
     </div>
   )
 }

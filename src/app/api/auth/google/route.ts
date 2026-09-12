@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
+import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 
 export const dynamic = 'force-dynamic'
 
@@ -118,6 +119,7 @@ export async function POST(req: NextRequest) {
       }
 
       const insertResult = await db.collection('profiles').insertOne(newProfile)
+      await db.collection('users').insertOne({ ...newProfile })
       profile = { ...newProfile, _id: insertResult.insertedId }
     }
 
@@ -130,6 +132,22 @@ export async function POST(req: NextRequest) {
       emailClean === 'admin@jobflux.ai' ||
       profile.role === 'admin'
     ) ? 'admin' : (profile.role || 'user')
+
+    // Log Google GIS sign-in activity
+    const { ip, userAgent } = getClientInfo(req)
+    await logUserActivity(db, {
+      userId: profile.user_id,
+      email: profile.email,
+      eventType: 'login',
+      description: `Candidate signed in via Google OAuth GIS`,
+      ipAddress: ip,
+      userAgent: userAgent,
+      metadata: {
+        method: 'google_gis',
+        role: role,
+        plan: profile.plan || 'trial'
+      }
+    })
 
     return NextResponse.json({
       status: 'success',

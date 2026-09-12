@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import crypto from 'crypto'
+import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,6 +92,21 @@ export async function POST(req: NextRequest) {
     }
 
     await db.collection('tasks').insertOne(newTask)
+
+    // Log on-demand scout task run activity
+    const { ip, userAgent } = getClientInfo(req)
+    await logUserActivity(db, {
+      userId: user_id,
+      eventType: 'task_run',
+      description: `Dispatched on-demand application scout (${taskId})`,
+      ipAddress: ip,
+      userAgent: userAgent,
+      metadata: {
+        task_id: taskId,
+        headless: newTask.headless,
+        source: newTask.source
+      }
+    })
 
     return NextResponse.json({
       success: true,

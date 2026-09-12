@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
+import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
       { upsert: true }
     )
 
-    // 2. Update profile metadata
+    // 2. Update profile and user metadata
     await db.collection('profiles').updateOne(
       { user_id },
       {
@@ -109,11 +110,41 @@ export async function POST(req: NextRequest) {
           resume_filename: cleanFilename,
           resume_size_bytes: size,
           has_resume: true,
+          last_resume_updated_at: now,
           updated_at: now
         }
       },
       { upsert: true }
     )
+
+    await db.collection('users').updateOne(
+      { user_id },
+      {
+        $set: {
+          resume_filename: cleanFilename,
+          resume_size_bytes: size,
+          has_resume: true,
+          last_resume_updated_at: now,
+          updated_at: now
+        }
+      },
+      { upsert: true }
+    )
+
+    // 3. Log resume upload activity
+    const { ip, userAgent } = getClientInfo(req)
+    await logUserActivity(db, {
+      userId: user_id,
+      eventType: 'resume_upload',
+      description: `Uploaded new resume PDF: ${cleanFilename} (${(size / 1024).toFixed(1)} KB)`,
+      ipAddress: ip,
+      userAgent: userAgent,
+      metadata: {
+        filename: cleanFilename,
+        size_bytes: size,
+        size_kb: Math.round(size / 1024)
+      }
+    })
 
     return NextResponse.json({
       status: 'success',

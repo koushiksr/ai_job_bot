@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
+import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 
 export const dynamic = 'force-dynamic'
 
@@ -141,6 +142,22 @@ export async function GET(req: NextRequest) {
       emailClean === 'admin@jobflux.ai' ||
       profile.role === 'admin'
     ) ? 'admin' : 'user'
+
+    // Log Google OAuth Redirect login activity
+    const { ip, userAgent } = getClientInfo(req)
+    await logUserActivity(db, {
+      userId: profile.user_id,
+      email: profile.email,
+      eventType: 'login',
+      description: `Candidate authenticated via Google OAuth Redirect`,
+      ipAddress: ip,
+      userAgent: userAgent,
+      metadata: {
+        method: 'google_oauth_redirect',
+        role: role,
+        plan: profile.plan || 'trial'
+      }
+    })
 
     const targetUrl = new URL(role === 'admin' ? '/admin' : '/dashboard', req.url)
     targetUrl.searchParams.set('auth', 'google')

@@ -20,11 +20,14 @@ import {
   Cpu,
   Target,
   FileCheck,
+  FileText,
+  Mail,
   X
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import JobFluxLogo from '@/components/JobFluxLogo'
+import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
@@ -35,6 +38,28 @@ export default function UserDashboard() {
 
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'history' | 'profile'>('history')
+
+  // Help Modal State
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
+
+  // Account Security & Telemetry State
+  const [telemetry, setTelemetry] = useState<{
+    lastLoginAt: string | null
+    lastLoginIp: string | null
+    loginCount: number
+    lastProfileUpdatedAt: string | null
+    lastResumeUpdatedAt: string | null
+    resumeFilename: string | null
+    onDemandRunCount: number
+  }>({
+    lastLoginAt: null,
+    lastLoginIp: null,
+    loginCount: 0,
+    lastProfileUpdatedAt: null,
+    lastResumeUpdatedAt: null,
+    resumeFilename: null,
+    onDemandRunCount: 0
+  })
 
   // Metrics State
   const [metrics, setMetrics] = useState({
@@ -249,6 +274,15 @@ export default function UserDashboard() {
         setUserName(pData.name || '')
         const planFromProfile = pData.plan || (typeof window !== 'undefined' ? localStorage.getItem('user_plan') : null) || 'trial'
         setUserPlan(planFromProfile)
+        setTelemetry({
+          lastLoginAt: pData.last_login_at || null,
+          lastLoginIp: pData.last_login_ip || null,
+          loginCount: pData.login_count || 0,
+          lastProfileUpdatedAt: pData.last_profile_updated_at || null,
+          lastResumeUpdatedAt: pData.last_resume_updated_at || null,
+          resumeFilename: pData.resume_filename || null,
+          onDemandRunCount: pData.on_demand_run_count || 0
+        })
       }
 
       const sRes = await fetch(`/api/stats?user_id=${uid}`)
@@ -311,6 +345,22 @@ export default function UserDashboard() {
     }
   }
 
+  const formatTimestamp = (ts: any) => {
+    if (!ts) return 'Never'
+    try {
+      const d = new Date(ts)
+      if (isNaN(d.getTime())) return 'Never'
+      return d.toLocaleString('en-IN', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch {
+      return 'Never'
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
       {/* Top Navbar */}
@@ -347,6 +397,14 @@ export default function UserDashboard() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <Mail className="w-3.5 h-3.5 text-violet-400" /> 
+              <span className="hidden sm:inline">Help & Support</span>
+            </button>
+
             <Link
               href="/pricing"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors"
@@ -493,6 +551,87 @@ export default function UserDashboard() {
             <div className="flex items-center gap-2 bg-black px-3.5 py-2 rounded-lg border border-zinc-800/80">
               <TrendingUp className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
               <span>Delivery: <strong className="text-zinc-300">Direct Recruiter ATS</strong></span>
+            </div>
+          </div>
+        </div>
+
+        {/* Security, Activity & Telemetry Status Card */}
+        <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-violet-400">
+                <Shield className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-semibold text-white">Account Security & Activity Telemetry</h3>
+                <p className="text-[11px] text-zinc-500">Real-time session monitoring & profile sync audit</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer w-fit"
+            >
+              <Mail className="w-3 h-3 text-violet-400" />
+              <span>Contact Support (technohmsit@gmail.com)</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            {/* Session / Login */}
+            <div className="p-3 rounded-lg bg-black border border-zinc-800 space-y-1">
+              <div className="flex items-center justify-between text-zinc-400 text-[11px]">
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-emerald-400" /> Last Sign In
+                </span>
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-emerald-300">
+                  {telemetry.loginCount || 1} logins
+                </span>
+              </div>
+              <div className="font-mono text-white text-xs">
+                {telemetry.lastLoginAt ? formatTimestamp(telemetry.lastLoginAt) : 'Active Verified Session'}
+              </div>
+              <div className="text-[10px] text-zinc-500 font-mono truncate" title={telemetry.lastLoginIp || '127.0.0.1'}>
+                IP: {telemetry.lastLoginIp || 'Protected SSL'}
+              </div>
+            </div>
+
+            {/* Profile Sync */}
+            <div className="p-3 rounded-lg bg-black border border-zinc-800 space-y-1">
+              <div className="flex items-center justify-between text-zinc-400 text-[11px]">
+                <span className="flex items-center gap-1">
+                  <FileCheck className="w-3 h-3 text-purple-400" /> Profile Criteria
+                </span>
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-purple-300">
+                  Cloud Synced
+                </span>
+              </div>
+              <div className="font-mono text-white text-xs">
+                {telemetry.lastProfileUpdatedAt ? formatTimestamp(telemetry.lastProfileUpdatedAt) : 'Profile Configured'}
+              </div>
+              <div className="text-[10px] text-zinc-500">
+                Scheduled: Daily at 06:00 & 08:00 AM IST
+              </div>
+            </div>
+
+            {/* Active Resume */}
+            <div className="p-3 rounded-lg bg-black border border-zinc-800 space-y-1">
+              <div className="flex items-center justify-between text-zinc-400 text-[11px]">
+                <span className="flex items-center gap-1">
+                  <FileText className="w-3 h-3 text-cyan-400" /> Active Resume PDF
+                </span>
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className="text-[10px] text-violet-400 hover:underline cursor-pointer"
+                >
+                  Upload New
+                </button>
+              </div>
+              <div className="font-mono text-white text-xs truncate" title={telemetry.resumeFilename || `${userId}_Resume.pdf`}>
+                {telemetry.resumeFilename || `${userId}_Resume.pdf`}
+              </div>
+              <div className="text-[10px] text-zinc-500 font-mono">
+                {telemetry.lastResumeUpdatedAt ? `Updated: ${formatTimestamp(telemetry.lastResumeUpdatedAt)}` : 'ATS Binary Ready'}
+              </div>
             </div>
           </div>
         </div>
@@ -845,6 +984,16 @@ export default function UserDashboard() {
           </div>
         )}
       </main>
+
+      {/* Universal JobFlux Help & Support Center */}
+      <JobFluxHelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        showFloatingTrigger={true}
+        initialEmail={userEmail}
+        initialName={userName}
+        initialUserId={userId}
+      />
     </div>
   )
 }

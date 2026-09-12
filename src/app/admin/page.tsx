@@ -34,6 +34,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
+import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 
 export default function AdminDashboard() {
   const [usersList, setUsersList] = useState<any[]>([])
@@ -57,6 +58,24 @@ export default function AdminDashboard() {
 
   // Admin Active Tab
   const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'payments' | 'enterprise_leads' | 'logs'>('candidates')
+
+  // Activity Audit & Telemetry State
+  const [activityLogs, setActivityLogs] = useState<any[]>([])
+  const [loadingActivity, setLoadingActivity] = useState<boolean>(false)
+  const [activityFilter, setActivityFilter] = useState<string>('all')
+  const [activityStats, setActivityStats] = useState<any>({
+    total_logins: 0,
+    total_profile_updates: 0,
+    total_resume_uploads: 0,
+    total_task_runs: 0,
+    total_logged_events: 0
+  })
+
+  // Support Tickets State
+  const [supportTickets, setSupportTickets] = useState<any[]>([])
+  const [loadingTickets, setLoadingTickets] = useState<boolean>(false)
+  const [logsSubTab, setLogsSubTab] = useState<'activity' | 'job_history' | 'tickets'>('activity')
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
 
   // Enterprise Leads State
   const [enterpriseLeads, setEnterpriseLeads] = useState<any[]>([])
@@ -176,6 +195,58 @@ export default function AdminDashboard() {
       })
     } catch {
       fetchEnterpriseLeads()
+    }
+  }
+
+  const fetchActivityLogs = async (type = activityFilter) => {
+    setLoadingActivity(true)
+    try {
+      const q = type && type !== 'all' ? `?event_type=${encodeURIComponent(type)}&limit=100` : '?limit=100'
+      const res = await fetch(`/api/admin/activity${q}`, {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setActivityLogs(data.logs || [])
+        if (data.stats) setActivityStats(data.stats)
+      }
+    } catch (e) {
+      console.error('Failed to fetch activity logs:', e)
+    } finally {
+      setLoadingActivity(false)
+    }
+  }
+
+  const fetchSupportTickets = async () => {
+    setLoadingTickets(true)
+    try {
+      const res = await fetch('/api/support?limit=50', {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setSupportTickets(data.tickets || [])
+      }
+    } catch (e) {
+      console.error('Failed to fetch support tickets:', e)
+    } finally {
+      setLoadingTickets(false)
+    }
+  }
+
+  const formatTimestamp = (ts: any) => {
+    if (!ts) return 'Never'
+    try {
+      const d = new Date(ts)
+      if (isNaN(d.getTime())) return 'Never'
+      return d.toLocaleString('en-IN', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch {
+      return 'Never'
     }
   }
 
@@ -317,6 +388,12 @@ export default function AdminDashboard() {
 
           <div className="flex items-center gap-3">
             <button
+              onClick={() => setIsHelpOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300"
+            >
+              <Mail className="w-3.5 h-3.5 text-violet-400" /> Help Desk
+            </button>
+            <button
               onClick={fetchOverviewAndUsers}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300"
             >
@@ -451,14 +528,18 @@ export default function AdminDashboard() {
             <Building2 className="w-3.5 h-3.5" /> Enterprise Leads ({enterpriseLeads.length})
           </button>
           <button
-            onClick={() => setActiveAdminTab('logs')}
+            onClick={() => {
+              setActiveAdminTab('logs')
+              fetchActivityLogs()
+              fetchSupportTickets()
+            }}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
               activeAdminTab === 'logs'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <History className="w-3.5 h-3.5" /> System Logs & Activity
+            <History className="w-3.5 h-3.5" /> Activity Audit & System Logs
           </button>
         </div>
 
@@ -501,22 +582,23 @@ export default function AdminDashboard() {
                       <th className="py-3.5 px-4">Naukri Email</th>
                       <th className="py-3.5 px-4">Plan & Access</th>
                       <th className="py-3.5 px-4 text-center">Auto-Apply</th>
-                      <th className="py-3.5 px-4 text-center">Today</th>
-                      <th className="py-3.5 px-4 text-center">Total Applied</th>
+                      <th className="py-3.5 px-4">Last Login</th>
+                      <th className="py-3.5 px-4">Profile & Resume</th>
+                      <th className="py-3.5 px-4 text-center">Today / Total</th>
                       <th className="py-3.5 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/50">
                     {loadingUsers ? (
                       <tr>
-                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                        <td colSpan={8} className="py-12 text-center text-slate-400">
                           <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                           Loading candidate profiles...
                         </td>
                       </tr>
                     ) : filteredUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="py-12 text-center text-slate-500">
+                        <td colSpan={8} className="py-12 text-center text-slate-500">
                           No candidate profiles match your search query.
                         </td>
                       </tr>
@@ -583,11 +665,42 @@ export default function AdminDashboard() {
                               )}
                             </button>
                           </td>
-                          <td className="py-4 px-4 text-center font-bold text-white font-mono">
-                            {u.applied_today || 0}
+                          <td className="py-4 px-4">
+                            <div className="space-y-1">
+                              <div className="text-white font-mono text-[11px] flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                                <span>{formatTimestamp(u.last_login_at)}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-300">
+                                  {u.login_count || 0} logins
+                                </span>
+                                {u.last_login_ip && (
+                                  <span className="text-[9px] font-mono text-zinc-500 truncate max-w-[80px]" title={u.last_login_ip}>
+                                    {u.last_login_ip}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </td>
-                          <td className="py-4 px-4 text-center font-bold text-indigo-400 font-mono">
-                            {u.total_applied || 0}
+                          <td className="py-4 px-4">
+                            <div className="space-y-1 text-[11px]">
+                              <div className="text-zinc-300 flex items-center gap-1">
+                                <FileText className="w-3 h-3 text-violet-400 shrink-0" />
+                                <span className="truncate max-w-[120px]" title={u.resume_filename || 'No resume PDF uploaded'}>
+                                  {u.resume_filename || 'No PDF'}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-zinc-500 font-mono">
+                                {u.last_resume_updated_at ? `PDF: ${formatTimestamp(u.last_resume_updated_at)}` : (u.last_profile_updated_at ? `Profile: ${formatTimestamp(u.last_profile_updated_at)}` : 'Synced')}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-center">
+                            <div className="font-mono font-bold text-white text-xs">
+                              {u.applied_today || 0} <span className="text-zinc-600 font-normal">/</span> <span className="text-indigo-400">{u.total_applied || 0}</span>
+                            </div>
+                            <div className="text-[9px] text-zinc-500 uppercase font-mono">Today / Total</div>
                           </td>
                           <td className="py-4 px-4 text-right">
                             <div className="flex items-center justify-end gap-2">
@@ -882,59 +995,329 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 3: SYSTEM LOGS & ACTIVITY */}
+        {/* TAB 4: ACTIVITY AUDIT & SYSTEM LOGS */}
         {activeAdminTab === 'logs' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 p-4 space-y-2 h-[600px] overflow-y-auto">
-              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
-                Select Candidate Activity
-              </h3>
-              {usersList.map((u: any) => (
+          <div className="space-y-4">
+            {/* Sub-Tabs Selector */}
+            <div className="flex items-center justify-between gap-4 flex-wrap pb-2 border-b border-zinc-900">
+              <div className="flex items-center gap-2">
                 <button
-                  key={u.user_id}
-                  onClick={() => loadSystemLogContent(u.user_id)}
-                  className={`w-full text-left p-3 rounded-xl text-xs font-mono transition-all flex items-center justify-between ${
-                    selectedSystemLog === u.user_id
-                      ? 'bg-indigo-600 text-white shadow-md'
-                      : 'bg-slate-950 hover:bg-slate-900 text-slate-300 border border-slate-800/80'
+                  onClick={() => {
+                    setLogsSubTab('activity')
+                    fetchActivityLogs()
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    logsSubTab === 'activity'
+                      ? 'bg-zinc-800 text-white'
+                      : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
                   }`}
                 >
-                  <span className="truncate">{u.name || u.user_id}</span>
-                  <span className="text-[10px] opacity-75">{u.total_applied || 0} applied</span>
+                  Live Activity Audit Trail ({activityLogs.length})
                 </button>
-              ))}
-            </div>
+                <button
+                  onClick={() => setLogsSubTab('job_history')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    logsSubTab === 'job_history'
+                      ? 'bg-zinc-800 text-white'
+                      : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                  }`}
+                >
+                  Job Application Records
+                </button>
+                <button
+                  onClick={() => {
+                    setLogsSubTab('tickets')
+                    fetchSupportTickets()
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    logsSubTab === 'tickets'
+                      ? 'bg-zinc-800 text-white'
+                      : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                  }`}
+                >
+                  Support Inquiries ({supportTickets.length})
+                </button>
+              </div>
 
-            <div className="md:col-span-2 rounded-2xl bg-[#050811] border border-slate-800 overflow-hidden flex flex-col h-[600px]">
-              <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-                <span className="text-xs font-mono text-cyan-400">
-                  {selectedSystemLog ? `Activity for ${selectedSystemLog}` : 'Select a candidate on the left'}
-                </span>
-                {selectedSystemLog && (
+              {logsSubTab === 'activity' && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {['all', 'login', 'profile_update', 'resume_upload', 'task_run'].map(type => (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        setActivityFilter(type)
+                        fetchActivityLogs(type)
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider transition-colors ${
+                        activityFilter === type
+                          ? 'bg-violet-600 text-white font-bold'
+                          : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border border-zinc-800'
+                      }`}
+                    >
+                      {type.replace('_', ' ')}
+                    </button>
+                  ))}
                   <button
-                    onClick={() => loadSystemLogContent(selectedSystemLog)}
-                    className="text-xs text-slate-400 hover:text-white"
+                    onClick={() => fetchActivityLogs(activityFilter)}
+                    className="p-1.5 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors ml-1"
+                    title="Refresh Activity Logs"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                   </button>
-                )}
-              </div>
-              <div className="p-4 flex-1 overflow-y-auto font-mono text-xs text-slate-300 space-y-1">
-                {loadingLogContent ? (
-                  <div className="h-full flex items-center justify-center text-slate-500">Loading activity...</div>
-                ) : selectedLogContent.length === 0 ? (
-                  <div className="h-full flex items-center justify-center text-slate-500">
-                    Click a candidate on the left to view their applied job activity.
-                  </div>
-                ) : (
-                  selectedLogContent.map((line, i) => (
-                    <div key={i} className="leading-relaxed whitespace-pre-wrap">
-                      {line}
-                    </div>
-                  ))
-                )}
-              </div>
+                </div>
+              )}
             </div>
+
+            {/* VIEW 1: LIVE ACTIVITY AUDIT TRAIL */}
+            {logsSubTab === 'activity' && (
+              <div className="space-y-4">
+                {/* 4 Stat Badges */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+                    <span className="text-[10px] uppercase font-mono text-zinc-500">Total Logins</span>
+                    <div className="text-xl font-semibold font-mono text-emerald-400">
+                      {activityStats.total_logins || 0}
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+                    <span className="text-[10px] uppercase font-mono text-zinc-500">Profile Updates</span>
+                    <div className="text-xl font-semibold font-mono text-purple-400">
+                      {activityStats.total_profile_updates || 0}
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+                    <span className="text-[10px] uppercase font-mono text-zinc-500">Resume Uploads</span>
+                    <div className="text-xl font-semibold font-mono text-cyan-400">
+                      {activityStats.total_resume_uploads || 0}
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+                    <span className="text-[10px] uppercase font-mono text-zinc-500">Scout Tasks</span>
+                    <div className="text-xl font-semibold font-mono text-amber-400">
+                      {activityStats.total_task_runs || 0}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Activity Feed Table */}
+                <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-slate-300">
+                      <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                        <tr>
+                          <th className="py-3 px-4">Timestamp</th>
+                          <th className="py-3 px-4">Candidate / User</th>
+                          <th className="py-3 px-4">Event</th>
+                          <th className="py-3 px-4">Activity Description</th>
+                          <th className="py-3 px-4">IP & Device</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/50">
+                        {loadingActivity ? (
+                          <tr>
+                            <td colSpan={5} className="py-12 text-center text-slate-400">
+                              <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
+                              Streaming live activity records...
+                            </td>
+                          </tr>
+                        ) : activityLogs.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="py-12 text-center text-slate-500">
+                              No activity logs found for this filter.
+                            </td>
+                          </tr>
+                        ) : (
+                          activityLogs.map((log, idx) => (
+                            <tr key={log.id || idx} className="hover:bg-slate-800/30 transition-colors">
+                              <td className="py-3 px-4 font-mono text-[11px] text-zinc-400 whitespace-nowrap">
+                                {formatTimestamp(log.created_at)}
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="font-semibold text-white font-mono text-xs truncate max-w-[140px]">
+                                  {log.user_id}
+                                </div>
+                                {log.email && (
+                                  <div className="text-[10px] text-zinc-500 truncate max-w-[140px]">
+                                    {log.email}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider ${
+                                  log.event_type === 'login' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' :
+                                  log.event_type === 'profile_update' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30' :
+                                  log.event_type === 'resume_upload' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' :
+                                  log.event_type === 'task_run' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' :
+                                  'bg-zinc-800 text-zinc-300'
+                                }`}>
+                                  {log.event_type}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-zinc-200">
+                                <div className="text-xs">{log.description}</div>
+                                {log.metadata?.filename && (
+                                  <div className="text-[10px] text-zinc-500 font-mono mt-0.5">
+                                    File: {log.metadata.filename} ({log.metadata.size_kb || 0} KB)
+                                  </div>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-[11px] font-mono text-zinc-400">
+                                <div>{log.ip_address || '127.0.0.1'}</div>
+                                <div className="text-[9px] text-zinc-600 truncate max-w-[160px]" title={log.user_agent}>
+                                  {log.user_agent || 'Unknown device'}
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 2: JOB APPLICATION RECORDS */}
+            {logsSubTab === 'job_history' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="rounded-2xl bg-[#09090b] border border-zinc-800 p-4 space-y-2 h-[600px] overflow-y-auto">
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
+                    Select Candidate
+                  </h3>
+                  {usersList.map((u: any) => (
+                    <button
+                      key={u.user_id}
+                      onClick={() => loadSystemLogContent(u.user_id)}
+                      className={`w-full text-left p-3 rounded-xl text-xs font-mono transition-all flex items-center justify-between ${
+                        selectedSystemLog === u.user_id
+                          ? 'bg-zinc-800 text-white shadow-md border border-zinc-700'
+                          : 'bg-black hover:bg-zinc-900 text-slate-300 border border-zinc-800'
+                      }`}
+                    >
+                      <span className="truncate">{u.name || u.user_id}</span>
+                      <span className="text-[10px] opacity-75">{u.total_applied || 0} applied</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="md:col-span-2 rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden flex flex-col h-[600px]">
+                  <div className="bg-black px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                    <span className="text-xs font-mono text-white">
+                      {selectedSystemLog ? `Application Log for ${selectedSystemLog}` : 'Select a candidate on the left'}
+                    </span>
+                    {selectedSystemLog && (
+                      <button
+                        onClick={() => loadSystemLogContent(selectedSystemLog)}
+                        className="text-xs text-slate-400 hover:text-white"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-4 flex-1 overflow-y-auto font-mono text-xs text-slate-300 space-y-1">
+                    {loadingLogContent ? (
+                      <div className="h-full flex items-center justify-center text-slate-500">Loading activity...</div>
+                    ) : selectedLogContent.length === 0 ? (
+                      <div className="h-full flex items-center justify-center text-slate-500">
+                        Click a candidate on the left to view their applied job activity.
+                      </div>
+                    ) : (
+                      selectedLogContent.map((line, i) => (
+                        <div key={i} className="leading-relaxed whitespace-pre-wrap">
+                          {line}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 3: INBOUND SUPPORT TICKETS */}
+            {logsSubTab === 'tickets' && (
+              <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+                <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-black">
+                  <div>
+                    <h3 className="text-xs font-semibold text-white">
+                      Inbound Support Queue
+                    </h3>
+                    <p className="text-[11px] text-zinc-500">
+                      Dispatched directly to primary address <span className="text-violet-400 font-mono">technohmsit@gmail.com</span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={fetchSupportTickets}
+                    className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs flex items-center gap-1.5 transition-colors"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-slate-300">
+                    <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                      <tr>
+                        <th className="py-3 px-4">Ticket ID</th>
+                        <th className="py-3 px-4">Candidate</th>
+                        <th className="py-3 px-4">Category</th>
+                        <th className="py-3 px-4">Subject & Message</th>
+                        <th className="py-3 px-4">Date</th>
+                        <th className="py-3 px-4 text-right">Target Email</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/50">
+                      {loadingTickets ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center text-slate-400">
+                            <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
+                            Loading support tickets...
+                          </td>
+                        </tr>
+                      ) : supportTickets.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center text-slate-500">
+                            No support inquiries received yet. Inquiries from the Help Modal will appear here.
+                          </td>
+                        </tr>
+                      ) : (
+                        supportTickets.map((t, idx) => (
+                          <tr key={t.id || idx} className="hover:bg-slate-800/30 transition-colors">
+                            <td className="py-3 px-4 font-mono font-semibold text-white">
+                              {t.ticket_id}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="font-semibold text-white">{t.name}</div>
+                              <a
+                                href={`mailto:${t.email}?subject=Re:%20${encodeURIComponent(t.subject)}`}
+                                className="text-[11px] text-violet-400 hover:underline flex items-center gap-1 mt-0.5"
+                              >
+                                <Mail className="w-3 h-3" /> {t.email}
+                              </a>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-300">
+                                {t.category}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 max-w-sm">
+                              <div className="font-semibold text-white text-xs">{t.subject}</div>
+                              <div className="text-[11px] text-zinc-400 truncate mt-0.5">
+                                {t.message}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-[11px] font-mono text-zinc-400 whitespace-nowrap">
+                              {formatTimestamp(t.created_at)}
+                            </td>
+                            <td className="py-3 px-4 text-right font-mono text-[11px] text-violet-300">
+                              technohmsit@gmail.com
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -979,6 +1362,13 @@ export default function AdminDashboard() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Help & Support Modal */}
+      <JobFluxHelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        showFloatingTrigger={false}
+      />
     </div>
   )
 }
