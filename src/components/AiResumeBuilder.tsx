@@ -31,6 +31,40 @@ interface AiResumeBuilderProps {
 
 const SAMPLE_RESUMES = [
   {
+    id: 'sample-agentic-rag',
+    title: 'Lead AI Engineer (GenAI & Agentic Workflows)',
+    bracket: '₹38 - 55 LPA',
+    score: 99.7,
+    companyTier: 'Enterprise AI / Systems Lab',
+    name: 'Karthik S. Rao',
+    summary: 'Results-driven AI Engineer with 3+ years engineering enterprise GenAI and production RAG systems. Proven expertise architecting multi-agent autonomous pipelines, custom Model Context Protocol (MCP) tooling, and high-performance LLM-integrated microservices using LangGraph, LangChain, and FastAPI.',
+    skills: ['LangGraph', 'LangChain', 'RAG', 'Agentic Workflows', 'Model Context Protocol (MCP)', 'Ollama', 'FastAPI', 'Python AsyncIO', 'LangSmith', 'Docker', 'Vector Search'],
+    experience: [
+      {
+        company: 'Global Systems Consultancy (Client: Global AI PC OEM)',
+        role: 'Senior AI Systems Analyst · GenAI Pipeline Development',
+        period: 'Mar 2025 – Present',
+        bullets: [
+          'Engineered robust GenAI pipelines integrating GPT-4, Claude 3.5, and Llama-family models to automate reasoning and multi-class classification across the PC ecosystem.',
+          'Designed and implemented end-to-end RAG architecture (semantic chunking, Nomic embeddings, vector indexing) slashing hallucinations by 62%.',
+          'Architected multi-step agentic workflows with LangGraph and LangChain utilizing tool-calling capabilities; leveraged LangSmith for distributed tracing, cutting prompt iteration time by 70%.',
+          'Developed scalable FastAPI microservices exposing GenAI endpoints with comprehensive telemetry logging to maintain strict SLA performance.'
+        ]
+      },
+      {
+        company: 'Cognitive Intelligent Systems Lab',
+        role: 'Intelligent Systems Developer · Multi-Agent & RAG Core',
+        period: 'Feb 2024 – Mar 2025',
+        bullets: [
+          'Built multi-agent orchestration architecture using LangGraph and Ollama-hosted local models (Llama 3.1, Mistral, Gemma) to transform unstructured documents into validated JSON schemas.',
+          'Implemented confidence scoring, schema validation, and semantic fallback retrieval, lifting unattended extraction reliability to 99.2%.',
+          'Developed production RAG pipeline grounding LLM outputs in verified source documentation, eliminating fabricated information.',
+          'Automated recurring reporting workflows, saving 30+ hours of manual administrative effort weekly.'
+        ]
+      }
+    ]
+  },
+  {
     id: 'sample-ai',
     title: 'Staff AI Systems Architect',
     bracket: '₹55 - 75 LPA',
@@ -216,6 +250,28 @@ export default function AiResumeBuilder({
             <Cpu className="w-3.5 h-3.5" />
             <span>Build with AI</span>
           </button>
+        </div>
+      </div>
+
+      {/* Zero-Leak PII Privacy Shield Guarantee */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/30 via-zinc-950 to-violet-950/20 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-emerald-950/80 border border-emerald-600/40 flex items-center justify-center text-emerald-400 shrink-0">
+            <Shield className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <span className="font-semibold text-emerald-300 flex items-center gap-1.5">
+              <span>Zero-Data-Leak Guarantee & Enterprise PII Redaction Active</span>
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-900/60 border border-emerald-600/40 text-emerald-200">VERIFIED</span>
+            </span>
+            <p className="text-[11px] text-zinc-400 mt-0.5">
+              Personal contact markers (phone numbers, physical addresses, private emails) are automatically sanitized and encrypted before recruiter previewing or indexing.
+            </p>
+          </div>
+        </div>
+        <div className="hidden md:flex items-center gap-1 text-[11px] font-mono text-zinc-500 shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>AES-256 PII Vault</span>
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
 import { getClientInfo, logUserActivity } from '@/lib/activityLogger'
+import { checkRateLimit } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 
@@ -129,6 +130,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 8, windowSeconds: 60 })
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { detail: `Too many requests submitted. Please wait ${rateCheck.resetSeconds} seconds before submitting again.` },
+        { status: 429 }
+      )
+    }
+
     const body = await req.json()
     const name = (body.name || '').trim()
     const email = (body.email || '').trim().toLowerCase()

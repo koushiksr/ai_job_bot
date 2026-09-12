@@ -12,6 +12,79 @@ const groq = new Groq({
 // Curated high-paying senior sample resumes
 const SAMPLES = [
   {
+    id: 'sample-agentic-rag',
+    role: 'Lead AI Engineer (GenAI & Agentic Workflows)',
+    bracket: '₹38 - 55 LPA',
+    ats_score: 99.7,
+    candidate_name: 'Karthik S. Rao',
+    location: 'Bengaluru, India · Hybrid / Remote',
+    email: 'karthik.ai@enterprise-mesh.internal',
+    phone: '+91 98450 ••••• (PII Redacted)',
+    summary: 'Results-driven AI Engineer with 3+ years experience engineering enterprise GenAI and production RAG systems. Proven expertise architecting robust pipelines, complex agentic workflows, and high-performance LLM-integrated microservices. Proficient in advanced orchestration frameworks (LangGraph, LangChain), custom Model Context Protocol (MCP) tooling, and rigorous LLM evaluation methodologies (LangSmith), consistently driving measurable business impact.',
+    skills: {
+      'AI & GenAI Core': ['LLM Application Development', 'RAG (Retrieval-Augmented Generation)', 'Agentic Workflows', 'Multi-Agent Orchestration', 'Model Context Protocol (MCP)', 'Tool/Function Calling', 'Prompt Engineering'],
+      'Frameworks & Orchestration': ['LangGraph', 'LangChain', 'Ollama', 'FastAPI', 'n8n', 'Workflow Automation', 'CrewAI'],
+      'Models & APIs': ['GPT-4', 'Claude 3.5', 'Llama 3.3', 'Mistral', 'Phi-4', 'Gemma', 'Whisper ASR', 'Nomic Embed', 'Groq API', 'OpenRouter'],
+      'Evaluation & Reliability': ['LangSmith Tracing', 'Confidence Scoring', 'JSON Schema Validation', 'Semantic & Vector Retrieval'],
+      'Programming & Backend': ['Python (AsyncIO)', 'JavaScript', 'TypeScript', 'REST API', 'MongoDB', 'Docker', 'Git', 'CI/CD', 'Jenkins', 'ReactJS', 'NodeJS']
+    },
+    experience: [
+      {
+        company: 'Global Systems Consultancy (Client: Global AI PC OEM)',
+        title: 'Senior AI Systems Analyst · GenAI Pipeline Development',
+        period: 'Mar 2025 – Present',
+        metrics: [
+          'Engineered robust GenAI pipelines integrating GPT-4, Claude 3.5, and Llama-family models to automate manual reasoning, summarization, and multi-class classification across the PC ecosystem.',
+          'Designed and implemented end-to-end RAG architecture (semantic chunking, Nomic embeddings, vector indexing) grounding LLM responses in enterprise knowledge, slashing hallucinations by 62%.',
+          'Established rigorous LLM evaluation frameworks to benchmark latency and token efficiency, ensuring 99.4% schema extraction accuracy across diverse operational use cases.',
+          'Architected multi-step agentic workflows with LangGraph and LangChain utilizing tool-calling capabilities; leveraged LangSmith for distributed tracing, cutting prompt-iteration cycles by 70%.',
+          'Developed scalable FastAPI microservices to expose GenAI endpoints to internal applications, implementing comprehensive logging and telemetry.'
+        ]
+      },
+      {
+        company: 'Cognitive Intelligent Systems Lab',
+        title: 'Intelligent Systems Developer · Multi-Agent & RAG Core',
+        period: 'Feb 2024 – Mar 2025',
+        metrics: [
+          'Built multi-agent orchestration architecture using LangGraph and Ollama-hosted local models (Llama 3.1, Mistral, Gemma) to transform unstructured documents into validated JSON schemas, eliminating manual data entry.',
+          'Implemented confidence scoring, schema validation, and semantic fallback retrieval, lifting unattended pipeline extraction reliability to 99.2%.',
+          'Developed an end-to-end RAG pipeline to ground LLM outputs in verified source documentation, guaranteeing high-accuracy results and eliminating fabricated information.',
+          'Automated recurring reporting workflows, saving 30+ hours of manual administrative effort weekly for client teams.',
+          'Contributed to high-volume MERN financial intelligence platform, integrating LLM-driven anomaly detection.'
+        ]
+      }
+    ],
+    projects: [
+      {
+        name: 'Enterprise Document Q&A (RAG) System',
+        tech: 'Python, LangChain, Nomic Embed, Vector Search, FastAPI',
+        description: 'Architected end-to-end RAG system enabling natural-language Q&A over massive multi-gigabyte PDF archives with semantic chunking and source citation for full traceability. Balanced sub-60ms retrieval latency with 98.6% answer relevance.'
+      },
+      {
+        name: 'Jarvis – Autonomous Agentic Voice Assistant',
+        tech: 'LangGraph, LangChain, react_agent, OpenRouter, Groq',
+        description: 'Built voice-controlled autonomous agent using LangGraph react_agent for multi-step workflow execution from voice queries. Integrated real-time TTS/STT alongside redundant Groq Llama-3.3 inference endpoints with 99.9% availability.'
+      },
+      {
+        name: 'Custom Model Context Protocol (MCP) Suite',
+        tech: 'Python, MCP SDK, Claude Code Integration',
+        description: 'Designed and implemented custom MCP servers extending Claude Code with repository context retrieval and automated local developer toolchain actions.'
+      }
+    ],
+    certifications: [
+      'Generative AI Engineering Microdegree',
+      'Outstanding Performance Award for AI Excellence',
+      'Advanced Full-Stack Architecture Certification',
+      'National-Level Technical Paper Presentation (AI & Automation Systems)'
+    ],
+    education: 'B.E., Electronics & Communication Engineering',
+    ats_highlights: [
+      'Keyword Density: 99.2% alignment with Senior AI, GenAI & Agentic Systems postings',
+      'Google XYZ Formula: 100% quantifiable achievement statements with concrete impact metrics',
+      'ATS Compliance: Single-column standard structure validated across Workday, Greenhouse & Taleo'
+    ]
+  },
+  {
     id: 'sample-ai-ml',
     role: 'Staff AI Systems Engineer',
     bracket: '₹55 - 75 LPA',

@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { checkRateLimit } from '@/lib/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 12, windowSeconds: 60 })
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { detail: `Too many sign-in attempts. Please wait ${rateCheck.resetSeconds} seconds before trying again.` },
+        { status: 429 }
+      )
+    }
+
     const body = await req.json()
     const emailClean = (body.email || '').trim().toLowerCase()
     const pwdClean = (body.password || '').trim()

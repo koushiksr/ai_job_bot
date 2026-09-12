@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import crypto from 'crypto'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { checkRateLimit } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +51,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 10, windowSeconds: 60 })
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { detail: `Too many on-demand task dispatches. Please wait ${rateCheck.resetSeconds} seconds before requesting again.` },
+        { status: 429 }
+      )
+    }
+
     const body = await req.json()
     const { user_id, headless } = body
 
