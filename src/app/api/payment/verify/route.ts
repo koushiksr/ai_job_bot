@@ -80,6 +80,7 @@ export async function POST(req: NextRequest) {
 
     if (Object.keys(query).length > 0) {
       await db.collection('profiles').updateOne(query, { $set: updateFields }, { upsert: false })
+      await db.collection('users').updateOne(query, { $set: updateFields }, { upsert: false })
     }
 
     // 3. Record transaction in payments collection

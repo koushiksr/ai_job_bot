@@ -36,7 +36,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const profile = await db.collection('profiles').findOne({
+    const profile = await db.collection('users').findOne({
+      email: { $regex: `^${emailClean}$`, $options: 'i' }
+    }) || await db.collection('profiles').findOne({
       email: { $regex: `^${emailClean}$`, $options: 'i' }
     })
 
@@ -44,11 +46,11 @@ export async function POST(req: NextRequest) {
       if (profile.password === pwdClean) {
         return NextResponse.json({
           status: 'success',
-          role: 'user',
+          role: profile.role || 'user',
           user_id: profile.user_id,
           email: profile.email,
           name: profile.name || profile.user_id.replace('_', ' '),
-          plan: profile.plan || 'pro',
+          plan: profile.plan || 'trial',
           trial_expires_at: profile.trial_expires_at || null
         })
       } else {

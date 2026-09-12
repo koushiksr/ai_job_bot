@@ -8,7 +8,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ users: [] })
     }
 
-    const profiles = await db.collection('profiles').find({}).toArray()
+    const userDocs = await db.collection('users').find({}).toArray()
+    const profiles = userDocs.length > 0 ? userDocs : await db.collection('profiles').find({}).toArray()
     const statsList = await db.collection('user_stats').find({}).toArray()
 
     const statsMap: Record<string, any> = {}
@@ -78,6 +79,10 @@ export async function PATCH(req: NextRequest) {
     }
 
     await db.collection('profiles').updateOne(
+      { user_id },
+      { $set: updates }
+    )
+    await db.collection('users').updateOne(
       { user_id },
       { $set: updates }
     )

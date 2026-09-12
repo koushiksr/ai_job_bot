@@ -72,15 +72,35 @@ export async function POST(req: NextRequest) {
         'Are you on a career break?': 'No'
       },
       enabled_for_daily_run: true,
+      role: 'user',
+      is_vip: false,
       plan: selectedPlan,
-      plan_name: selectedPlan === 'trial' ? '1-Day Free Trial' : selectedPlan,
+      plan_name: selectedPlan === 'trial' ? 'JobFlux 1-Day Free Trial' : `JobFlux ${selectedPlan.toUpperCase()}`,
       trial_started_at: now,
       trial_expires_at: trialExpires,
       created_at: now,
       updated_at: now
     }
 
-    await db.collection('profiles').insertOne(newProfile)
+    await db.collection('profiles').insertOne({ ...newProfile })
+    await db.collection('users').insertOne({ ...newProfile })
+
+    // Initialize clean user_stats record
+    await db.collection('user_stats').updateOne(
+      { user_id: userId },
+      {
+        $setOnInsert: {
+          user_id: userId,
+          today: 0,
+          this_week: 0,
+          this_month: 0,
+          total_applied: 0,
+          last_applied_at: null,
+          last_date: now.toISOString().split('T')[0]
+        }
+      },
+      { upsert: true }
+    )
 
     return NextResponse.json({
       status: 'success',

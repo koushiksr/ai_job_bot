@@ -103,15 +103,35 @@ export async function GET(req: NextRequest) {
           'Are you on a career break?': 'No'
         },
         enabled_for_daily_run: true,
+        role: 'user',
+        is_vip: false,
         plan: 'trial',
-        plan_name: '1-Day Free Trial',
+        plan_name: 'JobFlux 1-Day Free Trial',
         trial_started_at: now,
         trial_expires_at: trialExpires,
         created_at: now,
         updated_at: now
       }
 
-      const insertResult = await db.collection('profiles').insertOne(newProfile)
+      const insertResult = await db.collection('profiles').insertOne({ ...newProfile })
+      await db.collection('users').insertOne({ ...newProfile })
+
+      // Initialize clean user_stats record
+      await db.collection('user_stats').updateOne(
+        { user_id: userId },
+        {
+          $setOnInsert: {
+            user_id: userId,
+            today: 0,
+            this_week: 0,
+            this_month: 0,
+            total_applied: 0,
+            last_applied_at: null,
+            last_date: now.toISOString().split('T')[0]
+          }
+        },
+        { upsert: true }
+      )
       profile = { ...newProfile, _id: insertResult.insertedId }
     }
 

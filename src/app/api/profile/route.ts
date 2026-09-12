@@ -127,6 +127,11 @@ export async function POST(req: NextRequest) {
       { $set: updateDoc },
       { upsert: true }
     )
+    await db.collection('users').updateOne(
+      { user_id: userId },
+      { $set: updateDoc },
+      { upsert: true }
+    )
 
     return NextResponse.json({
       status: 'success',
@@ -149,7 +154,9 @@ export async function DELETE(req: NextRequest) {
     const db = await getDb()
     if (db) {
       await db.collection('profiles').deleteOne({ user_id: userId })
+      await db.collection('users').deleteOne({ user_id: userId })
       await db.collection('user_stats').deleteOne({ user_id: userId })
+      await db.collection('resumes').deleteOne({ user_id: userId })
     }
 
     return NextResponse.json({ status: 'success', deleted: userId })
