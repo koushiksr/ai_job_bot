@@ -85,7 +85,8 @@ export async function POST(req: NextRequest) {
           name: name || 'Technohm SIT Administrator',
           email: 'technohmsit@gmail.com',
           role: 'admin',
-          plan: 'enterprise',
+          plan: 'trial',
+          plan_name: 'JobFlux 1-Day Free Trial',
           created_at: now,
           updated_at: now
         }
@@ -179,13 +180,41 @@ export async function POST(req: NextRequest) {
       }
     })
 
+    const rawPlan = (profile.plan || 'trial').toLowerCase()
+    let verifiedPlan = 'trial'
+    let planName = 'JobFlux 1-Day Free Trial'
+    let isPlanActive = true
+
+    if (rawPlan === 'vip') {
+      verifiedPlan = 'vip'
+      planName = 'JobFlux VIP Elite'
+      isPlanActive = true
+    } else if (rawPlan !== 'trial') {
+      const planExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
+      if (planExpires && planExpires > now) {
+        verifiedPlan = rawPlan
+        planName = profile.plan_name || `JobFlux ${rawPlan.toUpperCase()}`
+        isPlanActive = true
+      } else {
+        verifiedPlan = 'trial'
+        planName = 'JobFlux 1-Day Free Trial (Plan Expired)'
+        isPlanActive = false
+      }
+    } else {
+      const trialExpires = profile.trial_expires_at ? new Date(profile.trial_expires_at) : null
+      isPlanActive = trialExpires ? trialExpires > now : true
+    }
+
     return NextResponse.json({
       status: 'success',
       role: role,
       user_id: profile.user_id,
       email: profile.email,
       name: profile.name || profile.user_id.replace('_', ' '),
-      plan: profile.plan || 'trial',
+      plan: verifiedPlan,
+      plan_name: planName,
+      is_plan_active: isPlanActive,
+      plan_expires_at: profile.plan_expires_at || null,
       trial_expires_at: profile.trial_expires_at || null,
       message: 'Authenticated successfully via Google!'
     })

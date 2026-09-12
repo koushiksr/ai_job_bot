@@ -43,6 +43,9 @@ export default function UserDashboard() {
   const [userName, setUserName] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
   const [userPlan, setUserPlan] = useState<string>('trial')
+  const [userPlanName, setUserPlanName] = useState<string>('JobFlux 1-Day Free Trial')
+  const [isPlanActive, setIsPlanActive] = useState<boolean>(true)
+  const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
 
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'history' | 'profile' | 'queries' | 'resume_builder'>('history')
@@ -91,7 +94,9 @@ export default function UserDashboard() {
   const [showProModal, setShowProModal] = useState<boolean>(false)
   const [proModalFeature, setProModalFeature] = useState<string>('On-Demand Turbo Scout')
 
-  const isProfessional = userPlan === 'elite' || userPlan === 'professional' || userRole === 'admin'
+  // Candidate account has Professional privileges ONLY if on an active, verified Professional tier.
+  // Admin accounts manage system configurations via the Admin Portal (/admin).
+  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise') && isPlanActive
 
   // Compute Daily 6 AM & 8 AM IST Countdown
   useEffect(() => {
@@ -313,8 +318,17 @@ export default function UserDashboard() {
       if (pRes.ok) {
         const pData = await pRes.json()
         setUserName(pData.name || '')
-        const planFromProfile = pData.plan || (typeof window !== 'undefined' ? localStorage.getItem('user_plan') : null) || 'trial'
-        setUserPlan(planFromProfile)
+        const verifiedPlan = (pData.plan || 'trial').toLowerCase()
+        const active = pData.is_plan_active !== false
+        setUserPlan(verifiedPlan)
+        setUserPlanName(pData.plan_name || (verifiedPlan === 'trial' ? 'JobFlux 1-Day Free Trial' : `JobFlux ${verifiedPlan.toUpperCase()}`))
+        setIsPlanActive(active)
+        setPlanExpiresAt(pData.plan_expires_at || pData.trial_expires_at || null)
+
+        // Sync verified plan from server to localStorage, replacing any manipulated state
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user_plan', verifiedPlan)
+        }
       }
 
       const sRes = await fetch(`/api/stats?user_id=${uid}`)
@@ -451,8 +465,16 @@ export default function UserDashboard() {
                   <h1 className="text-xs font-semibold text-white truncate max-w-[140px]">
                     {userName || 'Candidate'}
                   </h1>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono uppercase">
-                    {userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-mono uppercase ${
+                    isProfessional
+                      ? 'bg-violet-950/80 border-violet-700/60 text-violet-300'
+                      : userPlan === 'pro' && isPlanActive
+                      ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
+                      : !isPlanActive
+                      ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                      : 'bg-zinc-900 border-zinc-800 text-zinc-300'
+                  }`}>
+                    {!isPlanActive ? 'EXPIRED' : userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
                   </span>
                 </div>
                 <p className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]">
@@ -552,8 +574,16 @@ export default function UserDashboard() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-semibold text-white truncate max-w-[140px]">{userName || 'Candidate'}</span>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono uppercase">
-                      {userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
+                    <span className={`text-[9px] px-1.5 py-0.2 rounded border font-mono uppercase ${
+                      isProfessional
+                        ? 'bg-violet-950/80 border-violet-700/60 text-violet-300'
+                        : userPlan === 'pro' && isPlanActive
+                        ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
+                        : !isPlanActive
+                        ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                        : 'bg-zinc-900 border-zinc-800 text-zinc-300'
+                    }`}>
+                      {!isPlanActive ? 'EXPIRED' : userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-500 font-mono truncate mt-0.5">{userEmail}</p>
@@ -623,8 +653,8 @@ export default function UserDashboard() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
         
-        {/* Launch Special Banner for Free Trial Users */}
-        {userPlan === 'trial' && (
+        {/* Launch Special Banner for Free Trial or Expired Users */}
+        {(!isProfessional && (userPlan !== 'pro' || !isPlanActive)) && (
           <div className="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-[#09090b] to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-zinc-300">
@@ -633,12 +663,18 @@ export default function UserDashboard() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-white">
-                    {metrics.total_applied >= 15
+                    {!isPlanActive
+                      ? 'Subscription Expired · Renew to Resume Automated Applications'
+                      : metrics.total_applied >= 15
                       ? 'Free Trial Quota Reached (15/15)'
                       : `Free Trial Active · ${metrics.total_applied}/15 Dispatched`}
                   </span>
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-400">
-                    {metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
+                  <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${
+                    !isPlanActive
+                      ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                      : 'bg-zinc-900 border-zinc-800 text-zinc-400'
+                  }`}>
+                    {!isPlanActive ? 'EXPIRED' : metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
@@ -647,10 +683,10 @@ export default function UserDashboard() {
               </div>
             </div>
             <Link
-              href="/pricing"
+              href="/pricing?plan=elite"
               className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <span>Upgrade Plan</span>
+              <span>{!isPlanActive ? 'Renew Plan' : 'Upgrade Plan'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

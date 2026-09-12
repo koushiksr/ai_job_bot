@@ -77,11 +77,15 @@ export async function POST(req: NextRequest) {
 
     const role = profile?.role || 'user'
     const plan = (profile?.plan || 'trial').toLowerCase()
-    const isPro = role === 'admin' || user_id === 'admin' || user_id === 'technohmsit' || plan === 'elite' || plan === 'professional' || plan === 'enterprise'
+    const now = new Date()
+    const isSuperUser = role === 'admin' || user_id === 'admin' || user_id === 'technohmsit'
+    const isProTier = plan === 'elite' || plan === 'professional' || plan === 'enterprise'
+    const hasActiveExpiration = profile?.plan_expires_at ? new Date(profile.plan_expires_at) > now : false
+    const isPro = isSuperUser || (isProTier && hasActiveExpiration)
 
     if (!isPro) {
       return NextResponse.json({
-        detail: 'Instant On-Demand Turbo Scout is exclusively reserved for Professional Tier members. Your automated applications execute during the scheduled daily 06:00 & 08:00 AM IST runs. Upgrade to Professional to trigger instant runs anytime.',
+        detail: 'Instant On-Demand Turbo Scout is exclusively reserved for active Professional Tier members. Your automated applications execute during the scheduled daily 06:00 & 08:00 AM IST runs. Upgrade to Professional to trigger instant runs anytime.',
         code: 'PLAN_UPGRADE_REQUIRED',
         required_plan: 'professional'
       }, { status: 403 })
@@ -104,7 +108,6 @@ export async function POST(req: NextRequest) {
     }
 
     const taskId = `task_${user_id}_${Date.now()}`
-    const now = new Date()
 
     const newTask = {
       task_id: taskId,

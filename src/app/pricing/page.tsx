@@ -162,6 +162,18 @@ export default function PricingPage() {
           name: prev.name || (uid.replace(/_/g, ' ') || '')
         }))
       }
+
+      // Check URL query parameters for direct plan activation triggers
+      const params = new URLSearchParams(window.location.search)
+      const targetPlanId = params.get('plan')
+      if (targetPlanId) {
+        const found = PLANS.find(p => p.id === targetPlanId || (targetPlanId === 'professional' && p.id === 'elite'))
+        if (found && found.id !== 'trial') {
+          setSelectedPlan(found)
+          setPaymentStep('details')
+          if (email) setCandidateEmail(email)
+        }
+      }
     }
   }, [])
 
@@ -248,16 +260,18 @@ export default function PricingPage() {
             })
 
             const verifyData = await verifyRes.json()
-            if (verifyRes.ok) {
+            if (verifyRes.ok && verifyData.verified) {
               if (typeof window !== 'undefined') {
                 localStorage.setItem('user_plan', selectedPlan.id)
               }
               setPaymentStep('success')
             } else {
-              alert(verifyData.detail || 'Payment verification failed.')
+              alert(verifyData.detail || 'Payment verification failed. Plan could not be activated.')
             }
           } catch (vErr: any) {
             alert(`Payment verification error: ${vErr.message}`)
+          } finally {
+            setActivating(false)
           }
         },
         modal: {
@@ -702,9 +716,9 @@ export default function PricingPage() {
                     <Check className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-base font-semibold text-white">Plan Activated</h4>
+                    <h4 className="text-base font-semibold text-white">Payment Confirmed · Plan Activated</h4>
                     <p className="text-xs text-zinc-400 mt-1">
-                      {selectedPlan.name} is now active for {candidateEmail}.
+                      {selectedPlan.name} is now cryptographically verified and active for {candidateEmail}.
                     </p>
                   </div>
                   <Link

@@ -37,10 +37,48 @@ export async function GET(req: NextRequest) {
       profile.job_filters.avoid_companies = []
     }
 
+    const rawPlan = (profile.plan || 'trial').toLowerCase()
+    const now = new Date()
+    let verifiedPlan = 'trial'
+    let verifiedPlanName = 'JobFlux 1-Day Free Trial'
+    let isPlanActive = true
+
+    if (rawPlan === 'vip') {
+      verifiedPlan = 'vip'
+      verifiedPlanName = 'JobFlux VIP Elite'
+      isPlanActive = true
+    } else if (rawPlan !== 'trial') {
+      const planExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
+      if (planExpires && planExpires > now) {
+        verifiedPlan = rawPlan
+        verifiedPlanName = profile.plan_name || `JobFlux ${rawPlan.toUpperCase()}`
+        isPlanActive = true
+      } else {
+        // Expired or unverified paid plan
+        verifiedPlan = 'trial'
+        verifiedPlanName = 'JobFlux 1-Day Free Trial (Plan Expired)'
+        isPlanActive = false
+      }
+    } else {
+      const trialExpires = profile.trial_expires_at ? new Date(profile.trial_expires_at) : null
+      isPlanActive = trialExpires ? trialExpires > now : true
+    }
+
     const responseData = {
       user_id: profile.user_id,
       name: profile.name || '',
       email: profile.email || '',
+      role: profile.role || 'user',
+      plan: verifiedPlan,
+      plan_name: verifiedPlanName,
+      raw_plan: rawPlan,
+      is_plan_active: isPlanActive,
+      plan_activated_at: profile.plan_activated_at || null,
+      plan_expires_at: profile.plan_expires_at || null,
+      trial_started_at: profile.trial_started_at || null,
+      trial_expires_at: profile.trial_expires_at || null,
+      is_vip: Boolean(profile.is_vip || profile.vip_access),
+      last_payment_id: profile.last_payment_id || null,
       experience: profile.experience || 0,
       current_ctc: profile.current_ctc || 0,
       expected_ctc: profile.expected_ctc || 0,
@@ -127,6 +165,20 @@ export async function POST(req: NextRequest) {
       updateDoc.enabled_for_daily_run = Boolean(body.enabled_for_daily_run)
     } else if (existing?.enabled_for_daily_run !== undefined) {
       updateDoc.enabled_for_daily_run = existing.enabled_for_daily_run
+    }
+
+    // Security: Preserve immutable plan, subscription, and role metadata
+    if (existing) {
+      updateDoc.plan = existing.plan || 'trial'
+      updateDoc.plan_name = existing.plan_name || 'JobFlux 1-Day Free Trial'
+      updateDoc.role = existing.role || 'user'
+      if (existing.plan_activated_at) updateDoc.plan_activated_at = existing.plan_activated_at
+      if (existing.plan_expires_at) updateDoc.plan_expires_at = existing.plan_expires_at
+      if (existing.trial_started_at) updateDoc.trial_started_at = existing.trial_started_at
+      if (existing.trial_expires_at) updateDoc.trial_expires_at = existing.trial_expires_at
+      if (existing.last_payment_id) updateDoc.last_payment_id = existing.last_payment_id
+      if (existing.last_order_id) updateDoc.last_order_id = existing.last_order_id
+      if (existing.is_vip !== undefined) updateDoc.is_vip = existing.is_vip
     }
 
     const versionHash = crypto.createHash('sha256').update(JSON.stringify(updateDoc)).digest('hex').substring(0, 16)

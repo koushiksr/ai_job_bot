@@ -80,7 +80,8 @@ export async function GET(req: NextRequest) {
           name: name || 'Technohm SIT Administrator',
           email: 'technohmsit@gmail.com',
           role: 'admin',
-          plan: 'enterprise',
+          plan: 'trial',
+          plan_name: 'JobFlux 1-Day Free Trial',
           created_at: now,
           updated_at: now
         }
@@ -189,12 +190,25 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    const rawPlan = (profile.plan || 'trial').toLowerCase()
+    let verifiedPlan = 'trial'
+    if (rawPlan === 'vip') {
+      verifiedPlan = 'vip'
+    } else if (rawPlan !== 'trial') {
+      const planExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
+      if (planExpires && planExpires > now) {
+        verifiedPlan = rawPlan
+      } else {
+        verifiedPlan = 'trial'
+      }
+    }
+
     const targetUrl = new URL(role === 'admin' ? '/admin' : '/dashboard', req.url)
     targetUrl.searchParams.set('auth', 'google')
     targetUrl.searchParams.set('user_id', profile.user_id)
     targetUrl.searchParams.set('email', profile.email)
     targetUrl.searchParams.set('name', profile.name || profile.user_id.replace(/_/g, ' '))
-    targetUrl.searchParams.set('plan', profile.plan || 'trial')
+    targetUrl.searchParams.set('plan', verifiedPlan)
     targetUrl.searchParams.set('role', role)
 
     return NextResponse.redirect(targetUrl)

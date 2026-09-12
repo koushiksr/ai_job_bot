@@ -61,11 +61,18 @@ export async function POST(req: NextRequest) {
     const durationDays = PLAN_DAYS[plan_id] || 30
     const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000)
 
-    const query: any = {}
-    if (user_id) {
-      query.user_id = user_id
+    let query: any = null
+    if (user_id && email) {
+      query = {
+        $or: [
+          { user_id: user_id },
+          { email: { $regex: `^${email.trim()}$`, $options: 'i' } }
+        ]
+      }
+    } else if (user_id) {
+      query = { user_id: user_id }
     } else if (email) {
-      query.email = { $regex: `^${email.trim()}$`, $options: 'i' }
+      query = { email: { $regex: `^${email.trim()}$`, $options: 'i' } }
     }
 
     const updateFields: any = {
@@ -79,12 +86,12 @@ export async function POST(req: NextRequest) {
       updated_at: now
     }
 
-    if (Object.keys(query).length > 0) {
-      await db.collection('profiles').updateOne(query, { $set: updateFields }, { upsert: false })
-      await db.collection('users').updateOne(query, { $set: updateFields }, { upsert: false })
+    if (query) {
+      await db.collection('profiles').updateMany(query, { $set: updateFields })
+      await db.collection('users').updateMany(query, { $set: updateFields })
     }
 
-    // 3. Record transaction in payments collection
+    // 3. Record verified transaction in payments collection
     await db.collection('payments').insertOne({
       order_id: razorpay_order_id,
       payment_id: razorpay_payment_id,
@@ -98,9 +105,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      verified: true,
       plan: plan_id,
-      expires_at: expiresAt,
-      message: `Plan activated successfully! Active for ${durationDays} days.`
+      plan_name: `JobFlux ${plan_id.toUpperCase()}`,
+      plan_activated_at: now,
+      plan_expires_at: expiresAt,
+      message: `Payment confirmed! ${plan_id.toUpperCase()} plan activated successfully for ${durationDays} days.`
     })
   } catch (err: any) {
     console.error('Payment verification error:', err)

@@ -9,7 +9,6 @@ export async function POST(req: NextRequest) {
     const name = (body.name || '').trim()
     const emailClean = (body.email || '').trim().toLowerCase()
     const pwdClean = (body.password || '').trim()
-    const selectedPlan = body.plan || 'trial'
 
     if (!emailClean || !pwdClean) {
       return NextResponse.json(
@@ -51,6 +50,8 @@ export async function POST(req: NextRequest) {
     // 1-Day Trial expires 24 hours from now
     const trialExpires = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
+    // Security: Any new registration is strictly initiated on 'trial'.
+    // Paid tiers (Starter, Pro, Elite) activate exclusively via verified payment confirmation.
     const newProfile = {
       user_id: userId,
       name: name || userId.replace('_', ' '),
@@ -74,10 +75,14 @@ export async function POST(req: NextRequest) {
       enabled_for_daily_run: true,
       role: 'user',
       is_vip: false,
-      plan: selectedPlan,
-      plan_name: selectedPlan === 'trial' ? 'JobFlux 1-Day Free Trial' : `JobFlux ${selectedPlan.toUpperCase()}`,
+      plan: 'trial',
+      plan_name: 'JobFlux 1-Day Free Trial',
       trial_started_at: now,
       trial_expires_at: trialExpires,
+      plan_activated_at: null,
+      plan_expires_at: null,
+      last_payment_id: null,
+      last_order_id: null,
       created_at: now,
       updated_at: now
     }
@@ -108,7 +113,8 @@ export async function POST(req: NextRequest) {
       user_id: userId,
       email: emailClean,
       name: newProfile.name,
-      plan: newProfile.plan,
+      plan: 'trial',
+      plan_name: 'JobFlux 1-Day Free Trial',
       trial_expires_at: trialExpires.toISOString(),
       message: 'Your 1-Day Free Trial has been activated!'
     })
