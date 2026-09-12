@@ -9,19 +9,25 @@ export async function POST(req: NextRequest) {
 
     // 1. Admin login check
     if (
-      (emailClean === 'admin' || emailClean === 'admin@jobbot.ai' || emailClean === 'admin@admin.com') &&
+      (
+        emailClean === 'admin' ||
+        emailClean === 'admin@jobfluxai.com' ||
+        emailClean === 'admin@jobflux.ai' ||
+        emailClean === 'admin@jobbot.ai' ||
+        emailClean === 'admin@admin.com'
+      ) &&
       pwdClean === 'admin'
     ) {
       return NextResponse.json({
         status: 'success',
         role: 'admin',
         user_id: 'admin',
-        email: 'admin@jobbot.ai',
-        name: 'Admin Controller'
+        email: emailClean.includes('@') ? emailClean : 'admin@jobfluxai.com',
+        name: 'JobFlux Controller'
       })
     }
 
-    // 2. Authenticate against MongoDB Atlas profiles collection
+    // 2. Authenticate against cloud profiles collection
     const db = await getDb()
     if (!db) {
       return NextResponse.json(
@@ -45,14 +51,14 @@ export async function POST(req: NextRequest) {
         })
       } else {
         return NextResponse.json(
-          { detail: 'Invalid Naukri password.' },
+          { detail: 'Invalid password. Please check your credentials.' },
           { status: 401 }
         )
       }
     }
 
     return NextResponse.json(
-      { detail: 'Invalid email or Naukri password.' },
+      { detail: 'Invalid email or password. Candidate account not found.' },
       { status: 401 }
     )
   } catch (err: any) {

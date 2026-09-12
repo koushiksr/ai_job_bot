@@ -14,8 +14,7 @@ import {
   LogOut,
   User,
   Sparkles,
-  Building2,
-  MapPin
+  Building2
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
@@ -155,6 +154,22 @@ export default function UserDashboard() {
   const handleLogout = () => {
     localStorage.clear()
     window.location.href = '/'
+  }
+
+  const formatJobDate = (job: any) => {
+    const raw = job.raw_date || job.date
+    if (!raw) return 'Recently'
+    try {
+      // If the string does not have a timezone indicator (no Z or +/- offset), treat as UTC timestamp
+      const hasTz = raw.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(raw)
+      const dateToParse = hasTz ? raw : `${raw.replace(' ', 'T')}Z`
+      const d = new Date(dateToParse)
+      if (isNaN(d.getTime())) return job.date || raw
+      const pad = (n: number) => n.toString().padStart(2, '0')
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    } catch {
+      return job.date || raw
+    }
   }
 
   return (
@@ -328,7 +343,7 @@ export default function UserDashboard() {
                 <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input
                   type="text"
-                  placeholder="Search company, job role, location..."
+                  placeholder="Search company, job role..."
                   value={historySearch}
                   onChange={e => {
                     setHistorySearch(e.target.value)
@@ -378,7 +393,6 @@ export default function UserDashboard() {
                     <tr>
                       <th className="py-3.5 px-4">Company</th>
                       <th className="py-3.5 px-4">Job Role / Title</th>
-                      <th className="py-3.5 px-4">Location</th>
                       <th className="py-3.5 px-4">Date Applied</th>
                       <th className="py-3.5 px-4 text-right">Status</th>
                     </tr>
@@ -386,14 +400,14 @@ export default function UserDashboard() {
                   <tbody className="divide-y divide-slate-800/50">
                     {loadingHistory ? (
                       <tr>
-                        <td colSpan={5} className="py-12 text-center text-slate-400">
+                        <td colSpan={4} className="py-12 text-center text-slate-400">
                           <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-blue-400" />
                           Loading applications from MongoDB Atlas...
                         </td>
                       </tr>
                     ) : historyJobs.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-12 text-center text-slate-500">
+                        <td colSpan={4} className="py-12 text-center text-slate-500">
                           No applied jobs found matching your criteria.
                         </td>
                       </tr>
@@ -421,14 +435,8 @@ export default function UserDashboard() {
                               <span className="font-medium">{job.title || 'Job Opening'}</span>
                             )}
                           </td>
-                          <td className="py-4 px-4 text-slate-400">
-                            <span className="inline-flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-slate-500" />
-                              {job.location || 'India'}
-                            </span>
-                          </td>
                           <td className="py-4 px-4 text-slate-400 font-mono">
-                            {job.date || 'Recently'}
+                            {formatJobDate(job)}
                           </td>
                           <td className="py-4 px-4 text-right">
                             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">

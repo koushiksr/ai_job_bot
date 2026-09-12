@@ -120,7 +120,7 @@ export default function AdminDashboard() {
       if (res.ok) {
         const data = await res.json()
         if (data.jobs && Array.isArray(data.jobs)) {
-          const lines = data.jobs.map((j: any) => `[${j.date}] ✅ Applied to: ${j.title} at ${j.company} (${j.location || 'India'})`)
+          const lines = data.jobs.map((j: any) => `[${j.date}] ✅ Applied to: ${j.title} at ${j.company}`)
           setSelectedLogContent(lines.length ? lines : ['No application history found for this candidate yet.'])
         }
       }

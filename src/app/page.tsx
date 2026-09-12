@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Bot, Briefcase, ChevronRight, Mail, Lock, Loader2 } from 'lucide-react'
+import { Briefcase, ChevronRight, Mail, Lock, Loader2, Sparkles } from 'lucide-react'
+import JobFluxLogo from '@/components/JobFluxLogo'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -19,9 +20,18 @@ export default function Home() {
     const cleanPwd = password.trim()
 
     // Direct Admin check
-    if ((cleanEmail === 'admin' || cleanEmail === 'admin@jobbot.ai' || cleanEmail === 'admin@admin.com') && cleanPwd === 'admin') {
+    if (
+      (
+        cleanEmail === 'admin' ||
+        cleanEmail === 'admin@jobfluxai.com' ||
+        cleanEmail === 'admin@jobflux.ai' ||
+        cleanEmail === 'admin@jobbot.ai' ||
+        cleanEmail === 'admin@admin.com'
+      ) &&
+      cleanPwd === 'admin'
+    ) {
       localStorage.setItem('user_id', 'admin')
-      localStorage.setItem('user_email', 'admin@jobbot.ai')
+      localStorage.setItem('user_email', cleanEmail.includes('@') ? cleanEmail : 'admin@jobfluxai.com')
       localStorage.setItem('user_role', 'admin')
       window.location.href = '/admin'
       return
@@ -46,7 +56,7 @@ export default function Home() {
         }
       } else {
         const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.detail || 'Invalid email or Naukri password.')
+        throw new Error(errData.detail || 'Invalid email or password.')
       }
     } catch (err: any) {
       setError(err.message || 'Authentication error. Please check your credentials.')
@@ -56,85 +66,91 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center p-6 md:p-24 relative overflow-hidden bg-[#090a0f] text-white">
+    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center p-6 md:p-24 relative overflow-hidden bg-[#080c14] text-slate-100">
       
-      {/* Background glow effects */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
+      {/* Subtle, standard clean background highlight */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(37,99,235,0.12),rgba(255,255,255,0))] pointer-events-none" />
       
       <motion.div 
-        initial={{ opacity: 0, x: -30 }}
+        initial={{ opacity: 0, x: -24 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.6 }}
         className="flex-1 text-center md:text-left md:pr-16 z-10"
       >
-        <div className="inline-flex items-center justify-center p-3 bg-blue-500/10 rounded-2xl mb-6 border border-blue-500/20">
-          <Bot className="w-8 h-8 text-blue-400" />
+        <div className="mb-6 inline-flex">
+          <JobFluxLogo size="lg" />
         </div>
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-br from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-          AI Job Bot
+        
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-white leading-tight">
+          Autonomous Job Application Engine
         </h1>
-        <p className="text-lg text-gray-400 mb-8 max-w-lg">
-          Automated multi-candidate job application engine powered by AI and MongoDB Atlas.
+        
+        <p className="text-base md:text-lg text-slate-400 mb-8 max-w-lg leading-relaxed">
+          Intelligent job search and automated application delivery. Streamline your job hunt with precision AI candidate profile matching.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 items-center md:items-start text-sm text-gray-500 font-medium">
-          <div className="flex items-center gap-2"><Briefcase className="w-4 h-4 text-blue-400"/> Multi-Candidate Automation</div>
-          <div className="hidden sm:block text-gray-700">•</div>
-          <div className="flex items-center gap-2"><Bot className="w-4 h-4 text-purple-400"/> AI-Powered Matching</div>
+        <div className="flex flex-col sm:flex-row gap-3 items-center md:items-start text-xs text-slate-400 font-medium">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
+            <Briefcase className="w-4 h-4 text-sky-400" />
+            <span>Multi-Candidate Automation</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
+            <Sparkles className="w-4 h-4 text-blue-400" />
+            <span>AI Matching & Answer Engine</span>
+          </div>
         </div>
       </motion.div>
       
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.15 }}
         className="flex-1 w-full max-w-md mt-12 md:mt-0 z-10"
       >
-        <div className="glass-panel p-8 w-full border border-gray-800/80 bg-gray-900/60 backdrop-blur-xl rounded-2xl shadow-2xl">
+        <div className="p-8 w-full border border-slate-800 bg-slate-900/80 backdrop-blur-xl rounded-2xl shadow-2xl">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-2xl font-bold">Sign In</h2>
-            <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">
+            <h2 className="text-xl font-bold text-white">Sign In</h2>
+            <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Cloud Online
             </span>
           </div>
-          <p className="text-sm text-gray-400 mb-6">
-            Log in using your Naukri candidate credentials
+          <p className="text-xs text-slate-400 mb-6">
+            Log in with your candidate credentials
           </p>
 
           {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs mb-4">
+            <div className="p-3 bg-rose-500/10 border border-rose-500/25 text-rose-400 rounded-xl text-xs mb-4">
               {error}
             </div>
           )}
 
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Email</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Candidate Email</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-gray-500 absolute left-3 top-3.5" />
+                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input 
-                  type="text" 
+                  type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-black/40 border border-gray-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-gray-600 transition-all outline-none"
-                  placeholder="your.email@example.com"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-600 transition-all outline-none"
+                  placeholder="name@example.com"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Password</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Account Password</label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-gray-500 absolute left-3 top-3.5" />
+                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input 
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-black/40 border border-gray-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-gray-600 transition-all outline-none"
-                  placeholder="Your Naukri password"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-600 transition-all outline-none"
+                  placeholder="Enter your password"
                   required
                 />
               </div>
@@ -143,13 +159,13 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl text-sm transition-all shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs transition-all shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Sign In
+                  <span>Sign In</span>
                   <ChevronRight className="w-4 h-4" />
                 </>
               )}

@@ -3,7 +3,7 @@ import { getDb } from '@/lib/mongodb'
 import Groq from 'groq-sdk'
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
+  apiKey: process.env.GROQ_API_KEY || 'dummy_key'
 });
 
 export async function POST(req: NextRequest) {

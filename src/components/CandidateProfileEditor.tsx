@@ -38,6 +38,7 @@ export default function CandidateProfileEditor({
   const [saveSuccess, setSaveSuccess] = useState<string>('')
   const [uploadingResume, setUploadingResume] = useState<boolean>(false)
   const [resumeFilename, setResumeFilename] = useState<string>('')
+  const [resumeVersion, setResumeVersion] = useState<number>(Date.now())
   const [resumeSuccess, setResumeSuccess] = useState<string>('')
   const [resumeError, setResumeError] = useState<string>('')
 
@@ -45,6 +46,8 @@ export default function CandidateProfileEditor({
   const [showAiPrompt, setShowAiPrompt] = useState<boolean>(false)
   const [aiPrompt, setAiPrompt] = useState<string>('')
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
+
+  const effectiveUserId = isNew ? newUserId : userId
 
   useEffect(() => {
     if (isNew) {
@@ -84,10 +87,11 @@ export default function CandidateProfileEditor({
     setResumeError('')
 
     try {
-      const res = await fetch(`/api/profile?user_id=${uid}`)
+      const res = await fetch(`/api/profile?user_id=${encodeURIComponent(uid)}&t=${Date.now()}`)
       if (res.ok) {
         const data = await res.json()
         setResumeFilename(data.resume_filename || `${uid}_Resume.pdf`)
+        setResumeVersion(Date.now())
         setRawJsonStr(data.raw_json || JSON.stringify(data, null, 2))
       }
     } catch (e: any) {
@@ -121,7 +125,7 @@ export default function CandidateProfileEditor({
       })
 
       if (res.ok) {
-        setSaveSuccess('JSON document synchronized with MongoDB Atlas!')
+        setSaveSuccess('Profile configuration synchronized successfully!')
         if (!isNew) loadProfileData(userId)
         if (onSaveSuccess) onSaveSuccess()
         setTimeout(() => setSaveSuccess(''), 4000)
@@ -185,11 +189,13 @@ export default function CandidateProfileEditor({
 
     if (!file.name.toLowerCase().endsWith('.pdf')) {
       alert('Please select a valid PDF file.')
+      e.target.value = ''
       return
     }
 
     if (isNew && !newUserId) {
       alert('Please enter a Candidate Unique ID before uploading a resume.')
+      e.target.value = ''
       return
     }
 
@@ -217,8 +223,17 @@ export default function CandidateProfileEditor({
         if (res.ok) {
           const data = await res.json()
           setResumeFilename(data.filename)
-          setResumeSuccess(`Resume "${data.filename}" uploaded to MongoDB Atlas!`)
+          setResumeVersion(data.timestamp || Date.now())
+          setResumeSuccess(`Resume "${data.filename}" saved to JobFlux Cloud!`)
           setTimeout(() => setResumeSuccess(''), 5000)
+
+          // Keep rawJsonStr in sync so saving JSON later doesn't revert the resume filename
+          try {
+            const currentObj = JSON.parse(rawJsonStr)
+            currentObj.resume_filename = data.filename
+            setRawJsonStr(JSON.stringify(currentObj, null, 2))
+          } catch {}
+
           if (!isNew) loadProfileData(userId)
           if (onSaveSuccess) onSaveSuccess()
         } else {
@@ -227,19 +242,21 @@ export default function CandidateProfileEditor({
           setTimeout(() => setResumeError(''), 5000)
         }
         setUploadingResume(false)
+        e.target.value = ''
       }
       reader.readAsDataURL(file)
     } catch (err: any) {
       setResumeError(`Error reading file: ${err.message}`)
       setUploadingResume(false)
+      e.target.value = ''
     }
   }
 
   if (loading) {
     return (
       <div className="py-16 text-center text-slate-400">
-        <RefreshCw className="w-6 h-6 mx-auto animate-spin mb-3 text-indigo-500" />
-        Loading candidate profile from MongoDB Atlas...
+        <RefreshCw className="w-6 h-6 mx-auto animate-spin mb-3 text-sky-500" />
+        Loading candidate profile...
       </div>
     )
   }
@@ -249,7 +266,7 @@ export default function CandidateProfileEditor({
       {/* Header status */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-3">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-md">
+          <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-md">
             <FileJson className="w-3.5 h-3.5" /> Advanced Profile Editor
           </div>
         </div>
@@ -262,8 +279,8 @@ export default function CandidateProfileEditor({
       </div>
 
       {isNew && (
-        <div className="p-5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 space-y-3 shadow-xl">
-          <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+        <div className="p-5 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-3 shadow-xl">
+          <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
             <User className="w-4 h-4" /> New Candidate Identity
           </h3>
           <div>
@@ -274,7 +291,7 @@ export default function CandidateProfileEditor({
               onChange={e => setNewUserId(e.target.value)}
               required
               placeholder="No spaces, use underscores"
-              className="w-full bg-slate-950 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 font-mono text-sm"
+              className="w-full bg-slate-950 border border-blue-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-blue-500 font-mono text-sm"
             />
           </div>
         </div>
@@ -284,7 +301,7 @@ export default function CandidateProfileEditor({
       <div className="p-5 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
           <span className="text-xs font-mono text-slate-400 font-bold uppercase tracking-wider">
-            MongoDB Atlas Profile Document (JSON)
+            Candidate Profile Document (JSON)
           </span>
           {jsonError && (
             <span className="text-xs text-rose-400 font-semibold">{jsonError}</span>
@@ -298,14 +315,14 @@ export default function CandidateProfileEditor({
             setRawJsonStr(e.target.value)
             setJsonError('')
           }}
-          className="w-full bg-[#050811] border border-slate-800 rounded-xl p-5 font-mono text-sm text-cyan-300 focus:outline-none focus:border-indigo-500 leading-relaxed shadow-inner"
+          className="w-full bg-[#050811] border border-slate-800 rounded-xl p-5 font-mono text-sm text-sky-300 focus:outline-none focus:border-blue-500 leading-relaxed shadow-inner"
           spellCheck={false}
         />
 
         <div className="flex justify-end gap-3">
           <div className="relative">
             {showAiPrompt && (
-              <div className="absolute bottom-full right-0 mb-3 w-80 p-4 bg-slate-900 border border-indigo-500/50 rounded-xl shadow-2xl z-10 animate-fadeIn">
+              <div className="absolute bottom-full right-0 mb-3 w-80 p-4 bg-slate-900 border border-blue-500/50 rounded-xl shadow-2xl z-10 animate-fadeIn">
                 <label className="block text-xs font-bold text-slate-300 mb-1">Target Job Title & Instructions (Optional)</label>
                 <p className="text-[10px] text-slate-400 mb-2 leading-relaxed">
                   <strong>Example:</strong> "Target Job: Senior Python Developer. I am looking for remote roles only. My expected CTC is 18 LPA. Please do not apply to any crypto or Web3 companies. I have a 30-day notice period."
@@ -315,11 +332,11 @@ export default function CandidateProfileEditor({
                   value={aiPrompt}
                   onChange={e => setAiPrompt(e.target.value)}
                   placeholder="Enter your target job title and specific instructions for the AI to follow when generating your profile..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 mb-3"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mb-3"
                 />
                 <div className="flex justify-end gap-2">
                   <button onClick={() => setShowAiPrompt(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors">Cancel</button>
-                  <button onClick={handleAiAutoFill} disabled={isAnalyzing} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors">
+                  <button onClick={handleAiAutoFill} disabled={isAnalyzing} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors">
                     {isAnalyzing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                     {isAnalyzing ? 'Analyzing...' : 'Auto-Fill'}
                   </button>
@@ -330,7 +347,7 @@ export default function CandidateProfileEditor({
             <button
               onClick={() => setShowAiPrompt(!showAiPrompt)}
               disabled={savingProfile || isAnalyzing}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-indigo-900/50 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 hover:border-indigo-500 shadow-lg transition-all`}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-blue-900/40 hover:bg-blue-600 text-sky-300 hover:text-white border border-blue-500/30 hover:border-blue-500 shadow-lg transition-all"
             >
               <Sparkles className="w-4 h-4" /> ✨ Auto-Fill with AI
             </button>
@@ -348,25 +365,25 @@ export default function CandidateProfileEditor({
         </div>
       </div>
 
-      {/* Resume PDF in MongoDB Atlas */}
+      {/* Resume PDF Section */}
       <div className="p-5 rounded-2xl bg-[#0c1017] border border-slate-800 space-y-3 shadow-xl">
-        <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+        <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
           <FileText className="w-4 h-4" /> Candidate Resume PDF (Cloud Synchronized)
         </h3>
 
         <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+            <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sky-400">
               <FileText className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-white font-mono">
-                  {resumeFilename || (isNew ? `${newUserId}_Resume.pdf` : `${userId}_Resume.pdf`)}
+                  {resumeFilename || (effectiveUserId ? `${effectiveUserId}_Resume.pdf` : 'Candidate_Resume.pdf')}
                 </span>
-                {!isNew && (
+                {(resumeFilename || !isNew) && (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                    Active in MongoDB Atlas
+                    Active in Cloud
                   </span>
                 )}
               </div>
@@ -377,9 +394,9 @@ export default function CandidateProfileEditor({
           </div>
 
           <div className="flex items-center gap-2 w-full md:w-auto">
-            {!isNew && (
+            {effectiveUserId && (
               <a
-                href={`/api/profile/resume?user_id=${userId}`}
+                href={`/api/profile/resume?user_id=${encodeURIComponent(effectiveUserId)}&t=${resumeVersion}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition-colors"
@@ -389,7 +406,7 @@ export default function CandidateProfileEditor({
             )}
 
             <label className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold ${
-              isAdmin ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-amber-600 hover:bg-amber-500'
+              isAdmin ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-blue-600 hover:bg-blue-500'
             } text-white cursor-pointer shadow-md transition-all`}>
               <Upload className="w-3.5 h-3.5" />
               <span>{uploadingResume ? 'Uploading...' : 'Upload New PDF'}</span>

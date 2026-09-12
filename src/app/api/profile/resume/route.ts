@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -27,9 +30,11 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="${filename}"`,
+        'Content-Disposition': `inline; filename="${encodeURIComponent(filename)}"`,
         'Content-Length': buffer.length.toString(),
-        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800'
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     })
   } catch (err: any) {
@@ -39,14 +44,32 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const data = await req.json()
-    const user_id = data.user_id
-    const file_base64 = data.file_base64 || data.pdf_base64 || data.base64
-    const filename = data.filename || data.resume_filename || `${user_id}_Resume.pdf`
-    const file_size_bytes = data.file_size_bytes
+    const contentType = req.headers.get('content-type') || ''
+    let user_id = ''
+    let file_base64 = ''
+    let filename = ''
+    let file_size_bytes = 0
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await req.formData()
+      user_id = (formData.get('user_id') as string) || ''
+      const file = formData.get('file') as File | null
+      if (file) {
+        filename = file.name
+        file_size_bytes = file.size
+        const arrayBuffer = await file.arrayBuffer()
+        file_base64 = Buffer.from(arrayBuffer).toString('base64')
+      }
+    } else {
+      const data = await req.json()
+      user_id = data.user_id
+      file_base64 = data.file_base64 || data.pdf_base64 || data.base64
+      filename = data.filename || data.resume_filename || `${user_id}_Resume.pdf`
+      file_size_bytes = data.file_size_bytes || (file_base64 ? Buffer.from(file_base64, 'base64').length : 0)
+    }
 
     if (!user_id || !file_base64) {
-      return NextResponse.json({ detail: 'user_id and file_base64/pdf_base64 are required' }, { status: 400 })
+      return NextResponse.json({ detail: 'user_id and resume PDF are required' }, { status: 400 })
     }
 
     const db = await getDb()
@@ -60,6 +83,7 @@ export async function POST(req: NextRequest) {
     }
 
     const size = file_size_bytes || Buffer.from(file_base64, 'base64').length
+    const now = new Date()
 
     // 1. Store binary PDF in dedicated 'resumes' collection
     await db.collection('resumes').updateOne(
@@ -71,7 +95,7 @@ export async function POST(req: NextRequest) {
           content_type: 'application/pdf',
           file_size_bytes: size,
           file_base64,
-          updated_at: new Date()
+          updated_at: now
         }
       },
       { upsert: true }
@@ -85,7 +109,7 @@ export async function POST(req: NextRequest) {
           resume_filename: cleanFilename,
           resume_size_bytes: size,
           has_resume: true,
-          updated_at: new Date()
+          updated_at: now
         }
       },
       { upsert: true }
@@ -93,9 +117,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       status: 'success',
-      message: 'Resume PDF uploaded and saved to MongoDB Atlas',
+      message: 'Resume PDF uploaded and saved directly to JobFlux Cloud',
       filename: cleanFilename,
-      size_bytes: size
+      size_bytes: size,
+      timestamp: now.getTime()
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message }, { status: 500 })

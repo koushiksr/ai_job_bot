@@ -36,8 +36,10 @@ export async function GET(req: NextRequest) {
 
     const now = new Date()
     if (dateFilter === 'today') {
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      query.applied_at = { $gte: start }
+      const istOffsetMs = 5.5 * 60 * 60 * 1000
+      const istNow = new Date(now.getTime() + istOffsetMs)
+      const startIst = new Date(Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate(), 0, 0, 0) - istOffsetMs)
+      query.applied_at = { $gte: startIst }
     } else if (dateFilter === 'week') {
       const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
       query.applied_at = { $gte: start }
@@ -57,16 +59,45 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .toArray()
 
-    const jobs = rawJobs.map(doc => ({
-      id: String(doc._id),
-      date: doc.applied_at ? new Date(doc.applied_at).toISOString().replace('T', ' ').substring(0, 19) : '',
-      title: doc.job_title || 'Unknown Title',
-      company: doc.company || 'Unknown Company',
-      location: doc.location || 'India',
-      url: doc.job_url || '',
-      status: doc.status || 'applied',
-      score: doc.match_score || 0
-    }))
+    const jobs = rawJobs.map(doc => {
+      let formattedDate = ''
+      let rawIso = ''
+      if (doc.applied_at) {
+        const d = new Date(doc.applied_at)
+        if (!isNaN(d.getTime())) {
+          rawIso = d.toISOString()
+          try {
+            const istFormatter = new Intl.DateTimeFormat('en-CA', {
+              timeZone: 'Asia/Kolkata',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            })
+            formattedDate = istFormatter.format(d).replace(', ', ' ')
+          } catch {
+            const istMs = d.getTime() + 5.5 * 3600 * 1000
+            const istD = new Date(istMs)
+            const pad = (n: number) => n.toString().padStart(2, '0')
+            formattedDate = `${istD.getUTCFullYear()}-${pad(istD.getUTCMonth() + 1)}-${pad(istD.getUTCDate())} ${pad(istD.getUTCHours())}:${pad(istD.getUTCMinutes())}:${pad(istD.getUTCSeconds())}`
+          }
+        }
+      }
+
+      return {
+        id: String(doc._id),
+        date: formattedDate || rawIso || '',
+        raw_date: rawIso,
+        title: doc.job_title || 'Unknown Title',
+        company: doc.company || 'Unknown Company',
+        url: doc.job_url || '',
+        status: doc.status || 'applied',
+        score: doc.match_score || 0
+      }
+    })
 
     const pages = Math.max(1, Math.ceil(total / limit))
     return NextResponse.json({ jobs, total, page, limit, pages })

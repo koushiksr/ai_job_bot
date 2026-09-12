@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Job Bot | Automated Job Application Assistant",
-  description: "AI-powered job application bot that automatically applies to jobs on your behalf.",
+  title: "JobFlux AI | Autonomous Job Application Engine",
+  description: "Intelligent automated job application engine for modern professionals.",
   icons: {
-    icon: "/logo.jpg",
+    icon: "/jobflux-logo.svg",
   }
 };
 

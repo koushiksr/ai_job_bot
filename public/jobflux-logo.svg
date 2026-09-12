@@ -1,0 +1,19 @@
+<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="jfFaviconGrad" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#38bdf8" />
+      <stop offset="50%" stopColor="#2563eb" />
+      <stop offset="100%" stopColor="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="jfFaviconAccent" x1="16" y1="12" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+      <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.8" />
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="42" height="42" rx="12" fill="#0f172a" stroke="url(#jfFaviconGrad)" stroke-width="2.5" />
+  <path d="M13 18C13 18 19 14 26 18C33 22 35 15 35 15" stroke="url(#jfFaviconGrad)" stroke-width="3.5" stroke-linecap="round" />
+  <path d="M13 24C13 24 20 20 27 24C34 28 35 21 35 21" stroke="url(#jfFaviconAccent)" stroke-width="3.5" stroke-linecap="round" />
+  <path d="M13 30C13 30 20 26 27 30C34 34 35 28 35 28" stroke="url(#jfFaviconGrad)" stroke-width="3.5" stroke-linecap="round" />
+  <circle cx="35" cy="21" r="2.5" fill="#38bdf8" />
+</svg>
+
