@@ -5,7 +5,7 @@ import { getDb } from '@/lib/mongodb'
 export const dynamic = 'force-dynamic'
 
 const PLAN_DAYS: Record<string, number> = {
-  starter: 7,
+  starter: 30,
   pro: 30,
   elite: 90
 }

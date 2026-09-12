@@ -25,7 +25,7 @@ export async function GET() {
         user_id: p.user_id || 'guest',
         email: p.email || 'N/A',
         plan_id: p.plan_id,
-        amount: p.plan_id === 'elite' ? '₹3,499' : p.plan_id === 'pro' ? '₹1,499' : '₹499',
+        amount: p.plan_id === 'elite' ? '₹1,199' : '₹499',
         verified_at: p.verified_at || p.created_at || new Date(),
         expires_at: p.expires_at || null,
         status: p.status || 'captured'
@@ -35,3 +35,4 @@ export async function GET() {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
 }
+

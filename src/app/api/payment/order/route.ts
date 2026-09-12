@@ -4,9 +4,9 @@ import Razorpay from 'razorpay'
 export const dynamic = 'force-dynamic'
 
 const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: number }> = {
-  starter: { amount: 49900, name: 'JobFlux Starter Sprint (7 Days)', days: 7 },
-  pro: { amount: 149900, name: 'JobFlux Career Pro (30 Days)', days: 30 },
-  elite: { amount: 349900, name: 'JobFlux Career Elite (90 Days)', days: 90 }
+  starter: { amount: 49900, name: 'JobFlux 1-Month Plan (30 Days)', days: 30 },
+  pro: { amount: 49900, name: 'JobFlux 1-Month Career Pro (30 Days)', days: 30 },
+  elite: { amount: 119900, name: 'JobFlux 3-Month Career Elite (90 Days)', days: 90 }
 }
 
 export async function POST(req: NextRequest) {

@@ -153,8 +153,19 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="flex-1 text-center md:text-left md:pr-16 z-10"
         >
-          <div className="mb-6 inline-flex">
+          <div className="mb-4 inline-flex">
             <JobFluxLogo size="lg" />
+          </div>
+
+          <div className="mb-5">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-blue-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold hover:border-amber-400/50 transition-all shadow-md shadow-amber-500/10"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>🔥 Launch Special: 1 Full Month of Auto-Apply for only ₹499!</span>
+              <ArrowRight className="w-3 h-3 text-amber-400" />
+            </Link>
           </div>
           
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-white leading-tight">
@@ -166,18 +177,18 @@ export default function Home() {
           </p>
           
           {/* Benefit Badges */}
-          <div className="flex flex-col sm:flex-row gap-3 items-center md:items-start text-xs text-slate-300 font-medium mb-8">
-            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
-              <Zap className="w-4 h-4 text-sky-400" />
-              <span>AI Applies Daily On Your Behalf</span>
+          <div className="flex flex-wrap gap-2.5 items-center md:items-start text-xs text-slate-300 font-medium mb-8">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
+              <Zap className="w-3.5 h-3.5 text-sky-400" />
+              <span>Daily Autonomous Auto-Apply</span>
             </div>
-            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
-              <Gift className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
+              <Gift className="w-3.5 h-3.5 text-emerald-400" />
               <span>1-Day Free Trial (Zero Risk)</span>
             </div>
-            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
-              <Clock className="w-4 h-4 text-blue-400" />
-              <span>Save 20+ Hours Weekly</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 font-semibold shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>₹499 / 1 Full Month Special</span>
             </div>
           </div>
 

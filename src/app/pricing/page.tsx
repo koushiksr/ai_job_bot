@@ -12,6 +12,7 @@ interface Plan {
   name: string
   badge?: string
   price: string
+  originalPrice?: string
   period: string
   description: string
   features: string[]
@@ -27,7 +28,7 @@ const PLANS: Plan[] = [
     badge: 'Zero Risk',
     price: '₹0',
     period: 'for 24 hours',
-    description: 'Test the automated application engine completely free for 1 day.',
+    description: 'Test the automated application engine completely free for 1 full day.',
     features: [
       '1 Full Day of Autonomous Auto-Apply',
       'Up to 15 Verified Job Applications',
@@ -39,57 +40,43 @@ const PLANS: Plan[] = [
     highlight: false
   },
   {
-    id: 'starter',
-    name: 'Starter Sprint',
-    badge: 'Urgent Seekers',
-    price: '₹499',
-    period: 'for 7 days',
-    description: 'A focused 1-week blitz to trigger immediate recruiter callbacks.',
-    features: [
-      '7 Days of Continuous Daily Auto-Apply',
-      'Up to 150+ Verified Job Applications',
-      'Dual Daily Automation Runs (6 AM & 8 AM)',
-      'Company blacklisting & preference filters',
-      'Live application history & direct links'
-    ],
-    cta: 'Get Starter Plan',
-    highlight: false
-  },
-  {
     id: 'pro',
-    name: 'Career Pro',
-    badge: 'Most Popular',
-    price: '₹1,499',
-    period: 'for 30 days',
-    description: 'Comprehensive 1-month continuous pipeline to secure multiple offers.',
+    name: '1-Month Full Access',
+    badge: '🔥 67% OFF LAUNCH SPECIAL',
+    price: '₹499',
+    originalPrice: '₹1,499',
+    period: 'for 30 days (1 Full Month)',
+    description: 'Complete 30-day autonomous daily job hunt to flood your inbox with interview calls.',
     features: [
       '30 Days of Continuous Daily Auto-Apply',
       'Up to 600+ Verified Job Applications',
-      'Priority execution server queue',
+      'Dual Daily Automation Runs (6:00 AM & 8:00 AM IST)',
       'AI tailored responses for recruiter questions',
-      'Custom keyword and salary targeting',
-      'Priority email & WhatsApp support'
+      'Target role, location & salary preference filters',
+      'Priority execution server queue',
+      'Live application history with direct recruiter links'
     ],
-    cta: 'Choose Pro Plan',
+    cta: 'Get 1 Month for ₹499',
     popular: true,
     highlight: true
   },
   {
     id: 'elite',
-    name: 'Career Elite',
-    badge: 'Best Value',
-    price: '₹3,499',
-    period: 'for 90 days',
-    description: 'Full-cycle automated job hunt with priority until you sign an offer.',
+    name: '3-Month Career Elite',
+    badge: 'Best Value (Save 65%)',
+    price: '₹1,199',
+    originalPrice: '₹3,499',
+    period: 'for 90 days (3 Months)',
+    description: 'Comprehensive 90-day pipeline until you sign your dream job offer.',
     features: [
       '90 Days of Continuous Daily Auto-Apply',
       'Up to 1,800+ Verified Job Applications',
       'VIP priority server queue slot',
       'Continuous daily applications until hired',
       'Resume optimization review by AI',
-      'Dedicated recruiter assistance'
+      'Dedicated priority recruiter assistance'
     ],
-    cta: 'Choose Elite Plan',
+    cta: 'Get 3 Months (₹1,199)',
     highlight: false
   }
 ]
@@ -232,9 +219,10 @@ export default function PricingPage() {
       {/* Hero Section */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-12 space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-sky-400 font-semibold tracking-wide uppercase inline-flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" /> Simple, Transparent Pricing
-          </span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-blue-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold shadow-lg shadow-amber-500/10">
+            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+            <span>🔥 Special Launch Offer: 1 Full Month of Daily Autonomous Applications for just ₹499!</span>
+          </div>
           <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
             AI Applies to Jobs for You. <br className="hidden sm:inline" />
             <span className="text-sky-400">Choose Your Plan.</span>
@@ -244,20 +232,20 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* 4 Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 3 Pricing Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
               className={`relative rounded-2xl p-6 flex flex-col justify-between border transition-all ${
                 plan.popular
-                  ? 'bg-slate-900/90 border-blue-500 shadow-xl shadow-blue-500/10 scale-105 z-10'
+                  ? 'bg-slate-900/90 border-blue-500 shadow-2xl shadow-blue-500/20 scale-105 z-10 ring-1 ring-blue-500/50'
                   : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold tracking-wider uppercase shadow-md">
-                  Most Popular
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-extrabold tracking-wider uppercase shadow-lg shadow-blue-600/30 whitespace-nowrap">
+                  {plan.badge || 'Most Popular'}
                 </div>
               )}
 
@@ -272,8 +260,13 @@ export default function PricingPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex items-baseline gap-1.5">
+                  <div className="flex items-baseline gap-2 flex-wrap">
                     <span className="text-3xl md:text-4xl font-extrabold text-white">{plan.price}</span>
+                    {plan.originalPrice && (
+                      <span className="text-sm text-slate-500 line-through font-bold">
+                        {plan.originalPrice}
+                      </span>
+                    )}
                     <span className="text-xs text-slate-400 font-medium">{plan.period}</span>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">{plan.description}</p>
