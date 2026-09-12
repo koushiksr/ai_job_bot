@@ -23,6 +23,7 @@ import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxSplash from '@/components/JobFluxSplash'
 import AiEngineVisualizer from '@/components/AiEngineVisualizer'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
+import LiquidFlowMesh from '@/components/LiquidFlowMesh'
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true)
@@ -185,6 +186,14 @@ export default function Home() {
       
       <div className="min-h-screen flex flex-col bg-[#000000] text-zinc-100 selection:bg-zinc-800 selection:text-white relative">
         
+        {/* Interactive Organic Dark Liquid Flow Mesh */}
+        <LiquidFlowMesh
+          className="h-[760px] w-full top-0 left-0"
+          opacity={0.65}
+          speedMultiplier={0.9}
+          interactive={true}
+        />
+
         {/* Subtle Auth0/Gladia top ambient radial light */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[420px] bg-spotlight pointer-events-none" />
 
@@ -629,6 +638,7 @@ export default function Home() {
         {/* Universal JobFlux Help & Support Center */}
         <JobFluxHelpModal
           isOpen={isHelpOpen}
+          onOpen={() => setIsHelpOpen(true)}
           onClose={() => setIsHelpOpen(false)}
           showFloatingTrigger={true}
         />

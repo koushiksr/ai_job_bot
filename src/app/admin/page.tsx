@@ -1774,6 +1774,7 @@ export default function AdminDashboard() {
       {/* Help & Support Modal */}
       <JobFluxHelpModal
         isOpen={isHelpOpen}
+        onOpen={() => setIsHelpOpen(true)}
         onClose={() => setIsHelpOpen(false)}
         showFloatingTrigger={false}
         onTicketSubmitted={() => fetchSupportTickets()}

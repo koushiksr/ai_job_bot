@@ -395,3 +395,4 @@ Return ONLY valid JSON matching this schema:
     return NextResponse.json({ detail: err.message || 'Failed to generate ATS resume' }, { status: 500 })
   }
 }
+

@@ -288,6 +288,22 @@ export default function AiEngineVisualizer() {
         </div>
       </div>
 
+      {/* Autonomous Liquid Data Stream Channel */}
+      <div className="relative h-1.5 w-full bg-zinc-950 overflow-hidden border-b border-zinc-900">
+        <div 
+          className="h-full liquid-gradient-stream transition-all duration-700 ease-out"
+          style={{
+            width: stage === 'scan' ? '25%' : stage === 'score' ? '50%' : stage === 'answer' ? '75%' : '100%'
+          }}
+        />
+        <div 
+          className="absolute top-0 h-full w-12 bg-white/70 blur-[3px] transition-all duration-700 ease-out pointer-events-none"
+          style={{
+            left: `calc(${stage === 'scan' ? '25%' : stage === 'score' ? '50%' : stage === 'answer' ? '75%' : '100%'} - 3rem)`
+          }}
+        />
+      </div>
+
       {/* Main Simulation Viewport */}
       <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         

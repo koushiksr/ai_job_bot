@@ -74,6 +74,28 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                 className="absolute inset-0 rounded-2xl border border-violet-500/30"
               />
 
+              {/* Organic Liquid Wave Ripple 1 */}
+              <motion.div
+                animate={{
+                  scale: [0.9, 1.45, 1.7],
+                  opacity: [0.4, 0.15, 0],
+                  rotate: [0, 90, 180]
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute -inset-4 border border-violet-500/30 bg-violet-600/5 animate-fluid-morph pointer-events-none"
+              />
+
+              {/* Organic Liquid Wave Ripple 2 */}
+              <motion.div
+                animate={{
+                  scale: [0.8, 1.25, 1.5],
+                  opacity: [0.3, 0.1, 0],
+                  rotate: [180, 90, 0]
+                }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
+                className="absolute -inset-8 border border-purple-400/20 bg-purple-600/5 animate-fluid-morph pointer-events-none"
+              />
+
               {/* Story-driven Emblem SVG with animated elements */}
               <svg
                 viewBox="0 0 48 48"

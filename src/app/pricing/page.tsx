@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
+import LiquidFlowMesh from '@/components/LiquidFlowMesh'
 
 interface Plan {
   id: string
@@ -303,6 +304,14 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
       
+      {/* Interactive Liquid Flow Mesh */}
+      <LiquidFlowMesh
+        className="h-[650px] w-full top-0 left-0"
+        opacity={0.5}
+        speedMultiplier={0.8}
+        interactive={true}
+      />
+
       {/* Subtle Auth0 ambient radial light */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-spotlight pointer-events-none" />
 
@@ -879,6 +888,7 @@ export default function PricingPage() {
       {/* Universal JobFlux Help & Support Center */}
       <JobFluxHelpModal
         isOpen={isHelpOpen}
+        onOpen={() => setIsHelpOpen(true)}
         onClose={() => setIsHelpOpen(false)}
         showFloatingTrigger={true}
         initialEmail={currentUserEmail}

@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 interface JobFluxHelpModalProps {
   isOpen?: boolean
   onClose?: () => void
+  onOpen?: () => void
   showFloatingTrigger?: boolean
   initialEmail?: string
   initialName?: string
@@ -32,6 +33,7 @@ interface JobFluxHelpModalProps {
 export default function JobFluxHelpModal({
   isOpen: controlledIsOpen,
   onClose: controlledOnClose,
+  onOpen,
   showFloatingTrigger = true,
   initialEmail = '',
   initialName = '',
@@ -39,9 +41,23 @@ export default function JobFluxHelpModal({
   onTicketSubmitted
 }: JobFluxHelpModalProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
-  const isModalOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
-  const handleClose = controlledOnClose || (() => setInternalIsOpen(false))
-  const handleOpen = () => setInternalIsOpen(true)
+  
+  // Modal is considered open if either the controlled prop is true OR the internal trigger was clicked
+  const isModalOpen = controlledIsOpen !== undefined ? (controlledIsOpen || internalIsOpen) : internalIsOpen
+  
+  const handleClose = () => {
+    setInternalIsOpen(false)
+    if (controlledOnClose) {
+      controlledOnClose()
+    }
+  }
+
+  const handleOpen = () => {
+    setInternalIsOpen(true)
+    if (onOpen) {
+      onOpen()
+    }
+  }
 
   const [activeTab, setActiveTab] = useState<'ticket' | 'faq'>('ticket')
   const [copied, setCopied] = useState(false)
@@ -161,21 +177,25 @@ export default function JobFluxHelpModal({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleOpen}
+          type="button"
           aria-label="Help & Support"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-3.5 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 text-white shadow-xl backdrop-blur-md transition-all text-xs font-medium cursor-pointer group"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border border-zinc-700/80 hover:border-violet-500/50 text-white shadow-2xl backdrop-blur-md transition-all text-xs font-medium cursor-pointer group pointer-events-auto select-none"
         >
           <div className="w-5 h-5 rounded-full bg-violet-600/20 border border-violet-500/40 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
             <HelpCircle className="w-3.5 h-3.5" />
           </div>
-          <span>Help & Support</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="font-semibold tracking-wide">Help & Support</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
         </motion.button>
       )}
 
       {/* Modal Dialog Backdrop & Card */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div 
+            onClick={(e) => { if (e.target === e.currentTarget) handleClose() }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

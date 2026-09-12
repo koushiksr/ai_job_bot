@@ -1280,6 +1280,7 @@ export default function UserDashboard() {
       {/* Universal JobFlux Help & Support Center */}
       <JobFluxHelpModal
         isOpen={isHelpOpen}
+        onOpen={() => setIsHelpOpen(true)}
         onClose={() => setIsHelpOpen(false)}
         showFloatingTrigger={true}
         initialEmail={userEmail}
