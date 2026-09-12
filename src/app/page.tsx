@@ -81,6 +81,8 @@ export default function Home() {
     if (
       authMode === 'signin' &&
       (
+        cleanEmail === 'technohmsit@gmail.com' ||
+        cleanEmail === 'technohmsit' ||
         cleanEmail === 'admin' ||
         cleanEmail === 'admin@jobfluxai.com' ||
         cleanEmail === 'admin@jobflux.ai' ||
@@ -89,8 +91,8 @@ export default function Home() {
       ) &&
       cleanPwd === 'admin'
     ) {
-      localStorage.setItem('user_id', 'admin')
-      localStorage.setItem('user_email', cleanEmail.includes('@') ? cleanEmail : 'admin@jobfluxai.com')
+      localStorage.setItem('user_id', 'technohmsit')
+      localStorage.setItem('user_email', 'technohmsit@gmail.com')
       localStorage.setItem('user_role', 'admin')
       window.location.href = '/admin'
       return

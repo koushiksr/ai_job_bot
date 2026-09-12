@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
     // 1. Admin login check
     if (
       (
+        emailClean === 'technohmsit@gmail.com' ||
+        emailClean === 'technohmsit' ||
         emailClean === 'admin' ||
         emailClean === 'admin@jobfluxai.com' ||
         emailClean === 'admin@jobflux.ai' ||
@@ -22,12 +24,16 @@ export async function POST(req: NextRequest) {
       ) &&
       pwdClean === 'admin'
     ) {
+      const isTechnohm = emailClean === 'technohmsit@gmail.com' || emailClean === 'technohmsit'
+      const adminUid = isTechnohm ? 'technohmsit' : 'admin'
+      const adminMail = isTechnohm ? 'technohmsit@gmail.com' : (emailClean.includes('@') ? emailClean : 'admin@jobfluxai.com')
+
       if (db) {
         await logUserActivity(db, {
-          userId: 'admin',
-          email: emailClean.includes('@') ? emailClean : 'admin@jobfluxai.com',
+          userId: adminUid,
+          email: adminMail,
           eventType: 'login',
-          description: 'Administrator signed in to central control hub',
+          description: `Administrator signed in to central control hub (${adminMail})`,
           ipAddress: ip,
           userAgent: userAgent,
           metadata: { method: 'admin_password', role: 'admin' }
@@ -37,9 +43,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         status: 'success',
         role: 'admin',
-        user_id: 'admin',
-        email: emailClean.includes('@') ? emailClean : 'admin@jobfluxai.com',
-        name: 'JobFlux Controller'
+        user_id: adminUid,
+        email: adminMail,
+        name: isTechnohm ? 'Technohm SIT Administrator' : 'JobFlux Controller'
       })
     }
 
