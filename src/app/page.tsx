@@ -221,7 +221,7 @@ export default function Home() {
             </div>
 
             {/* Live Interactive AI Engine Demonstration */}
-            <div className="pt-2">
+            <div className="pt-2 w-full h-[450px] shrink-0 overflow-hidden">
               <AiEngineVisualizer />
             </div>
 

@@ -1,21 +1,20 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Sparkles,
   Zap,
   CheckCircle2,
   Clock,
-  Building2,
-  Send,
   Eye,
   Cpu,
   Target,
   Search,
-  ShieldCheck,
   Flame,
-  Layers
+  Layers,
+  ShieldCheck,
+  Lock
 } from 'lucide-react'
 
 interface JobSimulation {
@@ -39,16 +38,16 @@ const SIMULATED_JOBS: JobSimulation[] = [
     id: 'stripe',
     company: 'Stripe',
     role: 'Senior Full Stack Engineer',
-    location: 'Bengaluru · Hybrid / Remote',
+    location: 'Bengaluru · Hybrid',
     salary: '₹38 - 48 LPA',
     logoText: 'S',
     logoBg: 'from-violet-600 to-indigo-600',
     matchScore: 98.7,
-    skills: ['React', 'Next.js', 'Node.js', 'Distributed Systems', 'PostgreSQL'],
+    skills: ['React', 'Next.js', 'Node.js', 'PostgreSQL'],
     screeningQuestion: 'Notice period & expected compensation?',
-    aiAnswer: 'Immediate (15 Days Negotiable) · Expected: ₹42 LPA',
+    aiAnswer: 'Immediate (15 Days) · Expected: ₹42 LPA',
     appliedTime: '06:02 AM IST',
-    recruiterStatus: 'Recruiter viewed application at 06:14 AM'
+    recruiterStatus: 'Recruiter viewed profile at 06:14 AM'
   },
   {
     id: 'google',
@@ -59,11 +58,11 @@ const SIMULATED_JOBS: JobSimulation[] = [
     logoText: 'G',
     logoBg: 'from-blue-600 to-cyan-600',
     matchScore: 99.4,
-    skills: ['Python', 'PyTorch', 'LLMs', 'High-Scale Infrastructure', 'C++'],
-    screeningQuestion: 'Experience deploying production AI models?',
-    aiAnswer: '4+ years fine-tuning & scaling LLM agents with high throughput',
+    skills: ['Python', 'PyTorch', 'LLMs', 'High-Scale Infra'],
+    screeningQuestion: 'Experience deploying production models?',
+    aiAnswer: '4+ years scaling LLM agents with high throughput',
     appliedTime: '06:04 AM IST',
-    recruiterStatus: 'Direct interview shortlist triggered'
+    recruiterStatus: 'Interview shortlist triggered'
   },
   {
     id: 'microsoft',
@@ -74,11 +73,11 @@ const SIMULATED_JOBS: JobSimulation[] = [
     logoText: 'M',
     logoBg: 'from-sky-600 to-blue-700',
     matchScore: 97.9,
-    skills: ['Kubernetes', 'Cloud Architecture', 'Go', 'Microservices', 'CI/CD'],
-    screeningQuestion: 'Are you open to hybrid/remote collaboration?',
-    aiAnswer: 'Yes, fully aligned with hybrid and remote team cadence',
+    skills: ['Kubernetes', 'Cloud Architecture', 'Go', 'Microservices'],
+    screeningQuestion: 'Open to hybrid / remote collaboration?',
+    aiAnswer: 'Yes, fully aligned with hybrid team cadence',
     appliedTime: '08:01 AM IST',
-    recruiterStatus: 'Resume downloaded by Talent Acquisition'
+    recruiterStatus: 'Resume downloaded by Talent Lead'
   },
   {
     id: 'razorpay',
@@ -89,9 +88,9 @@ const SIMULATED_JOBS: JobSimulation[] = [
     logoText: 'R',
     logoBg: 'from-blue-500 to-indigo-700',
     matchScore: 98.2,
-    skills: ['Node.js', 'Golang', 'Fintech APIs', 'Kafka', 'Redis'],
-    screeningQuestion: 'Experience handling high-concurrency payment streams?',
-    aiAnswer: 'Architected payment services processing 20K+ RPS with 99.99% uptime',
+    skills: ['Node.js', 'Golang', 'Fintech APIs', 'Kafka'],
+    screeningQuestion: 'Experience in high-concurrency systems?',
+    aiAnswer: 'Architected payment services processing 20K+ RPS',
     appliedTime: '08:03 AM IST',
     recruiterStatus: 'Recruiter sent initial assessment link'
   }
@@ -128,13 +127,13 @@ export default function AiEngineVisualizer() {
   }, [currentJobIdx])
 
   return (
-    <div className="w-full rounded-2xl bg-[#0c1017]/90 border border-slate-800/90 overflow-hidden shadow-2xl backdrop-blur-xl relative">
-      {/* Ambient glow highlight */}
+    <div className="w-full h-[450px] rounded-2xl bg-[#0c1017]/95 border border-slate-800/90 overflow-hidden shadow-2xl backdrop-blur-xl relative flex flex-col justify-between select-none">
+      {/* Ambient background subtle gradient */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Top Cockpit Header */}
-      <div className="px-5 py-3.5 bg-slate-950/90 border-b border-slate-800/80 flex items-center justify-between">
+      {/* 1. Cockpit Header (Fixed Height: 48px) */}
+      <div className="h-12 px-5 bg-slate-950/95 border-b border-slate-800/80 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -145,7 +144,7 @@ export default function AiEngineVisualizer() {
               JobFlux Autonomous Engine
             </span>
             <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-blue-500/10 text-sky-400 border border-blue-500/30">
-              LIVE SIMULATION
+              ACTIVE SCANNING
             </span>
           </div>
         </div>
@@ -160,8 +159,8 @@ export default function AiEngineVisualizer() {
         </div>
       </div>
 
-      {/* 4-Step Animated Pipeline Progress Bar */}
-      <div className="px-5 py-3 bg-slate-900/40 border-b border-slate-800/60 grid grid-cols-4 gap-2 text-[10px] font-mono">
+      {/* 2. 4-Step Pipeline Stage Indicator (Fixed Height: 42px) */}
+      <div className="h-[42px] px-5 bg-slate-900/40 border-b border-slate-800/60 grid grid-cols-4 gap-2 text-[10px] font-mono items-center shrink-0">
         <div
           className={`flex items-center gap-1.5 py-1 px-2 rounded-lg transition-all ${
             stage === 'scan'
@@ -211,113 +210,108 @@ export default function AiEngineVisualizer() {
         </div>
       </div>
 
-      {/* Main Dynamic Stage Showcase Card */}
-      <div className="p-5 space-y-4">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${currentJob.id}-${stage}`}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-4"
-          >
-            {/* Target Job Card */}
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5">
-                <div
-                  className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${currentJob.logoBg} flex items-center justify-center font-extrabold text-white text-base shadow-md shrink-0`}
-                >
-                  {currentJob.logoText}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-bold text-white">{currentJob.role}</h4>
-                    <span className="text-[10px] font-semibold text-slate-400 font-mono">
-                      @{currentJob.company}
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
-                    <span>{currentJob.location}</span>
-                    <span>•</span>
-                    <span className="text-emerald-400 font-semibold font-mono">{currentJob.salary}</span>
-                  </div>
-                </div>
+      {/* 3. Main Stage Content Area (Fixed Height: 280px - Zero Layout Shift) */}
+      <div className="h-[280px] p-4 flex flex-col justify-between shrink-0 overflow-hidden">
+        <motion.div
+          key={`${currentJob.id}`}
+          initial={{ opacity: 0.3 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25 }}
+          className="h-full flex flex-col justify-between space-y-3"
+        >
+          {/* Target Job Card (Fixed Height: 70px) */}
+          <div className="h-[70px] p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div
+                className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${currentJob.logoBg} flex items-center justify-center font-extrabold text-white text-sm shadow-md shrink-0`}
+              >
+                {currentJob.logoText}
               </div>
-
-              {/* Dynamic Match Badge */}
-              <div className="flex items-center gap-2">
-                <div className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold font-mono flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{currentJob.matchScore}% FIT</span>
-                </div>
-              </div>
-            </div>
-
-            {/* AI Automated Actions View */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* Left Box: Candidate Matching Skills */}
-              <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 font-mono">
-                  <Layers className="w-3 h-3 text-sky-400" /> Matched Skills & Keywords
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {currentJob.skills.map((s, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-900 text-slate-300 border border-slate-800 font-mono"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right Box: Intelligent Screening Q&A Auto-Fill */}
-              <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 font-mono">
-                  <Cpu className="w-3 h-3 text-amber-400" /> AI Recruiter Screening Response
-                </span>
-                <div className="text-[11px] text-slate-300">
-                  <span className="text-slate-500 block text-[10px] font-mono">Q: {currentJob.screeningQuestion}</span>
-                  <span className="text-sky-300 font-semibold font-mono block mt-0.5">
-                    A: {currentJob.aiAnswer}
+              <div className="overflow-hidden">
+                <div className="flex items-center gap-1.5 truncate">
+                  <h4 className="text-xs sm:text-sm font-bold text-white truncate">{currentJob.role}</h4>
+                  <span className="text-[10px] font-semibold text-slate-400 font-mono shrink-0">
+                    @{currentJob.company}
                   </span>
                 </div>
+                <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1.5 truncate">
+                  <span className="truncate">{currentJob.location}</span>
+                  <span>•</span>
+                  <span className="text-emerald-400 font-semibold font-mono shrink-0">{currentJob.salary}</span>
+                </div>
               </div>
             </div>
 
-            {/* Bottom Status Banner */}
-            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-950/30 via-emerald-950/20 to-slate-950/60 border border-emerald-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="text-slate-300">
-                  Applied autonomously at <span className="font-mono text-white font-bold">{currentJob.appliedTime}</span>
+            {/* Match Badge */}
+            <div className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold font-mono shrink-0 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-emerald-400" />
+              <span>{currentJob.matchScore}%</span>
+            </div>
+          </div>
+
+          {/* AI Automated Actions Grid (Fixed Height: 94px) */}
+          <div className="h-[94px] grid grid-cols-1 sm:grid-cols-2 gap-2.5 shrink-0">
+            {/* Left Box: Candidate Matching Skills */}
+            <div className="h-full p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col justify-between overflow-hidden">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1 font-mono">
+                <Layers className="w-3 h-3 text-sky-400" /> Matched Skills
+              </span>
+              <div className="flex flex-wrap gap-1 overflow-hidden">
+                {currentJob.skills.map((s, idx) => (
+                  <span
+                    key={idx}
+                    className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-900 text-slate-300 border border-slate-800 font-mono truncate"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Box: Intelligent Screening Q&A Auto-Fill */}
+            <div className="h-full p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col justify-between overflow-hidden">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1 font-mono">
+                <Cpu className="w-3 h-3 text-amber-400" /> AI Screening Auto-Answer
+              </span>
+              <div className="text-[10px] overflow-hidden">
+                <span className="text-slate-500 block truncate font-mono">Q: {currentJob.screeningQuestion}</span>
+                <span className="text-sky-300 font-semibold font-mono block truncate mt-0.5">
+                  A: {currentJob.aiAnswer}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-slate-400 text-[11px] font-mono">
-                <Eye className="w-3.5 h-3.5 text-blue-400" />
-                <span>{currentJob.recruiterStatus}</span>
-              </div>
             </div>
-          </motion.div>
-        </AnimatePresence>
+          </div>
 
-        {/* Mini Live Ticker of Recent Submissions */}
-        <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 font-mono overflow-x-auto gap-4">
-          <div className="flex items-center gap-1.5 text-slate-500 shrink-0">
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
-            <span>Recent Pipeline:</span>
+          {/* Delivery Confirmation Banner (Fixed Height: 38px) */}
+          <div className="h-[38px] px-3 rounded-xl bg-gradient-to-r from-blue-950/30 via-emerald-950/20 to-slate-950/60 border border-emerald-500/20 flex items-center justify-between text-[11px] shrink-0">
+            <div className="flex items-center gap-1.5 truncate">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="text-slate-300 truncate">
+                Delivered at <span className="font-mono text-white font-bold">{currentJob.appliedTime}</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-slate-400 text-[10px] font-mono shrink-0">
+              <Eye className="w-3 h-3 text-blue-400" />
+              <span className="truncate">{currentJob.recruiterStatus}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 overflow-hidden text-ellipsis whitespace-nowrap">
-            <span className="text-slate-300">Stripe (98%) <span className="text-emerald-400">✅</span></span>
-            <span className="text-slate-600">•</span>
-            <span className="text-slate-300">Google (99%) <span className="text-emerald-400">✅</span></span>
-            <span className="text-slate-600">•</span>
-            <span className="text-slate-300">Microsoft (97%) <span className="text-emerald-400">✅</span></span>
-            <span className="text-slate-600">•</span>
-            <span className="text-slate-300">Razorpay (98%) <span className="text-emerald-400">✅</span></span>
-          </div>
+        </motion.div>
+      </div>
+
+      {/* 4. Bottom Trust & Live Pipeline Ticker (Fixed Height: 36px) */}
+      <div className="h-9 px-4 bg-slate-950/80 border-t border-slate-800/70 flex items-center justify-between text-[10px] text-slate-400 font-mono shrink-0">
+        <div className="flex items-center gap-1.5 text-slate-400 shrink-0">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="text-slate-300 font-semibold">100% Safe Automation</span>
+        </div>
+        <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap text-slate-400">
+          <span className="text-slate-300">Stripe <span className="text-emerald-400">✓</span></span>
+          <span className="text-slate-600">•</span>
+          <span className="text-slate-300">Google <span className="text-emerald-400">✓</span></span>
+          <span className="text-slate-600">•</span>
+          <span className="text-slate-300">Microsoft <span className="text-emerald-400">✓</span></span>
+          <span className="text-slate-600">•</span>
+          <span className="text-slate-300">Razorpay <span className="text-emerald-400">✓</span></span>
         </div>
       </div>
     </div>
