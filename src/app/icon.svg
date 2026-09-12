@@ -1,72 +1,50 @@
 <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Background Gradient -->
-    <linearGradient id="jfBg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0c1424"/>
-      <stop offset="100%" stop-color="#04070e"/>
+    <linearGradient id="jfCaseGrad" x1="6" y1="15" x2="42" y2="43" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.98"/>
     </linearGradient>
-
-    <!-- Outer Rim Gradient -->
-    <linearGradient id="jfRim" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9"/>
-      <stop offset="50%" stop-color="#2563eb" stop-opacity="0.5"/>
-      <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0.2"/>
-    </linearGradient>
-
-    <!-- Briefcase Body Gradient -->
-    <linearGradient id="jfCase" x1="8" y1="17" x2="40" y2="39" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#131e33" stop-opacity="0.95"/>
-      <stop offset="100%" stop-color="#0a1120" stop-opacity="0.98"/>
-    </linearGradient>
-
-    <!-- Supersonic Jet Top Wing -->
-    <linearGradient id="jfJetTop" x1="15" y1="10" x2="37" y2="22" gradientUnits="userSpaceOnUse">
+    <linearGradient id="jfJetTop" x1="16" y1="6" x2="44" y2="22" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#bae6fd"/>
-      <stop offset="40%" stop-color="#38bdf8"/>
+      <stop offset="35%" stop-color="#38bdf8"/>
       <stop offset="100%" stop-color="#2563eb"/>
     </linearGradient>
-
-    <!-- Supersonic Jet Bottom Wing -->
-    <linearGradient id="jfJetBtm" x1="22" y1="14" x2="32" y2="30" gradientUnits="userSpaceOnUse">
+    <linearGradient id="jfJetBtm" x1="25" y1="10" x2="36" y2="32" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#1d4ed8"/>
-      <stop offset="100%" stop-color="#172554"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
     </linearGradient>
-
-    <!-- AI Spark Filter -->
-    <filter id="sparkGlow" x="28" y="2" width="20" height="20" filterUnits="userSpaceOnUse">
+    <linearGradient id="jfHandle" x1="19" y1="8" x2="29" y2="14" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    <filter id="jfSparkGlow" x="28" y="0" width="20" height="20" filterUnits="userSpaceOnUse">
       <feGaussianBlur stdDeviation="1.2" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
 
-  <!-- Squircle Base -->
-  <rect x="1.5" y="1.5" width="45" height="45" rx="11" fill="url(#jfBg)" stroke="url(#jfRim)" stroke-width="1.5"/>
-
   <!-- Briefcase Handle -->
-  <path d="M 19.5 15 C 19.5 12 28.5 12 28.5 15" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <path d="M 18.5 15 C 18.5 10 29.5 10 29.5 15" stroke="url(#jfHandle)" stroke-width="2.8" stroke-linecap="round" fill="none"/>
 
-  <!-- Briefcase Body (Career / Opportunities) -->
-  <rect x="7" y="18" width="34" height="21" rx="4.5" fill="url(#jfCase)" stroke="#38bdf8" stroke-width="1.3" stroke-opacity="0.55"/>
+  <!-- Briefcase Body (Transparent background around it) -->
+  <rect x="5" y="16" width="38" height="26" rx="6" fill="url(#jfCaseGrad)" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.85"/>
 
-  <!-- Briefcase Horizontal Seam & Metallic Latch -->
-  <line x1="7" y1="24" x2="41" y2="24" stroke="#1e293b" stroke-width="1"/>
-  <rect x="22" y="22.5" width="4" height="3" rx="1" fill="#0284c7" stroke="#38bdf8" stroke-width="0.8"/>
+  <!-- Briefcase Horizontal Seam & Latch -->
+  <line x1="5" y1="24" x2="43" y2="24" stroke="#334155" stroke-width="1.5" stroke-dasharray="2.5 2"/>
+  <rect x="21.5" y="22" width="5" height="4" rx="1.2" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
 
-  <!-- Velocity Propulsion Streaks from Jet (Flux) -->
-  <line x1="14" y1="30" x2="20" y2="26" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
-  <line x1="12" y1="34" x2="17" y2="30.5" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Velocity Propulsion Streaks from Jet -->
+  <line x1="13" y1="32" x2="21" y2="27" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" opacity="0.8"/>
+  <line x1="10" y1="37" x2="17" y2="32.5" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
 
-  <!-- Supersonic Delta Jet (Autonomous Application Dispatch) -->
-  <!-- Top/Left Wing -->
-  <polygon points="37,10 18,22 26,24" fill="url(#jfJetTop)"/>
-  <!-- Bottom/Right Wing -->
-  <polygon points="37,10 26,24 28,31" fill="url(#jfJetBtm)"/>
-  <!-- Crisp Center Trajectory Spine -->
-  <line x1="37" y1="10" x2="26" y2="24" stroke="#ffffff" stroke-width="1" stroke-linecap="round" opacity="0.95"/>
+  <!-- Supersonic Delta Jet (Autonomous Job Application Rocket) -->
+  <polygon points="42,5 17,21 28,24" fill="url(#jfJetTop)"/>
+  <polygon points="42,5 28,24 31,34" fill="url(#jfJetBtm)"/>
+  <line x1="42" y1="5" x2="28" y2="24" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity="0.95"/>
 
-  <!-- AI Autonomous Beacon Spark -->
-  <g filter="url(#sparkGlow)">
-    <path d="M 38 5 Q 38 8.5 41.5 8.5 Q 38 8.5 38 12 Q 38 8.5 34.5 8.5 Q 38 8.5 38 5 Z" fill="#ffffff"/>
-    <circle cx="38" cy="8.5" r="1" fill="#38bdf8"/>
+  <!-- AI Autonomous Beacon Spark at Apex -->
+  <g filter="url(#jfSparkGlow)">
+    <path d="M 43 1 Q 43 5 47 5 Q 43 5 43 9 Q 43 5 39 5 Q 43 5 43 1 Z" fill="#ffffff"/>
+    <circle cx="43" cy="5" r="1.2" fill="#38bdf8"/>
   </g>
 </svg>

@@ -23,9 +23,9 @@ export default function JobFluxLogo({
 
   return (
     <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
-      {/* Story-driven Emblem: Briefcase (Career) + Supersonic Jet (Flux Auto-Apply) + AI Beacon */}
+      {/* Story-driven Emblem: Briefcase (Career) + Supersonic Delta Jet (Flux Auto-Apply) + AI Beacon */}
       <div 
-        className="relative flex items-center justify-center shrink-0 drop-shadow-md"
+        className="relative flex items-center justify-center shrink-0 drop-shadow-[0_2px_10px_rgba(56,189,248,0.25)]"
         style={{ width: iconSizes.w, height: iconSizes.h }}
       >
         <svg
@@ -35,65 +35,56 @@ export default function JobFluxLogo({
           className="w-full h-full"
         >
           <defs>
-            <linearGradient id="jfBgGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#0c1424" />
-              <stop offset="100%" stopColor="#04070e" />
+            <linearGradient id="jfCaseGradLogo" x1="6" y1="15" x2="42" y2="43" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#1e293b" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#0f172a" stopOpacity="0.98" />
             </linearGradient>
 
-            <linearGradient id="jfRimGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.9" />
-              <stop offset="50%" stopColor="#2563eb" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#1e1b4b" stopOpacity="0.2" />
-            </linearGradient>
-
-            <linearGradient id="jfCaseGrad" x1="8" y1="17" x2="40" y2="39" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#131e33" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#0a1120" stopOpacity="0.98" />
-            </linearGradient>
-
-            <linearGradient id="jfJetTopGrad" x1="15" y1="10" x2="37" y2="22" gradientUnits="userSpaceOnUse">
+            <linearGradient id="jfJetTopLogo" x1="16" y1="6" x2="44" y2="22" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#bae6fd" />
-              <stop offset="40%" stopColor="#38bdf8" />
+              <stop offset="35%" stopColor="#38bdf8" />
               <stop offset="100%" stopColor="#2563eb" />
             </linearGradient>
 
-            <linearGradient id="jfJetBtmGrad" x1="22" y1="14" x2="32" y2="30" gradientUnits="userSpaceOnUse">
+            <linearGradient id="jfJetBtmLogo" x1="25" y1="10" x2="36" y2="32" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#1d4ed8" />
-              <stop offset="100%" stopColor="#172554" />
+              <stop offset="100%" stopColor="#1e3a8a" />
             </linearGradient>
 
-            <filter id="sparkGlowLogo" x="28" y="2" width="20" height="20" filterUnits="userSpaceOnUse">
+            <linearGradient id="jfHandleLogo" x1="19" y1="8" x2="29" y2="14" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#94a3b8" />
+              <stop offset="100%" stopColor="#64748b" />
+            </linearGradient>
+
+            <filter id="jfSparkGlowLogo" x="28" y="0" width="20" height="20" filterUnits="userSpaceOnUse">
               <feGaussianBlur stdDeviation="1.2" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
           </defs>
 
-          {/* Squircle Base */}
-          <rect x="1.5" y="1.5" width="45" height="45" rx="11" fill="url(#jfBgGrad)" stroke="url(#jfRimGrad)" strokeWidth="1.5" />
-
           {/* Briefcase Handle */}
-          <path d="M 19.5 15 C 19.5 12 28.5 12 28.5 15" stroke="#94a3b8" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+          <path d="M 18.5 15 C 18.5 10 29.5 10 29.5 15" stroke="url(#jfHandleLogo)" strokeWidth="2.8" strokeLinecap="round" fill="none" />
 
-          {/* Briefcase Body (Career / Opportunities) */}
-          <rect x="7" y="18" width="34" height="21" rx="4.5" fill="url(#jfCaseGrad)" stroke="#38bdf8" strokeWidth="1.3" strokeOpacity="0.55" />
+          {/* Briefcase Body (Floating with transparency) */}
+          <rect x="5" y="16" width="38" height="26" rx="6" fill="url(#jfCaseGradLogo)" stroke="#38bdf8" strokeWidth="2" strokeOpacity="0.85" />
 
-          {/* Briefcase Horizontal Seam & Metallic Latch */}
-          <line x1="7" y1="24" x2="41" y2="24" stroke="#1e293b" strokeWidth="1" />
-          <rect x="22" y="22.5" width="4" height="3" rx="1" fill="#0284c7" stroke="#38bdf8" strokeWidth="0.8" />
+          {/* Briefcase Horizontal Seam & Latch */}
+          <line x1="5" y1="24" x2="43" y2="24" stroke="#334155" strokeWidth="1.5" strokeDasharray="2.5 2" />
+          <rect x="21.5" y="22" width="5" height="4" rx="1.2" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
 
           {/* Velocity Propulsion Streaks from Jet (Flux) */}
-          <line x1="14" y1="30" x2="20" y2="26" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" opacity="0.6" />
-          <line x1="12" y1="34" x2="17" y2="30.5" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
+          <line x1="13" y1="32" x2="21" y2="27" stroke="#38bdf8" strokeWidth="2.2" strokeLinecap="round" opacity="0.8" />
+          <line x1="10" y1="37" x2="17" y2="32.5" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
 
-          {/* Supersonic Delta Jet (Autonomous Application Dispatch) */}
-          <polygon points="37,10 18,22 26,24" fill="url(#jfJetTopGrad)" />
-          <polygon points="37,10 26,24 28,31" fill="url(#jfJetBtmGrad)" />
-          <line x1="37" y1="10" x2="26" y2="24" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" opacity="0.95" />
+          {/* Supersonic Delta Jet (Autonomous Job Application Rocket Launch) */}
+          <polygon points="42,5 17,21 28,24" fill="url(#jfJetTopLogo)" />
+          <polygon points="42,5 28,24 31,34" fill="url(#jfJetBtmLogo)" />
+          <line x1="42" y1="5" x2="28" y2="24" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" opacity="0.95" />
 
-          {/* AI Autonomous Beacon Spark */}
-          <g filter="url(#sparkGlowLogo)">
-            <path d="M 38 5 Q 38 8.5 41.5 8.5 Q 38 8.5 38 12 Q 38 8.5 34.5 8.5 Q 38 8.5 38 5 Z" fill="#ffffff" />
-            <circle cx="38" cy="8.5" r="1" fill="#38bdf8" />
+          {/* AI Autonomous Beacon Spark at Apex */}
+          <g filter="url(#jfSparkGlowLogo)">
+            <path d="M 43 1 Q 43 5 47 5 Q 43 5 43 9 Q 43 5 39 5 Q 43 5 43 1 Z" fill="#ffffff" />
+            <circle cx="43" cy="5" r="1.2" fill="#38bdf8" />
           </g>
         </svg>
       </div>

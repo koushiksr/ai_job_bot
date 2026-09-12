@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Briefcase, ChevronRight, Mail, Lock, Loader2, Sparkles } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
+import JobFluxSplash from '@/components/JobFluxSplash'
 
 export default function Home() {
+  const [showSplash, setShowSplash] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -66,7 +68,9 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center p-6 md:p-24 relative overflow-hidden bg-[#080c14] text-slate-100">
+    <>
+      {showSplash && <JobFluxSplash onComplete={() => setShowSplash(false)} />}
+      <div className="min-h-screen flex flex-col md:flex-row items-center justify-center p-6 md:p-24 relative overflow-hidden bg-[#080c14] text-slate-100">
       
       {/* Subtle, standard clean background highlight */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(37,99,235,0.12),rgba(255,255,255,0))] pointer-events-none" />
@@ -174,5 +178,6 @@ export default function Home() {
         </div>
       </motion.div>
     </div>
-  )
+  </>
+)
 }
