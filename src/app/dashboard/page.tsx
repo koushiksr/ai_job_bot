@@ -904,7 +904,7 @@ export default function UserDashboard() {
                             <span>{job.company || 'Direct Employer'}</span>
                           </td>
                           <td className="py-3 px-4 text-zinc-300">
-                            {job.url ? (
+                            {job.url && isProfessional ? (
                               <a
                                 href={job.url}
                                 target="_blank"
@@ -915,6 +915,22 @@ export default function UserDashboard() {
                                 {job.title || 'Job Opening'}
                                 <ExternalLink className="w-3 h-3 text-zinc-500" />
                               </a>
+                            ) : job.url && !isProfessional ? (
+                              <span className="inline-flex items-center gap-1.5">
+                                <span className="text-zinc-400">{job.title || 'Job Opening'}</span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setProModalFeature('Job Redirect URL Access')
+                                    setShowProModal(true)
+                                  }}
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-violet-950/80 border border-violet-700/50 text-violet-300 hover:bg-violet-900/60 transition-colors cursor-pointer"
+                                  title="Upgrade to Professional to open job listing"
+                                >
+                                  <Lock className="w-2.5 h-2.5" />
+                                  PRO
+                                </button>
+                              </span>
                             ) : (
                               <span>{job.title || 'Job Opening'}</span>
                             )}
@@ -1247,7 +1263,7 @@ export default function UserDashboard() {
 
               {/* Actions */}
               <div className="flex items-center gap-2 pt-2">
-                {selectedJobAudit.url && (
+                {selectedJobAudit.url && isProfessional && (
                   <a
                     href={selectedJobAudit.url}
                     target="_blank"
@@ -1257,6 +1273,19 @@ export default function UserDashboard() {
                     <span>View Portal Opening</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
+                )}
+                {selectedJobAudit.url && !isProfessional && (
+                  <button
+                    onClick={() => {
+                      setProModalFeature('Job Redirect URL Access')
+                      setShowProModal(true)
+                    }}
+                    className="flex-1 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-violet-500/40 hover:border-violet-500/70 text-violet-300 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>View Portal Opening</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-violet-950/80 border border-violet-700/50 text-violet-300">PRO</span>
+                  </button>
                 )}
                 <button
                   onClick={() => setSelectedJobAudit(null)}
