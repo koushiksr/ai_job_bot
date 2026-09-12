@@ -173,12 +173,16 @@ export default function UserDashboard() {
         const data = await res.json()
         if (data.task && (data.task.status === 'pending' || data.task.status === 'running')) {
           setActiveTask(data.task)
-          setIsTriggeringScout(true)
-          setTaskFeedback({
-            type: 'info',
-            text: 'Autonomous AI Scout is actively processing tasks...'
-          })
-          pollTaskStatus(uid)
+          // Only show the executing radar UI for Professional users.
+          // Non-pro users should not see the scout execution animation.
+          if (isProfessional) {
+            setIsTriggeringScout(true)
+            setTaskFeedback({
+              type: 'info',
+              text: 'Autonomous AI Scout is actively processing tasks...'
+            })
+            pollTaskStatus(uid)
+          }
         }
       }
     } catch {
@@ -548,8 +552,8 @@ export default function UserDashboard() {
             </div>
           </div>
 
-          {/* Active Radar Telemetry Animation (Visible during Scouting / Active Tasks) */}
-          {isTriggeringScout && (
+          {/* Active Radar Telemetry Animation (Visible during Scouting — PRO only) */}
+          {isTriggeringScout && isProfessional && (
             <div className="p-4 rounded-xl bg-zinc-950/95 border border-violet-500/40 relative overflow-hidden space-y-3 shadow-lg shadow-violet-950/20">
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep pointer-events-none" />
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -585,8 +589,8 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {/* Feedback Toast */}
-          {taskFeedback && (
+          {/* Feedback Toast — only shown to Professional users running on-demand scans */}
+          {taskFeedback && isProfessional && (
             <div className={`p-3 rounded-lg text-xs flex items-center justify-between border ${
               taskFeedback.type === 'success'
                 ? 'bg-zinc-950 border-emerald-500/30 text-emerald-300'
