@@ -125,9 +125,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Failed to find or create profile.' }, { status: 500 })
     }
 
+    const role = (
+      emailClean === 'admin@jobfluxai.com' ||
+      emailClean === 'admin@jobflux.ai' ||
+      profile.role === 'admin'
+    ) ? 'admin' : (profile.role || 'user')
+
     return NextResponse.json({
       status: 'success',
-      role: 'user',
+      role: role,
       user_id: profile.user_id,
       email: profile.email,
       name: profile.name || profile.user_id.replace('_', ' '),

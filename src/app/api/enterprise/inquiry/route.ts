@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
+import { verifyAdminRequest } from '@/lib/adminAuth'
 import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
@@ -9,6 +10,14 @@ export async function GET(req: NextRequest) {
     const db = await getDb()
     if (!db) {
       return NextResponse.json({ inquiries: [] })
+    }
+
+    const { authorized } = await verifyAdminRequest(req, db)
+    if (!authorized) {
+      return NextResponse.json(
+        { detail: 'Forbidden: Administrator privileges required.' },
+        { status: 403 }
+      )
     }
 
     const inquiries = await db
@@ -101,6 +110,14 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
     }
 
+    const { authorized } = await verifyAdminRequest(req, db)
+    if (!authorized) {
+      return NextResponse.json(
+        { detail: 'Forbidden: Administrator privileges required.' },
+        { status: 403 }
+      )
+    }
+
     await db.collection('enterprise_inquiries').updateOne(
       { inquiry_id: inquiry_id },
       {
@@ -116,4 +133,3 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
 }
-

@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
+import { verifyAdminRequest } from '@/lib/adminAuth'
 
 export async function GET(req: NextRequest) {
   try {
     const db = await getDb()
     if (!db) {
       return NextResponse.json({ users: [] })
+    }
+
+    const { authorized } = await verifyAdminRequest(req, db)
+    if (!authorized) {
+      return NextResponse.json(
+        { detail: 'Forbidden: Administrator privileges required.' },
+        { status: 403 }
+      )
     }
 
     const userDocs = await db.collection('users').find({}).toArray()
@@ -54,6 +63,14 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
     }
 
+    const { authorized } = await verifyAdminRequest(req, db)
+    if (!authorized) {
+      return NextResponse.json(
+        { detail: 'Forbidden: Administrator privileges required.' },
+        { status: 403 }
+      )
+    }
+
     const body = await req.json()
     const { user_id, is_vip, plan, enabled_for_daily_run, extend_days } = body
 
@@ -92,4 +109,3 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
 }
-

@@ -1,13 +1,22 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
+import { verifyAdminRequest } from '@/lib/adminAuth'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const db = await getDb()
     if (!db) {
       return NextResponse.json({ payments: [] })
+    }
+
+    const { authorized } = await verifyAdminRequest(req, db)
+    if (!authorized) {
+      return NextResponse.json(
+        { detail: 'Forbidden: Administrator privileges required.' },
+        { status: 403 }
+      )
     }
 
     const payments = await db
@@ -35,4 +44,3 @@ export async function GET() {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }
 }
-

@@ -329,6 +329,15 @@ export default function PricingPage() {
                   <span>Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
+                <button
+                  onClick={() => {
+                    localStorage.clear()
+                    window.location.href = '/'
+                  }}
+                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer"
+                >
+                  Sign Out
+                </button>
               </div>
             ) : (
               <>

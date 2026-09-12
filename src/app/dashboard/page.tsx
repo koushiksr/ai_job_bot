@@ -115,6 +115,14 @@ export default function UserDashboard() {
         localStorage.setItem('user_plan', gPlan)
         window.history.replaceState({}, document.title, '/dashboard')
       }
+
+      const noticeParam = p.get('notice')
+      if (noticeParam) {
+        setTaskFeedback({
+          type: 'error',
+          text: decodeURIComponent(noticeParam)
+        })
+      }
     }
 
     const storedUid = localStorage.getItem('user_id')

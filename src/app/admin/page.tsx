@@ -69,49 +69,73 @@ export default function AdminDashboard() {
   const [selectedSystemLog, setSelectedSystemLog] = useState<string | null>(null)
   const [selectedLogContent, setSelectedLogContent] = useState<string[]>([])
   const [loadingLogContent, setLoadingLogContent] = useState<boolean>(false)
+  const [authChecking, setAuthChecking] = useState<boolean>(true)
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false)
+
+  const getAdminHeaders = () => {
+    const uid = typeof window !== 'undefined' ? localStorage.getItem('user_id') || '' : ''
+    return {
+      'Content-Type': 'application/json',
+      'x-user-id': uid
+    }
+  }
 
   const fetchOverviewAndUsers = async () => {
     setLoadingUsers(true)
     try {
-      const uRes = await fetch('/api/admin/users')
-      if (uRes.ok) {
-        const uData = await uRes.json()
-        const users = uData.users || []
-        setUsersList(users)
-
-        let total = 0
-        let today = 0
-        let week = 0
-        let month = 0
-
-        users.forEach((u: any) => {
-          total += u.total_applied || 0
-          today += u.applied_today || 0
-          week += u.applied_this_week || 0
-          month += u.applied_this_month || 0
-        })
-
-        setOverviewMetrics({
-          total_profiles: users.length,
-          scheduled_profiles_active: users.filter((u: any) => u.enabled_for_daily_run !== false).length,
-          vip_profiles_count: users.filter((u: any) => u.is_vip).length,
-          applied_today: today,
-          applied_this_week: week,
-          applied_this_month: month,
-          total_applied: total
-        })
+      const uRes = await fetch('/api/admin/users', {
+        headers: getAdminHeaders()
+      })
+      if (!uRes.ok) {
+        if (uRes.status === 403) {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user_role', 'user')
+            window.location.replace('/dashboard?notice=' + encodeURIComponent('Access denied: Administrator privileges required.'))
+          }
+          return
+        }
+        throw new Error('Failed to fetch admin users')
       }
+      const uData = await uRes.json()
+      const users = uData.users || []
+      setUsersList(users)
+
+      let total = 0
+      let today = 0
+      let week = 0
+      let month = 0
+
+      users.forEach((u: any) => {
+        total += u.total_applied || 0
+        today += u.applied_today || 0
+        week += u.applied_this_week || 0
+        month += u.applied_this_month || 0
+      })
+
+      setOverviewMetrics({
+        total_profiles: users.length,
+        scheduled_profiles_active: users.filter((u: any) => u.enabled_for_daily_run !== false).length,
+        vip_profiles_count: users.filter((u: any) => u.is_vip).length,
+        applied_today: today,
+        applied_this_week: week,
+        applied_this_month: month,
+        total_applied: total
+      })
+      setIsAuthorized(true)
     } catch (e) {
       console.error('Failed to fetch admin users:', e)
     } finally {
       setLoadingUsers(false)
+      setAuthChecking(false)
     }
   }
 
   const fetchPayments = async () => {
     setLoadingPayments(true)
     try {
-      const res = await fetch('/api/admin/payments')
+      const res = await fetch('/api/admin/payments', {
+        headers: getAdminHeaders()
+      })
       if (res.ok) {
         const data = await res.json()
         setPaymentsList(data.payments || [])
@@ -126,7 +150,9 @@ export default function AdminDashboard() {
   const fetchEnterpriseLeads = async () => {
     setLoadingLeads(true)
     try {
-      const res = await fetch('/api/enterprise/inquiry')
+      const res = await fetch('/api/enterprise/inquiry', {
+        headers: getAdminHeaders()
+      })
       if (res.ok) {
         const data = await res.json()
         setEnterpriseLeads(data.inquiries || [])
@@ -145,7 +171,7 @@ export default function AdminDashboard() {
     try {
       await fetch('/api/enterprise/inquiry', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ inquiry_id: inquiryId, status: newStatus })
       })
     } catch {
@@ -153,11 +179,29 @@ export default function AdminDashboard() {
     }
   }
 
-  // Initial Load
+  // Initial Auth & Access Verification
   useEffect(() => {
-    fetchOverviewAndUsers()
-    fetchPayments()
-    fetchEnterpriseLeads()
+    if (typeof window !== 'undefined') {
+      const storedUid = localStorage.getItem('user_id')
+      const storedRole = localStorage.getItem('user_role')
+
+      // 1. Check if logged in
+      if (!storedUid) {
+        window.location.replace('/?error=' + encodeURIComponent('Please sign in with administrator credentials.'))
+        return
+      }
+
+      // 2. Check client-side admin role flag
+      if (storedRole !== 'admin') {
+        window.location.replace('/dashboard?notice=' + encodeURIComponent('Access denied: Administrator privileges required.'))
+        return
+      }
+
+      // 3. Verify server-side against MongoDB
+      fetchOverviewAndUsers()
+      fetchPayments()
+      fetchEnterpriseLeads()
+    }
   }, [])
 
   const handleToggleDaily = async (userId: string, currentStatus: boolean) => {
@@ -168,7 +212,7 @@ export default function AdminDashboard() {
     try {
       await fetch('/api/profile', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ user_id: userId, enabled_for_daily_run: newStatus })
       })
     } catch {
@@ -184,7 +228,7 @@ export default function AdminDashboard() {
     try {
       await fetch('/api/admin/users', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ user_id: userId, is_vip: newVip })
       })
       fetchOverviewAndUsers()
@@ -214,7 +258,8 @@ export default function AdminDashboard() {
     if (!confirm(`Are you sure you want to delete profile: ${userId}?`)) return
     try {
       await fetch(`/api/profile?user_id=${encodeURIComponent(userId)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAdminHeaders()
       })
       fetchOverviewAndUsers()
     } catch (e) {
@@ -232,6 +277,19 @@ export default function AdminDashboard() {
     (u.email || '').toLowerCase().includes(userSearch.toLowerCase()) ||
     (u.user_id || '').toLowerCase().includes(userSearch.toLowerCase())
   )
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-zinc-400 font-mono text-xs gap-3">
+        <RefreshCw className="w-5 h-5 animate-spin text-zinc-300" />
+        <span>Verifying administrator privileges...</span>
+      </div>
+    )
+  }
+
+  if (!isAuthorized) {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
