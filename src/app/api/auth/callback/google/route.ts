@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
   const forwardedProto = req.headers.get('x-forwarded-proto') || 'https'
   const host = req.headers.get('host') || 'jobfluxai.vercel.app'
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${forwardedProto}://${host}`
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || `${forwardedProto}://${host}`).replace(/\/+$/, '')
   const redirectUri = `${appUrl}/api/auth/callback/google`
 
   try {
