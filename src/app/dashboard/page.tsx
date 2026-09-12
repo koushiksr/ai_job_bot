@@ -23,12 +23,16 @@ import {
   FileText,
   Mail,
   MessageSquare,
-  X
+  X,
+  Lock,
+  Crown
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
+import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
+import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
@@ -74,6 +78,12 @@ export default function UserDashboard() {
 
   // AI Application Audit Modal
   const [selectedJobAudit, setSelectedJobAudit] = useState<any | null>(null)
+
+  // Professional Tier Feature Gating & Perks Modal
+  const [showProModal, setShowProModal] = useState<boolean>(false)
+  const [proModalFeature, setProModalFeature] = useState<string>('On-Demand Turbo Scout')
+
+  const isProfessional = userPlan === 'elite' || userPlan === 'professional' || userRole === 'admin'
 
   // Compute Daily 6 AM & 8 AM IST Countdown
   useEffect(() => {
@@ -176,6 +186,12 @@ export default function UserDashboard() {
   }
 
   const handleTriggerOnDemandScout = async () => {
+    if (!isProfessional) {
+      setProModalFeature('Instant On-Demand Turbo Scout')
+      setShowProModal(true)
+      return
+    }
+
     if (isTriggeringScout) return
     setIsTriggeringScout(true)
     setTaskFeedback({
@@ -494,23 +510,40 @@ export default function UserDashboard() {
             </div>
 
             <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
-              <button
-                onClick={handleTriggerOnDemandScout}
-                disabled={isTriggeringScout}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
-              >
-                {isTriggeringScout ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-violet-400" />
-                    <span>Scouting Openings...</span>
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Trigger On-Demand Run</span>
-                  </>
-                )}
-              </button>
+              {isProfessional ? (
+                <button
+                  onClick={handleTriggerOnDemandScout}
+                  disabled={isTriggeringScout}
+                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
+                >
+                  {isTriggeringScout ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-violet-400" />
+                      <span>Scouting Openings...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Trigger On-Demand Run</span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setProModalFeature('Instant On-Demand Turbo Scout')
+                    setShowProModal(true)
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-gradient-to-r from-violet-950/40 via-zinc-900 to-violet-950/40 hover:from-violet-900/50 hover:to-zinc-800 border border-violet-500/40 text-violet-200 text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.15)] group relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/10 to-transparent animate-laser-sweep pointer-events-none" />
+                  <Lock className="w-3.5 h-3.5 text-violet-400 group-hover:scale-110 transition-transform" />
+                  <span>Trigger On-Demand Run</span>
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-violet-900/80 border border-violet-600/50 text-white font-semibold">
+                    PRO
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -573,22 +606,97 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {/* Protocols */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-zinc-800/80 text-[11px] text-zinc-400">
+          {/* Protocols: 4-Cell Enterprise Telemetry Matrix */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-3 border-t border-zinc-800/80 text-[11px] text-zinc-400">
             <div className="flex items-center gap-2 bg-black px-3.5 py-2 rounded-lg border border-zinc-800/80">
               <Shield className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
               <span>Pacing: <strong className="text-zinc-300">Human Emulation (4s-8s)</strong></span>
             </div>
-            <div className="flex items-center gap-2 bg-black px-3.5 py-2 rounded-lg border border-zinc-800/80">
-              <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-              <span>Screening: <strong className="text-zinc-300">Contextual Auto-Fill</strong></span>
+
+            <div
+              onClick={() => {
+                if (!isProfessional) {
+                  setProModalFeature('Neural LLM Screening Tailor')
+                  setShowProModal(true)
+                }
+              }}
+              className={`flex items-center justify-between gap-1.5 bg-black px-3.5 py-2 rounded-lg border transition-colors ${
+                isProfessional ? 'border-zinc-800/80' : 'border-violet-500/30 hover:border-violet-500/60 cursor-pointer group'
+              }`}
+            >
+              <div className="flex items-center gap-2 truncate">
+                <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                <span className="truncate">Screening: <strong className="text-zinc-300">Contextual</strong></span>
+              </div>
+              {isProfessional ? (
+                <span className="text-[9px] font-mono text-emerald-400 shrink-0">NEURAL ACTIVE</span>
+              ) : (
+                <span className="text-[9px] font-mono text-violet-400 flex items-center gap-0.5 shrink-0 group-hover:underline">
+                  <Lock className="w-2.5 h-2.5" /> NEURAL: PRO
+                </span>
+              )}
             </div>
-            <div className="flex items-center gap-2 bg-black px-3.5 py-2 rounded-lg border border-zinc-800/80">
-              <TrendingUp className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-              <span>Delivery: <strong className="text-zinc-300">Direct Recruiter ATS</strong></span>
+
+            <div
+              onClick={() => {
+                if (!isProfessional) {
+                  setProModalFeature('Zero-Queue Recruiter Fast-Path')
+                  setShowProModal(true)
+                }
+              }}
+              className={`flex items-center justify-between gap-1.5 bg-black px-3.5 py-2 rounded-lg border transition-colors ${
+                isProfessional ? 'border-zinc-800/80' : 'border-violet-500/30 hover:border-violet-500/60 cursor-pointer group'
+              }`}
+            >
+              <div className="flex items-center gap-2 truncate">
+                <TrendingUp className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                <span className="truncate">Delivery: <strong className="text-zinc-300">Recruiter ATS</strong></span>
+              </div>
+              {isProfessional ? (
+                <span className="text-[9px] font-mono text-emerald-400 shrink-0">FAST-PATH</span>
+              ) : (
+                <span className="text-[9px] font-mono text-violet-400 flex items-center gap-0.5 shrink-0 group-hover:underline">
+                  <Lock className="w-2.5 h-2.5" /> FAST-PATH: PRO
+                </span>
+              )}
+            </div>
+
+            <div
+              onClick={() => {
+                if (!isProfessional) {
+                  setProModalFeature('Instant On-Demand Turbo Trigger')
+                  setShowProModal(true)
+                }
+              }}
+              className={`flex items-center justify-between gap-1.5 bg-black px-3.5 py-2 rounded-lg border transition-colors ${
+                isProfessional ? 'border-zinc-800/80' : 'border-violet-500/30 hover:border-violet-500/60 cursor-pointer group'
+              }`}
+            >
+              <div className="flex items-center gap-2 truncate">
+                <Zap className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                <span className="truncate">Trigger: <strong className="text-zinc-300">Daily Dual</strong></span>
+              </div>
+              {isProfessional ? (
+                <span className="text-[9px] font-mono text-violet-300 shrink-0">TURBO ACTIVE</span>
+              ) : (
+                <span className="text-[9px] font-mono text-violet-400 flex items-center gap-0.5 shrink-0 group-hover:underline">
+                  <Lock className="w-2.5 h-2.5" /> TURBO: PRO
+                </span>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Neural ATS Recruiter Readiness Diagnostic Widget */}
+        <NeuralAtsDiagnosticCard
+          isProfessional={isProfessional}
+          skillsCount={8}
+          resumeUploaded={true}
+          onUnlockClick={(feat) => {
+            setProModalFeature(feat || 'Professional Suite')
+            setShowProModal(true)
+          }}
+        />
 
         {/* 4 Clean Auth0-Style Metric Cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1103,6 +1211,13 @@ export default function UserDashboard() {
           </div>
         )}
       </main>
+
+      {/* Professional Tier Perks & Upgrade Modal */}
+      <ProfessionalUpgradeModal
+        isOpen={showProModal}
+        onClose={() => setShowProModal(false)}
+        featureTitle={proModalFeature}
+      />
 
       {/* Universal JobFlux Help & Support Center */}
       <JobFluxHelpModal

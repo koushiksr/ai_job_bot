@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic'
 const PLAN_DAYS: Record<string, number> = {
   starter: 30,
   pro: 30,
-  elite: 90
+  elite: 90,
+  professional: 90
 }
 
 export async function POST(req: NextRequest) {

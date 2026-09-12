@@ -6,7 +6,8 @@ export const dynamic = 'force-dynamic'
 const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: number }> = {
   starter: { amount: 49900, name: 'JobFlux 1-Month Plan (30 Days)', days: 30 },
   pro: { amount: 49900, name: 'JobFlux 1-Month Career Pro (30 Days)', days: 30 },
-  elite: { amount: 119900, name: 'JobFlux 3-Month Career Elite (90 Days)', days: 90 }
+  elite: { amount: 119900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 },
+  professional: { amount: 119900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 }
 }
 
 export async function POST(req: NextRequest) {

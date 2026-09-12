@@ -62,6 +62,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Database connection failed' }, { status: 500 })
     }
 
+    // 1. Plan Verification: On-Demand runs are strictly reserved for Professional subscribers
+    const profile = await db.collection('profiles').findOne({ user_id: user_id }) ||
+                    await db.collection('users').findOne({ user_id: user_id })
+
+    const role = profile?.role || 'user'
+    const plan = (profile?.plan || 'trial').toLowerCase()
+    const isPro = role === 'admin' || user_id === 'admin' || user_id === 'technohmsit' || plan === 'elite' || plan === 'professional' || plan === 'enterprise'
+
+    if (!isPro) {
+      return NextResponse.json({
+        detail: 'Instant On-Demand Turbo Scout is exclusively reserved for Professional Tier members. Your automated applications execute during the scheduled daily 06:00 & 08:00 AM IST runs. Upgrade to Professional to trigger instant runs anytime.',
+        code: 'PLAN_UPGRADE_REQUIRED',
+        required_plan: 'professional'
+      }, { status: 403 })
+    }
+
     // Check if there is already an active/pending task for this user
     const existingTask = await db.collection('tasks').findOne({
       user_id: user_id,
