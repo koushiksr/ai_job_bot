@@ -88,7 +88,8 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ detail: 'user_id is required' }, { status: 400 })
     }
 
-    const updates: any = { updated_at: new Date() }
+    const now = new Date()
+    const updates: any = { updated_at: now }
     if (typeof is_vip === 'boolean') {
       updates.is_vip = is_vip
       updates.vip_access = is_vip
@@ -99,9 +100,29 @@ export async function PATCH(req: NextRequest) {
     }
     if (plan) {
       updates.plan = plan
-      updates.plan_name = `JobFlux ${plan.toUpperCase()}`
-      if (extend_days) {
-        updates.plan_expires_at = new Date(Date.now() + extend_days * 24 * 60 * 60 * 1000)
+      updates.plan_activated_at = now
+      if (plan === 'vip') {
+        updates.plan_name = 'JobFlux VIP Elite'
+        updates.is_vip = true
+        updates.vip_access = true
+        updates.free_privilege = true
+        updates.plan_expires_at = new Date(now.getTime() + 3650 * 24 * 60 * 60 * 1000)
+      } else if (plan === 'elite' || plan === 'professional') {
+        const days = extend_days || 90
+        updates.plan_name = 'JobFlux PROFESSIONAL'
+        updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+      } else if (plan === 'pro' || plan === 'starter') {
+        const days = extend_days || 30
+        updates.plan_name = 'JobFlux PRO'
+        updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+      } else if (plan === 'trial') {
+        updates.plan_name = 'JobFlux 1-Day Free Trial'
+        updates.trial_started_at = now
+        updates.trial_expires_at = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+        updates.plan_expires_at = null
+        updates.is_vip = false
+        updates.vip_access = false
+        updates.free_privilege = false
       }
     }
 
@@ -114,7 +135,11 @@ export async function PATCH(req: NextRequest) {
       { $set: updates }
     )
 
-    return NextResponse.json({ success: true, message: 'Candidate updated successfully', updates })
+    return NextResponse.json({
+      success: true,
+      message: `Candidate plan updated to ${plan || 'custom'} successfully`,
+      updates
+    })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }

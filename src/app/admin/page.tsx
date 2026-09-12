@@ -409,6 +409,26 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleChangePlan = async (userId: string, newPlan: string) => {
+    setUsersList(prev =>
+      prev.map(u => (u.user_id === userId ? { ...u, plan: newPlan, is_vip: newPlan === 'vip' } : u))
+    )
+    try {
+      await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          user_id: userId,
+          plan: newPlan,
+          is_vip: newPlan === 'vip'
+        })
+      })
+      fetchOverviewAndUsers()
+    } catch {
+      fetchOverviewAndUsers()
+    }
+  }
+
   const loadSystemLogContent = async (filename: string) => {
     setSelectedSystemLog(filename)
     setLoadingLogContent(true)
@@ -784,6 +804,7 @@ export default function AdminDashboard() {
                                   u.plan === 'elite' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30' :
                                   u.plan === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
                                   u.plan === 'starter' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
+                                  u.plan === 'vip' ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40' :
                                   'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
                                 }`}>
                                   {u.plan || 'trial'}
@@ -794,8 +815,23 @@ export default function AdminDashboard() {
                                   </span>
                                 )}
                               </div>
+
+                              {/* Admin Plan Override Dropdown */}
+                              <select
+                                value={u.plan || 'trial'}
+                                onChange={(e) => handleChangePlan(u.user_id, e.target.value)}
+                                className="bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-[10px] text-slate-200 rounded-md px-1.5 py-1 focus:outline-none focus:border-indigo-500 cursor-pointer font-mono font-medium transition-colors"
+                                title="Admin Quick Action: Change this candidate's plan tier"
+                              >
+                                <option value="trial">Free Trial (24h)</option>
+                                <option value="starter">Starter (30d)</option>
+                                <option value="pro">Pro (30d)</option>
+                                <option value="elite">Professional (90d)</option>
+                                <option value="vip">VIP Pass (Lifetime)</option>
+                              </select>
+
                               <button
-                                onClick={() => handleToggleVip(u.user_id, !!u.is_vip)}
+                                onClick={() => handleToggleVip(u.user_id, !u.is_vip)}
                                 className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
                                   u.is_vip
                                     ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
