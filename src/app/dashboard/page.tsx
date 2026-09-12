@@ -195,35 +195,44 @@ export default function UserDashboard() {
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#0c1017]/90 backdrop-blur-xl border-b border-slate-800/80 px-6 py-4">
+      <header className="sticky top-0 z-40 bg-[#0c1017]/90 backdrop-blur-xl border-b border-slate-800/80 px-4 sm:px-6 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2 mr-1">
-              <JobFluxLogo className="w-8 h-8" />
-              <span className="font-black text-lg tracking-tight text-white hidden md:inline">Job<span className="text-blue-500">Flux</span></span>
+          
+          {/* Left: Brand Logo + Divider + Candidate Identity */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link href="/" className="flex items-center hover:opacity-90 transition-opacity">
+              <JobFluxLogo size="sm" showText={true} />
             </Link>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 font-bold text-white text-sm">
-              {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base font-bold text-white">
-                  {userName || 'Candidate Dashboard'}
-                </h1>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase ${
-                  userPlan === 'trial'
-                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                }`}>
-                  {userPlan === 'trial' ? '1-Day Free Trial' : `${userPlan.toUpperCase()} Plan`}
-                </span>
+
+            {/* Vertical separator */}
+            <div className="h-7 w-px bg-slate-800/90 hidden sm:block" />
+
+            {/* Candidate User Info */}
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 font-bold text-white text-sm shrink-0">
+                {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
               </div>
-              <p className="text-xs text-slate-400 font-mono">
-                {userEmail}
-              </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-sm sm:text-base font-bold text-white truncate max-w-[140px] sm:max-w-none">
+                    {userName || 'Candidate Dashboard'}
+                  </h1>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider ${
+                    userPlan === 'trial'
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  }`}>
+                    {userPlan === 'trial' ? '1-Day Free Trial' : `${userPlan.toUpperCase()} Plan`}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 font-mono truncate max-w-[180px] sm:max-w-none">
+                  {userEmail}
+                </p>
+              </div>
             </div>
           </div>
 
+          {/* Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/pricing"
@@ -244,7 +253,7 @@ export default function UserDashboard() {
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-rose-500/10 hover:text-rose-400 border border-slate-800 transition-all text-slate-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-rose-500/10 hover:text-rose-400 border border-slate-800 transition-all text-slate-300 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Log Out</span>
             </button>
