@@ -47,7 +47,9 @@ export async function POST(req: NextRequest) {
           role: 'user',
           user_id: profile.user_id,
           email: profile.email,
-          name: profile.name || profile.user_id.replace('_', ' ')
+          name: profile.name || profile.user_id.replace('_', ' '),
+          plan: profile.plan || 'pro',
+          trial_expires_at: profile.trial_expires_at || null
         })
       } else {
         return NextResponse.json(
