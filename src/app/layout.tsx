@@ -16,7 +16,13 @@ export const metadata: Metadata = {
   title: "JobFlux AI | Autonomous Job Application Engine",
   description: "Intelligent automated job application engine for modern professionals.",
   icons: {
-    icon: "/jobflux-logo.svg",
+    icon: [
+      { url: "/jobflux-logo.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" }
+    ],
+    shortcut: "/jobflux-logo.svg",
+    apple: "/jobflux-logo.svg",
   }
 };
 
