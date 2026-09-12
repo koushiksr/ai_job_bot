@@ -36,6 +36,7 @@ import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import JobFluxLogo from '@/components/JobFluxLogo'
+import AiLoadingScreen from '@/components/AiLoadingScreen'
 
 export default function AdminDashboard() {
   const [usersList, setUsersList] = useState<any[]>([])
@@ -101,6 +102,7 @@ export default function AdminDashboard() {
   const [selectedLogContent, setSelectedLogContent] = useState<string[]>([])
   const [loadingLogContent, setLoadingLogContent] = useState<boolean>(false)
   const [authChecking, setAuthChecking] = useState<boolean>(true)
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false)
 
   const getAdminHeaders = () => {
@@ -304,6 +306,25 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleAdminRefresh = async () => {
+    setIsRefreshing(true)
+    const startTime = Date.now()
+    try {
+      await Promise.allSettled([
+        fetchOverviewAndUsers(),
+        fetchPayments(),
+        fetchEnterpriseLeads(),
+        fetchSupportTickets()
+      ])
+    } finally {
+      const elapsed = Date.now() - startTime
+      const remaining = Math.max(0, 700 - elapsed)
+      setTimeout(() => {
+        setIsRefreshing(false)
+      }, remaining)
+    }
+  }
+
   // Initial Auth & Access Verification
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -431,20 +452,11 @@ export default function AdminDashboard() {
 
   if (authChecking) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-zinc-400 font-mono text-xs gap-4 relative overflow-hidden select-none">
-        <div className="absolute w-[400px] h-[400px] rounded-full bg-violet-600/10 blur-[100px] pointer-events-none" />
-        <div className="relative flex items-center justify-center">
-          <div className="w-16 h-16 rounded-2xl border border-violet-500/30 animate-radar-pulse absolute inset-0 -m-1" />
-          <JobFluxLogo size="lg" showText={false} />
-        </div>
-        <div className="flex flex-col items-center gap-2 z-10">
-          <span className="text-zinc-200 font-medium tracking-tight text-sm">Verifying Administrator Privileges</span>
-          <div className="w-36 h-[2px] bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden relative">
-            <div className="w-20 h-full bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep" />
-          </div>
-          <span className="text-[10px] text-zinc-500 font-mono">technohmsit@gmail.com</span>
-        </div>
-      </div>
+      <AiLoadingScreen
+        title="Verifying Administrator Privileges"
+        subtitle="Synchronizing MongoDB Atlas cluster, telemetry logs & candidates..."
+        accountInfo="technohmsit@gmail.com"
+      />
     )
   }
 
@@ -453,7 +465,17 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
+    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+      {/* On-Demand Cluster Telemetry Refresh Animation Overlay */}
+      {isRefreshing && (
+        <AiLoadingScreen
+          title="Refreshing Cluster Telemetry"
+          subtitle="Synchronizing MongoDB Atlas, candidate queues & transaction records..."
+          accountInfo="technohmsit@gmail.com"
+          fullscreen={true}
+        />
+      )}
+
       {/* Admin Top Navbar */}
       <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-6 py-3 sm:py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
@@ -484,11 +506,12 @@ export default function AdminDashboard() {
               <span className="hidden sm:inline">Help Desk</span>
             </button>
             <button
-              onClick={fetchOverviewAndUsers}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer shrink-0"
+              onClick={handleAdminRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer shrink-0 disabled:opacity-50"
               title="Refresh"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className={`w-3.5 h-3.5 text-violet-400 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
             <button

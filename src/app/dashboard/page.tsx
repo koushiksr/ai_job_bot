@@ -35,6 +35,7 @@ import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
 import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 import AiResumeBuilder from '@/components/AiResumeBuilder'
+import AiLoadingScreen from '@/components/AiLoadingScreen'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
@@ -53,6 +54,10 @@ export default function UserDashboard() {
   // Help Modal State
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false)
+
+  // Initial Load & On-Demand Telemetry Refresh States
+  const [pageLoading, setPageLoading] = useState<boolean>(true)
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
 
   // Metrics State
   const [metrics, setMetrics] = useState({
@@ -162,11 +167,37 @@ export default function UserDashboard() {
     setUserEmail(storedEmail || '')
     setUserRole(storedRole || 'user')
 
-    loadUserData(storedUid)
-    loadUserHistory(storedUid, 1, '', 'all')
-    loadUserTickets(storedUid)
-    checkActiveTask(storedUid)
+    refreshAllDashboardData(storedUid, true)
   }, [])
+
+  const refreshAllDashboardData = async (uid: string, isInitial = false) => {
+    if (!uid) return
+    if (isInitial) {
+      setPageLoading(true)
+    } else {
+      setIsRefreshing(true)
+    }
+    const startTime = Date.now()
+
+    try {
+      await Promise.allSettled([
+        loadUserData(uid),
+        loadUserHistory(uid, 1, historySearch, historyFilter),
+        loadUserTickets(uid),
+        checkActiveTask(uid)
+      ])
+    } catch (e) {
+      console.error('Error refreshing dashboard data:', e)
+    } finally {
+      const elapsed = Date.now() - startTime
+      // Keep animation visible for at least 700ms for smooth cyber transition
+      const remaining = Math.max(0, 700 - elapsed)
+      setTimeout(() => {
+        setPageLoading(false)
+        setIsRefreshing(false)
+      }, remaining)
+    }
+  }
 
   const checkActiveTask = async (uid: string) => {
     try {
@@ -378,8 +409,28 @@ export default function UserDashboard() {
     }
   }
 
+  if (pageLoading) {
+    return (
+      <AiLoadingScreen
+        title="Synchronizing Autonomous Engine"
+        subtitle="Retrieving verified applications, recruiter telemetry & queue status..."
+        accountInfo={userEmail || userId}
+      />
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
+    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+      {/* On-Demand Telemetry Refresh Animation Overlay */}
+      {isRefreshing && (
+        <AiLoadingScreen
+          title="Refreshing Live Telemetry"
+          subtitle="Synchronizing application dispatch logs and verified recruiter feeds..."
+          accountInfo={userEmail || userId}
+          fullscreen={true}
+        />
+      )}
+
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3.5 sm:px-6 py-2.5 sm:py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
@@ -413,6 +464,16 @@ export default function UserDashboard() {
 
           {/* Right Desktop Actions (Clean & Spaced Out) */}
           <div className="hidden md:flex items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => refreshAllDashboardData(userId)}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+              title="Refresh Telemetry"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-violet-400 ${isRefreshing ? 'animate-spin' : ''}`} /> 
+              <span>Refresh</span>
+            </button>
+
             <button
               onClick={() => setIsHelpOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
@@ -508,6 +569,17 @@ export default function UserDashboard() {
 
             {/* Quick Actions List */}
             <div className="space-y-1 text-xs">
+              <button
+                onClick={() => {
+                  setIsMobileNavOpen(false)
+                  refreshAllDashboardData(userId)
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
+              >
+                <RefreshCw className="w-4 h-4 text-violet-400 shrink-0" />
+                <span>Refresh Live Telemetry</span>
+              </button>
+
               <button
                 onClick={() => { setIsHelpOpen(true); setIsMobileNavOpen(false) }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
