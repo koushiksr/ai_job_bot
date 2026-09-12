@@ -200,37 +200,37 @@ export default function AiResumeBuilder({
   const activeSample = SAMPLE_RESUMES[selectedSampleIdx]
 
   return (
-    <div className="p-6 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-6 relative overflow-hidden card-featured-glow text-zinc-100">
+    <div className="p-4 sm:p-6 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4 sm:space-y-6 relative overflow-hidden card-featured-glow text-zinc-100">
       {/* Top Laser Sweep */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-violet-950/60 border border-violet-800/50 flex items-center justify-center text-violet-300 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-            <Sparkles className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 border-b border-zinc-800/80 pb-4 sm:pb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-violet-950/60 border border-violet-800/50 flex items-center justify-center text-violet-300 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <h2 className="text-sm sm:text-lg font-bold text-white tracking-tight">
                 AI Neural ATS Resume Builder
               </h2>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-violet-950/80 border border-violet-700/60 text-violet-300 font-semibold flex items-center gap-1">
+              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded bg-violet-950/80 border border-violet-700/60 text-violet-300 font-semibold flex items-center gap-1">
                 <Crown className="w-3 h-3 text-violet-400" />
-                PROFESSIONAL TIER
+                PROFESSIONAL
               </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Engineered for high-paying senior brackets (₹25L - ₹75L+ CTC) · 100% Recruiter & ATS friendly format.
+            <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
+              Engineered for high-paying senior brackets (₹25L - ₹75L+ CTC) · 100% Recruiter & ATS friendly.
             </p>
           </div>
         </div>
 
-        {/* Sub-Tabs: Samples vs Generator */}
-        <div className="flex items-center bg-black p-1 rounded-xl border border-zinc-800 shrink-0">
+        {/* Sub-Tabs: Samples vs Generator - 50/50 on Mobile */}
+        <div className="flex items-center bg-black p-1 rounded-xl border border-zinc-800 w-full sm:w-auto shrink-0">
           <button
             onClick={() => setActiveSubTab('samples')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeSubTab === 'samples'
                 ? 'bg-zinc-800 text-white shadow-sm'
                 : 'text-zinc-400 hover:text-white'
@@ -241,7 +241,7 @@ export default function AiResumeBuilder({
           </button>
           <button
             onClick={() => setActiveSubTab('generator')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeSubTab === 'generator'
                 ? 'bg-white text-black shadow-sm'
                 : 'text-zinc-400 hover:text-white'
@@ -254,44 +254,44 @@ export default function AiResumeBuilder({
       </div>
 
       {/* Zero-Leak PII Privacy Shield Guarantee */}
-      <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/30 via-zinc-950 to-violet-950/20 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
+      <div className="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/30 via-zinc-950 to-violet-950/20 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-emerald-950/80 border border-emerald-600/40 flex items-center justify-center text-emerald-400 shrink-0">
             <Shield className="w-3.5 h-3.5" />
           </div>
           <div>
-            <span className="font-semibold text-emerald-300 flex items-center gap-1.5">
-              <span>Zero-Data-Leak Guarantee & Enterprise PII Redaction Active</span>
+            <span className="font-semibold text-emerald-300 flex items-center gap-1.5 flex-wrap">
+              <span>Zero-Data-Leak Guarantee & PII Redaction Active</span>
               <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-900/60 border border-emerald-600/40 text-emerald-200">VERIFIED</span>
             </span>
-            <p className="text-[11px] text-zinc-400 mt-0.5">
-              Personal contact markers (phone numbers, physical addresses, private emails) are automatically sanitized and encrypted before recruiter previewing or indexing.
+            <p className="text-[10px] sm:text-[11px] text-zinc-400 mt-0.5">
+              Personal contact markers (phone numbers, physical addresses, private emails) are sanitized and encrypted before recruiter previewing or indexing.
             </p>
           </div>
         </div>
         <div className="hidden md:flex items-center gap-1 text-[11px] font-mono text-zinc-500 shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>AES-256 PII Vault</span>
+          <span>AES-256 Vault</span>
         </div>
       </div>
 
       {/* SUB-TAB 1: High-Paying Sample Resumes */}
       {activeSubTab === 'samples' && (
-        <div className="space-y-5">
-          {/* Sample Switcher Pills */}
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="space-y-4 sm:space-y-5">
+          {/* Sample Switcher Pills with Mobile Horizontal Swipe */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none flex-nowrap pb-1 -mx-1 px-1">
             {SAMPLE_RESUMES.map((s, idx) => (
               <button
                 key={s.id}
                 onClick={() => setSelectedSampleIdx(idx)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-2 border ${
+                className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 border shrink-0 whitespace-nowrap ${
                   selectedSampleIdx === idx
                     ? 'bg-zinc-900 border-violet-500/50 text-white shadow-sm'
                     : 'bg-black border-zinc-800 text-zinc-400 hover:text-white'
                 }`}
               >
                 <span>{s.title}</span>
-                <span className="text-[10px] font-mono text-emerald-400 px-1.5 py-0.2 rounded bg-emerald-950/60 border border-emerald-800/40">
+                <span className="text-[9px] sm:text-[10px] font-mono text-emerald-400 px-1.5 py-0.2 rounded bg-emerald-950/60 border border-emerald-800/40">
                   {s.bracket}
                 </span>
               </button>
@@ -299,17 +299,17 @@ export default function AiResumeBuilder({
           </div>
 
           {/* Clean ATS Resume Document Layout */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-zinc-800/90 shadow-2xl space-y-5 font-sans relative">
+          <div className="p-4 sm:p-8 rounded-2xl bg-zinc-950 border border-zinc-800/90 shadow-2xl space-y-4 sm:space-y-5 font-sans relative">
             {/* Top ATS Match Score Badge */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-zinc-800/90 pb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-zinc-800/90 pb-3 sm:pb-4">
               <div>
-                <h3 className="text-xl font-bold text-white tracking-tight">{activeSample.name}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">{activeSample.name}</h3>
                 <p className="text-xs text-violet-400 font-medium mt-0.5">{activeSample.title} · {activeSample.companyTier}</p>
               </div>
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 font-semibold flex items-center gap-1">
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <span className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 font-semibold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  {activeSample.score}% ATS PASS RATING
+                  {activeSample.score}% ATS RATING
                 </span>
               </div>
             </div>

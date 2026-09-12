@@ -379,31 +379,31 @@ export default function UserDashboard() {
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-6 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3 sm:px-6 py-2.5 sm:py-3.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Brand Logo & Candidate Identity */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Link href="/" className="flex items-center hover:opacity-90 transition-opacity">
+          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
+            <Link href="/" className="flex items-center hover:opacity-90 transition-opacity shrink-0">
               <JobFluxLogo size="sm" showText={true} />
             </Link>
 
-            <div className="h-6 w-px bg-zinc-800 hidden sm:block" />
+            <div className="h-5 sm:h-6 w-px bg-zinc-800 hidden sm:block shrink-0" />
 
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-medium text-white text-xs shrink-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-medium text-white text-[11px] sm:text-xs shrink-0">
                 {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xs sm:text-sm font-semibold text-white truncate max-w-[140px] sm:max-w-none">
-                    {userName || 'Candidate Dashboard'}
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <h1 className="text-xs sm:text-sm font-semibold text-white truncate max-w-[110px] sm:max-w-none">
+                    {userName || 'Candidate'}
                   </h1>
-                  <span className="text-[9px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono uppercase">
+                  <span className="text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono uppercase shrink-0">
                     {userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
                   </span>
                 </div>
-                <p className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px] sm:max-w-none">
+                <p className="text-[10px] sm:text-[11px] text-zinc-500 font-mono truncate max-w-[130px] sm:max-w-none hidden xs:block">
                   {userEmail}
                 </p>
               </div>
@@ -411,27 +411,28 @@ export default function UserDashboard() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setIsHelpOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              title="Help & Support"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
             >
               <Mail className="w-3.5 h-3.5 text-violet-400" /> 
-              <span className="hidden sm:inline">Help & Support</span>
+              <span className="hidden md:inline">Help & Support</span>
             </button>
 
             <Link
               href="/pricing"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors"
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0"
             >
               <Sparkles className="w-3.5 h-3.5" /> 
-              <span>Upgrade Plan</span>
+              <span>Upgrade</span>
             </Link>
 
             {userRole === 'admin' && (
               <Link
                 href="/admin"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition-colors"
               >
                 <Shield className="w-3.5 h-3.5 text-zinc-400" /> <span className="hidden sm:inline">Admin</span>
               </Link>
@@ -439,16 +440,17 @@ export default function UserDashboard() {
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
+              title="Sign out"
+              className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
             >
-              <LogOut className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Log Out</span>
+              <LogOut className="w-3.5 h-3.5" /> <span className="hidden md:inline">Log Out</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
         
         {/* Launch Special Banner for Free Trial Users */}
         {userPlan === 'trial' && (
@@ -726,97 +728,99 @@ export default function UserDashboard() {
         />
 
         {/* 4 Clean Auth0-Style Metric Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
             <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-zinc-400" /> Today
+              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+                <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> Today
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">24h Quota</span>
+              <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500">24h</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
+            <div className="text-xl sm:text-3xl font-semibold text-white font-mono">
               {metrics.today}
             </div>
-            <p className="text-[11px] text-zinc-500">Applications delivered today</p>
+            <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">Applications today</p>
           </div>
 
-          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+          <div className="p-3.5 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
             <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-zinc-400" /> This Week
+              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+                <Calendar className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> This Week
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">7 Days</span>
+              <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500">7d</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
+            <div className="text-xl sm:text-3xl font-semibold text-white font-mono">
               {metrics.this_week}
             </div>
-            <p className="text-[11px] text-zinc-500">Verified recruiter deliveries</p>
+            <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">7-day deliveries</p>
           </div>
 
-          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+          <div className="p-3.5 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
             <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5 text-zinc-400" /> This Month
+              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+                <TrendingUp className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> This Month
               </span>
-              <span className="text-[10px] font-mono text-zinc-500">30 Days</span>
+              <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500">30d</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
+            <div className="text-xl sm:text-3xl font-semibold text-white font-mono">
               {metrics.this_month}
             </div>
-            <p className="text-[11px] text-zinc-500">Candidate outreach volume</p>
+            <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">Monthly outreach</p>
           </div>
 
-          <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
+          <div className="p-3.5 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
             <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> Total Applications
+              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs truncate">
+                <Sparkles className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> Total
               </span>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                100% Verified
+              <span className="text-[9px] sm:text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
+                Verified
               </span>
             </div>
-            <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
+            <div className="text-xl sm:text-3xl font-semibold text-white font-mono">
               {metrics.total_applied}
             </div>
-            <p className="text-[11px] text-zinc-500">Cumulative verified submissions</p>
+            <p className="text-[10px] sm:text-[11px] text-zinc-500 truncate">Total submissions</p>
           </div>
         </section>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-2 border-b border-zinc-900 pb-3">
+        {/* Tab Navigation with Mobile Horizontal Swipe */}
+        <div className="flex items-center gap-1.5 sm:gap-2 border-b border-zinc-900 pb-2 sm:pb-3 overflow-x-auto scrollbar-none flex-nowrap -mx-1 px-1">
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'history'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <Briefcase className="w-3.5 h-3.5" /> Job Applications ({historyTotalCount || historyJobs.length})
+            <Briefcase className="w-3.5 h-3.5 shrink-0" />
+            <span>Applications ({historyTotalCount || historyJobs.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'profile'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <User className="w-3.5 h-3.5" /> Candidate Profile & Resume
+            <User className="w-3.5 h-3.5 shrink-0" />
+            <span>Profile & Resume</span>
           </button>
           <button
             onClick={() => {
               setActiveTab('queries')
               loadUserTickets(userId)
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'queries'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <MessageSquare className="w-3.5 h-3.5 text-violet-400" />
-            <span>My Requests & Inquiries</span>
+            <MessageSquare className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+            <span>Inquiries</span>
             {userTickets.length > 0 && (
               <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
                 {userTickets.length}
@@ -825,14 +829,14 @@ export default function UserDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('resume_builder')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               activeTab === 'resume_builder'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-            <span>AI ATS Resume Builder</span>
+            <Sparkles className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+            <span>AI ATS Resume</span>
             <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-violet-950/80 border border-violet-700/50 text-violet-300 font-semibold">
               PRO
             </span>

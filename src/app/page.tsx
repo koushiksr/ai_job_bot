@@ -198,12 +198,12 @@ export default function Home() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[420px] bg-spotlight pointer-events-none" />
 
         {/* Top Minimalist Header */}
-        <header className="w-full max-w-7xl mx-auto px-6 py-5 flex items-center justify-between z-20 border-b border-zinc-900/60">
-          <Link href="/" className="flex items-center gap-2">
+        <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-3.5 sm:py-5 flex items-center justify-between z-20 border-b border-zinc-900/60">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <JobFluxLogo size="sm" />
           </Link>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-4">
             <Link
               href="/pricing"
               className="text-xs text-zinc-400 hover:text-white transition-colors font-medium hidden sm:inline-block"
@@ -215,13 +215,13 @@ export default function Home() {
               onClick={() => setIsHelpOpen(true)}
               className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex items-center gap-1"
             >
-              <Mail className="w-3 h-3 text-violet-400" />
-              <span>Help & Support</span>
+              <Mail className="w-3 h-3 text-violet-400 shrink-0" />
+              <span className="hidden sm:inline">Help & Support</span>
             </button>
 
             {existingUser ? (
-              <div className="flex items-center gap-3">
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   <span className="text-zinc-300 font-mono text-[11px] max-w-[150px] truncate">
                     {existingUser.email || existingUser.id}
@@ -229,16 +229,16 @@ export default function Home() {
                 </div>
                 <Link
                   href={existingUser.role === 'admin' ? '/admin' : '/dashboard'}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors"
+                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0"
                 >
                   Dashboard
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer flex items-center gap-1"
+                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer flex items-center gap-1 shrink-0"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>Sign out</span>
+                  <span className="hidden sm:inline">Sign out</span>
                 </button>
               </div>
             ) : (
@@ -251,7 +251,7 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => { setAuthMode('trial'); setError('') }}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-all shadow-sm cursor-pointer"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-all shadow-sm cursor-pointer shrink-0"
                 >
                   Start Free Trial
                 </button>
@@ -261,7 +261,7 @@ export default function Home() {
         </header>
         
         {/* Main Hero Section */}
-        <main className="w-full max-w-7xl mx-auto px-6 py-12 md:py-20 flex-1 flex flex-col lg:flex-row items-center justify-between gap-12 z-10">
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-20 flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 z-10">
           
           {/* Left Column: Clean Value Proposition */}
           <motion.div 

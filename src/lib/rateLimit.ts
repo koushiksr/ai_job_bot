@@ -79,3 +79,4 @@ export function checkRateLimit(
     resetSeconds: Math.ceil((record.resetTime - now) / 1000)
   }
 }
+
