@@ -123,6 +123,15 @@ export async function PATCH(req: NextRequest) {
         updates.is_vip = false
         updates.vip_access = false
         updates.free_privilege = false
+      } else if (plan === 'none' || plan === 'no_plan') {
+        updates.plan = 'none'
+        updates.plan_name = 'No Active Plan'
+        updates.plan_expires_at = null
+        updates.trial_expires_at = null
+        updates.enabled_for_daily_run = false
+        updates.is_vip = false
+        updates.vip_access = false
+        updates.free_privilege = false
       }
     }
 

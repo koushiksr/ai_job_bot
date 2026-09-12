@@ -470,11 +470,13 @@ export default function UserDashboard() {
                       ? 'bg-violet-950/80 border-violet-700/60 text-violet-300'
                       : userPlan === 'pro' && isPlanActive
                       ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
+                      : userPlan === 'none' || userPlan === 'no_plan'
+                      ? 'bg-zinc-900 border-zinc-800 text-zinc-500'
                       : !isPlanActive
                       ? 'bg-red-950/80 border-red-700/60 text-red-300'
                       : 'bg-zinc-900 border-zinc-800 text-zinc-300'
                   }`}>
-                    {!isPlanActive ? 'EXPIRED' : userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
+                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
                   </span>
                 </div>
                 <p className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]">
@@ -579,11 +581,13 @@ export default function UserDashboard() {
                         ? 'bg-violet-950/80 border-violet-700/60 text-violet-300'
                         : userPlan === 'pro' && isPlanActive
                         ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
+                        : userPlan === 'none' || userPlan === 'no_plan'
+                        ? 'bg-zinc-900 border-zinc-800 text-zinc-500'
                         : !isPlanActive
                         ? 'bg-red-950/80 border-red-700/60 text-red-300'
                         : 'bg-zinc-900 border-zinc-800 text-zinc-300'
                     }`}>
-                      {!isPlanActive ? 'EXPIRED' : userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
+                      {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-500 font-mono truncate mt-0.5">{userEmail}</p>
@@ -663,18 +667,22 @@ export default function UserDashboard() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-white">
-                    {!isPlanActive
+                    {userPlan === 'none' || userPlan === 'no_plan'
+                      ? 'No Active Subscription · Choose a Plan to Start Auto-Apply'
+                      : !isPlanActive
                       ? 'Subscription Expired · Renew to Resume Automated Applications'
                       : metrics.total_applied >= 15
                       ? 'Free Trial Quota Reached (15/15)'
                       : `Free Trial Active · ${metrics.total_applied}/15 Dispatched`}
                   </span>
                   <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${
-                    !isPlanActive
+                    userPlan === 'none' || userPlan === 'no_plan'
+                      ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                      : !isPlanActive
                       ? 'bg-red-950/80 border-red-700/60 text-red-300'
                       : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                   }`}>
-                    {!isPlanActive ? 'EXPIRED' : metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
+                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
@@ -686,7 +694,7 @@ export default function UserDashboard() {
               href="/pricing?plan=elite"
               className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <span>{!isPlanActive ? 'Renew Plan' : 'Upgrade Plan'}</span>
+              <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : 'Upgrade Plan'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

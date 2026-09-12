@@ -88,7 +88,11 @@ export async function POST(req: NextRequest) {
         let planName = 'JobFlux 1-Day Free Trial'
         let isPlanActive = true
 
-        if (rawPlan === 'vip') {
+        if (rawPlan === 'none' || rawPlan === 'no_plan') {
+          activePlan = 'none'
+          planName = 'No Active Plan'
+          isPlanActive = false
+        } else if (rawPlan === 'vip') {
           activePlan = 'vip'
           planName = 'JobFlux VIP Elite'
           isPlanActive = true
@@ -100,13 +104,17 @@ export async function POST(req: NextRequest) {
             isPlanActive = true
           } else {
             // Plan expired or unverified
-            activePlan = 'trial'
-            planName = 'JobFlux 1-Day Free Trial (Plan Expired)'
+            activePlan = 'none'
+            planName = 'Plan Expired (No Active Plan)'
             isPlanActive = false
           }
         } else {
           const trialExpires = profile.trial_expires_at ? new Date(profile.trial_expires_at) : null
           isPlanActive = trialExpires ? trialExpires > now : true
+          if (!isPlanActive) {
+            activePlan = 'none'
+            planName = 'Free Trial Expired (No Active Plan)'
+          }
         }
 
         // Log candidate/admin login event

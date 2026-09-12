@@ -805,9 +805,10 @@ export default function AdminDashboard() {
                                   u.plan === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
                                   u.plan === 'starter' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
                                   u.plan === 'vip' ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40' :
+                                  u.plan === 'none' || u.plan === 'no_plan' ? 'bg-zinc-800/80 text-zinc-400 border border-zinc-700' :
                                   'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
                                 }`}>
-                                  {u.plan || 'trial'}
+                                  {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
                                 </span>
                                 {u.is_vip && (
                                   <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40">
@@ -823,6 +824,7 @@ export default function AdminDashboard() {
                                 className="bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-[10px] text-slate-200 rounded-md px-1.5 py-1 focus:outline-none focus:border-indigo-500 cursor-pointer font-mono font-medium transition-colors"
                                 title="Admin Quick Action: Change this candidate's plan tier"
                               >
+                                <option value="none">No Plan (Inactive)</option>
                                 <option value="trial">Free Trial (24h)</option>
                                 <option value="starter">Starter (30d)</option>
                                 <option value="pro">Pro (30d)</option>
