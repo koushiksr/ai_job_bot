@@ -1,0 +1,168 @@
+/**
+ * Server-Side Web Push Dispatcher
+ * 
+ * Uses the RFC 8291 / RFC 8292 standard to push real-time notifications directly
+ * to candidate and admin operating systems (macOS, Windows, Android, iOS) via
+ * Google FCM, Apple APNs, and Mozilla push services.
+ */
+
+import webpush from 'web-push'
+import { getDb } from '@/lib/mongodb'
+import { getDynamicVapidCredentials } from '@/config/vapid'
+
+export interface WebPushPayload {
+  title: string
+  body: string
+  url?: string
+  icon?: string
+  badge?: string
+  tag?: string
+  data?: Record<string, any>
+}
+
+export interface PushSubscriptionRecord {
+  endpoint: string
+  expirationTime?: number | null
+  keys: {
+    p256dh: string
+    auth: string
+  }
+}
+
+/**
+ * Configure web-push with active VAPID credentials.
+ */
+async function configureVapid(db?: any) {
+  const { publicKey, privateKey, subject } = await getDynamicVapidCredentials(db)
+  webpush.setVapidDetails(subject, publicKey, privateKey)
+  return { publicKey, privateKey, subject }
+}
+
+/**
+ * Send a Web Push notification to a single device subscription.
+ * Automatically cleans up expired/uninstalled subscriptions (HTTP 410 / 404).
+ */
+export async function sendPushToSubscription(
+  subscription: PushSubscriptionRecord,
+  payload: WebPushPayload,
+  db?: any
+): Promise<{ success: boolean; statusCode?: number; error?: string }> {
+  try {
+    await configureVapid(db)
+    const jsonPayload = JSON.stringify({
+      title: payload.title,
+      body: payload.body,
+      url: payload.url || '/dashboard',
+      icon: payload.icon || '/images/icon.png',
+      badge: payload.badge || '/images/icon.png',
+      tag: payload.tag || `jobflux_${Date.now()}`
+    })
+
+    const res = await webpush.sendNotification(
+      subscription as any,
+      jsonPayload,
+      {
+        TTL: 60 * 60 * 24 // 24 hours time-to-live in push gateway
+      }
+    )
+
+    return { success: true, statusCode: res.statusCode }
+  } catch (err: any) {
+    const statusCode = err.statusCode
+
+    // If subscription is expired or unregistered, prune it from MongoDB
+    if (statusCode === 410 || statusCode === 404) {
+      if (db && subscription.endpoint) {
+        try {
+          await db.collection('push_subscriptions').deleteOne({ endpoint: subscription.endpoint })
+        } catch (_) {}
+      }
+    }
+
+    return {
+      success: false,
+      statusCode,
+      error: err.message || 'Push delivery failed'
+    }
+  }
+}
+
+/**
+ * Send a background Web Push notification to all devices registered to a specific candidate email.
+ */
+export async function sendPushToUser(
+  email: string,
+  payload: WebPushPayload
+): Promise<{ delivered: number; failed: number; total: number }> {
+  if (!email) return { delivered: 0, failed: 0, total: 0 }
+
+  let db: any = null
+  try {
+    db = await getDb()
+  } catch (_) {}
+
+  if (!db) return { delivered: 0, failed: 0, total: 0 }
+
+  const clean = email.toLowerCase().trim()
+  const subscriptions = await db.collection('push_subscriptions')
+    .find({ email: clean })
+    .toArray()
+
+  let delivered = 0
+  let failed = 0
+
+  await Promise.all(
+    subscriptions.map(async (subDoc: any) => {
+      const subRecord: PushSubscriptionRecord = {
+        endpoint: subDoc.endpoint,
+        keys: subDoc.keys
+      }
+      const res = await sendPushToSubscription(subRecord, payload, db)
+      if (res.success) {
+        delivered++
+      } else {
+        failed++
+      }
+    })
+  )
+
+  return { delivered, failed, total: subscriptions.length }
+}
+
+/**
+ * Broadcast a background Web Push notification to all active device subscriptions.
+ */
+export async function broadcastPush(
+  payload: WebPushPayload
+): Promise<{ delivered: number; failed: number; total: number }> {
+  let db: any = null
+  try {
+    db = await getDb()
+  } catch (_) {}
+
+  if (!db) return { delivered: 0, failed: 0, total: 0 }
+
+  const subscriptions = await db.collection('push_subscriptions')
+    .find({})
+    .toArray()
+
+  let delivered = 0
+  let failed = 0
+
+  await Promise.all(
+    subscriptions.map(async (subDoc: any) => {
+      const subRecord: PushSubscriptionRecord = {
+        endpoint: subDoc.endpoint,
+        keys: subDoc.keys
+      }
+      const res = await sendPushToSubscription(subRecord, payload, db)
+      if (res.success) {
+        delivered++
+      } else {
+        failed++
+      }
+    })
+  )
+
+  return { delivered, failed, total: subscriptions.length }
+}

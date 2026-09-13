@@ -42,7 +42,7 @@ import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
 import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 import AiResumeBuilder from '@/components/AiResumeBuilder'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
-import { sendBrowserNotification } from '@/lib/notifications'
+import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 
 export default function UserDashboard() {
@@ -129,6 +129,7 @@ export default function UserDashboard() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      registerServiceWorker()
       if (!('Notification' in window)) {
         setNotificationPermission('unsupported')
       } else {
@@ -220,8 +221,11 @@ export default function UserDashboard() {
       const perm = await Notification.requestPermission()
       setNotificationPermission(perm)
       if (perm === 'granted') {
+        if (userEmail) {
+          subscribeDeviceToPush(userEmail, userId).catch(() => {})
+        }
         sendBrowserNotification('⚡ JobFlux AI Notifications Active', {
-          body: 'You will now receive real-time notifications for completed sweeps and exclusive purchase offers.'
+          body: 'You will now receive background push notifications even when this tab is closed.'
         })
         setTestNotificationSent(true)
         setTimeout(() => setTestNotificationSent(false), 4000)
@@ -322,6 +326,9 @@ export default function UserDashboard() {
 
     if (storedEmail) {
       loadUserOffers(storedEmail)
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        subscribeDeviceToPush(storedEmail, storedUid).catch(() => {})
+      }
     }
 
     refreshAllDashboardData(storedUid, true)

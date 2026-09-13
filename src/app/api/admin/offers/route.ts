@@ -7,6 +7,7 @@ import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 export const dynamic = 'force-dynamic'
 
 import { OFFER_PRESETS } from '@/config/plans'
+import { sendPushToUser } from '@/lib/webPushService'
 
 
 
@@ -240,6 +241,15 @@ export async function POST(req: NextRequest) {
         read: false,
         created_at: new Date()
       })
+
+      // 4. Dispatch background Web Push (reaches candidate OS even if browser is closed)
+      try {
+        await sendPushToUser(candidateEmailClean, {
+          title: `🎁 Exclusive Offer: ${discountBadge}!`,
+          body: `${offerTitle} (${originalPrice} → ${discountedPrice}). Use code ${cleanPromoCode}.`,
+          url: claimUrl
+        })
+      } catch (_) {}
 
       dispatchedRecipients.push(candidate.email)
     }

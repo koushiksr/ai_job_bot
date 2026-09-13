@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
+import { sendPushToUser, broadcastPush } from '@/lib/webPushService'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,6 +67,12 @@ export async function POST(req: NextRequest) {
     const title = (body.title || '').trim() || '⚡ JobFlux AI Priority Alert'
     const message = (body.message || '').trim() || 'You have a new update in your JobFlux AI Cockpit.'
     const claimUrl = (body.claimUrl || '').trim() || '/dashboard'
+    const delaySeconds = parseInt(body.delaySeconds || body.delay_seconds || '0', 10)
+
+    // Optional delay for closed-tab / minimized browser testing
+    if (delaySeconds > 0) {
+      await new Promise(resolve => setTimeout(resolve, Math.min(delaySeconds, 30) * 1000))
+    }
 
     const now = new Date()
 
@@ -99,6 +106,13 @@ export async function POST(req: NextRequest) {
         await db.collection('user_notifications').insertMany(notifDocs)
       }
 
+      // 1. Broadcast Web Push to all registered device subscriptions (delivers even when tab is closed)
+      const pushStats = await broadcastPush({
+        title,
+        body: message,
+        url: claimUrl
+      })
+
       await db.collection('admin_push_logs').insertOne({
         target_email: 'All Candidates (Broadcast)',
         target_type: 'broadcast',
@@ -106,6 +120,8 @@ export async function POST(req: NextRequest) {
         title,
         message,
         claim_url: claimUrl,
+        web_push_delivered: pushStats.delivered,
+        web_push_failed: pushStats.failed,
         dispatched_by: adminEmail || userId || 'admin',
         dispatched_at: now,
         status: 'delivered'
@@ -115,7 +131,8 @@ export async function POST(req: NextRequest) {
         success: true,
         target_type: 'broadcast',
         dispatched_count: emailList.length,
-        message: `✓ Push notification broadcasted to ${emailList.length} candidate(s)!`
+        web_push_delivered: pushStats.delivered,
+        message: `✓ Push broadcasted to ${emailList.length} candidate account(s) and ${pushStats.delivered} active browser device(s)!`
       })
     } else {
       if (!targetEmail) {
@@ -132,6 +149,13 @@ export async function POST(req: NextRequest) {
         created_at: now
       })
 
+      // 2. Dispatch real Web Push to candidate's registered background devices
+      const pushStats = await sendPushToUser(targetEmail, {
+        title,
+        body: message,
+        url: claimUrl
+      })
+
       await db.collection('admin_push_logs').insertOne({
         target_email: targetEmail,
         target_type: 'single',
@@ -139,17 +163,23 @@ export async function POST(req: NextRequest) {
         title,
         message,
         claim_url: claimUrl,
+        web_push_delivered: pushStats.delivered,
         dispatched_by: adminEmail || userId || 'admin',
         dispatched_at: now,
         status: 'delivered'
       })
 
+      const deviceNotice = pushStats.delivered > 0
+        ? ` (delivered to ${pushStats.delivered} background device)`
+        : ''
+
       return NextResponse.json({
         success: true,
         target_type: 'single',
         dispatched_count: 1,
+        web_push_delivered: pushStats.delivered,
         target_email: targetEmail,
-        message: `✓ Push notification delivered to ${targetEmail}!`
+        message: `✓ Push notification delivered to ${targetEmail}${deviceNotice}!`
       })
     }
   } catch (err: any) {

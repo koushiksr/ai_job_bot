@@ -55,7 +55,7 @@ import JobFluxLogo from '@/components/JobFluxLogo'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
 import { APP_CONFIG } from '@/config/appConfig'
 import { OFFER_PRESETS } from '@/config/plans'
-import { sendBrowserNotification } from '@/lib/notifications'
+import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 
 export default function AdminDashboard() {
   const [usersList, setUsersList] = useState<any[]>([])
@@ -150,6 +150,9 @@ export default function AdminDashboard() {
   const [customPushUrl, setCustomPushUrl] = useState<string>('/dashboard')
   const [pushLogs, setPushLogs] = useState<any[]>([])
   const [loadingPushLogs, setLoadingPushLogs] = useState<boolean>(false)
+  const [deviceWebPushActive, setDeviceWebPushActive] = useState<boolean>(false)
+  const [closedTabTestActive, setClosedTabTestActive] = useState<boolean>(false)
+  const [closedTabCountdown, setClosedTabCountdown] = useState<number>(0)
 
   // Activity Audit & Telemetry State
   const [activityLogs, setActivityLogs] = useState<any[]>([])
@@ -203,15 +206,19 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      registerServiceWorker()
       if (!('Notification' in window)) {
         setNotificationPermission('unsupported')
       } else {
-        setNotificationPermission(Notification.permission)
+        const perm = Notification.permission
+        setNotificationPermission(perm)
+        if (perm === 'granted') {
+          setDeviceWebPushActive(true)
+          subscribeDeviceToPush(APP_CONFIG.supportEmail, 'technohmsit').catch(() => {})
+        }
       }
     }
   }, [])
-
-
 
   const handleRequestNotification = async () => {
     if (typeof window === 'undefined' || !('Notification' in window)) {
@@ -225,19 +232,80 @@ export default function AdminDashboard() {
     }
 
     try {
-      const perm = await Notification.requestPermission()
-      setNotificationPermission(perm)
-      if (perm === 'granted') {
+      const subRes = await subscribeDeviceToPush(APP_CONFIG.supportEmail, 'technohmsit')
+      if (subRes.success) {
+        setDeviceWebPushActive(true)
+        setNotificationPermission('granted')
         sendBrowserNotification('⚡ JobFlux AI Admin Notifications Active', {
-          body: 'You will now receive real-time admin alerts for candidate dispatches and queue actions.'
+          body: 'This browser device is now registered to receive background push notifications even when closed.'
         })
         setTestNotificationSent(true)
         setTimeout(() => setTestNotificationSent(false), 4000)
-      } else if (perm === 'denied') {
-        setShowUnblockGuide(true)
+      } else {
+        const perm = Notification.permission as NotificationPermission
+        setNotificationPermission(perm)
+        if (perm === 'denied') {
+          setShowUnblockGuide(true)
+        }
       }
     } catch (err) {
       console.error('Notification permission error:', err)
+    }
+  }
+
+  const handleTestClosedTabPush = async () => {
+    try {
+      // 1. Ensure device is registered
+      const subRes = await subscribeDeviceToPush(APP_CONFIG.supportEmail, 'technohmsit')
+      if (!subRes.success) {
+        alert(`Cannot start closed-tab test: ${subRes.error || 'Permission denied'}`)
+        return
+      }
+
+      setDeviceWebPushActive(true)
+      setClosedTabTestActive(true)
+      setClosedTabCountdown(5)
+
+      // Start client visual countdown
+      const timer = setInterval(() => {
+        setClosedTabCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer)
+            setClosedTabTestActive(false)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+
+      // 2. Dispatch scheduled delayed push via backend
+      const res = await fetch('/api/admin/push-notification', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          targetType: 'single',
+          targetEmail: APP_CONFIG.supportEmail,
+          delaySeconds: 5,
+          title: '⚡ YouTube-Style Desktop Alert Delivered!',
+          message: 'JobFlux background Web Push arrived on your desktop with this tab closed/minimized!',
+          claimUrl: '/dashboard'
+        })
+      })
+
+      const data = await res.json()
+      if (!data.success) {
+        clearInterval(timer)
+        setClosedTabTestActive(false)
+        setPushDiagnosticResult(data)
+      } else {
+        setPushDiagnosticResult({
+          success: true,
+          message: '✓ 5-second delayed push dispatched! Check your desktop notification center.'
+        })
+      }
+    } catch (err: any) {
+      setClosedTabTestActive(false)
+      alert(err.message || 'Failed to schedule closed-tab test')
     }
   }
 
@@ -3094,9 +3162,25 @@ export default function AdminDashboard() {
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                           <BellRing className="w-3.5 h-3.5" />
-                          Custom Push Notification & In-App Toast Dispatcher
+                          Custom Push Notification & Background Web Push Dispatcher
                         </span>
-                        <span className="text-[10px] text-zinc-400 font-mono">Real-Time MongoDB + Web Push Sync</span>
+                        <div className="flex items-center gap-2">
+                          {deviceWebPushActive ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800/60 font-mono flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                              Background Web Push Active
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handleRequestNotification}
+                              className="px-2 py-0.5 rounded text-[10px] bg-amber-950 text-amber-300 border border-amber-700/60 hover:bg-amber-900 cursor-pointer"
+                            >
+                              Enable Web Push on This Device
+                            </button>
+                          )}
+                          <span className="text-[10px] text-zinc-400 font-mono hidden sm:inline">RFC 8291 VAPID</span>
+                        </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
@@ -3136,19 +3220,40 @@ export default function AdminDashboard() {
                           className="w-full px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs focus:outline-none focus:border-amber-400"
                         />
                       </div>
-                      <div className="flex items-center justify-between pt-1">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                         <span className="text-[11px] text-zinc-400">
                           Target: <strong className="text-white font-mono">{diagnosticRecipient === 'custom' ? customPushRecipient || 'None specified' : diagnosticRecipient === 'all' ? 'All Candidates (Broadcast)' : diagnosticRecipient}</strong>
                         </span>
-                        <button
-                          type="button"
-                          disabled={pushDiagnosticLoading}
-                          onClick={() => handleTriggerPushNotification()}
-                          className="px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-                        >
-                          <Send className="w-3 h-3" />
-                          <span>Dispatch Custom Push Alert</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={closedTabTestActive || pushDiagnosticLoading}
+                            onClick={handleTestClosedTabPush}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 ${
+                              closedTabTestActive
+                                ? 'bg-amber-950 text-amber-300 border-amber-500 animate-pulse'
+                                : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
+                            }`}
+                            title="Tests delivery with the browser tab closed: schedules push 5 seconds in future so you can close this tab"
+                          >
+                            <Bell className="w-3 h-3 text-amber-400" />
+                            <span>
+                              {closedTabTestActive
+                                ? `Close tab now! (${closedTabCountdown}s)`
+                                : 'Test 5s Closed-Tab Push (YouTube-Style)'}
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={pushDiagnosticLoading}
+                            onClick={() => handleTriggerPushNotification()}
+                            className="px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                          >
+                            <Send className="w-3 h-3" />
+                            <span>Dispatch Push Alert</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
