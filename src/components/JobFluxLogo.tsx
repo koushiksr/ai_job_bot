@@ -23,9 +23,9 @@ export default function JobFluxLogo({
 
   return (
     <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
-      {/* Sleek Minimalist Emblem: Obsidian Briefcase + Violet Delta Jet + Apex Beacon */}
+      {/* Sleek Minimalist Emblem: Obsidian Briefcase + Electric Sky Delta Jet + Apex Beacon */}
       <div 
-        className="relative flex items-center justify-center shrink-0 drop-shadow-[0_2px_12px_rgba(168,85,247,0.2)]"
+        className="relative flex items-center justify-center shrink-0 drop-shadow-[0_2px_12px_rgba(56,189,248,0.25)]"
         style={{ width: iconSizes.w, height: iconSizes.h }}
       >
         <svg
@@ -42,13 +42,13 @@ export default function JobFluxLogo({
 
             <linearGradient id="jfJetTopLogo" x1="16" y1="6" x2="44" y2="22" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="40%" stopColor="#c084fc" />
-              <stop offset="100%" stopColor="#7c3aed" />
+              <stop offset="40%" stopColor="#38bdf8" />
+              <stop offset="100%" stopColor="#0284c7" />
             </linearGradient>
 
             <linearGradient id="jfJetBtmLogo" x1="25" y1="10" x2="36" y2="32" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#6d28d9" />
-              <stop offset="100%" stopColor="#4c1d95" />
+              <stop offset="0%" stopColor="#0369a1" />
+              <stop offset="100%" stopColor="#075985" />
             </linearGradient>
 
             <linearGradient id="jfHandleLogo" x1="19" y1="8" x2="29" y2="14" gradientUnits="userSpaceOnUse">
@@ -68,8 +68,8 @@ export default function JobFluxLogo({
           <rect x="21.5" y="22" width="5" height="4" rx="1.2" fill="#27272a" stroke="#3f3f46" strokeWidth="1" />
 
           {/* Velocity Streaks */}
-          <line x1="13" y1="32" x2="21" y2="27" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-          <line x1="10" y1="37" x2="17" y2="32.5" stroke="#c084fc" strokeWidth="1.6" strokeLinecap="round" opacity="0.4" />
+          <line x1="13" y1="32" x2="21" y2="27" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+          <line x1="10" y1="37" x2="17" y2="32.5" stroke="#7dd3fc" strokeWidth="1.6" strokeLinecap="round" opacity="0.5" />
 
           {/* Delta Jet */}
           <polygon points="42,5 17,21 28,24" fill="url(#jfJetTopLogo)" />
@@ -78,7 +78,7 @@ export default function JobFluxLogo({
 
           {/* AI Beacon Apex */}
           <circle cx="42" cy="5" r="2.2" fill="#ffffff" />
-          <circle cx="42" cy="5" r="4" stroke="#c084fc" strokeWidth="1" opacity="0.6" />
+          <circle cx="42" cy="5" r="4" stroke="#38bdf8" strokeWidth="1" opacity="0.6" />
         </svg>
       </div>
 

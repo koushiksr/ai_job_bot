@@ -77,7 +77,7 @@ export default function NaukriProfileScorePage() {
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-8 relative z-10 w-full">
         <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-zinc-950 border border-zinc-800 text-zinc-300">
-            <TrendingUp className="w-3.5 h-3.5 text-purple-400" /> Naukri Resdex Algorithm Diagnostics
+            <TrendingUp className="w-3.5 h-3.5 text-sky-400" /> Naukri Resdex Algorithm Diagnostics
           </div>
           <h1 className="text-3xl md:text-4xl font-semibold text-white tracking-tight">
             Naukri Recruiter Visibility Calculator
@@ -93,7 +93,7 @@ export default function NaukriProfileScorePage() {
             <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
               Your Resdex Inbound Score
             </span>
-            <div className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400">
+            <div className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-400">
               {score} <span className="text-2xl text-zinc-500 font-normal">/ 100</span>
             </div>
             <p className="text-xs text-zinc-300 mt-2">
@@ -114,7 +114,7 @@ export default function NaukriProfileScorePage() {
           </div>
 
           <div className="bg-black border border-zinc-800/80 rounded-2xl p-4 text-xs max-w-sm">
-            <div className="flex items-center gap-1.5 text-purple-400 font-bold mb-1">
+            <div className="flex items-center gap-1.5 text-sky-400 font-bold mb-1">
               <Sparkles className="w-3.5 h-3.5" /> Recruiter Search Fact
             </div>
             <p className="text-zinc-400 leading-relaxed text-[11px]">
@@ -142,7 +142,7 @@ export default function NaukriProfileScorePage() {
                   onClick={() => setLastUpdate(opt.id as any)}
                   className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                     lastUpdate === opt.id
-                      ? 'bg-purple-500/10 border-purple-500/50 text-white'
+                      ? 'bg-sky-500/10 border-sky-500/50 text-white'
                       : 'bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                   }`}
                 >
@@ -170,7 +170,7 @@ export default function NaukriProfileScorePage() {
                   onClick={() => setNoticePeriod(opt.id as any)}
                   className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                     noticePeriod === opt.id
-                      ? 'bg-purple-500/10 border-purple-500/50 text-white'
+                      ? 'bg-sky-500/10 border-sky-500/50 text-white'
                       : 'bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                   }`}
                 >
@@ -197,7 +197,7 @@ export default function NaukriProfileScorePage() {
                   onClick={() => setHeadlineType(opt.id as any)}
                   className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                     headlineType === opt.id
-                      ? 'bg-purple-500/10 border-purple-500/50 text-white'
+                      ? 'bg-sky-500/10 border-sky-500/50 text-white'
                       : 'bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                   }`}
                 >
@@ -210,8 +210,8 @@ export default function NaukriProfileScorePage() {
         </div>
 
         {/* Action Conversion */}
-        <div className="rounded-3xl border border-purple-500/30 bg-[#09090b] p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="rounded-3xl border border-sky-500/30 bg-[#09090b] p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10">
             <h3 className="text-lg font-bold text-white mb-1.5">
               Want a guaranteed 95+ score every single day?
@@ -222,7 +222,7 @@ export default function NaukriProfileScorePage() {
           </div>
           <Link
             href="/"
-            className="relative z-10 whitespace-nowrap inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-zinc-950 font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-purple-500/20 transition-all"
+            className="relative z-10 whitespace-nowrap inline-flex items-center gap-2 bg-gradient-to-r from-sky-400 to-cyan-400 hover:from-sky-300 hover:to-cyan-300 text-zinc-950 font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-sky-500/20 transition-all"
           >
             Start Autonomous JobFlux <ArrowRight className="w-4 h-4" />
           </Link>

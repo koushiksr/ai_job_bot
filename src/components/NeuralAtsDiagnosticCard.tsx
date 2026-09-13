@@ -30,12 +30,12 @@ export default function NeuralAtsDiagnosticCard({
   return (
     <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4 relative overflow-hidden card-featured-glow text-zinc-100">
       {/* Top subtle laser beam sweep */}
-      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-400/80 to-transparent animate-laser-sweep pointer-events-none" />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-violet-400 shrink-0 shadow-inner">
+          <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
             <Cpu className="w-4 h-4" />
           </div>
           <div>
@@ -44,7 +44,7 @@ export default function NeuralAtsDiagnosticCard({
                 Neural ATS Recruiter Readiness Diagnostic
               </h3>
               {isProfessional ? (
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-violet-950/80 border border-violet-700/60 text-violet-300 font-semibold flex items-center gap-1">
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-950/80 border border-amber-700/60 text-amber-300 font-semibold flex items-center gap-1">
                   <Sparkles className="w-2.5 h-2.5" /> NEURAL ACTIVE
                 </span>
               ) : (
@@ -94,29 +94,29 @@ export default function NeuralAtsDiagnosticCard({
           className={`p-3.5 rounded-xl bg-zinc-950 border transition-all space-y-2 ${
             isProfessional
               ? 'border-zinc-800/90'
-              : 'border-violet-500/30 hover:border-violet-500/60 cursor-pointer group'
+              : 'border-amber-500/30 hover:border-amber-500/60 cursor-pointer group'
           }`}
         >
           <div className="flex items-center justify-between text-xs">
             <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
-              <Target className="w-3.5 h-3.5 text-violet-400" /> Recruiter Keyword Alignment
+              <Target className="w-3.5 h-3.5 text-amber-400" /> Recruiter Keyword Alignment
             </span>
             {isProfessional ? (
-              <span className="font-mono text-violet-300 font-semibold text-[11px]">OPTIMIZED</span>
+              <span className="font-mono text-amber-300 font-semibold text-[11px]">OPTIMIZED</span>
             ) : (
-              <span className="font-mono text-violet-400 text-[10px] flex items-center gap-1 group-hover:underline">
+              <span className="font-mono text-amber-400 text-[10px] flex items-center gap-1 group-hover:underline">
                 <Lock className="w-2.5 h-2.5" /> PRO ONLY
               </span>
             )}
           </div>
           <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-            <div className="w-[82%] h-full bg-gradient-to-r from-violet-600 to-purple-400 rounded-full" />
+            <div className="w-[82%] h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full" />
           </div>
           <p className="text-[10px] text-zinc-400">
             {isProfessional ? (
               '16 high-impact keywords actively injected into custom screening answers.'
             ) : (
-              <span className="flex items-center gap-1 text-violet-300">
+              <span className="flex items-center gap-1 text-amber-300">
                 <span>🔒 14 High-Impact Keywords Locked. Click to unlock →</span>
               </span>
             )}
@@ -129,7 +129,7 @@ export default function NeuralAtsDiagnosticCard({
           className={`p-3.5 rounded-xl bg-zinc-950 border transition-all space-y-2 ${
             isProfessional
               ? 'border-zinc-800/90'
-              : 'border-violet-500/30 hover:border-violet-500/60 cursor-pointer group'
+              : 'border-blue-500/30 hover:border-blue-500/60 cursor-pointer group'
           }`}
         >
           <div className="flex items-center justify-between text-xs">
@@ -139,7 +139,7 @@ export default function NeuralAtsDiagnosticCard({
             {isProfessional ? (
               <span className="font-mono text-emerald-400 text-[11px]">UNLIMITED</span>
             ) : (
-              <span className="font-mono text-violet-400 text-[10px] flex items-center gap-1 group-hover:underline">
+              <span className="font-mono text-blue-400 text-[10px] flex items-center gap-1 group-hover:underline">
                 <Lock className="w-2.5 h-2.5" /> PRO ONLY
               </span>
             )}
@@ -151,7 +151,7 @@ export default function NeuralAtsDiagnosticCard({
             {isProfessional ? (
               'Current employer & agency blacklists actively masking applications.'
             ) : (
-              <span className="flex items-center gap-1 text-violet-300">
+              <span className="flex items-center gap-1 text-blue-300">
                 <span>🔒 Basic protection. Unlock full competitor matrix →</span>
               </span>
             )}
@@ -161,9 +161,9 @@ export default function NeuralAtsDiagnosticCard({
 
       {/* Up-Sell Teaser Banner if Not Professional */}
       {!isProfessional && (
-        <div className="p-3 rounded-xl bg-gradient-to-r from-violet-950/40 via-black to-violet-950/30 border border-violet-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="p-3 rounded-xl bg-gradient-to-r from-blue-950/40 via-black to-blue-950/30 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-zinc-300">
-            <Zap className="w-4 h-4 text-violet-400 shrink-0" />
+            <Zap className="w-4 h-4 text-blue-400 shrink-0" />
             <span>
               <strong className="text-white">Professional Plan</strong> unlocks instant On-Demand Turbo sweeps, neural ATS scoring, and zero-queue recruiter priority.
             </span>

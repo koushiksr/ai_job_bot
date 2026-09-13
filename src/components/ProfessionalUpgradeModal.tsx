@@ -41,10 +41,10 @@ export default function ProfessionalUpgradeModal({
           className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-[#09090b] border border-zinc-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl card-featured-glow text-zinc-100"
         >
           {/* Laser beam sweep accent */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-laser-sweep pointer-events-none" />
 
-          {/* Background Ambient Violet Spotlight */}
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
+          {/* Background Ambient Blue Spotlight */}
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
           {/* Close button */}
           <button
@@ -57,8 +57,8 @@ export default function ProfessionalUpgradeModal({
           {/* Modal Header */}
           <div className="flex items-center gap-3 mb-2">
             <JobFluxLogo size="sm" showText={false} />
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-violet-950/80 border border-violet-700/60 text-violet-300 font-semibold flex items-center gap-1.5">
-              <Crown className="w-3 h-3 text-violet-400" />
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-blue-950/80 border border-blue-700/60 text-blue-300 font-semibold flex items-center gap-1.5">
+              <Crown className="w-3 h-3 text-blue-400" />
               Professional Tier Exclusive
             </span>
           </div>
@@ -74,7 +74,7 @@ export default function ProfessionalUpgradeModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-6">
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-violet-950/60 border border-violet-800/50 flex items-center justify-center text-violet-300">
+                <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
                   <Zap className="w-3.5 h-3.5" />
                 </div>
                 <h4 className="text-xs font-semibold text-white">Instant On-Demand Scout</h4>
@@ -86,7 +86,7 @@ export default function ProfessionalUpgradeModal({
 
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-violet-950/60 border border-violet-800/50 flex items-center justify-center text-violet-300">
+                <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
                   <Cpu className="w-3.5 h-3.5" />
                 </div>
                 <h4 className="text-xs font-semibold text-white">Neural ATS Keyword Injector</h4>
@@ -98,7 +98,7 @@ export default function ProfessionalUpgradeModal({
 
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-violet-950/60 border border-violet-800/50 flex items-center justify-center text-violet-300">
+                <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
                   <Send className="w-3.5 h-3.5" />
                 </div>
                 <h4 className="text-xs font-semibold text-white">Zero-Queue Recruiter Fast-Path</h4>
@@ -110,7 +110,7 @@ export default function ProfessionalUpgradeModal({
 
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-violet-950/60 border border-violet-800/50 flex items-center justify-center text-violet-300">
+                <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
                   <Shield className="w-3.5 h-3.5" />
                 </div>
                 <h4 className="text-xs font-semibold text-white">Stealth Employer Blacklist</h4>
@@ -122,7 +122,7 @@ export default function ProfessionalUpgradeModal({
           </div>
 
           {/* Pricing Highlight Card */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-violet-950/30 via-zinc-950 to-violet-950/20 border border-violet-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/30 via-zinc-950 to-blue-950/20 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white uppercase tracking-wider">Professional Plan</span>
@@ -150,7 +150,7 @@ export default function ProfessionalUpgradeModal({
           {/* Footer Note */}
           <div className="mt-4 flex items-center justify-between text-[11px] text-zinc-500">
             <span>Or start with 1-Month Essentials for ₹499</span>
-            <Link href="/pricing" onClick={onClose} className="text-violet-400 hover:text-violet-300 transition-colors font-medium">
+            <Link href="/pricing" onClick={onClose} className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
               View All Tiers →
             </Link>
           </div>

@@ -61,7 +61,7 @@ export default function ToolsHeader() {
               className="hover:text-white transition-colors flex items-center gap-1"
             >
               <span>Resume Studio</span>
-              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-violet-950/80 border border-violet-700/50 text-violet-300">
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-950/80 border border-amber-700/50 text-amber-300">
                 ATS
               </span>
             </Link>
@@ -93,7 +93,7 @@ export default function ToolsHeader() {
               onClick={() => setIsHelpOpen(true)}
               className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
             >
-              <Mail className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+              <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
               <span>Help & Support</span>
             </button>
           </nav>
@@ -106,7 +106,7 @@ export default function ToolsHeader() {
               onClick={() => setIsHelpOpen(true)}
               className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex md:hidden items-center gap-1 shrink-0 px-2 py-1"
             >
-              <Mail className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+              <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
               <span className="hidden sm:inline">Help</span>
             </button>
 

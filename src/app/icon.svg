@@ -9,14 +9,14 @@
     <!-- Supersonic Delta Jet Top Surface -->
     <linearGradient id="jfJetTop" x1="16" y1="6" x2="44" y2="22" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="35%" stop-color="#c084fc"/>
-      <stop offset="100%" stop-color="#7c3aed"/>
+      <stop offset="35%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
     </linearGradient>
 
     <!-- Delta Jet Bottom Shadow / Depth -->
     <linearGradient id="jfJetBtm" x1="25" y1="10" x2="36" y2="32" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#6d28d9"/>
-      <stop offset="100%" stop-color="#4c1d95"/>
+      <stop offset="0%" stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#0c4a6e"/>
     </linearGradient>
 
     <!-- Minimalist Handle -->
@@ -43,8 +43,8 @@
   <rect x="21.5" y="22" width="5" height="4" rx="1.2" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
 
   <!-- Velocity Propulsion Streaks from Jet -->
-  <line x1="13" y1="32" x2="21" y2="27" stroke="#a855f7" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-  <line x1="10" y1="37" x2="17" y2="32.5" stroke="#c084fc" stroke-width="1.6" stroke-linecap="round" opacity="0.4"/>
+  <line x1="13" y1="32" x2="21" y2="27" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="10" y1="37" x2="17" y2="32.5" stroke="#7dd3fc" stroke-width="1.6" stroke-linecap="round" opacity="0.4"/>
 
   <!-- Supersonic Delta Jet (Autonomous Job Application Rocket) -->
   <polygon points="42,5 17,21 28,24" fill="url(#jfJetTop)"/>
@@ -54,6 +54,6 @@
   <!-- AI Autonomous Beacon Spark at Apex -->
   <g filter="url(#jfSparkGlow)">
     <path d="M 42 1 Q 42 5 46 5 Q 42 5 42 9 Q 42 5 38 5 Q 42 5 42 1 Z" fill="#ffffff"/>
-    <circle cx="42" cy="5" r="1.5" fill="#c084fc"/>
+    <circle cx="42" cy="5" r="1.5" fill="#38bdf8"/>
   </g>
 </svg>

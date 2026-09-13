@@ -179,9 +179,9 @@ export default function JobFluxHelpModal({
           onClick={handleOpen}
           type="button"
           aria-label="Help & Support"
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border border-zinc-700/80 hover:border-violet-500/50 text-white shadow-2xl backdrop-blur-md transition-all text-xs font-medium cursor-pointer group pointer-events-auto select-none"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border border-zinc-700/80 hover:border-teal-500/50 text-white shadow-2xl backdrop-blur-md transition-all text-xs font-medium cursor-pointer group pointer-events-auto select-none"
         >
-          <div className="w-5 h-5 rounded-full bg-violet-600/20 border border-violet-500/40 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
+          <div className="w-5 h-5 rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
             <HelpCircle className="w-3.5 h-3.5" />
           </div>
           <span className="font-semibold tracking-wide">Help & Support</span>
@@ -206,7 +206,7 @@ export default function JobFluxHelpModal({
               {/* Header */}
               <div className="p-4 sm:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/60">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                  <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
                     <MessageSquare className="w-4 h-4" />
                   </div>
                   <div>
@@ -231,7 +231,7 @@ export default function JobFluxHelpModal({
                 <div className="p-4 rounded-xl bg-black border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-violet-500/10 border border-violet-500/30 text-violet-300">
+                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-teal-500/10 border border-teal-500/30 text-teal-300">
                         Primary Preference
                       </span>
                       <span className="text-[10px] text-zinc-500 font-mono flex items-center gap-1">
@@ -309,7 +309,7 @@ export default function JobFluxHelpModal({
                             Inquiry Received Successfully
                           </h4>
                           <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
-                            Ticket reference <strong className="text-zinc-200 font-mono">#{submittedTicket}</strong> has been forwarded to our support queue at <span className="text-violet-300 font-mono">{supportEmail}</span>.
+                            Ticket reference <strong className="text-zinc-200 font-mono">#{submittedTicket}</strong> has been forwarded to our support queue at <span className="text-teal-300 font-mono">{supportEmail}</span>.
                           </p>
                         </div>
                         <p className="text-[11px] text-zinc-500">
@@ -343,7 +343,7 @@ export default function JobFluxHelpModal({
                           </div>
                           <div className="space-y-1">
                             <label className="text-[11px] text-zinc-400 font-medium">
-                              Email Address <span className="text-violet-400">*</span>
+                              Email Address <span className="text-teal-400">*</span>
                             </label>
                             <input
                               type="email"
@@ -401,7 +401,7 @@ export default function JobFluxHelpModal({
 
                         <div className="space-y-1">
                           <label className="text-[11px] text-zinc-400 font-medium">
-                            Message Details <span className="text-violet-400">*</span>
+                            Message Details <span className="text-teal-400">*</span>
                           </label>
                           <textarea
                             required

@@ -230,12 +230,12 @@ export default function AiResumeBuilder({
   return (
     <div className="p-4 sm:p-6 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4 sm:space-y-6 relative overflow-hidden card-featured-glow text-zinc-100">
       {/* Top Laser Sweep */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/80 to-transparent animate-laser-sweep pointer-events-none" />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 border-b border-zinc-800/80 pb-4 sm:pb-5">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-violet-950/60 border border-violet-800/50 flex items-center justify-center text-violet-300 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/60 border border-amber-800/50 flex items-center justify-center text-amber-300 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
@@ -243,8 +243,8 @@ export default function AiResumeBuilder({
               <h2 className="text-sm sm:text-lg font-bold text-white tracking-tight">
                 AI Neural ATS Resume Builder
               </h2>
-              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded bg-violet-950/80 border border-violet-700/60 text-violet-300 font-semibold flex items-center gap-1">
-                <Crown className="w-3 h-3 text-violet-400" />
+              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded bg-amber-950/80 border border-amber-700/60 text-amber-300 font-semibold flex items-center gap-1">
+                <Crown className="w-3 h-3 text-amber-400" />
                 PROFESSIONAL
               </span>
             </div>
@@ -291,7 +291,7 @@ export default function AiResumeBuilder({
 
         <Link
           href="/resume-builder"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-300 hover:text-white bg-violet-950/60 hover:bg-violet-900/80 px-3 py-1.5 rounded-lg border border-violet-700/50 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 hover:text-white bg-amber-950/60 hover:bg-amber-900/80 px-3 py-1.5 rounded-lg border border-amber-700/50 transition-colors cursor-pointer"
         >
           <span>Open Fullscreen Resume Studio</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -309,7 +309,7 @@ export default function AiResumeBuilder({
                 onClick={() => setSelectedSampleIdx(idx)}
                 className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 border shrink-0 whitespace-nowrap ${
                   selectedSampleIdx === idx
-                    ? 'bg-zinc-900 border-violet-500/50 text-white shadow-sm'
+                    ? 'bg-zinc-900 border-amber-500/50 text-white shadow-sm'
                     : 'bg-black border-zinc-800 text-zinc-400 hover:text-white'
                 }`}
               >
@@ -327,7 +327,7 @@ export default function AiResumeBuilder({
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-zinc-800/90 pb-3 sm:pb-4">
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">{activeSample.name}</h3>
-                <p className="text-xs text-violet-400 font-medium mt-0.5">{activeSample.title} · {activeSample.companyTier}</p>
+                <p className="text-xs text-amber-400 font-medium mt-0.5">{activeSample.title} · {activeSample.companyTier}</p>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
                 <span className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 font-semibold flex items-center gap-1">
@@ -338,7 +338,7 @@ export default function AiResumeBuilder({
                   onClick={() => onUpgradeClick('Download ' + activeSample.title + ' ATS Template')}
                   className="px-2.5 sm:px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 hover:text-white text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
-                  <Download className="w-3.5 h-3.5 text-violet-400" />
+                  <Download className="w-3.5 h-3.5 text-amber-400" />
                   <span>Buy Subscription to Download</span>
                 </button>
               </div>
@@ -380,7 +380,7 @@ export default function AiResumeBuilder({
                       <span className="font-semibold text-white">{exp.role}</span>
                       <span className="text-zinc-500 font-mono text-[11px]">{exp.period}</span>
                     </div>
-                    <p className="text-xs text-violet-400 font-medium">{exp.company}</p>
+                    <p className="text-xs text-amber-400 font-medium">{exp.company}</p>
                     <ul className="space-y-1 pl-4 list-disc text-xs text-zinc-300">
                       {exp.bullets.map((b, bIdx) => (
                         <li key={bIdx} className="leading-relaxed">{b}</li>
@@ -415,7 +415,7 @@ export default function AiResumeBuilder({
           <form onSubmit={handleGenerate} className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800/90 space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-violet-400" />
+                <Target className="w-4 h-4 text-amber-400" />
                 <h3 className="text-sm font-semibold text-white">
                   Target High-Paying Job Questionnaire
                 </h3>
@@ -435,7 +435,7 @@ export default function AiResumeBuilder({
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
                   placeholder="e.g. Senior Full Stack Engineer / Staff AI Engineer"
-                  className="w-full bg-black border border-zinc-800 focus:border-violet-500 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-black border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-white outline-none"
                   required
                 />
               </div>
@@ -449,7 +449,7 @@ export default function AiResumeBuilder({
                   value={targetBracket}
                   onChange={(e) => setTargetBracket(e.target.value)}
                   placeholder="e.g. ₹35 - 50 LPA or ₹50 - 75 LPA"
-                  className="w-full bg-black border border-zinc-800 focus:border-violet-500 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-black border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-white outline-none"
                   required
                 />
               </div>
@@ -464,7 +464,7 @@ export default function AiResumeBuilder({
                   max="30"
                   value={expYears}
                   onChange={(e) => setExpYears(Number(e.target.value))}
-                  className="w-full bg-black border border-zinc-800 focus:border-violet-500 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-black border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-white outline-none"
                   required
                 />
               </div>
@@ -478,7 +478,7 @@ export default function AiResumeBuilder({
                   value={currentCompany}
                   onChange={(e) => setCurrentCompany(e.target.value)}
                   placeholder="e.g. Capgemini / Startup / Tech Co"
-                  className="w-full bg-black border border-zinc-800 focus:border-violet-500 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-black border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-white outline-none"
                   required
                 />
               </div>
@@ -492,7 +492,7 @@ export default function AiResumeBuilder({
                   value={coreSkills}
                   onChange={(e) => setCoreSkills(e.target.value)}
                   placeholder="e.g. React, Next.js, Node.js, Python, PostgreSQL, AWS, Docker"
-                  className="w-full bg-black border border-zinc-800 focus:border-violet-500 rounded-lg px-3 py-2 text-white outline-none"
+                  className="w-full bg-black border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-white outline-none"
                   required
                 />
               </div>
@@ -506,7 +506,7 @@ export default function AiResumeBuilder({
                   value={achievements}
                   onChange={(e) => setAchievements(e.target.value)}
                   placeholder="e.g. Scaled API to 25k RPS, reduced load times by 40%, migrated database with zero downtime..."
-                  className="w-full bg-black border border-zinc-800 focus:border-violet-500 rounded-lg p-3 text-white outline-none resize-none"
+                  className="w-full bg-black border border-zinc-800 focus:border-amber-500 rounded-lg p-3 text-white outline-none resize-none"
                   required
                 />
               </div>
@@ -520,7 +520,7 @@ export default function AiResumeBuilder({
                   id="autoSyncBot"
                   checked={autoSyncToBot}
                   onChange={(e) => setAutoSyncToBot(e.target.checked)}
-                  className="accent-violet-500 w-4 h-4 rounded cursor-pointer"
+                  className="accent-amber-500 w-4 h-4 rounded cursor-pointer"
                 />
                 <label htmlFor="autoSyncBot" className="text-zinc-300 cursor-pointer">
                   <strong className="text-white">Auto-attach generated ATS resume to Naukri Auto-Apply Bot</strong> (replaces older resume for daily runs)
@@ -540,7 +540,7 @@ export default function AiResumeBuilder({
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-violet-700" />
+                  <Sparkles className="w-4 h-4 text-amber-600" />
                   <span>Generate High-Paying ATS Resume</span>
                 </>
               )}
@@ -550,9 +550,9 @@ export default function AiResumeBuilder({
           {/* Intermediate Synthesizing Card with Ref for immediate scroll */}
           <div ref={resultSectionRef} id="ats-resume-synthesis-anchor">
             {isGenerating && (
-              <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-violet-500/40 text-center space-y-3.5 shadow-2xl card-featured-glow animate-pulse">
-                <div className="w-12 h-12 mx-auto rounded-2xl bg-violet-950/80 border border-violet-600/60 flex items-center justify-center text-violet-300 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                  <RefreshCw className="w-6 h-6 animate-spin text-violet-400" />
+              <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-amber-500/40 text-center space-y-3.5 shadow-2xl card-featured-glow animate-pulse">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-amber-950/80 border border-amber-600/60 flex items-center justify-center text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+                  <RefreshCw className="w-6 h-6 animate-spin text-amber-400" />
                 </div>
                 <div>
                   <h4 className="text-sm sm:text-base font-bold text-white">
@@ -563,7 +563,7 @@ export default function AiResumeBuilder({
                   </p>
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono bg-black border border-zinc-800 text-zinc-400">
-                  <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>Preparing preview & subscription download options below...</span>
                 </div>
               </div>
@@ -584,7 +584,7 @@ export default function AiResumeBuilder({
                           {generatedResult.resume.ats_score}% ATS OPTIMIZED
                         </span>
                       </div>
-                      <p className="text-xs text-violet-400 mt-0.5">{generatedResult.resume.role}</p>
+                      <p className="text-xs text-amber-400 mt-0.5">{generatedResult.resume.role}</p>
                     </div>
 
                     <div className="flex items-center gap-2.5">
@@ -656,7 +656,7 @@ export default function AiResumeBuilder({
 
               {/* If User is NOT Professional -> Tantalizing Blurred Preview with Upgrade Lock */}
               {generatedResult.is_preview && (
-                <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-violet-500/40 shadow-2xl space-y-5 relative overflow-hidden card-featured-glow">
+                <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-blue-500/40 shadow-2xl space-y-5 relative overflow-hidden card-featured-glow">
                   {/* Top Score Banner */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
                     <div>
@@ -674,7 +674,7 @@ export default function AiResumeBuilder({
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => onUpgradeClick('Download Full ATS Resume & Cloud Bot Sync')}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 px-3.5 py-1.5 rounded-lg transition-all shadow-md shadow-violet-600/20 cursor-pointer"
+                        className="flex items-center gap-1.5 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-3.5 py-1.5 rounded-lg transition-all shadow-md shadow-blue-600/20 cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Buy Subscription to Download</span>
@@ -710,12 +710,12 @@ export default function AiResumeBuilder({
 
                     {/* Glowing Lock Overlay */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-black/80 backdrop-blur-md text-center space-y-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-violet-950/90 border border-violet-600/70 flex items-center justify-center text-violet-300 shadow-[0_0_25px_rgba(168,85,247,0.4)]">
+                      <div className="w-12 h-12 rounded-2xl bg-blue-950/90 border border-blue-600/70 flex items-center justify-center text-blue-300 shadow-[0_0_25px_rgba(37,99,235,0.4)]">
                         <Lock className="w-5 h-5" />
                       </div>
                       <div className="space-y-1">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-violet-950/80 border border-violet-700/60 text-violet-300 font-semibold">
-                          <Crown className="w-3 h-3 text-violet-400" /> Subscription Required to Download
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-950/80 border border-blue-700/60 text-blue-300 font-semibold">
+                          <Crown className="w-3 h-3 text-blue-400" /> Subscription Required to Download
                         </span>
                         <h4 className="text-base font-bold text-white pt-1">
                           Buy Subscription to Download Full ATS Resume
@@ -728,7 +728,7 @@ export default function AiResumeBuilder({
                       <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
                         <button
                           onClick={() => onUpgradeClick('Download Full ATS Resume & Cloud Bot Sync')}
-                          className="px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-xl shadow-violet-600/30"
+                          className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-500 hover:opacity-95 text-white font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-xl shadow-blue-600/30"
                         >
                           <Download className="w-4 h-4" />
                           <span>Buy Subscription to Download PDF</span>

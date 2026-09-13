@@ -474,7 +474,7 @@ export default function ResumeBuilderPage() {
                 <span className="text-xs sm:text-sm font-bold text-white tracking-tight">
                   Harvard / FAANG ATS Resume Studio
                 </span>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-violet-950/80 border border-violet-700/60 text-violet-300 font-semibold uppercase">
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-700/60 text-amber-300 font-semibold uppercase">
                   Single Column Ivy
                 </span>
               </div>
@@ -489,7 +489,7 @@ export default function ResumeBuilderPage() {
             className="hidden md:flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 bg-zinc-950 px-2.5 py-1 rounded-md border border-zinc-800"
             title="Zero Data-Leak Guarantee: Automatically scrubs and anonymizes sensitive PII (Home address, Aadhaar/PAN, internal IDs, personal phone) before cloud processing"
           >
-            <Shield className="w-3 h-3 text-emerald-400 shrink-0" />
+            <Shield className="w-3 text-emerald-400 shrink-0" />
             <span>Auto PII Sanitized</span>
           </div>
 
@@ -497,7 +497,7 @@ export default function ResumeBuilderPage() {
           <span
             className={`text-[9px] font-mono px-2 py-0.5 rounded border uppercase font-semibold ${
               isProfessional
-                ? 'bg-violet-950/80 border-violet-700/60 text-violet-300'
+                ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
                 : 'bg-zinc-900 border-zinc-800 text-zinc-400'
             }`}
           >
@@ -508,17 +508,17 @@ export default function ResumeBuilderPage() {
           <button
             onClick={handleSyncToBot}
             disabled={syncingBot}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-950/80 hover:bg-violet-900 border border-violet-600/60 text-violet-200 transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-950/80 hover:bg-blue-900 border border-blue-600/60 text-blue-200 transition-all cursor-pointer shadow-sm"
             title="Automatically dispatch this ATS resume on automated morning runs"
           >
             {syncingBot ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <Send className="w-3.5 h-3.5 text-violet-300" />
+              <Send className="w-3.5 h-3.5 text-blue-300" />
             )}
             <span className="hidden sm:inline">Sync with Auto-Apply Bot</span>
             <span className="sm:hidden">Sync Bot</span>
-            {!isProfessional && <Lock className="w-3 h-3 text-violet-400 ml-0.5" />}
+            {!isProfessional && <Lock className="w-3 h-3 text-blue-400 ml-0.5" />}
           </button>
 
           {/* Print/Download Button */}
@@ -588,7 +588,7 @@ export default function ResumeBuilderPage() {
           <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 Select Harvard/FAANG Standard Template
               </span>
               <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400">
@@ -605,7 +605,7 @@ export default function ResumeBuilderPage() {
                     onClick={() => handleSelectPreset(p.id)}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       active
-                        ? 'bg-violet-950/40 border-violet-600/70 text-white shadow-sm ring-1 ring-violet-500/40'
+                        ? 'bg-amber-950/40 border-amber-600/70 text-white shadow-sm ring-1 ring-amber-500/40'
                         : 'bg-black border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
                     }`}
                   >
@@ -796,7 +796,7 @@ export default function ResumeBuilderPage() {
                       </span>
                       <button
                         onClick={() => handleAddMetric(expIdx)}
-                        className="text-[10px] font-medium text-violet-400 hover:text-violet-300 flex items-center gap-1 cursor-pointer"
+                        className="text-[10px] font-medium text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
                       >
                         <Plus className="w-3 h-3" />
                         <span>Add Bullet</span>
@@ -920,9 +920,9 @@ export default function ResumeBuilderPage() {
 
           {/* Freemium Watermark/Notification Bar if not Professional */}
           {!isProfessional && (
-            <div className="no-print p-3 rounded-xl bg-violet-950/30 border border-violet-800/40 flex items-center justify-between gap-3 text-xs">
+            <div className="no-print p-3 rounded-xl bg-blue-950/30 border border-blue-800/40 flex items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <Crown className="w-4 h-4 text-violet-400 shrink-0" />
+                <Crown className="w-4 h-4 text-blue-400 shrink-0" />
                 <div>
                   <span className="font-semibold text-white">Free Candidate Preparation Mode</span>
                   <p className="text-[11px] text-zinc-400">

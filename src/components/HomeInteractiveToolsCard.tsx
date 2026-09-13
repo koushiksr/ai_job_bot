@@ -98,7 +98,7 @@ export default function HomeInteractiveToolsCard({
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <TrendingUp className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+          <TrendingUp className="w-3.5 h-3.5 text-sky-400 shrink-0" />
           <span className="truncate">Naukri Resdex Rank</span>
         </button>
 
@@ -271,7 +271,7 @@ export default function HomeInteractiveToolsCard({
                     onClick={() => setLastUpdate(item.id as any)}
                     className={`py-1.5 rounded-lg border text-center transition-all cursor-pointer ${
                       lastUpdate === item.id
-                        ? 'bg-purple-500/20 border-purple-500/60 text-purple-300 font-semibold'
+                        ? 'bg-sky-500/20 border-sky-500/60 text-sky-300 font-semibold'
                         : 'bg-black border-zinc-800 text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -295,7 +295,7 @@ export default function HomeInteractiveToolsCard({
                     onClick={() => setNoticePeriod(item.id as any)}
                     className={`py-1.5 rounded-lg border text-center transition-all cursor-pointer ${
                       noticePeriod === item.id
-                        ? 'bg-purple-500/20 border-purple-500/60 text-purple-300 font-semibold'
+                        ? 'bg-sky-500/20 border-sky-500/60 text-sky-300 font-semibold'
                         : 'bg-black border-zinc-800 text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -313,7 +313,7 @@ export default function HomeInteractiveToolsCard({
                 <span className="text-xs text-zinc-400">Recruiter Resdex Visibility Tier:</span>
                 <div className="text-lg font-bold text-white flex items-center gap-2 mt-0.5">
                   {lastUpdate === 'today' && noticePeriod === 'immediate' ? (
-                    <span className="text-emerald-400 flex items-center gap-1">
+                     <span className="text-emerald-400 flex items-center gap-1">
                       <Flame className="w-4 h-4" /> Top 5% (Page 1 Inbound Magnet)
                     </span>
                   ) : lastUpdate === 'week' ? (
@@ -325,7 +325,7 @@ export default function HomeInteractiveToolsCard({
               </div>
               <div className="text-right">
                 <span className="text-[10px] text-zinc-500 block uppercase font-mono">Inbound Call Rate</span>
-                <span className="text-base font-black text-purple-400 font-mono">
+                <span className="text-base font-black text-sky-400 font-mono">
                   {lastUpdate === 'today' ? '4.8x Calls' : lastUpdate === 'week' ? '1.6x Calls' : '0.2x Calls'}
                 </span>
               </div>
@@ -343,7 +343,7 @@ export default function HomeInteractiveToolsCard({
               {isLoggedIn ? (
                 <a
                   href="/dashboard"
-                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-purple-500 hover:bg-purple-400 text-black font-bold text-xs transition-all text-center"
+                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-sky-400 hover:bg-sky-300 text-black font-bold text-xs transition-all text-center"
                 >
                   Activate in Dashboard
                 </a>
@@ -351,7 +351,7 @@ export default function HomeInteractiveToolsCard({
                 <button
                   type="button"
                   onClick={() => onTriggerAuth('trial')}
-                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-black font-bold text-xs transition-all shadow-md shadow-purple-500/20 cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-gradient-to-r from-sky-400 to-cyan-400 hover:from-sky-300 hover:to-cyan-300 text-black font-bold text-xs transition-all shadow-md shadow-sky-500/20 cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <span>Sign In to Activate 9 AM Bump</span>
                   <ArrowRight className="w-3.5 h-3.5" />

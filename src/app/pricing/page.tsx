@@ -344,7 +344,7 @@ export default function PricingPage() {
               onClick={() => setIsHelpOpen(true)}
               className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex items-center gap-1 shrink-0"
             >
-              <Mail className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+              <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
               <span className="hidden sm:inline">Help & Support</span>
             </button>
 
@@ -490,7 +490,7 @@ export default function PricingPage() {
               >
                 {/* Laser beam sweep accent for featured plan */}
                 {isFeatured && (
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent animate-laser-sweep pointer-events-none" />
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-laser-sweep pointer-events-none" />
                 )}
 
                 {/* Header Info */}
@@ -587,8 +587,8 @@ export default function PricingPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#09090b] border border-violet-500/30 flex items-start gap-4 shadow-xl">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 shrink-0">
+          <div className="p-5 rounded-2xl bg-[#09090b] border border-sky-500/30 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
               <Zap className="w-5 h-5" />
             </div>
             <div className="space-y-1 text-xs">

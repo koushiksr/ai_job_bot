@@ -55,7 +55,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: [0.8, 1.2, 1], opacity: [0.15, 0.3, 0.2] }}
             transition={{ duration: 1.5, ease: 'easeOut' }}
-            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-violet-600/15 via-purple-500/10 to-transparent blur-[120px] pointer-events-none"
+            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-sky-500/15 via-cyan-500/10 to-transparent blur-[120px] pointer-events-none"
           />
 
           {/* Central Animated Emblem */}
@@ -71,7 +71,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: [0.9, 1.35, 1.1], opacity: [0.4, 0, 0] }}
                 transition={{ duration: 1.2, repeat: Infinity, ease: 'easeOut' }}
-                className="absolute inset-0 rounded-2xl border border-violet-500/30"
+                className="absolute inset-0 rounded-2xl border border-sky-500/30"
               />
 
               {/* Organic Liquid Wave Ripple 1 */}
@@ -82,7 +82,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   rotate: [0, 90, 180]
                 }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -inset-4 border border-violet-500/30 bg-violet-600/5 animate-fluid-morph pointer-events-none"
+                className="absolute -inset-4 border border-sky-500/30 bg-sky-500/5 animate-fluid-morph pointer-events-none"
               />
 
               {/* Organic Liquid Wave Ripple 2 */}
@@ -93,7 +93,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   rotate: [180, 90, 0]
                 }}
                 transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-                className="absolute -inset-8 border border-purple-400/20 bg-purple-600/5 animate-fluid-morph pointer-events-none"
+                className="absolute -inset-8 border border-cyan-400/20 bg-cyan-500/5 animate-fluid-morph pointer-events-none"
               />
 
               {/* Story-driven Emblem SVG with animated elements */}
@@ -101,7 +101,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                 viewBox="0 0 48 48"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-full drop-shadow-[0_0_30px_rgba(168,85,247,0.25)]"
+                className="w-full h-full drop-shadow-[0_0_30px_rgba(56,189,248,0.25)]"
               >
                 <defs>
                   <linearGradient id="splashCaseGrad" x1="6" y1="15" x2="42" y2="43" gradientUnits="userSpaceOnUse">
@@ -111,13 +111,13 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
 
                   <linearGradient id="splashJetTop" x1="16" y1="6" x2="44" y2="22" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#ffffff" />
-                    <stop offset="40%" stopColor="#c084fc" />
-                    <stop offset="100%" stopColor="#7c3aed" />
+                    <stop offset="40%" stopColor="#38bdf8" />
+                    <stop offset="100%" stopColor="#0284c7" />
                   </linearGradient>
 
                   <linearGradient id="splashJetBtm" x1="25" y1="10" x2="36" y2="32" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#6d28d9" />
-                    <stop offset="100%" stopColor="#4c1d95" />
+                    <stop offset="0%" stopColor="#0369a1" />
+                    <stop offset="100%" stopColor="#075985" />
                   </linearGradient>
 
                   <linearGradient id="splashHandle" x1="19" y1="8" x2="29" y2="14" gradientUnits="userSpaceOnUse">
@@ -171,7 +171,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   y1="32"
                   x2="21"
                   y2="27"
-                  stroke="#a855f7"
+                  stroke="#38bdf8"
                   strokeWidth="2"
                   strokeLinecap="round"
                 />
@@ -183,7 +183,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   y1="37"
                   x2="17"
                   y2="32.5"
-                  stroke="#c084fc"
+                  stroke="#7dd3fc"
                   strokeWidth="1.6"
                   strokeLinecap="round"
                 />
@@ -207,7 +207,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   transition={{ duration: 0.5, delay: 0.5, ease: 'backOut' }}
                 >
                   <path d="M 43 1 Q 43 5 47 5 Q 43 5 43 9 Q 43 5 39 5 Q 43 5 43 1 Z" fill="#ffffff" />
-                  <circle cx="43" cy="5" r="1.5" fill="#c084fc" />
+                  <circle cx="43" cy="5" r="1.5" fill="#38bdf8" />
                 </motion.g>
               </svg>
             </motion.div>
@@ -235,7 +235,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                     initial={{ x: '-100%' }}
                     animate={{ x: '100%' }}
                     transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
-                    className="w-20 h-full bg-gradient-to-r from-transparent via-violet-400 to-transparent"
+                    className="w-20 h-full bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
                   />
                 </div>
                 <motion.span

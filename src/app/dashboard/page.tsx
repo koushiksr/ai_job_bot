@@ -496,7 +496,7 @@ export default function UserDashboard() {
                   </h1>
                   <span className={`text-[9px] px-1.5 py-0.2 rounded border font-mono uppercase ${
                     isProfessional
-                      ? 'bg-violet-950/80 border-violet-700/60 text-violet-300'
+                      ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
                       : userPlan === 'pro' && isPlanActive
                       ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
                       : userPlan === 'none' || userPlan === 'no_plan'
@@ -523,7 +523,7 @@ export default function UserDashboard() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
               title="Refresh Telemetry"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-violet-400 ${isRefreshing ? 'animate-spin' : ''}`} /> 
+              <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${isRefreshing ? 'animate-spin' : ''}`} /> 
               <span>Refresh</span>
             </button>
 
@@ -531,7 +531,7 @@ export default function UserDashboard() {
               onClick={() => setIsHelpOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
             >
-              <Mail className="w-3.5 h-3.5 text-violet-400" /> 
+              <Mail className="w-3.5 h-3.5 text-teal-400" /> 
               <span>Help & Support</span>
             </button>
 
@@ -607,7 +607,7 @@ export default function UserDashboard() {
                     <span className="text-xs font-semibold text-white truncate max-w-[140px]">{userName || 'Candidate'}</span>
                     <span className={`text-[9px] px-1.5 py-0.2 rounded border font-mono uppercase ${
                       isProfessional
-                        ? 'bg-violet-950/80 border-violet-700/60 text-violet-300'
+                        ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
                         : userPlan === 'pro' && isPlanActive
                         ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
                         : userPlan === 'none' || userPlan === 'no_plan'
@@ -639,7 +639,7 @@ export default function UserDashboard() {
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
               >
-                <RefreshCw className="w-4 h-4 text-violet-400 shrink-0" />
+                <RefreshCw className="w-4 h-4 text-sky-400 shrink-0" />
                 <span>Refresh Live Telemetry</span>
               </button>
 
@@ -648,9 +648,9 @@ export default function UserDashboard() {
                 onClick={() => setIsMobileNavOpen(false)}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
               >
-                <FileText className="w-4 h-4 text-violet-400 shrink-0" />
+                <FileText className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>AI ATS Resume Studio</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-violet-950/80 border border-violet-700/50 text-violet-300 ml-auto font-semibold">
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-700/50 text-amber-300 ml-auto font-semibold">
                   HARVARD
                 </span>
               </Link>
@@ -659,7 +659,7 @@ export default function UserDashboard() {
                 onClick={() => { setIsHelpOpen(true); setIsMobileNavOpen(false) }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
               >
-                <Mail className="w-4 h-4 text-violet-400 shrink-0" />
+                <Mail className="w-4 h-4 text-teal-400 shrink-0" />
                 <span>Help & Support Center</span>
               </button>
 
@@ -678,7 +678,7 @@ export default function UserDashboard() {
                   onClick={() => setIsMobileNavOpen(false)}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
                 >
-                  <Shield className="w-4 h-4 text-violet-400 shrink-0" />
+                  <Shield className="w-4 h-4 text-sky-400 shrink-0" />
                   <span>Admin Control Center</span>
                 </Link>
               )}
@@ -703,7 +703,7 @@ export default function UserDashboard() {
           <div className="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-[#09090b] to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-zinc-300">
-                <Sparkles className="w-4 h-4 text-violet-400" />
+                <Sparkles className="w-4 h-4 text-blue-400" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -744,14 +744,14 @@ export default function UserDashboard() {
         {/* Unified Mission Control Card (Cockpit + Live Metrics + Telemetry Strip) */}
         <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden card-featured-glow relative">
           {/* Subtle top laser scan accent */}
-          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
 
           {/* Section 1: Cockpit Header & Trigger */}
           <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-950/50">
             <div className="flex items-center gap-3.5">
               <div className="relative shrink-0">
                 <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
-                  <Cpu className="w-5 h-5 text-violet-400" />
+                  <Cpu className="w-5 h-5 text-sky-400" />
                 </div>
                 <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -773,7 +773,7 @@ export default function UserDashboard() {
                     <>
                       <span>Schedule: <strong className="text-zinc-300">Dual Precision · 06:00 &amp; 08:00 AM IST</strong></span>
                       <span className="text-zinc-600 hidden sm:inline">•</span>
-                      <span className="text-violet-300 font-medium">+ Unlimited On-Demand</span>
+                      <span className="text-sky-300 font-medium">+ Unlimited On-Demand</span>
                       <span className="text-zinc-600 hidden sm:inline">•</span>
                       <span>Next: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
                     </>
@@ -813,11 +813,11 @@ export default function UserDashboard() {
                     setProModalFeature('Instant On-Demand Turbo Scout')
                     setShowProModal(true)
                   }}
-                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-violet-500/40 text-violet-200 text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.1)] group"
+                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-blue-500/40 text-blue-200 text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.15)] group"
                 >
-                  <Lock className="w-3.5 h-3.5 text-violet-400 group-hover:scale-110 transition-transform" />
+                  <Lock className="w-3.5 h-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
                   <span>Trigger On-Demand Run</span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-violet-900/80 border border-violet-600/50 text-white font-semibold">
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-900/80 border border-blue-600/50 text-white font-semibold">
                     PRO
                   </span>
                 </button>
@@ -827,14 +827,14 @@ export default function UserDashboard() {
 
           {/* Active Radar Telemetry Animation (Visible during Scouting — PRO only) */}
           {isTriggeringScout && isProfessional && (
-            <div className="p-4 bg-zinc-950/95 border-t border-b border-violet-500/40 relative overflow-hidden space-y-3">
+            <div className="p-4 bg-zinc-950/95 border-t border-b border-sky-500/40 relative overflow-hidden space-y-3">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
-                    <div className="absolute inset-0 rounded-full border border-violet-500/30 animate-radar-pulse" />
-                    <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8 drop-shadow-[0_0_12px_rgba(168,85,247,0.5)]">
-                      <polygon points="42,5 17,21 28,24" fill="#c084fc" />
-                      <polygon points="42,5 28,24 31,34" fill="#7c3aed" />
+                    <div className="absolute inset-0 rounded-full border border-sky-500/30 animate-radar-pulse" />
+                    <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8 drop-shadow-[0_0_12px_rgba(56,189,248,0.5)]">
+                      <polygon points="42,5 17,21 28,24" fill="#38bdf8" />
+                      <polygon points="42,5 28,24 31,34" fill="#0284c7" />
                       <line x1="42" y1="5" x2="28" y2="24" stroke="#ffffff" strokeWidth="1.2" opacity="0.9" />
                       <circle cx="42" cy="5" r="2" fill="#ffffff" />
                     </svg>
@@ -842,7 +842,7 @@ export default function UserDashboard() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-white">Autonomous Scout Executing</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-violet-950/80 border border-violet-700/60 text-violet-300 animate-pulse">
+                      <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-sky-950/80 border border-sky-700/60 text-sky-300 animate-pulse">
                         RADAR SWEEP ACTIVE
                       </span>
                     </div>
@@ -852,7 +852,7 @@ export default function UserDashboard() {
                   </div>
                 </div>
                 <div className="w-full sm:w-44 h-2 bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden relative shrink-0">
-                  <div className="w-20 h-full bg-gradient-to-r from-violet-600 via-purple-400 to-violet-600 rounded-full animate-laser-sweep" />
+                  <div className="w-20 h-full bg-gradient-to-r from-sky-600 via-cyan-400 to-sky-600 rounded-full animate-laser-sweep" />
                 </div>
               </div>
             </div>
@@ -933,7 +933,7 @@ export default function UserDashboard() {
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
                 <span>Screening: <strong className="text-zinc-300">Contextual AI</strong></span>
-                {!isProfessional && <span className="text-[9px] font-mono text-violet-400 ml-0.5">🔒 PRO</span>}
+                {!isProfessional && <span className="text-[9px] font-mono text-blue-400 ml-0.5">🔒 PRO</span>}
               </button>
               <span className="text-zinc-800 hidden sm:inline">|</span>
               <button
@@ -942,7 +942,7 @@ export default function UserDashboard() {
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
                 <span>Delivery: <strong className="text-zinc-300">Recruiter ATS</strong></span>
-                {!isProfessional && <span className="text-[9px] font-mono text-violet-400 ml-0.5">🔒 PRO</span>}
+                {!isProfessional && <span className="text-[9px] font-mono text-blue-400 ml-0.5">🔒 PRO</span>}
               </button>
             </div>
 
@@ -987,7 +987,7 @@ export default function UserDashboard() {
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
           >
-            <MessageSquare className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+            <MessageSquare className="w-3.5 h-3.5 text-teal-400 shrink-0" />
             <span>Inquiries</span>
             {userTickets.length > 0 && (
               <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
@@ -1003,9 +1003,9 @@ export default function UserDashboard() {
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
             <span>AI ATS Resume</span>
-            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-violet-950/80 border border-violet-700/50 text-violet-300 font-semibold">
+            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-amber-950/80 border border-amber-700/50 text-amber-300 font-semibold">
               PRO
             </span>
           </button>
@@ -1081,7 +1081,7 @@ export default function UserDashboard() {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
-                      <Target className="w-4 h-4 text-violet-400" />
+                      <Target className="w-4 h-4 text-sky-400" />
                     </div>
                     <div>
                       <h3 className="text-xs font-semibold text-white">
@@ -1116,7 +1116,7 @@ export default function UserDashboard() {
                       onClick={() => setActiveTab('resume_builder')}
                       className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <Sparkles className="w-3 h-3 text-violet-400" />
+                      <Sparkles className="w-3 h-3 text-amber-400" />
                       <span>AI Resume Builder</span>
                     </button>
                   </div>
@@ -1173,7 +1173,7 @@ export default function UserDashboard() {
                           setProModalFeature('Instant On-Demand Turbo Trigger')
                           setShowProModal(true)
                         }}
-                        className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-violet-500/40 text-violet-300 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-blue-500/40 text-blue-300 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Lock className="w-3 h-3" />
                         <span>Trigger Scout (PRO)</span>
@@ -1210,7 +1210,7 @@ export default function UserDashboard() {
                         <td colSpan={4} className="py-16 text-center">
                           <div className="max-w-md mx-auto space-y-3">
                             <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
-                              <Cpu className="w-6 h-6 text-violet-400" />
+                              <Cpu className="w-6 h-6 text-sky-400" />
                             </div>
                             <div className="space-y-1">
                               <h4 className="text-xs font-semibold text-white">
@@ -1259,7 +1259,7 @@ export default function UserDashboard() {
                                     setProModalFeature('Job Redirect URL Access')
                                     setShowProModal(true)
                                   }}
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-violet-950/80 border border-violet-700/50 text-violet-300 hover:bg-violet-900/60 transition-colors cursor-pointer"
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-blue-950/80 border border-blue-700/50 text-blue-300 hover:bg-blue-900/60 transition-colors cursor-pointer"
                                   title="Upgrade to Professional to open job listing"
                                 >
                                   <Lock className="w-2.5 h-2.5" />
@@ -1297,7 +1297,7 @@ export default function UserDashboard() {
                 ) : historyJobs.length === 0 ? (
                   <div className="py-12 px-4 text-center space-y-3">
                     <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
-                      <Cpu className="w-5 h-5 text-violet-400" />
+                      <Cpu className="w-5 h-5 text-sky-400" />
                     </div>
                     <div className="space-y-1">
                       <h4 className="text-xs font-semibold text-white">
@@ -1337,7 +1337,7 @@ export default function UserDashboard() {
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono pt-1">
                         <span>{formatJobDate(job)}</span>
-                        <span className="text-violet-400 flex items-center gap-0.5 font-medium">
+                        <span className="text-sky-400 flex items-center gap-0.5 font-medium">
                           Audit Receipt &rarr;
                         </span>
                       </div>
@@ -1380,15 +1380,15 @@ export default function UserDashboard() {
         {activeTab === 'profile' && (
           <div className="space-y-4">
             {/* AI Resume Builder Teaser Banner */}
-            <div className="p-4 rounded-xl bg-gradient-to-r from-violet-950/40 via-zinc-950 to-violet-950/30 border border-violet-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-gradient-to-r from-amber-950/40 via-zinc-950 to-amber-950/30 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-violet-950/80 border border-violet-800/60 flex items-center justify-center text-violet-300 shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-amber-950/80 border border-amber-800/60 flex items-center justify-center text-amber-300 shrink-0">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-white">Need an ATS-Optimized Resume for High-Paying Senior Roles?</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-violet-900/80 border border-violet-600/50 text-white font-semibold">
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-900/80 border border-amber-600/50 text-white font-semibold">
                       PRO ONLY
                     </span>
                   </div>
@@ -1445,13 +1445,13 @@ export default function UserDashboard() {
             {/* Header / Summary Card */}
             <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-violet-400 shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-teal-400 shrink-0">
                   <MessageSquare className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white">My Support Requests & Inquiries</h3>
                   <p className="text-xs text-zinc-400 mt-0.5">
-                    Direct communications with JobFlux Administrator (<span className="text-violet-300 font-mono">technohmsit@gmail.com</span>).
+                    Direct communications with JobFlux Administrator (<span className="text-teal-300 font-mono">technohmsit@gmail.com</span>).
                   </p>
                 </div>
               </div>
@@ -1478,7 +1478,7 @@ export default function UserDashboard() {
             {/* Queries List */}
             {loadingUserTickets ? (
               <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 text-center text-zinc-400">
-                <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-violet-400" />
+                <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-teal-400" />
                 <span>Loading your inquiries...</span>
               </div>
             ) : userTickets.length === 0 ? (
@@ -1554,14 +1554,14 @@ export default function UserDashboard() {
 
                     {/* Admin Response Box */}
                     {t.admin_response ? (
-                      <div className="p-3 rounded-lg bg-violet-950/20 border border-violet-800/40 space-y-1">
+                      <div className="p-3 rounded-lg bg-teal-950/20 border border-teal-800/40 space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-semibold text-violet-300 flex items-center gap-1.5">
-                            <Shield className="w-3 h-3 text-violet-400" />
+                          <span className="font-semibold text-teal-300 flex items-center gap-1.5">
+                            <Shield className="w-3 h-3 text-teal-400" />
                             Administrator Response (technohmsit@gmail.com)
                           </span>
                           {t.resolved_at && (
-                            <span className="text-[10px] font-mono text-violet-400">
+                            <span className="text-[10px] font-mono text-teal-400">
                               {formatTimestamp(t.resolved_at)}
                             </span>
                           )}
@@ -1685,11 +1685,11 @@ export default function UserDashboard() {
                       setProModalFeature('Job Redirect URL Access')
                       setShowProModal(true)
                     }}
-                    className="flex-1 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-violet-500/40 hover:border-violet-500/70 text-violet-300 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    className="flex-1 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-blue-500/40 hover:border-blue-500/70 text-blue-300 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
                     <Lock className="w-3.5 h-3.5" />
                     <span>View Portal Opening</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-violet-950/80 border border-violet-700/50 text-violet-300">PRO</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-700/50 text-blue-300">PRO</span>
                   </button>
                 )}
                 <button

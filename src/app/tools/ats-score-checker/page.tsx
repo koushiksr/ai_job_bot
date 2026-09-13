@@ -149,11 +149,11 @@ export default function AtsScoreCheckerPage() {
           <div className="bg-[#09090b] border border-zinc-800 rounded-2xl p-5 shadow-xl">
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
-                <Search className="w-4 h-4 text-violet-400" /> Target Job Description (JD)
+                <Search className="w-4 h-4 text-amber-400" /> Target Job Description (JD)
               </label>
               <button
                 onClick={() => setJdText(SAMPLE_JD)}
-                className="text-[11px] text-violet-400 hover:text-violet-300 hover:underline cursor-pointer"
+                className="text-[11px] text-amber-400 hover:text-amber-300 hover:underline cursor-pointer"
               >
                 Reset Sample
               </button>

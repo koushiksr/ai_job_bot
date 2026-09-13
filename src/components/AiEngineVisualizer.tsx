@@ -169,10 +169,10 @@ export default function AiEngineVisualizer() {
   return (
     <div className="w-full max-w-6xl mx-auto rounded-2xl bg-[#09090b] border border-zinc-800 shadow-2xl overflow-hidden relative text-zinc-100">
       {/* Autonomous Laser Beam Sweep */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep z-20 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent animate-laser-sweep z-20 pointer-events-none" />
       
-      {/* Subtle top ambient purple aura */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Subtle top ambient cyan aura */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Cockpit Header */}
       <div className="p-4 sm:px-6 bg-[#050507] border-b border-zinc-800/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -335,7 +335,7 @@ export default function AiEngineVisualizer() {
 
           {/* Recruiter Response Toast Alert */}
           <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-[11px] flex items-center gap-2.5 text-zinc-300 font-sans min-h-[46px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
             <span className="line-clamp-2">{activeRole.recruiterMessage}</span>
           </div>
         </div>

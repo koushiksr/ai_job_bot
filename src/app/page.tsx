@@ -317,7 +317,7 @@ export default function Home() {
                 className="hover:text-white transition-colors flex items-center gap-1"
               >
                 <span>Resume Studio</span>
-                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-violet-950/80 border border-violet-700/50 text-violet-300">ATS</span>
+                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-950/80 border border-amber-700/50 text-amber-300">ATS</span>
               </Link>
               <Link
                 href="/tools"
@@ -343,7 +343,7 @@ export default function Home() {
                 onClick={() => setIsHelpOpen(true)}
                 className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                <Mail className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
                 <span>Help & Support</span>
               </button>
             </nav>
@@ -355,7 +355,7 @@ export default function Home() {
                 onClick={() => setIsHelpOpen(true)}
                 className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex md:hidden items-center gap-1 shrink-0 px-2 py-1"
               >
-                <Mail className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
                 <span className="hidden sm:inline">Help</span>
               </button>
 
@@ -429,16 +429,16 @@ export default function Home() {
           >
             <div>
               {/* Sleek Autonomous Radar Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-violet-500/30 text-zinc-300 text-xs font-mono mb-5 relative overflow-hidden backdrop-blur-md shadow-[0_0_20px_rgba(168,85,247,0.12)]">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-sky-500/30 text-zinc-300 text-xs font-mono mb-5 relative overflow-hidden backdrop-blur-md shadow-[0_0_20px_rgba(56,189,248,0.15)]">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
                 </span>
                 <span className="text-zinc-200">Autonomous Radar Active</span>
                 <span className="text-zinc-600">·</span>
-                <span className="text-violet-400 font-medium">Dual Runs (06:00 & 08:00 AM IST)</span>
+                <span className="text-sky-400 font-medium">Dual Runs (06:00 & 08:00 AM IST)</span>
                 {/* Laser scanline */}
-                <div className="absolute inset-x-0 bottom-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/90 to-transparent animate-laser-sweep" />
+                <div className="absolute inset-x-0 bottom-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/90 to-transparent animate-laser-sweep" />
               </div>
               
               <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-white leading-[1.1]">
@@ -454,7 +454,7 @@ export default function Home() {
             {/* Benefit Badges in Monochromatic Glass Style */}
             <div className="flex flex-wrap gap-2.5 items-center justify-center lg:justify-start text-xs text-zinc-300">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
-                <Clock className="w-3.5 h-3.5 text-violet-400" />
+                <Clock className="w-3.5 h-3.5 text-sky-400" />
                 <span>Dual Morning Runs (6 & 8 AM IST)</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
@@ -510,7 +510,7 @@ export default function Home() {
             {existingUser ? (
               <div className="p-7 w-full border border-zinc-800 bg-[#09090b] rounded-2xl shadow-xl space-y-5 text-center relative overflow-hidden card-featured-glow">
                 {/* Laser beam sweep accent */}
-                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
                 <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center mx-auto">
                   <User className="w-6 h-6 text-zinc-400" />
                 </div>
@@ -545,11 +545,11 @@ export default function Home() {
             ) : (
               <div className={`p-6 sm:p-7 w-full border bg-[#09090b] rounded-2xl shadow-xl space-y-5 relative overflow-hidden transition-all duration-500 ${
                 cardHighlighted
-                  ? 'border-violet-500/80 ring-2 ring-violet-500/50 shadow-[0_0_35px_rgba(168,85,247,0.25)]'
+                  ? 'border-sky-500/80 ring-2 ring-sky-500/50 shadow-[0_0_35px_rgba(56,189,248,0.25)]'
                   : 'border-zinc-800 card-featured-glow'
               }`}>
                 {/* Laser beam sweep accent */}
-                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
                 
                 {/* Auth0-Style Segmented Control */}
                 <div className="flex items-center bg-black p-1 rounded-lg border border-zinc-800">
@@ -637,7 +637,7 @@ export default function Home() {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           autoComplete="name"
-                          className="w-full bg-black border border-zinc-800 focus:border-violet-500/80 focus:ring-1 focus:ring-violet-500/40 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
+                          className="w-full bg-black border border-zinc-800 focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/40 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
                           placeholder="Candidate name"
                           required
                         />
@@ -656,7 +656,7 @@ export default function Home() {
                         onChange={(e) => setEmail(e.target.value)}
                         autoComplete="email"
                         spellCheck={false}
-                        className="w-full bg-black border border-zinc-800 focus:border-violet-500/80 focus:ring-1 focus:ring-violet-500/40 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
+                        className="w-full bg-black border border-zinc-800 focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/40 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
                         placeholder="name@example.com"
                         required
                       />
@@ -670,7 +670,7 @@ export default function Home() {
                         <button
                           type="button"
                           onClick={() => setIsHelpOpen(true)}
-                          className="text-[11px] text-zinc-500 hover:text-violet-400 transition-colors cursor-pointer"
+                          className="text-[11px] text-zinc-500 hover:text-sky-400 transition-colors cursor-pointer"
                         >
                           Forgot?
                         </button>
@@ -683,7 +683,7 @@ export default function Home() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete={authMode === 'trial' ? 'new-password' : 'current-password'}
-                        className="w-full bg-black border border-zinc-800 focus:border-violet-500/80 focus:ring-1 focus:ring-violet-500/40 rounded-lg pl-9 pr-9 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
+                        className="w-full bg-black border border-zinc-800 focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/40 rounded-lg pl-9 pr-9 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
                         placeholder="••••••••"
                         required
                       />
@@ -784,7 +784,7 @@ export default function Home() {
             <div className="flex items-center gap-5 text-[11px] text-zinc-400 font-mono">
               <span className="text-emerald-400 font-medium">✓ 14,820+ Applications Submitted</span>
               <span className="hidden sm:inline text-zinc-400">⚡ 98.6% ATS Pass Rate</span>
-              <span className="text-violet-400 font-semibold hidden md:inline">🔒 0 Account Bans Guaranteed</span>
+              <span className="text-emerald-400 font-semibold hidden md:inline">🔒 0 Account Bans Guaranteed</span>
             </div>
           </div>
         </div>
@@ -873,7 +873,7 @@ export default function Home() {
         {/* Section: Why Buy JobFlux AI — The Comparison & Math */}
         <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 border-t border-zinc-900 z-10 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-violet-500/10 text-violet-400 border border-violet-500/20">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-sky-500/10 text-sky-400 border border-sky-500/20">
               <Sparkles className="w-3.5 h-3.5" /> High-Return Career Investment
             </div>
             <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight">
@@ -892,7 +892,7 @@ export default function Home() {
                   <th className="p-4 sm:p-5 font-semibold">Key Capabilities</th>
                   <th className="p-4 sm:p-5 font-semibold text-zinc-500">Manual Applying</th>
                   <th className="p-4 sm:p-5 font-semibold text-zinc-500">Cheap Chrome Extensions</th>
-                  <th className="p-4 sm:p-5 font-bold text-violet-300 bg-violet-950/40">JobFlux AI Autopilot</th>
+                  <th className="p-4 sm:p-5 font-bold text-sky-300 bg-sky-950/40">JobFlux AI Autopilot</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
@@ -900,43 +900,43 @@ export default function Home() {
                   <td className="p-4 sm:p-5 font-medium text-white">Daily Application Velocity</td>
                   <td className="p-4 sm:p-5 text-zinc-500">5-10 / day (Exhausting)</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Unreliable (Crashes often)</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-violet-950/20">50 / day Guaranteed (Dual 6 & 8 AM runs)</td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">50 / day Guaranteed (Dual 6 & 8 AM runs)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Naukri Resdex 24h Profile Bump</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Must remember every morning</td>
                   <td className="p-4 sm:p-5 text-zinc-500">None</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-violet-950/20">Automatic 9 AM Silent Touch (3x more calls)</td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">Automatic 9 AM Silent Touch (3x more calls)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">AI Screening Questionnaire Solver</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Manual typing on every job</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Leaves blank or random guesses</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-violet-950/20">Context-Aware AI Answers from Resume</td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">Context-Aware AI Answers from Resume</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Naukri Account Safety & Ban Risk</td>
                   <td className="p-4 sm:p-5 text-emerald-400">Safe (Manual)</td>
                   <td className="p-4 sm:p-5 text-rose-400">High Risk (Datacenter IP bans)</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-violet-950/20">100% Safe (Local Residential IP + Stealth)</td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">100% Safe (Local Residential IP + Stealth)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Harvard ATS Resume Studio</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Pay ₹2,000+ for external writers</td>
                   <td className="p-4 sm:p-5 text-zinc-500">None</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-violet-950/20">Included Free (99.7% ATS pass rate)</td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">Included Free (99.7% ATS pass rate)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Time Invested Per Month</td>
                   <td className="p-4 sm:p-5 text-rose-400 font-semibold">60 - 75 Hours Wasted</td>
                   <td className="p-4 sm:p-5 text-zinc-400">15 Hours debugging errors</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-violet-950/20">0 Hours (100% Automated Background)</td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">0 Hours (100% Automated Background)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Monthly Investment</td>
                   <td className="p-4 sm:p-5 text-zinc-400">₹45,000+ (in lost dev time)</td>
                   <td className="p-4 sm:p-5 text-zinc-400">₹1,500 - ₹3,000/mo ($20-$40)</td>
-                  <td className="p-4 sm:p-5 font-bold text-white bg-violet-950/40">Just ₹499 / Month (₹16 / day)</td>
+                  <td className="p-4 sm:p-5 font-bold text-white bg-sky-950/40">Just ₹499 / Month (₹16 / day)</td>
                 </tr>
               </tbody>
             </table>
@@ -961,9 +961,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="p-6 sm:p-7 rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-950/20 to-zinc-950 flex flex-col justify-between space-y-4">
+            <div className="p-6 sm:p-7 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-950/20 to-zinc-950 flex flex-col justify-between space-y-4">
               <div className="space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
                   <Zap className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white">
@@ -987,36 +987,36 @@ export default function Home() {
         {/* Section 4: Interactive SEO FAQ Accordion & Knowledge Base */}
         <section id="faq" className="w-full max-w-5xl mx-auto px-6 py-16 border-t border-zinc-900 z-10 space-y-8 scroll-mt-20">
           <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-[11px] font-mono text-violet-400 uppercase tracking-wider">
+            <span className="text-[11px] font-mono text-sky-400 uppercase tracking-wider">
               Frequently Asked Questions
             </span>
             <h2 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight">
               Everything you need to know about JobFlux AI
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-400">
-              Clear answers on how the autonomous engine operates, ATS scoring standards, and safe recruiter delivery.
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              Real answers about safety, ATS compliance, automation limits, and money-back guarantees.
             </p>
           </div>
 
           <div className="space-y-3">
             {FAQS.map((faq, idx) => {
-              const isOpen = openFaq === idx
+              const isOpen = openFaq === idx;
               return (
                 <div
                   key={idx}
-                  className="rounded-xl border border-zinc-800/80 bg-[#09090b] overflow-hidden transition-colors hover:border-zinc-700"
+                  className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:border-zinc-700"
                 >
                   <button
-                    type="button"
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
-                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer"
+                    className="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer"
+                    aria-expanded={isOpen}
                   >
                     <span className="text-xs sm:text-sm font-semibold text-white leading-snug">
                       {faq.q}
                     </span>
                     <ChevronDown
                       className={`w-4 h-4 text-zinc-400 shrink-0 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 text-violet-400' : ''
+                        isOpen ? 'rotate-180 text-sky-400' : ''
                       }`}
                     />
                   </button>

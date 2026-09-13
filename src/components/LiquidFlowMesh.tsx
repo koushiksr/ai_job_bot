@@ -92,10 +92,10 @@ export default function LiquidFlowMesh({
     const droplets: Droplet[] = []
     const dropletCount = 22
     const dropletColors = [
-      'rgba(168, 85, 247, ', // Violet
-      'rgba(139, 92, 246, ', // Purple
-      'rgba(99, 102, 241, ', // Indigo
-      'rgba(192, 132, 252, ' // Bright Lilac
+      'rgba(56, 189, 248, ', // Sky
+      'rgba(6, 182, 212, ', // Cyan
+      'rgba(59, 130, 246, ', // Blue
+      'rgba(14, 165, 233, ' // Deep Sky
     ]
 
     for (let i = 0; i < dropletCount; i++) {
@@ -130,12 +130,12 @@ export default function LiquidFlowMesh({
 
       ctx.clearRect(0, 0, width, height)
 
-      // Layer 1: Deep Midnight Obsidian/Indigo Fluid Stream
+      // Layer 1: Deep Oceanic Stream
       ctx.save()
       const grad1 = ctx.createLinearGradient(0, 0, width, height)
-      grad1.addColorStop(0, 'rgba(15, 10, 35, 0.45)')
-      grad1.addColorStop(0.5, 'rgba(40, 15, 75, 0.35)')
-      grad1.addColorStop(1, 'rgba(10, 5, 25, 0.5)')
+      grad1.addColorStop(0, 'rgba(8, 14, 28, 0.45)')
+      grad1.addColorStop(0.5, 'rgba(12, 24, 45, 0.35)')
+      grad1.addColorStop(1, 'rgba(5, 10, 20, 0.5)')
       ctx.fillStyle = grad1
       ctx.beginPath()
       ctx.moveTo(0, height)
@@ -165,13 +165,13 @@ export default function LiquidFlowMesh({
       ctx.fill()
       ctx.restore()
 
-      // Layer 2: Glowing Violet Viscous Flow Stream (Chromatic)
+      // Layer 2: Glowing Cyan Viscous Flow Stream (Chromatic)
       ctx.save()
       ctx.globalCompositeOperation = 'screen'
       const grad2 = ctx.createLinearGradient(0, 0, width * 0.8, height)
-      grad2.addColorStop(0, 'rgba(88, 28, 135, 0.30)')
-      grad2.addColorStop(0.5, 'rgba(126, 34, 206, 0.28)')
-      grad2.addColorStop(0.8, 'rgba(67, 56, 202, 0.22)')
+      grad2.addColorStop(0, 'rgba(2, 132, 199, 0.25)')
+      grad2.addColorStop(0.5, 'rgba(14, 165, 233, 0.22)')
+      grad2.addColorStop(0.8, 'rgba(56, 189, 248, 0.18)')
       grad2.addColorStop(1, 'rgba(15, 23, 42, 0.0)')
       ctx.fillStyle = grad2
       ctx.beginPath()
@@ -203,10 +203,10 @@ export default function LiquidFlowMesh({
       ctx.save()
       ctx.globalCompositeOperation = 'lighter'
       const strokeGrad = ctx.createLinearGradient(0, 0, width, 0)
-      strokeGrad.addColorStop(0, 'rgba(147, 51, 234, 0.0)')
-      strokeGrad.addColorStop(0.2, 'rgba(168, 85, 247, 0.55)')
-      strokeGrad.addColorStop(0.5, 'rgba(192, 132, 252, 0.75)')
-      strokeGrad.addColorStop(0.8, 'rgba(99, 102, 241, 0.55)')
+      strokeGrad.addColorStop(0, 'rgba(14, 165, 233, 0.0)')
+      strokeGrad.addColorStop(0.2, 'rgba(56, 189, 248, 0.55)')
+      strokeGrad.addColorStop(0.5, 'rgba(125, 211, 252, 0.75)')
+      strokeGrad.addColorStop(0.8, 'rgba(6, 182, 212, 0.55)')
       strokeGrad.addColorStop(1, 'rgba(59, 130, 246, 0.0)')
       
       ctx.strokeStyle = strokeGrad
@@ -247,8 +247,8 @@ export default function LiquidFlowMesh({
           mouse.x, mouse.y, 0,
           mouse.x, mouse.y, mouse.radius * 0.9
         )
-        mouseGlow.addColorStop(0, `rgba(168, 85, 247, ${0.18 * mouse.strength})`)
-        mouseGlow.addColorStop(0.5, `rgba(126, 34, 206, ${0.08 * mouse.strength})`)
+        mouseGlow.addColorStop(0, `rgba(56, 189, 248, ${0.18 * mouse.strength})`)
+        mouseGlow.addColorStop(0.5, `rgba(14, 165, 233, ${0.08 * mouse.strength})`)
         mouseGlow.addColorStop(1, 'rgba(0, 0, 0, 0)')
         ctx.fillStyle = mouseGlow
         ctx.beginPath()

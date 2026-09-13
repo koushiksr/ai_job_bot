@@ -57,7 +57,7 @@ const TOOLS = [
     slug: '/tools/naukri-profile-score',
     icon: TrendingUp,
     badge: 'Recruiter Search Ranking',
-    badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    badgeColor: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
     description:
       'Find out which page of recruiter searches your profile lands on. Calculate your score based on active touch timestamps, notice period, and keyword density.',
     features: ['Page 1 vs Page 5+ Estimator', 'Freshness Factor Breakdown', 'Notice Period Impact', 'Daily Bump Optimization Tips']
@@ -137,7 +137,7 @@ export default function ToolsHubPage() {
         {/* Feature Highlight / Upsell to Main Bot */}
         <div className="rounded-3xl border border-zinc-800 bg-[#09090b] p-8 md:p-12 relative overflow-hidden space-y-6">
           <div className="max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
               <Bot className="w-3.5 h-3.5" /> Next-Level Automation
             </div>
             <h2 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight">
