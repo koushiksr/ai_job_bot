@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   Sparkles,
@@ -154,10 +154,37 @@ export default function AiResumeBuilder({
   const [generatedResult, setGeneratedResult] = useState<any | null>(null)
   const [syncSuccess, setSyncSuccess] = useState<boolean>(false)
 
+  // Smooth scroll refs
+  const resultSectionRef = useRef<HTMLDivElement>(null)
+  const downloadSectionRef = useRef<HTMLDivElement>(null)
+
+  // When generatedResult arrives, scroll down to the preview & buy subscription section
+  useEffect(() => {
+    if (generatedResult) {
+      const timer = setTimeout(() => {
+        if (downloadSectionRef.current) {
+          downloadSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        } else if (resultSectionRef.current) {
+          resultSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 150)
+      return () => clearTimeout(timer)
+    }
+  }, [generatedResult])
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsGenerating(true)
     setSyncSuccess(false)
+
+    // Scroll down immediately so user sees the synthesizing progress and the download/subscription area
+    setTimeout(() => {
+      if (resultSectionRef.current) {
+        resultSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      } else {
+        window.scrollBy({ top: 380, behavior: 'smooth' })
+      }
+    }, 100)
 
     try {
       const res = await fetch('/api/resume/generate', {
@@ -302,11 +329,18 @@ export default function AiResumeBuilder({
                 <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">{activeSample.name}</h3>
                 <p className="text-xs text-violet-400 font-medium mt-0.5">{activeSample.title} · {activeSample.companyTier}</p>
               </div>
-              <div className="flex items-center gap-2 self-start sm:self-auto">
+              <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
                 <span className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 font-semibold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   {activeSample.score}% ATS RATING
                 </span>
+                <button
+                  onClick={() => onUpgradeClick('Download ' + activeSample.title + ' ATS Template')}
+                  className="px-2.5 sm:px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 hover:text-white text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Download className="w-3.5 h-3.5 text-violet-400" />
+                  <span>Buy Subscription to Download</span>
+                </button>
               </div>
             </div>
 
@@ -513,9 +547,32 @@ export default function AiResumeBuilder({
             </button>
           </form>
 
+          {/* Intermediate Synthesizing Card with Ref for immediate scroll */}
+          <div ref={resultSectionRef} id="ats-resume-synthesis-anchor">
+            {isGenerating && (
+              <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-violet-500/40 text-center space-y-3.5 shadow-2xl card-featured-glow animate-pulse">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-violet-950/80 border border-violet-600/60 flex items-center justify-center text-violet-300 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+                  <RefreshCw className="w-6 h-6 animate-spin text-violet-400" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-bold text-white">
+                    Synthesizing ATS-Optimized Resume with AI...
+                  </h4>
+                  <p className="text-xs text-zinc-400 mt-1 max-w-md mx-auto leading-relaxed">
+                    Injecting high-density keywords for Workday, Greenhouse & Naukri Resdex algorithms. Formatting quantified Google XYZ bullet points.
+                  </p>
+                </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono bg-black border border-zinc-800 text-zinc-400">
+                  <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                  <span>Preparing preview & subscription download options below...</span>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Generated Result Display */}
           {generatedResult && (
-            <div className="space-y-4">
+            <div ref={downloadSectionRef} id="buy-subscription-download-section" className="space-y-4 pt-2">
               {/* If User is Professional -> Full Resume & Actions */}
               {!generatedResult.is_preview && generatedResult.resume && (
                 <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-zinc-800 shadow-2xl space-y-6">
@@ -533,10 +590,10 @@ export default function AiResumeBuilder({
                     <div className="flex items-center gap-2.5">
                       <button
                         onClick={handlePrintDownload}
-                        className="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-white/10"
                       >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Print / Save PDF</span>
+                        <Download className="w-4 h-4" />
+                        <span>Download / Save PDF</span>
                       </button>
                     </div>
                   </div>
@@ -614,9 +671,14 @@ export default function AiResumeBuilder({
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[11px] font-mono text-violet-400 bg-violet-950/60 px-2.5 py-1 rounded-lg border border-violet-800/50">
-                      <Lock className="w-3 h-3" />
-                      <span>PROFESSIONAL TIER REQUIRED</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        onClick={() => onUpgradeClick('Download Full ATS Resume & Cloud Bot Sync')}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 px-3.5 py-1.5 rounded-lg transition-all shadow-md shadow-violet-600/20 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Buy Subscription to Download</span>
+                      </button>
                     </div>
                   </div>
 
@@ -647,26 +709,39 @@ export default function AiResumeBuilder({
                     </div>
 
                     {/* Glowing Lock Overlay */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-black/70 backdrop-blur-sm text-center space-y-3">
-                      <div className="w-11 h-11 rounded-2xl bg-violet-950/80 border border-violet-700/60 flex items-center justify-center text-violet-300 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-black/80 backdrop-blur-md text-center space-y-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-violet-950/90 border border-violet-600/70 flex items-center justify-center text-violet-300 shadow-[0_0_25px_rgba(168,85,247,0.4)]">
                         <Lock className="w-5 h-5" />
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-white">
-                          Unlock Full ATS Resume & Auto-Sync to Naukri Bot
+                      <div className="space-y-1">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-violet-950/80 border border-violet-700/60 text-violet-300 font-semibold">
+                          <Crown className="w-3 h-3 text-violet-400" /> Subscription Required to Download
+                        </span>
+                        <h4 className="text-base font-bold text-white pt-1">
+                          Buy Subscription to Download Full ATS Resume
                         </h4>
-                        <p className="text-xs text-zinc-400 mt-1 max-w-md">
-                          The complete quantified work history, keyword injector, printable PDF export, and 1-click cloud sync to your daily application bot are reserved for Professional members.
+                        <p className="text-xs text-zinc-400 max-w-md leading-relaxed">
+                          Download the complete 99%+ ATS-compliant PDF resume, unlock quantified Google XYZ bullets, and auto-sync to your daily 50-job application bot.
                         </p>
                       </div>
 
-                      <button
-                        onClick={() => onUpgradeClick('AI ATS Resume Builder & Cloud Bot Sync')}
-                        className="px-6 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-white/10"
-                      >
-                        <span>Upgrade to Professional (₹1,199 / 3 Months)</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
+                      <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
+                        <button
+                          onClick={() => onUpgradeClick('Download Full ATS Resume & Cloud Bot Sync')}
+                          className="px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-xl shadow-violet-600/30"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Buy Subscription to Download PDF</span>
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </button>
+
+                        <Link
+                          href="/pricing"
+                          className="text-xs text-zinc-400 hover:text-white px-3 py-2 transition-colors font-medium"
+                        >
+                          View Plans (From ₹499/mo) →
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

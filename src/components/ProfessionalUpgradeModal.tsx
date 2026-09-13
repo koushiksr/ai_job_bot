@@ -142,7 +142,7 @@ export default function ProfessionalUpgradeModal({
               onClick={onClose}
               className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs transition-all flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-white/10"
             >
-              <span>Upgrade to Professional</span>
+              <span>{featureTitle.toLowerCase().includes('download') ? 'Buy Subscription to Download' : 'Upgrade to Professional'}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
