@@ -557,7 +557,7 @@ export default function UserDashboard() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
               title="Refresh Telemetry"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${isRefreshing ? 'animate-spin' : ''}`} /> 
+              <RefreshCw className={`w-3.5 h-3.5 text-zinc-400 ${isRefreshing ? 'animate-spin' : ''}`} /> 
               <span>Refresh</span>
             </button>
 
@@ -565,7 +565,7 @@ export default function UserDashboard() {
               onClick={() => setIsHelpOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
             >
-              <Mail className="w-3.5 h-3.5 text-teal-400" /> 
+              <Mail className="w-3.5 h-3.5 text-zinc-400" /> 
               <span>Help & Support</span>
             </button>
 
@@ -710,7 +710,7 @@ export default function UserDashboard() {
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
               >
-                <RefreshCw className="w-4 h-4 text-sky-400 shrink-0" />
+                <RefreshCw className="w-4 h-4 text-zinc-400 shrink-0" />
                 <span>Refresh Live Telemetry</span>
               </button>
 
@@ -719,9 +719,9 @@ export default function UserDashboard() {
                 onClick={() => setIsMobileNavOpen(false)}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
               >
-                <FileText className="w-4 h-4 text-amber-400 shrink-0" />
+                <FileText className="w-4 h-4 text-zinc-400 shrink-0" />
                 <span>AI ATS Resume Studio</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-700/50 text-amber-300 ml-auto font-semibold">
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 ml-auto font-semibold">
                   HARVARD
                 </span>
               </Link>
@@ -730,7 +730,7 @@ export default function UserDashboard() {
                 onClick={() => { setIsHelpOpen(true); setIsMobileNavOpen(false) }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
               >
-                <Mail className="w-4 h-4 text-teal-400 shrink-0" />
+                <Mail className="w-4 h-4 text-zinc-400 shrink-0" />
                 <span>Help & Support Center</span>
               </button>
 
@@ -739,7 +739,7 @@ export default function UserDashboard() {
                 onClick={() => setIsMobileNavOpen(false)}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
               >
-                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <Sparkles className="w-4 h-4 text-zinc-400 shrink-0" />
                 <span>Compare Pricing & Plans</span>
               </Link>
 
@@ -749,7 +749,7 @@ export default function UserDashboard() {
                   onClick={() => setIsMobileNavOpen(false)}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
                 >
-                  <Shield className="w-4 h-4 text-sky-400 shrink-0" />
+                  <Shield className="w-4 h-4 text-zinc-400 shrink-0" />
                   <span>Admin Control Center</span>
                 </Link>
               )}
@@ -814,15 +814,15 @@ export default function UserDashboard() {
 
         {/* Unified Mission Control Card (Cockpit + Live Metrics + Telemetry Strip) */}
         <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden card-featured-glow relative">
-          {/* Subtle top laser scan accent */}
-          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+          {/* Subtle top accent */}
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 
-          {/* Section 1: Cockpit Header & Trigger */}
+          {/* Section 1: Cockpit Header */}
           <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-950/50">
             <div className="flex items-center gap-3.5">
               <div className="relative shrink-0">
                 <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
-                  <Cpu className="w-5 h-5 text-sky-400" />
+                  <Cpu className="w-5 h-5 text-zinc-300" />
                 </div>
                 <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -1031,7 +1031,7 @@ export default function UserDashboard() {
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
           >
-            <MessageSquare className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
             <span>Inquiries</span>
             {userTickets.length > 0 && (
               <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
@@ -1047,9 +1047,9 @@ export default function UserDashboard() {
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
             <span>AI ATS Resume</span>
-            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-amber-950/80 border border-amber-700/50 text-amber-300 font-semibold">
+            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">
               PRO
             </span>
           </button>
@@ -1160,7 +1160,7 @@ export default function UserDashboard() {
                       onClick={() => setActiveTab('resume_builder')}
                       className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      <Sparkles className="w-3 h-3 text-zinc-400" />
                       <span>AI Resume Builder</span>
                     </button>
                   </div>
@@ -1203,7 +1203,7 @@ export default function UserDashboard() {
                       </p>
                     </div>
                     <div className="w-full py-2 px-2.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 text-xs font-mono flex items-center justify-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                      <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                       <span>Sweeps: {isProfessional ? '06:00 & 08:00 AM IST' : '06:00 AM IST'}</span>
                     </div>
                   </div>
