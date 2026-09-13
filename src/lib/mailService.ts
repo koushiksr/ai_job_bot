@@ -30,7 +30,7 @@ function createTransporter() {
     secure: true,
     auth: {
       user: user.trim(),
-      pass: pass.trim().replace(/\s+/g, '')
+      pass: pass.trim().replace(/['"]/g, '').replace(/\s+/g, '')
     }
   })
 }
