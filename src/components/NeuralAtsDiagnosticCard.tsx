@@ -165,7 +165,7 @@ export default function NeuralAtsDiagnosticCard({
           <div className="flex items-center gap-2 text-zinc-300">
             <Zap className="w-4 h-4 text-blue-400 shrink-0" />
             <span>
-              <strong className="text-white">Professional Plan</strong> unlocks instant On-Demand Turbo sweeps, neural ATS scoring, and zero-queue recruiter priority.
+              <strong className="text-white">Professional Plan</strong> unlocks neural ATS scoring, Harvard ATS resume PDF downloads, dual morning runs, and upcoming On-Demand turbo sweeps.
             </span>
           </div>
           <button

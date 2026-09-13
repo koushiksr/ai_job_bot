@@ -73,14 +73,19 @@ export default function ProfessionalUpgradeModal({
           {/* 4 Professional Power Features Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-6">
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
-                  <Zap className="w-3.5 h-3.5" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
+                    <Zap className="w-3.5 h-3.5" />
+                  </div>
+                  <h4 className="text-xs font-semibold text-white">Instant On-Demand Scout</h4>
                 </div>
-                <h4 className="text-xs font-semibold text-white">Instant On-Demand Scout</h4>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-950/80 border border-sky-600/50 text-sky-300 uppercase tracking-wider font-semibold">
+                  Coming Soon
+                </span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Run unlimited real-time application sweeps on demand whenever you find fresh jobs, without waiting for the 6 AM & 8 AM runs.
+                Real-time manual triggers (under active beta development to optimize cloud resource efficiency). Dual 6 AM &amp; 8 AM daily sweeps are active today.
               </p>
             </div>
 

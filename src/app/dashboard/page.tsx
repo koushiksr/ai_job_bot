@@ -94,7 +94,7 @@ export default function UserDashboard() {
 
   // Professional Tier Feature Gating & Perks Modal
   const [showProModal, setShowProModal] = useState<boolean>(false)
-  const [proModalFeature, setProModalFeature] = useState<string>('On-Demand Turbo Scout')
+  const [proModalFeature, setProModalFeature] = useState<string>('Dual 6 AM & 8 AM Turbo Sweeps')
 
   // Candidate account has Professional privileges if on an active Professional tier OR VIP pass.
   // Admin accounts manage system configurations via the Admin Portal (/admin).
@@ -844,13 +844,13 @@ export default function UserDashboard() {
                     <>
                       <span>Schedule: <strong className="text-zinc-300">Dual Precision · 06:00 &amp; 08:00 AM IST</strong></span>
                       <span className="text-zinc-600 hidden sm:inline">•</span>
-                      <span className="text-sky-300 font-medium">+ Unlimited On-Demand</span>
+                      <span className="text-emerald-400 font-medium">Auto Cloud Dispatch</span>
                       <span className="text-zinc-600 hidden sm:inline">•</span>
-                      <span>Next: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
+                      <span>Next Sweep: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
                     </>
                   ) : (
                     <>
-                      <span>Schedule: <strong className="text-zinc-300">Daily Morning Scan</strong></span>
+                      <span>Schedule: <strong className="text-zinc-300">Daily Morning Scan (06:00 AM IST)</strong></span>
                       <span className="text-zinc-600 hidden sm:inline">•</span>
                       <span>Next Run: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
                     </>
@@ -859,40 +859,13 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            <div className="w-full sm:w-auto">
-              {isProfessional ? (
-                <button
-                  onClick={handleTriggerOnDemandScout}
-                  disabled={isTriggeringScout}
-                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
-                >
-                  {isTriggeringScout ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-zinc-900" />
-                      <span>Scouting Openings...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-3.5 h-3.5 text-zinc-900" />
-                      <span>Trigger On-Demand Run</span>
-                    </>
-                  )}
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    setProModalFeature('Instant On-Demand Turbo Scout')
-                    setShowProModal(true)
-                  }}
-                  className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-blue-500/40 text-blue-200 text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.15)] group"
-                >
-                  <Lock className="w-3.5 h-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
-                  <span>Trigger On-Demand Run</span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-900/80 border border-blue-600/50 text-white font-semibold">
-                    PRO
-                  </span>
-                </button>
-              )}
+            <div className="w-full sm:w-auto flex items-center gap-2">
+              <div className="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-zinc-900/90 border border-zinc-800 text-xs flex items-center justify-center sm:justify-start gap-2 font-mono">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-zinc-300">Autonomous Radar</span>
+                <span className="text-zinc-600">•</span>
+                <span className="text-sky-400 font-semibold">{isProfessional ? 'Dual 6 & 8 AM' : '6 AM Active'}</span>
+              </div>
             </div>
           </div>
 
@@ -1229,27 +1202,10 @@ export default function UserDashboard() {
                         Daily autonomous sweeps run at 06:00 AM IST. Dispatched applications will log below.
                       </p>
                     </div>
-                    {isProfessional ? (
-                      <button
-                        onClick={handleTriggerOnDemandScout}
-                        disabled={isTriggeringScout}
-                        className="w-full py-1.5 px-2.5 rounded bg-white hover:bg-zinc-200 text-black text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Zap className="w-3 h-3" />
-                        <span>Run On-Demand Now</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setProModalFeature('Instant On-Demand Turbo Trigger')
-                          setShowProModal(true)
-                        }}
-                        className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-blue-500/40 text-blue-300 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Lock className="w-3 h-3" />
-                        <span>Trigger Scout (PRO)</span>
-                      </button>
-                    )}
+                    <div className="w-full py-2 px-2.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 text-xs font-mono flex items-center justify-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                      <span>Sweeps: {isProfessional ? '06:00 & 08:00 AM IST' : '06:00 AM IST'}</span>
+                    </div>
                   </div>
                 </div>
               </div>

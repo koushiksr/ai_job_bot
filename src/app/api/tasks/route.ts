@@ -85,8 +85,8 @@ export async function POST(req: NextRequest) {
 
     if (!isPro) {
       return NextResponse.json({
-        detail: 'Instant On-Demand Turbo Scout is exclusively reserved for active Professional Tier members. Your automated applications execute during the scheduled daily 06:00 & 08:00 AM IST runs. Upgrade to Professional to trigger instant runs anytime.',
-        code: 'PLAN_UPGRADE_REQUIRED',
+        detail: 'On-Demand real-time task triggers are currently in beta development to optimize cloud energy and system resources. Autonomous applications run during scheduled daily 06:00 & 08:00 AM IST windows.',
+        code: 'ON_DEMAND_COMING_SOON',
         required_plan: 'professional'
       }, { status: 403 })
     }

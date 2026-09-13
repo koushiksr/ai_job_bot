@@ -96,6 +96,7 @@ const PLANS: Plan[] = [
       { text: 'Up to 1,800+ Verified Job Applications' },
       { text: 'VIP Priority Server Queue Slot' },
       { text: 'AI Resume Optimization & Keyword Match' },
+      { text: 'On-Demand Cloud Scout (Coming Soon)' },
       { text: 'Continuous Applications Until Hired' },
       { text: 'Dedicated Recruiter Response Priority' }
     ],

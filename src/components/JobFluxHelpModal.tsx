@@ -159,7 +159,7 @@ export default function JobFluxHelpModal({
     },
     {
       q: 'Can I trigger an application scout on-demand anytime?',
-      a: 'Yes! On your Candidate Dashboard, click "Trigger Application Scout". This dispatches an immediate background queue task that searches and applies for matching jobs outside the regular 6 AM & 8 AM schedule.'
+      a: 'To maximize cloud energy efficiency and optimize server resource utilization, all applications are dispatched automatically during high-visibility morning recruiter windows (06:00 AM & 08:00 AM IST). Real-time On-Demand manual triggers are currently in active beta development and coming soon to premium accounts.'
     },
     {
       q: 'How do enterprise and agency cohorts work?',
