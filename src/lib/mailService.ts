@@ -267,14 +267,14 @@ export function generatePasswordResetHtml(name: string, resetUrl: string, otp: s
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td valign="middle" style="width:44px;padding-right:12px;">
-                    <img src="https://jobfluxai.vercel.app/admin-helpdesk-avatar.jpg" width="40" height="40" alt="TechNOHMS Helpdesk" style="display:block;border-radius:10px;border:1px solid #38bdf8;box-shadow:0 0 12px rgba(56,189,248,0.25);background-color:#09090b;" />
+                    <img src="https://jobfluxai.vercel.app/jobflux-logo.svg" width="38" height="38" alt="JobFlux AI" style="display:block;border-radius:10px;background-color:#09090b;border:1px solid #27272a;box-shadow:0 0 10px rgba(56,189,248,0.25);" />
                   </td>
                   <td valign="middle">
-                    <div style="font-size:15px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
-                      TechNOHMS <span style="color:#38bdf8;">Helpdesk</span>
+                    <div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
+                      ⚡ JobFlux <span style="color:#38bdf8;">AI</span>
                     </div>
-                    <div style="font-size:10px;font-family:monospace;color:#10b981;letter-spacing:0.5px;margin-top:2px;">
-                      ⚡ JobFlux AI &bull; FitMetrix Services
+                    <div style="font-size:10px;font-family:monospace;color:#a1a1aa;letter-spacing:0.5px;margin-top:2px;">
+                      Autonomous Career &amp; Recruitment Intelligence
                     </div>
                   </td>
                   <td align="right" valign="middle">
@@ -421,14 +421,14 @@ export function generatePurchaseOfferHtml({
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td valign="middle" style="width:44px;padding-right:12px;">
-                    <img src="https://jobfluxai.vercel.app/admin-helpdesk-avatar.jpg" width="40" height="40" alt="TechNOHMS Helpdesk" style="display:block;border-radius:10px;border:1px solid #38bdf8;box-shadow:0 0 12px rgba(56,189,248,0.25);background-color:#09090b;" />
+                    <img src="https://jobfluxai.vercel.app/jobflux-logo.svg" width="38" height="38" alt="JobFlux AI" style="display:block;border-radius:10px;background-color:#09090b;border:1px solid #27272a;box-shadow:0 0 10px rgba(56,189,248,0.25);" />
                   </td>
                   <td valign="middle">
-                    <div style="font-size:15px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
-                      TechNOHMS <span style="color:#38bdf8;">Helpdesk</span>
+                    <div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
+                      ⚡ JobFlux <span style="color:#38bdf8;">AI</span>
                     </div>
-                    <div style="font-size:10px;font-family:monospace;color:#10b981;letter-spacing:0.5px;margin-top:2px;">
-                      ⚡ JobFlux AI &bull; FitMetrix Services
+                    <div style="font-size:10px;font-family:monospace;color:#a1a1aa;letter-spacing:0.5px;margin-top:2px;">
+                      Autonomous Career &amp; Recruitment Intelligence
                     </div>
                   </td>
                   <td align="right" valign="middle">

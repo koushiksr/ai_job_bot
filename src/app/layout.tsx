@@ -72,7 +72,7 @@ export const metadata: Metadata = {
       "Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes. Dual runs at 6 AM & 8 AM IST.",
     images: [
       {
-        url: "/logo.jpg",
+        url: "/jobflux-logo.svg",
         width: 1200,
         height: 630,
         alt: "JobFlux AI Autonomous Job Application Engine"
@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     title: "JobFlux AI | Autonomous Naukri Job Apply Bot & Harvard ATS Resume Studio",
     description:
       "Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes.",
-    images: ["/logo.jpg"],
+    images: ["/jobflux-logo.svg"],
     creator: "@jobfluxai"
   },
   robots: {

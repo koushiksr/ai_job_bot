@@ -136,8 +136,6 @@ export default function AdminDashboard() {
   const [showConfigPass, setShowConfigPass] = useState<boolean>(false)
   const [newAppPassInput, setNewAppPassInput] = useState<string>('')
   const [savingPass, setSavingPass] = useState<boolean>(false)
-  const [selectedAvatar, setSelectedAvatar] = useState<string>('nexus')
-  const [switchingAvatar, setSwitchingAvatar] = useState<boolean>(false)
 
   // Activity Audit & Telemetry State
   const [activityLogs, setActivityLogs] = useState<any[]>([])
@@ -454,27 +452,6 @@ export default function AdminDashboard() {
       })
     } finally {
       setSavingPass(false)
-    }
-  }
-
-  const handleSelectAvatar = async (key: string) => {
-    setSwitchingAvatar(true)
-    try {
-      const res = await fetch('/api/admin/set-avatar', {
-        method: 'POST',
-        headers: getAdminHeaders(),
-        body: JSON.stringify({ avatarKey: key })
-      })
-      if (res.ok) {
-        setSelectedAvatar(key)
-        sendBrowserNotification('⚡ Helpdesk Avatar Updated', {
-          body: `Active email header and Gmail branding updated to ${key}!`
-        })
-      }
-    } catch (err) {
-      console.warn('Failed to update avatar:', err)
-    } finally {
-      setSwitchingAvatar(false)
     }
   }
 
@@ -2853,169 +2830,39 @@ export default function AdminDashboard() {
               </div>
 
               <div className="p-5 space-y-5">
-                {/* Universal Helpdesk Avatar Gallery & Multi-Service Branding */}
-                <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-zinc-800 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                {/* Official JobFlux AI Brand & Dispatch Identity */}
+                <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-black border border-sky-500/30 flex items-center justify-center p-2 shadow-inner shrink-0">
+                      <img
+                        src="/jobflux-logo.svg"
+                        alt="JobFlux AI Logo"
+                        className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(56,189,248,0.3)]"
+                      />
+                    </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-amber-400" />
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">
-                          Universal Admin Helpdesk Branding (JobFlux AI + FitMetrix)
-                        </span>
+                        <strong className="text-sm font-bold text-white tracking-tight">
+                          JobFlux <span className="text-sky-400">AI</span> Official Brand Identity
+                        </strong>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                          technohmsit@gmail.com
+                          Active
                         </span>
                       </div>
-                      <p className="text-[11px] text-zinc-400 mt-1">
-                        Select your universal brand icon for Gmail headers, push alerts, and Google Account profile picture across JobFlux AI and FitMetrix.
+                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                        Emails are dispatched with the official JobFlux rocket emblem from <span className="font-mono text-zinc-300">{mailSender}</span>.
                       </p>
                     </div>
-
-                    <a
-                      href="https://myaccount.google.com/profile/picture"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto shrink-0"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Set Google Profile Photo ↗</span>
-                    </a>
                   </div>
 
-                  {/* 3 Avatar Options Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                    {/* Option 1: Titanium Cyber Shield */}
-                    <div className={`p-3 rounded-xl border transition-all ${
-                      selectedAvatar === 'shield'
-                        ? 'bg-zinc-900 border-sky-500 shadow-md shadow-sky-500/10'
-                        : 'bg-zinc-950/70 border-zinc-800 hover:border-zinc-700'
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <img
-                          src="/avatar-option1-shield.jpg"
-                          alt="Option 1 Shield"
-                          className="w-14 h-14 rounded-xl border border-zinc-700 object-cover shrink-0 shadow"
-                        />
-                        <div className="space-y-1 flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1">
-                            <strong className="text-xs text-white truncate">Cyber Titanium Shield</strong>
-                            {selectedAvatar === 'shield' && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-500 text-black shrink-0">ACTIVE</span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-zinc-400 line-clamp-2">
-                            Obsidian shield with glowing cyan AI star + emerald pulse wave.
-                          </p>
-                          <div className="flex items-center gap-2 pt-1">
-                            <button
-                              type="button"
-                              disabled={switchingAvatar || selectedAvatar === 'shield'}
-                              onClick={() => handleSelectAvatar('shield')}
-                              className="text-[10px] font-bold text-sky-400 hover:underline cursor-pointer disabled:opacity-40"
-                            >
-                              Use for Emails
-                            </button>
-                            <span className="text-zinc-700">&bull;</span>
-                            <a
-                              href="/avatar-option1-shield.jpg"
-                              download="admin-helpdesk-shield-avatar.jpg"
-                              className="text-[10px] text-zinc-400 hover:text-white"
-                            >
-                              Download 512px
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Option 2: Frosted Hex Nexus */}
-                    <div className={`p-3 rounded-xl border transition-all ${
-                      selectedAvatar === 'nexus'
-                        ? 'bg-zinc-900 border-emerald-500 shadow-md shadow-emerald-500/10'
-                        : 'bg-zinc-950/70 border-zinc-800 hover:border-zinc-700'
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <img
-                          src="/avatar-option2-nexus.jpg"
-                          alt="Option 2 Hex Nexus"
-                          className="w-14 h-14 rounded-xl border border-zinc-700 object-cover shrink-0 shadow"
-                        />
-                        <div className="space-y-1 flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1">
-                            <strong className="text-xs text-white truncate">Frosted Hex Nexus</strong>
-                            {selectedAvatar === 'nexus' && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-black shrink-0">ACTIVE</span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-zinc-400 line-clamp-2">
-                            Quantum AI compass + cardiogram heartbeat with gold core headset.
-                          </p>
-                          <div className="flex items-center gap-2 pt-1">
-                            <button
-                              type="button"
-                              disabled={switchingAvatar || selectedAvatar === 'nexus'}
-                              onClick={() => handleSelectAvatar('nexus')}
-                              className="text-[10px] font-bold text-emerald-400 hover:underline cursor-pointer disabled:opacity-40"
-                            >
-                              Use for Emails
-                            </button>
-                            <span className="text-zinc-700">&bull;</span>
-                            <a
-                              href="/avatar-option2-nexus.jpg"
-                              download="admin-helpdesk-nexus-avatar.jpg"
-                              className="text-[10px] text-zinc-400 hover:text-white"
-                            >
-                              Download 512px
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Option 3: Apple Minimalist Infinity Loop */}
-                    <div className={`p-3 rounded-xl border transition-all ${
-                      selectedAvatar === 'infinity'
-                        ? 'bg-zinc-900 border-amber-500 shadow-md shadow-amber-500/10'
-                        : 'bg-zinc-950/70 border-zinc-800 hover:border-zinc-700'
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <img
-                          src="/avatar-option3-infinity.jpg"
-                          alt="Option 3 Infinity"
-                          className="w-14 h-14 rounded-xl border border-zinc-700 object-cover shrink-0 shadow"
-                        />
-                        <div className="space-y-1 flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1">
-                            <strong className="text-xs text-white truncate">Minimalist Infinity</strong>
-                            {selectedAvatar === 'infinity' && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-black shrink-0">ACTIVE</span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-zinc-400 line-clamp-2">
-                            Matte obsidian medallion with dual glowing cyan & emerald infinity ribbon.
-                          </p>
-                          <div className="flex items-center gap-2 pt-1">
-                            <button
-                              type="button"
-                              disabled={switchingAvatar || selectedAvatar === 'infinity'}
-                              onClick={() => handleSelectAvatar('infinity')}
-                              className="text-[10px] font-bold text-amber-400 hover:underline cursor-pointer disabled:opacity-40"
-                            >
-                              Use for Emails
-                            </button>
-                            <span className="text-zinc-700">&bull;</span>
-                            <a
-                              href="/avatar-option3-infinity.jpg"
-                              download="admin-helpdesk-infinity-avatar.jpg"
-                              className="text-[10px] text-zinc-400 hover:text-white"
-                            >
-                              Download 512px
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <a
+                    href="/jobflux-logo.svg"
+                    download="jobflux-logo.svg"
+                    className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sky-300 border border-sky-500/30 text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto shrink-0"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Download SVG Logo</span>
+                  </a>
                 </div>
 
                 {/* Diagnostic Dispatch Bar */}
