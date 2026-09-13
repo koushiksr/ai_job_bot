@@ -45,13 +45,46 @@ export async function GET(req: NextRequest) {
       .limit(30)
       .toArray()
 
+    // Get active candidate assigned offers with expiry status
+    const assignedOffersList = await db.collection('assigned_offers')
+      .find({})
+      .sort({ created_at: -1 })
+      .limit(60)
+      .toArray()
+
+    const activeAssignedOffers = assignedOffersList.map(o => {
+      const exp = o.expires_at ? new Date(o.expires_at) : null
+      const isExpired = exp ? now > exp : false
+      const hoursLeft = exp && !isExpired ? Math.round((exp.getTime() - now.getTime()) / 3600000) : 0
+      return {
+        id: o._id.toString(),
+        candidate_email: o.candidate_email,
+        candidate_name: o.candidate_name,
+        promo_code: o.promo_code,
+        offer_title: o.offer_title,
+        discount_badge: o.discount_badge,
+        discounted_price: o.discounted_price,
+        original_price: o.original_price,
+        claimed: Boolean(o.claimed),
+        claimed_at: o.claimed_at || null,
+        expires_at: o.expires_at || null,
+        validity_hours: o.validity_hours || 48,
+        is_expired: isExpired,
+        hours_left: hoursLeft,
+        created_at: o.created_at
+      }
+    })
+
     return NextResponse.json({
       presets: OFFER_PRESETS,
       metrics: {
         total_candidates: allProfiles.length,
         unsubscribed_count: unsubscribedOrTrial.length,
-        subscribed_count: Math.max(0, allProfiles.length - unsubscribedOrTrial.length)
+        subscribed_count: Math.max(0, allProfiles.length - unsubscribedOrTrial.length),
+        active_assigned_offers: activeAssignedOffers.filter(o => !o.claimed && !o.is_expired).length,
+        expired_offers: activeAssignedOffers.filter(o => o.is_expired).length
       },
+      assigned_offers: activeAssignedOffers,
       history: history.map(h => ({
         id: h._id.toString(),
         campaign_name: h.campaign_name,
@@ -62,6 +95,10 @@ export async function GET(req: NextRequest) {
         discount_badge: h.discount_badge,
         discounted_price: h.discounted_price,
         promo_code: h.promo_code,
+        validity_hours: h.validity_hours || 48,
+        expires_at: h.expires_at || null,
+        emails_sent: h.emails_sent || 0,
+        push_delivered: h.push_delivered || 0,
         confirmed_by: h.confirmed_by,
         created_at: h.created_at,
         status: h.status || 'sent'
@@ -94,6 +131,8 @@ export async function POST(req: NextRequest) {
       originalPrice = '₹99 / mo',
       discountedPrice = '₹49 / mo',
       promoCode = 'FLASH49',
+      validityHours = 48,
+      validUntil = null,
       customMessage = '',
       confirmedByAdmin = false
     } = body
@@ -109,6 +148,9 @@ export async function POST(req: NextRequest) {
     const { ip, userAgent } = getClientInfo(req)
     const origin = req.headers.get('origin') || process.env.NEXTAUTH_URL || 'https://jobfluxai.vercel.app'
     const claimUrl = `${origin}/pricing?promo=${encodeURIComponent(promoCode)}`
+
+    const hours = parseInt(validityHours as any, 10) || 48
+    const offerExpiresAt = validUntil ? new Date(validUntil) : new Date(Date.now() + hours * 60 * 60 * 1000)
 
     // Determine target candidates
     let candidatesToNotify: Array<{ email: string; name: string }> = []
@@ -246,6 +288,8 @@ export async function POST(req: NextRequest) {
             discounted_price: discountedPrice,
             claim_url: claimUrl,
             custom_message: customMessage || '',
+            validity_hours: hours,
+            expires_at: offerExpiresAt,
             assigned_by: adminEmail || userId || 'admin',
             claimed: false,
             claimed_at: null,
@@ -263,7 +307,7 @@ export async function POST(req: NextRequest) {
         email: candidateEmailClean,
         type: 'offer_assigned',
         title: `⚡ Exclusive Offer: ${discountBadge}`,
-        message: `${offerTitle} — Pay only ${discountedPrice} (Regular ${originalPrice}) with code ${cleanPromoCode}.`,
+        message: `${offerTitle} — Pay only ${discountedPrice} (Regular ${originalPrice}) with code ${cleanPromoCode}. Expires in ${hours} hours.`,
         promo_code: cleanPromoCode,
         claim_url: claimUrl,
         read: false,
@@ -274,7 +318,7 @@ export async function POST(req: NextRequest) {
       try {
         const pushResult = await sendPushToUser(candidateEmailClean, {
           title: `🎁 Exclusive Offer: ${discountBadge}!`,
-          body: `${offerTitle} (${originalPrice} → ${discountedPrice}). Code: ${cleanPromoCode}.`,
+          body: `${offerTitle} (${originalPrice} → ${discountedPrice}). Code: ${cleanPromoCode}. Expires in ${hours}h.`,
           url: claimUrl,
           tag: `jobflux_offer_${cleanPromoCode}`
         })
@@ -299,6 +343,8 @@ export async function POST(req: NextRequest) {
       original_price: originalPrice,
       discounted_price: discountedPrice,
       promo_code: promoCode,
+      validity_hours: hours,
+      expires_at: offerExpiresAt,
       claim_url: claimUrl,
       custom_message: customMessage,
       emails_sent: totalEmailsSent,

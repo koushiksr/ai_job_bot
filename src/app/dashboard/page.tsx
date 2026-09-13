@@ -110,6 +110,12 @@ export default function UserDashboard() {
   // Admin accounts manage system configurations via the Admin Portal (/admin).
   const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'vip' || isVip) && isPlanActive
 
+  // Plan Expiry & Renewal Computations
+  const planExpiryDate = planExpiresAt ? new Date(planExpiresAt) : null
+  const hoursUntilPlanExpiry = planExpiryDate ? Math.round((planExpiryDate.getTime() - Date.now()) / (1000 * 60 * 60)) : null
+  const isPlanExpiringSoon = !isVip && hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry > 0 && hoursUntilPlanExpiry <= 48
+  const isPlanExpired = !isVip && ((hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 0) || (!isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan'))
+
   // Browser Push Notifications State & Assistants
   const [notificationPermission, setNotificationPermission] = useState<string>('default')
   const [showUnblockGuide, setShowUnblockGuide] = useState<boolean>(false)
@@ -1290,6 +1296,62 @@ export default function UserDashboard() {
           </div>
         )}
 
+        {/* Candidate Plan Expiry Warning Banner (1-Day / 2-Day Pre-Expiry Alert) */}
+        {(isPlanExpiringSoon || isPlanExpired) && (
+          <div className={`p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border shadow-lg ${
+            isPlanExpired
+              ? 'bg-rose-950/40 border-rose-800/60 text-rose-200 shadow-rose-950/20'
+              : hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 24
+              ? 'bg-red-950/30 border-red-800/60 text-red-200 shadow-red-950/20'
+              : 'bg-amber-950/30 border-amber-800/60 text-amber-200 shadow-amber-950/20'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+                isPlanExpired
+                  ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
+                  : 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+              }`}>
+                <Clock className={`w-4 h-4 ${!isPlanExpired ? 'animate-pulse' : ''}`} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
+                    isPlanExpired
+                      ? 'bg-rose-500 text-white'
+                      : hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 24
+                      ? 'bg-red-500 text-white'
+                      : 'bg-amber-500 text-black'
+                  }`}>
+                    {isPlanExpired ? 'PLAN EXPIRED' : hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 24 ? '1-DAY EXPIRY ALERT' : '2-DAY EXPIRY ALERT'}
+                  </span>
+                  <span className="text-xs font-bold text-white">
+                    {userPlanName}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-300 mt-0.5">
+                  {isPlanExpired
+                    ? 'Your subscription plan has expired. Automated application submissions are paused. Renew now to resume daily job applications.'
+                    : `Your current plan expires in ${hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 24 ? `${hoursUntilPlanExpiry} hours` : `${Math.ceil((hoursUntilPlanExpiry || 48) / 24)} days`}. Renew today to prevent application pauses.`}
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0 self-stretch sm:self-auto flex items-center justify-end">
+              <Link
+                href="/pricing"
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md ${
+                  isPlanExpired
+                    ? 'bg-rose-600 hover:bg-rose-500 text-white'
+                    : 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20'
+                }`}
+              >
+                <span>{isPlanExpired ? 'Renew Subscription' : 'Renew / Upgrade Plan'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Administrator Assigned Exclusive Promotional Offer Banner */}
         {activeOfferBanner ? (
           <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/50 via-[#0d1520] to-amber-950/50 border-2 border-amber-400/80 shadow-[0_0_30px_rgba(245,158,11,0.3)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
@@ -1309,6 +1371,20 @@ export default function UserDashboard() {
                   <span className="text-[11px] font-mono text-zinc-300 bg-black/70 px-2 py-0.5 rounded border border-zinc-700">
                     Code: <strong className="text-amber-300 font-bold">{activeOfferBanner.promo_code}</strong>
                   </span>
+                  {activeOfferBanner.expires_at && (
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded border flex items-center gap-1 ${
+                      activeOfferBanner.is_expired
+                        ? 'bg-rose-950/80 border-rose-800 text-rose-300 font-bold'
+                        : activeOfferBanner.hours_left !== undefined && activeOfferBanner.hours_left <= 24
+                        ? 'bg-red-950/80 border-red-800 text-red-300 font-bold animate-pulse'
+                        : 'bg-black/70 border-amber-500/40 text-amber-300'
+                    }`}>
+                      <Clock className="w-2.5 h-2.5" />
+                      {activeOfferBanner.is_expired
+                        ? 'Offer Expired'
+                        : `Valid for: ${activeOfferBanner.hours_left !== undefined ? (activeOfferBanner.hours_left > 24 ? Math.ceil(activeOfferBanner.hours_left / 24) + ' days' : `${activeOfferBanner.hours_left}h remaining`) : 'limited time'}`}
+                    </span>
+                  )}
                 </div>
                 <h4 className="text-sm sm:text-base font-bold text-white mt-1.5 flex items-center gap-2.5">
                   <span>{activeOfferBanner.offer_title}</span>
@@ -1321,13 +1397,23 @@ export default function UserDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3 z-10 shrink-0 self-stretch sm:self-auto justify-end">
-              <Link
-                href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-black text-xs font-extrabold transition-all shadow-[0_0_20px_rgba(245,158,11,0.45)] hover:scale-102 cursor-pointer flex items-center justify-center gap-2"
-              >
-                <span>Claim & Upgrade ({activeOfferBanner.discounted_price})</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              {activeOfferBanner.is_expired ? (
+                <Link
+                  href="/pricing"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-zinc-800 text-zinc-400 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>Offer Expired · View Pricing</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              ) : (
+                <Link
+                  href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-black text-xs font-extrabold transition-all shadow-[0_0_20px_rgba(245,158,11,0.45)] hover:scale-102 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>Claim & Upgrade ({activeOfferBanner.discounted_price})</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
             </div>
           </div>
         ) : (!isProfessional) ? (

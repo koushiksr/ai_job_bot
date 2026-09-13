@@ -45,7 +45,8 @@ import {
   BellRing,
   Settings,
   Lock,
-  CheckCheck
+  CheckCheck,
+  Eye
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -131,7 +132,15 @@ export default function AdminDashboard() {
   const [customMessage, setCustomMessage] = useState<string>('Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 90% discount (Regular ₹1,000/mo) for just ₹99.')
   const [isConfirmOfferModalOpen, setIsConfirmOfferModalOpen] = useState<boolean>(false)
   const [sendingOffer, setSendingOffer] = useState<boolean>(false)
+  const [validityHours, setValidityHours] = useState<number>(48)
   const [offerNotification, setOfferNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+  // Plan & Offer Expiry Telemetry State
+  const [expiryStats, setExpiryStats] = useState<any | null>(null)
+  const [loadingExpiryStats, setLoadingExpiryStats] = useState<boolean>(false)
+  const [loadingExpirySweep, setLoadingExpirySweep] = useState<boolean>(false)
+  const [sweepResult, setSweepResult] = useState<any | null>(null)
+  const [inspectCandidate, setInspectCandidate] = useState<any | null>(null)
 
   // Live Email Diagnostic State
   const [mailDiagnosticLoading, setMailDiagnosticLoading] = useState<boolean>(false)
@@ -429,6 +438,47 @@ export default function AdminDashboard() {
     }
   }
 
+  const fetchExpiryStats = async () => {
+    setLoadingExpiryStats(true)
+    try {
+      const res = await fetch('/api/admin/expiry-reminders', {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setExpiryStats(data)
+      }
+    } catch (err) {
+      console.warn('Failed to fetch expiry stats:', err)
+    } finally {
+      setLoadingExpiryStats(false)
+    }
+  }
+
+  const handleRunExpirySweep = async (targetEmail?: string) => {
+    setLoadingExpirySweep(true)
+    setSweepResult(null)
+    try {
+      const res = await fetch('/api/admin/expiry-reminders', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          targetEmail: targetEmail || undefined,
+          force: Boolean(targetEmail)
+        })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.detail || 'Sweep failed')
+      setSweepResult(data)
+      await fetchExpiryStats()
+      await fetchOverviewAndUsers()
+    } catch (err: any) {
+      setSweepResult({ success: false, error: err.message })
+    } finally {
+      setLoadingExpirySweep(false)
+    }
+  }
+
   const fetchOffersData = async () => {
     setLoadingOffers(true)
     try {
@@ -441,6 +491,7 @@ export default function AdminDashboard() {
       }
       fetchMailDiagnostics()
       fetchPushDiagnostics()
+      fetchExpiryStats()
     } catch (err) {
       console.error('Failed to fetch offers:', err)
     } finally {
@@ -632,6 +683,7 @@ export default function AdminDashboard() {
           discountedPrice,
           promoCode,
           customMessage,
+          validityHours,
           confirmedByAdmin: true
         })
       })
@@ -1471,6 +1523,48 @@ export default function AdminDashboard() {
                                 <Crown className="w-3 h-3 text-amber-400" />
                                 {u.is_vip ? 'Revoke VIP' : 'Grant VIP Pass'}
                               </button>
+
+                              {/* Expiry Countdown & Status */}
+                              {u.plan_expires_at && (
+                                <div className="text-[10px] font-mono mt-1 flex items-center gap-1">
+                                  <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                                  <span className={
+                                    u.plan_expiry_status === 'expired'
+                                      ? 'text-rose-400 font-bold'
+                                      : u.plan_expiry_status === 'expiring_soon_1d'
+                                      ? 'text-rose-400 font-bold animate-pulse'
+                                      : u.plan_expiry_status === 'expiring_soon_2d'
+                                      ? 'text-amber-400 font-bold'
+                                      : 'text-zinc-400'
+                                  }>
+                                    {u.plan_expiry_status === 'expired'
+                                      ? 'Plan Expired'
+                                      : u.hours_until_expiry !== null && u.hours_until_expiry !== undefined
+                                      ? `${u.hours_until_expiry <= 24 ? `Expires: ${u.hours_until_expiry}h` : `Expires: ${Math.ceil(u.hours_until_expiry / 24)}d`}`
+                                      : 'Active'}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Assigned Offers Chips */}
+                              {u.assigned_offers && u.assigned_offers.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {u.assigned_offers.map((off: any, oIdx: number) => (
+                                    <span
+                                      key={oIdx}
+                                      className={`px-1.5 py-0.2 rounded text-[9px] font-mono flex items-center gap-1 ${
+                                        off.is_expired
+                                          ? 'bg-zinc-900 text-zinc-500 line-through border border-zinc-800'
+                                          : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                                      }`}
+                                      title={`Offer: ${off.offer_title} (${off.discounted_price}) - Code: ${off.promo_code}`}
+                                    >
+                                      <Tag className="w-2.5 h-2.5" />
+                                      {off.promo_code} ({off.is_expired ? 'Expired' : `${off.hours_left}h`})
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </td>
                           <td className="py-4 px-4 text-center">
@@ -1542,6 +1636,15 @@ export default function AdminDashboard() {
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </button>
                               <button
+                                type="button"
+                                onClick={() => setInspectCandidate(u)}
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-amber-300 font-bold text-xs transition-colors border border-amber-500/30 shadow-sm cursor-pointer"
+                                title="Inspect candidate plan validity, assigned offers & reminder telemetry"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-amber-400" />
+                                <span>Inspect</span>
+                              </button>
+                              <button
                                 onClick={() => setEditingUser(u)}
                                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-md"
                               >
@@ -1563,6 +1666,163 @@ export default function AdminDashboard() {
                 </table>
               </div>
             </div>
+
+            {/* Candidate Expiry & Telemetry Inspection Modal */}
+            {inspectCandidate && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                <div className="relative w-full max-w-2xl bg-[#0e0e11] border border-zinc-800 rounded-2xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-base font-bold text-white flex items-center gap-2">
+                        <User className="w-4 h-4 text-sky-400" />
+                        <span>Candidate Telemetry: {inspectCandidate.name || inspectCandidate.user_id}</span>
+                      </h3>
+                      <p className="text-xs text-zinc-400 font-mono mt-0.5">{inspectCandidate.email}</p>
+                    </div>
+                    <button
+                      onClick={() => setInspectCandidate(null)}
+                      className="p-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Plan Validity Section */}
+                  <div className="p-4 rounded-xl bg-black border border-zinc-800 space-y-2">
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Plan Validity & Expiry Countdown</span>
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <span className="text-zinc-500">Current Plan:</span>
+                        <div className="font-bold text-white uppercase">{inspectCandidate.plan || 'Free'}</div>
+                      </div>
+                      <div>
+                        <span className="text-zinc-500">Expiry Status:</span>
+                        <div className={`font-bold ${
+                          inspectCandidate.plan_expiry_status === 'expired' ? 'text-rose-400' :
+                          inspectCandidate.plan_expiry_status === 'expiring_soon_1d' ? 'text-rose-400' :
+                          inspectCandidate.plan_expiry_status === 'expiring_soon_2d' ? 'text-amber-400' :
+                          'text-emerald-400'
+                        }`}>
+                          {inspectCandidate.plan_expiry_status || 'Active'}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-zinc-500">Plan Expires At:</span>
+                        <div className="font-mono text-zinc-300">
+                          {inspectCandidate.plan_expires_at ? formatTimestamp(inspectCandidate.plan_expires_at) : 'No fixed expiration (Lifetime / Trial)'}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-zinc-500">Hours Remaining:</span>
+                        <div className="font-mono text-zinc-300">
+                          {inspectCandidate.hours_until_expiry !== null && inspectCandidate.hours_until_expiry !== undefined
+                            ? `${inspectCandidate.hours_until_expiry} hours (${Math.round(inspectCandidate.hours_until_expiry / 24 * 10) / 10} days)`
+                            : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Assigned Offers Section */}
+                  <div className="p-4 rounded-xl bg-black border border-zinc-800 space-y-2">
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5 text-sky-400" />
+                      <span>Assigned Promotional Offers ({inspectCandidate.assigned_offers?.length || 0})</span>
+                    </h4>
+                    {(!inspectCandidate.assigned_offers || inspectCandidate.assigned_offers.length === 0) ? (
+                      <p className="text-xs text-zinc-500">No promotional offers currently assigned to this candidate.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {inspectCandidate.assigned_offers.map((off: any, idx: number) => (
+                          <div key={idx} className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between gap-3">
+                            <div>
+                              <div className="font-bold text-white">{off.offer_title}</div>
+                              <div className="text-[11px] text-zinc-400">
+                                Code: <span className="text-sky-300 font-mono font-bold">{off.promo_code}</span> · Price: <span className="text-emerald-400 font-mono font-bold">{off.discounted_price}</span>
+                              </div>
+                              <div className="text-[10px] text-zinc-500 font-mono mt-0.5">
+                                Assigned: {formatTimestamp(off.assigned_at)} · Expires: {formatTimestamp(off.expires_at)}
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                                off.is_expired ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                              }`}>
+                                {off.is_expired ? 'Expired' : `${off.hours_left}h left`}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Automated Expiry Reminders Sent History */}
+                  <div className="p-4 rounded-xl bg-black border border-zinc-800 space-y-2">
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <BellRing className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Automated Reminder Dispatch Logs ({inspectCandidate.reminders_sent?.length || 0})</span>
+                    </h4>
+                    {(!inspectCandidate.reminders_sent || inspectCandidate.reminders_sent.length === 0) ? (
+                      <p className="text-xs text-zinc-500">No automated expiry reminders dispatched yet for this candidate.</p>
+                    ) : (
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                        {inspectCandidate.reminders_sent.map((rem: any, rIdx: number) => (
+                          <div key={rIdx} className="p-2 rounded bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between">
+                            <div>
+                              <span className="font-semibold text-white uppercase text-[10px] tracking-wider mr-2">
+                                {rem.type === 'plan_expiry' ? 'Plan Expiry Warning' : 'Offer Expiry Warning'}
+                              </span>
+                              <span className="text-[11px] text-zinc-400">
+                                {rem.warning_tier || 'Alert'} ({rem.details?.hours_left !== undefined ? `${rem.details.hours_left}h left` : ''})
+                              </span>
+                              <div className="text-[10px] text-zinc-500 font-mono">
+                                Email: {rem.channels?.email ? '✅ Sent' : '❌ Skipped'} · Push: {rem.channels?.push ? '✅ Sent' : '❌ Skipped'}
+                              </div>
+                            </div>
+                            <div className="text-[10px] font-mono text-zinc-400">
+                              {formatTimestamp(rem.sent_at)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="text-[11px] text-zinc-500">
+                      Anti-flooding safeguards enforce an 18-hour quiet window unless manually triggered.
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setInspectCandidate(null)}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs cursor-pointer"
+                      >
+                        Close
+                      </button>
+                      <button
+                        type="button"
+                        disabled={loadingExpirySweep}
+                        onClick={async () => {
+                          await handleRunExpirySweep(inspectCandidate.email)
+                          const updated = usersList.find(u => u.email === inspectCandidate.email || u.user_id === inspectCandidate.user_id)
+                          if (updated) setInspectCandidate(updated)
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>{loadingExpirySweep ? 'Sending...' : 'Trigger 1D/2D Expiry Alert Now'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -2624,6 +2884,118 @@ export default function AdminDashboard() {
               </div>
             </div>
 
+            {/* Automated Expiry & Renewal Telemetry Watchdog Card */}
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0d121c] to-zinc-950 border border-amber-500/30 shadow-xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>Automated Expiry & Renewal Watchdog</span>
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/60">
+                        18h Anti-Flooding Active
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-zinc-400">
+                      Monitors candidate plan renewals and promotional offer expiries (1-day & 2-day dual alerts via Google SMTP + OS Web Push).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={loadingExpirySweep}
+                    onClick={() => handleRunExpirySweep()}
+                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingExpirySweep ? 'animate-spin' : ''}`} />
+                    <span>{loadingExpirySweep ? 'Running Sweep...' : 'Run Automated Expiry Sweep Now'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {sweepResult && (
+                <div className={`p-3 rounded-xl text-xs flex items-center justify-between border ${
+                  sweepResult.success ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300' : 'bg-rose-950/40 border-rose-800/50 text-rose-300'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {sweepResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertTriangle className="w-4 h-4 text-rose-400" />}
+                    <span>{sweepResult.message || (sweepResult.success ? `Sweep complete: ${sweepResult.summary?.plan_reminders_sent || 0} plan alerts & ${sweepResult.summary?.offer_reminders_sent || 0} offer alerts dispatched!` : sweepResult.error)}</span>
+                  </div>
+                  <button onClick={() => setSweepResult(null)} className="text-zinc-400 hover:text-white cursor-pointer">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Expiry Quick Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+                  <span className="text-[10px] uppercase font-mono text-rose-400 font-bold block">1-Day Plan Expiry</span>
+                  <div className="text-lg font-bold text-white mt-0.5">
+                    {expiryStats?.summary?.expiring_in_24h ?? 0}
+                  </div>
+                  <span className="text-[10px] text-zinc-500">&le; 24h Remaining</span>
+                </div>
+                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+                  <span className="text-[10px] uppercase font-mono text-amber-400 font-bold block">2-Day Plan Expiry</span>
+                  <div className="text-lg font-bold text-white mt-0.5">
+                    {expiryStats?.summary?.expiring_in_48h ?? 0}
+                  </div>
+                  <span className="text-[10px] text-zinc-500">24h - 48h Remaining</span>
+                </div>
+                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+                  <span className="text-[10px] uppercase font-mono text-zinc-400 font-bold block">Expired Plans</span>
+                  <div className="text-lg font-bold text-zinc-300 mt-0.5">
+                    {expiryStats?.summary?.expired_count ?? 0}
+                  </div>
+                  <span className="text-[10px] text-zinc-500">Ready for Special Offer</span>
+                </div>
+                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+                  <span className="text-[10px] uppercase font-mono text-sky-400 font-bold block">Expiring Offers</span>
+                  <div className="text-lg font-bold text-sky-300 mt-0.5">
+                    {expiryStats?.summary?.offers_expiring_soon ?? 0}
+                  </div>
+                  <span className="text-[10px] text-zinc-500">&le; 48h Offer Validity</span>
+                </div>
+              </div>
+
+              {/* List of candidates expiring within 48h */}
+              {expiryStats?.candidates_expiring_48h && expiryStats.candidates_expiring_48h.length > 0 && (
+                <div className="mt-3 p-3 rounded-xl bg-black/40 border border-zinc-800/80">
+                  <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block mb-2">
+                    Priority Candidates Expiring Within 48 Hours:
+                  </span>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    {expiryStats.candidates_expiring_48h.map((c: any) => (
+                      <div key={c.email || c.user_id} className="flex items-center justify-between p-2 rounded-lg bg-zinc-900/70 border border-zinc-800 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-white">{c.name || c.user_id}</span>
+                          <span className="text-[11px] font-mono text-zinc-400">{c.email}</span>
+                          <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase ${
+                            c.hours_left <= 24 ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300'
+                          }`}>
+                            {c.hours_left <= 24 ? '1-Day Warning' : '2-Day Warning'} ({c.hours_left}h left)
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRunExpirySweep(c.email)}
+                          disabled={loadingExpirySweep}
+                          className="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-medium cursor-pointer disabled:opacity-50"
+                        >
+                          Trigger Alert Now
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Campaign Designer & Live Preview */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Left Column: Form Settings */}
@@ -2964,6 +3336,40 @@ export default function AdminDashboard() {
                         onChange={(e) => setCustomMessage(e.target.value)}
                         className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:border-amber-500 outline-none"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] text-zinc-400 mb-1 flex items-center justify-between">
+                        <span className="font-semibold text-white">Offer Validity Duration (Auto-expiry & Reminders)</span>
+                        <span className="text-[10px] text-amber-400 font-mono">
+                          Expires in {validityHours} hours ({Math.round(validityHours / 24 * 10) / 10} days)
+                        </span>
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[
+                          { hours: 24, label: '24 Hours', sub: 'Flash Deal (1 Day)' },
+                          { hours: 48, label: '48 Hours', sub: 'Standard (2 Days)' },
+                          { hours: 72, label: '3 Days', sub: 'Weekend Pass' },
+                          { hours: 168, label: '7 Days', sub: 'Extended Week' }
+                        ].map((opt) => (
+                          <button
+                            key={opt.hours}
+                            type="button"
+                            onClick={() => setValidityHours(opt.hours)}
+                            className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                              validityHours === opt.hours
+                                ? 'bg-amber-500/20 border-amber-500/60 text-amber-300 font-bold ring-1 ring-amber-500/40'
+                                : 'bg-black/60 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+                            }`}
+                          >
+                            <span className="block text-xs">{opt.label}</span>
+                            <span className="block text-[9px] text-zinc-500 font-mono">{opt.sub}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-zinc-500 mt-1">
+                        Candidates will receive automated 1-day/2-day expiry warnings via Google SMTP email and OS push before expiry.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -3659,6 +4065,10 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-500">Pricing / Code:</span>
                   <span className="font-mono text-emerald-400">{discountedPrice} · {promoCode}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Validity Window:</span>
+                  <span className="font-mono text-amber-400 font-bold">{validityHours} Hours ({Math.round(validityHours / 24 * 10) / 10} days)</span>
                 </div>
               </div>
 

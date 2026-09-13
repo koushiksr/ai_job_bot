@@ -48,8 +48,12 @@ export async function GET(req: NextRequest) {
       .limit(10)
       .toArray()
 
-    return NextResponse.json({
-      assigned_offers: assignedOffers.map(o => ({
+    const now = new Date()
+    const mappedOffers = assignedOffers.map(o => {
+      const exp = o.expires_at ? new Date(o.expires_at) : null
+      const isExpired = exp ? now > exp : false
+      const hoursLeft = exp && !isExpired ? Math.round((exp.getTime() - now.getTime()) / 3600000) : 0
+      return {
         id: o._id.toString(),
         promo_code: o.promo_code,
         preset_id: o.preset_id,
@@ -59,16 +63,28 @@ export async function GET(req: NextRequest) {
         discounted_price: o.discounted_price,
         claim_url: o.claim_url,
         custom_message: o.custom_message,
+        expires_at: o.expires_at || null,
+        validity_hours: o.validity_hours || 48,
+        is_expired: isExpired,
+        hours_left: hoursLeft,
         created_at: o.created_at
-      })),
-      unclaimed_count: assignedOffers.length,
-      latest_offer: assignedOffers.length > 0 ? {
-        promo_code: assignedOffers[0].promo_code,
-        offer_title: assignedOffers[0].offer_title,
-        discount_badge: assignedOffers[0].discount_badge,
-        discounted_price: assignedOffers[0].discounted_price,
-        original_price: assignedOffers[0].original_price,
-        claim_url: assignedOffers[0].claim_url
+      }
+    })
+
+    const activeUnexpiredOffers = mappedOffers.filter(o => !o.is_expired)
+
+    return NextResponse.json({
+      assigned_offers: mappedOffers,
+      unclaimed_count: activeUnexpiredOffers.length,
+      latest_offer: activeUnexpiredOffers.length > 0 ? {
+        promo_code: activeUnexpiredOffers[0].promo_code,
+        offer_title: activeUnexpiredOffers[0].offer_title,
+        discount_badge: activeUnexpiredOffers[0].discount_badge,
+        discounted_price: activeUnexpiredOffers[0].discounted_price,
+        original_price: activeUnexpiredOffers[0].original_price,
+        claim_url: activeUnexpiredOffers[0].claim_url,
+        expires_at: activeUnexpiredOffers[0].expires_at,
+        hours_left: activeUnexpiredOffers[0].hours_left
       } : null,
       notifications: notifications.map(n => ({
         id: n._id.toString(),
@@ -141,6 +157,16 @@ export async function POST(req: NextRequest) {
         assigned_to_user: false,
         error: `Exclusive offer "${cleanPromo}" is not assigned to your account (${email}). Offers are individually assigned by the administrator.`
       }, { status: 403 })
+    }
+
+    // 3. Verify offer is not expired
+    if (assigned.expires_at && new Date() > new Date(assigned.expires_at)) {
+      return NextResponse.json({
+        valid: false,
+        assigned_to_user: true,
+        expired: true,
+        error: `This exclusive offer (${cleanPromo}) expired on ${new Date(assigned.expires_at).toLocaleDateString()}. Please contact support or check your dashboard for new offers.`
+      }, { status: 400 })
     }
 
     return NextResponse.json({

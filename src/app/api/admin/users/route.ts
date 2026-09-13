@@ -20,14 +20,70 @@ export async function GET(req: NextRequest) {
     const userDocs = await db.collection('users').find({}).toArray()
     const profiles = userDocs.length > 0 ? userDocs : await db.collection('profiles').find({}).toArray()
     const statsList = await db.collection('user_stats').find({}).toArray()
+    const assignedOffersList = await db.collection('assigned_offers').find({}).toArray()
+    const remindersList = await db.collection('expiry_reminders_sent').find({}).toArray()
+
+    const now = new Date()
 
     const statsMap: Record<string, any> = {}
     statsList.forEach(s => {
       statsMap[s.user_id] = s
     })
 
+    const offersByEmail: Record<string, any[]> = {}
+    assignedOffersList.forEach(o => {
+      const em = (o.candidate_email || '').toLowerCase().trim()
+      if (!offersByEmail[em]) offersByEmail[em] = []
+      const exp = o.expires_at ? new Date(o.expires_at) : null
+      const isExp = exp ? now > exp : false
+      offersByEmail[em].push({
+        promo_code: o.promo_code,
+        offer_title: o.offer_title,
+        discount_badge: o.discount_badge,
+        discounted_price: o.discounted_price,
+        claimed: Boolean(o.claimed),
+        expires_at: o.expires_at || null,
+        is_expired: isExp,
+        hours_left: exp && !isExp ? Math.round((exp.getTime() - now.getTime()) / 3600000) : 0
+      })
+    })
+
+    const remindersByEmail: Record<string, any[]> = {}
+    remindersList.forEach(r => {
+      const em = (r.email || '').toLowerCase().trim()
+      if (!remindersByEmail[em]) remindersByEmail[em] = []
+      remindersByEmail[em].push({
+        type: r.reminder_type,
+        title: r.title,
+        created_at: r.created_at,
+        channels: r.channels
+      })
+    })
+
     const users = profiles.map(p => {
       const s = statsMap[p.user_id] || {}
+      const emailClean = (p.email || '').toLowerCase().trim()
+      const rawExp = p.plan_expires_at || p.trial_expires_at || null
+      let planExpiryStatus: 'active' | 'expiring_soon_2d' | 'expiring_soon_1d' | 'expired' | 'no_expiry' = 'no_expiry'
+      let planHoursLeft = 0
+
+      if (rawExp) {
+        const expDate = new Date(rawExp)
+        planHoursLeft = Math.round((expDate.getTime() - now.getTime()) / 3600000)
+        if (planHoursLeft <= 0) {
+          planExpiryStatus = 'expired'
+        } else if (planHoursLeft <= 24) {
+          planExpiryStatus = 'expiring_soon_1d'
+        } else if (planHoursLeft <= 48) {
+          planExpiryStatus = 'expiring_soon_2d'
+        } else {
+          planExpiryStatus = 'active'
+        }
+      }
+
+      const userOffers = offersByEmail[emailClean] || []
+      const userReminders = remindersByEmail[emailClean] || []
+
       return {
         id: p.user_id,
         user_id: p.user_id,
@@ -39,8 +95,12 @@ export async function GET(req: NextRequest) {
         enabled_for_daily_run: p.enabled_for_daily_run !== false,
         plan: p.plan || 'trial',
         plan_name: p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '1-Day Free Trial'),
-        plan_expires_at: p.plan_expires_at || p.trial_expires_at || null,
+        plan_expires_at: rawExp,
         trial_expires_at: p.trial_expires_at || null,
+        plan_expiry_status: planExpiryStatus,
+        plan_hours_left: planHoursLeft,
+        assigned_offers: userOffers,
+        reminders_sent: userReminders,
         is_vip: Boolean(p.is_vip || p.vip_access || p.free_privilege),
         total_applied: s.total_applied || 0,
         applied_today: s.today || 0,
