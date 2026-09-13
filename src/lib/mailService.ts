@@ -17,19 +17,41 @@ interface MailResult {
 }
 
 /**
- * Returns sanitized and validated SMTP credentials.
- * Automatically overrides any stale revoked keys (e.g. nxgq or vkij) with the verified active key.
+ * Returns sanitized SMTP credentials from environment variables.
  */
 export function getSmtpCredentials() {
   const user = (process.env.SMTP_USER || process.env.ADMIN_MAIL_TO_SEND_PASSWORD || 'technohmsit@gmail.com').trim()
-  let pass = (process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || 'tidw wevs gebl qljb')
+  const pass = (process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || 'tidw wevs gebl qljb')
     .trim()
     .replace(/['"]/g, '')
     .replace(/\s+/g, '')
 
-  // Critical safeguard: if Vercel or local env still has old/revoked passwords, override with verified active pass
-  if (!pass || pass.includes('nxgq') || pass.includes('vkij')) {
-    pass = 'tidwwevsgeblqljb'
+  return { user, pass }
+}
+
+/**
+ * Returns dynamic SMTP credentials.
+ * Prioritizes active credentials saved in MongoDB `system_config` (key: 'smtp_config'),
+ * allowing instant password updates from the admin UI without redeploying.
+ */
+export async function getDynamicSmtpCredentials(db?: any) {
+  let { user, pass } = getSmtpCredentials()
+
+  try {
+    const database = db || (await getDb())
+    if (database) {
+      const config = await database.collection('system_config').findOne({ key: 'smtp_config' })
+      if (config) {
+        if (config.user && typeof config.user === 'string' && config.user.trim()) {
+          user = config.user.trim()
+        }
+        if (config.pass && typeof config.pass === 'string' && config.pass.trim()) {
+          pass = config.pass.trim().replace(/['"]/g, '').replace(/\s+/g, '')
+        }
+      }
+    }
+  } catch (err) {
+    // Fallback quietly to env vars
   }
 
   return { user, pass }
@@ -38,8 +60,8 @@ export function getSmtpCredentials() {
 /**
  * Creates and returns a Nodemailer transporter configured for Gmail SMTP.
  */
-export function createTransporter() {
-  const { user, pass } = getSmtpCredentials()
+export function createTransporter(credentials?: { user: string; pass: string }) {
+  const { user, pass } = credentials || getSmtpCredentials()
 
   return nodemailer.createTransport({
     service: 'gmail',
@@ -55,7 +77,7 @@ export function createTransporter() {
 
 /**
  * Centralized mail dispatch function.
- * Tries SMTP delivery; automatically audits and records all emails into MongoDB `emails` collection.
+ * Supports Resend API (if configured) or direct Gmail SMTP with MongoDB audit logging.
  */
 export async function sendEmail({
   to,
@@ -65,8 +87,6 @@ export async function sendEmail({
   fromName = 'JobFlux AI'
 }: SendMailOptions): Promise<MailResult> {
   const recipient = Array.isArray(to) ? to.join(', ') : to
-  const { user } = getSmtpCredentials()
-  const formattedFrom = `"${fromName}" <${user}>`
   const now = new Date()
 
   let db: any = null
@@ -76,8 +96,66 @@ export async function sendEmail({
     console.warn('MongoDB connection unavailable for mail audit:', err)
   }
 
+  // 1. Check for Resend API Key in env or MongoDB
+  let resendApiKey = process.env.RESEND_API_KEY
+  if (!resendApiKey && db) {
+    try {
+      const resendConfig = await db.collection('system_config').findOne({ key: 'resend_config' })
+      if (resendConfig?.api_key) {
+        resendApiKey = resendConfig.api_key.trim()
+      }
+    } catch (_) {}
+  }
+
+  if (resendApiKey) {
+    try {
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'notifications@jobfluxai.com'
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `"${fromName}" <${fromEmail}>`,
+          to: Array.isArray(to) ? to : [to],
+          subject,
+          html,
+          text: text || html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+        })
+      })
+
+      const data = await response.json()
+      if (response.ok) {
+        if (db) {
+          await db.collection('emails').insertOne({
+            to: recipient,
+            from: `"${fromName}" <${fromEmail}>`,
+            subject,
+            html_preview: html.slice(0, 1000),
+            status: 'sent',
+            provider: 'resend',
+            message_id: data.id,
+            created_at: now
+          })
+        }
+        return {
+          success: true,
+          messageId: data.id,
+          simulated: false
+        }
+      }
+    } catch (resendErr: any) {
+      console.warn('Resend dispatch failed, falling back to Gmail SMTP:', resendErr.message)
+    }
+  }
+
+  // 2. Gmail SMTP Delivery
+  const { user, pass } = await getDynamicSmtpCredentials(db)
+  const formattedFrom = `"${fromName}" <${user}>`
+
   try {
-    const transporter = createTransporter()
+    const transporter = createTransporter({ user, pass })
     const info = await transporter.sendMail({
       from: formattedFrom,
       to: recipient,
@@ -94,6 +172,7 @@ export async function sendEmail({
         subject,
         html_preview: html.slice(0, 1000),
         status: 'sent',
+        provider: 'gmail_smtp',
         message_id: info.messageId,
         smtp_response: info.response,
         created_at: now
@@ -117,6 +196,7 @@ export async function sendEmail({
           subject,
           html_preview: html.slice(0, 1000),
           status: 'failed',
+          provider: 'gmail_smtp',
           smtp_error: smtpErr.message || 'SMTP Authentication required',
           created_at: now
         })

@@ -43,7 +43,9 @@ import {
   Bell,
   BellOff,
   BellRing,
-  Settings
+  Settings,
+  Lock,
+  CheckCheck
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -129,6 +131,11 @@ export default function AdminDashboard() {
   const [mailLogs, setMailLogs] = useState<any[]>([])
   const [loadingMailLogs, setLoadingMailLogs] = useState<boolean>(false)
   const [diagnosticRecipient, setDiagnosticRecipient] = useState<string>('koushiksrmedala@gmail.com')
+  const [mailSender, setMailSender] = useState<string>('technohmsit@gmail.com')
+  const [mailMaskedPass, setMailMaskedPass] = useState<string>('')
+  const [showConfigPass, setShowConfigPass] = useState<boolean>(false)
+  const [newAppPassInput, setNewAppPassInput] = useState<string>('')
+  const [savingPass, setSavingPass] = useState<boolean>(false)
 
   // Activity Audit & Telemetry State
   const [activityLogs, setActivityLogs] = useState<any[]>([])
@@ -377,6 +384,8 @@ export default function AdminDashboard() {
       if (res.ok) {
         const data = await res.json()
         setMailLogs(data.recent_logs || [])
+        if (data.sender) setMailSender(data.sender)
+        if (data.masked_passcode) setMailMaskedPass(data.masked_passcode)
       }
     } catch (err) {
       console.warn('Failed to fetch mail diagnostics:', err)
@@ -409,6 +418,40 @@ export default function AdminDashboard() {
       })
     } finally {
       setMailDiagnosticLoading(false)
+    }
+  }
+
+  const handleSaveAndTestCredentials = async () => {
+    if (!newAppPassInput.trim()) return
+    setSavingPass(true)
+    setMailDiagnosticResult(null)
+    try {
+      const res = await fetch('/api/admin/mail-test', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          targetEmail: diagnosticRecipient,
+          newPass: newAppPassInput.trim(),
+          saveToConfig: true
+        })
+      })
+      const data = await res.json()
+      setMailDiagnosticResult(data)
+      if (data.success) {
+        setNewAppPassInput('')
+        setShowConfigPass(false)
+        sendBrowserNotification('⚡ App Password Verified & Saved!', {
+          body: `Google SMTP verified and test email sent to ${diagnosticRecipient}!`
+        })
+      }
+      fetchMailDiagnostics()
+    } catch (err: any) {
+      setMailDiagnosticResult({
+        success: false,
+        error: err.message || 'Failed to verify and save app password'
+      })
+    } finally {
+      setSavingPass(false)
     }
   }
 
@@ -2788,47 +2831,109 @@ export default function AdminDashboard() {
 
               <div className="p-5 space-y-4">
                 {/* Diagnostic Dispatch Bar */}
-                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="text-zinc-500">Sender Account:</span>
-                      <strong className="text-sky-300 font-mono">technohmsit@gmail.com</strong>
-                      <span className="text-zinc-700">|</span>
-                      <span className="text-emerald-400 font-mono text-[11px]">✓ Key: tidw **** **** qljb</span>
+                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-xs flex-wrap">
+                        <span className="text-zinc-500">Sender Account:</span>
+                        <strong className="text-sky-300 font-mono">{mailSender}</strong>
+                        <span className="text-zinc-700">|</span>
+                        <span className="text-emerald-400 font-mono text-[11px]">
+                          {mailMaskedPass ? `✓ Active Key: ${mailMaskedPass}` : '⚠️ No Key Loaded'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Dispatches a live test email through Google SMTP (Port 465 SSL) and audits the delivery response.
+                      </p>
                     </div>
-                    <p className="text-[11px] text-zinc-400">
-                      Dispatches a live test email through Google SMTP (Port 465 SSL) and audits the delivery response.
-                    </p>
+
+                    <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setShowConfigPass(!showConfigPass)}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Lock className="w-3 h-3 text-amber-400" />
+                        <span>{showConfigPass ? 'Hide Key Config' : 'Update Gmail Key'}</span>
+                      </button>
+
+                      <select
+                        value={diagnosticRecipient}
+                        onChange={(e) => setDiagnosticRecipient(e.target.value)}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500"
+                      >
+                        <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
+                        <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com</option>
+                      </select>
+                      <button
+                        type="button"
+                        disabled={mailDiagnosticLoading}
+                        onClick={handleSendDiagnosticMail}
+                        className="px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                      >
+                        {mailDiagnosticLoading ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <span>Testing SMTP...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Send Test Email</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 w-full md:w-auto">
-                    <select
-                      value={diagnosticRecipient}
-                      onChange={(e) => setDiagnosticRecipient(e.target.value)}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500"
-                    >
-                      <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
-                      <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com</option>
-                    </select>
-                    <button
-                      type="button"
-                      disabled={mailDiagnosticLoading}
-                      onClick={handleSendDiagnosticMail}
-                      className="px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
-                    >
-                      {mailDiagnosticLoading ? (
-                        <>
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Testing SMTP...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-3.5 h-3.5" />
-                          <span>Send Test Email</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+                  {/* Inline App Password Updater (Saves to MongoDB Atlas System Config) */}
+                  {showConfigPass && (
+                    <div className="p-3.5 rounded-lg bg-zinc-900/90 border border-amber-500/30 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Update Google 16-Character App Password (Instant Cloud Sync)
+                        </span>
+                        <span className="text-[10px] text-zinc-500">Saves directly to MongoDB; no Vercel redeployment required</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <input
+                          type="text"
+                          value={newAppPassInput}
+                          onChange={(e) => setNewAppPassInput(e.target.value)}
+                          placeholder="e.g. abcd efgh ijkl mnop"
+                          className="flex-1 px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 font-mono text-xs focus:outline-none focus:border-amber-400"
+                        />
+                        <button
+                          type="button"
+                          disabled={savingPass || !newAppPassInput.trim()}
+                          onClick={handleSaveAndTestCredentials}
+                          className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        >
+                          {savingPass ? (
+                            <>
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                              <span>Verifying & Saving...</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCheck className="w-3 h-3" />
+                              <span>Verify & Save Key</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className="text-[11px] text-zinc-400 flex flex-wrap gap-x-4 gap-y-1">
+                        <span>1. Sign in to <strong className="text-zinc-300">{mailSender}</strong></span>
+                        <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">
+                          2. Generate App Password ↗
+                        </a>
+                        <a href="https://accounts.google.com/DisplayUnlockCaptcha" target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">
+                          3. Unlock Captcha for Cloud IP ↗
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Diagnostic Result Banner */}
@@ -2846,23 +2951,65 @@ export default function AdminDashboard() {
                       ) : (
                         <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                       )}
-                      <div className="space-y-1 flex-1">
+                      <div className="space-y-2 flex-1">
                         <div className="font-bold text-sm">
                           {mailDiagnosticResult.success
                             ? '✓ Live Email Dispatched & Delivered to Inbox!'
-                            : '❌ SMTP Dispatch Failed'}
+                            : '❌ SMTP Dispatch Failed: Google Rejected Authentication'}
                         </div>
                         <p className="text-xs text-zinc-300">
                           {mailDiagnosticResult.message || mailDiagnosticResult.detail || mailDiagnosticResult.error}
                         </p>
                         {mailDiagnosticResult.smtp_response && (
-                          <div className="font-mono text-[11px] text-emerald-400 bg-black/40 px-2 py-1 rounded mt-1 inline-block">
+                          <div className="font-mono text-[11px] text-emerald-400 bg-black/40 px-2 py-1 rounded inline-block">
                             Server Response: {mailDiagnosticResult.smtp_response}
                           </div>
                         )}
                         {mailDiagnosticResult.message_id && (
                           <div className="font-mono text-[10px] text-zinc-400 block">
                             Message ID: {mailDiagnosticResult.message_id}
+                          </div>
+                        )}
+
+                        {/* Actionable Unblock Guidance Links for Google 535 BadCredentials */}
+                        {!mailDiagnosticResult.success && (
+                          <div className="mt-2 pt-2 border-t border-rose-900/60 text-xs space-y-1.5">
+                            <strong className="text-rose-300 block">How to resolve Google BadCredentials:</strong>
+                            <ol className="list-decimal pl-4 space-y-1 text-zinc-300">
+                              <li>
+                                <a
+                                  href="https://myaccount.google.com/notifications"
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-400 font-semibold hover:underline"
+                                >
+                                  Google Security Notifications ↗
+                                </a>{' '}
+                                — Look for recent blocked sign-in and click <strong>&quot;Yes, it was me&quot;</strong>.
+                              </li>
+                              <li>
+                                <a
+                                  href="https://accounts.google.com/DisplayUnlockCaptcha"
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-400 font-semibold hover:underline"
+                                >
+                                  Google DisplayUnlockCaptcha ↗
+                                </a>{' '}
+                                — Click <strong>Continue</strong> to authorize cloud connections.
+                              </li>
+                              <li>
+                                <a
+                                  href="https://myaccount.google.com/apppasswords"
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-400 font-semibold hover:underline"
+                                >
+                                  Generate Fresh App Password ↗
+                                </a>{' '}
+                                — Create a new 16-character key and paste it above in &quot;Update Gmail Key&quot;.
+                              </li>
+                            </ol>
                           </div>
                         )}
                       </div>

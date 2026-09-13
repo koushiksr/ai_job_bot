@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
-import { createTransporter, getSmtpCredentials } from '@/lib/mailService'
+import { createTransporter, getDynamicSmtpCredentials } from '@/lib/mailService'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,14 +19,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { user, pass } = getSmtpCredentials()
+    const { user, pass } = await getDynamicSmtpCredentials(db)
     const maskedPass = pass ? `${pass.slice(0, 4)} **** **** ${pass.slice(-4)}` : 'MISSING'
 
-    // Fetch latest 10 email records from MongoDB
+    // Fetch latest 15 email records from MongoDB
     const recentLogs = await db.collection('emails')
       .find({})
       .sort({ created_at: -1 })
-      .limit(10)
+      .limit(15)
       .toArray()
 
     return NextResponse.json({
@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
         from: log.from,
         subject: log.subject,
         status: log.status,
+        provider: log.provider || 'gmail_smtp',
         message_id: log.message_id,
         smtp_response: log.smtp_response,
         smtp_error: log.smtp_error,
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
     }
 
-    const { authorized, email: adminEmail } = await verifyAdminRequest(req, db)
+    const { authorized } = await verifyAdminRequest(req, db)
     if (!authorized) {
       return NextResponse.json({ detail: 'Forbidden: Admin access required' }, { status: 403 })
     }
@@ -70,9 +71,12 @@ export async function POST(req: NextRequest) {
       target = 'koushiksrmedala@gmail.com'
     }
 
-    const { user, pass } = getSmtpCredentials()
-    const transporter = createTransporter()
+    const currentCreds = await getDynamicSmtpCredentials(db)
+    const user = (body.newUser ? String(body.newUser).trim() : currentCreds.user)
+    const pass = (body.newPass ? String(body.newPass).trim().replace(/['"]/g, '').replace(/\s+/g, '') : currentCreds.pass)
+    const saveToConfig = Boolean(body.saveToConfig)
 
+    const transporter = createTransporter({ user, pass })
     const now = new Date()
 
     // 1. Verify Handshake
@@ -85,6 +89,7 @@ export async function POST(req: NextRequest) {
           from: `"JobFlux AI Diagnostic" <${user}>`,
           subject: '⚡ Diagnostic Test Attempt',
           status: 'failed',
+          provider: 'gmail_smtp',
           smtp_error: verifyErr.message,
           created_at: now
         })
@@ -95,9 +100,23 @@ export async function POST(req: NextRequest) {
         step: 'verify',
         error: verifyErr.message,
         sender: user,
-        masked_pass: `${pass.slice(0, 4)} **** **** ${pass.slice(-4)}`,
-        detail: `Google SMTP rejected authentication: ${verifyErr.message}`
+        masked_pass: pass ? `${pass.slice(0, 4)} **** **** ${pass.slice(-4)}` : 'EMPTY',
+        detail: `Google SMTP rejected authentication: ${verifyErr.message}`,
+        help_steps: [
+          { label: 'Check Google Security Alerts (Click "Yes, it was me")', url: 'https://myaccount.google.com/notifications' },
+          { label: 'Unlock Google Captcha for external cloud sign-ins', url: 'https://accounts.google.com/DisplayUnlockCaptcha' },
+          { label: 'Generate a fresh 16-character App Password', url: 'https://myaccount.google.com/apppasswords' }
+        ]
       }, { status: 400 })
+    }
+
+    // Handshake succeeded: If user wanted to save these verified credentials to MongoDB
+    if (saveToConfig && db) {
+      await db.collection('system_config').updateOne(
+        { key: 'smtp_config' },
+        { $set: { key: 'smtp_config', user, pass, updated_at: now } },
+        { upsert: true }
+      )
     }
 
     // 2. Send Live Test Message
@@ -131,6 +150,7 @@ export async function POST(req: NextRequest) {
         from: `"JobFlux AI Diagnostic" <${user}>`,
         subject: '⚡ JobFlux AI Live SMTP Diagnostic Receipt',
         status: 'sent',
+        provider: 'gmail_smtp',
         message_id: info.messageId,
         smtp_response: info.response,
         created_at: now
@@ -140,6 +160,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       sender: user,
+      saved_to_db: saveToConfig,
       recipient: target,
       message_id: info.messageId,
       smtp_response: info.response,

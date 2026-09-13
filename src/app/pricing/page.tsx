@@ -631,9 +631,21 @@ export default function PricingPage() {
                         {plan.price}
                       </span>
                       {plan.originalPrice && (
-                        <span className="text-xs text-zinc-500 line-through">
-                          {plan.originalPrice}
-                        </span>
+                        <>
+                          <span className="text-xs text-zinc-500 line-through">
+                            {plan.originalPrice}
+                          </span>
+                          {plan.id === 'pro' && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              90% OFF
+                            </span>
+                          )}
+                          {plan.id === 'elite' && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              92% OFF
+                            </span>
+                          )}
+                        </>
                       )}
                       <span className="text-xs text-zinc-400 font-normal">
                         {plan.period}
