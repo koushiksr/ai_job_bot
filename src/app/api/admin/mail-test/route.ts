@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
                 <tr>
                   <td align="center" style="padding-bottom:12px;">
                     <a href="https://jobfluxai.vercel.app" target="_blank" style="text-decoration:none;display:inline-block;">
-                      <img class="mobile-logo" src="https://jobfluxai.vercel.app/icon.svg" width="98" height="98" alt="JobFlux AI Logo" style="display:block;width:98px;height:98px;min-width:98px;min-height:98px;max-width:98px;max-height:98px;border-radius:20px;border:1px solid rgba(56,189,248,0.35);box-shadow:0 10px 25px -5px rgba(56,189,248,0.3);background:#09090b;margin:0 auto;" />
+                      <img class="mobile-logo" src="https://jobfluxai.vercel.app/icon.png" width="98" height="98" alt="JobFlux AI Logo" style="display:block;width:98px;height:98px;min-width:98px;min-height:98px;max-width:98px;max-height:98px;border-radius:20px;border:1px solid rgba(56,189,248,0.35);box-shadow:0 10px 25px -5px rgba(56,189,248,0.3);background:#09090b;margin:0 auto;" />
                     </a>
                   </td>
                 </tr>
