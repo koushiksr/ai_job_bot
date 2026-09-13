@@ -78,14 +78,14 @@ export default function ProfessionalUpgradeModal({
                   <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
                     <Zap className="w-3.5 h-3.5" />
                   </div>
-                  <h4 className="text-xs font-semibold text-white">Instant On-Demand Scout</h4>
+                  <h4 className="text-xs font-semibold text-white">On-Demand Real-Time Sweeps</h4>
                 </div>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-950/80 border border-sky-600/50 text-sky-300 uppercase tracking-wider font-semibold">
-                  Coming Soon
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-600/50 text-emerald-300 uppercase tracking-wider font-semibold">
+                  5x / Week
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Real-time manual triggers (under active beta development to optimize cloud resource efficiency). Dual 6 AM &amp; 8 AM daily sweeps are active today.
+                Trigger on-demand application sweeps up to 5 times per week whenever you want new openings scanned, processed sequentially on cloud workers.
               </p>
             </div>
 

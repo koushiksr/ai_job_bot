@@ -73,7 +73,7 @@ const PLANS: Plan[] = [
     features: [
       { text: '30 Days of Continuous Daily Auto-Apply' },
       { text: 'Up to 600+ Verified Job Applications' },
-      { text: 'Dual Daily Runs (6:00 AM & 8:00 AM IST)' },
+      { text: 'Daily Autonomous Application Sweeps' },
       { text: 'AI Tailored Responses for Recruiter Screening' },
       { text: 'Target Role, Location & Salary Filters' },
       { text: 'Priority Cloud Worker Queue' },
@@ -96,7 +96,7 @@ const PLANS: Plan[] = [
       { text: 'Up to 1,800+ Verified Job Applications' },
       { text: 'VIP Priority Server Queue Slot' },
       { text: 'AI Resume Optimization & Keyword Match' },
-      { text: 'On-Demand Cloud Scout (Coming Soon)' },
+      { text: 'On-Demand Real-Time Sweeps (Up to 5x / week)' },
       { text: 'Continuous Applications Until Hired' },
       { text: 'Dedicated Recruiter Response Priority' }
     ],

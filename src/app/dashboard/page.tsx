@@ -89,47 +89,36 @@ export default function UserDashboard() {
   const [isTriggeringScout, setIsTriggeringScout] = useState<boolean>(false)
   const [activeTask, setActiveTask] = useState<any>(null)
   const [taskFeedback, setTaskFeedback] = useState<{ type: 'success' | 'info' | 'error', text: string } | null>(null)
+  const [weeklyQuota, setWeeklyQuota] = useState<{ limit: number, used: number, remaining: number, is_unlimited: boolean } | null>(null)
+  const [queueStatus, setQueueStatus] = useState<{ queue_position: number, is_global_sweep_active: boolean, active_user_id: string | null } | null>(null)
 
   // AI Application Audit Modal
   const [selectedJobAudit, setSelectedJobAudit] = useState<any | null>(null)
 
   // Professional Tier Feature Gating & Perks Modal
   const [showProModal, setShowProModal] = useState<boolean>(false)
-  const [proModalFeature, setProModalFeature] = useState<string>('Dual 6 AM & 8 AM Turbo Sweeps')
+  const [proModalFeature, setProModalFeature] = useState<string>('On-Demand Application Sweeps (Up to 5x / week)')
 
   // Candidate account has Professional privileges if on an active Professional tier OR VIP pass.
   // Admin accounts manage system configurations via the Admin Portal (/admin).
   const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'vip' || isVip) && isPlanActive
 
-  // Compute Daily 6 AM & 8 AM IST Countdown
+  // Compute Daily Sweep Status
   useEffect(() => {
     const computeCountdown = () => {
       const now = new Date()
       const utcMs = now.getTime() + now.getTimezoneOffset() * 60000
       const istTime = new Date(utcMs + 5.5 * 3600000)
 
-      const target6 = new Date(istTime)
-      target6.setHours(6, 0, 0, 0)
-      const target8 = new Date(istTime)
-      target8.setHours(8, 0, 0, 0)
+      const targetMidnight = new Date(istTime)
+      targetMidnight.setHours(24, 0, 0, 0)
 
-      let target: Date
-      if (istTime < target6) {
-        target = target6
-      } else if (istTime < target8) {
-        target = target8
-      } else {
-        target = new Date(target6)
-        target.setDate(target.getDate() + 1)
-      }
-
-      const diffSecs = Math.max(0, Math.floor((target.getTime() - istTime.getTime()) / 1000))
+      const diffSecs = Math.max(0, Math.floor((targetMidnight.getTime() - istTime.getTime()) / 1000))
       const hours = Math.floor(diffSecs / 3600)
       const minutes = Math.floor((diffSecs % 3600) / 60)
       const seconds = diffSecs % 60
 
-      const targetTimeStr = target.getHours() === 6 ? '06:00 AM IST' : '08:00 AM IST'
-      setCountdownText(`${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s (${targetTimeStr})`)
+      setCountdownText(`${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`)
     }
 
     computeCountdown()
@@ -233,18 +222,29 @@ export default function UserDashboard() {
       const res = await fetch(`/api/tasks?user_id=${uid}&t=${Date.now()}`)
       if (res.ok) {
         const data = await res.json()
+        if (data.weekly_quota) {
+          setWeeklyQuota(data.weekly_quota)
+        }
+        if (data.queue_status) {
+          setQueueStatus(data.queue_status)
+        }
         if (data.task && (data.task.status === 'pending' || data.task.status === 'running')) {
           setActiveTask(data.task)
-          // Only show the executing radar UI for Professional users.
-          // Non-pro users should not see the scout execution animation.
-          if (isProfessional) {
-            setIsTriggeringScout(true)
+          setIsTriggeringScout(true)
+          if (data.task.status === 'running') {
             setTaskFeedback({
               type: 'info',
-              text: 'Autonomous AI Scout is actively processing tasks...'
+              text: 'Autonomous AI Scout is actively processing applications live...'
             })
-            pollTaskStatus(uid)
+          } else {
+            setTaskFeedback({
+              type: 'info',
+              text: data.queue_status?.queue_position > 1
+                ? `Queued at position #${data.queue_status.queue_position} in line (worker runs tasks sequentially).`
+                : 'Enqueued in cloud task runner. Waiting for worker pickup...'
+            })
           }
+          pollTaskStatus(uid)
         }
       }
     } catch {
@@ -254,16 +254,27 @@ export default function UserDashboard() {
 
   const handleTriggerOnDemandScout = async () => {
     if (!isProfessional) {
-      setProModalFeature('Instant On-Demand Turbo Scout')
+      setProModalFeature('On-Demand Application Sweeps (Up to 5x / week)')
       setShowProModal(true)
       return
     }
 
-    if (isTriggeringScout) return
+    if (weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0) {
+      setTaskFeedback({
+        type: 'error',
+        text: 'Weekly on-demand sweep quota reached (5/5). Quota resets on a rolling 7-day basis. Daily automated sweeps continue running automatically.'
+      })
+      return
+    }
+
+    if (isTriggeringScout || (activeTask && (activeTask.status === 'pending' || activeTask.status === 'running'))) {
+      return
+    }
+
     setIsTriggeringScout(true)
     setTaskFeedback({
       type: 'info',
-      text: 'Dispatching task to Cloud Queue Worker...'
+      text: 'Dispatching on-demand sweep to Cloud Queue Worker...'
     })
 
     try {
@@ -272,24 +283,41 @@ export default function UserDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          action: 'run_apply'
+          headless: true
         })
       })
 
       const data = await res.json()
-      if (res.ok && data.task) {
-        setActiveTask(data.task)
+      if (res.ok) {
+        if (data.quota) setWeeklyQuota(data.quota)
+        if (data.queue_position) {
+          setQueueStatus(prev => ({
+            queue_position: data.queue_position,
+            is_global_sweep_active: prev?.is_global_sweep_active || false,
+            active_user_id: prev?.active_user_id || null
+          }))
+        }
+        setActiveTask(data.task || {
+          task_id: data.task_id,
+          status: data.status || 'pending',
+          logs: [`[${new Date().toLocaleTimeString()}] 🚀 On-demand sweep enqueued.`]
+        })
         setTaskFeedback({
           type: 'info',
-          text: 'Autonomous worker picked up task. Scanning openings...'
+          text: data.message || 'On-demand sweep enqueued successfully.'
         })
         pollTaskStatus(userId)
       } else {
         setIsTriggeringScout(false)
-        setTaskFeedback({
-          type: 'error',
-          text: data.detail || 'Failed to dispatch task'
-        })
+        if (data.code === 'UPGRADE_REQUIRED') {
+          setProModalFeature('On-Demand Application Sweeps (Up to 5x / week)')
+          setShowProModal(true)
+        } else {
+          setTaskFeedback({
+            type: 'error',
+            text: data.detail || 'Failed to dispatch on-demand task'
+          })
+        }
       }
     } catch (err: any) {
       setIsTriggeringScout(false)
@@ -308,18 +336,32 @@ export default function UserDashboard() {
         const res = await fetch(`/api/tasks?user_id=${uid}&t=${Date.now()}`)
         if (res.ok) {
           const data = await res.json()
+          if (data.weekly_quota) setWeeklyQuota(data.weekly_quota)
+          if (data.queue_status) setQueueStatus(data.queue_status)
           if (data.task) {
             setActiveTask(data.task)
             if (data.task.status === 'completed') {
               clearInterval(interval)
               setIsTriggeringScout(false)
-              setTaskFeedback({ type: 'success', text: 'On-demand scout run completed! Results updated.' })
+              setTaskFeedback({ type: 'success', text: data.task.summary || 'On-demand sweep completed! Results updated.' })
               loadUserData(uid)
               loadUserHistory(uid, 1, historySearch, historyFilter)
             } else if (data.task.status === 'failed') {
               clearInterval(interval)
               setIsTriggeringScout(false)
-              setTaskFeedback({ type: 'error', text: 'Task encountered an error. Check logs.' })
+              setTaskFeedback({ type: 'error', text: data.task.summary || 'Task ended. Check logs for details.' })
+            } else if (data.task.status === 'pending') {
+              if (data.queue_status?.queue_position > 1) {
+                setTaskFeedback({
+                  type: 'info',
+                  text: `Queued at position #${data.queue_status.queue_position} in line (worker runs tasks one by one)`
+                })
+              }
+            } else if (data.task.status === 'running') {
+              setTaskFeedback({
+                type: 'info',
+                text: 'Autonomous AI Scout is actively processing applications live...'
+              })
             }
           }
         }
@@ -327,13 +369,13 @@ export default function UserDashboard() {
         // ignore
       }
 
-      if (attempts >= 15) {
+      if (attempts >= 60) {
         clearInterval(interval)
         setIsTriggeringScout(false)
         loadUserData(uid)
         loadUserHistory(uid, 1, historySearch, historyFilter)
       }
-    }, 4000)
+    }, 3000)
   }
 
   const loadUserData = async (uid: string) => {
@@ -928,32 +970,60 @@ export default function UserDashboard() {
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2 flex-wrap">
-                  {isProfessional ? (
-                    <>
-                      <span>Schedule: <strong className="text-zinc-300">Dual Precision · 06:00 &amp; 08:00 AM IST</strong></span>
-                      <span className="text-zinc-600 hidden sm:inline">•</span>
-                      <span className="text-emerald-400 font-medium">Auto Cloud Dispatch</span>
-                      <span className="text-zinc-600 hidden sm:inline">•</span>
-                      <span>Next Sweep: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Schedule: <strong className="text-zinc-300">Daily Morning Scan (06:00 AM IST)</strong></span>
-                      <span className="text-zinc-600 hidden sm:inline">•</span>
-                      <span>Next Run: <strong className="text-zinc-200 font-mono">{countdownText}</strong></span>
-                    </>
-                  )}
+                  <span>Schedule: <strong className="text-zinc-300">Daily Autonomous Sweeps</strong></span>
+                  <span className="text-zinc-600 hidden sm:inline">•</span>
+                  <span className="text-emerald-400 font-medium">Applies Daily</span>
+                  <span className="text-zinc-600 hidden sm:inline">•</span>
+                  <span>Autonomous Radar: <strong className="text-zinc-200 font-mono">Active</strong></span>
                 </p>
               </div>
             </div>
 
-            <div className="w-full sm:w-auto flex items-center gap-2">
-              <div className="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-zinc-900/90 border border-zinc-800 text-xs flex items-center justify-center sm:justify-start gap-2 font-mono">
+            <div className="w-full sm:w-auto flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+              <div className="px-3 py-2 rounded-lg bg-zinc-900/90 border border-zinc-800 text-xs flex items-center justify-center gap-2 font-mono shrink-0">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-zinc-300">Autonomous Radar</span>
+                <span className="text-zinc-300">Radar</span>
                 <span className="text-zinc-600">•</span>
-                <span className="text-sky-400 font-semibold">{isProfessional ? 'Dual 6 & 8 AM' : '6 AM Active'}</span>
+                <span className="text-emerald-400 font-semibold">Daily Sweeps Active</span>
               </div>
+
+              <button
+                type="button"
+                onClick={handleTriggerOnDemandScout}
+                disabled={isTriggeringScout || (activeTask && (activeTask.status === 'pending' || activeTask.status === 'running')) || (isProfessional && weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0)}
+                className="w-full sm:w-auto px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white hover:bg-zinc-200 text-black disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
+                title={!isProfessional ? "Upgrade to Professional to run on-demand sweeps" : (weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0) ? "Weekly on-demand sweep quota reached (5/5). Resets in rolling 7 days." : "Trigger instant real-time job application sweep"}
+              >
+                {activeTask?.status === 'running' ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-black" />
+                    <span>Running Sweep...</span>
+                  </>
+                ) : activeTask?.status === 'pending' ? (
+                  <>
+                    <Clock className="w-3.5 h-3.5 text-zinc-700" />
+                    <span>Queued {queueStatus?.queue_position && queueStatus.queue_position > 1 ? `(#${queueStatus.queue_position})` : ''}</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <span>On-Demand Sweep</span>
+                    {isProfessional ? (
+                      weeklyQuota?.is_unlimited ? (
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold">VIP</span>
+                      ) : (
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-200 text-zinc-800 font-bold">
+                          {weeklyQuota ? `${weeklyQuota.remaining}/5` : '5/5'}
+                        </span>
+                      )
+                    ) : (
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-950/80 border border-blue-700/50 text-blue-300 font-semibold">
+                        PRO
+                      </span>
+                    )}
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -973,13 +1043,25 @@ export default function UserDashboard() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-white">Autonomous Scout Executing</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-sky-950/80 border border-sky-700/60 text-sky-300 animate-pulse">
-                        RADAR SWEEP ACTIVE
+                      <span className="text-xs font-semibold text-white">
+                        {activeTask?.status === 'pending'
+                          ? (queueStatus && queueStatus.queue_position > 1
+                              ? `Task Queued · Position #${queueStatus.queue_position} in line`
+                              : 'Task Enqueued · Awaiting Cloud Worker')
+                          : 'Autonomous Sweep Active'}
+                      </span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${
+                        activeTask?.status === 'pending'
+                          ? 'bg-amber-950/80 border border-amber-700/60 text-amber-300'
+                          : 'bg-sky-950/80 border border-sky-700/60 text-sky-300 animate-pulse'
+                      }`}>
+                        {activeTask?.status === 'pending' ? 'FIFO QUEUE' : 'SWEEP ACTIVE'}
                       </span>
                     </div>
                     <p className="text-[11px] text-zinc-400 mt-0.5">
-                      Targeting recruiter feeds, auto-formulating screening Q&As, and submitting verified applications...
+                      {activeTask?.status === 'pending'
+                        ? 'Worker daemon processes candidate tasks sequentially one by one to safeguard candidate accounts.'
+                        : 'Targeting recruiter feeds, auto-formulating screening Q&As, and submitting verified applications...'}
                     </p>
                   </div>
                 </div>
@@ -1214,7 +1296,7 @@ export default function UserDashboard() {
                         Autonomous Agent Setup · 3 Steps to Go Live
                       </h3>
                       <p className="text-[11px] text-zinc-400">
-                        Complete your calibration so the autonomous engine can submit verified applications at 06:00 AM IST.
+                        Complete your calibration so the autonomous engine can submit verified applications during daily sweeps.
                       </p>
                     </div>
                   </div>
@@ -1282,12 +1364,30 @@ export default function UserDashboard() {
                       </div>
                       <h4 className="text-xs font-semibold text-zinc-200">Autonomous Execution</h4>
                       <p className="text-[11px] text-zinc-400 leading-relaxed">
-                        Daily autonomous sweeps run at 06:00 AM IST. Dispatched applications will log below.
+                        Daily autonomous sweeps run automatically. Dispatched applications will log below.
                       </p>
                     </div>
-                    <div className="w-full py-2 px-2.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 text-xs font-mono flex items-center justify-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                      <span>Sweeps: {isProfessional ? '06:00 & 08:00 AM IST' : '06:00 AM IST'}</span>
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full py-1.5 px-2.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 text-xs font-mono flex items-center justify-between">
+                        <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-zinc-400" /> Schedule</span>
+                        <span className="text-emerald-400 font-semibold text-[11px]">Daily Sweeps</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleTriggerOnDemandScout}
+                        disabled={isTriggeringScout || (activeTask && (activeTask.status === 'pending' || activeTask.status === 'running')) || (isProfessional && weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0)}
+                        className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Zap className="w-3 h-3 text-amber-400 fill-amber-400" />
+                        <span>Run On-Demand Sweep</span>
+                        {isProfessional ? (
+                          weeklyQuota && !weeklyQuota.is_unlimited ? (
+                            <span className="text-[10px] font-mono text-zinc-400">({weeklyQuota.remaining}/5)</span>
+                          ) : null
+                        ) : (
+                          <span className="text-[9px] font-mono px-1 rounded bg-blue-950/80 border border-blue-700/50 text-blue-300">PRO</span>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1329,7 +1429,7 @@ export default function UserDashboard() {
                               <p className="text-[11px] text-zinc-400 leading-relaxed">
                                 {historySearch
                                   ? `No previous job applications match "${historySearch}". Try adjusting your search query.`
-                                  : `Your agent is active and scheduled for the automated morning sweep at 06:00 AM IST. All matched employer submissions and answered screening questions will populate here in real-time.`}
+                                  : `Your agent is active and calibrated for daily autonomous sweeps. All matched employer submissions and answered screening questions will populate here in real-time.`}
                               </p>
                             </div>
                           </div>
@@ -1382,15 +1482,13 @@ export default function UserDashboard() {
                               <span>{job.title || 'Job Opening'}</span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-zinc-500 font-mono text-[11px]">
+                          <td className="py-3 px-4 text-zinc-400 font-mono text-[11px]">
                             {formatJobDate(job)}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-zinc-900 text-emerald-400 border border-zinc-800">
-                                <CheckCircle2 className="w-3 h-3" /> APPLIED
-                              </span>
-                            </div>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-emerald-950/60 text-emerald-400 border border-emerald-800/50">
+                              <CheckCircle2 className="w-3 h-3" /> APPLIED
+                            </span>
                           </td>
                         </tr>
                       ))
@@ -1399,28 +1497,24 @@ export default function UserDashboard() {
                 </table>
               </div>
 
-              {/* Mobile Card List View (md:hidden) */}
+              {/* Mobile Card View */}
               <div className="md:hidden divide-y divide-zinc-800/60">
                 {loadingHistory ? (
-                  <div className="py-10 text-center text-zinc-500 text-xs">
+                  <div className="py-12 text-center text-zinc-500 text-xs">
                     <RefreshCw className="w-4 h-4 mx-auto animate-spin mb-2 text-zinc-400" />
                     Loading applications...
                   </div>
                 ) : historyJobs.length === 0 ? (
-                  <div className="py-12 px-4 text-center space-y-3">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
-                      <Cpu className="w-5 h-5 text-sky-400" />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-semibold text-white">
-                        {historySearch ? 'No Applications Match Search' : 'Autonomous Engine Standing By'}
-                      </h4>
-                      <p className="text-[11px] text-zinc-400">
-                        {historySearch
-                          ? `No previous job applications match "${historySearch}".`
-                          : 'Morning sweeps run at 06:00 AM IST. Verified applications will appear here.'}
-                      </p>
-                    </div>
+                  <div className="p-8 text-center space-y-2">
+                    <Cpu className="w-5 h-5 text-sky-400 mx-auto" />
+                    <h4 className="text-xs font-semibold text-white">
+                      {historySearch ? 'No Results Found' : 'Engine Standing By'}
+                    </h4>
+                    <p className="text-[11px] text-zinc-400">
+                      {historySearch
+                        ? `No previous job applications match "${historySearch}".`
+                        : 'Autonomous sweeps apply daily. Verified applications will appear here.'}
+                    </p>
                   </div>
                 ) : (
                   historyJobs.map((job, idx) => (

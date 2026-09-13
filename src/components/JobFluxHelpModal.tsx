@@ -147,7 +147,7 @@ export default function JobFluxHelpModal({
   const faqs = [
     {
       q: 'How do the daily automated application runs work?',
-      a: 'JobFlux AI autonomous engines execute twice every single day at 06:00 AM and 08:00 AM IST. The bot dynamically matches open vacancies on Naukri according to your exact target roles, experience, and location preferences, intelligently answering employer screening questions with your tailored ATS profile.'
+      a: 'JobFlux AI autonomous engines execute daily sweeps. The bot dynamically matches open vacancies on Naukri according to your exact target roles, experience, and location preferences, intelligently answering employer screening questions with your tailored ATS profile.'
     },
     {
       q: 'How do I update or replace my candidate resume?',
@@ -158,8 +158,8 @@ export default function JobFluxHelpModal({
       a: 'Our central support desk is managed at technohmsit@gmail.com. Inquiries sent to this address receive direct priority attention from our technical team within 2 to 4 hours.'
     },
     {
-      q: 'Can I trigger an application scout on-demand anytime?',
-      a: 'To maximize cloud energy efficiency and optimize server resource utilization, all applications are dispatched automatically during high-visibility morning recruiter windows (06:00 AM & 08:00 AM IST). Real-time On-Demand manual triggers are currently in active beta development and coming soon to premium accounts.'
+      q: 'Can I trigger an application sweep on-demand anytime?',
+      a: 'Yes! In addition to daily automated sweeps, Professional subscribers can trigger manual on-demand sweeps up to 5 times per week directly from their dashboard cockpit. The cloud worker processes candidate runs sequentially one by one to safeguard candidate accounts.'
     },
     {
       q: 'How do enterprise and agency cohorts work?',
