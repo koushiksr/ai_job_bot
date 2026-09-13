@@ -21,7 +21,7 @@ interface MailResult {
  */
 function createTransporter() {
   const user = process.env.SMTP_USER || process.env.ADMIN_MAIL_TO_SEND_PASSWORD || 'technohmsit@gmail.com'
-  const pass = process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || 'nxgq faop lohb gpot'
+  const pass = process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || 'tidw wevs gebl qljb'
 
   return nodemailer.createTransport({
     service: 'gmail',

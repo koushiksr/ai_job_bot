@@ -39,7 +39,11 @@ import {
   PlayCircle,
   StopCircle,
   Ban,
-  RotateCcw
+  RotateCcw,
+  Bell,
+  BellOff,
+  BellRing,
+  Settings
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -162,6 +166,90 @@ export default function AdminDashboard() {
   const [authChecking, setAuthChecking] = useState<boolean>(true)
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false)
+
+  // Browser Push Notifications State & Assistants for Admin
+  const [notificationPermission, setNotificationPermission] = useState<string>('default')
+  const [showUnblockGuide, setShowUnblockGuide] = useState<boolean>(false)
+  const [notificationBannerDismissed, setNotificationBannerDismissed] = useState<boolean>(false)
+  const [testNotificationSent, setTestNotificationSent] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!('Notification' in window)) {
+        setNotificationPermission('unsupported')
+      } else {
+        setNotificationPermission(Notification.permission)
+      }
+    }
+  }, [])
+
+  const sendBrowserNotification = (title: string, options?: NotificationOptions) => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        const n = new Notification(title, {
+          icon: '/favicon.ico',
+          ...options
+        })
+        n.onclick = () => {
+          window.focus()
+          n.close()
+        }
+      } catch (e) {
+        console.warn('Could not dispatch browser notification:', e)
+      }
+    }
+  }
+
+  const handleRequestNotification = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      alert('Push notifications are not supported by your current browser.')
+      return
+    }
+
+    if (Notification.permission === 'denied') {
+      setShowUnblockGuide(true)
+      return
+    }
+
+    try {
+      const perm = await Notification.requestPermission()
+      setNotificationPermission(perm)
+      if (perm === 'granted') {
+        sendBrowserNotification('⚡ JobFlux AI Admin Notifications Active', {
+          body: 'You will now receive real-time admin alerts for candidate dispatches and queue actions.'
+        })
+        setTestNotificationSent(true)
+        setTimeout(() => setTestNotificationSent(false), 4000)
+      } else if (perm === 'denied') {
+        setShowUnblockGuide(true)
+      }
+    } catch (err) {
+      console.error('Notification permission error:', err)
+    }
+  }
+
+  const handleSendTestNotification = () => {
+    sendBrowserNotification('⚡ JobFlux AI Admin Alert', {
+      body: 'Admin push notifications are verified and active on your system!'
+    })
+    setTestNotificationSent(true)
+    setTimeout(() => setTestNotificationSent(false), 3000)
+  }
+
+  const recheckNotificationPermission = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      const perm = Notification.permission
+      setNotificationPermission(perm)
+      if (perm === 'granted') {
+        setShowUnblockGuide(false)
+        sendBrowserNotification('⚡ Notifications Successfully Unblocked!', {
+          body: 'JobFlux AI admin push alerts are now active.'
+        })
+      } else if (perm === 'denied') {
+        alert('Notifications are still marked as Blocked in browser settings. Please toggle them to "Allow" in the address bar padlock.')
+      }
+    }
+  }
 
   const getAdminHeaders = () => {
     const uid = typeof window !== 'undefined' ? localStorage.getItem('user_id') || '' : ''
@@ -312,6 +400,9 @@ export default function AdminDashboard() {
         type: 'success',
         message: data.message || `Offer dispatched successfully to ${data.dispatched_count} candidate(s)!`
       })
+      sendBrowserNotification('⚡ JobFlux AI Campaign Dispatched', {
+        body: `Offer "${offerTitle}" dispatched to ${data.dispatched_count || 1} candidate(s)!`
+      })
       setIsConfirmOfferModalOpen(false)
       fetchOffersData()
     } catch (err: any) {
@@ -360,6 +451,9 @@ export default function AdminDashboard() {
         throw new Error(data.detail || 'Action failed')
       }
       setQueueNotification({ type: 'success', message: data.message })
+      sendBrowserNotification('⚡ JobFlux Queue Updated', {
+        body: data.message || `Queue action "${action}" executed.`
+      })
       if (action === 'cancel_all_pending') setShowConfirmCancelAll(false)
       fetchQueueData()
     } catch (err: any) {
@@ -720,6 +814,85 @@ export default function AdminDashboard() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+        {/* Browser Push Notifications Assistant Banner for Admin */}
+        {notificationPermission === 'denied' && (
+          <div className="p-3 sm:p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                <BellOff className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-white flex items-center gap-2">
+                  <span>Browser Push Notifications Blocked</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 font-mono">Action Required</span>
+                </div>
+                <p className="text-[11px] text-amber-300/80 mt-0.5">
+                  Your browser is currently blocking notifications for JobFlux AI. Enable them to receive real-time admin dispatch confirmations & queue updates.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowUnblockGuide(true)}
+              className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 self-end sm:self-auto"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>How to Unblock (1-Click Guide)</span>
+            </button>
+          </div>
+        )}
+
+        {notificationPermission === 'default' && !notificationBannerDismissed && (
+          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-zinc-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
+                <Bell className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-white">Enable Real-Time Admin Push Notifications</div>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Receive immediate alerts when background worker sweeps complete, tickets are filed, or purchase offers are dispatched.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setNotificationBannerDismissed(true)}
+                className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+                title="Dismiss"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleRequestNotification}
+                className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5"
+              >
+                <BellRing className="w-3.5 h-3.5" />
+                <span>Allow Notifications</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {notificationPermission === 'granted' && (
+          <div className="p-2.5 rounded-xl bg-emerald-950/20 border border-emerald-800/30 text-emerald-300 flex items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Real-time push notifications active for admin alerts, worker sweeps, and queue dispatches.</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleSendTestNotification}
+              className="px-2.5 py-1 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+            >
+              <Bell className="w-3 h-3" />
+              <span>{testNotificationSent ? 'Alert Sent! ✓' : 'Send Test Alert'}</span>
+            </button>
+          </div>
+        )}
+
         {/* Real-time Cluster Radar Telemetry Bar */}
         <div className="px-4 py-2.5 rounded-xl bg-[#09090b] border border-zinc-800/90 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs relative overflow-hidden card-featured-glow">
           <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
@@ -3101,6 +3274,79 @@ export default function AdminDashboard() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Unblock Guide Modal */}
+      {showUnblockGuide && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <BellOff className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-sm text-white">How to Unblock Push Notifications</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowUnblockGuide(false)}
+                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-zinc-300">
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
+                <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center shrink-0 text-xs">1</span>
+                <div>
+                  <div className="font-semibold text-white">Click the Site Settings / Padlock Icon</div>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    Look at your browser&apos;s address bar next to <code className="text-amber-300 font-mono text-[10px]">jobfluxai.vercel.app</code> and click the icon.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
+                <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center shrink-0 text-xs">2</span>
+                <div>
+                  <div className="font-semibold text-white">Switch &ldquo;Notifications&rdquo; from Block to Allow</div>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    In the site permissions menu, find <strong>Notifications</strong> and change the dropdown setting to <strong>Allow</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
+                <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center shrink-0 text-xs">3</span>
+                <div>
+                  <div className="font-semibold text-white">Verify Connection</div>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    Click the button below to confirm the permission change and receive an immediate verification alert!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setShowUnblockGuide(false)}
+                className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={recheckNotificationPermission}
+                className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>I&apos;ve Allowed It · Check Permission</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Help & Support Modal */}
       <JobFluxHelpModal
