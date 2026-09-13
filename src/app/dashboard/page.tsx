@@ -188,10 +188,47 @@ export default function UserDashboard() {
         } else {
           setActiveOfferBanner(null)
         }
+
+        // 3. Process any real-time push notifications dispatched by administrator
+        const notifs = data.notifications || []
+        for (const notif of notifs) {
+          const notifKey = `jobflux_seen_notif_${notif.id}`
+          if (typeof window !== 'undefined' && !sessionStorage.getItem(notifKey)) {
+            sessionStorage.setItem(notifKey, 'true')
+
+            // Dispatch native OS browser push notification with high-res PNG icon
+            sendBrowserNotification(notif.title || '⚡ JobFlux AI Radar Alert', {
+              body: notif.message,
+              icon: '/images/icon.png',
+              badge: '/images/icon.png'
+            })
+
+            // Dispatch floating slide-over in-app toast
+            setInAppToast({
+              id: notif.id,
+              title: notif.title || '⚡ JobFlux Priority Alert',
+              message: notif.message,
+              promo_code: notif.promo_code,
+              claim_url: notif.claim_url
+            })
+            break // Present one priority alert at a time
+          }
+        }
       }
     } catch (e) {
       console.error('Failed to load candidate assigned offers:', e)
     }
+  }
+
+  const dismissToast = (notifId?: string) => {
+    if (notifId) {
+      fetch('/api/user/offers', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notification_id: notifId })
+      }).catch(() => {})
+    }
+    setInAppToast(null)
   }
 
   const handleRequestNotification = async () => {
@@ -1188,22 +1225,6 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {notificationPermission === 'granted' && (
-          <div className="p-2.5 rounded-xl bg-emerald-950/20 border border-emerald-800/30 text-emerald-300 flex items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>Real-time push notifications active for application receipts and sweep alerts.</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleSendTestNotification}
-              className="px-2.5 py-1 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-            >
-              <Bell className="w-3 h-3" />
-              <span>{testNotificationSent ? 'Alert Sent! ✓' : 'Send Test Alert'}</span>
-            </button>
-          </div>
-        )}
 
         {/* Unblock Instructions Modal */}
         {showUnblockGuide && (
@@ -2337,7 +2358,7 @@ export default function UserDashboard() {
                 {inAppToast.claim_url && (
                   <Link
                     href={inAppToast.claim_url}
-                    onClick={() => setInAppToast(null)}
+                    onClick={() => dismissToast(inAppToast.id)}
                     className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-md"
                   >
                     <span>Claim Offer Now</span>
@@ -2348,7 +2369,7 @@ export default function UserDashboard() {
             </div>
             <button
               type="button"
-              onClick={() => setInAppToast(null)}
+              onClick={() => dismissToast(inAppToast.id)}
               className="p-1 rounded-md text-zinc-400 hover:text-white transition-colors cursor-pointer"
               title="Dismiss alert"
             >

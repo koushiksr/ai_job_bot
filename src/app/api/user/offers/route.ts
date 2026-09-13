@@ -161,3 +161,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
+
+/**
+ * PATCH /api/user/offers
+ * Marks an individual notification or all notifications as read for a candidate.
+ */
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json().catch(() => ({}))
+    const { notification_id, email } = body
+
+    const db = await getDb()
+    if (!db) {
+      return NextResponse.json({ error: 'Database unavailable' }, { status: 503 })
+    }
+
+    if (notification_id) {
+      const { ObjectId } = await import('mongodb')
+      try {
+        await db.collection('user_notifications').updateOne(
+          { _id: new ObjectId(notification_id) },
+          { $set: { read: true, read_at: new Date() } }
+        )
+      } catch {
+        // ID might be string or invalid, fallback
+      }
+    } else if (email) {
+      await db.collection('user_notifications').updateMany(
+        { email: email.toLowerCase().trim(), read: false },
+        { $set: { read: true, read_at: new Date() } }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+

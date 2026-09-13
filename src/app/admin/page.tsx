@@ -137,6 +137,17 @@ export default function AdminDashboard() {
   const [newAppPassInput, setNewAppPassInput] = useState<string>('')
   const [savingPass, setSavingPass] = useState<boolean>(false)
 
+  // Push Notification Dispatcher State
+  const [pushDiagnosticLoading, setPushDiagnosticLoading] = useState<boolean>(false)
+  const [pushDiagnosticResult, setPushDiagnosticResult] = useState<any | null>(null)
+  const [showCustomPushConfig, setShowCustomPushConfig] = useState<boolean>(false)
+  const [customPushRecipient, setCustomPushRecipient] = useState<string>('')
+  const [customPushTitle, setCustomPushTitle] = useState<string>('⚡ JobFlux AI Priority Alert')
+  const [customPushMessage, setCustomPushMessage] = useState<string>('New high-match job opportunities discovered in your domain.')
+  const [customPushUrl, setCustomPushUrl] = useState<string>('/dashboard')
+  const [pushLogs, setPushLogs] = useState<any[]>([])
+  const [loadingPushLogs, setLoadingPushLogs] = useState<boolean>(false)
+
   // Activity Audit & Telemetry State
   const [activityLogs, setActivityLogs] = useState<any[]>([])
   const [loadingActivity, setLoadingActivity] = useState<boolean>(false)
@@ -369,10 +380,77 @@ export default function AdminDashboard() {
         setOffersData(data)
       }
       fetchMailDiagnostics()
+      fetchPushDiagnostics()
     } catch (err) {
       console.error('Failed to fetch offers:', err)
     } finally {
       setLoadingOffers(false)
+    }
+  }
+
+  const fetchPushDiagnostics = async () => {
+    setLoadingPushLogs(true)
+    try {
+      const res = await fetch('/api/admin/push-notification', {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setPushLogs(data.recent_logs || [])
+      }
+    } catch (err) {
+      console.warn('Failed to fetch push logs:', err)
+    } finally {
+      setLoadingPushLogs(false)
+    }
+  }
+
+  const handleTriggerPushNotification = async (targetOverride?: string) => {
+    setPushDiagnosticLoading(true)
+    setPushDiagnosticResult(null)
+    try {
+      let targetEmail = targetOverride || diagnosticRecipient
+      let targetType = 'single'
+
+      if (targetEmail === 'custom') {
+        targetEmail = customPushRecipient.trim()
+      } else if (targetEmail === 'all') {
+        targetType = 'all'
+      }
+
+      if (!targetEmail && targetType !== 'all') {
+        alert('Please enter or select a recipient email address for push notification.')
+        setPushDiagnosticLoading(false)
+        return
+      }
+
+      const res = await fetch('/api/admin/push-notification', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          targetType,
+          targetEmail,
+          title: customPushTitle.trim() || '⚡ JobFlux AI Priority Alert',
+          message: customPushMessage.trim() || 'You have a new update in your JobFlux AI Cockpit.',
+          claimUrl: customPushUrl.trim() || '/dashboard'
+        })
+      })
+
+      const data = await res.json()
+      setPushDiagnosticResult(data)
+      if (data.success) {
+        sendBrowserNotification(customPushTitle.trim() || '⚡ Push Dispatched!', {
+          body: `Push notification sent to ${targetType === 'all' ? 'all candidates' : targetEmail}!`
+        })
+      }
+      fetchPushDiagnostics()
+    } catch (err: any) {
+      setPushDiagnosticResult({
+        success: false,
+        error: err.message || 'Failed to trigger push notification'
+      })
+    } finally {
+      setPushDiagnosticLoading(false)
     }
   }
 
@@ -2893,19 +2971,51 @@ export default function AdminDashboard() {
                         <span>{showConfigPass ? 'Hide Key Config' : 'Update Gmail Key'}</span>
                       </button>
 
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomPushConfig(!showCustomPushConfig)}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
+                          showCustomPushConfig
+                            ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                            : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-300'
+                        }`}
+                      >
+                        <Bell className="w-3 h-3 text-amber-400" />
+                        <span>{showCustomPushConfig ? 'Hide Push Settings' : 'Push Alert Settings'}</span>
+                      </button>
+
                       <select
                         value={diagnosticRecipient}
                         onChange={(e) => setDiagnosticRecipient(e.target.value)}
-                        className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500"
+                        className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 max-w-[220px]"
                       >
                         <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
                         <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com</option>
+                        {usersList
+                          .filter(u => u.email && u.email !== 'koushiksrmedala@gmail.com' && u.email !== 'koushiksr1999@gmail.com')
+                          .map(u => (
+                            <option key={u.email} value={u.email}>{u.name ? `${u.name} (${u.email})` : u.email}</option>
+                          ))}
+                        <option value="custom">-- Custom Specific Email --</option>
+                        <option value="all">-- Broadcast to All Candidates --</option>
                       </select>
+
+                      {diagnosticRecipient === 'custom' && (
+                        <input
+                          type="email"
+                          value={customPushRecipient}
+                          onChange={(e) => setCustomPushRecipient(e.target.value)}
+                          placeholder="Enter candidate email..."
+                          className="px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-400"
+                        />
+                      )}
+
                       <button
                         type="button"
                         disabled={mailDiagnosticLoading}
                         onClick={handleSendDiagnosticMail}
-                        className="px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                        className="px-3.5 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                        title="Dispatch live test email via Google SMTP"
                       >
                         {mailDiagnosticLoading ? (
                           <>
@@ -2916,6 +3026,26 @@ export default function AdminDashboard() {
                           <>
                             <Send className="w-3.5 h-3.5" />
                             <span>Send Test Email</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={pushDiagnosticLoading}
+                        onClick={() => handleTriggerPushNotification()}
+                        className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                        title="Trigger real-time browser push notification and in-app toast to recipient"
+                      >
+                        {pushDiagnosticLoading ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <span>Triggering Push...</span>
+                          </>
+                        ) : (
+                          <>
+                            <BellRing className="w-3.5 h-3.5 fill-black/20" />
+                            <span>Trigger Push Notification</span>
                           </>
                         )}
                       </button>
@@ -2970,7 +3100,103 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   )}
+
+                  {/* Custom Push Notification Dispatcher Config Panel */}
+                  {showCustomPushConfig && (
+                    <div className="p-3.5 rounded-lg bg-zinc-900/90 border border-amber-500/40 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                          <BellRing className="w-3.5 h-3.5" />
+                          Custom Push Notification & In-App Toast Dispatcher
+                        </span>
+                        <span className="text-[10px] text-zinc-400 font-mono">Real-Time MongoDB + Web Push Sync</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-zinc-300 mb-1">
+                            Notification Title
+                          </label>
+                          <input
+                            type="text"
+                            value={customPushTitle}
+                            onChange={(e) => setCustomPushTitle(e.target.value)}
+                            placeholder="e.g. ⚡ JobFlux AI Radar Alert"
+                            className="w-full px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs focus:outline-none focus:border-amber-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-zinc-300 mb-1">
+                            Action / Target URL
+                          </label>
+                          <input
+                            type="text"
+                            value={customPushUrl}
+                            onChange={(e) => setCustomPushUrl(e.target.value)}
+                            placeholder="e.g. /dashboard or /pricing"
+                            className="w-full px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-400"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-zinc-300 mb-1">
+                          Notification Message / Body
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={customPushMessage}
+                          onChange={(e) => setCustomPushMessage(e.target.value)}
+                          placeholder="e.g. 15 new high-match job opportunities applied on your behalf!"
+                          className="w-full px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs focus:outline-none focus:border-amber-400"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[11px] text-zinc-400">
+                          Target: <strong className="text-white font-mono">{diagnosticRecipient === 'custom' ? customPushRecipient || 'None specified' : diagnosticRecipient === 'all' ? 'All Candidates (Broadcast)' : diagnosticRecipient}</strong>
+                        </span>
+                        <button
+                          type="button"
+                          disabled={pushDiagnosticLoading}
+                          onClick={() => handleTriggerPushNotification()}
+                          className="px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <Send className="w-3 h-3" />
+                          <span>Dispatch Custom Push Alert</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Push Notification Result Banner */}
+                {pushDiagnosticResult && (
+                  <div
+                    className={`p-3.5 rounded-xl text-xs border ${
+                      pushDiagnosticResult.success
+                        ? 'bg-amber-950/30 border-amber-500/50 text-amber-200'
+                        : 'bg-rose-950/30 border-rose-800/50 text-rose-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {pushDiagnosticResult.success ? (
+                          <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                        ) : (
+                          <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                        )}
+                        <span className="font-semibold text-xs">
+                          {pushDiagnosticResult.message || pushDiagnosticResult.error}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPushDiagnosticResult(null)}
+                        className="text-zinc-400 hover:text-white text-xs cursor-pointer p-1"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Diagnostic Result Banner */}
                 {mailDiagnosticResult && (
