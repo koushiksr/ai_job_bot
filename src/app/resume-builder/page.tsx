@@ -36,13 +36,13 @@ const PRESET_TEMPLATES = [
     bracket: '₹38 - 55 LPA',
     ats_score: 99.7,
     data: {
-      name: 'Koushik S. Rao',
+      name: 'Karthik S. Rao',
       role: 'Lead AI Engineer (GenAI & Agentic Workflows)',
       bracket: '₹38 - 55 LPA',
-      email: 'koushik.ai@enterprise-mesh.internal',
-      phone: '+91 98450 •••••',
-      location: 'Bengaluru, India · Hybrid / Remote',
-      linkedin: 'linkedin.com/in/koushik-ai-lead',
+      email: 'karthik.rao.ai@gmail.com',
+      phone: '+91 98452 41088',
+      location: 'Bengaluru, Karnataka, India · Hybrid / Remote',
+      linkedin: 'linkedin.com/in/karthik-s-rao',
       summary:
         'Results-driven AI Engineer with 4+ years architecting enterprise GenAI pipelines, multi-agent orchestration workflows, and production RAG microservices. Proven track record reducing LLM hallucination rates by 62% using LangGraph and semantic vector indexing, serving 12M+ monthly queries across fault-tolerant distributed infrastructure.',
       skills: {
@@ -101,11 +101,11 @@ const PRESET_TEMPLATES = [
           ]
         }
       ],
-      education: 'B.E. in Electronics & Communication Engineering · VTU (Honors, 8.8 CGPA)',
+      education: 'B.Tech in Computer Science & Engineering · BITS Pilani (Honors, 9.1 CGPA)',
       certifications: [
-        'Advanced Generative AI Engineering Microdegree',
-        'Certified AWS Solutions Architect – Associate',
-        'LangGraph Multi-Agent Systems Specialization'
+        'AWS Certified Solutions Architect – Professional',
+        'DeepLearning.AI Generative AI with LLMs Specialization',
+        'Certified Kubernetes Application Developer (CKAD)'
       ]
     }
   },

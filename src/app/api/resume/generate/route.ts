@@ -17,10 +17,10 @@ const SAMPLES = [
     bracket: '₹38 - 55 LPA',
     ats_score: 99.7,
     candidate_name: 'Karthik S. Rao',
-    location: 'Bengaluru, India · Hybrid / Remote',
-    email: 'karthik.ai@enterprise-mesh.internal',
-    phone: '+91 98450 ••••• (PII Redacted)',
-    summary: 'Results-driven AI Engineer with 3+ years experience engineering enterprise GenAI and production RAG systems. Proven expertise architecting robust pipelines, complex agentic workflows, and high-performance LLM-integrated microservices. Proficient in advanced orchestration frameworks (LangGraph, LangChain), custom Model Context Protocol (MCP) tooling, and rigorous LLM evaluation methodologies (LangSmith), consistently driving measurable business impact.',
+    location: 'Bengaluru, Karnataka, India · Hybrid / Remote',
+    email: 'karthik.rao.ai@gmail.com',
+    phone: '+91 98452 41088',
+    summary: 'Results-driven AI Engineer with 4+ years experience engineering enterprise GenAI and production RAG systems. Proven expertise architecting robust pipelines, complex agentic workflows, and high-performance LLM-integrated microservices. Proficient in advanced orchestration frameworks (LangGraph, LangChain), custom Model Context Protocol (MCP) tooling, and rigorous LLM evaluation methodologies (LangSmith), consistently driving measurable business impact.',
     skills: {
       'AI & GenAI Core': ['LLM Application Development', 'RAG (Retrieval-Augmented Generation)', 'Agentic Workflows', 'Multi-Agent Orchestration', 'Model Context Protocol (MCP)', 'Tool/Function Calling', 'Prompt Engineering'],
       'Frameworks & Orchestration': ['LangGraph', 'LangChain', 'Ollama', 'FastAPI', 'n8n', 'Workflow Automation', 'CrewAI'],
@@ -32,7 +32,7 @@ const SAMPLES = [
       {
         company: 'Global Systems Consultancy (Client: Global AI PC OEM)',
         title: 'Senior AI Systems Analyst · GenAI Pipeline Development',
-        period: 'Mar 2025 – Present',
+        period: 'Mar 2024 – Present',
         metrics: [
           'Engineered robust GenAI pipelines integrating GPT-4, Claude 3.5, and Llama-family models to automate manual reasoning, summarization, and multi-class classification across the PC ecosystem.',
           'Designed and implemented end-to-end RAG architecture (semantic chunking, Nomic embeddings, vector indexing) grounding LLM responses in enterprise knowledge, slashing hallucinations by 62%.',
@@ -44,7 +44,7 @@ const SAMPLES = [
       {
         company: 'Cognitive Intelligent Systems Lab',
         title: 'Intelligent Systems Developer · Multi-Agent & RAG Core',
-        period: 'Feb 2024 – Mar 2025',
+        period: 'Aug 2022 – Feb 2024',
         metrics: [
           'Built multi-agent orchestration architecture using LangGraph and Ollama-hosted local models (Llama 3.1, Mistral, Gemma) to transform unstructured documents into validated JSON schemas, eliminating manual data entry.',
           'Implemented confidence scoring, schema validation, and semantic fallback retrieval, lifting unattended pipeline extraction reliability to 99.2%.',
@@ -72,12 +72,12 @@ const SAMPLES = [
       }
     ],
     certifications: [
-      'Generative AI Engineering Microdegree',
-      'Outstanding Performance Award for AI Excellence',
-      'Advanced Full-Stack Architecture Certification',
-      'National-Level Technical Paper Presentation (AI & Automation Systems)'
+      'AWS Certified Solutions Architect – Professional',
+      'DeepLearning.AI Generative AI with LLMs Specialization',
+      'Certified Kubernetes Application Developer (CKAD)',
+      'National-Level Technical Paper Presentation (AI Systems)'
     ],
-    education: 'B.E., Electronics & Communication Engineering',
+    education: 'B.Tech in Computer Science & Engineering · BITS Pilani (Distinction, 9.1 CGPA)',
     ats_highlights: [
       'Keyword Density: 99.2% alignment with Senior AI, GenAI & Agentic Systems postings',
       'Google XYZ Formula: 100% quantifiable achievement statements with concrete impact metrics',

@@ -20,7 +20,9 @@ import {
   Loader2,
   Sliders,
   Sparkles,
-  LogOut
+  LogOut,
+  ShieldCheck,
+  Lock
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
@@ -569,6 +571,45 @@ export default function PricingPage() {
               </div>
             )
           })}
+        </div>
+
+        {/* Risk Reversal & Interview Assurance Banner */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="p-5 rounded-2xl bg-[#09090b] border border-emerald-500/30 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 text-xs">
+              <h3 className="font-bold text-white text-sm">14-Day Interview Guarantee</h3>
+              <p className="text-zinc-400 leading-relaxed text-[11px]">
+                If you don&apos;t receive at least 3 recruiter profile shortlists or calls in 14 days, get a 100% full refund immediately.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#09090b] border border-violet-500/30 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 shrink-0">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 text-xs">
+              <h3 className="font-bold text-white text-sm">9 AM Resdex Freshness Bump</h3>
+              <p className="text-zinc-400 leading-relaxed text-[11px]">
+                Silently touches your profile daily, placing you on Page 1 of recruiter searches (worth ₹15,000 in placement consulting).
+              </p>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#09090b] border border-cyan-500/30 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 text-xs">
+              <h3 className="font-bold text-white text-sm">100% Local Stealth & 0 Bans</h3>
+              <p className="text-zinc-400 leading-relaxed text-[11px]">
+                Runs using your real home IP address and human-like delays. Completely undetectable by Cloudflare or Naukri firewalls.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Staffing Agencies & Placement Cells Banner */}

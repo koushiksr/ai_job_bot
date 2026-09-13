@@ -12,6 +12,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0
     },
     {
+      url: `${baseUrl}/tools`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.95
+    },
+    {
+      url: `${baseUrl}/tools/naukri-headline-generator`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.95
+    },
+    {
+      url: `${baseUrl}/tools/ats-score-checker`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.95
+    },
+    {
+      url: `${baseUrl}/tools/naukri-profile-score`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.95
+    },
+    {
       url: `${baseUrl}/resume-builder`,
       lastModified: currentDate,
       changeFrequency: 'daily',
@@ -25,4 +49,3 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   ]
 }
-
