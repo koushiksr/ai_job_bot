@@ -804,14 +804,15 @@ export default function AdminDashboard() {
                                   u.plan === 'elite' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' :
                                   u.plan === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
                                   u.plan === 'starter' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
-                                  u.plan === 'vip' ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40' :
+                                  u.plan === 'vip' ? 'bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]' :
                                   u.plan === 'none' || u.plan === 'no_plan' ? 'bg-zinc-800/80 text-zinc-400 border border-zinc-700' :
                                   'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
                                 }`}>
                                   {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
                                 </span>
                                 {u.is_vip && (
-                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]">
+                                    <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40" />
                                     VIP PASS
                                   </span>
                                 )}

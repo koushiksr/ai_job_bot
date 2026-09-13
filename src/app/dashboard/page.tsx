@@ -47,6 +47,7 @@ export default function UserDashboard() {
   const [userPlanName, setUserPlanName] = useState<string>('JobFlux 1-Day Free Trial')
   const [isPlanActive, setIsPlanActive] = useState<boolean>(true)
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
+  const [isVip, setIsVip] = useState<boolean>(false)
 
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'history' | 'profile' | 'queries' | 'resume_builder'>('history')
@@ -95,9 +96,9 @@ export default function UserDashboard() {
   const [showProModal, setShowProModal] = useState<boolean>(false)
   const [proModalFeature, setProModalFeature] = useState<string>('On-Demand Turbo Scout')
 
-  // Candidate account has Professional privileges ONLY if on an active, verified Professional tier.
+  // Candidate account has Professional privileges if on an active Professional tier OR VIP pass.
   // Admin accounts manage system configurations via the Admin Portal (/admin).
-  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise') && isPlanActive
+  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'vip' || isVip) && isPlanActive
 
   // Compute Daily 6 AM & 8 AM IST Countdown
   useEffect(() => {
@@ -163,6 +164,7 @@ export default function UserDashboard() {
     const storedUid = localStorage.getItem('user_id')
     const storedEmail = localStorage.getItem('user_email')
     const storedRole = localStorage.getItem('user_role')
+    const storedVip = localStorage.getItem('user_is_vip') === 'true'
 
     if (!storedUid) {
       window.location.href = '/'
@@ -172,6 +174,7 @@ export default function UserDashboard() {
     setUserId(storedUid)
     setUserEmail(storedEmail || '')
     setUserRole(storedRole || 'user')
+    if (storedVip) setIsVip(true)
 
     refreshAllDashboardData(storedUid, true)
   }, [])
@@ -321,14 +324,17 @@ export default function UserDashboard() {
         setUserName(pData.name || '')
         const verifiedPlan = (pData.plan || 'trial').toLowerCase()
         const active = pData.is_plan_active !== false
+        const vip = Boolean(pData.is_vip || verifiedPlan === 'vip')
+        setIsVip(vip)
         setUserPlan(verifiedPlan)
         setUserPlanName(pData.plan_name || (verifiedPlan === 'trial' ? 'JobFlux 1-Day Free Trial' : `JobFlux ${verifiedPlan.toUpperCase()}`))
         setIsPlanActive(active)
         setPlanExpiresAt(pData.plan_expires_at || pData.trial_expires_at || null)
 
-        // Sync verified plan from server to localStorage, replacing any manipulated state
+        // Sync verified plan and VIP status from server to localStorage
         if (typeof window !== 'undefined') {
           localStorage.setItem('user_plan', verifiedPlan)
+          localStorage.setItem('user_is_vip', vip ? 'true' : 'false')
         }
       }
 
@@ -490,23 +496,51 @@ export default function UserDashboard() {
                 {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-xs font-semibold text-white truncate max-w-[140px]">
                     {userName || 'Candidate'}
                   </h1>
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-mono uppercase ${
-                    isProfessional
-                      ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
-                      : userPlan === 'pro' && isPlanActive
-                      ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
-                      : userPlan === 'none' || userPlan === 'no_plan'
-                      ? 'bg-zinc-900 border-zinc-800 text-zinc-500'
-                      : !isPlanActive
-                      ? 'bg-red-950/80 border-red-700/60 text-red-300'
-                      : 'bg-zinc-900 border-zinc-800 text-zinc-300'
-                  }`}>
-                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
-                  </span>
+
+                  {/* VIP Badge in Radiant Gold Color */}
+                  {(isVip || userPlan === 'vip') && (
+                    <span
+                      className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-mono font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.3)] shrink-0"
+                      title="VIP Lifetime Access Pass Active"
+                    >
+                      <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
+                      <span>VIP</span>
+                    </span>
+                  )}
+
+                  {/* Subscription Badge in Gold Color */}
+                  {userPlan !== 'vip' && (
+                    <span className={`inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold shrink-0 transition-all ${
+                      isPlanActive && (userPlan === 'starter' || userPlan === 'pro' || userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise')
+                        ? 'border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.25)]'
+                        : userPlan === 'trial' && isPlanActive
+                        ? 'border border-amber-500/60 bg-amber-950/60 text-amber-300 font-medium shadow-[0_0_8px_rgba(245,158,11,0.15)]'
+                        : userPlan === 'none' || userPlan === 'no_plan'
+                        ? 'bg-zinc-900 border border-zinc-800 text-zinc-500'
+                        : !isPlanActive
+                        ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                        : 'bg-zinc-900 border-zinc-800 text-zinc-300'
+                    }`}>
+                      {isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' && (
+                        <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                      )}
+                      <span>
+                        {userPlan === 'none' || userPlan === 'no_plan'
+                          ? 'NO PLAN'
+                          : !isPlanActive
+                          ? 'EXPIRED'
+                          : userPlan === 'trial'
+                          ? 'Free Trial'
+                          : userPlan === 'elite'
+                          ? 'PROFESSIONAL'
+                          : userPlan.toUpperCase()}
+                      </span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]">
                   {userEmail}
@@ -578,6 +612,15 @@ export default function UserDashboard() {
               <span className="w-6 h-6 rounded-md bg-zinc-800 border border-zinc-700/60 flex items-center justify-center font-bold text-[10px] text-white">
                 {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
               </span>
+              {(isVip || userPlan === 'vip') ? (
+                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 px-1.5 py-0.2 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.25)]">
+                  <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40" /> VIP
+                </span>
+              ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
+                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 px-1.5 py-0.2 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.2)]">
+                  <Sparkles className="w-2 h-2 text-amber-400" /> {userPlan === 'elite' ? 'PRO' : userPlan === 'trial' ? 'TRIAL' : userPlan.toUpperCase()}
+                </span>
+              ) : null}
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -603,21 +646,49 @@ export default function UserDashboard() {
                   {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs font-semibold text-white truncate max-w-[140px]">{userName || 'Candidate'}</span>
-                    <span className={`text-[9px] px-1.5 py-0.2 rounded border font-mono uppercase ${
-                      isProfessional
-                        ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
-                        : userPlan === 'pro' && isPlanActive
-                        ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
-                        : userPlan === 'none' || userPlan === 'no_plan'
-                        ? 'bg-zinc-900 border-zinc-800 text-zinc-500'
-                        : !isPlanActive
-                        ? 'bg-red-950/80 border-red-700/60 text-red-300'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-300'
-                    }`}>
-                      {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'trial' ? 'Free Trial' : userPlan.toUpperCase()}
-                    </span>
+
+                    {/* VIP Badge in Radiant Gold Color */}
+                    {(isVip || userPlan === 'vip') && (
+                      <span
+                        className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-mono font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.3)] shrink-0"
+                        title="VIP Lifetime Access Pass Active"
+                      >
+                        <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
+                        <span>VIP</span>
+                      </span>
+                    )}
+
+                    {/* Subscription Badge in Gold Color */}
+                    {userPlan !== 'vip' && (
+                      <span className={`inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold shrink-0 transition-all ${
+                        isPlanActive && (userPlan === 'starter' || userPlan === 'pro' || userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise')
+                          ? 'border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.25)]'
+                          : userPlan === 'trial' && isPlanActive
+                          ? 'border border-amber-500/60 bg-amber-950/60 text-amber-300 font-medium shadow-[0_0_8px_rgba(245,158,11,0.15)]'
+                          : userPlan === 'none' || userPlan === 'no_plan'
+                          ? 'bg-zinc-900 border-zinc-800 text-zinc-500'
+                          : !isPlanActive
+                          ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                          : 'bg-zinc-900 border-zinc-800 text-zinc-300'
+                      }`}>
+                        {isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' && (
+                          <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                        )}
+                        <span>
+                          {userPlan === 'none' || userPlan === 'no_plan'
+                            ? 'NO PLAN'
+                            : !isPlanActive
+                            ? 'EXPIRED'
+                            : userPlan === 'trial'
+                            ? 'Free Trial'
+                            : userPlan === 'elite'
+                            ? 'PROFESSIONAL'
+                            : userPlan.toUpperCase()}
+                        </span>
+                      </span>
+                    )}
                   </div>
                   <p className="text-[11px] text-zinc-500 font-mono truncate mt-0.5">{userEmail}</p>
                 </div>

@@ -237,6 +237,7 @@ export default function ResumeBuilderPage() {
   const [userRole, setUserRole] = useState<string>('user')
   const [userPlan, setUserPlan] = useState<string>('trial')
   const [isPlanActive, setIsPlanActive] = useState<boolean>(true)
+  const [isVip, setIsVip] = useState<boolean>(false)
   const [loadingProfile, setLoadingProfile] = useState<boolean>(true)
 
   // Current Resume State
@@ -256,9 +257,9 @@ export default function ResumeBuilderPage() {
 
   const resumeSheetRef = useRef<HTMLDivElement>(null)
 
-  // Professional privilege strictly checked against active plan
+  // Professional privilege checked against active plan or VIP pass
   const isProfessional =
-    (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise') && isPlanActive
+    (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'vip' || isVip) && isPlanActive
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -288,6 +289,7 @@ export default function ResumeBuilderPage() {
         const data = await res.json()
         if (data.plan) setUserPlan(data.plan)
         if (typeof data.is_plan_active === 'boolean') setIsPlanActive(data.is_plan_active)
+        if (typeof data.is_vip === 'boolean') setIsVip(Boolean(data.is_vip || data.plan === 'vip'))
 
         // If user already has profile details, enrich template
         if (data.name) {
@@ -493,16 +495,28 @@ export default function ResumeBuilderPage() {
             <span>Auto PII Sanitized</span>
           </div>
 
-          {/* User Plan Badge */}
-          <span
-            className={`text-[9px] font-mono px-2 py-0.5 rounded border uppercase font-semibold ${
-              isProfessional
-                ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-400'
-            }`}
-          >
-            {isProfessional ? 'PROFESSIONAL' : 'FREE PREVIEW'}
-          </span>
+          {/* User Plan & VIP Badges */}
+          <div className="flex items-center gap-1.5">
+            {(isVip || userPlan === 'vip') && (
+              <span
+                className="inline-flex items-center gap-1 text-[9px] font-mono px-2.5 py-0.5 rounded-full border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.25)] shrink-0"
+                title="VIP Lifetime Access Pass Active"
+              >
+                <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
+                <span>VIP</span>
+              </span>
+            )}
+            <span
+              className={`inline-flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full border uppercase font-semibold ${
+                isProfessional
+                  ? 'border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-400'
+              }`}
+            >
+              {isProfessional && <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />}
+              <span>{isProfessional ? (userPlan === 'vip' ? 'VIP PASS' : userPlan === 'elite' ? 'PROFESSIONAL' : userPlan.toUpperCase()) : 'FREE PREVIEW'}</span>
+            </span>
+          </div>
 
           {/* Sync to Naukri Bot Button */}
           <button
