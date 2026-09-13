@@ -377,7 +377,7 @@ export default function PricingPage() {
             ) : (
               <>
                 <Link
-                  href="/"
+                  href="/?mode=signin"
                   className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1"
                 >
                   Sign In

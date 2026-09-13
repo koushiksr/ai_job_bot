@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import { motion } from 'framer-motion'
@@ -17,7 +17,10 @@ import {
   CheckCircle2,
   ShieldCheck,
   Clock,
-  LogOut
+  LogOut,
+  Eye,
+  EyeOff,
+  Sparkles
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxSplash from '@/components/JobFluxSplash'
@@ -35,8 +38,33 @@ export default function Home() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [cardHighlighted, setCardHighlighted] = useState(false)
+
+  const authCardRef = useRef<HTMLDivElement>(null)
+  const emailInputRef = useRef<HTMLInputElement>(null)
+  const nameInputRef = useRef<HTMLInputElement>(null)
+
+  const scrollToAuth = (mode: 'signin' | 'trial') => {
+    setAuthMode(mode)
+    setError('')
+
+    if (authCardRef.current) {
+      authCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setCardHighlighted(true)
+      setTimeout(() => setCardHighlighted(false), 1500)
+    }
+
+    setTimeout(() => {
+      if (mode === 'trial' && nameInputRef.current) {
+        nameInputRef.current.focus()
+      } else if (emailInputRef.current) {
+        emailInputRef.current.focus()
+      }
+    }, 400)
+  }
 
   // Check if already logged in -> auto navigate to dashboard
   useEffect(() => {
@@ -59,9 +87,27 @@ export default function Home() {
       }
 
       const p = new URLSearchParams(window.location.search)
-      if (p.get('mode') === 'trial') {
+      const modeParam = p.get('mode')
+      const hash = window.location.hash
+
+      if (modeParam === 'signin' || hash === '#signin' || hash === '#auth-card') {
+        setAuthMode('signin')
+        setTimeout(() => {
+          authCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          setCardHighlighted(true)
+          setTimeout(() => setCardHighlighted(false), 1500)
+          emailInputRef.current?.focus()
+        }, 700)
+      } else if (modeParam === 'trial' || hash === '#trial') {
         setAuthMode('trial')
+        setTimeout(() => {
+          authCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          setCardHighlighted(true)
+          setTimeout(() => setCardHighlighted(false), 1500)
+          nameInputRef.current?.focus()
+        }, 700)
       }
+
       const errParam = p.get('error')
       if (errParam) {
         setError(decodeURIComponent(errParam))
@@ -182,7 +228,23 @@ export default function Home() {
 
   return (
     <>
-      {showSplash && <JobFluxSplash onComplete={() => setShowSplash(false)} />}
+      {showSplash && (
+        <JobFluxSplash
+          onComplete={() => {
+            setShowSplash(false)
+            if (typeof window !== 'undefined') {
+              const p = new URLSearchParams(window.location.search)
+              const modeParam = p.get('mode')
+              const hash = window.location.hash
+              if (modeParam === 'signin' || hash === '#signin' || hash === '#auth-card') {
+                scrollToAuth('signin')
+              } else if (modeParam === 'trial' || hash === '#trial') {
+                scrollToAuth('trial')
+              }
+            }
+          }}
+        />
+      )}
       
       <div className="min-h-screen flex flex-col bg-[#000000] text-zinc-100 selection:bg-zinc-800 selection:text-white relative">
         
@@ -197,67 +259,103 @@ export default function Home() {
         {/* Subtle Auth0/Gladia top ambient radial light */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[420px] bg-spotlight pointer-events-none" />
 
-        {/* Top Minimalist Header */}
-        <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-3.5 sm:py-5 flex items-center justify-between z-20 border-b border-zinc-900/60">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <JobFluxLogo size="sm" />
-          </Link>
-
-          <div className="flex items-center gap-2.5 sm:gap-4">
-            <Link
-              href="/pricing"
-              className="text-xs text-zinc-400 hover:text-white transition-colors font-medium hidden sm:inline-block"
-            >
-              Pricing
+        {/* Top Sticky Minimalist Header */}
+        <header className="sticky top-0 z-40 w-full bg-black/80 backdrop-blur-xl border-b border-zinc-900/80">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2 shrink-0">
+              <JobFluxLogo size="sm" />
             </Link>
 
-            <button
-              onClick={() => setIsHelpOpen(true)}
-              className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex items-center gap-1"
-            >
-              <Mail className="w-3 h-3 text-violet-400 shrink-0" />
-              <span className="hidden sm:inline">Help & Support</span>
-            </button>
+            {/* In-page Anchor & Navigation Links (Desktop) */}
+            <nav className="hidden md:flex items-center gap-6 text-xs text-zinc-400 font-medium">
+              <a
+                href="#ai-engine-showcase"
+                className="hover:text-white transition-colors"
+              >
+                Engine
+              </a>
+              <a
+                href="#features"
+                className="hover:text-white transition-colors"
+              >
+                Features
+              </a>
+              <Link
+                href="/pricing"
+                className="hover:text-white transition-colors"
+              >
+                Pricing
+              </Link>
+              <button
+                type="button"
+                onClick={() => setIsHelpOpen(true)}
+                className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Mail className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                <span>Help & Support</span>
+              </button>
+            </nav>
 
-            {existingUser ? (
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span className="text-zinc-300 font-mono text-[11px] max-w-[150px] truncate">
-                    {existingUser.email || existingUser.id}
-                  </span>
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Mobile Help Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsHelpOpen(true)}
+                className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex md:hidden items-center gap-1 shrink-0 px-2 py-1"
+              >
+                <Mail className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                <span className="hidden sm:inline">Help</span>
+              </button>
+
+              <Link
+                href="/pricing"
+                className="text-xs text-zinc-400 hover:text-white transition-colors font-medium md:hidden hidden sm:inline-block px-2 py-1"
+              >
+                Pricing
+              </Link>
+
+              {existingUser ? (
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span className="text-zinc-300 font-mono text-[11px] max-w-[150px] truncate">
+                      {existingUser.email || existingUser.id}
+                    </span>
+                  </div>
+                  <Link
+                    href={existingUser.role === 'admin' ? '/admin' : '/dashboard'}
+                    className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer flex items-center gap-1 shrink-0"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Sign out</span>
+                  </button>
                 </div>
-                <Link
-                  href={existingUser.role === 'admin' ? '/admin' : '/dashboard'}
-                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer flex items-center gap-1 shrink-0"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Sign out</span>
-                </button>
-              </div>
-            ) : (
-              <>
-                <button
-                  onClick={() => { setAuthMode('signin'); setError('') }}
-                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer"
-                >
-                  Sign in
-                </button>
-                <button
-                  onClick={() => { setAuthMode('trial'); setError('') }}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-all shadow-sm cursor-pointer shrink-0"
-                >
-                  <span className="hidden sm:inline">Start Free Trial</span>
-                  <span className="sm:hidden">Try Free</span>
-                </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => scrollToAuth('signin')}
+                    className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2.5 py-1.5 rounded-lg hover:bg-zinc-900/80 cursor-pointer"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollToAuth('trial')}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-all shadow-sm cursor-pointer shrink-0"
+                  >
+                    <span className="hidden sm:inline">Start Free Trial</span>
+                    <span className="sm:hidden">Try Free</span>
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </header>
         
@@ -323,7 +421,8 @@ export default function Home() {
                 </Link>
               ) : (
                 <button
-                  onClick={() => { setAuthMode('trial'); setError('') }}
+                  type="button"
+                  onClick={() => scrollToAuth('trial')}
                   className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-white/5"
                 >
                   <span>Start 1-Day Free Trial</span>
@@ -343,10 +442,12 @@ export default function Home() {
           
           {/* Right Column: Auth0-Style Authentication Card or Already Logged In Card */}
           <motion.div 
+            ref={authCardRef}
+            id="auth-card"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="w-full lg:w-[420px] shrink-0"
+            className="w-full lg:w-[420px] shrink-0 scroll-mt-24"
           >
             {existingUser ? (
               <div className="p-7 w-full border border-zinc-800 bg-[#09090b] rounded-2xl shadow-xl space-y-5 text-center relative overflow-hidden card-featured-glow">
@@ -384,7 +485,11 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="p-7 w-full border border-zinc-800 bg-[#09090b] rounded-2xl shadow-xl space-y-5 relative overflow-hidden card-featured-glow">
+              <div className={`p-6 sm:p-7 w-full border bg-[#09090b] rounded-2xl shadow-xl space-y-5 relative overflow-hidden transition-all duration-500 ${
+                cardHighlighted
+                  ? 'border-violet-500/80 ring-2 ring-violet-500/50 shadow-[0_0_35px_rgba(168,85,247,0.25)]'
+                  : 'border-zinc-800 card-featured-glow'
+              }`}>
                 {/* Laser beam sweep accent */}
                 <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-violet-400/80 to-transparent animate-laser-sweep pointer-events-none" />
                 
@@ -469,10 +574,12 @@ export default function Home() {
                       <div className="relative">
                         <User className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
                         <input 
+                          ref={nameInputRef}
                           type="text" 
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-colors"
+                          autoComplete="name"
+                          className="w-full bg-black border border-zinc-800 focus:border-violet-500/80 focus:ring-1 focus:ring-violet-500/40 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
                           placeholder="Candidate name"
                           required
                         />
@@ -485,10 +592,13 @@ export default function Home() {
                     <div className="relative">
                       <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
                       <input 
+                        ref={emailInputRef}
                         type="email" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-colors"
+                        autoComplete="email"
+                        spellCheck={false}
+                        className="w-full bg-black border border-zinc-800 focus:border-violet-500/80 focus:ring-1 focus:ring-violet-500/40 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
                         placeholder="name@example.com"
                         required
                       />
@@ -496,17 +606,42 @@ export default function Home() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-zinc-300 mb-1">Password</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-medium text-zinc-300">Password</label>
+                      {authMode === 'signin' && (
+                        <button
+                          type="button"
+                          onClick={() => setIsHelpOpen(true)}
+                          className="text-[11px] text-zinc-500 hover:text-violet-400 transition-colors cursor-pointer"
+                        >
+                          Forgot?
+                        </button>
+                      )}
+                    </div>
                     <div className="relative">
                       <Lock className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
                       <input 
-                        type="password" 
+                        type={showPassword ? 'text' : 'password'} 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-colors"
+                        autoComplete={authMode === 'trial' ? 'new-password' : 'current-password'}
+                        className="w-full bg-black border border-zinc-800 focus:border-violet-500/80 focus:ring-1 focus:ring-violet-500/40 rounded-lg pl-9 pr-9 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
                         placeholder="••••••••"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        className="absolute right-2.5 top-2.5 text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer p-0.5"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-3.5 h-3.5" />
+                        ) : (
+                          <Eye className="w-3.5 h-3.5" />
+                        )}
+                      </button>
                     </div>
                   </div>
 
@@ -516,7 +651,7 @@ export default function Home() {
                     className="w-full py-2.5 bg-white hover:bg-zinc-200 text-black font-semibold rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 mt-2"
                   >
                     {loading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <>
                         <span>{authMode === 'trial' ? 'Start 1-Day Trial (₹0)' : 'Sign In'}</span>
@@ -526,7 +661,34 @@ export default function Home() {
                   </button>
                 </form>
 
-                <div className="pt-2 text-center">
+                {/* Quick Switch Helper */}
+                <div className="text-center pt-1">
+                  {authMode === 'trial' ? (
+                    <p className="text-[11px] text-zinc-500">
+                      Already have an account?{' '}
+                      <button
+                        type="button"
+                        onClick={() => scrollToAuth('signin')}
+                        className="text-white hover:underline font-medium cursor-pointer"
+                      >
+                        Sign in
+                      </button>
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-zinc-500">
+                      New to JobFlux?{' '}
+                      <button
+                        type="button"
+                        onClick={() => scrollToAuth('trial')}
+                        className="text-white hover:underline font-medium cursor-pointer"
+                      >
+                        Start 1-Day Free Trial
+                      </button>
+                    </p>
+                  )}
+                </div>
+
+                <div className="pt-1 text-center">
                   <Link
                     href="/pricing"
                     className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors inline-flex items-center gap-1"
@@ -541,7 +703,7 @@ export default function Home() {
         </main>
 
         {/* Section 2: AI Engine Simulation (Sleek Gladia Cockpit) */}
-        <section id="ai-engine-showcase" className="w-full max-w-7xl mx-auto px-6 py-16 border-t border-zinc-900 z-10 space-y-8">
+        <section id="ai-engine-showcase" className="w-full max-w-7xl mx-auto px-6 py-16 border-t border-zinc-900 z-10 space-y-8 scroll-mt-20">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
               Autonomous Flow
@@ -558,7 +720,7 @@ export default function Home() {
         </section>
 
         {/* Section 3: 3 Pillars (Clean Bento Grid) */}
-        <section className="w-full max-w-7xl mx-auto px-6 py-16 border-t border-zinc-900 z-10 space-y-10">
+        <section id="features" className="w-full max-w-7xl mx-auto px-6 py-16 border-t border-zinc-900 z-10 space-y-10 scroll-mt-20">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
               Built for speed, accuracy, and reach.
