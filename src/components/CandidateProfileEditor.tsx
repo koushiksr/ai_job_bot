@@ -28,7 +28,8 @@ import {
   Code2,
   FileText,
   Sliders,
-  Check
+  Check,
+  Radio
 } from 'lucide-react'
 
 interface CandidateProfileEditorProps {
@@ -91,7 +92,7 @@ export default function CandidateProfileEditor({
   const [newQaKey, setNewQaKey] = useState<string>('')
   const [newQaVal, setNewQaVal] = useState<string>('')
 
-  // 5. Employment History
+  // 5. Employment History (Enforcing strictly ONE current employer)
   const [employmentHistory, setEmploymentHistory] = useState<EmploymentItem[]>([])
   const [newEmpCompany, setNewEmpCompany] = useState<string>('')
   const [newEmpTitle, setNewEmpTitle] = useState<string>('')
@@ -107,6 +108,9 @@ export default function CandidateProfileEditor({
   // 7. Bot Automation Settings
   const [enabledForDailyRun, setEnabledForDailyRun] = useState<boolean>(true)
   const [searchUrl, setSearchUrl] = useState<string>('https://www.naukri.com/mnjuser/recommendedjobs')
+
+  // Validation state
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Resume state
   const [uploadingResume, setUploadingResume] = useState<boolean>(false)
@@ -162,11 +166,21 @@ export default function CandidateProfileEditor({
     'Hybrid'
   ]
 
-  // Convert CTC value to LPA display format
+  // Clear single validation error
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors(prev => {
+        const next = { ...prev }
+        delete next[field]
+        return next
+      })
+    }
+  }
+
+  // Format CTC value to Indian Rupees display format
   const formatLpaDisplay = (val: number | string): string => {
     const num = Number(val) || 0
     if (num <= 0) return '₹ 0 / year'
-    // If num is already in rupees (e.g. 1500000)
     const inRupees = num < 1000 ? Math.round(num * 100000) : Math.round(num)
     return `₹ ${inRupees.toLocaleString('en-IN')} / year`
   }
@@ -205,9 +219,26 @@ export default function CandidateProfileEditor({
       : (Array.isArray(data.avoid_companies) ? data.avoid_companies : [])
     setAvoidCompanies(avoid)
 
-    // Employment History
+    // Employment History: ENFORCE EXACTLY AT MOST 1 CURRENT EMPLOYER
     if (Array.isArray(data.employment_history)) {
-      setEmploymentHistory(data.employment_history)
+      let foundCurrent = false
+      const normalizedHistory = data.employment_history.map((job: any) => {
+        const isEndPresent = ['present', 'current', 'ongoing', 'now'].includes(String(job.end_date || '').trim().toLowerCase())
+        if (!foundCurrent && (job.is_current || isEndPresent)) {
+          foundCurrent = true
+          return { ...job, is_current: true, end_date: 'Present' }
+        }
+        return { ...job, is_current: false }
+      })
+      // If none marked present but current_company exists, match and mark it
+      if (!foundCurrent && data.current_company) {
+        const idx = normalizedHistory.findIndex((j: any) => j.company?.toLowerCase() === data.current_company?.toLowerCase())
+        if (idx !== -1) {
+          normalizedHistory[idx].is_current = true
+          normalizedHistory[idx].end_date = 'Present'
+        }
+      }
+      setEmploymentHistory(normalizedHistory)
     }
 
     // Predefined answers
@@ -343,7 +374,6 @@ export default function CandidateProfileEditor({
   useEffect(() => {
     if (isNew) {
       setLoading(false)
-      // Provide clean initial template
       populateStateFromObject({
         name: '',
         email: '',
@@ -399,20 +429,111 @@ export default function CandidateProfileEditor({
     }
   }
 
-  // Save Profile Handler
+  // Comprehensive Data Validation Engine
+  const validateForm = (): boolean => {
+    const errs: Record<string, string> = {}
+
+    // 1. Candidate ID (New Only)
+    if (isNew && !newUserId.trim()) {
+      errs.newUserId = 'Candidate Unique ID is required.'
+    }
+
+    // 2. Name
+    if (!candidateName.trim()) {
+      errs.name = 'Full name is required.'
+    } else if (candidateName.trim().length < 2) {
+      errs.name = 'Full name must be at least 2 characters.'
+    }
+
+    // 3. Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!naukriEmail.trim()) {
+      errs.email = 'Naukri login email is required for the bot.'
+    } else if (!emailRegex.test(naukriEmail.trim())) {
+      errs.email = 'Please enter a valid email format (e.g. name@gmail.com).'
+    }
+
+    // 4. Password
+    if (!naukriPassword.trim()) {
+      errs.password = 'Naukri login password is required for headless automation.'
+    } else if (naukriPassword.length < 4) {
+      errs.password = 'Password must be at least 4 characters.'
+    }
+
+    // 5. Current Base Location
+    if (!currentLocation.trim()) {
+      errs.location = 'Current base location is required (e.g. Bangalore).'
+    }
+
+    // 6. Current Company
+    if (!currentCompany.trim()) {
+      errs.company = 'Current company name is required.'
+    }
+
+    // 7. Experience
+    const expNum = Number(experienceYears)
+    if (isNaN(expNum) || expNum < 0) {
+      errs.experience = 'Experience must be a positive number.'
+    } else if (expNum > 45) {
+      errs.experience = 'Experience cannot exceed 45 years.'
+    }
+
+    // 8. Compensation (CTC)
+    const curCtc = Number(currentCtcLpa)
+    const expCtc = Number(expectedCtcLpa)
+    if (isNaN(curCtc) || curCtc <= 0) {
+      errs.currentCtc = 'Please enter your current CTC in LPA (e.g. 15 for 15 LPA).'
+    }
+    if (isNaN(expCtc) || expCtc <= 0) {
+      errs.expectedCtc = 'Please enter your expected CTC in LPA (e.g. 20 for 20 LPA).'
+    } else if (curCtc > 0 && expCtc > 0 && expCtc < curCtc * 0.5) {
+      errs.expectedCtc = 'Expected CTC is unusually lower than Current CTC. Please verify.'
+    }
+
+    // 9. Target Roles (Critical for Naukri search)
+    if (targetRoles.length === 0) {
+      errs.targetRoles = 'Please add at least 1 Target Job Title/Role (e.g. "Senior QA Engineer").'
+    }
+
+    // 10. Preferred Locations
+    if (targetLocations.length === 0) {
+      errs.targetLocations = 'Please add at least 1 Preferred Location (e.g. "Bangalore" or "Remote").'
+    }
+
+    // 11. Skills & Tech Stack
+    if (skills.length === 0) {
+      errs.skills = 'Please add at least 1 Technical Skill or Keyword (e.g. "Python", "Selenium").'
+    }
+
+    // 12. Employment History: Strictly at most 1 current employer
+    const currentCount = employmentHistory.filter(e => e.is_current).length
+    if (currentCount > 1) {
+      errs.employment = `You currently have ${currentCount} employers marked as current. Exactly 1 current employer is allowed.`
+    }
+
+    setErrors(errs)
+
+    if (Object.keys(errs).length > 0) {
+      const firstKey = Object.keys(errs)[0]
+      setSaveError(errs[firstKey])
+      // Smooth scroll to top of form so user sees the issue immediately
+      const el = document.getElementById('profile-form-top')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return false
+    }
+
+    setSaveError('')
+    return true
+  }
+
+  // Save Profile Handler with Comprehensive Validation
   const handleSaveProfile = async () => {
     setSavingProfile(true)
     setSaveSuccess('')
     setSaveError('')
 
-    if (isNew && !newUserId.trim()) {
-      setSaveError('Candidate Unique ID is required.')
-      setSavingProfile(false)
-      return
-    }
-
-    if (!naukriEmail.trim()) {
-      setSaveError('Naukri Login Email is required for automated applications.')
+    const isValid = validateForm()
+    if (!isValid) {
       setSavingProfile(false)
       return
     }
@@ -430,6 +551,7 @@ export default function CandidateProfileEditor({
 
       if (res.ok) {
         setSaveSuccess('Profile saved successfully and synced with the JobFlux Bot!')
+        setErrors({})
         if (!isNew && userId) loadProfileData(userId)
         if (onSaveSuccess) onSaveSuccess()
         setTimeout(() => setSaveSuccess(''), 5000)
@@ -444,7 +566,7 @@ export default function CandidateProfileEditor({
     }
   }
 
-  // AI Auto-Fill Handler
+  // AI Auto-Fill Handler with Strict Invariant Enforcement
   const handleAiAutoFill = async () => {
     if (isNew && !newUserId.trim()) {
       setSaveError('Candidate Unique ID is required before running AI Auto-Fill.')
@@ -473,10 +595,49 @@ export default function CandidateProfileEditor({
         if (!aiData.password && naukriPassword) {
           aiData.password = naukriPassword
         }
+
+        // ENFORCE SINGLE CURRENT EMPLOYER INVARIANT ON AI EXTRACTION
+        let aiHistory: EmploymentItem[] = Array.isArray(aiData.employment_history) ? aiData.employment_history : []
+        let foundCurrent = false
+        aiHistory = aiHistory.map((job: any) => {
+          const isEndPresent = ['present', 'current', 'ongoing', 'now'].includes(String(job.end_date || '').trim().toLowerCase())
+          if (!foundCurrent && (job.is_current || isEndPresent)) {
+            foundCurrent = true
+            return { ...job, is_current: true, end_date: 'Present' }
+          }
+          return { ...job, is_current: false }
+        })
+
+        if (!foundCurrent && aiHistory.length > 0) {
+          const matchIdx = aiHistory.findIndex((j: any) => j.company?.toLowerCase() === (aiData.current_company || '').toLowerCase())
+          if (matchIdx !== -1) {
+            aiHistory[matchIdx].is_current = true
+            aiHistory[matchIdx].end_date = 'Present'
+          } else {
+            aiHistory[0].is_current = true
+            aiHistory[0].end_date = 'Present'
+          }
+        }
+        aiData.employment_history = aiHistory
+
+        // Sync current company with that single employer
+        const currentJob = aiHistory.find(j => j.is_current)
+        if (currentJob?.company) {
+          aiData.current_company = currentJob.company
+          // Automatically add current company to blacklist if not already there
+          if (!Array.isArray(aiData.job_filters?.avoid_companies)) {
+            aiData.job_filters = { ...(aiData.job_filters || {}), avoid_companies: [] }
+          }
+          if (!aiData.job_filters.avoid_companies.some((c: string) => c.toLowerCase() === currentJob.company.toLowerCase())) {
+            aiData.job_filters.avoid_companies.push(currentJob.company)
+          }
+        }
+
         populateStateFromObject(aiData)
+        setErrors({})
         setShowAiPrompt(false)
         setAiPrompt('')
-        setSaveSuccess('✨ AI successfully analyzed your resume and auto-filled your profile! Review and click "Save Profile".')
+        setSaveSuccess('✨ AI successfully analyzed your resume and auto-filled your profile! Review details below, verify your password, and click "Save Profile".')
         setTimeout(() => setSaveSuccess(''), 6000)
       } else {
         let errMessage = 'Failed to analyze resume with AI.'
@@ -535,7 +696,7 @@ export default function CandidateProfileEditor({
           const data = await res.json()
           setResumeFilename(data.filename)
           setResumeVersion(data.timestamp || Date.now())
-          setResumeSuccess(`Resume "${data.filename}" saved to JobFlux Cloud! Tap "Auto-Fill with AI" below to extract details.`)
+          setResumeSuccess(`Resume "${data.filename}" saved to JobFlux Cloud! Tap "Auto-Fill with AI" to extract your details.`)
           setTimeout(() => setResumeSuccess(''), 6000)
 
           if (!isNew && userId) loadProfileData(userId)
@@ -561,12 +722,14 @@ export default function CandidateProfileEditor({
     list: string[],
     setList: React.Dispatch<React.SetStateAction<string[]>>,
     input: string,
-    setInput: React.Dispatch<React.SetStateAction<string>>
+    setInput: React.Dispatch<React.SetStateAction<string>>,
+    fieldKey?: string
   ) => {
     const trimmed = input.trim()
     if (!trimmed) return
     if (!list.some(item => item.toLowerCase() === trimmed.toLowerCase())) {
       setList([...list, trimmed])
+      if (fieldKey) clearError(fieldKey)
     }
     setInput('')
   }
@@ -623,27 +786,103 @@ export default function CandidateProfileEditor({
     setCustomQaList(customQaList.filter((_, i) => i !== idx))
   }
 
-  // Employment history helpers
+  // -------------------------------------------------------------
+  // SINGLE CURRENT EMPLOYER LOGIC ENGINE
+  // -------------------------------------------------------------
+
+  // Mark an employer as the ONE AND ONLY current employer
+  const handleSetSingleCurrentEmployer = (index: number) => {
+    const targetComp = employmentHistory[index]?.company || ''
+    const updated = employmentHistory.map((emp, i) => {
+      if (i === index) {
+        return {
+          ...emp,
+          is_current: true,
+          end_date: 'Present'
+        }
+      }
+      return {
+        ...emp,
+        is_current: false,
+        end_date: emp.end_date === 'Present' ? '' : emp.end_date
+      }
+    })
+    setEmploymentHistory(updated)
+
+    if (targetComp) {
+      setCurrentCompany(targetComp)
+      clearError('company')
+      // Auto-add to avoidCompanies to protect candidate
+      if (!avoidCompanies.some(c => c.toLowerCase() === targetComp.toLowerCase())) {
+        setAvoidCompanies(prev => [...prev, targetComp])
+      }
+    }
+    clearError('employment')
+  }
+
+  // Unmark a current employer
+  const handleUnsetCurrentEmployer = (index: number) => {
+    const updated = employmentHistory.map((emp, i) => {
+      if (i === index) {
+        return { ...emp, is_current: false, end_date: '' }
+      }
+      return emp
+    })
+    setEmploymentHistory(updated)
+  }
+
+  // When user types in Current Company at top, keep current employer synchronized
+  const handleCurrentCompanyInputChange = (val: string) => {
+    setCurrentCompany(val)
+    clearError('company')
+
+    // If an employer is marked as current, sync its name
+    if (employmentHistory.some(e => e.is_current)) {
+      setEmploymentHistory(prev => prev.map(emp => emp.is_current ? { ...emp, company: val } : emp))
+    }
+  }
+
+  // Add Employer Form Submission (Enforcing Single Current Rule)
   const handleAddEmployment = (e?: React.FormEvent) => {
     if (e) e.preventDefault()
-    if (!newEmpCompany.trim() || !newEmpTitle.trim()) return
+    const comp = newEmpCompany.trim()
+    const title = newEmpTitle.trim()
+    if (!comp || !title) return
+
+    let updatedList = [...employmentHistory]
+
+    if (newEmpCurrent) {
+      // Set all existing employers to is_current: false
+      updatedList = updatedList.map(emp => ({
+        ...emp,
+        is_current: false,
+        end_date: emp.end_date === 'Present' ? '' : emp.end_date
+      }))
+      setCurrentCompany(comp)
+      clearError('company')
+
+      // Auto-add to blacklist
+      if (!avoidCompanies.some(c => c.toLowerCase() === comp.toLowerCase())) {
+        setAvoidCompanies(prev => [...prev, comp])
+      }
+    }
+
     const newItem: EmploymentItem = {
-      company: newEmpCompany.trim(),
-      job_title: newEmpTitle.trim(),
+      company: comp,
+      job_title: title,
       start_date: newEmpStart.trim() || undefined,
       end_date: newEmpCurrent ? 'Present' : (newEmpEnd.trim() || undefined),
       is_current: newEmpCurrent
     }
-    setEmploymentHistory([newItem, ...employmentHistory])
-    if (newEmpCurrent) {
-      setCurrentCompany(newEmpCompany.trim())
-    }
+
+    setEmploymentHistory([newItem, ...updatedList])
     setNewEmpCompany('')
     setNewEmpTitle('')
     setNewEmpStart('')
     setNewEmpEnd('Present')
     setNewEmpCurrent(false)
     setShowAddEmpForm(false)
+    clearError('employment')
   }
 
   const handleRemoveEmployment = (index: number) => {
@@ -663,6 +902,9 @@ export default function CandidateProfileEditor({
     }
   }
 
+  // Count current employers
+  const currentEmployersCount = employmentHistory.filter(e => e.is_current).length
+
   if (loading) {
     return (
       <div className="py-20 text-center text-zinc-400">
@@ -673,20 +915,20 @@ export default function CandidateProfileEditor({
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div id="profile-form-top" className="space-y-6 max-w-5xl mx-auto">
       {/* HEADER BAR */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-white tracking-wide">
-              Candidate Profile Configuration
+              Candidate Profile & Automation Settings
             </span>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
               Bot Sync Active
             </span>
           </div>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Fill your Naukri credentials & preferences. The AI Bot uses these settings to find and apply to matching jobs.
+            Configure your Naukri credentials, compensation, target roles, and work history. The AI Bot uses these settings to scout and apply.
           </p>
         </div>
 
@@ -698,7 +940,7 @@ export default function CandidateProfileEditor({
             className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-all cursor-pointer shadow-sm disabled:opacity-50"
           >
             {savingProfile ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            <span>{savingProfile ? 'Saving...' : 'Save Profile'}</span>
+            <span>{savingProfile ? 'Saving...' : 'Save Profile & Sync'}</span>
           </button>
         </div>
       </div>
@@ -727,11 +969,21 @@ export default function CandidateProfileEditor({
           <input
             type="text"
             value={newUserId}
-            onChange={e => setNewUserId(e.target.value)}
+            onChange={e => {
+              setNewUserId(e.target.value)
+              clearError('newUserId')
+            }}
             required
             placeholder="e.g. candidate4_john_doe (no spaces, use underscores)"
-            className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono text-xs"
+            className={`w-full bg-black border rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none font-mono text-xs ${
+              errors.newUserId ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+            }`}
           />
+          {errors.newUserId && (
+            <span className="text-[11px] text-rose-400 font-medium flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> {errors.newUserId}
+            </span>
+          )}
         </div>
       )}
 
@@ -902,34 +1154,52 @@ export default function CandidateProfileEditor({
           {/* Full Name */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1.5">
-              Full Name
+              Full Name <span className="text-rose-400">*</span>
             </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={candidateName}
-                onChange={e => setCandidateName(e.target.value)}
-                placeholder="e.g. Mahalakshmi S R"
-                className="w-full bg-black border border-zinc-800 rounded-lg px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
-              />
-            </div>
+            <input
+              type="text"
+              value={candidateName}
+              onChange={e => {
+                setCandidateName(e.target.value)
+                clearError('name')
+              }}
+              placeholder="e.g. Mahalakshmi S R"
+              className={`w-full bg-black border rounded-lg px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none ${
+                errors.name ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+              }`}
+            />
+            {errors.name && (
+              <span className="text-[11px] text-rose-400 mt-1 block font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> {errors.name}
+              </span>
+            )}
           </div>
 
           {/* Current City / Location */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1.5">
-              Current City / Base Location
+              Current City / Base Location <span className="text-rose-400">*</span>
             </label>
             <div className="relative">
               <MapPin className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
               <input
                 type="text"
                 value={currentLocation}
-                onChange={e => setCurrentLocation(e.target.value)}
+                onChange={e => {
+                  setCurrentLocation(e.target.value)
+                  clearError('location')
+                }}
                 placeholder="e.g. Bangalore"
-                className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+                className={`w-full bg-black border rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none ${
+                  errors.location ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+                }`}
               />
             </div>
+            {errors.location && (
+              <span className="text-[11px] text-rose-400 mt-1 block font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> {errors.location}
+              </span>
+            )}
           </div>
 
           {/* Naukri Login Email */}
@@ -942,12 +1212,22 @@ export default function CandidateProfileEditor({
               <input
                 type="email"
                 value={naukriEmail}
-                onChange={e => setNaukriEmail(e.target.value)}
+                onChange={e => {
+                  setNaukriEmail(e.target.value)
+                  clearError('email')
+                }}
                 placeholder="candidate@gmail.com"
                 required
-                className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono"
+                className={`w-full bg-black border rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none font-mono ${
+                  errors.email ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+                }`}
               />
             </div>
+            {errors.email && (
+              <span className="text-[11px] text-rose-400 mt-1 block font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> {errors.email}
+              </span>
+            )}
           </div>
 
           {/* Naukri Login Password */}
@@ -970,14 +1250,25 @@ export default function CandidateProfileEditor({
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={naukriPassword}
-                onChange={e => setNaukriPassword(e.target.value)}
+                onChange={e => {
+                  setNaukriPassword(e.target.value)
+                  clearError('password')
+                }}
                 placeholder="Naukri password for automated login"
-                className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-10 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono"
+                className={`w-full bg-black border rounded-lg pl-9 pr-10 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none font-mono ${
+                  errors.password ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+                }`}
               />
             </div>
-            <p className="text-[10px] text-zinc-500 mt-1">
-              Encrypted and stored in private MongoDB cluster for headless session authentication.
-            </p>
+            {errors.password ? (
+              <span className="text-[11px] text-rose-400 mt-1 block font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> {errors.password}
+              </span>
+            ) : (
+              <p className="text-[10px] text-zinc-500 mt-1">
+                Encrypted and stored in private MongoDB cluster for headless session authentication.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -1000,42 +1291,62 @@ export default function CandidateProfileEditor({
           {/* Total Experience */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1.5">
-              Total Experience (Years)
+              Total Experience (Years) <span className="text-rose-400">*</span>
             </label>
             <input
               type="number"
               step="0.5"
               min="0"
+              max="45"
               value={experienceYears}
-              onChange={e => setExperienceYears(e.target.value)}
+              onChange={e => {
+                setExperienceYears(e.target.value)
+                clearError('experience')
+              }}
               placeholder="e.g. 6"
-              className="w-full bg-black border border-zinc-800 rounded-lg px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono"
+              className={`w-full bg-black border rounded-lg px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none font-mono ${
+                errors.experience ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+              }`}
             />
-            <span className="text-[10px] text-zinc-500 mt-1 block">e.g. 6.0 years</span>
+            {errors.experience ? (
+              <span className="text-[11px] text-rose-400 mt-1 block font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> {errors.experience}
+              </span>
+            ) : (
+              <span className="text-[10px] text-zinc-500 mt-1 block">e.g. 6.0 years</span>
+            )}
           </div>
 
           {/* Current Company */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1.5">
-              Current Company
+              Current Company <span className="text-rose-400">*</span>
             </label>
             <div className="relative">
               <Building2 className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
               <input
                 type="text"
                 value={currentCompany}
-                onChange={e => setCurrentCompany(e.target.value)}
+                onChange={e => handleCurrentCompanyInputChange(e.target.value)}
                 placeholder="e.g. Wipro"
-                className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+                className={`w-full bg-black border rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none ${
+                  errors.company ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+                }`}
               />
             </div>
-            <span className="text-[10px] text-zinc-500 mt-1 block">Current payroll company</span>
+            {errors.company ? (
+              <span className="text-[11px] text-rose-400 mt-1 block font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> {errors.company}
+              </span>
+            ) : (
+              <span className="text-[10px] text-zinc-500 mt-1 block">Current payroll company</span>
+            )}
           </div>
 
           {/* Current CTC (LPA) */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1.5">
-              Current CTC (₹ in LPA)
+              Current CTC (₹ in LPA) <span className="text-rose-400">*</span>
             </label>
             <div className="relative">
               <IndianRupee className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
@@ -1044,20 +1355,31 @@ export default function CandidateProfileEditor({
                 step="0.5"
                 min="0"
                 value={currentCtcLpa}
-                onChange={e => setCurrentCtcLpa(e.target.value)}
+                onChange={e => {
+                  setCurrentCtcLpa(e.target.value)
+                  clearError('currentCtc')
+                }}
                 placeholder="e.g. 15"
-                className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono"
+                className={`w-full bg-black border rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none font-mono ${
+                  errors.currentCtc ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+                }`}
               />
             </div>
-            <span className="text-[10px] text-zinc-400 mt-1 block font-mono">
-              {formatLpaDisplay(currentCtcLpa)}
-            </span>
+            {errors.currentCtc ? (
+              <span className="text-[11px] text-rose-400 mt-1 block font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> {errors.currentCtc}
+              </span>
+            ) : (
+              <span className="text-[10px] text-zinc-400 mt-1 block font-mono">
+                {formatLpaDisplay(currentCtcLpa)}
+              </span>
+            )}
           </div>
 
           {/* Expected CTC (LPA) */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1.5">
-              Expected CTC (₹ in LPA)
+              Expected CTC (₹ in LPA) <span className="text-rose-400">*</span>
             </label>
             <div className="relative">
               <IndianRupee className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
@@ -1066,16 +1388,50 @@ export default function CandidateProfileEditor({
                 step="0.5"
                 min="0"
                 value={expectedCtcLpa}
-                onChange={e => setExpectedCtcLpa(e.target.value)}
+                onChange={e => {
+                  setExpectedCtcLpa(e.target.value)
+                  clearError('expectedCtc')
+                }}
                 placeholder="e.g. 20"
-                className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono"
+                className={`w-full bg-black border rounded-lg pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none font-mono ${
+                  errors.expectedCtc ? 'border-rose-500/80 focus:border-rose-500' : 'border-zinc-800 focus:border-zinc-500'
+                }`}
               />
             </div>
-            <span className="text-[10px] text-zinc-400 mt-1 block font-mono">
-              {formatLpaDisplay(expectedCtcLpa)}
-            </span>
+            {errors.expectedCtc ? (
+              <span className="text-[11px] text-rose-400 mt-1 block font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> {errors.expectedCtc}
+              </span>
+            ) : (
+              <span className="text-[10px] text-zinc-400 mt-1 block font-mono">
+                {formatLpaDisplay(expectedCtcLpa)}
+              </span>
+            )}
           </div>
         </div>
+
+        {/* Current Employer Exclusion Shield Badge */}
+        {currentCompany.trim() && (
+          <div className="flex items-center gap-2 pt-2 border-t border-zinc-800/60 text-xs flex-wrap">
+            <span className="text-zinc-400 text-[11px]">Employer Application Shield:</span>
+            {avoidCompanies.some(c => c.toLowerCase() === currentCompany.trim().toLowerCase()) ? (
+              <span className="text-emerald-400 flex items-center gap-1 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded-lg font-mono text-[10px]">
+                <Shield className="w-3 h-3 text-emerald-400" /> "{currentCompany}" is Blacklisted (Bot will never apply)
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setAvoidCompanies(prev => [...prev, currentCompany.trim()])
+                }}
+                className="text-amber-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 px-2.5 py-1 rounded-lg font-mono text-[10px] cursor-pointer flex items-center gap-1 transition-colors"
+                title="Add current company to avoid_companies to prevent accidental applications"
+              >
+                <Plus className="w-3 h-3" /> Add "{currentCompany}" to Blacklist (Recommended)
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 4. TARGET JOB FILTERS & PREFERENCES */}
@@ -1095,9 +1451,11 @@ export default function CandidateProfileEditor({
         {/* Target Job Roles */}
         <div className="space-y-2">
           <label className="block text-xs font-medium text-zinc-300">
-            Target Job Titles / Roles ({targetRoles.length})
+            Target Job Titles / Roles ({targetRoles.length}) <span className="text-rose-400">*</span>
           </label>
-          <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black border border-zinc-800 rounded-xl">
+          <div className={`flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black border rounded-xl ${
+            errors.targetRoles ? 'border-rose-500/80' : 'border-zinc-800'
+          }`}>
             {targetRoles.map((role, idx) => (
               <span
                 key={idx}
@@ -1121,7 +1479,7 @@ export default function CandidateProfileEditor({
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    addTag(targetRoles, setTargetRoles, newRoleInput, setNewRoleInput)
+                    addTag(targetRoles, setTargetRoles, newRoleInput, setNewRoleInput, 'targetRoles')
                   }
                 }}
                 placeholder="Type role & press Enter (e.g. Senior QA Engineer)..."
@@ -1130,7 +1488,7 @@ export default function CandidateProfileEditor({
               {newRoleInput && (
                 <button
                   type="button"
-                  onClick={() => addTag(targetRoles, setTargetRoles, newRoleInput, setNewRoleInput)}
+                  onClick={() => addTag(targetRoles, setTargetRoles, newRoleInput, setNewRoleInput, 'targetRoles')}
                   className="px-2 py-0.5 rounded bg-zinc-800 text-[10px] text-white cursor-pointer"
                 >
                   Add
@@ -1138,17 +1496,24 @@ export default function CandidateProfileEditor({
               )}
             </div>
           </div>
+          {errors.targetRoles && (
+            <span className="text-[11px] text-rose-400 font-medium flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 shrink-0" /> {errors.targetRoles}
+            </span>
+          )}
         </div>
 
         {/* Target Locations */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-medium text-zinc-300">
-              Preferred Job Locations ({targetLocations.length})
+              Preferred Job Locations ({targetLocations.length}) <span className="text-rose-400">*</span>
             </label>
             <span className="text-[10px] text-zinc-500">Quick-add popular hubs below</span>
           </div>
-          <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black border border-zinc-800 rounded-xl">
+          <div className={`flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black border rounded-xl ${
+            errors.targetLocations ? 'border-rose-500/80' : 'border-zinc-800'
+          }`}>
             {targetLocations.map((loc, idx) => (
               <span
                 key={idx}
@@ -1172,7 +1537,7 @@ export default function CandidateProfileEditor({
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    addTag(targetLocations, setTargetLocations, newLocationInput, setNewLocationInput)
+                    addTag(targetLocations, setTargetLocations, newLocationInput, setNewLocationInput, 'targetLocations')
                   }
                 }}
                 placeholder="Type location & press Enter (e.g. Bangalore)..."
@@ -1181,7 +1546,7 @@ export default function CandidateProfileEditor({
               {newLocationInput && (
                 <button
                   type="button"
-                  onClick={() => addTag(targetLocations, setTargetLocations, newLocationInput, setNewLocationInput)}
+                  onClick={() => addTag(targetLocations, setTargetLocations, newLocationInput, setNewLocationInput, 'targetLocations')}
                   className="px-2 py-0.5 rounded bg-zinc-800 text-[10px] text-white cursor-pointer"
                 >
                   Add
@@ -1189,6 +1554,12 @@ export default function CandidateProfileEditor({
               )}
             </div>
           </div>
+          {errors.targetLocations && (
+            <span className="text-[11px] text-rose-400 font-medium flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 shrink-0" /> {errors.targetLocations}
+            </span>
+          )}
+
           {/* Quick presets for locations */}
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             <span className="text-[10px] text-zinc-500 uppercase font-mono mr-1">Quick Add:</span>
@@ -1203,6 +1574,7 @@ export default function CandidateProfileEditor({
                       removeTag(targetLocations, setTargetLocations, preset)
                     } else {
                       setTargetLocations([...targetLocations, preset])
+                      clearError('targetLocations')
                     }
                   }}
                   className={`text-[10px] px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
@@ -1221,9 +1593,11 @@ export default function CandidateProfileEditor({
         {/* Primary Tech Stack & Skills */}
         <div className="space-y-2">
           <label className="block text-xs font-medium text-zinc-300">
-            Primary Tech Stack & Keywords ({skills.length})
+            Primary Tech Stack & Keywords ({skills.length}) <span className="text-rose-400">*</span>
           </label>
-          <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black border border-zinc-800 rounded-xl">
+          <div className={`flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black border rounded-xl ${
+            errors.skills ? 'border-rose-500/80' : 'border-zinc-800'
+          }`}>
             {skills.map((skill, idx) => (
               <span
                 key={idx}
@@ -1247,7 +1621,7 @@ export default function CandidateProfileEditor({
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    addTag(skills, setSkills, newSkillInput, setNewSkillInput)
+                    addTag(skills, setSkills, newSkillInput, setNewSkillInput, 'skills')
                   }
                 }}
                 placeholder="Type skill & press Enter (e.g. Cypress, Playwright, Python)..."
@@ -1256,7 +1630,7 @@ export default function CandidateProfileEditor({
               {newSkillInput && (
                 <button
                   type="button"
-                  onClick={() => addTag(skills, setSkills, newSkillInput, setNewSkillInput)}
+                  onClick={() => addTag(skills, setSkills, newSkillInput, setNewSkillInput, 'skills')}
                   className="px-2 py-0.5 rounded bg-zinc-800 text-[10px] text-white cursor-pointer"
                 >
                   Add
@@ -1264,6 +1638,11 @@ export default function CandidateProfileEditor({
               )}
             </div>
           </div>
+          {errors.skills && (
+            <span className="text-[11px] text-rose-400 font-medium flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 shrink-0" /> {errors.skills}
+            </span>
+          )}
         </div>
 
         {/* Must-Have Keywords (Strict Match) */}
@@ -1448,15 +1827,30 @@ export default function CandidateProfileEditor({
         </form>
       </div>
 
-      {/* 6. EMPLOYMENT HISTORY (EXTRACTED BY AI) */}
+      {/* 6. EMPLOYMENT HISTORY (STRICTLY AT MOST 1 CURRENT EMPLOYER) */}
       <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
-        <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
+        <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 flex-wrap gap-2">
           <div>
-            <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-zinc-400" /> Work History & Employers ({employmentHistory.length})
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-zinc-400" /> Work History & Employers ({employmentHistory.length})
+              </h3>
+              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                currentEmployersCount === 1
+                  ? 'bg-zinc-900 border-zinc-800 text-emerald-400'
+                  : currentEmployersCount === 0
+                  ? 'bg-zinc-900 border-zinc-800 text-zinc-400'
+                  : 'bg-rose-950/60 border-rose-800/80 text-rose-300'
+              }`}>
+                {currentEmployersCount === 1
+                  ? '1 Current Employer Active'
+                  : currentEmployersCount === 0
+                  ? '0 Current Selected'
+                  : `${currentEmployersCount} Current Marked (Must be 1)`}
+              </span>
+            </div>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Verified employment timeline extracted from your resume. Used to answer company-specific questions.
+              Verified employment timeline. Only <strong>1 employer</strong> can be marked as current.
             </p>
           </div>
           <button
@@ -1467,6 +1861,13 @@ export default function CandidateProfileEditor({
             <Plus className="w-3 h-3" /> Add Employer
           </button>
         </div>
+
+        {errors.employment && (
+          <div className="p-3 rounded-lg bg-rose-950/40 border border-rose-800 text-rose-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errors.employment}</span>
+          </div>
+        )}
 
         {/* Add Employer Form */}
         {showAddEmpForm && (
@@ -1528,7 +1929,7 @@ export default function CandidateProfileEditor({
                   }}
                   className="rounded bg-zinc-900 border-zinc-700"
                 />
-                <span>This is my current employer</span>
+                <span>This is my current employer (will become the single active current company)</span>
               </label>
               <div className="flex gap-2">
                 <button
@@ -1559,28 +1960,36 @@ export default function CandidateProfileEditor({
             {employmentHistory.map((emp, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-xl bg-black border border-zinc-800 flex items-center justify-between gap-3"
+                className={`p-3.5 rounded-xl bg-black border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                  emp.is_current ? 'border-zinc-700 shadow-sm' : 'border-zinc-800'
+                }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 shrink-0">
+                  <div className={`p-2 rounded-lg border shrink-0 ${
+                    emp.is_current ? 'bg-zinc-900 border-zinc-700 text-white' : 'bg-zinc-950 border-zinc-800 text-zinc-500'
+                  }`}>
                     <Building2 className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-semibold text-white">{emp.company}</span>
-                      {emp.is_current && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400">
-                          Current Employer
+                      {emp.is_current ? (
+                        <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-emerald-400 flex items-center gap-1 font-semibold">
+                          <Check className="w-2.5 h-2.5" /> Current Employer (Payroll)
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-950 border border-zinc-800 text-zinc-500">
+                          Former Employer
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2">
+                    <div className="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2 flex-wrap">
                       <span>{emp.job_title}</span>
                       {(emp.start_date || emp.end_date) && (
                         <>
                           <span className="text-zinc-600">·</span>
                           <span className="font-mono text-[10px] text-zinc-500">
-                            {emp.start_date || 'Start'} – {emp.end_date || 'Present'}
+                            {emp.start_date || 'Start'} – {emp.end_date || (emp.is_current ? 'Present' : 'End')}
                           </span>
                         </>
                       )}
@@ -1588,14 +1997,37 @@ export default function CandidateProfileEditor({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleRemoveEmployment(idx)}
-                  className="text-zinc-500 hover:text-rose-400 p-1.5 rounded transition-colors cursor-pointer"
-                  title="Remove employment record"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2 self-end sm:self-center">
+                  {/* Single Current Employer Radio-Toggle Button */}
+                  {emp.is_current ? (
+                    <button
+                      type="button"
+                      onClick={() => handleUnsetCurrentEmployer(idx)}
+                      className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                      title="Click to unmark as current employer"
+                    >
+                      Unmark Current
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleSetSingleCurrentEmployer(idx)}
+                      className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      title="Set as the 1 current employer and sync with current_company"
+                    >
+                      Set as Current
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveEmployment(idx)}
+                    className="text-zinc-500 hover:text-rose-400 p-1.5 rounded transition-colors cursor-pointer"
+                    title="Remove employment record"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

@@ -490,10 +490,20 @@ export default function UserDashboard() {
               <JobFluxLogo size="sm" showText={true} />
             </Link>
 
-            {/* Desktop Only: Divider + Candidate Details */}
-            <div className="hidden md:flex items-center gap-3 border-l border-zinc-800 pl-3.5">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-semibold text-white text-xs shrink-0">
+            {/* Desktop Only: Candidate Identity & Avatar (Clickable to open Candidate Profile & Resume) */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('profile')}
+              className={`hidden md:flex items-center gap-3 border-l border-zinc-800 pl-3.5 pr-2.5 py-1.5 rounded-xl transition-all cursor-pointer text-left ${
+                activeTab === 'profile'
+                  ? 'bg-zinc-900 border border-zinc-700 shadow-sm'
+                  : 'hover:bg-zinc-900/60 border border-transparent hover:border-zinc-800'
+              }`}
+              title="Click to view and edit Candidate Profile & Resume"
+            >
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-semibold text-white text-xs shrink-0 relative">
                 {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+                <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -546,11 +556,24 @@ export default function UserDashboard() {
                   {userEmail}
                 </p>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Right Desktop Actions (Clean & Spaced Out) */}
           <div className="hidden md:flex items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                activeTab === 'profile'
+                  ? 'bg-white text-black border-white shadow-sm font-semibold'
+                  : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-300 hover:text-white'
+              }`}
+              title="Edit Candidate Profile, Resume & Credentials"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Profile</span>
+            </button>
+
             <button
               onClick={() => refreshAllDashboardData(userId)}
               disabled={isRefreshing}
@@ -639,11 +662,19 @@ export default function UserDashboard() {
 
           {/* Floating Action Sheet */}
           <div className="fixed top-14 right-3 left-3 max-w-sm ml-auto z-50 p-4 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 rounded-2xl shadow-2xl shadow-black/80 space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
-            {/* Candidate Identity Card */}
+            {/* Candidate Identity Card (Clickable to open profile) */}
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0">
+              <div
+                onClick={() => {
+                  setActiveTab('profile')
+                  setIsMobileNavOpen(false)
+                }}
+                className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+                title="Click to manage Candidate Profile & Resume"
+              >
+                <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0 relative">
                   {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -703,6 +734,22 @@ export default function UserDashboard() {
 
             {/* Quick Actions List */}
             <div className="space-y-1 text-xs">
+              <button
+                onClick={() => {
+                  setActiveTab('profile')
+                  setIsMobileNavOpen(false)
+                }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors cursor-pointer text-left ${
+                  activeTab === 'profile'
+                    ? 'bg-zinc-800 text-white font-semibold'
+                    : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                <User className="w-4 h-4 text-zinc-400 shrink-0" />
+                <span>Candidate Profile & Resume</span>
+                <span className="text-[10px] text-zinc-400 font-mono ml-auto">Manage</span>
+              </button>
+
               <button
                 onClick={() => {
                   setIsMobileNavOpen(false)
