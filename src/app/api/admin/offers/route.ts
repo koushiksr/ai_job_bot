@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
     const {
       targetType = 'single',
       targetEmail = 'koushiksrmedala@gmail.com',
+      targetEmails = [],
       offerTitle = 'Exclusive 50% Flash Discount: JobFlux Essentials for ₹49',
       discountBadge = '50% OFF FLASH PASS',
       originalPrice = '₹99 / mo',
@@ -112,7 +113,24 @@ export async function POST(req: NextRequest) {
     // Determine target candidates
     let candidatesToNotify: Array<{ email: string; name: string }> = []
 
-    if (targetType === 'single' || targetType === 'custom_email') {
+    if (targetType === 'multiple') {
+      const rawList: string[] = Array.isArray(targetEmails)
+        ? targetEmails
+        : (typeof targetEmails === 'string' ? (targetEmails as string).split(',') : [])
+      const cleanList = rawList.map(e => e.trim().toLowerCase()).filter(e => e && e.includes('@'))
+      const seen = new Set<string>()
+      for (const em of cleanList) {
+        if (!seen.has(em)) {
+          seen.add(em)
+          const user = await db.collection('users').findOne({ email: { $regex: `^${em}$`, $options: 'i' } }) ||
+                       await db.collection('profiles').findOne({ email: { $regex: `^${em}$`, $options: 'i' } })
+          candidatesToNotify.push({
+            email: em,
+            name: user?.name || em.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ')
+          })
+        }
+      }
+    } else if (targetType === 'single' || targetType === 'custom_email') {
       const cleanTarget = (targetEmail || '').trim().toLowerCase()
       if (!cleanTarget || !cleanTarget.includes('@')) {
         return NextResponse.json({ detail: 'Please specify a valid candidate email.' }, { status: 400 })
@@ -176,8 +194,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Dispatch offers
+    // Dispatch offers via Dual-Channel (Email + Native Background Web Push)
     const dispatchedRecipients: string[] = []
+    let totalEmailsSent = 0
+    let totalPushDelivered = 0
+
     for (const candidate of candidatesToNotify) {
       const html = generatePurchaseOfferHtml({
         candidateName: candidate.name,
@@ -190,13 +211,20 @@ export async function POST(req: NextRequest) {
         customMessage: customMessage || undefined
       })
 
-      // 1. Send Email Notification
-      await sendEmail({
-        to: candidate.email,
-        subject: `⚡ ${offerTitle} [Code: ${promoCode}]`,
-        html,
-        text: `Hi ${candidate.name},\n\nSpecial Offer: ${offerTitle}\nUse code ${promoCode} to get ${discountBadge} at ${discountedPrice} (Regular ${originalPrice}).\nClaim here: ${claimUrl}`
-      })
+      // 1. Send Email Notification via Google SMTP
+      try {
+        const mailResult = await sendEmail({
+          to: candidate.email,
+          subject: `⚡ ${offerTitle} [Code: ${promoCode}]`,
+          html,
+          text: `Hi ${candidate.name},\n\nSpecial Offer: ${offerTitle}\nUse code ${promoCode} to get ${discountBadge} at ${discountedPrice} (Regular ${originalPrice}).\nClaim here: ${claimUrl}`
+        })
+        if (mailResult && (mailResult as any).success) {
+          totalEmailsSent++
+        }
+      } catch (mailErr) {
+        console.warn(`[Offers] Failed sending email to ${candidate.email}:`, mailErr)
+      }
 
       // 2. Persist Candidate-Restricted Offer Assignment in MongoDB
       const candidateEmailClean = candidate.email.toLowerCase().trim()
@@ -230,7 +258,7 @@ export async function POST(req: NextRequest) {
         { upsert: true }
       )
 
-      // 3. Create Real-Time In-App & Push Notification for Candidate Dashboard
+      // 3. Create Real-Time In-App Notification for Candidate Dashboard
       await db.collection('user_notifications').insertOne({
         email: candidateEmailClean,
         type: 'offer_assigned',
@@ -242,19 +270,25 @@ export async function POST(req: NextRequest) {
         created_at: new Date()
       })
 
-      // 4. Dispatch background Web Push (reaches candidate OS even if browser is closed)
+      // 4. Dispatch background Web Push (reaches candidate OS outside browser via Google FCM / Apple APNs)
       try {
-        await sendPushToUser(candidateEmailClean, {
+        const pushResult = await sendPushToUser(candidateEmailClean, {
           title: `🎁 Exclusive Offer: ${discountBadge}!`,
-          body: `${offerTitle} (${originalPrice} → ${discountedPrice}). Use code ${cleanPromoCode}.`,
-          url: claimUrl
+          body: `${offerTitle} (${originalPrice} → ${discountedPrice}). Code: ${cleanPromoCode}.`,
+          url: claimUrl,
+          tag: `jobflux_offer_${cleanPromoCode}`
         })
-      } catch (_) {}
+        if (pushResult && pushResult.delivered > 0) {
+          totalPushDelivered += pushResult.delivered
+        }
+      } catch (pushErr) {
+        console.warn(`[Offers] Web Push dispatch notice for ${candidateEmailClean}:`, pushErr)
+      }
 
       dispatchedRecipients.push(candidate.email)
     }
 
-    // Record Campaign in admin_offers collection
+    // Record Campaign in admin_offers collection with delivery telemetry
     const campaignRecord = {
       campaign_name: offerTitle,
       preset: body.offerPreset || 'custom',
@@ -267,6 +301,8 @@ export async function POST(req: NextRequest) {
       promo_code: promoCode,
       claim_url: claimUrl,
       custom_message: customMessage,
+      emails_sent: totalEmailsSent,
+      push_delivered: totalPushDelivered,
       confirmed_by: adminEmail || userId,
       status: 'dispatched',
       created_at: new Date()
@@ -292,8 +328,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       status: 'success',
-      message: `Purchase offer campaign successfully dispatched to ${dispatchedRecipients.length} candidate(s).`,
+      message: `✓ Offer successfully dispatched to ${dispatchedRecipients.length} candidate(s) (${totalEmailsSent} emails sent, ${totalPushDelivered} devices reached via Web Push).`,
       dispatched_count: dispatchedRecipients.length,
+      emails_sent: totalEmailsSent,
+      push_delivered: totalPushDelivered,
       recipients: dispatchedRecipients
     })
   } catch (err: any) {

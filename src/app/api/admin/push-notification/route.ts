@@ -134,6 +134,56 @@ export async function POST(req: NextRequest) {
         web_push_delivered: pushStats.delivered,
         message: `✓ Push broadcasted to ${emailList.length} candidate account(s) and ${pushStats.delivered} active browser device(s)!`
       })
+    } else if (targetType === 'multiple' || Array.isArray(body.targetEmails)) {
+      const emailList: string[] = (Array.isArray(body.targetEmails) ? body.targetEmails : [targetEmail])
+        .map((e: string) => (e || '').toLowerCase().trim())
+        .filter((e: string) => e && e.includes('@'))
+
+      if (emailList.length === 0) {
+        return NextResponse.json({ error: 'At least one target candidate email is required' }, { status: 400 })
+      }
+
+      let totalDelivered = 0
+      for (const email of emailList) {
+        await db.collection('user_notifications').insertOne({
+          email,
+          type: 'admin_push_alert',
+          title,
+          message,
+          claim_url: claimUrl,
+          read: false,
+          created_at: now
+        })
+
+        const pushStats = await sendPushToUser(email, {
+          title,
+          body: message,
+          url: claimUrl,
+          tag: `jobflux_alert_${Date.now()}`
+        })
+        totalDelivered += pushStats.delivered
+      }
+
+      await db.collection('admin_push_logs').insertOne({
+        target_email: `${emailList.length} Selected Candidates`,
+        target_type: 'multiple',
+        recipient_count: emailList.length,
+        title,
+        message,
+        claim_url: claimUrl,
+        web_push_delivered: totalDelivered,
+        dispatched_by: adminEmail || userId || 'admin',
+        dispatched_at: now,
+        status: 'delivered'
+      })
+
+      return NextResponse.json({
+        success: true,
+        target_type: 'multiple',
+        dispatched_count: emailList.length,
+        web_push_delivered: totalDelivered,
+        message: `✓ Push notification delivered to ${emailList.length} candidate(s) (${totalDelivered} background device(s) reached)!`
+      })
     } else {
       if (!targetEmail) {
         return NextResponse.json({ error: 'Target candidate email is required' }, { status: 400 })

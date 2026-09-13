@@ -63,11 +63,18 @@ export async function sendPushToSubscription(
       tag: payload.tag || `jobflux_${Date.now()}`
     })
 
+    // Sanitize topic for RFC 8030 standard (alphanumeric, -, _ max 32 chars)
+    const topicHeader = payload.tag
+      ? payload.tag.replace(/[^a-zA-Z0-9_\-]/g, '').slice(0, 32)
+      : undefined
+
     const res = await webpush.sendNotification(
       subscription as any,
       jsonPayload,
       {
-        TTL: 60 * 60 * 24 // 24 hours time-to-live in push gateway
+        TTL: 60 * 60 * 24 * 3, // 72 hours cloud retention in Apple APNs & Google FCM
+        urgency: 'high',       // Wake up sleeping mobile/desktop devices immediately
+        topic: topicHeader || undefined
       }
     )
 

@@ -115,8 +115,13 @@ export default function AdminDashboard() {
     history: []
   })
   const [loadingOffers, setLoadingOffers] = useState<boolean>(false)
-  const [targetType, setTargetType] = useState<'single' | 'bulk_unsubscribed' | 'all_users'>('single')
+  const [targetType, setTargetType] = useState<'single' | 'multiple' | 'bulk_unsubscribed' | 'all_users'>('single')
   const [targetEmail, setTargetEmail] = useState<string>(APP_CONFIG.defaultTestRecipients[0] || 'koushiksrmedala@gmail.com')
+  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([
+    APP_CONFIG.defaultTestRecipients[0] || 'koushiksrmedala@gmail.com'
+  ])
+  const [candidateFilterQuery, setCandidateFilterQuery] = useState<string>('')
+  const [customExtraEmails, setCustomExtraEmails] = useState<string>('')
   const [selectedPresetId, setSelectedPresetId] = useState<string>('offer_99')
   const [offerTitle, setOfferTitle] = useState<string>('Candidate Welcome: 90% Off JobFlux Essentials for ₹99')
   const [discountBadge, setDiscountBadge] = useState<string>('90% OFF (ACTUAL ₹1,000)')
@@ -603,12 +608,23 @@ export default function AdminDashboard() {
     setSendingOffer(true)
     setOfferNotification(null)
     try {
+      const extraList = customExtraEmails
+        .split(/[,;\n]/)
+        .map(e => e.trim().toLowerCase())
+        .filter(e => e && e.includes('@'))
+      const combinedMultipleEmails = Array.from(new Set([...selectedCandidates, ...extraList]))
+
+      if (targetType === 'multiple' && combinedMultipleEmails.length === 0) {
+        throw new Error('Please select or specify at least one candidate email.')
+      }
+
       const res = await fetch('/api/admin/offers', {
         method: 'POST',
         headers: getAdminHeaders(),
         body: JSON.stringify({
           targetType,
           targetEmail,
+          targetEmails: combinedMultipleEmails,
           offerPreset: selectedPresetId,
           offerTitle,
           discountBadge,
@@ -2678,6 +2694,170 @@ export default function AdminDashboard() {
                       </div>
                     )}
 
+                    {/* Option 2: Select Multiple Candidates */}
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black border border-zinc-800/80 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="targetType"
+                        checked={targetType === 'multiple'}
+                        onChange={() => setTargetType('multiple')}
+                        className="text-amber-500 focus:ring-amber-500"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-white">Select Multiple Specific Candidates</span>
+                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-500/20 text-amber-300 font-mono font-bold">
+                            {selectedCandidates.length} selected
+                          </span>
+                        </div>
+                        <span className="block text-[11px] text-zinc-500">
+                          Choose 2 or more candidates to receive this same offer simultaneously (Email + Background Web Push)
+                        </span>
+                      </div>
+                    </label>
+
+                    {targetType === 'multiple' && (
+                      <div className="pl-6 space-y-2.5 pt-1">
+                        {/* Search and quick selection action bar */}
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                          <div className="relative flex-1">
+                            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                            <input
+                              type="text"
+                              value={candidateFilterQuery}
+                              onChange={(e) => setCandidateFilterQuery(e.target.value)}
+                              placeholder="Filter candidates by name or email..."
+                              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:border-amber-500 outline-none font-mono"
+                            />
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const pool = [...usersList]
+                                APP_CONFIG.defaultTestRecipients.forEach(testEmail => {
+                                  if (!pool.some(u => (u.email || '').toLowerCase() === testEmail.toLowerCase())) {
+                                    pool.push({ name: testEmail.split('@')[0], email: testEmail, user_id: testEmail, plan: 'trial' })
+                                  }
+                                })
+                                const q = candidateFilterQuery.toLowerCase()
+                                const matched = pool
+                                  .filter(u => {
+                                    const name = (u.name || '').toLowerCase()
+                                    const email = (u.email || u.user_id || '').toLowerCase()
+                                    return !q || name.includes(q) || email.includes(q)
+                                  })
+                                  .map(u => (u.email || (u.user_id?.includes('@') ? u.user_id : '')).toLowerCase().trim())
+                                  .filter(e => e && e.includes('@'))
+                                setSelectedCandidates(Array.from(new Set([...selectedCandidates, ...matched])))
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-medium cursor-pointer"
+                            >
+                              Select All Visible
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedCandidates([])}
+                              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-[11px] cursor-pointer"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Candidates Checklist Scrollbox */}
+                        <div className="max-h-52 overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-950 divide-y divide-zinc-900 p-1">
+                          {(() => {
+                            const pool = [...usersList]
+                            APP_CONFIG.defaultTestRecipients.forEach(testEmail => {
+                              if (!pool.some(u => (u.email || '').toLowerCase() === testEmail.toLowerCase())) {
+                                pool.push({
+                                  name: testEmail.split('@')[0],
+                                  email: testEmail,
+                                  user_id: testEmail,
+                                  plan: 'trial'
+                                })
+                              }
+                            })
+
+                            const q = candidateFilterQuery.toLowerCase()
+                            const filtered = pool.filter(u => {
+                              const name = (u.name || '').toLowerCase()
+                              const email = (u.email || u.user_id || '').toLowerCase()
+                              return !q || name.includes(q) || email.includes(q)
+                            })
+
+                            if (filtered.length === 0) {
+                              return (
+                                <div className="p-4 text-center text-xs text-zinc-500">
+                                  No candidates matching query.
+                                </div>
+                              )
+                            }
+
+                            return filtered.map(u => {
+                              const email = (u.email || (u.user_id?.includes('@') ? u.user_id : '')).toLowerCase().trim()
+                              if (!email) return null
+                              const isChecked = selectedCandidates.includes(email)
+                              return (
+                                <div
+                                  key={email}
+                                  onClick={() => {
+                                    setSelectedCandidates(prev =>
+                                      prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email]
+                                    )
+                                  }}
+                                  className={`p-2 rounded-lg flex items-center justify-between gap-3 text-xs cursor-pointer transition-colors ${
+                                    isChecked ? 'bg-amber-500/10 border border-amber-500/30' : 'hover:bg-zinc-900 border border-transparent'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() => {}}
+                                      className="rounded text-amber-500 focus:ring-amber-500 shrink-0 cursor-pointer"
+                                    />
+                                    <div className="min-w-0">
+                                      <div className="font-medium text-white truncate text-xs">
+                                        {u.name || email.split('@')[0]}
+                                      </div>
+                                      <div className="text-[11px] text-zinc-400 font-mono truncate">
+                                        {email}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase shrink-0 ${
+                                    u.plan === 'pro'
+                                      ? 'bg-amber-500/20 text-amber-300'
+                                      : u.plan === 'trial'
+                                      ? 'bg-sky-500/20 text-sky-300'
+                                      : 'bg-zinc-800 text-zinc-400'
+                                  }`}>
+                                    {u.plan || 'Free'}
+                                  </span>
+                                </div>
+                              )
+                            })
+                          })()}
+                        </div>
+
+                        {/* Extra custom comma-separated candidate emails */}
+                        <div>
+                          <label className="block text-[11px] text-zinc-400 mb-1">
+                            Additional Custom Candidate Emails (Optional, comma-separated):
+                          </label>
+                          <input
+                            type="text"
+                            value={customExtraEmails}
+                            onChange={(e) => setCustomExtraEmails(e.target.value)}
+                            placeholder="user1@example.com, user2@example.com"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:border-amber-500 outline-none font-mono"
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black border border-zinc-800/80 cursor-pointer">
                       <input
                         type="radio"
@@ -3465,10 +3645,16 @@ export default function AdminDashboard() {
                   <span className="font-mono text-amber-300 capitalize">
                     {targetType === 'single'
                       ? targetEmail
+                      : targetType === 'multiple'
+                      ? `${Array.from(new Set([...selectedCandidates, ...customExtraEmails.split(/[,;\n]/).map(e => e.trim().toLowerCase()).filter(e => e && e.includes('@'))])).length} Selected Candidates`
                       : targetType === 'bulk_unsubscribed'
                       ? `${offersData.metrics.unsubscribed_count} Unsubscribed Candidates`
                       : `${offersData.metrics.total_candidates} Registered Candidates`}
                   </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Delivery Channels:</span>
+                  <span className="font-mono text-sky-400">Email + Native Background Web Push</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-500">Pricing / Code:</span>
@@ -3476,10 +3662,17 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                You are about to dispatch branded promotional emails to the specified candidate audience.
-                Please verify that the discounts and terms are intentional before approving.
-              </p>
+              <div className="p-3 bg-zinc-950/90 rounded-xl border border-zinc-800 text-[11px] text-zinc-400 space-y-1.5">
+                <div className="text-white font-medium flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Dual-Channel Delivery & Anti-Spam Safeguard:</span>
+                </div>
+                <p className="leading-relaxed">
+                  • <strong>Email Delivery:</strong> Dispatches custom branded HTML offer via Google SMTP.<br />
+                  • <strong>Background Web Push:</strong> Delivers native OS banners to Android & desktop via Google FCM and Apple APNs (reaches devices even when browser tab is closed).<br />
+                  • <strong>Smart Tagging:</strong> Uses promo code tagging to replace duplicate alerts rather than spamming multiple buzzes on candidate phones.
+                </p>
+              </div>
 
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
