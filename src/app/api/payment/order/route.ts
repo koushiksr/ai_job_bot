@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Razorpay from 'razorpay'
+import { getDb } from '@/lib/mongodb'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,14 +34,47 @@ export async function POST(req: NextRequest) {
     let orderAmount = plan.amount
     let orderPlanName = plan.name
     let promoApplied = false
+    let assignedOfferId = ''
 
     if (cleanPromo && PROMO_DISCOUNTS[cleanPromo]) {
       const discount = PROMO_DISCOUNTS[cleanPromo]
-      if (discount.allowedPlans.includes(plan_id)) {
-        orderAmount = discount.amount
-        orderPlanName = discount.name
-        promoApplied = true
+      if (!discount.allowedPlans.includes(plan_id)) {
+        return NextResponse.json({
+          detail: `Promo code "${cleanPromo}" is valid for ${discount.allowedPlans.join('/')}, not ${plan_id}.`
+        }, { status: 400 })
       }
+
+      // STRICT CANDIDATE-LOCK: Verify offer was assigned to this candidate's email
+      const db = await getDb()
+      if (!db) {
+        return NextResponse.json({ detail: 'Database unavailable for offer verification' }, { status: 503 })
+      }
+
+      const candidateEmailClean = (email || '').toLowerCase().trim()
+      if (!candidateEmailClean) {
+        return NextResponse.json({
+          detail: 'Account email is required to verify exclusive promotional offer eligibility.'
+        }, { status: 400 })
+      }
+
+      const assigned = await db.collection('assigned_offers').findOne({
+        candidate_email: candidateEmailClean,
+        promo_code: cleanPromo,
+        claimed: false
+      })
+
+      if (!assigned) {
+        return NextResponse.json({
+          detail: `Exclusive promotional rate "${cleanPromo}" is not assigned to your account (${candidateEmailClean}). Only candidates assigned by the administrator can claim this offer.`
+        }, { status: 403 })
+      }
+
+      orderAmount = discount.amount
+      orderPlanName = discount.name
+      promoApplied = true
+      assignedOfferId = assigned._id.toString()
+    } else if (cleanPromo && !PROMO_DISCOUNTS[cleanPromo]) {
+      return NextResponse.json({ detail: `Invalid promotional code "${cleanPromo}".` }, { status: 400 })
     }
 
     const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
@@ -68,6 +102,7 @@ export async function POST(req: NextRequest) {
         plan_id: plan_id,
         plan_name: orderPlanName,
         promo_code: promoApplied ? cleanPromo : '',
+        assigned_offer_id: assignedOfferId,
         user_id: user_id || '',
         email: email || ''
       }

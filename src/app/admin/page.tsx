@@ -201,7 +201,8 @@ export default function AdminDashboard() {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       try {
         const n = new Notification(title, {
-          icon: '/icon.svg',
+          icon: '/images/icon.png',
+          badge: '/images/icon.png',
           ...options
         })
         n.onclick = () => {

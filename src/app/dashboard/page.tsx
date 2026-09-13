@@ -114,6 +114,17 @@ export default function UserDashboard() {
   const [notificationBannerDismissed, setNotificationBannerDismissed] = useState<boolean>(false)
   const [testNotificationSent, setTestNotificationSent] = useState<boolean>(false)
 
+  // Candidate Exclusive Assigned Offers & Real-Time Alert State
+  const [assignedOffers, setAssignedOffers] = useState<any[]>([])
+  const [activeOfferBanner, setActiveOfferBanner] = useState<any | null>(null)
+  const [inAppToast, setInAppToast] = useState<{
+    id?: string
+    title: string
+    message: string
+    promo_code?: string
+    claim_url?: string
+  } | null>(null)
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (!('Notification' in window)) {
@@ -128,7 +139,8 @@ export default function UserDashboard() {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       try {
         const n = new Notification(title, {
-          icon: '/icon.svg',
+          icon: '/images/icon.png',
+          badge: '/images/icon.png',
           ...options
         })
         n.onclick = () => {
@@ -138,6 +150,47 @@ export default function UserDashboard() {
       } catch (e) {
         console.warn('Could not dispatch browser notification:', e)
       }
+    }
+  }
+
+  const loadUserOffers = async (email: string) => {
+    if (!email) return
+    try {
+      const clean = email.toLowerCase().trim()
+      const res = await fetch(`/api/user/offers?email=${encodeURIComponent(clean)}&t=${Date.now()}`)
+      if (res.ok) {
+        const data = await res.json()
+        const offers = data.assigned_offers || []
+        setAssignedOffers(offers)
+        if (offers.length > 0) {
+          const latest = offers[0]
+          setActiveOfferBanner(latest)
+
+          // Dispatch native browser notification and in-app toast once per session per offer
+          const alertKey = `jobflux_alerted_offer_${latest.id || latest.promo_code}`
+          if (typeof window !== 'undefined' && !sessionStorage.getItem(alertKey)) {
+            sessionStorage.setItem(alertKey, 'true')
+
+            // 1. Browser Push Notification with PNG Icon
+            sendBrowserNotification(`🎁 Special Offer Assigned: ${latest.discount_badge}!`, {
+              body: `Exclusive deal: ${latest.offer_title} at ${latest.discounted_price}. 1-click claim locked to your account.`
+            })
+
+            // 2. Real-time In-App Slide-over Toast
+            setInAppToast({
+              id: latest.id,
+              title: `🎁 Exclusive Offer Assigned to You: ${latest.discount_badge}!`,
+              message: `${latest.offer_title} (${latest.original_price} → ${latest.discounted_price}). Promo code: ${latest.promo_code}`,
+              promo_code: latest.promo_code,
+              claim_url: latest.claim_url || `/pricing?promo=${latest.promo_code}`
+            })
+          }
+        } else {
+          setActiveOfferBanner(null)
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load candidate assigned offers:', e)
     }
   }
 
@@ -256,8 +309,22 @@ export default function UserDashboard() {
     setUserRole(storedRole || 'user')
     if (storedVip) setIsVip(true)
 
+    if (storedEmail) {
+      loadUserOffers(storedEmail)
+    }
+
     refreshAllDashboardData(storedUid, true)
   }, [])
+
+  // Real-time polling for candidate-assigned promotional offers & push notifications
+  useEffect(() => {
+    const emailToPoll = userEmail || (typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : '')
+    if (!emailToPoll) return
+    const interval = setInterval(() => {
+      loadUserOffers(emailToPoll)
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [userEmail])
 
   // If activeTab is set to 'profile', redirect to dedicated /profile route
   useEffect(() => {
@@ -288,11 +355,13 @@ export default function UserDashboard() {
     const startTime = Date.now()
 
     try {
+      const emailToQuery = userEmail || (typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : '')
       await Promise.allSettled([
         loadUserData(uid),
         loadUserHistory(uid, 1, historySearch, historyFilter),
         loadUserTickets(uid),
-        checkActiveTask(uid)
+        checkActiveTask(uid),
+        emailToQuery ? loadUserOffers(emailToQuery) : Promise.resolve()
       ])
     } catch (e) {
       console.error('Error refreshing dashboard data:', e)
@@ -494,6 +563,14 @@ export default function UserDashboard() {
           localStorage.setItem('user_plan', verifiedPlan)
           localStorage.setItem('user_is_vip', vip ? 'true' : 'false')
         }
+
+        if (pData.email) {
+          setUserEmail(pData.email)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user_email', pData.email)
+          }
+          loadUserOffers(pData.email)
+        }
       }
 
       const sRes = await fetch(`/api/stats?user_id=${uid}`)
@@ -672,14 +749,42 @@ export default function UserDashboard() {
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-white' : ''}`} />
             </button>
 
-            {/* Upgrade Plan (Shown only for non-VIP/Free users) */}
-            {!isProfessional && !isVip && (
+            {/* Sales & Upgrade Action Button - Always Prominent */}
+            {activeOfferBanner ? (
+              <Link
+                href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-black transition-all shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse"
+                title={`Claim your exclusive offer: ${activeOfferBanner.offer_title}`}
+              >
+                <Sparkles className="w-3.5 h-3.5 fill-black/20" />
+                <span>🎁 Claim Deal ({activeOfferBanner.discounted_price})</span>
+              </Link>
+            ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
               <Link
                 href="/pricing"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-zinc-200 text-black transition-all shrink-0 shadow-sm"
+                title="Upgrade to unlock automated applications"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Upgrade</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span>⚡ Upgrade to Pro</span>
+              </Link>
+            ) : userPlan === 'pro' ? (
+              <Link
+                href="/pricing?plan=elite"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black transition-all shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
+                title="Upgrade to Professional (3-Month Fast-Track)"
+              >
+                <Crown className="w-3.5 h-3.5 fill-black/20" />
+                <span>⭐ Upgrade to Professional (₹199)</span>
+              </Link>
+            ) : (
+              <Link
+                href="/pricing"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/40 transition-colors shrink-0 shadow-sm"
+                title="View membership plans or extend coverage"
+              >
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <span>⭐ Plans & Upgrades</span>
               </Link>
             )}
 
@@ -806,13 +911,39 @@ export default function UserDashboard() {
 
           {/* Right Mobile Actions: Clean, Smart & Uncluttered */}
           <div className="flex md:hidden items-center gap-2 shrink-0">
-            <Link
-              href="/pricing"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-black shrink-0 shadow-sm"
-            >
-              <Sparkles className="w-3 h-3" />
-              <span>Upgrade</span>
-            </Link>
+            {activeOfferBanner ? (
+              <Link
+                href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-400 text-black shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.4)] animate-pulse"
+              >
+                <Sparkles className="w-3 h-3 fill-black/20" />
+                <span>Offer: {activeOfferBanner.discounted_price}</span>
+              </Link>
+            ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
+              <Link
+                href="/pricing"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white text-black shrink-0 shadow-sm"
+              >
+                <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500" />
+                <span>Upgrade</span>
+              </Link>
+            ) : userPlan === 'pro' ? (
+              <Link
+                href="/pricing?plan=elite"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-400 text-black shrink-0"
+              >
+                <Crown className="w-3 h-3 fill-black/20" />
+                <span>₹199 Pro</span>
+              </Link>
+            ) : (
+              <Link
+                href="/pricing"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-zinc-800 text-amber-300 border border-amber-500/40 shrink-0"
+              >
+                <Crown className="w-3 h-3 text-amber-400" />
+                <span>Plans</span>
+              </Link>
+            )}
 
             <button
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
@@ -1157,8 +1288,47 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* Launch Special Banner for Free Trial or Expired Users */}
-        {(!isProfessional && (userPlan !== 'pro' || !isPlanActive)) && (
+        {/* Administrator Assigned Exclusive Promotional Offer Banner */}
+        {activeOfferBanner ? (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/50 via-[#0d1520] to-amber-950/50 border-2 border-amber-400/80 shadow-[0_0_30px_rgba(245,158,11,0.3)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 transform translate-x-6 -translate-y-6 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex items-start sm:items-center gap-3.5 z-10">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-500/20 border border-amber-400/60 flex items-center justify-center text-amber-300 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.35)]">
+                <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-mono font-extrabold uppercase px-2.5 py-0.5 rounded-md bg-amber-400 text-black shadow-sm tracking-wide">
+                    {activeOfferBanner.discount_badge || 'SPECIAL OFFER'}
+                  </span>
+                  <span className="text-xs font-mono font-bold text-cyan-300">
+                    Locked to Your Email ({userEmail || 'Account'})
+                  </span>
+                  <span className="text-[11px] font-mono text-zinc-300 bg-black/70 px-2 py-0.5 rounded border border-zinc-700">
+                    Code: <strong className="text-amber-300 font-bold">{activeOfferBanner.promo_code}</strong>
+                  </span>
+                </div>
+                <h4 className="text-sm sm:text-base font-bold text-white mt-1.5 flex items-center gap-2.5">
+                  <span>{activeOfferBanner.offer_title}</span>
+                  <span className="text-zinc-500 line-through text-xs sm:text-sm font-mono">{activeOfferBanner.original_price}</span>
+                  <span className="text-emerald-400 font-extrabold text-sm sm:text-base font-mono">{activeOfferBanner.discounted_price}</span>
+                </h4>
+                <p className="text-[11px] sm:text-xs text-zinc-300 mt-0.5">
+                  {activeOfferBanner.custom_message || 'Administrator assigned deal locked to your email address. 1-click instant unlock.'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 z-10 shrink-0 self-stretch sm:self-auto justify-end">
+              <Link
+                href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-black text-xs font-extrabold transition-all shadow-[0_0_20px_rgba(245,158,11,0.45)] hover:scale-102 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>Claim & Upgrade ({activeOfferBanner.discounted_price})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        ) : (!isProfessional) ? (
           <div className="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-[#09090b] to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-zinc-300">
@@ -1171,6 +1341,8 @@ export default function UserDashboard() {
                       ? 'No Active Subscription · Choose a Plan to Start Auto-Apply'
                       : !isPlanActive
                       ? 'Subscription Expired · Renew to Resume Automated Applications'
+                      : userPlan === 'pro'
+                      ? 'Essentials Active · Upgrade to Professional for 1,800+ Applications'
                       : metrics.total_applied >= 15
                       ? 'Free Trial Quota Reached (15/15)'
                       : `Free Trial Active · ${metrics.total_applied}/15 Dispatched`}
@@ -1180,9 +1352,13 @@ export default function UserDashboard() {
                       ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
                       : !isPlanActive
                       ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                      : userPlan === 'pro'
+                      ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
+                      : metrics.total_applied >= 15
+                      ? 'bg-red-950/80 border-red-700/60 text-red-300'
                       : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                   }`}>
-                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
+                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
@@ -1194,11 +1370,11 @@ export default function UserDashboard() {
               href="/pricing?plan=elite"
               className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : 'Upgrade Plan'}</span>
+              <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : userPlan === 'pro' ? 'Upgrade to Pro (₹199)' : 'Upgrade Plan'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-        )}
+        ) : null}
 
         {/* Unified Mission Control Card (Cockpit + Live Metrics + Telemetry Strip) */}
         <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden card-featured-glow relative">
@@ -2142,6 +2318,45 @@ export default function UserDashboard() {
       </main>
 
 
+
+      {/* Real-time In-App Candidate Promotional Offer Alert Toast */}
+      {inAppToast && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full p-4 rounded-2xl bg-[#0d0f17]/95 border-2 border-amber-400 shadow-[0_15px_40px_rgba(0,0,0,0.85)] backdrop-blur-md animate-in slide-in-from-bottom-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+                <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>{inAppToast.title}</span>
+                </div>
+                <p className="text-[11px] text-zinc-300 mt-1 leading-relaxed">
+                  {inAppToast.message}
+                </p>
+                {inAppToast.claim_url && (
+                  <Link
+                    href={inAppToast.claim_url}
+                    onClick={() => setInAppToast(null)}
+                    className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-md"
+                  >
+                    <span>Claim Offer Now</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setInAppToast(null)}
+              className="p-1 rounded-md text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              title="Dismiss alert"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Professional Tier Perks & Upgrade Modal */}
       <ProfessionalUpgradeModal

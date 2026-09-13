@@ -160,6 +160,8 @@ export default function PricingPage() {
     durationDays?: number
   } | null>(null)
   const [promoError, setPromoError] = useState('')
+  const [validatingPromo, setValidatingPromo] = useState(false)
+  const [promoSuccessMsg, setPromoSuccessMsg] = useState('')
 
   const PROMO_DEFINITIONS: Record<
     string,
@@ -203,12 +205,13 @@ export default function PricingPage() {
     }
   }
 
-  const applyPromoToPlan = (code: string, plan: Plan | null) => {
+  const applyPromoToPlan = async (code: string, plan: Plan | null, emailToCheck?: string) => {
     const clean = code.trim().toUpperCase()
     if (!clean) {
       setAppliedPromoCode('')
       setPromoDiscount(null)
       setPromoError('')
+      setPromoSuccessMsg('')
       return
     }
 
@@ -217,6 +220,7 @@ export default function PricingPage() {
       setPromoError('Invalid promo code. Please check and try again.')
       setAppliedPromoCode('')
       setPromoDiscount(null)
+      setPromoSuccessMsg('')
       return
     }
 
@@ -228,18 +232,58 @@ export default function PricingPage() {
       )
       setAppliedPromoCode('')
       setPromoDiscount(null)
+      setPromoSuccessMsg('')
       return
     }
 
-    setAppliedPromoCode(clean)
-    setInputPromoCode(clean)
-    setPromoDiscount({
-      code: clean,
-      displayPrice: def.displayPrice,
-      label: def.label,
-      durationDays: def.durationDays
-    })
+    const targetEmail = (emailToCheck || candidateEmail || currentUserEmail || (typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : '')).trim().toLowerCase()
+
+    if (!targetEmail) {
+      setPromoError('Please enter your account email above to verify exclusive offer assignment.')
+      setAppliedPromoCode('')
+      setPromoDiscount(null)
+      setPromoSuccessMsg('')
+      return
+    }
+
+    setValidatingPromo(true)
     setPromoError('')
+    setPromoSuccessMsg('')
+
+    try {
+      const res = await fetch('/api/user/offers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: targetEmail,
+          promo_code: clean,
+          plan_id: plan?.id
+        })
+      })
+      const data = await res.json()
+      if (!res.ok || !data.valid) {
+        setPromoError(data.error || `Exclusive promo code "${clean}" is not assigned to your account (${targetEmail}).`)
+        setAppliedPromoCode('')
+        setPromoDiscount(null)
+        setPromoSuccessMsg('')
+        return
+      }
+
+      setAppliedPromoCode(clean)
+      setInputPromoCode(clean)
+      setPromoDiscount({
+        code: clean,
+        displayPrice: def.displayPrice,
+        label: def.label,
+        durationDays: def.durationDays
+      })
+      setPromoSuccessMsg(data.message || `✓ Exclusive offer verified for ${targetEmail}!`)
+      setPromoError('')
+    } catch (err: any) {
+      setPromoError('Network error while verifying offer assignment. Please try again.')
+    } finally {
+      setValidatingPromo(false)
+    }
   }
 
   useEffect(() => {
@@ -285,7 +329,10 @@ export default function PricingPage() {
       }
 
       if (promoParam) {
-        applyPromoToPlan(promoParam, initialPlan)
+        setInputPromoCode(promoParam.trim().toUpperCase())
+        if (email) {
+          applyPromoToPlan(promoParam, initialPlan, email)
+        }
       }
     }
   }, [])
@@ -312,7 +359,7 @@ export default function PricingPage() {
     setCandidateEmail(storedEmail || currentUserEmail)
 
     if (appliedPromoCode) {
-      applyPromoToPlan(appliedPromoCode, plan)
+      applyPromoToPlan(appliedPromoCode, plan, storedEmail || currentUserEmail)
     }
   }
 
@@ -352,7 +399,7 @@ export default function PricingPage() {
         currency: orderData.currency,
         name: 'JobFlux AI',
         description: orderData.plan_name || selectedPlan.name,
-        image: '/icon.svg',
+        image: '/images/icon.png',
         order_id: orderData.order_id,
         prefill: {
           email: candidateEmail,
@@ -858,7 +905,16 @@ export default function PricingPage() {
                     <input
                       type="email"
                       value={candidateEmail}
-                      onChange={e => setCandidateEmail(e.target.value)}
+                      onChange={e => {
+                        const newEmail = e.target.value
+                        setCandidateEmail(newEmail)
+                        if (appliedPromoCode) {
+                          setAppliedPromoCode('')
+                          setPromoDiscount(null)
+                          setPromoSuccessMsg('')
+                          setPromoError('Email changed. Please re-apply your exclusive offer to verify assignment.')
+                        }
+                      }}
                       placeholder="Your login email"
                       required
                       className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
@@ -872,7 +928,7 @@ export default function PricingPage() {
                   <div>
                     <label className="block text-xs font-medium text-zinc-300 mb-1 flex items-center justify-between">
                       <span>Promo Code / Purchase Offer</span>
-                      <span className="text-[10px] text-amber-400 font-mono">Special Deals Supported</span>
+                      <span className="text-[10px] text-amber-400 font-mono">Candidate-Locked Deals</span>
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -881,37 +937,51 @@ export default function PricingPage() {
                         onChange={e => {
                           setInputPromoCode(e.target.value.toUpperCase())
                           setPromoError('')
+                          setPromoSuccessMsg('')
                         }}
                         placeholder="e.g. FLASH49, PRO129, VIP299"
                         className="flex-1 bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono uppercase text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 transition-colors"
                       />
                       <button
                         type="button"
-                        onClick={() => applyPromoToPlan(inputPromoCode, selectedPlan)}
-                        className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                        disabled={validatingPromo || !inputPromoCode.trim()}
+                        onClick={() => applyPromoToPlan(inputPromoCode, selectedPlan, candidateEmail)}
+                        className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5"
                       >
-                        Apply
+                        {validatingPromo ? (
+                          <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
+                        ) : null}
+                        <span>{validatingPromo ? 'Checking...' : 'Apply'}</span>
                       </button>
                     </div>
                     {appliedPromoCode && promoDiscount && (
-                      <div className="mt-1.5 flex items-center justify-between text-[11px] bg-amber-500/10 border border-amber-500/30 rounded-md px-2.5 py-1.5 text-amber-300">
-                        <span className="font-medium">✓ {appliedPromoCode}: {promoDiscount.label}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAppliedPromoCode('')
-                            setInputPromoCode('')
-                            setPromoDiscount(null)
-                            setPromoError('')
-                          }}
-                          className="text-zinc-400 hover:text-white ml-2 underline cursor-pointer text-[10px]"
-                        >
-                          Remove
-                        </button>
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center justify-between text-[11px] bg-emerald-500/10 border border-emerald-500/30 rounded-md px-2.5 py-1.5 text-emerald-300">
+                          <span className="font-medium">✓ {appliedPromoCode}: {promoDiscount.label}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAppliedPromoCode('')
+                              setInputPromoCode('')
+                              setPromoDiscount(null)
+                              setPromoError('')
+                              setPromoSuccessMsg('')
+                            }}
+                            className="text-zinc-400 hover:text-white ml-2 underline cursor-pointer text-[10px]"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        {promoSuccessMsg && (
+                          <p className="text-[11px] text-emerald-400 font-medium px-1">{promoSuccessMsg}</p>
+                        )}
                       </div>
                     )}
                     {promoError && (
-                      <p className="text-[11px] text-rose-400 mt-1">{promoError}</p>
+                      <div className="mt-2 p-2.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[11px] flex items-start gap-1.5 leading-relaxed">
+                        <span className="text-rose-400 font-bold shrink-0">✕</span>
+                        <span>{promoError}</span>
+                      </div>
                     )}
                   </div>
 

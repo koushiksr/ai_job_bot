@@ -249,11 +249,56 @@ export async function POST(req: NextRequest) {
         customMessage: customMessage || undefined
       })
 
+      // 1. Send Email Notification
       await sendEmail({
         to: candidate.email,
         subject: `⚡ ${offerTitle} [Code: ${promoCode}]`,
         html,
         text: `Hi ${candidate.name},\n\nSpecial Offer: ${offerTitle}\nUse code ${promoCode} to get ${discountBadge} at ${discountedPrice} (Regular ${originalPrice}).\nClaim here: ${claimUrl}`
+      })
+
+      // 2. Persist Candidate-Restricted Offer Assignment in MongoDB
+      const candidateEmailClean = candidate.email.toLowerCase().trim()
+      const cleanPromoCode = promoCode.trim().toUpperCase()
+      await db.collection('assigned_offers').updateOne(
+        {
+          candidate_email: candidateEmailClean,
+          promo_code: cleanPromoCode
+        },
+        {
+          $set: {
+            candidate_email: candidateEmailClean,
+            candidate_name: candidate.name,
+            promo_code: cleanPromoCode,
+            preset_id: body.offerPreset || 'custom',
+            offer_title: offerTitle,
+            discount_badge: discountBadge,
+            original_price: originalPrice,
+            discounted_price: discountedPrice,
+            claim_url: claimUrl,
+            custom_message: customMessage || '',
+            assigned_by: adminEmail || userId || 'admin',
+            claimed: false,
+            claimed_at: null,
+            updated_at: new Date()
+          },
+          $setOnInsert: {
+            created_at: new Date()
+          }
+        },
+        { upsert: true }
+      )
+
+      // 3. Create Real-Time In-App & Push Notification for Candidate Dashboard
+      await db.collection('user_notifications').insertOne({
+        email: candidateEmailClean,
+        type: 'offer_assigned',
+        title: `⚡ Exclusive Offer: ${discountBadge}`,
+        message: `${offerTitle} — Pay only ${discountedPrice} (Regular ${originalPrice}) with code ${cleanPromoCode}.`,
+        promo_code: cleanPromoCode,
+        claim_url: claimUrl,
+        read: false,
+        created_at: new Date()
       })
 
       dispatchedRecipients.push(candidate.email)

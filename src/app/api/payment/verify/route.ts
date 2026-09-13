@@ -104,7 +104,26 @@ export async function POST(req: NextRequest) {
       await db.collection('users').updateMany(query, { $set: updateFields })
     }
 
-    // 3. Record verified transaction in payments collection
+    // 3. If an assigned offer promo was applied, mark it permanently as claimed
+    if (cleanPromo) {
+      await db.collection('assigned_offers').updateMany(
+        {
+          promo_code: cleanPromo,
+          candidate_email: (email || '').toLowerCase().trim(),
+          claimed: false
+        },
+        {
+          $set: {
+            claimed: true,
+            claimed_at: now,
+            payment_id: razorpay_payment_id,
+            order_id: razorpay_order_id
+          }
+        }
+      )
+    }
+
+    // 4. Record verified transaction in payments collection
     await db.collection('payments').insertOne({
       order_id: razorpay_order_id,
       payment_id: razorpay_payment_id,
