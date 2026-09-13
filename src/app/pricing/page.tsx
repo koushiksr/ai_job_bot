@@ -66,8 +66,8 @@ const PLANS: Plan[] = [
     name: 'Essentials',
     subtitle: 'For candidates with daily proactive application demands.',
     badge: 'POPULAR',
-    price: '₹499',
-    originalPrice: '₹1,499',
+    price: '₹99',
+    originalPrice: '₹1,000',
     period: '/ month',
     featuresIntro: 'Everything in Free, with 600+ monthly applications, plus...',
     features: [
@@ -79,7 +79,7 @@ const PLANS: Plan[] = [
       { text: 'Priority Cloud Worker Queue' },
       { text: 'Live Application History & Recruiter Links' }
     ],
-    cta: 'Get 1 Month for ₹499',
+    cta: 'Get 1 Month for ₹99',
     popular: true,
     highlight: true
   },
@@ -87,8 +87,8 @@ const PLANS: Plan[] = [
     id: 'elite',
     name: 'Professional',
     subtitle: 'Best for comprehensive pipeline until you sign an offer.',
-    price: '₹1,199',
-    originalPrice: '₹3,499',
+    price: '₹199',
+    originalPrice: '₹2,500',
     period: '/ 3 months',
     featuresIntro: 'Everything in Essentials, with extended 90-day pipeline, plus...',
     features: [
@@ -99,7 +99,7 @@ const PLANS: Plan[] = [
       { text: 'Continuous Applications Until Hired' },
       { text: 'Dedicated Recruiter Response Priority' }
     ],
-    cta: 'Get 3 Months (₹1,199)',
+    cta: 'Get 3 Months (₹199)',
     highlight: false
   },
   {

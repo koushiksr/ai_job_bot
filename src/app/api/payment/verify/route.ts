@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
       user_id: user_id || null,
       email: email || null,
       plan_id: plan_id,
+      amount: plan_id === 'elite' || plan_id === 'professional' ? '₹199' : '₹99',
       verified_at: now,
       expires_at: expiresAt,
       status: 'captured'

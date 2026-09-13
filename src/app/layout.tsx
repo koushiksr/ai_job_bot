@@ -116,7 +116,7 @@ const jsonLdData = {
         "@type": "AggregateOffer",
         "priceCurrency": "INR",
         "lowPrice": "0",
-        "highPrice": "1199",
+        "highPrice": "199",
         "offerCount": "3"
       },
       "aggregateRating": {

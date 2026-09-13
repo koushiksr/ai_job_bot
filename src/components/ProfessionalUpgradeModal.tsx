@@ -127,12 +127,12 @@ export default function ProfessionalUpgradeModal({
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white uppercase tracking-wider">Professional Plan</span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300">
-                  SAVE 66% · BEST VALUE
+                  SAVE 92% · BEST VALUE
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-2xl font-extrabold text-white font-mono">₹1,199</span>
-                <span className="text-xs text-zinc-500 line-through">₹3,499</span>
+                <span className="text-2xl font-extrabold text-white font-mono">₹199</span>
+                <span className="text-xs text-zinc-500 line-through">₹2,500</span>
                 <span className="text-xs text-zinc-400 font-mono">/ 3 Full Months (1,800+ Applications)</span>
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function ProfessionalUpgradeModal({
 
           {/* Footer Note */}
           <div className="mt-4 flex items-center justify-between text-[11px] text-zinc-500">
-            <span>Or start with 1-Month Essentials for ₹499</span>
+            <span>Or start with 1-Month Essentials for ₹99 (was ₹1,000)</span>
             <Link href="/pricing" onClick={onClose} className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
               View All Tiers →
             </Link>

@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
         user_id: p.user_id || 'guest',
         email: p.email || 'N/A',
         plan_id: p.plan_id,
-        amount: p.plan_id === 'elite' ? '₹1,199' : '₹499',
+        amount: p.amount || (p.plan_id === 'elite' || p.plan_id === 'professional' ? '₹199' : '₹99'),
         verified_at: p.verified_at || p.created_at || new Date(),
         expires_at: p.expires_at || null,
         status: p.status || 'captured'

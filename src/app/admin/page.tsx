@@ -1323,7 +1323,7 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-bold text-emerald-400 font-mono text-sm">
-                            {p.amount || '₹499'}
+                            {p.amount || (p.plan_id === 'elite' || p.plan_id === 'professional' ? '₹199' : '₹99')}
                           </td>
                           <td className="py-3.5 px-4 font-mono text-[11px] text-cyan-400">
                             {p.payment_id}

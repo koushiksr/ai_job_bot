@@ -739,7 +739,7 @@ export default function AiResumeBuilder({
                           href="/pricing"
                           className="text-xs text-zinc-400 hover:text-white px-3 py-2 transition-colors font-medium"
                         >
-                          View Plans (From ₹499/mo) →
+                          View Plans (From ₹99/mo) →
                         </Link>
                       </div>
                     </div>

@@ -936,7 +936,7 @@ export default function Home() {
                   <td className="p-4 sm:p-5 font-medium text-white">Monthly Investment</td>
                   <td className="p-4 sm:p-5 text-zinc-400">₹45,000+ (in lost dev time)</td>
                   <td className="p-4 sm:p-5 text-zinc-400">₹1,500 - ₹3,000/mo ($20-$40)</td>
-                  <td className="p-4 sm:p-5 font-bold text-white bg-sky-950/40">Just ₹499 / Month (₹16 / day)</td>
+                  <td className="p-4 sm:p-5 font-bold text-white bg-sky-950/40">Just ₹99 / Month (was ₹1,000 · ₹3.3 / day)</td>
                 </tr>
               </tbody>
             </table>
@@ -967,17 +967,17 @@ export default function Home() {
                   <Zap className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white">
-                  The ROI: Why ₹499 is a Complete No-Brainer
+                  The ROI: Why ₹99 is a Complete No-Brainer
                 </h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  As a software engineer, your time is worth ₹1,000 to ₹3,000 per hour. Spending 60 hours clicking apply manually costs you ₹60,000+ in wasted personal time and burnout. JobFlux AI costs ₹16 per day to run in the background while you focus on interview prep.
+                  As a software engineer, your time is worth ₹1,000 to ₹3,000 per hour. Spending 60 hours clicking apply manually costs you ₹60,000+ in wasted personal time and burnout. JobFlux AI costs just ₹99 for a full month (down from ₹1,000) to run in the background while you focus on interview prep.
                 </p>
               </div>
               <Link
                 href="/pricing"
                 className="inline-flex items-center justify-between px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all shadow-lg shadow-white/5"
               >
-                <span>Get Started for ₹499 / Month</span>
+                <span>Get Started for ₹99 / Month</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
