@@ -1,6 +1,95 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 
+/**
+ * Extracts the company name from a Naukri job-listings URL slug.
+ * Naukri slugs follow the pattern:
+ *   /job-listings-<role-slug>-<company-slug>-<location-slug>-<exp>-<jobid>
+ *
+ * Examples:
+ *   /job-listings-python-developer-gen-ai-infosys-pune-3-to-5-years-040826033708
+ *   → strips ID, exp, location → role slug "python-developer-gen-ai" + company "infosys"
+ *   → returns "Infosys"
+ *
+ * Returns null when the company cannot be reliably extracted.
+ */
+function extractCompanyFromNaukriUrl(url: string, jobTitle: string = ''): string | null {
+  if (!url || !url.includes('/job-listings-')) return null
+
+  const match = url.match(/\/job-listings-([a-z0-9-]+?)(?:\?|$)/i)
+  if (!match) return null
+
+  let slug = match[1].toLowerCase()
+
+  // Strip trailing numeric job ID (8-16 digit number)
+  slug = slug.replace(/-\d{8,16}$/, '')
+
+  // Strip experience suffix: -3-to-5-years, -0-to-1-years, etc.
+  slug = slug.replace(/-\d+(?:-to-\d+)?-years?$/, '')
+
+  // List of Indian cities to strip from the end of the slug
+  const locations = [
+    'hyderabad-secunderabad', 'hyderabad', 'secunderabad',
+    'bengaluru-bangalore', 'bengaluru', 'bangalore',
+    'pune', 'mumbai', 'navi-mumbai', 'thane',
+    'delhi-ncr', 'new-delhi', 'noida', 'greater-noida',
+    'gurgaon-gurugram', 'gurgaon', 'gurugram',
+    'chennai', 'kolkata', 'ahmedabad', 'surat', 'jaipur',
+    'kochi', 'coimbatore', 'indore', 'bhubaneswar',
+    'remote', 'hybrid', 'anywhere-in-india', 'pan-india', 'work-from-home'
+  ]
+  for (const loc of locations) {
+    if (slug.endsWith('-' + loc)) {
+      slug = slug.slice(0, -(loc.length + 1))
+      break
+    }
+  }
+
+  // Strip multiple locations (Naukri sometimes lists 2-3 cities):
+  // run a second pass
+  for (const loc of locations) {
+    if (slug.endsWith('-' + loc)) {
+      slug = slug.slice(0, -(loc.length + 1))
+      break
+    }
+  }
+
+  // Normalise job title to a slug for stripping from the start
+  if (jobTitle) {
+    const titleSlug = jobTitle.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+
+    // Try progressively shorter title prefix matches
+    const titleTokens = titleSlug.split('-').filter(Boolean)
+    for (let len = titleTokens.length; len >= 2; len--) {
+      const prefix = titleTokens.slice(0, len).join('-')
+      if (slug.startsWith(prefix + '-')) {
+        const remaining = slug.slice(prefix.length + 1)
+        if (remaining && remaining.length >= 2) {
+          return toTitleCase(remaining)
+        }
+        break
+      }
+    }
+  }
+
+  // Heuristic: last 1-3 hyphenated tokens are likely the company
+  const tokens = slug.split('-').filter(Boolean)
+  if (tokens.length >= 2) {
+    // Take last 1-4 tokens as company (handles "Tiger Analytics", "Infosys BPM", etc.)
+    // Avoid returning long strings that are actually part of the role slug
+    const companyTokens = tokens.slice(-Math.min(4, Math.ceil(tokens.length / 2)))
+    return toTitleCase(companyTokens.join('-'))
+  }
+
+  return null
+}
+
+function toTitleCase(slug: string): string {
+  return slug.replace(/-/g, ' ').replace(/\b[a-z]/g, c => c.toUpperCase()).trim()
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -120,12 +209,26 @@ export async function GET(req: NextRequest) {
         }
       }
 
+      // Resolve company: use stored value; if it is a placeholder, try to extract from URL
+      const storedCompany = doc.company || ''
+      const isUnknownCompany = !storedCompany ||
+        storedCompany === 'Unknown Company' ||
+        storedCompany === 'Unknown' ||
+        storedCompany === 'Confidential'
+
+      let resolvedCompany = storedCompany
+      if (isUnknownCompany && doc.job_url) {
+        const extracted = extractCompanyFromNaukriUrl(doc.job_url, doc.job_title || '')
+        if (extracted) resolvedCompany = extracted
+      }
+      if (!resolvedCompany) resolvedCompany = 'Unknown Company'
+
       return {
         id: String(doc._id),
         date: formattedDate || rawIso || '',
         raw_date: rawIso,
         title: doc.job_title || 'Unknown Title',
-        company: doc.company || 'Unknown Company',
+        company: resolvedCompany,
         // Job redirect URLs are a Professional-plan exclusive feature.
         // For non-pro users, never return a raw URL or string literal that could be treated as a relative link.
         url: isProfessional && doc.job_url && doc.job_url !== '__locked__' ? doc.job_url : '',
