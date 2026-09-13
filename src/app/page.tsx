@@ -281,6 +281,13 @@ export default function Home() {
                 Features
               </a>
               <Link
+                href="/resume-builder"
+                className="hover:text-white transition-colors flex items-center gap-1"
+              >
+                <span>Resume Studio</span>
+                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-violet-950/80 border border-violet-700/50 text-violet-300">ATS</span>
+              </Link>
+              <Link
                 href="/pricing"
                 className="hover:text-white transition-colors"
               >

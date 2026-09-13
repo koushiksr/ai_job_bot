@@ -72,6 +72,68 @@ export default function CandidateProfileEditor({
     }
   }
 
+  // Curated Indian mass consultancy & IT services presets
+  const MASS_CONSULTANCY_PRESETS = [
+    'TCS',
+    'Infosys',
+    'Wipro',
+    'Cognizant',
+    'Accenture',
+    'Capgemini',
+    'HCLTech',
+    'Tech Mahindra',
+    'LTIMindtree',
+    'Genpact',
+    'IBM India',
+    'Deloitte USI',
+    'EY GDS',
+    'PwC SDC',
+    'KPMG India'
+  ]
+
+  const handleToggleBlacklist = (company: string) => {
+    try {
+      const obj = JSON.parse(rawJsonStr)
+      if (!obj.job_filters) obj.job_filters = {}
+      if (!Array.isArray(obj.job_filters.avoid_companies)) obj.job_filters.avoid_companies = []
+      
+      const exists = obj.job_filters.avoid_companies.some((c: string) => c.toLowerCase() === company.toLowerCase())
+      if (exists) {
+        obj.job_filters.avoid_companies = obj.job_filters.avoid_companies.filter((c: string) => c.toLowerCase() !== company.toLowerCase())
+        setSaveSuccess(`Removed "${company}" from blacklist. Remember to Save Configuration.`)
+      } else {
+        obj.job_filters.avoid_companies.push(company)
+        setSaveSuccess(`Added "${company}" to exclusion blacklist. Remember to Save Configuration.`)
+      }
+      setRawJsonStr(JSON.stringify(obj, null, 2))
+      setTimeout(() => setSaveSuccess(''), 4000)
+    } catch {
+      setJsonError('Please fix JSON syntax errors before modifying company blacklist.')
+    }
+  }
+
+  const handleExcludeAllMassConsultancies = () => {
+    try {
+      const obj = JSON.parse(rawJsonStr)
+      if (!obj.job_filters) obj.job_filters = {}
+      if (!Array.isArray(obj.job_filters.avoid_companies)) obj.job_filters.avoid_companies = []
+
+      const topMass = ['TCS', 'Infosys', 'Wipro', 'Cognizant', 'Accenture', 'Capgemini', 'HCLTech', 'Tech Mahindra']
+      let addedCount = 0
+      topMass.forEach(c => {
+        if (!obj.job_filters.avoid_companies.some((existing: string) => existing.toLowerCase() === c.toLowerCase())) {
+          obj.job_filters.avoid_companies.push(c)
+          addedCount++
+        }
+      })
+      setRawJsonStr(JSON.stringify(obj, null, 2))
+      setSaveSuccess(`Blocked ${addedCount} top mass consultancies. Remember to Save Configuration.`)
+      setTimeout(() => setSaveSuccess(''), 4000)
+    } catch {
+      setJsonError('Please fix JSON syntax errors before modifying company blacklist.')
+    }
+  }
+
   const handleAddBlacklist = (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     const trimmed = newBlacklistCompany.trim()
@@ -80,12 +142,12 @@ export default function CandidateProfileEditor({
       const obj = JSON.parse(rawJsonStr)
       if (!obj.job_filters) obj.job_filters = {}
       if (!Array.isArray(obj.job_filters.avoid_companies)) obj.job_filters.avoid_companies = []
-      if (!obj.job_filters.avoid_companies.includes(trimmed)) {
+      if (!obj.job_filters.avoid_companies.some((c: string) => c.toLowerCase() === trimmed.toLowerCase())) {
         obj.job_filters.avoid_companies.push(trimmed)
       }
       setRawJsonStr(JSON.stringify(obj, null, 2))
       setNewBlacklistCompany('')
-      setSaveSuccess(`Added "${trimmed}" to company exclusion blacklist. Click Save Configuration to persist.`)
+      setSaveSuccess(`Added "${trimmed}" to company exclusion blacklist. Remember to Save Configuration.`)
       setTimeout(() => setSaveSuccess(''), 4000)
     } catch {
       setJsonError('Please fix JSON syntax errors before modifying company blacklist.')
@@ -96,10 +158,10 @@ export default function CandidateProfileEditor({
     try {
       const obj = JSON.parse(rawJsonStr)
       if (obj.job_filters && Array.isArray(obj.job_filters.avoid_companies)) {
-        obj.job_filters.avoid_companies = obj.job_filters.avoid_companies.filter((c: string) => c !== companyToRemove)
+        obj.job_filters.avoid_companies = obj.job_filters.avoid_companies.filter((c: string) => c.toLowerCase() !== companyToRemove.toLowerCase())
       }
       setRawJsonStr(JSON.stringify(obj, null, 2))
-      setSaveSuccess(`Removed "${companyToRemove}" from blacklist. Click Save Configuration to persist.`)
+      setSaveSuccess(`Removed "${companyToRemove}" from blacklist. Remember to Save Configuration.`)
       setTimeout(() => setSaveSuccess(''), 4000)
     } catch {
       setJsonError('Please fix JSON syntax errors before modifying company blacklist.')
@@ -486,26 +548,11 @@ export default function CandidateProfileEditor({
           </div>
         )}
 
-        {/* Enterprise PII Privacy & Redaction Shield */}
-        <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/40 via-zinc-950 to-violet-950/20 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-600/50 flex items-center justify-center text-emerald-400 shrink-0">
-              <Shield className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="font-semibold text-emerald-300 flex items-center gap-1.5">
-                <span>100% PII Privacy Shield & Zero-Leak Redaction Active</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-900/60 border border-emerald-600/40 text-emerald-200">VERIFIED</span>
-              </span>
-              <p className="text-[11px] text-zinc-400 mt-0.5">
-                Personal contact markers (phone numbers, physical addresses, private emails) are sanitized and protected by JobFlux AI. Only verified employers can request official interview contact credentials.
-              </p>
-            </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-1 text-[11px] font-mono text-zinc-500 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Vault Encrypted</span>
-          </div>
+        {/* Subtle Minimal PII Privacy Shield */}
+        <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-950/80 px-3 py-2 rounded-xl border border-zinc-800/80 w-fit" title="Zero Data-Leak Guarantee: Automatically scrubs and anonymizes sensitive PII (Home address, Aadhaar/PAN, internal IDs, personal phone) before cloud processing">
+          <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="font-medium text-zinc-300">Auto PII Sanitized</span>
+          <span className="text-zinc-500 text-[10px] hidden sm:inline">· Zero Data-Leak: Sensitive PII (Address, Aadhaar/PAN, internal IDs, phone) scrubbed before cloud sync</span>
         </div>
       </div>
 
@@ -520,18 +567,67 @@ export default function CandidateProfileEditor({
               The autonomous bot will automatically skip and never apply to any job openings at these companies (e.g. current employer or competitor).
             </p>
           </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
-            {getAvoidCompanies().length} Companies Blocked
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
+              {getAvoidCompanies().length} Blocked
+            </span>
+            <button
+              type="button"
+              onClick={handleExcludeAllMassConsultancies}
+              className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-red-950/40 hover:bg-red-950/70 border border-red-800/50 text-red-300 transition-colors cursor-pointer"
+              title="Add top 8 mass consultancies in one tap"
+            >
+              + Block Top 8 Mass Consultancies
+            </button>
+          </div>
         </div>
 
-        {/* Add Company Form */}
-        <form onSubmit={handleAddBlacklist} className="flex flex-col sm:flex-row gap-2">
+        {/* Quick-Tap Preset Pills */}
+        <div className="space-y-1.5 pt-1">
+          <div className="text-[10px] font-mono uppercase text-zinc-500 flex items-center justify-between">
+            <span>Quick-Tap Presets (Tap to toggle exclusion)</span>
+            <span className="text-[9px] text-zinc-600">Mass Consultancies & IT Services</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {MASS_CONSULTANCY_PRESETS.map((comp) => {
+              const isBlocked = getAvoidCompanies().some(c => c.toLowerCase() === comp.toLowerCase())
+              return (
+                <button
+                  key={comp}
+                  type="button"
+                  onClick={() => handleToggleBlacklist(comp)}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    isBlocked
+                      ? 'bg-red-950/60 border border-red-700/60 text-red-300 shadow-sm'
+                      : 'bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white'
+                  }`}
+                  title={isBlocked ? `Click to unblock ${comp}` : `Click to exclude ${comp}`}
+                >
+                  {isBlocked ? (
+                    <>
+                      <X className="w-3 h-3 text-red-400" />
+                      <span>{comp}</span>
+                      <span className="text-[9px] text-red-400/80 font-mono">Blocked</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3 h-3 text-zinc-500" />
+                      <span>{comp}</span>
+                    </>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Add Custom Company Form */}
+        <form onSubmit={handleAddBlacklist} className="flex flex-col sm:flex-row gap-2 pt-1">
           <input
             type="text"
             value={newBlacklistCompany}
             onChange={(e) => setNewBlacklistCompany(e.target.value)}
-            placeholder="Enter company name to blacklist (e.g. Capgemini, CurrentEmployer Pvt Ltd)..."
+            placeholder="Type custom company to blacklist (e.g. CurrentEmployer Pvt Ltd)..."
             className="flex-1 bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
           />
           <button
@@ -539,35 +635,40 @@ export default function CandidateProfileEditor({
             className="w-full sm:w-auto px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
           >
             <Plus className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Add to Blacklist</span>
+            <span>Add Custom</span>
           </button>
         </form>
 
-        {/* Blacklisted Badges */}
-        <div className="flex flex-wrap gap-2 pt-1">
-          {getAvoidCompanies().length === 0 ? (
-            <p className="text-xs text-zinc-500 italic">
-              No companies currently blacklisted. All matching companies on Naukri are eligible for automated applications.
-            </p>
-          ) : (
-            getAvoidCompanies().map((comp, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 font-medium"
-              >
-                <Ban className="w-3 h-3 text-red-400/80" />
-                <span>{comp}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveBlacklist(comp)}
-                  className="text-zinc-500 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
-                  title={`Remove ${comp} from blacklist`}
+        {/* Active Blacklisted Badges */}
+        <div className="space-y-1.5 pt-1">
+          <div className="text-[10px] font-mono uppercase text-zinc-500">
+            Active Excluded List ({getAvoidCompanies().length})
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {getAvoidCompanies().length === 0 ? (
+              <p className="text-xs text-zinc-500 italic">
+                No companies currently blacklisted. All matching companies on Naukri are eligible for automated applications.
+              </p>
+            ) : (
+              getAvoidCompanies().map((comp, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 font-medium"
                 >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))
-          )}
+                  <Ban className="w-3 h-3 text-red-400/80" />
+                  <span>{comp}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveBlacklist(comp)}
+                    className="text-zinc-500 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
+                    title={`Remove ${comp} from blacklist`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

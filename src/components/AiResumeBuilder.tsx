@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import {
   Sparkles,
   Lock,
@@ -253,26 +254,21 @@ export default function AiResumeBuilder({
         </div>
       </div>
 
-      {/* Zero-Leak PII Privacy Shield Guarantee */}
-      <div className="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/30 via-zinc-950 to-violet-950/20 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-emerald-950/80 border border-emerald-600/40 flex items-center justify-center text-emerald-400 shrink-0">
-            <Shield className="w-3.5 h-3.5" />
-          </div>
-          <div>
-            <span className="font-semibold text-emerald-300 flex items-center gap-1.5 flex-wrap">
-              <span>Zero-Data-Leak Guarantee & PII Redaction Active</span>
-              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-900/60 border border-emerald-600/40 text-emerald-200">VERIFIED</span>
-            </span>
-            <p className="text-[10px] sm:text-[11px] text-zinc-400 mt-0.5">
-              Personal contact markers (phone numbers, physical addresses, private emails) are sanitized and encrypted before recruiter previewing or indexing.
-            </p>
-          </div>
+      {/* Subtle Minimal PII Privacy Shield & Dedicated Studio Link */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-950/80 px-3 py-1.5 rounded-xl border border-zinc-800/80 w-fit" title="Zero Data-Leak Guarantee: Automatically scrubs and anonymizes sensitive PII (Home address, Aadhaar/PAN, internal IDs, personal phone) before cloud processing">
+          <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="font-medium text-zinc-300">Auto PII Sanitized</span>
+          <span className="text-zinc-500 text-[10px] hidden sm:inline">· Sensitive PII scrubbed before ATS parsing</span>
         </div>
-        <div className="hidden md:flex items-center gap-1 text-[11px] font-mono text-zinc-500 shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>AES-256 Vault</span>
-        </div>
+
+        <Link
+          href="/resume-builder"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-300 hover:text-white bg-violet-950/60 hover:bg-violet-900/80 px-3 py-1.5 rounded-lg border border-violet-700/50 transition-colors cursor-pointer"
+        >
+          <span>Open Fullscreen Resume Studio</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* SUB-TAB 1: High-Paying Sample Resumes */}

@@ -26,7 +26,8 @@ import {
   X,
   Lock,
   Crown,
-  ChevronDown
+  ChevronDown,
+  Download
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
@@ -423,6 +424,34 @@ export default function UserDashboard() {
     }
   }
 
+  const handleExportHistoryCsv = () => {
+    if (!historyJobs || historyJobs.length === 0) {
+      alert('No application records available to export.')
+      return
+    }
+
+    const headers = ['Job Title', 'Company', 'Dispatched At', 'Location', 'Status', 'Portal URL']
+    const rows = historyJobs.map(job => [
+      `"${(job.title || '').replace(/"/g, '""')}"`,
+      `"${(job.company || '').replace(/"/g, '""')}"`,
+      `"${formatJobDate(job)}"`,
+      `"${(job.location || 'India').replace(/"/g, '""')}"`,
+      `"${(job.status || 'Dispatched').replace(/"/g, '""')}"`,
+      `"${(job.url || '').replace(/"/g, '""')}"`
+    ])
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `JobFlux_Applications_${userId || 'Candidate'}_${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   if (pageLoading) {
     return (
       <AiLoadingScreen
@@ -613,6 +642,18 @@ export default function UserDashboard() {
                 <RefreshCw className="w-4 h-4 text-violet-400 shrink-0" />
                 <span>Refresh Live Telemetry</span>
               </button>
+
+              <Link
+                href="/resume-builder"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+              >
+                <FileText className="w-4 h-4 text-violet-400 shrink-0" />
+                <span>AI ATS Resume Studio</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-violet-950/80 border border-violet-700/50 text-violet-300 ml-auto font-semibold">
+                  HARVARD
+                </span>
+              </Link>
 
               <button
                 onClick={() => { setIsHelpOpen(true); setIsMobileNavOpen(false) }}
@@ -989,35 +1030,48 @@ export default function UserDashboard() {
                 />
               </div>
 
-              {/* Time Pill Filters */}
-              <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto">
-                {(['all', 'today', 'week', 'month'] as const).map(f => {
-                  const label =
-                    f === 'all'
-                      ? `All (${metrics.total_applied})`
-                      : f === 'today'
-                      ? `Today (${metrics.today})`
-                      : f === 'week'
-                      ? `Week (${metrics.this_week})`
-                      : `Month (${metrics.this_month})`
-                  const active = historyFilter === f
-                  return (
-                    <button
-                      key={f}
-                      onClick={() => {
-                        setHistoryFilter(f)
-                        loadUserHistory(userId, 1, historySearch, f)
-                      }}
-                      className={`px-3 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
-                        active
-                          ? 'bg-zinc-800 text-white'
-                          : 'bg-black text-zinc-500 hover:text-zinc-300 border border-zinc-800'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  )
-                })}
+              {/* Actions & Export */}
+              <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+                {/* Time Pill Filters */}
+                <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                  {(['all', 'today', 'week', 'month'] as const).map(f => {
+                    const label =
+                      f === 'all'
+                        ? `All (${metrics.total_applied})`
+                        : f === 'today'
+                        ? `Today (${metrics.today})`
+                        : f === 'week'
+                        ? `Week (${metrics.this_week})`
+                        : `Month (${metrics.this_month})`
+                    const active = historyFilter === f
+                    return (
+                      <button
+                        key={f}
+                        onClick={() => {
+                          setHistoryFilter(f)
+                          loadUserHistory(userId, 1, historySearch, f)
+                        }}
+                        className={`px-3 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
+                          active
+                            ? 'bg-zinc-800 text-white'
+                            : 'bg-black text-zinc-500 hover:text-zinc-300 border border-zinc-800'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <button
+                  onClick={handleExportHistoryCsv}
+                  disabled={historyJobs.length === 0}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 disabled:opacity-40 text-zinc-300 hover:text-white border border-zinc-800 text-xs font-medium transition-colors cursor-pointer shrink-0"
+                  title="Export application records to CSV spreadsheet"
+                >
+                  <Download className="w-3.5 h-3.5 text-zinc-400" />
+                  <span className="hidden sm:inline">Export CSV</span>
+                </button>
               </div>
             </div>
 
@@ -1343,13 +1397,13 @@ export default function UserDashboard() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setActiveTab('resume_builder')}
+              <Link
+                href="/resume-builder"
                 className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
-                <span>Launch AI Resume Builder</span>
+                <span>Launch Fullscreen Resume Studio</span>
                 <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              </Link>
             </div>
 
             {/* Neural ATS Recruiter Readiness Diagnostic Widget */}
