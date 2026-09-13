@@ -76,6 +76,7 @@ export async function GET(req: NextRequest) {
       user_id: profile.user_id,
       name: profile.name || '',
       email: profile.email || '',
+      password: profile.password || '',
       role: profile.role || 'user',
       plan: verifiedPlan,
       plan_name: verifiedPlanName,
