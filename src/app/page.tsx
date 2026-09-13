@@ -28,11 +28,39 @@ import AiEngineVisualizer from '@/components/AiEngineVisualizer'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import LiquidFlowMesh from '@/components/LiquidFlowMesh'
 
+const FAQS = [
+  {
+    q: 'How does the JobFlux autonomous Naukri auto-apply bot work?',
+    a: 'JobFlux AI connects to verified hiring feeds on Naukri, searches for job openings matching your specified skills, role titles, and CTC brackets, intelligently answers recruiter screening questionnaires using your candidate profile context, and delivers verified applications during high-visibility morning windows at 6:00 AM & 8:00 AM IST.'
+  },
+  {
+    q: 'What makes the Harvard & FAANG ATS resume standard different?',
+    a: 'Unlike multi-column or graphic-heavy resumes that fail Applicant Tracking Systems, our Harvard ATS format uses a clean, single-column structure with Google XYZ formula metric bullets ("Accomplished X, measured by Y, by doing Z"). This layout achieves a 99%+ parsing pass rate across Workday, Greenhouse, Lever, Taleo, and iCIMS.'
+  },
+  {
+    q: 'Can I blacklist my current employer and mass consultancies?',
+    a: 'Yes. JobFlux includes quick-tap exclusion presets for major consultancies and IT service firms (TCS, Infosys, Wipro, Cognizant, Accenture, Capgemini, HCLTech, etc.) as well as custom company blocking. The autonomous bot automatically skips any openings from blacklisted companies.'
+  },
+  {
+    q: 'Does the AI bot accurately answer custom recruiter screening questions?',
+    a: 'Yes. JobFlux AI utilizes contextual profiling to formulate accurate responses for notice period (e.g. Immediate / 15 Days), expected CTC, current CTC, relocation preferences, and key technical stack depth, ensuring screening forms are never left blank.'
+  },
+  {
+    q: 'Is automated job applying safe for my Naukri candidate profile?',
+    a: 'JobFlux AI is engineered with human-like operational pacing, secure session encryption, and zero data-leak sanitization. Sensitive PII is anonymized prior to cloud processing, and the engine adheres strictly to Naukri application rate guidelines.'
+  },
+  {
+    q: 'Is there a free trial available?',
+    a: 'Yes! Every candidate receives a 1-Day Free Trial (₹0) upon registration with access to 15 autonomous applications and full access to prepare and preview their Harvard ATS resume.'
+  }
+]
+
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true)
   const [authMode, setAuthMode] = useState<'signin' | 'trial'>('signin')
   const [existingUser, setExistingUser] = useState<{ id: string; email: string; role: string } | null>(null)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
   
   // Form fields
   const [name, setName] = useState('')
@@ -293,6 +321,12 @@ export default function Home() {
               >
                 Pricing
               </Link>
+              <a
+                href="#faq"
+                className="hover:text-white transition-colors"
+              >
+                FAQ
+              </a>
               <button
                 type="button"
                 onClick={() => setIsHelpOpen(true)}
@@ -790,6 +824,83 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Section 4: Interactive SEO FAQ Accordion & Knowledge Base */}
+        <section id="faq" className="w-full max-w-5xl mx-auto px-6 py-16 border-t border-zinc-900 z-10 space-y-8 scroll-mt-20">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-[11px] font-mono text-violet-400 uppercase tracking-wider">
+              Frequently Asked Questions
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight">
+              Everything you need to know about JobFlux AI
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-400">
+              Clear answers on how the autonomous engine operates, ATS scoring standards, and safe recruiter delivery.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {FAQS.map((faq, idx) => {
+              const isOpen = openFaq === idx
+              return (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-zinc-800/80 bg-[#09090b] overflow-hidden transition-colors hover:border-zinc-700"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer"
+                  >
+                    <span className="text-xs sm:text-sm font-semibold text-white leading-snug">
+                      {faq.q}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-zinc-400 shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-violet-400' : ''
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 sm:px-5 pb-5 pt-0 text-xs sm:text-sm text-zinc-400 leading-relaxed border-t border-zinc-900 mt-1">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* Section 5: Semantic Tech Roles & Indian Tech Hubs Matrix (SEO Indexing Mesh) */}
+        <section className="w-full max-w-7xl mx-auto px-6 py-12 border-t border-zinc-900/60 z-10 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+            <div className="space-y-2">
+              <h4 className="text-[11px] font-mono uppercase text-zinc-300 font-semibold tracking-wider">
+                Target Engineering Roles
+              </h4>
+              <p className="text-zinc-500 leading-relaxed text-[11px]">
+                Senior AI Engineer · Generative AI & RAG Architect · Lead Full Stack Developer · Staff Cloud Infrastructure · DevOps & Kubernetes SRE · Backend Microservices Engineer (Python, Go, Java) · Engineering Manager
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-[11px] font-mono uppercase text-zinc-300 font-semibold tracking-wider">
+                Primary Tech Hubs Covered
+              </h4>
+              <p className="text-zinc-500 leading-relaxed text-[11px]">
+                Bengaluru (Whitefield, Bellandur, Electronic City) · Hyderabad (HITEC City, Gachibowli) · Pune (Hinjewadi) · Gurgaon & NCR (Cyber City) · Noida · Chennai (OMR) · Mumbai · Remote India
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-[11px] font-mono uppercase text-zinc-300 font-semibold tracking-wider">
+                ATS Platforms & Screeners Supported
+              </h4>
+              <p className="text-zinc-500 leading-relaxed text-[11px]">
+                Workday · Greenhouse · Lever · Taleo · iCIMS · SmartRecruiters · Naukri Rapid Apply · SuccessFactors · Ashby
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Minimalist Footer */}
         <footer className="w-full border-t border-zinc-900 py-8 px-6 z-10">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
@@ -798,6 +909,7 @@ export default function Home() {
               <span>© {new Date().getFullYear()} JobFlux AI. All rights reserved.</span>
             </div>
             <div className="flex items-center gap-5 text-zinc-400">
+              <Link href="/resume-builder" className="hover:text-white transition-colors">Resume Studio</Link>
               <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
               <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
               <Link href="/admin" className="hover:text-white transition-colors">Admin</Link>
@@ -816,6 +928,27 @@ export default function Home() {
 
       {/* Google Identity Services SDK Script */}
       <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+
+      {/* FAQPage Schema.org Structured Data for Google Rich Snippets */}
+      <Script
+        id="faq-schema-jsonld"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: FAQS.map((f) => ({
+              '@type': 'Question',
+              name: f.q,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: f.a
+              }
+            }))
+          })
+        }}
+      />
     </>
   )
 }
