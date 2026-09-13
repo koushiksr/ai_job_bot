@@ -352,7 +352,7 @@ export default function PricingPage() {
         currency: orderData.currency,
         name: 'JobFlux AI',
         description: orderData.plan_name || selectedPlan.name,
-        image: '/jobflux-logo.svg',
+        image: '/icon.svg',
         order_id: orderData.order_id,
         prefill: {
           email: candidateEmail,

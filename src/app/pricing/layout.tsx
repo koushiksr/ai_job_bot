@@ -24,9 +24,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/jobflux-logo.svg',
-        width: 1200,
-        height: 630,
+        url: '/icon.svg',
+        width: 512,
+        height: 512,
         alt: 'JobFlux AI Pricing & Plans'
       }
     ]
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: 'Pricing & Plans | JobFlux AI Autonomous Job Apply Bot',
     description:
       'Start free with 1-Day Trial (₹0). Upgrade to Essentials or Professional for automated daily 6 AM & 8 AM recruiter applications.',
-    images: ['/jobflux-logo.svg']
+    images: ['/icon.svg']
   }
 }
 

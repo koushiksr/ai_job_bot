@@ -128,7 +128,7 @@ export default function UserDashboard() {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       try {
         const n = new Notification(title, {
-          icon: '/favicon.ico',
+          icon: '/icon.svg',
           ...options
         })
         n.onclick = () => {

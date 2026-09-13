@@ -27,9 +27,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/jobflux-logo.svg',
-        width: 1200,
-        height: 630,
+        url: '/icon.svg',
+        width: 512,
+        height: 512,
         alt: 'Harvard ATS Resume Studio'
       }
     ]
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     title: 'Harvard & FAANG ATS Resume Builder | JobFlux AI',
     description:
       'Build an authentic single-column Harvard ATS resume that passes Workday, Greenhouse & Lever parsers. 1-click sync with your Naukri Auto-Apply Bot.',
-    images: ['/jobflux-logo.svg']
+    images: ['/icon.svg']
   }
 }
 

@@ -201,7 +201,7 @@ export default function AdminDashboard() {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       try {
         const n = new Notification(title, {
-          icon: '/favicon.ico',
+          icon: '/icon.svg',
           ...options
         })
         n.onclick = () => {
@@ -2835,7 +2835,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-black border border-sky-500/30 flex items-center justify-center p-2 shadow-inner shrink-0">
                       <img
-                        src="/jobflux-logo.svg"
+                        src="/icon.svg"
                         alt="JobFlux AI Logo"
                         className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(56,189,248,0.3)]"
                       />
@@ -2856,8 +2856,8 @@ export default function AdminDashboard() {
                   </div>
 
                   <a
-                    href="/jobflux-logo.svg"
-                    download="jobflux-logo.svg"
+                    href="/icon.svg"
+                    download="icon.svg"
                     className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sky-300 border border-sky-500/30 text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto shrink-0"
                   >
                     <FileText className="w-3.5 h-3.5" />

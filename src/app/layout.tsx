@@ -55,12 +55,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icon.svg?v=4", type: "image/svg+xml" },
-      { url: "/jobflux-logo.svg?v=4", type: "image/svg+xml" },
-      { url: "/favicon.svg?v=4", type: "image/svg+xml" }
+      { url: "/icon.svg?v=5", type: "image/svg+xml" }
     ],
-    shortcut: "/icon.svg?v=4",
-    apple: "/icon.svg?v=4"
+    shortcut: "/icon.svg?v=5",
+    apple: "/icon.svg?v=5"
   },
   openGraph: {
     type: "website",
@@ -72,9 +70,9 @@ export const metadata: Metadata = {
       "Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes. Dual runs at 6 AM & 8 AM IST.",
     images: [
       {
-        url: "/jobflux-logo.svg",
-        width: 1200,
-        height: 630,
+        url: "/icon.svg",
+        width: 512,
+        height: 512,
         alt: "JobFlux AI Autonomous Job Application Engine"
       }
     ]
@@ -84,7 +82,7 @@ export const metadata: Metadata = {
     title: "JobFlux AI | Autonomous Naukri Job Apply Bot & Harvard ATS Resume Studio",
     description:
       "Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes.",
-    images: ["/jobflux-logo.svg"],
+    images: ["/icon.svg"],
     creator: "@jobfluxai"
   },
   robots: {
@@ -142,7 +140,7 @@ const jsonLdData = {
       "@type": "Organization",
       "name": "JobFlux AI",
       "url": siteUrl,
-      "logo": `${siteUrl}/jobflux-logo.svg`,
+      "logo": `${siteUrl}/icon.svg`,
       "contactPoint": {
         "@type": "ContactPoint",
         "email": "technohmsit@gmail.com",
