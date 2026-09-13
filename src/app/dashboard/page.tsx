@@ -451,6 +451,12 @@ export default function UserDashboard() {
   }
 
   const handleExportHistoryCsv = () => {
+    if (!isProfessional) {
+      setProModalFeature('Export Applications to CSV Spreadsheet')
+      setShowProModal(true)
+      return
+    }
+
     if (!historyJobs || historyJobs.length === 0) {
       alert('No application records available to export.')
       return
@@ -463,7 +469,7 @@ export default function UserDashboard() {
       `"${formatJobDate(job)}"`,
       `"${(job.location || 'India').replace(/"/g, '""')}"`,
       `"${(job.status || 'Dispatched').replace(/"/g, '""')}"`,
-      `"${(job.url || '').replace(/"/g, '""')}"`
+      `"${(job.url && job.url !== '__locked__' ? job.url : '').replace(/"/g, '""')}"`
     ])
 
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
@@ -1182,10 +1188,15 @@ export default function UserDashboard() {
                   onClick={handleExportHistoryCsv}
                   disabled={historyJobs.length === 0}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 disabled:opacity-40 text-zinc-300 hover:text-white border border-zinc-800 text-xs font-medium transition-colors cursor-pointer shrink-0"
-                  title="Export application records to CSV spreadsheet"
+                  title={isProfessional ? "Export application records to CSV spreadsheet" : "Upgrade to Professional to export applications to CSV"}
                 >
                   <Download className="w-3.5 h-3.5 text-zinc-400" />
                   <span className="hidden sm:inline">Export CSV</span>
+                  {!isProfessional && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-950/80 border border-blue-700/50 text-blue-300 font-semibold">
+                      PRO
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -1338,33 +1349,35 @@ export default function UserDashboard() {
                             <span>{job.company || 'Direct Employer'}</span>
                           </td>
                           <td className="py-3 px-4 text-zinc-300">
-                            {job.url && isProfessional ? (
+                            {isProfessional && job.url && job.url !== '__locked__' && job.url.startsWith('http') ? (
                               <a
                                 href={job.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="hover:text-white transition-colors inline-flex items-center gap-1.5"
+                                className="hover:text-white transition-colors inline-flex items-center gap-1.5 group"
+                                title="Open job listing on portal"
                               >
-                                {job.title || 'Job Opening'}
-                                <ExternalLink className="w-3 h-3 text-zinc-500" />
+                                <span className="group-hover:underline">{job.title || 'Job Opening'}</span>
+                                <ExternalLink className="w-3 h-3 text-zinc-500 group-hover:text-white" />
                               </a>
-                            ) : job.url && !isProfessional ? (
-                              <span className="inline-flex items-center gap-1.5">
-                                <span className="text-zinc-400">{job.title || 'Job Opening'}</span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setProModalFeature('Job Redirect URL Access')
-                                    setShowProModal(true)
-                                  }}
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-blue-950/80 border border-blue-700/50 text-blue-300 hover:bg-blue-900/60 transition-colors cursor-pointer"
-                                  title="Upgrade to Professional to open job listing"
-                                >
+                            ) : (job.is_url_locked || job.url === '__locked__' || (!isProfessional && job.url)) ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setProModalFeature('Job Redirect URL Access')
+                                  setShowProModal(true)
+                                }}
+                                className="inline-flex items-center gap-1.5 text-left group cursor-pointer"
+                                title="Upgrade to Professional to open direct portal job listing"
+                              >
+                                <span className="text-zinc-300 group-hover:text-white transition-colors">{job.title || 'Job Opening'}</span>
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-blue-950/80 border border-blue-700/50 text-blue-300 group-hover:bg-blue-900/60 transition-colors">
                                   <Lock className="w-2.5 h-2.5" />
                                   PRO
-                                </button>
-                              </span>
+                                </span>
+                              </button>
                             ) : (
                               <span>{job.title || 'Job Opening'}</span>
                             )}
@@ -1740,7 +1753,7 @@ export default function UserDashboard() {
 
               {/* Actions */}
               <div className="flex items-center gap-2 pt-2">
-                {selectedJobAudit.url && isProfessional && (
+                {isProfessional && selectedJobAudit.url && selectedJobAudit.url !== '__locked__' && selectedJobAudit.url.startsWith('http') && (
                   <a
                     href={selectedJobAudit.url}
                     target="_blank"
@@ -1751,7 +1764,7 @@ export default function UserDashboard() {
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
-                {selectedJobAudit.url && !isProfessional && (
+                {(selectedJobAudit.is_url_locked || selectedJobAudit.url === '__locked__' || (!isProfessional && selectedJobAudit.url)) && (
                   <button
                     onClick={() => {
                       setProModalFeature('Job Redirect URL Access')

@@ -25,21 +25,29 @@ export async function GET(req: NextRequest) {
     try {
       const profile = await db.collection('profiles').findOne(
         { user_id: userId },
-        { projection: { plan: 1, role: 1 } }
+        { projection: { plan: 1, role: 1, is_vip: 1, vip_access: 1, plan_expires_at: 1 } }
       )
-      if (!profile) {
-        const user = await db.collection('users').findOne(
-          { $or: [{ user_id: userId }, { email: userId }] },
-          { projection: { plan: 1, role: 1 } }
-        )
-        const plan = user?.plan || ''
-        const role = user?.role || 'user'
-        isProfessional = plan === 'elite' || plan === 'professional' || role === 'admin'
-      } else {
-        const plan = profile?.plan || ''
-        const role = profile?.role || 'user'
-        isProfessional = plan === 'elite' || plan === 'professional' || role === 'admin'
-      }
+      const user = await db.collection('users').findOne(
+        { $or: [{ user_id: userId }, { email: userId }] },
+        { projection: { plan: 1, role: 1, is_vip: 1, vip_access: 1, plan_expires_at: 1 } }
+      )
+
+      const activeDoc = profile || user
+      const plan = (activeDoc?.plan || user?.plan || '').toLowerCase()
+      const role = activeDoc?.role || user?.role || 'user'
+      const isVip = Boolean(activeDoc?.is_vip || activeDoc?.vip_access || user?.is_vip || user?.vip_access)
+      const now = new Date()
+      const expires = activeDoc?.plan_expires_at ? new Date(activeDoc.plan_expires_at) : null
+      const isPlanActive = plan === 'vip' || isVip || (expires ? expires > now : true)
+
+      isProfessional = (
+        isVip ||
+        plan === 'vip' ||
+        plan === 'elite' ||
+        plan === 'professional' ||
+        plan === 'enterprise' ||
+        role === 'admin'
+      ) && isPlanActive
     } catch {
       // If lookup fails, default to non-pro (fail safe)
       isProfessional = false
@@ -119,9 +127,9 @@ export async function GET(req: NextRequest) {
         title: doc.job_title || 'Unknown Title',
         company: doc.company || 'Unknown Company',
         // Job redirect URLs are a Professional-plan exclusive feature.
-        // Non-pro users receive a boolean flag instead of the raw URL
-        // so it cannot be scraped from the API response.
-        url: isProfessional ? (doc.job_url || '') : (doc.job_url ? '__locked__' : ''),
+        // For non-pro users, never return a raw URL or string literal that could be treated as a relative link.
+        url: isProfessional && doc.job_url && doc.job_url !== '__locked__' ? doc.job_url : '',
+        is_url_locked: !isProfessional && Boolean(doc.job_url && doc.job_url !== '__locked__'),
         status: doc.status || 'applied',
         score: doc.match_score || 0
       }
