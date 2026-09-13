@@ -29,7 +29,11 @@ import {
   Building2,
   Phone,
   Mail,
-  MessageSquare
+  MessageSquare,
+  Tag,
+  Send,
+  Percent,
+  AlertTriangle
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -59,7 +63,31 @@ export default function AdminDashboard() {
   })
 
   // Admin Active Tab
-  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'requests' | 'payments' | 'enterprise_leads' | 'logs'>('candidates')
+  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'requests' | 'payments' | 'offers' | 'enterprise_leads' | 'logs'>('candidates')
+
+  // Purchase Offers & Campaigns State
+  const [offersData, setOffersData] = useState<{
+    presets: any[]
+    metrics: { total_candidates: number; unsubscribed_count: number; subscribed_count: number }
+    history: any[]
+  }>({
+    presets: [],
+    metrics: { total_candidates: 0, unsubscribed_count: 0, subscribed_count: 0 },
+    history: []
+  })
+  const [loadingOffers, setLoadingOffers] = useState<boolean>(false)
+  const [targetType, setTargetType] = useState<'single' | 'bulk_unsubscribed' | 'all_users'>('single')
+  const [targetEmail, setTargetEmail] = useState<string>('koushiksrmedala@gmail.com')
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('flash_50')
+  const [offerTitle, setOfferTitle] = useState<string>('Exclusive 50% Flash Discount on JobFlux Pro')
+  const [discountBadge, setDiscountBadge] = useState<string>('50% OFF FLASH PASS')
+  const [originalPrice, setOriginalPrice] = useState<string>('₹999 / mo')
+  const [discountedPrice, setDiscountedPrice] = useState<string>('₹499 / mo')
+  const [promoCode, setPromoCode] = useState<string>('FLASH50')
+  const [customMessage, setCustomMessage] = useState<string>('Unlock unlimited daily autonomous applications, top-tier Harvard ATS resume formatting, and direct priority recruiter submission at 50% off for your first month.')
+  const [isConfirmOfferModalOpen, setIsConfirmOfferModalOpen] = useState<boolean>(false)
+  const [sendingOffer, setSendingOffer] = useState<boolean>(false)
+  const [offerNotification, setOfferNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   // Activity Audit & Telemetry State
   const [activityLogs, setActivityLogs] = useState<any[]>([])
@@ -194,6 +222,75 @@ export default function AdminDashboard() {
       console.error('Failed to fetch enterprise leads:', e)
     } finally {
       setLoadingLeads(false)
+    }
+  }
+
+  const fetchOffersData = async () => {
+    setLoadingOffers(true)
+    try {
+      const res = await fetch('/api/admin/offers', {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setOffersData(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch offers:', err)
+    } finally {
+      setLoadingOffers(false)
+    }
+  }
+
+  const handleSelectPreset = (preset: any) => {
+    setSelectedPresetId(preset.id)
+    setOfferTitle(preset.offerTitle)
+    setDiscountBadge(preset.discountBadge)
+    setOriginalPrice(preset.originalPrice)
+    setDiscountedPrice(preset.discountedPrice)
+    setPromoCode(preset.promoCode)
+    setCustomMessage(preset.customMessage)
+  }
+
+  const handleDispatchOffer = async () => {
+    setSendingOffer(true)
+    setOfferNotification(null)
+    try {
+      const res = await fetch('/api/admin/offers', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          targetType,
+          targetEmail,
+          offerPreset: selectedPresetId,
+          offerTitle,
+          discountBadge,
+          originalPrice,
+          discountedPrice,
+          promoCode,
+          customMessage,
+          confirmedByAdmin: true
+        })
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.detail || 'Failed to dispatch offer campaign')
+      }
+
+      setOfferNotification({
+        type: 'success',
+        message: data.message || `Offer dispatched successfully to ${data.dispatched_count} candidate(s)!`
+      })
+      setIsConfirmOfferModalOpen(false)
+      fetchOffersData()
+    } catch (err: any) {
+      setOfferNotification({
+        type: 'error',
+        message: err.message || 'Error dispatching offer campaign.'
+      })
+    } finally {
+      setSendingOffer(false)
     }
   }
 
@@ -693,6 +790,20 @@ export default function AdminDashboard() {
             }`}
           >
             <CreditCard className="w-3.5 h-3.5" /> Payments ({paymentsList.length})
+          </button>
+          <button
+            onClick={() => {
+              setActiveAdminTab('offers')
+              fetchOffersData()
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+              activeAdminTab === 'offers'
+                ? 'bg-zinc-800 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+            }`}
+          >
+            <Tag className="w-3.5 h-3.5 text-amber-400" />
+            <span>Purchase Offers & Campaigns</span>
           </button>
           <button
             onClick={() => {
@@ -1345,6 +1456,483 @@ export default function AdminDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: PURCHASE OFFERS & CAMPAIGNS */}
+        {activeAdminTab === 'offers' && (
+          <div className="space-y-6">
+            {/* Header / Actions */}
+            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-amber-400" />
+                  <span>Purchase Offers, Flash Discounts & Promotional Campaigns</span>
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Design luxury promotional upgrade offers, configure custom coupon codes, and dispatch bulk or single-candidate email campaigns.
+                </p>
+              </div>
+              <button
+                onClick={fetchOffersData}
+                className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingOffers ? 'animate-spin' : ''}`} />
+                <span>Refresh Hub</span>
+              </button>
+            </div>
+
+            {/* Notification Banner */}
+            {offerNotification && (
+              <div
+                className={`p-4 rounded-xl text-xs flex items-start justify-between gap-3 border ${
+                  offerNotification.type === 'success'
+                    ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
+                    : 'bg-rose-950/40 border-rose-800/50 text-rose-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {offerNotification.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  )}
+                  <span>{offerNotification.message}</span>
+                </div>
+                <button
+                  onClick={() => setOfferNotification(null)}
+                  className="text-zinc-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Metrics Overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800">
+                <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Total Candidate Base</span>
+                <div className="text-xl font-bold text-white mt-1">{offersData.metrics.total_candidates}</div>
+                <p className="text-[11px] text-zinc-500 mt-0.5">Registered accounts</p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#09090b] border border-amber-500/20 bg-amber-500/5">
+                <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider">Prime Target Audience</span>
+                <div className="text-xl font-bold text-amber-300 mt-1">{offersData.metrics.unsubscribed_count}</div>
+                <p className="text-[11px] text-amber-400/80 mt-0.5">Unsubscribed & expired free trial candidates</p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800">
+                <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Subscribed Pro/VIP</span>
+                <div className="text-xl font-bold text-emerald-400 mt-1">{offersData.metrics.subscribed_count}</div>
+                <p className="text-[11px] text-zinc-500 mt-0.5">Active paid candidates</p>
+              </div>
+            </div>
+
+            {/* Campaign Designer & Live Preview */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Form Settings */}
+              <div className="lg:col-span-7 space-y-5 p-5 rounded-2xl bg-[#09090b] border border-zinc-800">
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>1. Select Offer Preset</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {offersData.presets.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => handleSelectPreset(p)}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          selectedPresetId === p.id
+                            ? 'bg-zinc-800/90 border-amber-500/60 ring-1 ring-amber-500/40 text-white'
+                            : 'bg-black/60 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+                        }`}
+                      >
+                        <span className="block text-[11px] font-bold text-amber-400 mb-1">{p.discountBadge}</span>
+                        <span className="block text-xs font-semibold text-white truncate">{p.name}</span>
+                        <span className="block text-[11px] font-mono text-zinc-400 mt-1">{p.discountedPrice}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-sky-400" />
+                    <span>2. Target Audience & Recipients</span>
+                  </h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black border border-zinc-800/80 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="targetType"
+                        checked={targetType === 'single'}
+                        onChange={() => setTargetType('single')}
+                        className="text-amber-500 focus:ring-amber-500"
+                      />
+                      <div className="flex-1">
+                        <span className="text-xs font-semibold text-white">Single Candidate Target</span>
+                        <span className="block text-[11px] text-zinc-500">Send tailored offer to a specific candidate</span>
+                      </div>
+                    </label>
+
+                    {targetType === 'single' && (
+                      <div className="pl-6 space-y-2 pt-1">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="email"
+                            value={targetEmail}
+                            onChange={(e) => setTargetEmail(e.target.value)}
+                            placeholder="candidate@example.com"
+                            className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:border-amber-500 outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setTargetEmail('koushiksrmedala@gmail.com')}
+                            className="px-2.5 py-2 text-[11px] rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 whitespace-nowrap cursor-pointer font-medium"
+                          >
+                            Set to koushiksrmedala@gmail.com
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black border border-zinc-800/80 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="targetType"
+                        checked={targetType === 'bulk_unsubscribed'}
+                        onChange={() => setTargetType('bulk_unsubscribed')}
+                        className="text-amber-500 focus:ring-amber-500"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-white">All Unsubscribed / Expired Trial Candidates (Bulk)</span>
+                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-500/20 text-amber-300 font-mono">
+                            {offersData.metrics.unsubscribed_count} candidates
+                          </span>
+                        </div>
+                        <span className="block text-[11px] text-zinc-500">High conversion cohort for flash activation</span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black border border-zinc-800/80 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="targetType"
+                        checked={targetType === 'all_users'}
+                        onChange={() => setTargetType('all_users')}
+                        className="text-amber-500 focus:ring-amber-500"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-white">All Registered Candidates (Global Blast)</span>
+                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-zinc-800 text-zinc-300 font-mono">
+                            {offersData.metrics.total_candidates} candidates
+                          </span>
+                        </div>
+                        <span className="block text-[11px] text-zinc-500">Includes active trial, expired, and free tiers</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Edit className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>3. Customize Offer Details</span>
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] text-zinc-400 mb-1">Offer Title</label>
+                      <input
+                        type="text"
+                        value={offerTitle}
+                        onChange={(e) => setOfferTitle(e.target.value)}
+                        className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] text-zinc-400 mb-1">Discount Badge</label>
+                        <input
+                          type="text"
+                          value={discountBadge}
+                          onChange={(e) => setDiscountBadge(e.target.value)}
+                          className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-amber-400 font-bold focus:border-amber-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-zinc-400 mb-1">Promo Code</label>
+                        <input
+                          type="text"
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                          className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-sky-400 font-mono font-bold focus:border-amber-500 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] text-zinc-400 mb-1">Original Price (Strikethrough)</label>
+                        <input
+                          type="text"
+                          value={originalPrice}
+                          onChange={(e) => setOriginalPrice(e.target.value)}
+                          className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-400 focus:border-amber-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-zinc-400 mb-1">Discounted Price (Hero)</label>
+                        <input
+                          type="text"
+                          value={discountedPrice}
+                          onChange={(e) => setDiscountedPrice(e.target.value)}
+                          className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white font-bold focus:border-amber-500 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] text-zinc-400 mb-1">Custom Pitch & Value Proposition</label>
+                      <textarea
+                        rows={3}
+                        value={customMessage}
+                        onChange={(e) => setCustomMessage(e.target.value)}
+                        className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:border-amber-500 outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmOfferModalOpen(true)}
+                    className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer transition-all"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Review & Dispatch Offer Campaign...</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column: Live Luxury Email Preview */}
+              <div className="lg:col-span-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Live Candidate Email Preview</span>
+                  </h4>
+                  <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                    HTML Luxury Template
+                  </span>
+                </div>
+
+                <div className="rounded-2xl border border-zinc-800 bg-[#09090b] overflow-hidden shadow-2xl">
+                  {/* Email Chrome Header */}
+                  <div className="p-3 bg-zinc-950 border-b border-zinc-800/80 text-[11px] space-y-1">
+                    <div className="flex items-center justify-between text-zinc-400">
+                      <span>From: <strong className="text-zinc-200">JobFlux AI</strong> &lt;technohmsit@gmail.com&gt;</span>
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/50 px-1.5 py-0.2 rounded border border-emerald-800/40">Verified</span>
+                    </div>
+                    <div className="text-zinc-300">
+                      Subject: <span className="font-semibold text-white">⚡ {offerTitle} [Code: {promoCode}]</span>
+                    </div>
+                  </div>
+
+                  {/* Email Body Preview */}
+                  <div className="p-6 bg-zinc-950/60 space-y-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <JobFluxLogo size="sm" />
+                        <span className="font-bold text-sm text-white">JobFlux AI</span>
+                      </div>
+                      <span className="text-[10px] font-mono uppercase bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">
+                        {discountBadge}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h5 className="text-base font-bold text-white tracking-tight">{offerTitle}</h5>
+                      <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                        Hi <strong className="text-zinc-300">{targetType === 'single' ? targetEmail.split('@')[0] : 'Candidate'}</strong>, {customMessage}
+                      </p>
+                    </div>
+
+                    {/* Price Callout */}
+                    <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-center space-y-1">
+                      <span className="text-[10px] text-zinc-500 uppercase tracking-wider block font-mono">Special Upgrade Price</span>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-xs line-through text-zinc-500">{originalPrice}</span>
+                        <span className="text-2xl font-black text-amber-400 tracking-tight">{discountedPrice}</span>
+                      </div>
+                      <div className="pt-2">
+                        <span className="inline-block text-[11px] font-mono font-bold bg-black px-3 py-1 rounded-md border border-amber-500/40 text-amber-300">
+                          PROMO CODE: {promoCode}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-center pt-1">
+                      <div className="inline-block py-2.5 px-6 rounded-lg bg-white text-black font-bold text-xs shadow-md">
+                        Claim {discountBadge} &rarr;
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-zinc-600 text-center border-t border-zinc-900 pt-3">
+                      Autonomous Career & Recruitment Intelligence · You received this exclusive upgrade invitation from JobFlux Controller.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Campaign History */}
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+              <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <History className="w-4 h-4 text-amber-400" />
+                    <span>Dispatched Campaigns Audit Trail</span>
+                  </h4>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Log of past purchase offers sent to single candidates or cohorts.
+                  </p>
+                </div>
+                <span className="text-xs font-mono text-zinc-500">
+                  {offersData.history.length} logged campaigns
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
+                      <th className="py-3 px-4">Campaign Name</th>
+                      <th className="py-3 px-4">Target Audience</th>
+                      <th className="py-3 px-4">Offer Price & Code</th>
+                      <th className="py-3 px-4">Recipients</th>
+                      <th className="py-3 px-4">Dispatched At</th>
+                      <th className="py-3 px-4 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60">
+                    {offersData.history.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-zinc-500 italic">
+                          No promotional campaigns dispatched yet. Use the builder above to launch your first offer.
+                        </td>
+                      </tr>
+                    ) : (
+                      offersData.history.map((h: any) => (
+                        <tr key={h.id} className="hover:bg-zinc-900/40 transition-colors">
+                          <td className="py-3.5 px-4 font-semibold text-white">
+                            {h.campaign_name}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="capitalize text-zinc-300">{h.target_type.replace('_', ' ')}</span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-amber-300">
+                            {h.discounted_price} <span className="text-zinc-500">({h.promo_code})</span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] bg-zinc-800 font-mono text-zinc-300">
+                              {h.recipient_count} recipient{h.recipient_count > 1 ? 's' : ''}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-zinc-400 text-[11px]">
+                            {new Date(h.created_at).toLocaleString()}
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              <CheckCircle2 className="w-3 h-3" />
+                              DISPATCHED
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Modal for Offer Dispatch */}
+        {isConfirmOfferModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black space-y-4">
+              <div className="flex items-center gap-3 text-amber-400">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Confirm Campaign Dispatch</h3>
+                  <p className="text-[11px] text-zinc-400">Mandatory administrative authorization</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-black/70 border border-zinc-800 rounded-xl text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Campaign:</span>
+                  <span className="font-semibold text-white">{offerTitle}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Target Audience:</span>
+                  <span className="font-mono text-amber-300 capitalize">
+                    {targetType === 'single'
+                      ? targetEmail
+                      : targetType === 'bulk_unsubscribed'
+                      ? `${offersData.metrics.unsubscribed_count} Unsubscribed Candidates`
+                      : `${offersData.metrics.total_candidates} Registered Candidates`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Pricing / Code:</span>
+                  <span className="font-mono text-emerald-400">{discountedPrice} · {promoCode}</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                You are about to dispatch branded promotional emails to the specified candidate audience.
+                Please verify that the discounts and terms are intentional before approving.
+              </p>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  disabled={sendingOffer}
+                  onClick={() => setIsConfirmOfferModalOpen(false)}
+                  className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={sendingOffer}
+                  onClick={handleDispatchOffer}
+                  className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {sendingOffer ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Dispatching Campaign...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Confirm & Dispatch Campaign</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
