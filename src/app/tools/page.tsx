@@ -3,16 +3,16 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import {
   Sparkles,
-  Search,
   FileCheck2,
   TrendingUp,
   ArrowRight,
-  ShieldAlert,
-  Clock,
-  Zap,
   CheckCircle2,
-  Bot
+  Bot,
+  Zap,
+  ShieldCheck
 } from 'lucide-react'
+import ToolsHeader from '@/components/ToolsHeader'
+import ToolsFooter from '@/components/ToolsFooter'
 
 export const metadata: Metadata = {
   title: 'Free Career & Naukri Automation Tools | JobFlux AI',
@@ -66,102 +66,68 @@ const TOOLS = [
 
 export default function ToolsHubPage() {
   return (
-    <div className="min-h-screen bg-[#05070f] text-slate-100 flex flex-col selection:bg-cyan-500/30">
-      {/* Background glow effects */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-cyan-500/10 to-transparent blur-3xl opacity-50" />
-        <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-purple-500/5 blur-3xl rounded-full" />
-      </div>
+    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+      {/* Subtle Auth0 ambient radial light */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-spotlight pointer-events-none" />
 
-      {/* Navigation header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-slate-800/80 bg-[#05070f]/80 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-cyan-500/20">
-              J
-            </div>
-            <span className="font-bold text-lg tracking-tight group-hover:text-cyan-400 transition-colors">
-              JobFlux <span className="text-cyan-400">AI</span>
-            </span>
-          </Link>
-
-          <nav className="flex items-center gap-4 text-sm font-medium">
-            <Link href="/" className="text-slate-400 hover:text-white transition-colors">
-              Home
-            </Link>
-            <Link href="/resume-builder" className="text-slate-400 hover:text-white transition-colors">
-              ATS Resume Studio
-            </Link>
-            <Link href="/pricing" className="text-slate-400 hover:text-white transition-colors">
-              Pricing
-            </Link>
-            <Link
-              href="/"
-              className="bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 px-3.5 py-1.5 rounded-lg transition-all"
-            >
-              Sign In
-            </Link>
-          </nav>
-        </div>
-      </header>
+      {/* Static Canonical Navbar */}
+      <ToolsHeader />
 
       {/* Main Content Hero */}
-      <main className="flex-1 max-w-6xl mx-auto px-6 py-12 relative z-10 w-full">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-4">
-            <Zap className="w-3.5 h-3.5" /> 100% Free · No Sign-Up Required
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16 relative z-10 w-full space-y-16">
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-zinc-950 border border-zinc-800 text-zinc-300">
+            <Zap className="w-3.5 h-3.5 text-cyan-400" /> 100% Free · No Sign-Up Barrier
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-5 leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-semibold text-white tracking-tight leading-tight">
             Free AI Career & Naukri <br className="hidden sm:inline" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
-              Optimization Tools
-            </span>
+            <span className="text-zinc-400">Optimization Suite</span>
           </h1>
-          <p className="text-slate-400 text-base md:text-lg leading-relaxed">
+          <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
             Engineered specifically for Indian software engineers and tech professionals. Optimize your Naukri.com visibility, beat ATS filters, and accelerate recruiter callbacks.
           </p>
         </div>
 
         {/* Tools Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {TOOLS.map((tool) => {
             const Icon = tool.icon
             return (
               <Link
                 key={tool.slug}
                 href={tool.slug}
-                className="group relative rounded-2xl border border-slate-800/90 bg-slate-900/40 backdrop-blur-sm p-6 hover:border-cyan-500/50 hover:bg-slate-900/70 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:shadow-cyan-500/5"
+                className="group relative rounded-2xl border border-zinc-800 bg-[#09090b] p-6 sm:p-7 hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between hover:shadow-2xl hover:shadow-black card-featured-glow"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                      <Icon className="w-6 h-6" />
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 group-hover:scale-105 transition-transform">
+                      <Icon className="w-6 h-6 text-zinc-200" />
                     </div>
                     <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${tool.badgeColor}`}>
                       {tool.badge}
                     </span>
                   </div>
 
-                  <h2 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors mb-2.5">
+                  <h2 className="text-base sm:text-lg font-semibold text-white group-hover:text-cyan-400 transition-colors mb-2.5">
                     {tool.title}
                   </h2>
-                  <p className="text-slate-400 text-xs leading-relaxed mb-6">
+                  <p className="text-zinc-400 text-xs leading-relaxed mb-6">
                     {tool.description}
                   </p>
 
-                  <ul className="space-y-2 mb-6">
+                  <ul className="space-y-2.5 mb-6">
                     {tool.features.map((feat, i) => (
-                      <li key={i} className="flex items-center gap-2 text-xs text-slate-300">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <li key={i} className="flex items-center gap-2 text-xs text-zinc-300">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>{feat}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between text-xs font-semibold text-cyan-400 group-hover:translate-x-1 transition-transform">
-                  <span>Open Tool</span>
-                  <ArrowRight className="w-4 h-4" />
+                <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs font-semibold text-zinc-300 group-hover:text-white transition-colors">
+                  <span>Open Tool Free</span>
+                  <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </div>
               </Link>
             )
@@ -169,41 +135,38 @@ export default function ToolsHubPage() {
         </div>
 
         {/* Feature Highlight / Upsell to Main Bot */}
-        <div className="rounded-3xl border border-cyan-500/30 bg-gradient-to-b from-cyan-950/20 to-slate-900/60 backdrop-blur-xl p-8 md:p-12 relative overflow-hidden">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-4">
+        <div className="rounded-3xl border border-zinc-800 bg-[#09090b] p-8 md:p-12 relative overflow-hidden space-y-6">
+          <div className="max-w-3xl space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20">
               <Bot className="w-3.5 h-3.5" /> Next-Level Automation
             </div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-4">
+            <h2 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight">
               Why apply manually when JobFlux AI can do it 24/7?
             </h2>
-            <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
+            <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-2xl">
               Our automated Playwright engine runs dual morning batches at 6 AM & 8 AM IST, submits to 50 targeted jobs every day, solves dynamic recruiter questionnaires with AI, and touches your profile daily for top Resdex recruiter ranking.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 pt-2">
               <Link
-                href="/"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-sm px-6 py-3 rounded-xl shadow-lg shadow-cyan-500/20 transition-all"
+                href="/?mode=trial"
+                className="inline-flex items-center gap-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs sm:text-sm px-6 py-3 rounded-lg shadow-lg shadow-white/5 transition-all"
               >
-                Start Autonomous Job Apply
+                <span>Start Autonomous Job Apply Free</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/resume-builder"
-                className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-sm px-6 py-3 rounded-xl transition-all"
+                className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold text-xs sm:text-sm px-6 py-3 rounded-lg transition-all"
               >
-                Build Harvard ATS Resume
+                <span>Build Harvard ATS Resume</span>
               </Link>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#05070f] px-6 py-8 text-center text-xs text-slate-500">
-        <p>© {new Date().getFullYear()} JobFlux AI. Built for high-growth tech talent across India.</p>
-      </footer>
+      {/* Static Canonical Footer */}
+      <ToolsFooter />
     </div>
   )
 }
-
