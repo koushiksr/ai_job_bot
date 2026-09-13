@@ -59,6 +59,7 @@ export default function UserDashboard() {
   // Help Modal State
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false)
+  const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState<boolean>(false)
 
   // Initial Load & On-Demand Telemetry Refresh States
   const [pageLoading, setPageLoading] = useState<boolean>(true)
@@ -178,6 +179,38 @@ export default function UserDashboard() {
 
     refreshAllDashboardData(storedUid, true)
   }, [])
+
+  // If activeTab is set to 'profile', open the slide-over drawer and keep current view clean
+  useEffect(() => {
+    if ((activeTab as string) === 'profile') {
+      setIsProfileDrawerOpen(true)
+      setActiveTab('history')
+    }
+  }, [activeTab])
+
+  // ESC key dismiss handler for aside drawer and audit dialog
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isProfileDrawerOpen) setIsProfileDrawerOpen(false)
+        if (selectedJobAudit) setSelectedJobAudit(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isProfileDrawerOpen, selectedJobAudit])
+
+  // Prevent background body scrolling when profile drawer is open
+  useEffect(() => {
+    if (isProfileDrawerOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isProfileDrawerOpen])
 
   const refreshAllDashboardData = async (uid: string, isInitial = false) => {
     if (!uid) return
@@ -493,13 +526,13 @@ export default function UserDashboard() {
             {/* Desktop Only: Candidate Identity & Avatar (Clickable to open Candidate Profile & Resume) */}
             <button
               type="button"
-              onClick={() => setActiveTab('profile')}
+              onClick={() => setIsProfileDrawerOpen(true)}
               className={`hidden md:flex items-center gap-3 border-l border-zinc-800 pl-3.5 pr-2.5 py-1.5 rounded-xl transition-all cursor-pointer text-left ${
-                activeTab === 'profile'
+                isProfileDrawerOpen
                   ? 'bg-zinc-900 border border-zinc-700 shadow-sm'
                   : 'hover:bg-zinc-900/60 border border-transparent hover:border-zinc-800'
               }`}
-              title="Click to view and edit Candidate Profile & Resume"
+              title="Open Candidate Profile & Resume (One-Time Setup)"
             >
               <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-semibold text-white text-xs shrink-0 relative">
                 {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
@@ -562,13 +595,13 @@ export default function UserDashboard() {
           {/* Right Desktop Actions (Clean & Spaced Out) */}
           <div className="hidden md:flex items-center gap-2.5 shrink-0">
             <button
-              onClick={() => setActiveTab('profile')}
+              onClick={() => setIsProfileDrawerOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                activeTab === 'profile'
+                isProfileDrawerOpen
                   ? 'bg-white text-black border-white shadow-sm font-semibold'
                   : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-300 hover:text-white'
               }`}
-              title="Edit Candidate Profile, Resume & Credentials"
+              title="Open Candidate Profile & Resume Aside Drawer (One-Time Setup)"
             >
               <User className="w-3.5 h-3.5" />
               <span>Profile</span>
@@ -666,8 +699,8 @@ export default function UserDashboard() {
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
               <div
                 onClick={() => {
-                  setActiveTab('profile')
                   setIsMobileNavOpen(false)
+                  setIsProfileDrawerOpen(true)
                 }}
                 className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
                 title="Click to manage Candidate Profile & Resume"
@@ -736,18 +769,18 @@ export default function UserDashboard() {
             <div className="space-y-1 text-xs">
               <button
                 onClick={() => {
-                  setActiveTab('profile')
                   setIsMobileNavOpen(false)
+                  setIsProfileDrawerOpen(true)
                 }}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors cursor-pointer text-left ${
-                  activeTab === 'profile'
+                  isProfileDrawerOpen
                     ? 'bg-zinc-800 text-white font-semibold'
                     : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
                 }`}
               >
                 <User className="w-4 h-4 text-zinc-400 shrink-0" />
-                <span>Candidate Profile & Resume</span>
-                <span className="text-[10px] text-zinc-400 font-mono ml-auto">Manage</span>
+                <span>Candidate Profile & Credentials</span>
+                <span className="text-[10px] text-emerald-400 font-mono ml-auto">One-Time</span>
               </button>
 
               <button
@@ -1043,61 +1076,71 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Tab Navigation with Mobile Horizontal Swipe */}
-        <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-zinc-950/90 border border-zinc-800/80 rounded-xl overflow-x-auto scrollbar-none flex-nowrap">
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-              activeTab === 'history'
-                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-            }`}
-          >
-            <Briefcase className="w-3.5 h-3.5 shrink-0" />
-            <span>Applications ({historyTotalCount || historyJobs.length})</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-              activeTab === 'profile'
-                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-            }`}
-          >
-            <User className="w-3.5 h-3.5 shrink-0" />
-            <span>Profile & Resume</span>
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('queries')
-              loadUserTickets(userId)
-            }}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-              activeTab === 'queries'
-                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-            <span>Inquiries</span>
-            {userTickets.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
-                {userTickets.length}
+        {/* Tab Navigation with Dedicated Aside Drawer Trigger */}
+        <div className="flex items-center justify-between gap-2 p-1 bg-zinc-950/90 border border-zinc-800/80 rounded-xl overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5 shrink-0" />
+              <span>Applications ({historyTotalCount || historyJobs.length})</span>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('queries')
+                loadUserTickets(userId)
+              }}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+                activeTab === 'queries'
+                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+              <span>Inquiries</span>
+              {userTickets.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
+                  {userTickets.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('resume_builder')}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
+                activeTab === 'resume_builder'
+                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span>AI ATS Resume</span>
+              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">
+                PRO
               </span>
-            )}
-          </button>
+            </button>
+          </div>
+
+          {/* Dedicated Aside Drawer Trigger Button (Like Naukri: Profile & Credentials in Side Drawer) */}
           <button
-            onClick={() => setActiveTab('resume_builder')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-              activeTab === 'resume_builder'
-                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+            type="button"
+            onClick={() => setIsProfileDrawerOpen(true)}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:py-2 rounded-lg text-xs font-medium border transition-all shrink-0 whitespace-nowrap cursor-pointer ml-auto ${
+              isProfileDrawerOpen
+                ? 'bg-zinc-800 text-white border-zinc-700 shadow-sm'
+                : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800/90 text-zinc-300 hover:text-white hover:border-zinc-700'
             }`}
+            title="Open Candidate Profile, Resume & Credentials Aside Drawer (One-Time Setup)"
           >
-            <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span>AI ATS Resume</span>
-            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">
-              PRO
+            <User className="w-3.5 h-3.5 text-zinc-400" />
+            <span className="hidden sm:inline">Profile & Credentials</span>
+            <span className="sm:hidden">Profile</span>
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-800 text-emerald-400 border border-zinc-700/80 font-semibold">
+              One-Time
             </span>
           </button>
         </div>
@@ -1227,11 +1270,12 @@ export default function UserDashboard() {
                       </p>
                     </div>
                     <button
-                      onClick={() => setActiveTab('profile')}
+                      onClick={() => setIsProfileDrawerOpen(true)}
                       className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <User className="w-3 h-3 text-zinc-400" />
-                      <span>Configure Filters</span>
+                      <span>Configure Filters & Credentials</span>
+                      <span className="text-[10px] font-mono text-emerald-400 font-semibold">(One-Time)</span>
                     </button>
                   </div>
 
@@ -1450,52 +1494,27 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* TAB 2: CANDIDATE PROFILE & RESUME */}
+        {/* TAB 2 (SLIDE-OVER DRAWER LAUNCHER): CANDIDATE PROFILE & CREDENTIALS */}
         {activeTab === 'profile' && (
-          <div className="space-y-4">
-            {/* AI Resume Builder Teaser Banner */}
-            <div className="p-4 rounded-xl bg-gradient-to-r from-amber-950/40 via-zinc-950 to-amber-950/30 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-950/80 border border-amber-800/60 flex items-center justify-center text-amber-300 shrink-0">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-white">Need an ATS-Optimized Resume for High-Paying Senior Roles?</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-900/80 border border-amber-600/50 text-white font-semibold">
-                      PRO ONLY
-                    </span>
-                  </div>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Let JobFlux AI construct a 99%+ ATS pass rate resume with quantified Google XYZ metrics, tailored for ₹25L - ₹75L+ CTC brackets.
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/resume-builder"
-                className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <span>Launch Fullscreen Resume Studio</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+          <div className="p-8 rounded-2xl bg-[#09090b] border border-zinc-800 text-center space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-emerald-400">
+              <User className="w-6 h-6" />
             </div>
-
-            {/* Neural ATS Recruiter Readiness Diagnostic Widget */}
-            <NeuralAtsDiagnosticCard
-              isProfessional={isProfessional}
-              skillsCount={8}
-              resumeUploaded={true}
-              onUnlockClick={(feat) => {
-                setProModalFeature(feat || 'Professional Suite')
-                setShowProModal(true)
+            <div>
+              <h3 className="text-base font-semibold text-white">Candidate Profile & Credentials</h3>
+              <p className="text-xs text-zinc-400 mt-1 max-w-md mx-auto">
+                Your profile, resume, and credentials are now organized in a dedicated slide-over aside drawer (One-Time Setup).
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setIsProfileDrawerOpen(true)
+                setActiveTab('history')
               }}
-            />
-
-            <CandidateProfileEditor
-              userId={userId}
-              isAdmin={false}
-              onSaveSuccess={() => loadUserData(userId)}
-            />
+              className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors cursor-pointer"
+            >
+              Open Profile Aside Drawer
+            </button>
           </div>
         )}
 
@@ -1777,6 +1796,109 @@ export default function UserDashboard() {
           </div>
         )}
       </main>
+
+      {/* CANDIDATE PROFILE & CREDENTIALS SLIDE-OVER DRAWER (Like Naukri: One-Time Setup in Slide-Over Aside) */}
+      {isProfileDrawerOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
+          {/* Smooth Backdrop with Blur */}
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
+            onClick={() => setIsProfileDrawerOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10 z-50 pointer-events-none">
+            <aside className="w-screen max-w-4xl bg-[#09090b] border-l border-zinc-800 shadow-2xl flex flex-col h-full overflow-hidden pointer-events-auto animate-in slide-in-from-right duration-300">
+              {/* Sticky Top Header */}
+              <div className="p-4 sm:p-5 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-sm shrink-0">
+                    {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-sm sm:text-base font-semibold text-white tracking-wide truncate">
+                        Candidate Profile & Naukri Credentials
+                      </h2>
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 font-semibold shrink-0">
+                        ONE-TIME SETUP
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                      Manage credentials, resume PDF, current employer & bot application preferences.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <button
+                    onClick={() => setIsProfileDrawerOpen(false)}
+                    className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    title="Close drawer (Esc)"
+                    aria-label="Close drawer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Scrollable Body */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+                {/* Identity & Sync Context Bar */}
+                <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-zinc-400 font-medium">Candidate Account:</span>
+                    <span className="font-semibold text-white">{userName || userId}</span>
+                    <span className="text-zinc-600 hidden sm:inline">·</span>
+                    <span className="text-zinc-400 font-mono text-[11px] truncate">{userEmail}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono text-zinc-500">Autonomous Target:</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
+                      Naukri Portal Automation
+                    </span>
+                  </div>
+                </div>
+
+                {/* Neural ATS Recruiter Readiness Diagnostic Widget */}
+                <NeuralAtsDiagnosticCard
+                  isProfessional={isProfessional}
+                  skillsCount={8}
+                  resumeUploaded={true}
+                  onUnlockClick={(feat) => {
+                    setProModalFeature(feat || 'Professional Suite')
+                    setShowProModal(true)
+                  }}
+                />
+
+                {/* Full Visual Candidate Profile Editor */}
+                <CandidateProfileEditor
+                  userId={userId}
+                  isAdmin={false}
+                  onSaveSuccess={() => {
+                    loadUserData(userId)
+                  }}
+                />
+              </div>
+
+              {/* Drawer Sticky Footer */}
+              <div className="p-3.5 border-t border-zinc-800/80 bg-zinc-950/95 backdrop-blur flex items-center justify-between text-xs text-zinc-400 shrink-0">
+                <span className="text-[11px] font-mono text-zinc-500 hidden sm:inline">
+                  ESC or click outside to dismiss
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileDrawerOpen(false)}
+                  className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium transition-colors ml-auto cursor-pointer"
+                >
+                  Close Drawer
+                </button>
+              </div>
+            </aside>
+          </div>
+        </div>
+      )}
 
       {/* Professional Tier Perks & Upgrade Modal */}
       <ProfessionalUpgradeModal

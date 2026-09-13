@@ -1141,13 +1141,15 @@ export default function CandidateProfileEditor({
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-              <User className="w-4 h-4 text-zinc-400" /> Naukri Account & Identity
+              <User className="w-4 h-4 text-zinc-400" /> Naukri Account & Credentials (One-Time Setup)
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">
-              The automated bot securely logs in with these credentials to submit applications on Naukri.com.
+              Configure your Naukri.com login credentials once. The automated bot securely uses them for daily application runs.
             </p>
           </div>
-          <span className="text-[10px] font-mono text-zinc-500">Step 2: Credentials</span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400">
+            One-Time Setup
+          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
