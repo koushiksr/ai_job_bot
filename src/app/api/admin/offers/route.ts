@@ -8,44 +8,64 @@ export const dynamic = 'force-dynamic'
 
 const OFFER_PRESETS = [
   {
+    id: 'offer_99',
+    name: 'Essentials 90% Welcome Pass (₹99 / mo)',
+    offerTitle: 'Candidate Welcome: 90% Off JobFlux Essentials for ₹99',
+    discountBadge: '90% OFF (ACTUAL ₹1,000)',
+    originalPrice: '₹1,000 / mo',
+    discountedPrice: '₹99 / mo',
+    promoCode: 'OFFER90',
+    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 90% discount (Regular ₹1,000/mo) for just ₹99.'
+  },
+  {
     id: 'flash_49',
     name: 'Essentials Flash Pass (₹49 / mo)',
-    offerTitle: 'Exclusive 50% Flash Discount: JobFlux Essentials for ₹49',
-    discountBadge: '50% OFF FLASH PASS',
-    originalPrice: '₹99 / mo',
+    offerTitle: 'Exclusive 95% Flash Discount: JobFlux Essentials for ₹49',
+    discountBadge: '95% OFF (ACTUAL ₹1,000)',
+    originalPrice: '₹1,000 / mo',
     discountedPrice: '₹49 / mo',
     promoCode: 'FLASH49',
-    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 50% off for your first month.'
+    customMessage: 'Claim an exclusive 95% flash pass! Get 30 days of autonomous job applications across Naukri for just ₹49 (Regular ₹1,000/mo).'
   },
   {
     id: 'sprint_69',
     name: 'Weekend Career Sprint (₹69 / mo)',
     offerTitle: 'Weekend Career Sprint: 1-Month JobFlux Essentials for ₹69',
-    discountBadge: 'SAVE 30% TODAY',
-    originalPrice: '₹99 / mo',
+    discountBadge: '93% OFF (ACTUAL ₹1,000)',
+    originalPrice: '₹1,000 / mo',
     discountedPrice: '₹69 / mo',
     promoCode: 'SPRINT69',
-    customMessage: 'Kickstart your interview pipeline this week with 600+ verified applications and daily smart scans across Naukri for only ₹69.'
+    customMessage: 'Kickstart your interview pipeline this week with 600+ verified applications and daily smart scans across Naukri at 93% discount (Regular ₹1,000/mo) for only ₹69.'
+  },
+  {
+    id: 'pro_199',
+    name: 'Professional 3-Month Plan (₹199 / 3 mos)',
+    offerTitle: 'Comprehensive 90-Day Pipeline: JobFlux Professional for ₹199',
+    discountBadge: '92% OFF (ACTUAL ₹2,500)',
+    originalPrice: '₹2,500 / 3 mos',
+    discountedPrice: '₹199 / 3 mos',
+    promoCode: 'PRO199',
+    customMessage: 'Get 90 days of continuous automated applications (1,800+ applies), on-demand sweeps up to 5x/week, and VIP queue priority at 92% off (Regular ₹2,500) for ₹199.'
   },
   {
     id: 'pro_129',
     name: 'Professional 3-Month Fast-Track (₹129)',
     offerTitle: 'Career Fast-Track: 3 Months of JobFlux Professional for ₹129',
-    discountBadge: 'SPECIAL ₹129 PASS',
-    originalPrice: '₹199 / 3 mos',
+    discountBadge: '95% OFF (ACTUAL ₹2,500)',
+    originalPrice: '₹2,500 / 3 mos',
     discountedPrice: '₹129 / 3 mos',
     promoCode: 'PRO129',
-    customMessage: 'Accelerate your interview shortlists with 90 days of continuous automated applies (1,800+ applications), on-demand sweeps up to 5x/week, and VIP priority queue for just ₹129.'
+    customMessage: 'Accelerate your interview shortlists with 90 days of continuous automated applies (1,800+ applications), on-demand sweeps up to 5x/week, and VIP priority queue at 95% off (Regular ₹2,500) for just ₹129.'
   },
   {
     id: 'vip_299',
     name: 'Lifetime VIP Career Pass (₹299)',
     offerTitle: 'Lifetime VIP Access: Autonomous Job Applications for ₹299',
-    discountBadge: 'EXCLUSIVE VIP PASS',
-    originalPrice: '₹2,500',
+    discountBadge: '97% OFF (ACTUAL ₹10,000)',
+    originalPrice: '₹10,000',
     discountedPrice: '₹299 One-Time',
     promoCode: 'VIP299',
-    customMessage: 'Get unlimited autonomous job applications and daily recruiter sweeps until you sign your dream offer, plus permanent VIP queue slot and priority placement assistance.'
+    customMessage: 'Get unlimited autonomous job applications and daily recruiter sweeps until you sign your dream offer, plus permanent VIP queue slot and priority placement assistance at 97% savings.'
   }
 ]
 

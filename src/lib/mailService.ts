@@ -17,11 +17,29 @@ interface MailResult {
 }
 
 /**
+ * Returns sanitized and validated SMTP credentials.
+ * Automatically overrides any stale revoked keys (e.g. nxgq or vkij) with the verified active key.
+ */
+export function getSmtpCredentials() {
+  const user = (process.env.SMTP_USER || process.env.ADMIN_MAIL_TO_SEND_PASSWORD || 'technohmsit@gmail.com').trim()
+  let pass = (process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || 'tidw wevs gebl qljb')
+    .trim()
+    .replace(/['"]/g, '')
+    .replace(/\s+/g, '')
+
+  // Critical safeguard: if Vercel or local env still has old/revoked passwords, override with verified active pass
+  if (!pass || pass.includes('nxgq') || pass.includes('vkij')) {
+    pass = 'tidwwevsgeblqljb'
+  }
+
+  return { user, pass }
+}
+
+/**
  * Creates and returns a Nodemailer transporter configured for Gmail SMTP.
  */
-function createTransporter() {
-  const user = process.env.SMTP_USER || process.env.ADMIN_MAIL_TO_SEND_PASSWORD || 'technohmsit@gmail.com'
-  const pass = process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || 'tidw wevs gebl qljb'
+export function createTransporter() {
+  const { user, pass } = getSmtpCredentials()
 
   return nodemailer.createTransport({
     service: 'gmail',
@@ -29,8 +47,8 @@ function createTransporter() {
     port: 465,
     secure: true,
     auth: {
-      user: user.trim(),
-      pass: pass.trim().replace(/['"]/g, '').replace(/\s+/g, '')
+      user,
+      pass
     }
   })
 }
@@ -47,8 +65,8 @@ export async function sendEmail({
   fromName = 'JobFlux AI'
 }: SendMailOptions): Promise<MailResult> {
   const recipient = Array.isArray(to) ? to.join(', ') : to
-  const fromAddress = process.env.SMTP_USER || process.env.ADMIN_MAIL_TO_SEND_PASSWORD || 'technohmsit@gmail.com'
-  const formattedFrom = `"${fromName}" <${fromAddress}>`
+  const { user } = getSmtpCredentials()
+  const formattedFrom = `"${fromName}" <${user}>`
   const now = new Date()
 
   let db: any = null
@@ -77,6 +95,7 @@ export async function sendEmail({
         html_preview: html.slice(0, 1000),
         status: 'sent',
         message_id: info.messageId,
+        smtp_response: info.response,
         created_at: now
       })
     }
@@ -87,7 +106,7 @@ export async function sendEmail({
       simulated: false
     }
   } catch (smtpErr: any) {
-    console.warn('SMTP transport dispatch notice (logging to database):', smtpErr.message)
+    console.error('SMTP transport dispatch notice (logging to database):', smtpErr.message)
 
     // Resilient fallback: Save email payload into MongoDB audit collection
     if (db) {
@@ -97,7 +116,7 @@ export async function sendEmail({
           from: formattedFrom,
           subject,
           html_preview: html.slice(0, 1000),
-          status: 'queued_audit',
+          status: 'failed',
           smtp_error: smtpErr.message || 'SMTP Authentication required',
           created_at: now
         })
@@ -107,10 +126,10 @@ export async function sendEmail({
     }
 
     return {
-      success: true,
+      success: false,
       simulated: true,
       error: smtpErr.message,
-      messageId: `audit_${Date.now()}`
+      messageId: `failed_${Date.now()}`
     }
   }
 }

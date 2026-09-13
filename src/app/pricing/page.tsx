@@ -167,25 +167,37 @@ export default function PricingPage() {
   > = {
     FLASH49: {
       displayPrice: '₹49',
-      label: '50% OFF Flash Pass (-₹50 savings)',
+      label: '95% OFF Flash Pass (Actual ₹1,000 / mo)',
       allowedPlans: ['pro', 'starter'],
       durationDays: 30
     },
     SPRINT69: {
       displayPrice: '₹69',
-      label: 'Weekend Career Sprint (-₹30 savings)',
+      label: '93% OFF Weekend Sprint (Actual ₹1,000 / mo)',
       allowedPlans: ['pro', 'starter'],
       durationDays: 30
     },
+    OFFER90: {
+      displayPrice: '₹99',
+      label: '90% OFF Special Pass (Actual ₹1,000 / mo)',
+      allowedPlans: ['pro', 'starter'],
+      durationDays: 30
+    },
+    PRO199: {
+      displayPrice: '₹199',
+      label: '92% OFF 3-Month Full Pass (Actual ₹2,500 / 3 mos)',
+      allowedPlans: ['elite', 'professional'],
+      durationDays: 90
+    },
     PRO129: {
       displayPrice: '₹129',
-      label: 'Professional 3-Month Fast-Track (-₹70 savings)',
+      label: '95% OFF 3-Month Fast-Track (Actual ₹2,500 / 3 mos)',
       allowedPlans: ['elite', 'professional'],
       durationDays: 90
     },
     VIP299: {
       displayPrice: '₹299',
-      label: 'Lifetime VIP Pass (365 Days Access)',
+      label: '97% OFF Lifetime VIP Pass (Actual ₹10,000 Value)',
       allowedPlans: ['elite', 'professional'],
       durationDays: 365
     }

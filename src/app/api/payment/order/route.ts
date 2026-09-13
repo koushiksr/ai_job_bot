@@ -11,10 +11,12 @@ const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: number 
 }
 
 export const PROMO_DISCOUNTS: Record<string, { amount: number; name: string; allowedPlans: string[]; days: number }> = {
-  FLASH49: { amount: 4900, name: 'JobFlux Essentials - Flash 50% Pass (30 Days)', allowedPlans: ['pro', 'starter'], days: 30 },
-  SPRINT69: { amount: 6900, name: 'JobFlux Essentials - Sprint Pass (30 Days)', allowedPlans: ['pro', 'starter'], days: 30 },
-  PRO129: { amount: 12900, name: 'JobFlux Professional - 3-Month Fast-Track (90 Days)', allowedPlans: ['elite', 'professional'], days: 90 },
-  VIP299: { amount: 29900, name: 'JobFlux Professional - Lifetime VIP Pass (365 Days)', allowedPlans: ['elite', 'professional'], days: 365 }
+  FLASH49: { amount: 4900, name: 'JobFlux Essentials - 95% Flash Pass (30 Days)', allowedPlans: ['pro', 'starter'], days: 30 },
+  SPRINT69: { amount: 6900, name: 'JobFlux Essentials - 93% Sprint Pass (30 Days)', allowedPlans: ['pro', 'starter'], days: 30 },
+  OFFER90: { amount: 9900, name: 'JobFlux Essentials - 90% Special Pass (30 Days)', allowedPlans: ['pro', 'starter'], days: 30 },
+  PRO199: { amount: 19900, name: 'JobFlux Professional - 92% 3-Month Pass (90 Days)', allowedPlans: ['elite', 'professional'], days: 90 },
+  PRO129: { amount: 12900, name: 'JobFlux Professional - 95% Fast-Track (90 Days)', allowedPlans: ['elite', 'professional'], days: 90 },
+  VIP299: { amount: 29900, name: 'JobFlux Professional - 97% VIP Annual Pass (365 Days)', allowedPlans: ['elite', 'professional'], days: 365 }
 }
 
 export async function POST(req: NextRequest) {

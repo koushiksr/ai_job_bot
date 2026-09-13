@@ -112,16 +112,23 @@ export default function AdminDashboard() {
   const [loadingOffers, setLoadingOffers] = useState<boolean>(false)
   const [targetType, setTargetType] = useState<'single' | 'bulk_unsubscribed' | 'all_users'>('single')
   const [targetEmail, setTargetEmail] = useState<string>('koushiksrmedala@gmail.com')
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('flash_49')
-  const [offerTitle, setOfferTitle] = useState<string>('Exclusive 50% Flash Discount: JobFlux Essentials for ₹49')
-  const [discountBadge, setDiscountBadge] = useState<string>('50% OFF FLASH PASS')
-  const [originalPrice, setOriginalPrice] = useState<string>('₹99 / mo')
-  const [discountedPrice, setDiscountedPrice] = useState<string>('₹49 / mo')
-  const [promoCode, setPromoCode] = useState<string>('FLASH49')
-  const [customMessage, setCustomMessage] = useState<string>('Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 50% off for your first month.')
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('offer_99')
+  const [offerTitle, setOfferTitle] = useState<string>('Candidate Welcome: 90% Off JobFlux Essentials for ₹99')
+  const [discountBadge, setDiscountBadge] = useState<string>('90% OFF (ACTUAL ₹1,000)')
+  const [originalPrice, setOriginalPrice] = useState<string>('₹1,000 / mo')
+  const [discountedPrice, setDiscountedPrice] = useState<string>('₹99 / mo')
+  const [promoCode, setPromoCode] = useState<string>('OFFER90')
+  const [customMessage, setCustomMessage] = useState<string>('Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 90% discount (Regular ₹1,000/mo) for just ₹99.')
   const [isConfirmOfferModalOpen, setIsConfirmOfferModalOpen] = useState<boolean>(false)
   const [sendingOffer, setSendingOffer] = useState<boolean>(false)
   const [offerNotification, setOfferNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+  // Live Email Diagnostic State
+  const [mailDiagnosticLoading, setMailDiagnosticLoading] = useState<boolean>(false)
+  const [mailDiagnosticResult, setMailDiagnosticResult] = useState<any | null>(null)
+  const [mailLogs, setMailLogs] = useState<any[]>([])
+  const [loadingMailLogs, setLoadingMailLogs] = useState<boolean>(false)
+  const [diagnosticRecipient, setDiagnosticRecipient] = useState<string>('koushiksrmedala@gmail.com')
 
   // Activity Audit & Telemetry State
   const [activityLogs, setActivityLogs] = useState<any[]>([])
@@ -353,10 +360,55 @@ export default function AdminDashboard() {
         const data = await res.json()
         setOffersData(data)
       }
+      fetchMailDiagnostics()
     } catch (err) {
       console.error('Failed to fetch offers:', err)
     } finally {
       setLoadingOffers(false)
+    }
+  }
+
+  const fetchMailDiagnostics = async () => {
+    setLoadingMailLogs(true)
+    try {
+      const res = await fetch('/api/admin/mail-test', {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setMailLogs(data.recent_logs || [])
+      }
+    } catch (err) {
+      console.warn('Failed to fetch mail diagnostics:', err)
+    } finally {
+      setLoadingMailLogs(false)
+    }
+  }
+
+  const handleSendDiagnosticMail = async () => {
+    setMailDiagnosticLoading(true)
+    setMailDiagnosticResult(null)
+    try {
+      const res = await fetch('/api/admin/mail-test', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({ targetEmail: diagnosticRecipient })
+      })
+      const data = await res.json()
+      setMailDiagnosticResult(data)
+      if (data.success) {
+        sendBrowserNotification('⚡ Diagnostic Email Delivered!', {
+          body: `Live email confirmed in ${diagnosticRecipient} inbox!`
+        })
+      }
+      fetchMailDiagnostics()
+    } catch (err: any) {
+      setMailDiagnosticResult({
+        success: false,
+        error: err.message || 'Failed to dispatch test email'
+      })
+    } finally {
+      setMailDiagnosticLoading(false)
     }
   }
 
@@ -2709,6 +2761,180 @@ export default function AdminDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            {/* Live Email Diagnostic & Delivery Audit */}
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+              <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-sky-400" />
+                    <span>Live Email Dispatch Diagnostic & Mailbox Audit</span>
+                  </h4>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Test live Google SMTP dispatch to verify delivery in real-time, view sender credentials, and inspect MongoDB dispatch logs.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={fetchMailDiagnostics}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingMailLogs ? 'animate-spin' : ''}`} />
+                  <span>Refresh Delivery Logs</span>
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4">
+                {/* Diagnostic Dispatch Bar */}
+                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-zinc-500">Sender Account:</span>
+                      <strong className="text-sky-300 font-mono">technohmsit@gmail.com</strong>
+                      <span className="text-zinc-700">|</span>
+                      <span className="text-emerald-400 font-mono text-[11px]">✓ Key: tidw **** **** qljb</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400">
+                      Dispatches a live test email through Google SMTP (Port 465 SSL) and audits the delivery response.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full md:w-auto">
+                    <select
+                      value={diagnosticRecipient}
+                      onChange={(e) => setDiagnosticRecipient(e.target.value)}
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500"
+                    >
+                      <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
+                      <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com</option>
+                    </select>
+                    <button
+                      type="button"
+                      disabled={mailDiagnosticLoading}
+                      onClick={handleSendDiagnosticMail}
+                      className="px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                    >
+                      {mailDiagnosticLoading ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Testing SMTP...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Send Test Email</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Diagnostic Result Banner */}
+                {mailDiagnosticResult && (
+                  <div
+                    className={`p-4 rounded-xl text-xs border ${
+                      mailDiagnosticResult.success
+                        ? 'bg-emerald-950/30 border-emerald-800/50 text-emerald-200'
+                        : 'bg-rose-950/30 border-rose-800/50 text-rose-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      {mailDiagnosticResult.success ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      )}
+                      <div className="space-y-1 flex-1">
+                        <div className="font-bold text-sm">
+                          {mailDiagnosticResult.success
+                            ? '✓ Live Email Dispatched & Delivered to Inbox!'
+                            : '❌ SMTP Dispatch Failed'}
+                        </div>
+                        <p className="text-xs text-zinc-300">
+                          {mailDiagnosticResult.message || mailDiagnosticResult.detail || mailDiagnosticResult.error}
+                        </p>
+                        {mailDiagnosticResult.smtp_response && (
+                          <div className="font-mono text-[11px] text-emerald-400 bg-black/40 px-2 py-1 rounded mt-1 inline-block">
+                            Server Response: {mailDiagnosticResult.smtp_response}
+                          </div>
+                        )}
+                        {mailDiagnosticResult.message_id && (
+                          <div className="font-mono text-[10px] text-zinc-400 block">
+                            Message ID: {mailDiagnosticResult.message_id}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Recent Dispatched Emails Table from MongoDB */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <span className="font-semibold text-zinc-300">Recent MongoDB Mail Dispatches (Real-Time Audit)</span>
+                    <span className="font-mono text-[11px] text-zinc-500">{mailLogs.length} audit records</span>
+                  </div>
+
+                  <div className="rounded-xl border border-zinc-800 overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-zinc-800 bg-zinc-950/80 text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                          <th className="py-2.5 px-3">Date & Time</th>
+                          <th className="py-2.5 px-3">Recipient</th>
+                          <th className="py-2.5 px-3">Subject</th>
+                          <th className="py-2.5 px-3 text-center">Status</th>
+                          <th className="py-2.5 px-3">Response / Error</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800/60 font-sans">
+                        {mailLogs.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="py-4 text-center text-zinc-500 italic">
+                              No recent email records found in MongoDB.
+                            </td>
+                          </tr>
+                        ) : (
+                          mailLogs.map((log) => (
+                            <tr key={log.id} className="hover:bg-zinc-900/40 transition-colors">
+                              <td className="py-2.5 px-3 font-mono text-[11px] text-zinc-400 whitespace-nowrap">
+                                {new Date(log.created_at).toLocaleTimeString('en-IN', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  second: '2-digit'
+                                })}{' '}
+                                · {new Date(log.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                              </td>
+                              <td className="py-2.5 px-3 font-mono text-zinc-200">
+                                {log.to}
+                              </td>
+                              <td className="py-2.5 px-3 text-zinc-300 max-w-xs truncate" title={log.subject}>
+                                {log.subject}
+                              </td>
+                              <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                                {log.status === 'sent' ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                    <CheckCircle2 className="w-2.5 h-2.5" />
+                                    DELIVERED
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                                    <AlertTriangle className="w-2.5 h-2.5" />
+                                    {log.status === 'failed' ? 'FAILED' : 'QUEUED'}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-2.5 px-3 font-mono text-[10px] text-zinc-400 max-w-xs truncate" title={log.smtp_response || log.smtp_error}>
+                                {log.smtp_response || log.smtp_error || 'Dispatched'}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
