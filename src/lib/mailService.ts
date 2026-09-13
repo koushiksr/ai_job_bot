@@ -215,34 +215,70 @@ export async function sendEmail({
 }
 
 /**
- * Luxury HTML Template: Password Reset Request
+ * Universal HTML Template: Password Reset Request
+ * Fully responsive across iOS Mail, Android Gmail, Desktop Outlook, and Webmail.
+ * Features TechNOHMS Admin Helpdesk universal branding (JobFlux AI & FitMetrix).
  */
 export function generatePasswordResetHtml(name: string, resetUrl: string, otp: string) {
+  const previewText = `Your JobFlux AI verification code is ${otp}. Use this code or click the secure link to reset your password.`
   return `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reset Your JobFlux AI Password</title>
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="dark light">
+  <meta name="supported-color-schemes" content="dark light">
+  <title>Reset Your Password · TechNOHMS Helpdesk</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    @media only screen and (max-width: 600px) {
+      .container-table { width: 100% !important; max-width: 100% !important; border-radius: 12px !important; }
+      .mobile-padding { padding: 24px 18px !important; }
+      .mobile-header-padding { padding: 18px 16px !important; }
+      .mobile-stack { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+      .mobile-btn { display: block !important; width: 100% !important; text-align: center !important; padding: 14px 16px !important; box-sizing: border-box !important; font-size: 14px !important; }
+      .mobile-title { font-size: 20px !important; line-height: 1.25 !important; }
+      .mobile-otp { font-size: 22px !important; letter-spacing: 4px !important; }
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e4e4e7;">
-  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#09090b;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e4e4e7;-webkit-font-smoothing:antialiased;">
+  <!-- Hidden Preheader for Mobile Inbox Preview -->
+  <div style="display:none;font-size:1px;color:#09090b;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+    ${previewText}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#09090b;padding:24px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:540px;background-color:#18181b;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
-          <!-- Header -->
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" class="container-table" style="max-width:560px;background-color:#18181b;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 25px 35px -5px rgba(0,0,0,0.6);">
+          <!-- Top Accent Gradient (JobFlux Cyan + FitMetrix Green + TechNOHMS Gold) -->
           <tr>
-            <td style="padding:28px 32px;background:linear-gradient(180deg,#18181b 0%,#09090b 100%);border-bottom:1px solid #27272a;">
+            <td style="height:3px;background:linear-gradient(90deg,#0284c7 0%,#10b981 50%,#f59e0b 100%);"></td>
+          </tr>
+
+          <!-- Universal Header -->
+          <tr>
+            <td class="mobile-header-padding" style="padding:22px 28px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;">
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td>
-                    <span style="font-size:18px;font-weight:700;letter-spacing:-0.5px;color:#ffffff;">
-                      ⚡ JobFlux <span style="color:#38bdf8;">AI</span>
-                    </span>
+                  <td valign="middle" style="width:44px;padding-right:12px;">
+                    <img src="https://jobfluxai.vercel.app/admin-helpdesk-avatar.jpg" width="40" height="40" alt="TechNOHMS Helpdesk" style="display:block;border-radius:10px;border:1px solid #38bdf8;box-shadow:0 0 12px rgba(56,189,248,0.25);background-color:#09090b;" />
                   </td>
-                  <td align="right">
-                    <span style="display:inline-block;font-size:10px;font-family:monospace;background-color:#0f172a;color:#38bdf8;border:1px solid #1e293b;padding:4px 8px;border-radius:6px;text-transform:uppercase;">
+                  <td valign="middle">
+                    <div style="font-size:15px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
+                      TechNOHMS <span style="color:#38bdf8;">Helpdesk</span>
+                    </div>
+                    <div style="font-size:10px;font-family:monospace;color:#10b981;letter-spacing:0.5px;margin-top:2px;">
+                      ⚡ JobFlux AI &bull; FitMetrix Services
+                    </div>
+                  </td>
+                  <td align="right" valign="middle">
+                    <span style="display:inline-block;font-size:10px;font-family:monospace;font-weight:700;background-color:#0f172a;color:#38bdf8;border:1px solid #1e293b;padding:4px 9px;border-radius:6px;text-transform:uppercase;">
                       Security Verification
                     </span>
                   </td>
@@ -251,52 +287,57 @@ export function generatePasswordResetHtml(name: string, resetUrl: string, otp: s
             </td>
           </tr>
 
-          <!-- Body -->
+          <!-- Main Body -->
           <tr>
-            <td style="padding:32px;">
-              <h1 style="margin:0 0 12px 0;font-size:20px;font-weight:600;color:#ffffff;letter-spacing:-0.3px;">
-                Reset Your Password
+            <td class="mobile-padding" style="padding:32px 28px;">
+              <h1 class="mobile-title" style="margin:0 0 12px 0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.4px;">
+                Reset Your JobFlux AI Password
               </h1>
-              <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#a1a1aa;">
-                Hi ${name || 'Candidate'}, we received a request to reset the password for your JobFlux AI account. Click the button below to choose a new password:
+              <p style="margin:0 0 18px 0;font-size:14px;line-height:1.6;color:#a1a1aa;">
+                Hi <strong style="color:#f4f4f5;">${name || 'Candidate'}</strong>, we received a password recovery request for your JobFlux AI account. Tap the button below to configure your new password securely:
               </p>
 
-              <!-- Reset Button -->
+              <!-- Reset Action Button (Full width on mobile) -->
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:24px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${resetUrl}" style="display:inline-block;background-color:#ffffff;color:#09090b;font-size:13px;font-weight:600;text-decoration:none;padding:12px 28px;border-radius:10px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.3);">
+                    <a href="${resetUrl}" class="mobile-btn" style="display:inline-block;background-color:#ffffff;color:#09090b;font-size:14px;font-weight:700;text-decoration:none;padding:14px 34px;border-radius:10px;box-shadow:0 8px 16px -2px rgba(0,0,0,0.4);">
                       Reset Password &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <!-- Quick OTP Section -->
-              <div style="background-color:#09090b;border:1px solid #27272a;border-radius:12px;padding:16px;text-align:center;margin:24px 0;">
-                <span style="display:block;font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">
-                  Or use this 6-digit verification code
+              <!-- 6-Digit OTP Verification Box -->
+              <div style="background-color:#09090b;border:1px solid #27272a;border-radius:12px;padding:18px;text-align:center;margin:24px 0;">
+                <span style="display:block;font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;font-weight:600;">
+                  Or enter this 6-digit one-time code
                 </span>
-                <span style="font-size:24px;font-weight:700;font-family:monospace;letter-spacing:6px;color:#38bdf8;">
+                <span class="mobile-otp" style="font-size:26px;font-weight:800;font-family:monospace;letter-spacing:6px;color:#38bdf8;">
                   ${otp}
                 </span>
               </div>
 
-              <p style="margin:0 0 16px 0;font-size:12px;line-height:1.5;color:#71717a;">
-                This link and verification code expire in <strong>60 minutes</strong>. If you did not initiate this request, you can safely ignore this email.
+              <p style="margin:0 0 14px 0;font-size:12px;line-height:1.6;color:#71717a;">
+                This link and verification code expire in <strong>60 minutes</strong>. If you did not make this request, your account is secure and you can ignore this notice.
               </p>
               <p style="margin:0;font-size:11px;line-height:1.5;color:#52525b;word-break:break-all;">
-                Direct link: <a href="${resetUrl}" style="color:#38bdf8;text-decoration:underline;">${resetUrl}</a>
+                Direct URL: <a href="${resetUrl}" style="color:#38bdf8;text-decoration:underline;">${resetUrl}</a>
               </p>
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Universal Multi-Service Footer -->
           <tr>
-            <td style="padding:20px 32px;background-color:#09090b;border-top:1px solid #27272a;text-align:center;">
-              <p style="margin:0;font-size:11px;color:#71717a;">
-                JobFlux AI · Autonomous Career & Recruitment Intelligence<br>
-                Need help? Contact <a href="mailto:technohmsit@gmail.com" style="color:#38bdf8;text-decoration:none;">technohmsit@gmail.com</a>
+            <td style="padding:22px 28px;background-color:#09090b;border-top:1px solid #27272a;text-align:center;">
+              <p style="margin:0 0 6px 0;font-size:12px;font-weight:600;color:#e4e4e7;">
+                TechNOHMS Unified Cloud &amp; Admin Helpdesk
+              </p>
+              <p style="margin:0 0 8px 0;font-size:11px;color:#71717a;line-height:1.5;">
+                Official Dispatch Gateway for <strong style="color:#38bdf8;">JobFlux AI</strong> &amp; <strong style="color:#10b981;">FitMetrix</strong>
+              </p>
+              <p style="margin:0;font-size:11px;color:#52525b;">
+                Admin Support: <a href="mailto:technohmsit@gmail.com" style="color:#38bdf8;text-decoration:none;">technohmsit@gmail.com</a> &bull; Priority Helpdesk
               </p>
             </td>
           </tr>
@@ -310,7 +351,9 @@ export function generatePasswordResetHtml(name: string, resetUrl: string, otp: s
 }
 
 /**
- * Luxury HTML Template: Purchase Offer & Promotional Upgrade
+ * Universal HTML Template: Purchase Offer & Promotional Upgrade
+ * Fully responsive across iPhone, Android, Gmail App, and Desktop Outlook.
+ * Features TechNOHMS Admin Helpdesk universal branding (JobFlux AI & FitMetrix).
  */
 export function generatePurchaseOfferHtml({
   candidateName,
@@ -318,7 +361,7 @@ export function generatePurchaseOfferHtml({
   discountBadge,
   originalPrice,
   discountedPrice,
-  promoCode = 'FLASH49',
+  promoCode = 'OFFER90',
   claimUrl = 'https://jobfluxai.vercel.app/pricing',
   customMessage
 }: {
@@ -331,37 +374,66 @@ export function generatePurchaseOfferHtml({
   claimUrl?: string
   customMessage?: string
 }) {
+  const previewText = `Exclusive Offer: ${offerTitle} for only ${discountedPrice} (Save against ${originalPrice}) with code ${promoCode}.`
   return `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="dark light">
+  <meta name="supported-color-schemes" content="dark light">
   <title>${offerTitle} · Exclusive Offer</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    @media only screen and (max-width: 600px) {
+      .container-table { width: 100% !important; max-width: 100% !important; border-radius: 12px !important; }
+      .mobile-padding { padding: 24px 18px !important; }
+      .mobile-header-padding { padding: 18px 16px !important; }
+      .mobile-stack { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+      .mobile-btn { display: block !important; width: 100% !important; text-align: center !important; padding: 15px 16px !important; box-sizing: border-box !important; font-size: 14px !important; }
+      .mobile-title { font-size: 20px !important; line-height: 1.25 !important; }
+      .mobile-promo-col { margin-top: 14px !important; text-align: left !important; }
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e4e4e7;">
-  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#09090b;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e4e4e7;-webkit-font-smoothing:antialiased;">
+  <!-- Hidden Preheader for Mobile Inbox Preview -->
+  <div style="display:none;font-size:1px;color:#09090b;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+    ${previewText}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#09090b;padding:24px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:#18181b;border:1px solid #27272a;border-radius:18px;overflow:hidden;box-shadow:0 25px 30px -5px rgba(0,0,0,0.6);">
-          <!-- Top Accent Stream -->
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" class="container-table" style="max-width:580px;background-color:#18181b;border:1px solid #27272a;border-radius:18px;overflow:hidden;box-shadow:0 25px 35px -5px rgba(0,0,0,0.6);">
+          <!-- Top Accent Stream (JobFlux Cyan + FitMetrix Green + TechNOHMS Gold) -->
           <tr>
-            <td style="height:3px;background:linear-gradient(90deg,#0284c7 0%,#38bdf8 50%,#f59e0b 100%);"></td>
+            <td style="height:3px;background:linear-gradient(90deg,#0284c7 0%,#10b981 50%,#f59e0b 100%);"></td>
           </tr>
 
-          <!-- Header -->
+          <!-- Universal Header -->
           <tr>
-            <td style="padding:28px 32px;background:linear-gradient(180deg,#18181b 0%,#09090b 100%);border-bottom:1px solid #27272a;">
+            <td class="mobile-header-padding" style="padding:22px 28px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;">
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td>
-                    <span style="font-size:18px;font-weight:700;letter-spacing:-0.5px;color:#ffffff;">
-                      ⚡ JobFlux <span style="color:#38bdf8;">AI</span>
-                    </span>
+                  <td valign="middle" style="width:44px;padding-right:12px;">
+                    <img src="https://jobfluxai.vercel.app/admin-helpdesk-avatar.jpg" width="40" height="40" alt="TechNOHMS Helpdesk" style="display:block;border-radius:10px;border:1px solid #38bdf8;box-shadow:0 0 12px rgba(56,189,248,0.25);background-color:#09090b;" />
                   </td>
-                  <td align="right">
-                    <span style="display:inline-block;font-size:10px;font-weight:700;font-family:monospace;background-color:#451a03;color:#fbbf24;border:1px solid #b45309;padding:4px 10px;border-radius:9999px;text-transform:uppercase;">
-                      ${discountBadge || 'SPECIAL OFFER'}
+                  <td valign="middle">
+                    <div style="font-size:15px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
+                      TechNOHMS <span style="color:#38bdf8;">Helpdesk</span>
+                    </div>
+                    <div style="font-size:10px;font-family:monospace;color:#10b981;letter-spacing:0.5px;margin-top:2px;">
+                      ⚡ JobFlux AI &bull; FitMetrix Services
+                    </div>
+                  </td>
+                  <td align="right" valign="middle">
+                    <span style="display:inline-block;font-size:10px;font-weight:800;font-family:monospace;background-color:#451a03;color:#fbbf24;border:1px solid #b45309;padding:5px 11px;border-radius:9999px;text-transform:uppercase;letter-spacing:0.5px;">
+                      ${discountBadge || 'EXCLUSIVE OFFER'}
                     </span>
                   </td>
                 </tr>
@@ -371,62 +443,64 @@ export function generatePurchaseOfferHtml({
 
           <!-- Body -->
           <tr>
-            <td style="padding:32px;">
-              <span style="display:inline-block;font-size:11px;font-weight:600;color:#38bdf8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
-                Verified Candidate Exclusive
-              </span>
-              <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">
+            <td class="mobile-padding" style="padding:32px 28px;">
+              <div style="display:inline-block;font-size:11px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
+                Verified Account Exclusive
+              </div>
+              <h1 class="mobile-title" style="margin:0 0 14px 0;font-size:24px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;line-height:1.25;">
                 ${offerTitle}
               </h1>
-              <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#a1a1aa;">
-                Hi ${candidateName || 'Candidate'},
+              <p style="margin:0 0 18px 0;font-size:14px;line-height:1.6;color:#a1a1aa;">
+                Hi <strong style="color:#f4f4f5;">${candidateName || 'Candidate'}</strong>,
               </p>
-              <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#d4d4d8;">
-                ${customMessage || 'We have reserved an exclusive promotional rate for your account to accelerate your interview pipeline with automated daily job sweeps and on-demand scout triggers.'}
+              <p style="margin:0 0 22px 0;font-size:14px;line-height:1.6;color:#d4d4d8;">
+                ${customMessage || 'We have reserved an exclusive promotional rate for your account to accelerate your interview pipeline with automated daily job sweeps, Harvard ATS resume formatting, and direct priority recruiter scout triggers.'}
               </p>
 
-              <!-- Deal Card -->
+              <!-- Deal Card (Bulletproof Mobile & Desktop Table) -->
               <div style="background-color:#09090b;border:1px solid #27272a;border-radius:14px;padding:22px;margin:24px 0;">
                 <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
-                    <td>
-                      <span style="display:block;font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+                    <td class="mobile-stack" valign="middle">
+                      <div style="font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">
                         Special Promotional Rate
-                      </span>
-                      <div style="display:flex;align-items:baseline;gap:8px;">
-                        <span style="font-size:28px;font-weight:800;color:#ffffff;font-family:monospace;">
-                          ${discountedPrice}
-                        </span>
-                        <span style="font-size:15px;color:#71717a;text-decoration:line-through;margin-left:8px;">
-                          ${originalPrice}
-                        </span>
                       </div>
+                      <table role="presentation" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td valign="baseline" style="font-size:32px;font-weight:800;color:#ffffff;font-family:monospace;line-height:1;">
+                            ${discountedPrice}
+                          </td>
+                          <td valign="baseline" style="padding-left:10px;font-size:16px;color:#71717a;text-decoration:line-through;line-height:1;">
+                            ${originalPrice}
+                          </td>
+                        </tr>
+                      </table>
                     </td>
-                    <td align="right" valign="middle">
-                      <div style="background-color:#18181b;border:1px dashed #38bdf8;padding:8px 14px;border-radius:8px;text-align:center;">
-                        <span style="display:block;font-size:9px;color:#a1a1aa;text-transform:uppercase;margin-bottom:2px;">Promo Code</span>
-                        <span style="font-size:13px;font-weight:700;font-family:monospace;color:#38bdf8;">${promoCode}</span>
+                    <td class="mobile-stack mobile-promo-col" align="right" valign="middle">
+                      <div style="display:inline-block;background-color:#18181b;border:1px dashed #38bdf8;padding:8px 16px;border-radius:8px;text-align:center;">
+                        <span style="display:block;font-size:9px;color:#a1a1aa;text-transform:uppercase;margin-bottom:2px;font-weight:600;">Promo Code</span>
+                        <span style="font-size:14px;font-weight:800;font-family:monospace;color:#38bdf8;letter-spacing:0.5px;">${promoCode}</span>
                       </div>
                     </td>
                   </tr>
                 </table>
 
-                <div style="margin-top:16px;padding-top:16px;border-top:1px solid #1f1f23;">
+                <div style="margin-top:18px;padding-top:16px;border-top:1px solid #27272a;">
                   <ul style="margin:0;padding-left:18px;font-size:12px;color:#a1a1aa;line-height:1.8;">
-                    <li>Daily Autonomous Application Sweeps on Naukri</li>
-                    <li>Up to 5 On-Demand Real-Time Sweeps per Week</li>
-                    <li>Verified Direct Job Portal Link Access</li>
+                    <li>Daily Autonomous Application Sweeps on Naukri (600+ monthly applies)</li>
+                    <li>Up to 5 On-Demand Real-Time Scout Sweeps per Week</li>
+                    <li>Verified Direct Job Portal Link Access &amp; Status Logs</li>
                     <li>Application Records Export to CSV Spreadsheet</li>
                     <li>Harvard / FAANG ATS Resume Builder &amp; 1-Click Bot Sync</li>
                   </ul>
                 </div>
               </div>
 
-              <!-- CTA Button -->
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:24px 0 12px 0;">
+              <!-- CTA Button (Full width on mobile) -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:26px 0 12px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${claimUrl}" style="display:inline-block;background-color:#ffffff;color:#09090b;font-size:13px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:10px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.4);">
+                    <a href="${claimUrl}" class="mobile-btn" style="display:inline-block;background-color:#ffffff;color:#09090b;font-size:14px;font-weight:800;text-decoration:none;padding:15px 38px;border-radius:10px;box-shadow:0 10px 20px -3px rgba(0,0,0,0.5);">
                       Claim Offer &amp; Activate &rarr;
                     </a>
                   </td>
@@ -434,19 +508,22 @@ export function generatePurchaseOfferHtml({
               </table>
 
               <p style="margin:12px 0 0 0;font-size:11px;text-align:center;color:#71717a;">
-                Offer confirmed by Administrator · Instant digital activation upon checkout.
+                Offer confirmed by Administrator &bull; Instant digital activation upon checkout.
               </p>
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Universal Multi-Service Footer -->
           <tr>
-            <td style="padding:20px 32px;background-color:#09090b;border-top:1px solid #27272a;text-align:center;">
-              <p style="margin:0 0 6px 0;font-size:11px;color:#71717a;">
-                JobFlux AI · Primary Administrator: technohmsit@gmail.com
+            <td style="padding:22px 28px;background-color:#09090b;border-top:1px solid #27272a;text-align:center;">
+              <p style="margin:0 0 6px 0;font-size:12px;font-weight:600;color:#e4e4e7;">
+                TechNOHMS Unified Cloud &amp; Admin Helpdesk
               </p>
-              <p style="margin:0;font-size:10px;color:#52525b;">
-                You received this offer because of your active JobFlux candidate account.
+              <p style="margin:0 0 8px 0;font-size:11px;color:#71717a;line-height:1.5;">
+                Official Dispatch Gateway for <strong style="color:#38bdf8;">JobFlux AI</strong> &amp; <strong style="color:#10b981;">FitMetrix</strong>
+              </p>
+              <p style="margin:0;font-size:11px;color:#52525b;">
+                Admin Support: <a href="mailto:technohmsit@gmail.com" style="color:#38bdf8;text-decoration:none;">technohmsit@gmail.com</a> &bull; Priority Helpdesk
               </p>
             </td>
           </tr>

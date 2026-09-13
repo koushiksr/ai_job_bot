@@ -121,25 +121,111 @@ export async function POST(req: NextRequest) {
 
     // 2. Send Live Test Message
     const info = await transporter.sendMail({
-      from: `"JobFlux AI Diagnostic" <${user}>`,
+      from: `"TechNOHMS Helpdesk" <${user}>`,
       to: target,
-      subject: '⚡ JobFlux AI Live SMTP Diagnostic Receipt',
-      text: `Hi Koushik,\n\nThis is a verified live diagnostic email sent directly from your deployed JobFlux AI application.\n\nSender: ${user}\nRecipient: ${target}\nTimestamp: ${now.toISOString()}\n\nStatus: 250 OK Delivered directly to your inbox.`,
+      subject: '⚡ TechNOHMS Helpdesk: Live SMTP Delivery Confirmed (JobFlux AI & FitMetrix)',
+      text: `Hi Koushik,\n\nVerified! Your Gmail SMTP connection for ${user} is operational.\n\nUniversal Admin Dispatch Gateway is active for JobFlux AI & FitMetrix.\n\nRecipient: ${target}\nServer Response: 250 OK`,
       html: `
-        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;background:#09090b;color:#f4f4f5;border:1px solid #27272a;border-radius:12px;padding:24px;">
-          <h2 style="color:#38bdf8;margin-top:0;">⚡ JobFlux AI Live Email Diagnostic</h2>
-          <p style="color:#d4d4d8;font-size:14px;line-height:1.6;">
-            Hi Koushik,<br><br>
-            Your deployed JobFlux AI instance authenticated with Google SMTP and delivered this email successfully.
-          </p>
-          <div style="background:#18181b;border:1px solid #27272a;border-radius:8px;padding:14px;margin:16px 0;font-size:13px;">
-            <div><strong>Sender:</strong> <span style="color:#38bdf8;">${user}</span></div>
-            <div style="margin-top:6px;"><strong>Recipient:</strong> <span style="color:#4ade80;">${target}</span></div>
-            <div style="margin-top:6px;"><strong>Server Response:</strong> <span style="color:#34d399;">250 2.0.0 OK</span></div>
-            <div style="margin-top:6px;"><strong>Timestamp:</strong> <span style="color:#a1a1aa;">${now.toISOString()}</span></div>
-          </div>
-          <p style="color:#71717a;font-size:12px;">JobFlux AI · Automatic Job Apply Bot</p>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style type="text/css">
+    @media only screen and (max-width: 600px) {
+      .container-table { width: 100% !important; border-radius: 12px !important; }
+      .mobile-padding { padding: 20px 16px !important; }
+      .mobile-stack { display: block !important; width: 100% !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e4e4e7;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#09090b;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" class="container-table" style="max-width:540px;background-color:#18181b;border:1px solid #27272a;border-radius:16px;overflow:hidden;box-shadow:0 20px 30px rgba(0,0,0,0.5);">
+          <!-- Top Accent Stream -->
+          <tr>
+            <td style="height:3px;background:linear-gradient(90deg,#0284c7 0%,#10b981 50%,#f59e0b 100%);"></td>
+          </tr>
+          <!-- Header -->
+          <tr>
+            <td style="padding:20px 24px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;">
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td valign="middle" style="width:44px;padding-right:12px;">
+                    <img src="https://jobfluxai.vercel.app/admin-helpdesk-avatar.jpg" width="40" height="40" alt="TechNOHMS Helpdesk" style="display:block;border-radius:10px;border:1px solid #38bdf8;box-shadow:0 0 10px rgba(56,189,248,0.25);background:#09090b;" />
+                  </td>
+                  <td valign="middle">
+                    <div style="font-size:15px;font-weight:800;color:#ffffff;line-height:1.2;">
+                      TechNOHMS <span style="color:#38bdf8;">Helpdesk</span>
+                    </div>
+                    <div style="font-size:10px;font-family:monospace;color:#10b981;letter-spacing:0.5px;margin-top:2px;">
+                      ⚡ JobFlux AI &bull; FitMetrix Services
+                    </div>
+                  </td>
+                  <td align="right" valign="middle">
+                    <span style="display:inline-block;font-size:10px;font-family:monospace;font-weight:700;background-color:#064e3b;color:#34d399;border:1px solid #059669;padding:4px 9px;border-radius:6px;text-transform:uppercase;">
+                      250 OK LIVE
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td class="mobile-padding" style="padding:28px 24px;">
+              <h2 style="margin:0 0 10px 0;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;">
+                ⚡ Live Email Pipeline Verified
+              </h2>
+              <p style="margin:0 0 20px 0;font-size:13px;line-height:1.6;color:#a1a1aa;">
+                Hi Koushik,<br>
+                Your universal notification gateway is fully operational. Emails from this sender will now be delivered cleanly across mobile and desktop devices for both <strong>JobFlux AI</strong> and <strong>FitMetrix</strong>.
+              </p>
+              <!-- Telemetry Card -->
+              <div style="background-color:#09090b;border:1px solid #27272a;border-radius:12px;padding:16px;font-size:12px;margin-bottom:20px;">
+                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="padding:6px 0;color:#71717a;width:35%;">Sender Account:</td>
+                    <td style="padding:6px 0;font-family:monospace;color:#38bdf8;font-weight:600;">${user}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#71717a;border-top:1px solid #1f1f23;">Recipient Target:</td>
+                    <td style="padding:6px 0;font-family:monospace;color:#4ade80;font-weight:600;border-top:1px solid #1f1f23;">${target}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#71717a;border-top:1px solid #1f1f23;">Delivery Protocol:</td>
+                    <td style="padding:6px 0;color:#f4f4f5;border-top:1px solid #1f1f23;">Google SMTP (Port 465 SSL)</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#71717a;border-top:1px solid #1f1f23;">Status:</td>
+                    <td style="padding:6px 0;font-weight:700;color:#34d399;border-top:1px solid #1f1f23;">✓ Delivered Directly to Inbox</td>
+                  </tr>
+                </table>
+              </div>
+              <p style="margin:0;font-size:11px;color:#52525b;line-height:1.5;">
+                Timestamp: ${now.toISOString()} &bull; Dispatched from JobFlux AI Production Engine
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:18px 24px;background-color:#09090b;border-top:1px solid #27272a;text-align:center;">
+              <p style="margin:0 0 4px 0;font-size:11px;font-weight:600;color:#e4e4e7;">
+                TechNOHMS Unified Cloud &amp; Admin Helpdesk
+              </p>
+              <p style="margin:0;font-size:10px;color:#71717a;">
+                Serving JobFlux AI &bull; FitMetrix Platform &bull; technohmsit@gmail.com
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
       `
     })
 
