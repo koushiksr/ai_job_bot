@@ -135,7 +135,9 @@ export async function POST(req: NextRequest) {
     @media only screen and (max-width: 600px) {
       .container-table { width: 100% !important; border-radius: 12px !important; }
       .mobile-padding { padding: 20px 16px !important; }
+      .mobile-header-padding { padding: 22px 16px 18px 16px !important; }
       .mobile-stack { display: block !important; width: 100% !important; }
+      .mobile-logo { width: 98px !important; height: 98px !important; min-width: 98px !important; min-height: 98px !important; }
     }
   </style>
 </head>
@@ -148,26 +150,30 @@ export async function POST(req: NextRequest) {
           <tr>
             <td style="height:3px;background:linear-gradient(90deg,#0284c7 0%,#10b981 50%,#f59e0b 100%);"></td>
           </tr>
-          <!-- Header -->
+          <!-- Header with Prominent 98x98 JobFlux AI Logo -->
           <tr>
-            <td style="padding:20px 24px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;">
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <td class="mobile-header-padding" align="center" style="padding:28px 24px 20px 24px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;text-align:center;">
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin:0 auto;text-align:center;">
                 <tr>
-                  <td valign="middle" style="width:44px;padding-right:12px;">
-                    <img src="https://jobfluxai.vercel.app/jobflux-logo.svg" width="38" height="38" alt="JobFlux AI" style="display:block;border-radius:10px;border:1px solid #27272a;box-shadow:0 0 10px rgba(56,189,248,0.25);background:#09090b;" />
+                  <td align="center" style="padding-bottom:12px;">
+                    <a href="https://jobfluxai.vercel.app" target="_blank" style="text-decoration:none;display:inline-block;">
+                      <img class="mobile-logo" src="https://jobfluxai.vercel.app/jobflux-logo.png" width="98" height="98" alt="JobFlux AI Logo" style="display:block;width:98px;height:98px;min-width:98px;min-height:98px;max-width:98px;max-height:98px;border-radius:20px;border:1px solid rgba(56,189,248,0.35);box-shadow:0 10px 25px -5px rgba(56,189,248,0.3);background:#09090b;margin:0 auto;" />
+                    </a>
                   </td>
-                  <td valign="middle">
-                    <div style="font-size:16px;font-weight:800;color:#ffffff;line-height:1.2;">
+                </tr>
+                <tr>
+                  <td align="center">
+                    <div style="font-size:22px;font-weight:800;color:#ffffff;line-height:1.2;">
                       ⚡ JobFlux <span style="color:#38bdf8;">AI</span>
                     </div>
-                    <div style="font-size:10px;font-family:monospace;color:#a1a1aa;letter-spacing:0.5px;margin-top:2px;">
+                    <div style="font-size:11px;font-family:monospace;color:#a1a1aa;letter-spacing:0.5px;margin-top:3px;">
                       Autonomous Career &amp; Recruitment Intelligence
                     </div>
-                  </td>
-                  <td align="right" valign="middle">
-                    <span style="display:inline-block;font-size:10px;font-family:monospace;font-weight:700;background-color:#064e3b;color:#34d399;border:1px solid #059669;padding:4px 9px;border-radius:6px;text-transform:uppercase;">
-                      250 OK LIVE
-                    </span>
+                    <div style="margin-top:10px;">
+                      <span style="display:inline-block;font-size:10px;font-family:monospace;font-weight:700;background-color:#064e3b;color:#34d399;border:1px solid #059669;padding:4px 12px;border-radius:9999px;text-transform:uppercase;letter-spacing:0.5px;">
+                        250 OK LIVE
+                      </span>
+                    </div>
                   </td>
                 </tr>
               </table>

@@ -238,11 +238,12 @@ export function generatePasswordResetHtml(name: string, resetUrl: string, otp: s
     @media only screen and (max-width: 600px) {
       .container-table { width: 100% !important; max-width: 100% !important; border-radius: 12px !important; }
       .mobile-padding { padding: 24px 18px !important; }
-      .mobile-header-padding { padding: 18px 16px !important; }
+      .mobile-header-padding { padding: 22px 16px 18px 16px !important; }
       .mobile-stack { display: block !important; width: 100% !important; box-sizing: border-box !important; }
       .mobile-btn { display: block !important; width: 100% !important; text-align: center !important; padding: 14px 16px !important; box-sizing: border-box !important; font-size: 14px !important; }
       .mobile-title { font-size: 20px !important; line-height: 1.25 !important; }
       .mobile-otp { font-size: 22px !important; letter-spacing: 4px !important; }
+      .mobile-logo { width: 98px !important; height: 98px !important; min-width: 98px !important; min-height: 98px !important; }
     }
   </style>
 </head>
@@ -261,26 +262,30 @@ export function generatePasswordResetHtml(name: string, resetUrl: string, otp: s
             <td style="height:3px;background:linear-gradient(90deg,#0284c7 0%,#10b981 50%,#f59e0b 100%);"></td>
           </tr>
 
-          <!-- Universal Header -->
+          <!-- Universal Header with Prominent 98x98 JobFlux AI Logo -->
           <tr>
-            <td class="mobile-header-padding" style="padding:22px 28px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;">
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <td class="mobile-header-padding" align="center" style="padding:28px 24px 22px 24px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;text-align:center;">
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin:0 auto;text-align:center;">
                 <tr>
-                  <td valign="middle" style="width:44px;padding-right:12px;">
-                    <img src="https://jobfluxai.vercel.app/jobflux-logo.svg" width="38" height="38" alt="JobFlux AI" style="display:block;border-radius:10px;background-color:#09090b;border:1px solid #27272a;box-shadow:0 0 10px rgba(56,189,248,0.25);" />
+                  <td align="center" style="padding-bottom:14px;">
+                    <a href="https://jobfluxai.vercel.app" target="_blank" style="text-decoration:none;display:inline-block;">
+                      <img class="mobile-logo" src="https://jobfluxai.vercel.app/jobflux-logo.png" width="98" height="98" alt="JobFlux AI Logo" style="display:block;width:98px;height:98px;min-width:98px;min-height:98px;max-width:98px;max-height:98px;border-radius:20px;background-color:#09090b;border:1px solid rgba(56,189,248,0.35);box-shadow:0 10px 25px -5px rgba(56,189,248,0.3);margin:0 auto;" />
+                    </a>
                   </td>
-                  <td valign="middle">
-                    <div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
+                </tr>
+                <tr>
+                  <td align="center">
+                    <div style="font-size:22px;font-weight:800;letter-spacing:-0.4px;color:#ffffff;line-height:1.2;">
                       ⚡ JobFlux <span style="color:#38bdf8;">AI</span>
                     </div>
-                    <div style="font-size:10px;font-family:monospace;color:#a1a1aa;letter-spacing:0.5px;margin-top:2px;">
+                    <div style="font-size:11px;font-family:monospace;color:#a1a1aa;letter-spacing:0.5px;margin-top:4px;">
                       Autonomous Career &amp; Recruitment Intelligence
                     </div>
-                  </td>
-                  <td align="right" valign="middle">
-                    <span style="display:inline-block;font-size:10px;font-family:monospace;font-weight:700;background-color:#0f172a;color:#38bdf8;border:1px solid #1e293b;padding:4px 9px;border-radius:6px;text-transform:uppercase;">
-                      Security Verification
-                    </span>
+                    <div style="margin-top:10px;">
+                      <span style="display:inline-block;font-size:10px;font-family:monospace;font-weight:700;background-color:#0f172a;color:#38bdf8;border:1px solid #1e293b;padding:4px 12px;border-radius:9999px;text-transform:uppercase;letter-spacing:0.5px;">
+                        Security Verification
+                      </span>
+                    </div>
                   </td>
                 </tr>
               </table>
@@ -392,11 +397,12 @@ export function generatePurchaseOfferHtml({
     @media only screen and (max-width: 600px) {
       .container-table { width: 100% !important; max-width: 100% !important; border-radius: 12px !important; }
       .mobile-padding { padding: 24px 18px !important; }
-      .mobile-header-padding { padding: 18px 16px !important; }
+      .mobile-header-padding { padding: 22px 16px 18px 16px !important; }
       .mobile-stack { display: block !important; width: 100% !important; box-sizing: border-box !important; }
       .mobile-btn { display: block !important; width: 100% !important; text-align: center !important; padding: 15px 16px !important; box-sizing: border-box !important; font-size: 14px !important; }
       .mobile-title { font-size: 20px !important; line-height: 1.25 !important; }
       .mobile-promo-col { margin-top: 14px !important; text-align: left !important; }
+      .mobile-logo { width: 98px !important; height: 98px !important; min-width: 98px !important; min-height: 98px !important; }
     }
   </style>
 </head>
@@ -415,26 +421,30 @@ export function generatePurchaseOfferHtml({
             <td style="height:3px;background:linear-gradient(90deg,#0284c7 0%,#10b981 50%,#f59e0b 100%);"></td>
           </tr>
 
-          <!-- Universal Header -->
+          <!-- Universal Header with Prominent 98x98 JobFlux AI Logo -->
           <tr>
-            <td class="mobile-header-padding" style="padding:22px 28px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;">
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <td class="mobile-header-padding" align="center" style="padding:28px 24px 22px 24px;background:linear-gradient(180deg,#1c1c21 0%,#141417 100%);border-bottom:1px solid #27272a;text-align:center;">
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin:0 auto;text-align:center;">
                 <tr>
-                  <td valign="middle" style="width:44px;padding-right:12px;">
-                    <img src="https://jobfluxai.vercel.app/jobflux-logo.svg" width="38" height="38" alt="JobFlux AI" style="display:block;border-radius:10px;background-color:#09090b;border:1px solid #27272a;box-shadow:0 0 10px rgba(56,189,248,0.25);" />
+                  <td align="center" style="padding-bottom:14px;">
+                    <a href="https://jobfluxai.vercel.app" target="_blank" style="text-decoration:none;display:inline-block;">
+                      <img class="mobile-logo" src="https://jobfluxai.vercel.app/jobflux-logo.png" width="98" height="98" alt="JobFlux AI Logo" style="display:block;width:98px;height:98px;min-width:98px;min-height:98px;max-width:98px;max-height:98px;border-radius:20px;background-color:#09090b;border:1px solid rgba(56,189,248,0.35);box-shadow:0 10px 25px -5px rgba(56,189,248,0.3);margin:0 auto;" />
+                    </a>
                   </td>
-                  <td valign="middle">
-                    <div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
+                </tr>
+                <tr>
+                  <td align="center">
+                    <div style="font-size:22px;font-weight:800;letter-spacing:-0.4px;color:#ffffff;line-height:1.2;">
                       ⚡ JobFlux <span style="color:#38bdf8;">AI</span>
                     </div>
-                    <div style="font-size:10px;font-family:monospace;color:#a1a1aa;letter-spacing:0.5px;margin-top:2px;">
+                    <div style="font-size:11px;font-family:monospace;color:#a1a1aa;letter-spacing:0.5px;margin-top:4px;">
                       Autonomous Career &amp; Recruitment Intelligence
                     </div>
-                  </td>
-                  <td align="right" valign="middle">
-                    <span style="display:inline-block;font-size:10px;font-weight:800;font-family:monospace;background-color:#451a03;color:#fbbf24;border:1px solid #b45309;padding:5px 11px;border-radius:9999px;text-transform:uppercase;letter-spacing:0.5px;">
-                      ${discountBadge || 'EXCLUSIVE OFFER'}
-                    </span>
+                    <div style="margin-top:10px;">
+                      <span style="display:inline-block;font-size:10px;font-weight:800;font-family:monospace;background-color:#451a03;color:#fbbf24;border:1px solid #b45309;padding:5px 12px;border-radius:9999px;text-transform:uppercase;letter-spacing:0.5px;">
+                        ${discountBadge || 'EXCLUSIVE OFFER'}
+                      </span>
+                    </div>
                   </td>
                 </tr>
               </table>
