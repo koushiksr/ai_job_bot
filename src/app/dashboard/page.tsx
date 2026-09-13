@@ -59,7 +59,7 @@ export default function UserDashboard() {
   // Help Modal State
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false)
-  const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState<boolean>(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false)
 
   // Initial Load & On-Demand Telemetry Refresh States
   const [pageLoading, setPageLoading] = useState<boolean>(true)
@@ -180,37 +180,24 @@ export default function UserDashboard() {
     refreshAllDashboardData(storedUid, true)
   }, [])
 
-  // If activeTab is set to 'profile', open the slide-over drawer and keep current view clean
+  // If activeTab is set to 'profile', redirect to dedicated /profile route
   useEffect(() => {
     if ((activeTab as string) === 'profile') {
-      setIsProfileDrawerOpen(true)
-      setActiveTab('history')
+      window.location.href = '/profile'
     }
   }, [activeTab])
 
-  // ESC key dismiss handler for aside drawer and audit dialog
+  // ESC key dismiss handler for user menu and audit dialog
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (isProfileDrawerOpen) setIsProfileDrawerOpen(false)
+        if (isUserMenuOpen) setIsUserMenuOpen(false)
         if (selectedJobAudit) setSelectedJobAudit(null)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isProfileDrawerOpen, selectedJobAudit])
-
-  // Prevent background body scrolling when profile drawer is open
-  useEffect(() => {
-    if (isProfileDrawerOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isProfileDrawerOpen])
+  }, [isUserMenuOpen, selectedJobAudit])
 
   const refreshAllDashboardData = async (uid: string, isInitial = false) => {
     if (!uid) return
@@ -514,140 +501,163 @@ export default function UserDashboard() {
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3.5 sm:px-6 py-2.5 sm:py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3.5 sm:px-6 py-2.5 sm:py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
-          {/* Left: Brand Logo & Desktop Candidate Identity */}
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <Link href="/" className="flex items-center hover:opacity-90 transition-opacity shrink-0">
+          {/* Left: Brand Logo & Status */}
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
               <JobFluxLogo size="sm" showText={true} />
             </Link>
-
-            {/* Desktop Only: Candidate Identity & Avatar (Clickable to open Candidate Profile & Resume) */}
-            <button
-              type="button"
-              onClick={() => setIsProfileDrawerOpen(true)}
-              className={`hidden md:flex items-center gap-3 border-l border-zinc-800 pl-3.5 pr-2.5 py-1.5 rounded-xl transition-all cursor-pointer text-left ${
-                isProfileDrawerOpen
-                  ? 'bg-zinc-900 border border-zinc-700 shadow-sm'
-                  : 'hover:bg-zinc-900/60 border border-transparent hover:border-zinc-800'
-              }`}
-              title="Open Candidate Profile & Resume (One-Time Setup)"
-            >
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-semibold text-white text-xs shrink-0 relative">
-                {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
-                <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xs font-semibold text-white truncate max-w-[140px]">
-                    {userName || 'Candidate'}
-                  </h1>
-
-                  {/* VIP Badge in Radiant Gold Color */}
-                  {(isVip || userPlan === 'vip') && (
-                    <span
-                      className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-mono font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.3)] shrink-0"
-                      title="VIP Lifetime Access Pass Active"
-                    >
-                      <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
-                      <span>VIP</span>
-                    </span>
-                  )}
-
-                  {/* Subscription Badge in Gold Color */}
-                  {userPlan !== 'vip' && (
-                    <span className={`inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold shrink-0 transition-all ${
-                      isPlanActive && (userPlan === 'starter' || userPlan === 'pro' || userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise')
-                        ? 'border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.25)]'
-                        : userPlan === 'trial' && isPlanActive
-                        ? 'border border-amber-500/60 bg-amber-950/60 text-amber-300 font-medium shadow-[0_0_8px_rgba(245,158,11,0.15)]'
-                        : userPlan === 'none' || userPlan === 'no_plan'
-                        ? 'bg-zinc-900 border border-zinc-800 text-zinc-500'
-                        : !isPlanActive
-                        ? 'bg-red-950/80 border-red-700/60 text-red-300'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-300'
-                    }`}>
-                      {isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' && (
-                        <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />
-                      )}
-                      <span>
-                        {userPlan === 'none' || userPlan === 'no_plan'
-                          ? 'NO PLAN'
-                          : !isPlanActive
-                          ? 'EXPIRED'
-                          : userPlan === 'trial'
-                          ? 'Free Trial'
-                          : userPlan === 'elite'
-                          ? 'PROFESSIONAL'
-                          : userPlan.toUpperCase()}
-                      </span>
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]">
-                  {userEmail}
-                </p>
-              </div>
-            </button>
+            <div className="hidden sm:flex items-center gap-2 border-l border-zinc-800 pl-3">
+              <span className="text-[11px] font-mono text-zinc-400">Autonomous Radar</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
           </div>
 
-          {/* Right Desktop Actions (Clean & Spaced Out) */}
+          {/* Right Desktop Actions (Clean, Premium & Uncluttered) */}
           <div className="hidden md:flex items-center gap-2.5 shrink-0">
-            <button
-              onClick={() => setIsProfileDrawerOpen(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                isProfileDrawerOpen
-                  ? 'bg-white text-black border-white shadow-sm font-semibold'
-                  : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-300 hover:text-white'
-              }`}
-              title="Open Candidate Profile & Resume Aside Drawer (One-Time Setup)"
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>Profile</span>
-            </button>
-
+            {/* Refresh Live Telemetry (Minimal Icon Button) */}
             <button
               onClick={() => refreshAllDashboardData(userId)}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
-              title="Refresh Telemetry"
+              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+              title="Refresh live application telemetry"
+              aria-label="Refresh telemetry"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-zinc-400 ${isRefreshing ? 'animate-spin' : ''}`} /> 
-              <span>Refresh</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-white' : ''}`} />
             </button>
 
-            <button
-              onClick={() => setIsHelpOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
-            >
-              <Mail className="w-3.5 h-3.5 text-zinc-400" /> 
-              <span>Help & Support</span>
-            </button>
-
-            <Link
-              href="/pricing"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
-            >
-              <Sparkles className="w-3.5 h-3.5" /> 
-              <span>Upgrade Plan</span>
-            </Link>
-
-            {userRole === 'admin' && (
+            {/* Upgrade Plan (Shown only for non-VIP/Free users) */}
+            {!isProfessional && !isVip && (
               <Link
-                href="/admin"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition-colors"
+                href="/pricing"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
               >
-                <Shield className="w-3.5 h-3.5 text-zinc-400" /> <span>Admin</span>
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Upgrade</span>
               </Link>
             )}
 
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-400 hover:text-white cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" /> <span>Sign Out</span>
-            </button>
+            {/* Candidate Identity & Account Menu Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className={`flex items-center gap-2.5 pl-2 pr-2.5 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                  isUserMenuOpen
+                    ? 'bg-zinc-800 border-zinc-700 text-white shadow-sm'
+                    : 'bg-zinc-900 hover:bg-zinc-800/80 border-zinc-800 text-zinc-300 hover:text-white'
+                }`}
+                title="Account settings and profile"
+              >
+                <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center justify-center font-bold text-white text-[11px] shrink-0 relative">
+                  {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
+                </div>
+                <span className="text-xs font-semibold text-white truncate max-w-[130px]">
+                  {userName ? userName.split(' ')[0] : 'Account'}
+                </span>
+                {(isVip || userPlan === 'vip') ? (
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold">
+                    VIP
+                  </span>
+                ) : isProfessional ? (
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold">
+                    PRO
+                  </span>
+                ) : null}
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Luxury Dropdown Menu */}
+              {isUserMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0c0c0e] border border-zinc-800 shadow-2xl py-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-150">
+                    {/* Header / Identity Info */}
+                    <div className="px-3.5 py-2.5 border-b border-zinc-800/80 space-y-0.5">
+                      <div className="font-semibold text-white truncate">{userName || 'Candidate'}</div>
+                      <div className="text-[11px] text-zinc-400 font-mono truncate">{userEmail}</div>
+                      <div className="pt-1 flex items-center gap-1.5">
+                        <span className="text-[10px] font-mono text-zinc-500">Plan:</span>
+                        <span className="text-[10px] font-mono text-emerald-400 font-semibold uppercase">
+                          {isVip ? 'VIP Lifetime Pass' : userPlan || 'Standard'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Navigation Items */}
+                    <div className="py-1">
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                      >
+                        <User className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium">Profile & Credentials</div>
+                          <div className="text-[10px] text-zinc-500">Naukri login, resume & filters</div>
+                        </div>
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-emerald-400 border border-zinc-700">1-Time</span>
+                      </Link>
+
+                      <Link
+                        href="/resume-builder"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium">AI ATS Resume Studio</div>
+                          <div className="text-[10px] text-zinc-500">FAANG Harvard ATS generator</div>
+                        </div>
+                        <span className="text-[9px] font-mono px-1 rounded bg-amber-950 border border-amber-800/60 text-amber-400 font-semibold">PRO</span>
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
+                          setIsHelpOpen(true)
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                      >
+                        <Mail className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <span>Help & Support Center</span>
+                      </button>
+
+                      {userRole === 'admin' && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                        >
+                          <Shield className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                          <span>Admin Console</span>
+                        </Link>
+                      )}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-zinc-800/80 my-1" />
+
+                    {/* Sign Out */}
+                    <div className="px-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 transition-colors cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5 shrink-0" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Right Mobile Actions: Clean, Smart & Uncluttered */}
@@ -697,12 +707,10 @@ export default function UserDashboard() {
           <div className="fixed top-14 right-3 left-3 max-w-sm ml-auto z-50 p-4 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 rounded-2xl shadow-2xl shadow-black/80 space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
             {/* Candidate Identity Card (Clickable to open profile) */}
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
-              <div
-                onClick={() => {
-                  setIsMobileNavOpen(false)
-                  setIsProfileDrawerOpen(true)
-                }}
-                className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+              <Link
+                href="/profile"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity cursor-pointer"
                 title="Click to manage Candidate Profile & Resume"
               >
                 <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0 relative">
@@ -732,7 +740,7 @@ export default function UserDashboard() {
                           : userPlan === 'trial' && isPlanActive
                           ? 'border border-amber-500/60 bg-amber-950/60 text-amber-300 font-medium shadow-[0_0_8px_rgba(245,158,11,0.15)]'
                           : userPlan === 'none' || userPlan === 'no_plan'
-                          ? 'bg-zinc-900 border-zinc-800 text-zinc-500'
+                          ? 'bg-zinc-900 border border-zinc-800 text-zinc-500'
                           : !isPlanActive
                           ? 'bg-red-950/80 border-red-700/60 text-red-300'
                           : 'bg-zinc-900 border-zinc-800 text-zinc-300'
@@ -756,7 +764,7 @@ export default function UserDashboard() {
                   </div>
                   <p className="text-[11px] text-zinc-500 font-mono truncate mt-0.5">{userEmail}</p>
                 </div>
-              </div>
+              </Link>
               <button
                 onClick={() => setIsMobileNavOpen(false)}
                 className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
@@ -767,21 +775,15 @@ export default function UserDashboard() {
 
             {/* Quick Actions List */}
             <div className="space-y-1 text-xs">
-              <button
-                onClick={() => {
-                  setIsMobileNavOpen(false)
-                  setIsProfileDrawerOpen(true)
-                }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors cursor-pointer text-left ${
-                  isProfileDrawerOpen
-                    ? 'bg-zinc-800 text-white font-semibold'
-                    : 'text-zinc-300 hover:text-white hover:bg-zinc-900'
-                }`}
+              <Link
+                href="/profile"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
               >
                 <User className="w-4 h-4 text-zinc-400 shrink-0" />
                 <span>Candidate Profile & Credentials</span>
-                <span className="text-[10px] text-emerald-400 font-mono ml-auto">One-Time</span>
-              </button>
+                <span className="text-[10px] text-emerald-400 font-mono ml-auto">1-Time</span>
+              </Link>
 
               <button
                 onClick={() => {
@@ -1076,71 +1078,50 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Tab Navigation with Dedicated Aside Drawer Trigger */}
-        <div className="flex items-center justify-between gap-2 p-1 bg-zinc-950/90 border border-zinc-800/80 rounded-xl overflow-x-auto scrollbar-none">
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-                activeTab === 'history'
-                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-              }`}
-            >
-              <Briefcase className="w-3.5 h-3.5 shrink-0" />
-              <span>Applications ({historyTotalCount || historyJobs.length})</span>
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('queries')
-                loadUserTickets(userId)
-              }}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-                activeTab === 'queries'
-                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-              }`}
-            >
-              <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-              <span>Inquiries</span>
-              {userTickets.length > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
-                  {userTickets.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('resume_builder')}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-                activeTab === 'resume_builder'
-                  ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              <span>AI ATS Resume</span>
-              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">
-                PRO
-              </span>
-            </button>
-          </div>
-
-          {/* Dedicated Aside Drawer Trigger Button (Like Naukri: Profile & Credentials in Side Drawer) */}
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-zinc-950/90 border border-zinc-800/80 rounded-xl overflow-x-auto scrollbar-none flex-nowrap">
           <button
-            type="button"
-            onClick={() => setIsProfileDrawerOpen(true)}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:py-2 rounded-lg text-xs font-medium border transition-all shrink-0 whitespace-nowrap cursor-pointer ml-auto ${
-              isProfileDrawerOpen
-                ? 'bg-zinc-800 text-white border-zinc-700 shadow-sm'
-                : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800/90 text-zinc-300 hover:text-white hover:border-zinc-700'
+            onClick={() => setActiveTab('history')}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              activeTab === 'history'
+                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
             }`}
-            title="Open Candidate Profile, Resume & Credentials Aside Drawer (One-Time Setup)"
           >
-            <User className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="hidden sm:inline">Profile & Credentials</span>
-            <span className="sm:hidden">Profile</span>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-800 text-emerald-400 border border-zinc-700/80 font-semibold">
-              One-Time
+            <Briefcase className="w-3.5 h-3.5 shrink-0" />
+            <span>Applications ({historyTotalCount || historyJobs.length})</span>
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('queries')
+              loadUserTickets(userId)
+            }}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              activeTab === 'queries'
+                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+            <span>Inquiries</span>
+            {userTickets.length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
+                {userTickets.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('resume_builder')}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
+              activeTab === 'resume_builder'
+                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span>AI ATS Resume</span>
+            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">
+              PRO
             </span>
           </button>
         </div>
@@ -1269,14 +1250,14 @@ export default function UserDashboard() {
                         Configure target job keywords, salary brackets, and exclude current employers.
                       </p>
                     </div>
-                    <button
-                      onClick={() => setIsProfileDrawerOpen(true)}
+                    <Link
+                      href="/profile"
                       className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <User className="w-3 h-3 text-zinc-400" />
                       <span>Configure Filters & Credentials</span>
                       <span className="text-[10px] font-mono text-emerald-400 font-semibold">(One-Time)</span>
-                    </button>
+                    </Link>
                   </div>
 
                   {/* Step 3 */}
@@ -1494,7 +1475,7 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* TAB 2 (SLIDE-OVER DRAWER LAUNCHER): CANDIDATE PROFILE & CREDENTIALS */}
+        {/* TAB 2 (FALLBACK): CANDIDATE PROFILE & CREDENTIALS */}
         {activeTab === 'profile' && (
           <div className="p-8 rounded-2xl bg-[#09090b] border border-zinc-800 text-center space-y-4">
             <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-emerald-400">
@@ -1503,18 +1484,16 @@ export default function UserDashboard() {
             <div>
               <h3 className="text-base font-semibold text-white">Candidate Profile & Credentials</h3>
               <p className="text-xs text-zinc-400 mt-1 max-w-md mx-auto">
-                Your profile, resume, and credentials are now organized in a dedicated slide-over aside drawer (One-Time Setup).
+                Candidate Profile, Resume, and Naukri Credentials are now managed on the dedicated Profile Settings page.
               </p>
             </div>
-            <button
-              onClick={() => {
-                setIsProfileDrawerOpen(true)
-                setActiveTab('history')
-              }}
-              className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors cursor-pointer"
+            <Link
+              href="/profile"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors"
             >
-              Open Profile Aside Drawer
-            </button>
+              <span>Open Profile Settings Page</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         )}
 
@@ -1797,108 +1776,7 @@ export default function UserDashboard() {
         )}
       </main>
 
-      {/* CANDIDATE PROFILE & CREDENTIALS SLIDE-OVER DRAWER (Like Naukri: One-Time Setup in Slide-Over Aside) */}
-      {isProfileDrawerOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
-          {/* Smooth Backdrop with Blur */}
-          <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
-            onClick={() => setIsProfileDrawerOpen(false)}
-            aria-hidden="true"
-          />
 
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10 z-50 pointer-events-none">
-            <aside className="w-screen max-w-4xl bg-[#09090b] border-l border-zinc-800 shadow-2xl flex flex-col h-full overflow-hidden pointer-events-auto animate-in slide-in-from-right duration-300">
-              {/* Sticky Top Header */}
-              <div className="p-4 sm:p-5 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-sm shrink-0">
-                    {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-sm sm:text-base font-semibold text-white tracking-wide truncate">
-                        Candidate Profile & Naukri Credentials
-                      </h2>
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 font-semibold shrink-0">
-                        ONE-TIME SETUP
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 mt-0.5 truncate">
-                      Manage credentials, resume PDF, current employer & bot application preferences.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <button
-                    onClick={() => setIsProfileDrawerOpen(false)}
-                    className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                    title="Close drawer (Esc)"
-                    aria-label="Close drawer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Scrollable Body */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-                {/* Identity & Sync Context Bar */}
-                <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-zinc-400 font-medium">Candidate Account:</span>
-                    <span className="font-semibold text-white">{userName || userId}</span>
-                    <span className="text-zinc-600 hidden sm:inline">·</span>
-                    <span className="text-zinc-400 font-mono text-[11px] truncate">{userEmail}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono text-zinc-500">Autonomous Target:</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
-                      Naukri Portal Automation
-                    </span>
-                  </div>
-                </div>
-
-                {/* Neural ATS Recruiter Readiness Diagnostic Widget */}
-                <NeuralAtsDiagnosticCard
-                  isProfessional={isProfessional}
-                  skillsCount={8}
-                  resumeUploaded={true}
-                  onUnlockClick={(feat) => {
-                    setProModalFeature(feat || 'Professional Suite')
-                    setShowProModal(true)
-                  }}
-                />
-
-                {/* Full Visual Candidate Profile Editor */}
-                <CandidateProfileEditor
-                  userId={userId}
-                  isAdmin={false}
-                  onSaveSuccess={() => {
-                    loadUserData(userId)
-                  }}
-                />
-              </div>
-
-              {/* Drawer Sticky Footer */}
-              <div className="p-3.5 border-t border-zinc-800/80 bg-zinc-950/95 backdrop-blur flex items-center justify-between text-xs text-zinc-400 shrink-0">
-                <span className="text-[11px] font-mono text-zinc-500 hidden sm:inline">
-                  ESC or click outside to dismiss
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsProfileDrawerOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium transition-colors ml-auto cursor-pointer"
-                >
-                  Close Drawer
-                </button>
-              </div>
-            </aside>
-          </div>
-        </div>
-      )}
 
       {/* Professional Tier Perks & Upgrade Modal */}
       <ProfessionalUpgradeModal
