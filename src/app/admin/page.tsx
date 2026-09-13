@@ -33,7 +33,13 @@ import {
   Tag,
   Send,
   Percent,
-  AlertTriangle
+  AlertTriangle,
+  Layers,
+  ListOrdered,
+  PlayCircle,
+  StopCircle,
+  Ban,
+  RotateCcw
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -63,7 +69,31 @@ export default function AdminDashboard() {
   })
 
   // Admin Active Tab
-  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'requests' | 'payments' | 'offers' | 'enterprise_leads' | 'logs'>('candidates')
+  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'logs'>('candidates')
+
+  // Queue & Live Executions State
+  const [queueTasks, setQueueTasks] = useState<any[]>([])
+  const [loadingQueue, setLoadingQueue] = useState<boolean>(false)
+  const [queueMetrics, setQueueMetrics] = useState<{
+    total: number
+    pending: number
+    running: number
+    completed: number
+    failed: number
+    cancelled: number
+  }>({ total: 0, pending: 0, running: 0, completed: 0, failed: 0, cancelled: 0 })
+  const [workerStatus, setWorkerStatus] = useState<{
+    is_busy: boolean
+    active_task_id: string | null
+    active_user_id: string | null
+    started_at: string | null
+  }>({ is_busy: false, active_task_id: null, active_user_id: null, started_at: null })
+  const [queueStatusFilter, setQueueStatusFilter] = useState<string>('all')
+  const [queueSearch, setQueueSearch] = useState<string>('')
+  const [selectedExecutionLog, setSelectedExecutionLog] = useState<any | null>(null)
+  const [actionProcessingId, setActionProcessingId] = useState<string | null>(null)
+  const [queueNotification, setQueueNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [showConfirmCancelAll, setShowConfirmCancelAll] = useState<boolean>(false)
 
   // Purchase Offers & Campaigns State
   const [offersData, setOffersData] = useState<{
@@ -291,6 +321,51 @@ export default function AdminDashboard() {
       })
     } finally {
       setSendingOffer(false)
+    }
+  }
+
+  const fetchQueueData = async (status = queueStatusFilter, search = queueSearch) => {
+    setLoadingQueue(true)
+    try {
+      const params = new URLSearchParams()
+      if (status !== 'all') params.set('status', status)
+      if (search) params.set('q', search)
+      const res = await fetch(`/api/admin/queue?${params.toString()}`, {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setQueueTasks(data.tasks || [])
+        if (data.metrics) setQueueMetrics(data.metrics)
+        if (data.worker_status) setWorkerStatus(data.worker_status)
+      }
+    } catch (err) {
+      console.error('Failed to fetch queue tasks:', err)
+    } finally {
+      setLoadingQueue(false)
+    }
+  }
+
+  const handleQueueAction = async (action: 'mark_not_to_execute' | 'requeue' | 'delete' | 'cancel_all_pending' | 'reclaim_stale', taskId?: string) => {
+    setActionProcessingId(taskId || action)
+    setQueueNotification(null)
+    try {
+      const res = await fetch('/api/admin/queue', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({ action, taskId })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.detail || 'Action failed')
+      }
+      setQueueNotification({ type: 'success', message: data.message })
+      if (action === 'cancel_all_pending') setShowConfirmCancelAll(false)
+      fetchQueueData()
+    } catch (err: any) {
+      setQueueNotification({ type: 'error', message: err.message || 'Error processing queue action' })
+    } finally {
+      setActionProcessingId(null)
     }
   }
 
@@ -776,6 +851,28 @@ export default function AdminDashboard() {
               <span className="text-[10px] font-mono text-zinc-500">
                 ({ticketStats.total})
               </span>
+            )}
+          </button>
+          <button
+            onClick={() => {
+              setActiveAdminTab('queue')
+              fetchQueueData()
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+              activeAdminTab === 'queue'
+                ? 'bg-zinc-800 text-white shadow-sm ring-1 ring-sky-500/30'
+                : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-sky-400" />
+            <span>Execution Queue</span>
+            {queueMetrics.pending > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-mono font-bold animate-pulse">
+                {queueMetrics.pending} in line
+              </span>
+            )}
+            {workerStatus.is_busy && (
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" title="Worker active" />
             )}
           </button>
           <button
@@ -1323,6 +1420,584 @@ export default function AdminDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: EXECUTION QUEUE & WORKER TELEMETRY */}
+        {activeAdminTab === 'queue' && (
+          <div className="space-y-6">
+            {/* Header & Controls */}
+            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-sky-400" />
+                  <span>Execution Queue & Serialized Worker Hub</span>
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Inspect lined-up candidate runs, monitor real-time Playwright execution logs, and mark tasks not to execute.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleQueueAction('reclaim_stale')}
+                  disabled={actionProcessingId === 'reclaim_stale'}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  title="Check and auto-fail running tasks with lost heartbeats"
+                >
+                  <RotateCcw className={`w-3.5 h-3.5 ${actionProcessingId === 'reclaim_stale' ? 'animate-spin' : ''}`} />
+                  <span>Reclaim Stale</span>
+                </button>
+
+                {queueMetrics.pending > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmCancelAll(true)}
+                    className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Ban className="w-3.5 h-3.5" />
+                    <span>Cancel All Pending ({queueMetrics.pending})</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => fetchQueueData(queueStatusFilter, queueSearch)}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingQueue ? 'animate-spin' : ''}`} />
+                  <span>Refresh Queue</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Notification Banner */}
+            {queueNotification && (
+              <div
+                className={`p-4 rounded-xl text-xs flex items-start justify-between gap-3 border ${
+                  queueNotification.type === 'success'
+                    ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
+                    : 'bg-rose-950/40 border-rose-800/50 text-rose-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {queueNotification.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  )}
+                  <span>{queueNotification.message}</span>
+                </div>
+                <button
+                  onClick={() => setQueueNotification(null)}
+                  className="text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Live Worker Status Bar */}
+            <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+              workerStatus.is_busy
+                ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
+                : 'bg-zinc-900/50 border-zinc-800 text-zinc-400'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+                  workerStatus.is_busy
+                    ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                    : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                }`}>
+                  <PlayCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-white flex items-center gap-2">
+                    <span>{workerStatus.is_busy ? 'Worker Process Active & Executing' : 'Queue Worker Idle'}</span>
+                    {workerStatus.is_busy ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        PROCESSING LIVE
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700">
+                        READY FOR JOBS
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    {workerStatus.is_busy ? (
+                      <>
+                        Running applications for candidate <strong className="text-white">{workerStatus.active_user_id}</strong> (Task ID: <code className="font-mono text-emerald-300">{workerStatus.active_task_id}</code>)
+                      </>
+                    ) : (
+                      'Daemon is polling MongoDB Atlas tasks every 3s. Pending requests will be picked up one-by-one in FIFO order.'
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {workerStatus.is_busy && (
+                <button
+                  type="button"
+                  onClick={() => handleQueueAction('mark_not_to_execute', workerStatus.active_task_id!)}
+                  disabled={actionProcessingId === workerStatus.active_task_id}
+                  className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0 self-end sm:self-auto"
+                >
+                  <StopCircle className="w-3.5 h-3.5" />
+                  <span>Abort Active Run</span>
+                </button>
+              )}
+            </div>
+
+            {/* Queue Metrics */}
+            <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+              <div
+                onClick={() => { setQueueStatusFilter('all'); fetchQueueData('all', queueSearch) }}
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  queueStatusFilter === 'all'
+                    ? 'bg-zinc-800 border-zinc-600 ring-1 ring-zinc-500 text-white'
+                    : 'bg-[#09090b] border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                }`}
+              >
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">All Tasks</span>
+                <div className="text-lg font-bold text-white mt-0.5">{queueMetrics.total}</div>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Total queued</p>
+              </div>
+
+              <div
+                onClick={() => { setQueueStatusFilter('pending'); fetchQueueData('pending', queueSearch) }}
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  queueStatusFilter === 'pending'
+                    ? 'bg-amber-950/40 border-amber-500 ring-1 ring-amber-500/50 text-white'
+                    : 'bg-[#09090b] border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50 text-amber-200'
+                }`}
+              >
+                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block">In Line (Pending)</span>
+                <div className="text-lg font-bold text-amber-300 mt-0.5">{queueMetrics.pending}</div>
+                <p className="text-[10px] text-amber-400/80 mt-0.5">Awaiting worker</p>
+              </div>
+
+              <div
+                onClick={() => { setQueueStatusFilter('running'); fetchQueueData('running', queueSearch) }}
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  queueStatusFilter === 'running'
+                    ? 'bg-emerald-950/40 border-emerald-500 ring-1 ring-emerald-500/50 text-white'
+                    : 'bg-[#09090b] border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50 text-emerald-200'
+                }`}
+              >
+                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block">Running Now</span>
+                <div className="text-lg font-bold text-emerald-300 mt-0.5">{queueMetrics.running}</div>
+                <p className="text-[10px] text-emerald-400/80 mt-0.5">In execution</p>
+              </div>
+
+              <div
+                onClick={() => { setQueueStatusFilter('completed'); fetchQueueData('completed', queueSearch) }}
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  queueStatusFilter === 'completed'
+                    ? 'bg-zinc-800 border-zinc-600 ring-1 ring-zinc-500 text-white'
+                    : 'bg-[#09090b] border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                }`}
+              >
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">Completed</span>
+                <div className="text-lg font-bold text-white mt-0.5">{queueMetrics.completed}</div>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Finished runs</p>
+              </div>
+
+              <div
+                onClick={() => { setQueueStatusFilter('cancelled'); fetchQueueData('cancelled', queueSearch) }}
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  queueStatusFilter === 'cancelled'
+                    ? 'bg-zinc-800 border-zinc-600 ring-1 ring-zinc-500 text-white'
+                    : 'bg-[#09090b] border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                }`}
+              >
+                <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">Cancelled / Skipped</span>
+                <div className="text-lg font-bold text-zinc-300 mt-0.5">{queueMetrics.cancelled}</div>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Not to execute</p>
+              </div>
+
+              <div
+                onClick={() => { setQueueStatusFilter('failed'); fetchQueueData('failed', queueSearch) }}
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  queueStatusFilter === 'failed'
+                    ? 'bg-rose-950/40 border-rose-500 ring-1 ring-rose-500/50 text-white'
+                    : 'bg-[#09090b] border-zinc-800 hover:border-rose-900/50 text-zinc-300'
+                }`}
+              >
+                <span className="text-[10px] font-mono text-rose-400 uppercase tracking-wider block">Failed / Timeouts</span>
+                <div className="text-lg font-bold text-rose-400 mt-0.5">{queueMetrics.failed}</div>
+                <p className="text-[10px] text-rose-500/80 mt-0.5">Execution errors</p>
+              </div>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+                <span className="text-xs text-zinc-500 font-medium mr-1">Filter by Status:</span>
+                {(['all', 'pending', 'running', 'completed', 'cancelled', 'failed'] as const).map(st => (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => { setQueueStatusFilter(st); fetchQueueData(st, queueSearch) }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all cursor-pointer ${
+                      queueStatusFilter === st
+                        ? 'bg-zinc-800 text-white border border-zinc-700'
+                        : 'bg-black text-zinc-400 hover:text-white border border-zinc-800'
+                    }`}
+                  >
+                    {st === 'cancelled' ? 'Not Executing' : st}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative w-full md:w-80">
+                <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  value={queueSearch}
+                  onChange={(e) => {
+                    setQueueSearch(e.target.value)
+                    fetchQueueData(queueStatusFilter, e.target.value)
+                  }}
+                  placeholder="Search candidate, user ID, task ID..."
+                  className="w-full bg-black border border-zinc-800 focus:border-sky-500 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-600 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Tasks Table */}
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+              <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <ListOrdered className="w-4 h-4 text-sky-400" />
+                    <span>Queue Tasks & Execution Logs</span>
+                  </h4>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Live tasks lined up for Playwright automated runs.
+                  </p>
+                </div>
+                <span className="text-xs font-mono text-zinc-500">
+                  {queueTasks.length} task records
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
+                      <th className="py-3 px-4">Queue / State</th>
+                      <th className="py-3 px-4">Candidate & Plan</th>
+                      <th className="py-3 px-4">Trigger Source</th>
+                      <th className="py-3 px-4">Timeline / Heartbeat</th>
+                      <th className="py-3 px-4">Applications / Summary</th>
+                      <th className="py-3 px-4 text-center">Execution Logs</th>
+                      <th className="py-3 px-4 text-center">Admin Controls</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60">
+                    {queueTasks.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-zinc-500 italic">
+                          No tasks matching the selected filter in queue.
+                        </td>
+                      </tr>
+                    ) : (
+                      queueTasks.map((t: any) => {
+                        const isPending = t.status === 'pending'
+                        const isRunning = t.status === 'running'
+                        const isCancelled = t.status === 'cancelled' || t.status === 'stopped'
+                        const isCompleted = t.status === 'completed'
+                        const isFailed = t.status === 'failed'
+
+                        return (
+                          <tr key={t.id} className="hover:bg-zinc-900/40 transition-colors">
+                            {/* Queue / Status Column */}
+                            <td className="py-3.5 px-4">
+                              {isPending ? (
+                                <div className="space-y-1">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                                    <Clock className="w-3 h-3 text-amber-400" />
+                                    #{t.queue_position} IN LINE
+                                  </span>
+                                  <span className="block text-[10px] text-zinc-500 font-mono">Waiting for turn</span>
+                                </div>
+                              ) : isRunning ? (
+                                <div className="space-y-1">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                    RUNNING NOW
+                                  </span>
+                                  <span className="block text-[10px] text-emerald-400/80 font-mono">
+                                    {t.heartbeat_seconds_ago !== null ? `Pulse: ${t.heartbeat_seconds_ago}s ago` : 'Active'}
+                                  </span>
+                                </div>
+                              ) : isCancelled ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-zinc-800 text-zinc-400 border border-zinc-700">
+                                  <Ban className="w-3 h-3 text-zinc-400" />
+                                  NOT EXECUTING
+                                </span>
+                              ) : isCompleted ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  COMPLETED
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  FAILED
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Candidate & Plan */}
+                            <td className="py-3.5 px-4">
+                              <div className="font-semibold text-white truncate max-w-[160px]">{t.candidate_name}</div>
+                              <div className="text-[11px] text-zinc-400 font-mono truncate max-w-[160px]">{t.candidate_email || t.user_id}</div>
+                              <div className="pt-0.5 flex items-center gap-1">
+                                {t.is_vip ? (
+                                  <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/60 px-1 rounded">VIP PASS</span>
+                                ) : (
+                                  <span className="text-[9px] font-mono text-zinc-400 uppercase bg-zinc-800 px-1 rounded">{t.candidate_plan}</span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Source */}
+                            <td className="py-3.5 px-4">
+                              <span className="text-zinc-300 font-mono text-[11px] block">
+                                {t.source === 'web_dashboard_on_demand'
+                                  ? 'On-Demand (UI)'
+                                  : t.source === 'daily_cron'
+                                  ? 'Daily Auto-Sweep'
+                                  : t.source === 'admin_dispatch'
+                                  ? 'Admin Trigger'
+                                  : t.source}
+                              </span>
+                              <span className="text-[10px] text-zinc-500 font-mono">
+                                {t.headless ? 'Headless Mode' : 'Desktop Window'}
+                              </span>
+                            </td>
+
+                            {/* Timeline */}
+                            <td className="py-3.5 px-4 text-[11px] text-zinc-400 font-mono space-y-0.5">
+                              <div>Queued: {new Date(t.created_at).toLocaleTimeString()}</div>
+                              {t.started_at && <div>Started: {new Date(t.started_at).toLocaleTimeString()}</div>}
+                              {t.completed_at && <div>Finished: {new Date(t.completed_at).toLocaleTimeString()}</div>}
+                            </td>
+
+                            {/* Results / Summary */}
+                            <td className="py-3.5 px-4 max-w-[200px]">
+                              {t.jobs_applied > 0 && (
+                                <span className="inline-block px-1.5 py-0.2 rounded text-[10px] bg-sky-950/60 text-sky-300 border border-sky-800/60 font-mono font-bold mb-1">
+                                  {t.jobs_applied} applied
+                                </span>
+                              )}
+                              <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                                {t.summary || (isPending ? 'Waiting in line to be executed' : isRunning ? 'Applying live...' : 'No summary')}
+                              </p>
+                            </td>
+
+                            {/* Execution Logs Button */}
+                            <td className="py-3.5 px-4 text-center">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedExecutionLog(t)}
+                                className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] font-mono transition-colors cursor-pointer"
+                              >
+                                View Logs ({t.logs_count})
+                              </button>
+                            </td>
+
+                            {/* Admin Actions */}
+                            <td className="py-3.5 px-4 text-center">
+                              <div className="flex items-center justify-center gap-1.5">
+                                {isPending && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQueueAction('mark_not_to_execute', t.task_id)}
+                                    disabled={actionProcessingId === t.task_id}
+                                    className="px-2.5 py-1 rounded-md bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                                    title="Mark task not to execute. Worker will skip this task."
+                                  >
+                                    <Ban className="w-3 h-3 text-rose-400" />
+                                    <span>Mark Not to Execute</span>
+                                  </button>
+                                )}
+
+                                {isRunning && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQueueAction('mark_not_to_execute', t.task_id)}
+                                    disabled={actionProcessingId === t.task_id}
+                                    className="px-2.5 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/50 text-rose-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                                    title="Abort live execution cleanly"
+                                  >
+                                    <StopCircle className="w-3 h-3 text-rose-400" />
+                                    <span>Abort Execution</span>
+                                  </button>
+                                )}
+
+                                {isCancelled && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQueueAction('requeue', t.task_id)}
+                                    disabled={actionProcessingId === t.task_id}
+                                    className="px-2.5 py-1 rounded-md bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-[11px] font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                                    title="Put task back in execution queue"
+                                  >
+                                    <RotateCcw className="w-3 h-3 text-sky-400" />
+                                    <span>Re-queue</span>
+                                  </button>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleQueueAction('delete', t.task_id)}
+                                  disabled={actionProcessingId === t.task_id}
+                                  className="p-1 rounded-md text-zinc-500 hover:text-rose-400 hover:bg-rose-950/20 transition-colors cursor-pointer"
+                                  title="Delete task record"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Live Execution Logs Drawer / Modal */}
+        {selectedExecutionLog && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl shadow-black flex flex-col max-h-[85vh]">
+              {/* Modal Header */}
+              <div className="p-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-sky-400" />
+                    <span>Execution Stream: {selectedExecutionLog.candidate_name} ({selectedExecutionLog.user_id})</span>
+                  </h4>
+                  <p className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                    Task ID: {selectedExecutionLog.task_id} · Status: <span className="uppercase text-sky-300 font-bold">{selectedExecutionLog.status}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedExecutionLog(null)}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Logs Content Area */}
+              <div className="p-4 bg-black overflow-y-auto flex-1 font-mono text-xs space-y-1 select-text">
+                {selectedExecutionLog.logs_preview && selectedExecutionLog.logs_preview.length > 0 ? (
+                  selectedExecutionLog.logs_preview.map((line: string, i: number) => (
+                    <div
+                      key={i}
+                      className={`leading-relaxed ${
+                        line.includes('❌') || line.includes('Error')
+                          ? 'text-rose-400'
+                          : line.includes('🛑')
+                          ? 'text-amber-400'
+                          : line.includes('🎉') || line.includes('COMPLETED')
+                          ? 'text-emerald-400 font-semibold'
+                          : line.includes('🎬') || line.includes('🚀')
+                          ? 'text-sky-300'
+                          : 'text-zinc-300'
+                      }`}
+                    >
+                      {line}
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-zinc-500 italic">
+                    No log lines captured yet for this task.
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-3.5 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between text-xs">
+                <div className="text-zinc-400">
+                  Total Captured Lines: <strong className="text-white">{selectedExecutionLog.logs_count}</strong>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {selectedExecutionLog.status === 'pending' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleQueueAction('mark_not_to_execute', selectedExecutionLog.task_id)
+                        setSelectedExecutionLog(null)
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-semibold cursor-pointer"
+                    >
+                      Mark Not to Execute
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedExecutionLog(null)}
+                    className="px-4 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-semibold cursor-pointer"
+                  >
+                    Close Log
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Cancel All Pending Confirmation Modal */}
+        {showConfirmCancelAll && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black space-y-4">
+              <div className="flex items-center gap-3 text-rose-400">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Cancel Entire Pending Queue?</h3>
+                  <p className="text-[11px] text-zinc-400">Confirmation safeguard</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                You are about to mark all <strong className="text-white font-bold">{queueMetrics.pending} pending task(s)</strong> as <span className="text-rose-400 font-semibold">&ldquo;Not to Execute&rdquo;</span>.
+                The background worker will skip these tasks and will not run browser automations for them.
+              </p>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmCancelAll(false)}
+                  className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQueueAction('cancel_all_pending')}
+                  disabled={actionProcessingId === 'cancel_all_pending'}
+                  className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <Ban className="w-3.5 h-3.5" />
+                  <span>Yes, Cancel All ({queueMetrics.pending})</span>
+                </button>
               </div>
             </div>
           </div>
