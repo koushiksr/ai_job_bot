@@ -1,8 +1,9 @@
 /**
- * JobFlux AI Service Worker for Background Web Push Notifications
+ * JobFlux AI Service Worker for Real Background Web Push Notifications
  * 
- * Runs independently of open browser tabs to deliver native OS desktop and mobile
- * push notifications even when the web application is completely closed.
+ * Complies with W3C Web Push, Google FCM, and Apple APNs specifications.
+ * Delivers native OS desktop and mobile push notifications even when the web application
+ * is completely closed.
  */
 
 self.addEventListener('install', (event) => {
@@ -27,14 +28,25 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  const origin = self.location.origin
   const title = data.title || '⚡ JobFlux AI Radar Alert'
+
+  // Apple APNs & Google FCM require absolute URLs for icons
+  const iconUrl = data.icon 
+    ? (data.icon.startsWith('http') ? data.icon : new URL(data.icon, origin).href)
+    : new URL('/images/icon.png', origin).href
+
+  const badgeUrl = data.badge
+    ? (data.badge.startsWith('http') ? data.badge : new URL(data.badge, origin).href)
+    : new URL('/images/icon.png', origin).href
+
   const options = {
     body: data.body || data.message || 'You have a new priority alert from JobFlux AI.',
-    icon: data.icon || '/images/icon.png',
-    badge: data.badge || '/images/icon.png',
+    icon: iconUrl,
+    badge: badgeUrl,
+    vibrate: [200, 100, 200, 100, 200],
     tag: data.tag || `jobflux_${Date.now()}`,
     renotify: true,
-    requireInteraction: true, // Keep notification visible until user interacts with it
     data: {
       url: data.url || data.claim_url || '/dashboard',
       timestamp: Date.now()
@@ -44,7 +56,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options))
 })
 
-// Handle user clicking on the notification
+// Handle user clicking on the notification banner
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 

@@ -10,7 +10,7 @@
 export const APP_CONFIG = {
   name: 'JobFlux AI',
   tagline: 'Autonomous AI Job Application Engine',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'https://jobfluxai.com',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://jobfluxai.vercel.app',
   
   // Support and operational contact
   supportEmail: 'technohmsit@gmail.com',

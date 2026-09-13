@@ -49,12 +49,17 @@ export async function sendPushToSubscription(
 ): Promise<{ success: boolean; statusCode?: number; error?: string }> {
   try {
     await configureVapid(db)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://jobfluxai.vercel.app'
+    const fullUrl = payload.url?.startsWith('http') ? payload.url : `${baseUrl}${payload.url || '/dashboard'}`
+    const fullIcon = payload.icon?.startsWith('http') ? payload.icon : `${baseUrl}/images/icon.png`
+    const fullBadge = payload.badge?.startsWith('http') ? payload.badge : `${baseUrl}/images/icon.png`
+
     const jsonPayload = JSON.stringify({
       title: payload.title,
       body: payload.body,
-      url: payload.url || '/dashboard',
-      icon: payload.icon || '/images/icon.png',
-      badge: payload.badge || '/images/icon.png',
+      url: fullUrl,
+      icon: fullIcon,
+      badge: fullBadge,
       tag: payload.tag || `jobflux_${Date.now()}`
     })
 
@@ -105,7 +110,13 @@ export async function sendPushToUser(
 
   const clean = email.toLowerCase().trim()
   const subscriptions = await db.collection('push_subscriptions')
-    .find({ email: clean })
+    .find({
+      $or: [
+        { email: clean },
+        { user_id: clean },
+        { email: { $regex: new RegExp(`^${clean}$`, 'i') } }
+      ]
+    })
     .toArray()
 
   let delivered = 0

@@ -161,25 +161,54 @@ export async function subscribeDeviceToPush(
 }
 
 /**
- * Dispatch an interactive in-browser notification.
- * Works when page is active; Service Worker handles notifications when page is closed.
+ * Dispatch a native operating system notification.
+ * Uses ServiceWorkerRegistration.showNotification() to ensure OS-level desktop & mobile
+ * delivery on Android, iOS, macOS Notification Center, and Windows.
  */
-export function sendBrowserNotification(
+export async function sendBrowserNotification(
   title: string,
   options?: AppNotificationOptions
-): Notification | null {
+): Promise<boolean> {
   if (typeof window === 'undefined' || !('Notification' in window)) {
-    return null
+    return false
   }
 
   if (Notification.permission !== 'granted') {
-    return null
+    return false
   }
 
+  const origin = window.location.origin
+  const iconUrl = new URL(options?.icon || APP_CONFIG.assets.iconPng, origin).href
+  const badgeUrl = new URL(options?.badge || APP_CONFIG.assets.iconPng, origin).href
+
+  // 1. PRIMARY: ServiceWorkerRegistration.showNotification()
+  // Delivers true OS system notifications on Android, iOS, macOS Notification Center, and Windows!
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.ready
+      if (reg && typeof reg.showNotification === 'function') {
+        const swOptions: any = {
+          icon: iconUrl,
+          badge: badgeUrl,
+          vibrate: [200, 100, 200, 100, 200],
+          data: {
+            url: (options as any)?.data?.url || (options as any)?.url || '/dashboard'
+          },
+          ...options
+        }
+        await reg.showNotification(title, swOptions)
+        return true
+      }
+    } catch (swErr) {
+      console.warn('SW showNotification error, falling back to window Notification:', swErr)
+    }
+  }
+
+  // 2. FALLBACK: window.Notification (legacy desktop fallback)
   try {
     const notification = new Notification(title, {
-      icon: APP_CONFIG.assets.iconPng,
-      badge: APP_CONFIG.assets.iconPng,
+      icon: iconUrl,
+      badge: badgeUrl,
       ...options
     })
 
@@ -193,9 +222,9 @@ export function sendBrowserNotification(
       notification.close()
     }
 
-    return notification
+    return true
   } catch (error) {
     console.warn('Could not dispatch browser notification:', error)
-    return null
+    return false
   }
 }
