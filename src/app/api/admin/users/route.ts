@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
+import { evaluateOfferEligibility } from '@/lib/offerEligibility'
 
 export async function GET(req: NextRequest) {
   try {
@@ -37,6 +38,7 @@ export async function GET(req: NextRequest) {
       const exp = o.expires_at ? new Date(o.expires_at) : null
       const isExp = exp ? now > exp : false
       offersByEmail[em].push({
+        id: o._id.toString(),
         promo_code: o.promo_code,
         offer_title: o.offer_title,
         discount_badge: o.discount_badge,
@@ -44,7 +46,8 @@ export async function GET(req: NextRequest) {
         claimed: Boolean(o.claimed),
         expires_at: o.expires_at || null,
         is_expired: isExp,
-        hours_left: exp && !isExp ? Math.round((exp.getTime() - now.getTime()) / 3600000) : 0
+        hours_left: exp && !isExp ? Math.round((exp.getTime() - now.getTime()) / 3600000) : 0,
+        revoked: Boolean(o.revoked)
       })
     })
 
@@ -99,6 +102,7 @@ export async function GET(req: NextRequest) {
         trial_expires_at: p.trial_expires_at || null,
         plan_expiry_status: planExpiryStatus,
         plan_hours_left: planHoursLeft,
+        offer_eligibility: evaluateOfferEligibility(p),
         assigned_offers: userOffers,
         reminders_sent: userReminders,
         is_vip: Boolean(p.is_vip || p.vip_access || p.free_privilege),

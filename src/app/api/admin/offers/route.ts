@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 import { OFFER_PRESETS } from '@/config/plans'
 import { sendPushToUser } from '@/lib/webPushService'
+import { evaluateOfferEligibility } from '@/lib/offerEligibility'
 
 
 
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
     const assignedOffersList = await db.collection('assigned_offers')
       .find({})
       .sort({ created_at: -1 })
-      .limit(60)
+      .limit(100)
       .toArray()
 
     const activeAssignedOffers = assignedOffersList.map(o => {
@@ -71,6 +72,7 @@ export async function GET(req: NextRequest) {
         validity_hours: o.validity_hours || 48,
         is_expired: isExpired,
         hours_left: hoursLeft,
+        revoked: Boolean(o.revoked),
         created_at: o.created_at
       }
     })
@@ -81,8 +83,9 @@ export async function GET(req: NextRequest) {
         total_candidates: allProfiles.length,
         unsubscribed_count: unsubscribedOrTrial.length,
         subscribed_count: Math.max(0, allProfiles.length - unsubscribedOrTrial.length),
-        active_assigned_offers: activeAssignedOffers.filter(o => !o.claimed && !o.is_expired).length,
-        expired_offers: activeAssignedOffers.filter(o => o.is_expired).length
+        active_assigned_offers: activeAssignedOffers.filter(o => !o.claimed && !o.is_expired && !o.revoked).length,
+        expired_offers: activeAssignedOffers.filter(o => o.is_expired && !o.revoked).length,
+        revoked_offers: activeAssignedOffers.filter(o => o.revoked).length
       },
       assigned_offers: activeAssignedOffers,
       history: history.map(h => ({
@@ -134,7 +137,8 @@ export async function POST(req: NextRequest) {
       validityHours = 48,
       validUntil = null,
       customMessage = '',
-      confirmedByAdmin = false
+      confirmedByAdmin = false,
+      forceOverride = false
     } = body
 
     // Enforce explicit Admin Confirmation safeguard
@@ -153,7 +157,7 @@ export async function POST(req: NextRequest) {
     const offerExpiresAt = validUntil ? new Date(validUntil) : new Date(Date.now() + hours * 60 * 60 * 1000)
 
     // Determine target candidates
-    let candidatesToNotify: Array<{ email: string; name: string }> = []
+    let rawTargets: Array<{ email: string; name: string }> = []
 
     if (targetType === 'multiple') {
       const rawList: string[] = Array.isArray(targetEmails)
@@ -166,7 +170,7 @@ export async function POST(req: NextRequest) {
           seen.add(em)
           const user = await db.collection('users').findOne({ email: { $regex: `^${em}$`, $options: 'i' } }) ||
                        await db.collection('profiles').findOne({ email: { $regex: `^${em}$`, $options: 'i' } })
-          candidatesToNotify.push({
+          rawTargets.push({
             email: em,
             name: user?.name || em.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ')
           })
@@ -181,32 +185,30 @@ export async function POST(req: NextRequest) {
       const user = await db.collection('users').findOne({ email: { $regex: `^${cleanTarget}$`, $options: 'i' } }) ||
                    await db.collection('profiles').findOne({ email: { $regex: `^${cleanTarget}$`, $options: 'i' } })
 
-      candidatesToNotify.push({
+      // Single candidate sales eligibility check
+      const eligibility = evaluateOfferEligibility(user)
+      if (!eligibility.eligible && !forceOverride) {
+        return NextResponse.json({
+          status: 'ineligible',
+          detail: `Offer dispatch restricted by sales policy: ${eligibility.reason}`,
+          eligibility,
+          can_override: true
+        }, { status: 422 })
+      }
+
+      rawTargets.push({
         email: cleanTarget,
         name: user?.name || cleanTarget.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ')
       })
     } else if (targetType === 'bulk_unsubscribed') {
       const allUsers = await db.collection('users').find({}).toArray()
       const allProfiles = allUsers.length > 0 ? allUsers : await db.collection('profiles').find({}).toArray()
-      const now = new Date()
-
-      const targets = allProfiles.filter(p => {
-        if (!p.email || !p.email.includes('@')) return false
-        const plan = (p.plan || 'none').toLowerCase()
-        if (plan === 'none' || plan === 'no_plan') return true
-        if (plan === 'trial') {
-          const expires = p.trial_expires_at ? new Date(p.trial_expires_at) : null
-          return !expires || expires < now
-        }
-        return false
-      })
-
       const seen = new Set<string>()
-      targets.forEach(t => {
-        const em = t.email.toLowerCase().trim()
-        if (!seen.has(em)) {
+      allProfiles.forEach(t => {
+        const em = (t.email || '').toLowerCase().trim()
+        if (em && em.includes('@') && !seen.has(em)) {
           seen.add(em)
-          candidatesToNotify.push({
+          rawTargets.push({
             email: em,
             name: t.name || em.split('@')[0]
           })
@@ -221,7 +223,7 @@ export async function POST(req: NextRequest) {
         const em = (t.email || '').toLowerCase().trim()
         if (em && em.includes('@') && !seen.has(em)) {
           seen.add(em)
-          candidatesToNotify.push({
+          rawTargets.push({
             email: em,
             name: t.name || em.split('@')[0]
           })
@@ -229,12 +231,43 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    if (candidatesToNotify.length === 0) {
+    if (rawTargets.length === 0) {
       return NextResponse.json(
-        { detail: 'No eligible candidate recipients found for the selected target filter.' },
+        { detail: 'No candidate recipients found for the selected target filter.' },
         { status: 400 }
       )
     }
+
+    // Filter by sales eligibility (or allow all if admin explicitly overrides)
+    const eligibleCandidates: Array<{ email: string; name: string }> = []
+    const skippedCandidates: Array<{ email: string; name: string; reason: string }> = []
+
+    for (const c of rawTargets) {
+      const user = await db.collection('users').findOne({ email: { $regex: `^${c.email}$`, $options: 'i' } }) ||
+                   await db.collection('profiles').findOne({ email: { $regex: `^${c.email}$`, $options: 'i' } })
+      const el = evaluateOfferEligibility(user)
+      if (el.eligible || forceOverride) {
+        eligibleCandidates.push(c)
+      } else {
+        skippedCandidates.push({
+          email: c.email,
+          name: c.name,
+          reason: el.reason
+        })
+      }
+    }
+
+    if (eligibleCandidates.length === 0) {
+      return NextResponse.json({
+        status: 'all_ineligible',
+        detail: `All ${skippedCandidates.length} candidate(s) currently have active plans with > 48h remaining or VIP passes. Promotional offers are restricted to candidates with no plan, expired plan, or within 1-2 days of expiry to protect subscription value.`,
+        skipped_count: skippedCandidates.length,
+        skipped_candidates: skippedCandidates,
+        can_override: true
+      }, { status: 422 })
+    }
+
+    const candidatesToNotify = eligibleCandidates
 
     // Dispatch offers via Dual-Channel (Email + Native Background Web Push)
     const dispatchedRecipients: string[] = []
@@ -372,10 +405,16 @@ export async function POST(req: NextRequest) {
       }
     })
 
+    const responseMsg = skippedCandidates.length > 0
+      ? `✓ Offer dispatched to ${dispatchedRecipients.length} eligible candidate(s). Skipped ${skippedCandidates.length} candidate(s) with active subscriptions (> 48h remaining) to protect revenue.`
+      : `✓ Offer successfully dispatched to ${dispatchedRecipients.length} candidate(s) (${totalEmailsSent} emails sent, ${totalPushDelivered} devices reached via Web Push).`
+
     return NextResponse.json({
       status: 'success',
-      message: `✓ Offer successfully dispatched to ${dispatchedRecipients.length} candidate(s) (${totalEmailsSent} emails sent, ${totalPushDelivered} devices reached via Web Push).`,
+      message: responseMsg,
       dispatched_count: dispatchedRecipients.length,
+      skipped_count: skippedCandidates.length,
+      skipped_candidates: skippedCandidates,
       emails_sent: totalEmailsSent,
       push_delivered: totalPushDelivered,
       recipients: dispatchedRecipients
@@ -383,5 +422,87 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('Admin offer dispatch error:', err)
     return NextResponse.json({ detail: err.message || 'Failed to dispatch offer campaign' }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const db = await getDb()
+    if (!db) {
+      return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
+    }
+
+    const { authorized, userId, email: adminEmail } = await verifyAdminRequest(req, db)
+    if (!authorized) {
+      return NextResponse.json({ detail: 'Forbidden: Administrator privileges required.' }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const offerId = searchParams.get('id')
+    const candidateEmail = searchParams.get('candidate_email')
+    const promoCode = searchParams.get('promo_code')
+
+    if (!offerId && !candidateEmail) {
+      return NextResponse.json(
+        { detail: 'Please specify offer id or candidate_email to remove offer.' },
+        { status: 400 }
+      )
+    }
+
+    let filter: any = {}
+    if (offerId) {
+      const { ObjectId } = await import('mongodb')
+      try {
+        filter._id = new ObjectId(offerId)
+      } catch {
+        filter._id = offerId
+      }
+    } else if (candidateEmail) {
+      filter.candidate_email = candidateEmail.toLowerCase().trim()
+      if (promoCode) {
+        filter.promo_code = promoCode.trim().toUpperCase()
+      }
+    }
+
+    const existing = await db.collection('assigned_offers').findOne(filter)
+    if (!existing) {
+      return NextResponse.json({ detail: 'Assigned offer not found or already removed.' }, { status: 404 })
+    }
+
+    // Permanently remove the assigned offer so it disappears from candidate dashboard & checkout
+    await db.collection('assigned_offers').deleteOne(filter)
+
+    // Clean up corresponding real-time notification
+    if (existing.candidate_email && existing.promo_code) {
+      await db.collection('user_notifications').deleteMany({
+        email: existing.candidate_email,
+        promo_code: existing.promo_code
+      })
+    }
+
+    const { ip, userAgent } = getClientInfo(req)
+    await logUserActivity(db, {
+      userId: userId || 'admin',
+      email: adminEmail || 'admin@jobfluxai.com',
+      eventType: 'plan_update',
+      description: `Revoked promotional offer "${existing.promo_code}" (${existing.offer_title}) from candidate ${existing.candidate_email}`,
+      ipAddress: ip,
+      userAgent: userAgent,
+      metadata: {
+        revoked_promo: existing.promo_code,
+        candidate_email: existing.candidate_email
+      }
+    })
+
+    return NextResponse.json({
+      status: 'success',
+      message: `✓ Offer "${existing.promo_code}" (${existing.discount_badge || 'Promo'}) has been revoked from ${existing.candidate_email}. It has been completely removed from their account.`,
+      revoked_id: offerId,
+      candidate_email: existing.candidate_email,
+      promo_code: existing.promo_code
+    })
+  } catch (err: any) {
+    console.error('Admin delete offer error:', err)
+    return NextResponse.json({ detail: err.message || 'Failed to revoke offer' }, { status: 500 })
   }
 }

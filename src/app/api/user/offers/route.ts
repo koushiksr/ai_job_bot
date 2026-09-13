@@ -33,7 +33,8 @@ export async function GET(req: NextRequest) {
     const assignedOffers = await db.collection('assigned_offers')
       .find({
         candidate_email: cleanEmail,
-        claimed: false
+        claimed: false,
+        revoked: { $ne: true }
       })
       .sort({ created_at: -1 })
       .toArray()
@@ -148,7 +149,8 @@ export async function POST(req: NextRequest) {
     const assigned = await db.collection('assigned_offers').findOne({
       candidate_email: email,
       promo_code: cleanPromo,
-      claimed: false
+      claimed: false,
+      revoked: { $ne: true }
     })
 
     if (!assigned) {

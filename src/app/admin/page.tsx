@@ -108,11 +108,20 @@ export default function AdminDashboard() {
   // Purchase Offers & Campaigns State
   const [offersData, setOffersData] = useState<{
     presets: any[]
-    metrics: { total_candidates: number; unsubscribed_count: number; subscribed_count: number }
+    metrics: {
+      total_candidates: number
+      unsubscribed_count: number
+      subscribed_count: number
+      active_assigned_offers?: number
+      expired_offers?: number
+      revoked_offers?: number
+    }
+    assigned_offers?: any[]
     history: any[]
   }>({
     presets: OFFER_PRESETS,
     metrics: { total_candidates: 0, unsubscribed_count: 0, subscribed_count: 0 },
+    assigned_offers: [],
     history: []
   })
   const [loadingOffers, setLoadingOffers] = useState<boolean>(false)
@@ -133,6 +142,9 @@ export default function AdminDashboard() {
   const [isConfirmOfferModalOpen, setIsConfirmOfferModalOpen] = useState<boolean>(false)
   const [sendingOffer, setSendingOffer] = useState<boolean>(false)
   const [validityHours, setValidityHours] = useState<number>(48)
+  const [forceOverride, setForceOverride] = useState<boolean>(false)
+  const [revokingOfferId, setRevokingOfferId] = useState<string | null>(null)
+  const [assignedOfferFilter, setAssignedOfferFilter] = useState<string>('all')
   const [offerNotification, setOfferNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   // Plan & Offer Expiry Telemetry State
@@ -655,6 +667,54 @@ export default function AdminDashboard() {
     setCustomMessage(preset.customMessage)
   }
 
+  const handleRevokeOffer = async (offerId?: string, candidateEmail?: string, promoCode?: string) => {
+    if (!confirm(`Are you sure you want to revoke and delete offer "${promoCode || 'this offer'}" from ${candidateEmail || 'this candidate'}? It will immediately disappear from their account.`)) {
+      return
+    }
+    setRevokingOfferId(offerId || candidateEmail || 'revoking')
+    try {
+      const params = new URLSearchParams()
+      if (offerId) params.set('id', offerId)
+      if (candidateEmail) params.set('candidate_email', candidateEmail)
+      if (promoCode) params.set('promo_code', promoCode)
+
+      const res = await fetch(`/api/admin/offers?${params.toString()}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.detail || 'Failed to revoke offer')
+
+      setOfferNotification({
+        type: 'success',
+        message: data.message || `Offer successfully revoked.`
+      })
+
+      // Update inspectCandidate if open
+      if (inspectCandidate && (inspectCandidate.email === candidateEmail || !candidateEmail)) {
+        setInspectCandidate((prev: any) => {
+          if (!prev) return null
+          return {
+            ...prev,
+            assigned_offers: (prev.assigned_offers || []).filter((o: any) =>
+              offerId ? o.id !== offerId : o.promo_code !== promoCode
+            )
+          }
+        })
+      }
+
+      await fetchOffersData()
+      await fetchOverviewAndUsers()
+    } catch (err: any) {
+      setOfferNotification({
+        type: 'error',
+        message: err.message || 'Error revoking offer.'
+      })
+    } finally {
+      setRevokingOfferId(null)
+    }
+  }
+
   const handleDispatchOffer = async () => {
     setSendingOffer(true)
     setOfferNotification(null)
@@ -684,6 +744,7 @@ export default function AdminDashboard() {
           promoCode,
           customMessage,
           validityHours,
+          forceOverride,
           confirmedByAdmin: true
         })
       })
@@ -1747,12 +1808,22 @@ export default function AdminDashboard() {
                                 Assigned: {formatTimestamp(off.assigned_at)} · Expires: {formatTimestamp(off.expires_at)}
                               </div>
                             </div>
-                            <div className="text-right shrink-0">
+                            <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
                                 off.is_expired ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
                               }`}>
                                 {off.is_expired ? 'Expired' : `${off.hours_left}h left`}
                               </span>
+                              <button
+                                type="button"
+                                disabled={revokingOfferId === (off.id || off.promo_code)}
+                                onClick={() => handleRevokeOffer(off.id, inspectCandidate.email, off.promo_code)}
+                                className="px-2 py-1 rounded bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors disabled:opacity-50"
+                                title="Revoke and delete this offer from candidate account"
+                              >
+                                <Trash2 className="w-2.5 h-2.5" />
+                                <span>{revokingOfferId === (off.id || off.promo_code) ? 'Revoking...' : 'Revoke Offer'}</span>
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -2864,7 +2935,7 @@ export default function AdminDashboard() {
             )}
 
             {/* Metrics Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800">
                 <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Total Candidate Base</span>
                 <div className="text-xl font-bold text-white mt-1">{offersData.metrics.total_candidates}</div>
@@ -2874,13 +2945,23 @@ export default function AdminDashboard() {
               <div className="p-4 rounded-xl bg-[#09090b] border border-amber-500/20 bg-amber-500/5">
                 <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider">Prime Target Audience</span>
                 <div className="text-xl font-bold text-amber-300 mt-1">{offersData.metrics.unsubscribed_count}</div>
-                <p className="text-[11px] text-amber-400/80 mt-0.5">Unsubscribed & expired free trial candidates</p>
+                <p className="text-[11px] text-amber-400/80 mt-0.5">Unsubscribed & expired candidates</p>
               </div>
 
               <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800">
                 <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Subscribed Pro/VIP</span>
                 <div className="text-xl font-bold text-emerald-400 mt-1">{offersData.metrics.subscribed_count}</div>
                 <p className="text-[11px] text-zinc-500 mt-0.5">Active paid candidates</p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#09090b] border border-sky-500/20 bg-sky-500/5">
+                <span className="text-[11px] font-mono text-sky-400 uppercase tracking-wider">Active Assigned Offers</span>
+                <div className="text-xl font-bold text-sky-300 mt-1">
+                  {offersData.metrics.active_assigned_offers ?? (offersData.assigned_offers || []).filter((o: any) => !o.claimed && !o.is_expired && !o.revoked).length}
+                </div>
+                <p className="text-[11px] text-sky-400/80 mt-0.5">
+                  {offersData.metrics.revoked_offers || (offersData.assigned_offers || []).filter((o: any) => o.revoked).length} revoked / purged
+                </p>
               </div>
             </div>
 
@@ -3063,6 +3144,38 @@ export default function AdminDashboard() {
                             Set to koushiksrmedala@gmail.com
                           </button>
                         </div>
+
+                        {(() => {
+                          const cleanTarget = (targetEmail || '').trim().toLowerCase()
+                          const matched = usersList.find(u => (u.email || u.user_id || '').toLowerCase() === cleanTarget)
+                          if (matched?.offer_eligibility) {
+                            const el = matched.offer_eligibility
+                            return (
+                              <div className={`p-2.5 rounded-lg text-xs border flex items-center justify-between ${
+                                el.eligible
+                                  ? 'bg-emerald-950/40 border-emerald-800/40 text-emerald-300'
+                                  : 'bg-amber-950/40 border-amber-800/40 text-amber-300'
+                              }`}>
+                                <div className="flex items-center gap-2">
+                                  <Shield className="w-3.5 h-3.5 shrink-0" />
+                                  <span><strong>{el.badge}:</strong> {el.reason}</span>
+                                </div>
+                                {!el.eligible && (
+                                  <label className="flex items-center gap-1 text-[10px] shrink-0 font-bold cursor-pointer text-white ml-2 bg-black/60 px-2 py-1 rounded border border-amber-500/40">
+                                    <input
+                                      type="checkbox"
+                                      checked={forceOverride}
+                                      onChange={(e) => setForceOverride(e.target.checked)}
+                                      className="rounded text-amber-500"
+                                    />
+                                    <span>Force Override</span>
+                                  </label>
+                                )}
+                              </div>
+                            )
+                          }
+                          return null
+                        })()}
                       </div>
                     )}
 
@@ -3199,15 +3312,24 @@ export default function AdminDashboard() {
                                       </div>
                                     </div>
                                   </div>
-                                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase shrink-0 ${
-                                    u.plan === 'pro'
-                                      ? 'bg-amber-500/20 text-amber-300'
-                                      : u.plan === 'trial'
-                                      ? 'bg-sky-500/20 text-sky-300'
-                                      : 'bg-zinc-800 text-zinc-400'
-                                  }`}>
-                                    {u.plan || 'Free'}
-                                  </span>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    {u.offer_eligibility ? (
+                                      <span
+                                        className={`px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 ${
+                                          u.offer_eligibility.eligible
+                                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                        }`}
+                                        title={u.offer_eligibility.reason}
+                                      >
+                                        {u.offer_eligibility.badge}
+                                      </span>
+                                    ) : (
+                                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase shrink-0 bg-zinc-800 text-zinc-400">
+                                        {u.plan || 'Free'}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               )
                             })
@@ -3226,6 +3348,31 @@ export default function AdminDashboard() {
                             placeholder="user1@example.com, user2@example.com"
                             className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:border-amber-500 outline-none font-mono"
                           />
+                        </div>
+
+                        {/* Sales Revenue Safeguard Policy Box */}
+                        <div className="p-3 rounded-xl bg-black border border-zinc-800 space-y-1.5 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                              <Shield className="w-3.5 h-3.5 text-amber-400" />
+                              <span>Sales & Retention Policy Safeguard</span>
+                            </span>
+                            <span className="text-[10px] text-zinc-500 font-mono">1-2 Days Before Expiry</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-400 leading-relaxed">
+                            Candidates with active subscriptions (&gt; 48 hours remaining) are protected from receiving standard discount offers to prevent cannibalizing full-price subscription value.
+                          </p>
+                          <label className="flex items-center gap-2 pt-1 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={forceOverride}
+                              onChange={(e) => setForceOverride(e.target.checked)}
+                              className="rounded text-amber-500 focus:ring-amber-500"
+                            />
+                            <span className="text-[11px] text-zinc-200 font-semibold">
+                              Override Safeguard: Force send to all selected active subscribers (Special VIP Promotion)
+                            </span>
+                          </label>
                         </div>
                       </div>
                     )}
@@ -3454,6 +3601,149 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Live Assigned Candidate Offers Hub */}
+            <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl space-y-0">
+              <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-emerald-400" />
+                    <span>Live Assigned Candidate Offers Hub</span>
+                    <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                      {(offersData.assigned_offers || []).length} assigned
+                    </span>
+                  </h4>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Active promo codes provisioned to candidates. Revoking an offer instantly removes it from the candidate's dashboard and checkout.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800 text-[11px] font-medium">
+                    {(['all', 'active', 'claimed', 'expired'] as const).map((filter) => (
+                      <button
+                        key={filter}
+                        type="button"
+                        onClick={() => setAssignedOfferFilter(filter)}
+                        className={`px-2.5 py-1 rounded-md capitalize transition-colors ${
+                          assignedOfferFilter === filter
+                            ? 'bg-amber-500/20 text-amber-300 font-bold'
+                            : 'text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
+                      <th className="py-3 px-4">Candidate</th>
+                      <th className="py-3 px-4">Offer Title & Code</th>
+                      <th className="py-3 px-4">Price</th>
+                      <th className="py-3 px-4">Validity Countdown</th>
+                      <th className="py-3 px-4 text-center">Status</th>
+                      <th className="py-3 px-4 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60">
+                    {(() => {
+                      const list = (offersData.assigned_offers || []).filter((off: any) => {
+                        if (assignedOfferFilter === 'active') return !off.claimed && !off.is_expired && !off.revoked
+                        if (assignedOfferFilter === 'claimed') return off.claimed && !off.revoked
+                        if (assignedOfferFilter === 'expired') return off.is_expired && !off.revoked
+                        return true
+                      })
+
+                      if (list.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-zinc-500 italic">
+                              No candidate offers found matching "{assignedOfferFilter}" filter.
+                            </td>
+                          </tr>
+                        )
+                      }
+
+                      return list.map((off: any, idx: number) => (
+                        <tr key={off.id || `${off.candidate_email}_${off.promo_code}_${idx}`} className="hover:bg-zinc-900/40 transition-colors">
+                          <td className="py-3.5 px-4">
+                            <div className="font-semibold text-white">{off.candidate_name || off.candidate_email?.split('@')[0] || 'Candidate'}</div>
+                            <div className="text-[11px] text-zinc-400 font-mono">{off.candidate_email}</div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-medium text-zinc-200">{off.offer_title}</div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-sky-300 font-mono font-bold">{off.promo_code}</span>
+                              <span className="text-[10px] uppercase bg-amber-500/15 text-amber-300 px-1.5 py-0.2 rounded border border-amber-500/30">
+                                {off.discount_badge}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-mono font-bold text-emerald-400">{off.discounted_price}</div>
+                            <div className="text-[10px] text-zinc-500 line-through font-mono">{off.original_price}</div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-mono text-zinc-300">
+                              {off.revoked ? (
+                                <span className="text-zinc-500">Revoked</span>
+                              ) : off.is_expired ? (
+                                <span className="text-rose-400 font-semibold">Expired</span>
+                              ) : (
+                                <span className="text-amber-400 font-bold">{off.hours_left}h remaining</span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-zinc-500 font-mono">
+                              Expires: {off.expires_at ? formatTimestamp(off.expires_at) : 'No expiry'}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            {off.revoked ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700">
+                                Revoked
+                              </span>
+                            ) : off.claimed ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800">
+                                Claimed
+                              </span>
+                            ) : off.is_expired ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-950 text-rose-300 border border-rose-800">
+                                Expired
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950 text-amber-300 border border-amber-800">
+                                Active
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            {off.revoked ? (
+                              <span className="text-[11px] text-zinc-600 font-mono italic">Revoked</span>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={revokingOfferId === (off.id || off.promo_code)}
+                                onClick={() => handleRevokeOffer(off.id, off.candidate_email, off.promo_code)}
+                                className="px-2.5 py-1 rounded bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-[11px] font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50"
+                                title="Revoke and remove offer from candidate account"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                <span>{revokingOfferId === (off.id || off.promo_code) ? 'Revoking...' : 'Revoke Offer'}</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    })()}
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -4069,6 +4359,14 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-500">Validity Window:</span>
                   <span className="font-mono text-amber-400 font-bold">{validityHours} Hours ({Math.round(validityHours / 24 * 10) / 10} days)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Sales Policy Rule:</span>
+                  <span className={`font-mono font-bold text-[11px] ${
+                    forceOverride ? 'text-amber-400' : 'text-emerald-400'
+                  }`}>
+                    {forceOverride ? 'Override Active (Forced VIP Upsell)' : 'Enforced (1-2 Days Before Expiry Only)'}
+                  </span>
                 </div>
               </div>
 
