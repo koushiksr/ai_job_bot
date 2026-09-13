@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JobFlux AI — Web Frontend & Candidate Automation Studio
+
+Autonomous recruitment intelligence platform and candidate portal for JobFlux AI, featuring automated job application pipeline tracking, Harvard/FAANG ATS resume studio, promotional campaign delivery, and administrator telemetry.
+
+## Project Structure
+
+```
+.
+├── docs/                      # Technical Documentation & Architecture
+│   ├── AGENTS.md              # Autonomous agent roles & execution protocols
+│   └── SYSTEM_ARCHITECTURE.md # Full system architecture specification
+├── public/                    # Static Assets
+│   ├── images/                # Consolidated image & SVG branding assets
+│   │   ├── icon.png           # 512x512 High-DPI PNG brand emblem
+│   │   └── icon.svg           # Scalable vector brand emblem
+│   ├── icon.png               # Root static asset alias
+│   └── icon.svg               # Root static asset alias
+└── src/
+    ├── app/                   # Next.js App Router (Pages & API Routes)
+    │   ├── admin/             # Admin console & queue management
+    │   ├── api/               # Serverless API endpoints
+    │   ├── dashboard/         # Candidate real-time tracking dashboard
+    │   ├── pricing/           # Subscription tiers & Razorpay checkout
+    │   ├── profile/           # Candidate profile & preferences editor
+    │   ├── resume-builder/    # Harvard single-column ATS resume studio
+    │   ├── tools/             # ATS score checker & Naukri headline tools
+    │   └── icon.svg           # Next.js App Router metadata icon
+    ├── components/            # Reusable React UI components
+    │   └── index.ts           # Central barrel export
+    └── lib/                   # Core business logic, db & mail helpers
+        └── index.ts           # Central barrel export
+```
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. **Run local development server**:
+   ```bash
+   npm run dev
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **Build for production**:
+   ```bash
+   npm run build
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [System Architecture](docs/SYSTEM_ARCHITECTURE.md)
+- [Agent Specifications](docs/AGENTS.md)
