@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { getDb } from '@/lib/mongodb'
+import { PROMO_DISCOUNTS } from '../order/route'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
       razorpay_payment_id,
       razorpay_signature,
       plan_id,
+      promo_code,
       user_id,
       email
     } = body
@@ -58,7 +60,18 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date()
-    const durationDays = PLAN_DAYS[plan_id] || 30
+    const cleanPromo = (promo_code || '').trim().toUpperCase()
+    let durationDays = PLAN_DAYS[plan_id] || 30
+    let recordedAmount = plan_id === 'elite' || plan_id === 'professional' ? '₹199' : '₹99'
+
+    if (cleanPromo && PROMO_DISCOUNTS[cleanPromo]) {
+      const discount = PROMO_DISCOUNTS[cleanPromo]
+      if (discount.allowedPlans.includes(plan_id)) {
+        recordedAmount = `₹${discount.amount / 100}`
+        if (discount.days) durationDays = discount.days
+      }
+    }
+
     const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000)
 
     let query: any = null
@@ -98,7 +111,8 @@ export async function POST(req: NextRequest) {
       user_id: user_id || null,
       email: email || null,
       plan_id: plan_id,
-      amount: plan_id === 'elite' || plan_id === 'professional' ? '₹199' : '₹99',
+      promo_code: cleanPromo || null,
+      amount: recordedAmount,
       verified_at: now,
       expires_at: expiresAt,
       status: 'captured'

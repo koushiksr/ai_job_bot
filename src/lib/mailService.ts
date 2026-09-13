@@ -219,7 +219,7 @@ export function generatePurchaseOfferHtml({
   discountBadge,
   originalPrice,
   discountedPrice,
-  promoCode = 'FLASH50',
+  promoCode = 'FLASH49',
   claimUrl = 'https://jobfluxai.vercel.app/pricing',
   customMessage
 }: {

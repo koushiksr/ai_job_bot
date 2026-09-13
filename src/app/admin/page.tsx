@@ -108,13 +108,13 @@ export default function AdminDashboard() {
   const [loadingOffers, setLoadingOffers] = useState<boolean>(false)
   const [targetType, setTargetType] = useState<'single' | 'bulk_unsubscribed' | 'all_users'>('single')
   const [targetEmail, setTargetEmail] = useState<string>('koushiksrmedala@gmail.com')
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('flash_50')
-  const [offerTitle, setOfferTitle] = useState<string>('Exclusive 50% Flash Discount on JobFlux Pro')
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('flash_49')
+  const [offerTitle, setOfferTitle] = useState<string>('Exclusive 50% Flash Discount: JobFlux Essentials for ₹49')
   const [discountBadge, setDiscountBadge] = useState<string>('50% OFF FLASH PASS')
-  const [originalPrice, setOriginalPrice] = useState<string>('₹999 / mo')
-  const [discountedPrice, setDiscountedPrice] = useState<string>('₹499 / mo')
-  const [promoCode, setPromoCode] = useState<string>('FLASH50')
-  const [customMessage, setCustomMessage] = useState<string>('Unlock unlimited daily autonomous applications, top-tier Harvard ATS resume formatting, and direct priority recruiter submission at 50% off for your first month.')
+  const [originalPrice, setOriginalPrice] = useState<string>('₹99 / mo')
+  const [discountedPrice, setDiscountedPrice] = useState<string>('₹49 / mo')
+  const [promoCode, setPromoCode] = useState<string>('FLASH49')
+  const [customMessage, setCustomMessage] = useState<string>('Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 50% off for your first month.')
   const [isConfirmOfferModalOpen, setIsConfirmOfferModalOpen] = useState<boolean>(false)
   const [sendingOffer, setSendingOffer] = useState<boolean>(false)
   const [offerNotification, setOfferNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
@@ -2215,7 +2215,7 @@ export default function AdminDashboard() {
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                     <span>1. Select Offer Preset</span>
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                     {offersData.presets.map((p) => (
                       <button
                         key={p.id}

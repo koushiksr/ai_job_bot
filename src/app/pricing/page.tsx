@@ -150,6 +150,86 @@ export default function PricingPage() {
   const [enterpriseSuccess, setEnterpriseSuccess] = useState(false)
   const [enterpriseError, setEnterpriseError] = useState('')
 
+  // Promo Code & Special Purchase Offers State
+  const [inputPromoCode, setInputPromoCode] = useState('')
+  const [appliedPromoCode, setAppliedPromoCode] = useState('')
+  const [promoDiscount, setPromoDiscount] = useState<{
+    code: string
+    displayPrice: string
+    label: string
+    durationDays?: number
+  } | null>(null)
+  const [promoError, setPromoError] = useState('')
+
+  const PROMO_DEFINITIONS: Record<
+    string,
+    { displayPrice: string; label: string; allowedPlans: string[]; durationDays?: number }
+  > = {
+    FLASH49: {
+      displayPrice: '₹49',
+      label: '50% OFF Flash Pass (-₹50 savings)',
+      allowedPlans: ['pro', 'starter'],
+      durationDays: 30
+    },
+    SPRINT69: {
+      displayPrice: '₹69',
+      label: 'Weekend Career Sprint (-₹30 savings)',
+      allowedPlans: ['pro', 'starter'],
+      durationDays: 30
+    },
+    PRO129: {
+      displayPrice: '₹129',
+      label: 'Professional 3-Month Fast-Track (-₹70 savings)',
+      allowedPlans: ['elite', 'professional'],
+      durationDays: 90
+    },
+    VIP299: {
+      displayPrice: '₹299',
+      label: 'Lifetime VIP Pass (365 Days Access)',
+      allowedPlans: ['elite', 'professional'],
+      durationDays: 365
+    }
+  }
+
+  const applyPromoToPlan = (code: string, plan: Plan | null) => {
+    const clean = code.trim().toUpperCase()
+    if (!clean) {
+      setAppliedPromoCode('')
+      setPromoDiscount(null)
+      setPromoError('')
+      return
+    }
+
+    const def = PROMO_DEFINITIONS[clean]
+    if (!def) {
+      setPromoError('Invalid promo code. Please check and try again.')
+      setAppliedPromoCode('')
+      setPromoDiscount(null)
+      return
+    }
+
+    if (plan && !def.allowedPlans.includes(plan.id)) {
+      setPromoError(
+        `Promo code ${clean} is only valid for ${
+          def.allowedPlans.includes('pro') ? 'Essentials (1-Month)' : 'Professional (3-Month)'
+        } plan.`
+      )
+      setAppliedPromoCode('')
+      setPromoDiscount(null)
+      return
+    }
+
+    setAppliedPromoCode(clean)
+    setInputPromoCode(clean)
+    setPromoDiscount({
+      code: clean,
+      displayPrice: def.displayPrice,
+      label: def.label,
+      durationDays: def.durationDays
+    })
+    setPromoError('')
+  }
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const email = localStorage.getItem('user_email') || ''
@@ -166,16 +246,34 @@ export default function PricingPage() {
         }))
       }
 
-      // Check URL query parameters for direct plan activation triggers
+      // Check URL query parameters for direct plan or promo code triggers
       const params = new URLSearchParams(window.location.search)
       const targetPlanId = params.get('plan')
+      const promoParam = params.get('promo')
+
+      let initialPlan: Plan | null = null
       if (targetPlanId) {
         const found = PLANS.find(p => p.id === targetPlanId || (targetPlanId === 'professional' && p.id === 'elite'))
         if (found && found.id !== 'trial') {
-          setSelectedPlan(found)
-          setPaymentStep('details')
-          if (email) setCandidateEmail(email)
+          initialPlan = found
         }
+      } else if (promoParam) {
+        const clean = promoParam.trim().toUpperCase()
+        if (clean === 'FLASH49' || clean === 'SPRINT69') {
+          initialPlan = PLANS.find(p => p.id === 'pro') || null
+        } else if (clean === 'PRO129' || clean === 'VIP299') {
+          initialPlan = PLANS.find(p => p.id === 'elite') || null
+        }
+      }
+
+      if (initialPlan) {
+        setSelectedPlan(initialPlan)
+        setPaymentStep('details')
+        if (email) setCandidateEmail(email)
+      }
+
+      if (promoParam) {
+        applyPromoToPlan(promoParam, initialPlan)
       }
     }
   }, [])
@@ -200,6 +298,10 @@ export default function PricingPage() {
     setPaymentStep('details')
     const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : ''
     setCandidateEmail(storedEmail || currentUserEmail)
+
+    if (appliedPromoCode) {
+      applyPromoToPlan(appliedPromoCode, plan)
+    }
   }
 
   const handleActivatePlan = async (e: React.FormEvent) => {
@@ -216,6 +318,7 @@ export default function PricingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan_id: selectedPlan.id,
+          promo_code: appliedPromoCode || undefined,
           user_id: storedUid || undefined,
           email: candidateEmail
         })
@@ -236,7 +339,7 @@ export default function PricingPage() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'JobFlux AI',
-        description: selectedPlan.name,
+        description: orderData.plan_name || selectedPlan.name,
         image: '/jobflux-logo.svg',
         order_id: orderData.order_id,
         prefill: {
@@ -257,6 +360,7 @@ export default function PricingPage() {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 plan_id: selectedPlan.id,
+                promo_code: appliedPromoCode || undefined,
                 user_id: storedUid || undefined,
                 email: candidateEmail
               })
@@ -698,10 +802,23 @@ export default function PricingPage() {
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
                 <div>
                   <h3 className="text-base font-semibold text-white">Activate {selectedPlan.name}</h3>
-                  <span className="text-xs text-zinc-400">{selectedPlan.price} {selectedPlan.period}</span>
+                  <div className="flex items-baseline gap-1.5 text-xs text-zinc-400">
+                    {promoDiscount ? (
+                      <>
+                        <span className="line-through text-zinc-500 font-mono">{selectedPlan.price}</span>
+                        <span className="font-extrabold text-amber-400 font-mono text-sm">{promoDiscount.displayPrice}</span>
+                        <span>{selectedPlan.period}</span>
+                      </>
+                    ) : (
+                      <span>{selectedPlan.price} {selectedPlan.period}</span>
+                    )}
+                  </div>
                 </div>
                 <button
-                  onClick={() => setSelectedPlan(null)}
+                  onClick={() => {
+                    setSelectedPlan(null)
+                    setPromoError('')
+                  }}
                   className="p-1 rounded-lg text-zinc-500 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
@@ -727,6 +844,53 @@ export default function PricingPage() {
                     </p>
                   </div>
 
+                  {/* Promo Code / Purchase Offer Section */}
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-300 mb-1 flex items-center justify-between">
+                      <span>Promo Code / Purchase Offer</span>
+                      <span className="text-[10px] text-amber-400 font-mono">Special Deals Supported</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={inputPromoCode}
+                        onChange={e => {
+                          setInputPromoCode(e.target.value.toUpperCase())
+                          setPromoError('')
+                        }}
+                        placeholder="e.g. FLASH49, PRO129, VIP299"
+                        className="flex-1 bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono uppercase text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => applyPromoToPlan(inputPromoCode, selectedPlan)}
+                        className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    {appliedPromoCode && promoDiscount && (
+                      <div className="mt-1.5 flex items-center justify-between text-[11px] bg-amber-500/10 border border-amber-500/30 rounded-md px-2.5 py-1.5 text-amber-300">
+                        <span className="font-medium">✓ {appliedPromoCode}: {promoDiscount.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAppliedPromoCode('')
+                            setInputPromoCode('')
+                            setPromoDiscount(null)
+                            setPromoError('')
+                          }}
+                          className="text-zinc-400 hover:text-white ml-2 underline cursor-pointer text-[10px]"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                    {promoError && (
+                      <p className="text-[11px] text-rose-400 mt-1">{promoError}</p>
+                    )}
+                  </div>
+
                   <div className="p-3 rounded-lg bg-black border border-zinc-800 space-y-2">
                     <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono block">
                       Payment Gateway
@@ -747,7 +911,7 @@ export default function PricingPage() {
                     ) : (
                       <>
                         <CreditCard className="w-4 h-4" />
-                        <span>Proceed to Pay ({selectedPlan.price})</span>
+                        <span>Proceed to Pay ({promoDiscount ? promoDiscount.displayPrice : selectedPlan.price})</span>
                       </>
                     )}
                   </button>

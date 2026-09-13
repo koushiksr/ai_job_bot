@@ -8,36 +8,47 @@ export const dynamic = 'force-dynamic'
 
 const OFFER_PRESETS = [
   {
-    id: 'flash_50',
-    name: 'Flash 50% Off (Most Popular)',
-    offerTitle: 'Exclusive 50% Flash Discount on JobFlux Pro',
+    id: 'flash_49',
+    name: 'Essentials Flash Pass (₹49 / mo)',
+    offerTitle: 'Exclusive 50% Flash Discount: JobFlux Essentials for ₹49',
     discountBadge: '50% OFF FLASH PASS',
-    originalPrice: '₹999 / mo',
-    discountedPrice: '₹499 / mo',
-    promoCode: 'FLASH50',
-    customMessage: 'Unlock unlimited daily autonomous applications, top-tier Harvard ATS resume formatting, and direct priority recruiter submission at 50% off for your first month.'
+    originalPrice: '₹99 / mo',
+    discountedPrice: '₹49 / mo',
+    promoCode: 'FLASH49',
+    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 50% off for your first month.'
   },
   {
-    id: 'starter_pass',
-    name: 'Starter Pass Deal (₹299)',
-    offerTitle: 'JobFlux Starter Pass: Accelerate Your Job Search',
-    discountBadge: 'LIMITED ₹299 PASS',
-    originalPrice: '₹599 / mo',
-    discountedPrice: '₹299 / mo',
-    promoCode: 'STARTER50',
-    customMessage: 'Supercharge your job applications with 450 automated applies per month and intelligent daily sweeps at our lowest price ever.'
+    id: 'sprint_69',
+    name: 'Weekend Career Sprint (₹69 / mo)',
+    offerTitle: 'Weekend Career Sprint: 1-Month JobFlux Essentials for ₹69',
+    discountBadge: 'SAVE 30% TODAY',
+    originalPrice: '₹99 / mo',
+    discountedPrice: '₹69 / mo',
+    promoCode: 'SPRINT69',
+    customMessage: 'Kickstart your interview pipeline this week with 600+ verified applications and daily smart scans across Naukri for only ₹69.'
   },
   {
-    id: 'quarterly_pro',
-    name: 'Quarterly Pro Bundle (60% Off)',
-    offerTitle: 'Quarterly Career Growth Bundle (3 Months)',
-    discountBadge: '60% OFF 3-MONTH BUNDLE',
-    originalPrice: '₹2,997',
-    discountedPrice: '₹1,199 / 3 mos',
-    promoCode: 'PRO3M',
-    customMessage: 'A complete 90-day autonomous job search campaign designed to land high-paying software and product roles without spending hours applying manually.'
+    id: 'pro_129',
+    name: 'Professional 3-Month Fast-Track (₹129)',
+    offerTitle: 'Career Fast-Track: 3 Months of JobFlux Professional for ₹129',
+    discountBadge: 'SPECIAL ₹129 PASS',
+    originalPrice: '₹199 / 3 mos',
+    discountedPrice: '₹129 / 3 mos',
+    promoCode: 'PRO129',
+    customMessage: 'Accelerate your interview shortlists with 90 days of continuous automated applies (1,800+ applications), on-demand sweeps up to 5x/week, and VIP priority queue for just ₹129.'
+  },
+  {
+    id: 'vip_299',
+    name: 'Lifetime VIP Career Pass (₹299)',
+    offerTitle: 'Lifetime VIP Access: Autonomous Job Applications for ₹299',
+    discountBadge: 'EXCLUSIVE VIP PASS',
+    originalPrice: '₹2,500',
+    discountedPrice: '₹299 One-Time',
+    promoCode: 'VIP299',
+    customMessage: 'Get unlimited autonomous job applications and daily recruiter sweeps until you sign your dream offer, plus permanent VIP queue slot and priority placement assistance.'
   }
 ]
+
 
 export async function GET(req: NextRequest) {
   try {
@@ -116,11 +127,11 @@ export async function POST(req: NextRequest) {
     const {
       targetType = 'single',
       targetEmail = 'koushiksrmedala@gmail.com',
-      offerTitle = 'Exclusive 50% Flash Discount on JobFlux Pro',
+      offerTitle = 'Exclusive 50% Flash Discount: JobFlux Essentials for ₹49',
       discountBadge = '50% OFF FLASH PASS',
-      originalPrice = '₹999 / mo',
-      discountedPrice = '₹499 / mo',
-      promoCode = 'FLASH50',
+      originalPrice = '₹99 / mo',
+      discountedPrice = '₹49 / mo',
+      promoCode = 'FLASH49',
       customMessage = '',
       confirmedByAdmin = false
     } = body
