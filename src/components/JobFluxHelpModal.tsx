@@ -18,6 +18,7 @@ import {
   Info
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { APP_CONFIG } from '@/config/appConfig'
 
 interface JobFluxHelpModalProps {
   isOpen?: boolean
@@ -76,7 +77,7 @@ export default function JobFluxHelpModal({
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
 
-  const supportEmail = 'technohmsit@gmail.com'
+  const supportEmail = APP_CONFIG.supportEmail
 
   // Pre-fill from localStorage if available
   useEffect(() => {
@@ -155,7 +156,7 @@ export default function JobFluxHelpModal({
     },
     {
       q: 'What is the priority contact email for immediate assistance?',
-      a: 'Our central support desk is managed at technohmsit@gmail.com. Inquiries sent to this address receive direct priority attention from our technical team within 2 to 4 hours.'
+      a: `Our central support desk is managed at ${APP_CONFIG.supportEmail}. Inquiries sent to this address receive direct priority attention from our technical team within 2 to 4 hours.`
     },
     {
       q: 'Can I trigger an application sweep on-demand anytime?',
@@ -163,7 +164,7 @@ export default function JobFluxHelpModal({
     },
     {
       q: 'How do enterprise and agency cohorts work?',
-      a: 'For staffing agencies, colleges, or team cohorts, we offer dedicated worker nodes, unified group analytics, and bulk seat billing. Reach out through the Enterprise modal on the pricing page or email us directly at technohmsit@gmail.com.'
+      a: `For staffing agencies, colleges, or team cohorts, we offer dedicated worker nodes, unified group analytics, and bulk seat billing. Reach out through the Enterprise modal on the pricing page or email us directly at ${APP_CONFIG.supportEmail}.`
     }
   ]
 

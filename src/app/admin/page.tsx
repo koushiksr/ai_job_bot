@@ -53,6 +53,9 @@ import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
+import { APP_CONFIG } from '@/config/appConfig'
+import { OFFER_PRESETS } from '@/config/plans'
+import { sendBrowserNotification } from '@/lib/notifications'
 
 export default function AdminDashboard() {
   const [usersList, setUsersList] = useState<any[]>([])
@@ -107,13 +110,13 @@ export default function AdminDashboard() {
     metrics: { total_candidates: number; unsubscribed_count: number; subscribed_count: number }
     history: any[]
   }>({
-    presets: [],
+    presets: OFFER_PRESETS,
     metrics: { total_candidates: 0, unsubscribed_count: 0, subscribed_count: 0 },
     history: []
   })
   const [loadingOffers, setLoadingOffers] = useState<boolean>(false)
   const [targetType, setTargetType] = useState<'single' | 'bulk_unsubscribed' | 'all_users'>('single')
-  const [targetEmail, setTargetEmail] = useState<string>('koushiksrmedala@gmail.com')
+  const [targetEmail, setTargetEmail] = useState<string>(APP_CONFIG.defaultTestRecipients[0] || 'koushiksrmedala@gmail.com')
   const [selectedPresetId, setSelectedPresetId] = useState<string>('offer_99')
   const [offerTitle, setOfferTitle] = useState<string>('Candidate Welcome: 90% Off JobFlux Essentials for ₹99')
   const [discountBadge, setDiscountBadge] = useState<string>('90% OFF (ACTUAL ₹1,000)')
@@ -130,8 +133,8 @@ export default function AdminDashboard() {
   const [mailDiagnosticResult, setMailDiagnosticResult] = useState<any | null>(null)
   const [mailLogs, setMailLogs] = useState<any[]>([])
   const [loadingMailLogs, setLoadingMailLogs] = useState<boolean>(false)
-  const [diagnosticRecipient, setDiagnosticRecipient] = useState<string>('koushiksrmedala@gmail.com')
-  const [mailSender, setMailSender] = useState<string>('technohmsit@gmail.com')
+  const [diagnosticRecipient, setDiagnosticRecipient] = useState<string>(APP_CONFIG.defaultTestRecipients[0] || 'koushiksrmedala@gmail.com')
+  const [mailSender, setMailSender] = useState<string>(APP_CONFIG.supportEmail)
   const [mailMaskedPass, setMailMaskedPass] = useState<string>('')
   const [showConfigPass, setShowConfigPass] = useState<boolean>(false)
   const [newAppPassInput, setNewAppPassInput] = useState<string>('')
@@ -208,23 +211,7 @@ export default function AdminDashboard() {
     }
   }, [])
 
-  const sendBrowserNotification = (title: string, options?: NotificationOptions) => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        const n = new Notification(title, {
-          icon: '/images/icon.png',
-          badge: '/images/icon.png',
-          ...options
-        })
-        n.onclick = () => {
-          window.focus()
-          n.close()
-        }
-      } catch (e) {
-        console.warn('Could not dispatch browser notification:', e)
-      }
-    }
-  }
+
 
   const handleRequestNotification = async () => {
     if (typeof window === 'undefined' || !('Notification' in window)) {

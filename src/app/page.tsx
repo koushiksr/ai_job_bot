@@ -31,6 +31,7 @@ import AiEngineVisualizer from '@/components/AiEngineVisualizer'
 import HomeInteractiveToolsCard from '@/components/HomeInteractiveToolsCard'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import LiquidFlowMesh from '@/components/LiquidFlowMesh'
+import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 
 const FAQS = [
   {
@@ -145,9 +146,8 @@ export default function Home() {
         // If already logged in, navigate immediately to appropriate portal
         const destination = (
           storedRole === 'admin' ||
-          storedUid === 'technohmsit' ||
-          storedUid === 'admin' ||
-          storedEmail.toLowerCase() === 'technohmsit@gmail.com'
+          isAdminUser(storedUid) ||
+          isAdminUser(storedEmail)
         ) ? '/admin' : '/dashboard'
         window.location.replace(destination)
         return
@@ -200,18 +200,15 @@ export default function Home() {
     if (
       authMode === 'signin' &&
       (
-        cleanEmail === 'technohmsit@gmail.com' ||
-        cleanEmail === 'technohmsit' ||
-        cleanEmail === 'admin' ||
-        cleanEmail === 'admin@jobfluxai.com' ||
+        isAdminUser(cleanEmail) ||
         cleanEmail === 'admin@jobflux.ai' ||
         cleanEmail === 'admin@jobbot.ai' ||
         cleanEmail === 'admin@admin.com'
       ) &&
       cleanPwd === 'admin'
     ) {
-      localStorage.setItem('user_id', 'technohmsit')
-      localStorage.setItem('user_email', 'technohmsit@gmail.com')
+      localStorage.setItem('user_id', APP_CONFIG.masterAdminId)
+      localStorage.setItem('user_email', APP_CONFIG.supportEmail)
       localStorage.setItem('user_role', 'admin')
       window.location.href = '/admin'
       return

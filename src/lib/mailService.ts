@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
 import { getDb } from '@/lib/mongodb'
+import { APP_CONFIG } from '@/config/appConfig'
 
 interface SendMailOptions {
   to: string | string[]
@@ -20,7 +21,7 @@ interface MailResult {
  * Returns sanitized SMTP credentials from environment variables.
  */
 export function getSmtpCredentials() {
-  const user = (process.env.SMTP_USER || process.env.ADMIN_MAIL_TO_SEND_PASSWORD || 'technohmsit@gmail.com').trim()
+  const user = (process.env.SMTP_USER || process.env.ADMIN_MAIL_TO_SEND_PASSWORD || APP_CONFIG.supportEmail).trim()
   const pass = (process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || 'tidw wevs gebl qljb')
     .trim()
     .replace(/['"]/g, '')
@@ -342,7 +343,7 @@ export function generatePasswordResetHtml(name: string, resetUrl: string, otp: s
                 Official Dispatch Gateway for <strong style="color:#38bdf8;">JobFlux AI</strong> &amp; <strong style="color:#10b981;">FitMetrix</strong>
               </p>
               <p style="margin:0;font-size:11px;color:#52525b;">
-                Admin Support: <a href="mailto:technohmsit@gmail.com" style="color:#38bdf8;text-decoration:none;">technohmsit@gmail.com</a> &bull; Priority Helpdesk
+                Admin Support: <a href="mailto:${APP_CONFIG.supportEmail}" style="color:#38bdf8;text-decoration:none;">${APP_CONFIG.supportEmail}</a> &bull; Priority Helpdesk
               </p>
             </td>
           </tr>
@@ -533,7 +534,7 @@ export function generatePurchaseOfferHtml({
                 Official Dispatch Gateway for <strong style="color:#38bdf8;">JobFlux AI</strong> &amp; <strong style="color:#10b981;">FitMetrix</strong>
               </p>
               <p style="margin:0;font-size:11px;color:#52525b;">
-                Admin Support: <a href="mailto:technohmsit@gmail.com" style="color:#38bdf8;text-decoration:none;">technohmsit@gmail.com</a> &bull; Priority Helpdesk
+                Admin Support: <a href="mailto:${APP_CONFIG.supportEmail}" style="color:#38bdf8;text-decoration:none;">${APP_CONFIG.supportEmail}</a> &bull; Priority Helpdesk
               </p>
             </td>
           </tr>

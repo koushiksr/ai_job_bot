@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
-import { PROMO_DISCOUNTS } from '@/app/api/payment/order/route'
+import { PROMO_DISCOUNTS } from '@/config/plans'
 
 export const dynamic = 'force-dynamic'
 

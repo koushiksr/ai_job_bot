@@ -1,0 +1,373 @@
+/**
+ * Centralized Plans, Pricing, and Promotional Offer Configuration
+ * 
+ * Single source of truth for:
+ * 1. Public pricing page plans, features, and UI cards
+ * 2. Razorpay backend transaction amounts (in paise) and duration allocations
+ * 3. Administrative campaign offer presets and automated email templates
+ * 4. Promo code validation, candidate assignment, and access control
+ * 
+ * To modify any price, promo code, feature list, or discount, update this single file.
+ */
+
+export interface PlanFeature {
+  text: string
+  isAddon?: boolean
+}
+
+export interface PlanDefinition {
+  id: string
+  name: string
+  subtitle: string
+  badge?: string
+  price: string
+  originalPrice?: string
+  amountPaise: number
+  period: string
+  durationDays: number
+  featuresIntro: string
+  features: PlanFeature[]
+  cta: string
+  highlight?: boolean
+  popular?: boolean
+}
+
+export interface PromoDefinition {
+  code: string
+  presetId: string
+  name: string
+  offerTitle: string
+  discountBadge: string
+  originalPrice: string
+  discountedPrice: string
+  amountPaise: number
+  allowedPlans: string[]
+  durationDays: number
+  description: string
+  customMessage: string
+  pricingDisplay: {
+    displayPrice: string
+    label: string
+  }
+}
+
+// ----------------------------------------------------------------------
+// 1. Master Plan Definitions
+// ----------------------------------------------------------------------
+
+export const MASTER_PLANS: PlanDefinition[] = [
+  {
+    id: 'trial',
+    name: 'Free',
+    subtitle: 'No credit card needed. Start testing for free.',
+    price: '₹0',
+    amountPaise: 0,
+    period: '/ 24 hours',
+    durationDays: 1,
+    featuresIntro: 'Up to 15 verified job applications with zero risk, plus...',
+    features: [
+      { text: '1 Full Day of Autonomous Auto-Apply' },
+      { text: 'Up to 15 Verified Job Applications' },
+      { text: 'Automated screening questions answered' },
+      { text: 'Real-time application telemetry dashboard' },
+      { text: 'Zero credit card required to start' }
+    ],
+    cta: 'Start free trial',
+    highlight: false
+  },
+  {
+    id: 'pro',
+    name: 'Essentials',
+    subtitle: 'For candidates with daily proactive application demands.',
+    badge: 'POPULAR',
+    price: '₹99',
+    originalPrice: '₹1,000',
+    amountPaise: 9900,
+    period: '/ month',
+    durationDays: 30,
+    featuresIntro: 'Everything in Free, with 600+ monthly applications, plus...',
+    features: [
+      { text: '30 Days of Continuous Daily Auto-Apply' },
+      { text: 'Up to 600+ Verified Job Applications' },
+      { text: 'Daily Autonomous Application Sweeps' },
+      { text: 'AI Tailored Responses for Recruiter Screening' },
+      { text: 'Target Role, Location & Salary Filters' },
+      { text: 'Priority Cloud Worker Queue' },
+      { text: 'Live Application History & Recruiter Links' }
+    ],
+    cta: 'Get 1 Month for ₹99',
+    popular: true,
+    highlight: true
+  },
+  {
+    id: 'elite',
+    name: 'Professional',
+    subtitle: 'Best for comprehensive pipeline until you sign an offer.',
+    price: '₹199',
+    originalPrice: '₹2,500',
+    amountPaise: 19900,
+    period: '/ 3 months',
+    durationDays: 90,
+    featuresIntro: 'Everything in Essentials, with extended 90-day pipeline, plus...',
+    features: [
+      { text: '90 Days of Continuous Daily Auto-Apply' },
+      { text: 'Up to 1,800+ Verified Job Applications' },
+      { text: 'VIP Priority Server Queue Slot' },
+      { text: 'AI Resume Optimization & Keyword Match' },
+      { text: 'On-Demand Real-Time Sweeps (Up to 5x / week)' },
+      { text: 'Continuous Applications Until Hired' },
+      { text: 'Dedicated Recruiter Response Priority' }
+    ],
+    cta: 'Get 3 Months (₹199)',
+    highlight: false
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    subtitle: 'For staffing agencies and colleges needing cohort scale.',
+    price: 'Custom',
+    amountPaise: 0,
+    period: '/ volume quote',
+    durationDays: 365,
+    featuresIntro: 'Everything in Professional, with bulk candidate controls, plus...',
+    features: [
+      { text: 'Bulk Candidate Licensing (10 to 500+ Seats)' },
+      { text: 'Candidate Cohort Grouping & Batching' },
+      { text: 'Multi-User Telemetry & Aggregated Stats' },
+      { text: 'Dedicated Cloud Automation Workers' },
+      { text: 'Priority SLA & Dedicated Support Desk' },
+      { text: 'Custom ATS Integration & Webhooks', isAddon: true },
+      { text: 'Dedicated Placement Coordinator', isAddon: true }
+    ],
+    cta: 'Contact sales',
+    highlight: false
+  }
+]
+
+// ----------------------------------------------------------------------
+// 2. Master Promotional Offers & Presets
+// ----------------------------------------------------------------------
+
+export const MASTER_PROMOS: PromoDefinition[] = [
+  {
+    code: 'OFFER90',
+    presetId: 'offer_99',
+    name: 'Essentials 90% Welcome Pass (₹99 / mo)',
+    offerTitle: 'Candidate Welcome: 90% Off JobFlux Essentials for ₹99',
+    discountBadge: '90% OFF (ACTUAL ₹1,000)',
+    originalPrice: '₹1,000 / mo',
+    discountedPrice: '₹99 / mo',
+    amountPaise: 9900,
+    allowedPlans: ['pro', 'starter'],
+    durationDays: 30,
+    description: 'JobFlux Essentials - 90% Special Pass (30 Days)',
+    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 90% discount (Regular ₹1,000/mo) for just ₹99.',
+    pricingDisplay: {
+      displayPrice: '₹99',
+      label: '90% OFF Special Pass (Actual ₹1,000 / mo)'
+    }
+  },
+  {
+    code: 'FLASH49',
+    presetId: 'flash_49',
+    name: 'Essentials Flash Pass (₹49 / mo)',
+    offerTitle: 'Exclusive 95% Flash Discount: JobFlux Essentials for ₹49',
+    discountBadge: '95% OFF (ACTUAL ₹1,000)',
+    originalPrice: '₹1,000 / mo',
+    discountedPrice: '₹49 / mo',
+    amountPaise: 4900,
+    allowedPlans: ['pro', 'starter'],
+    durationDays: 30,
+    description: 'JobFlux Essentials - 95% Flash Pass (30 Days)',
+    customMessage: 'Claim an exclusive 95% flash pass! Get 30 days of autonomous job applications across Naukri for just ₹49 (Regular ₹1,000/mo).',
+    pricingDisplay: {
+      displayPrice: '₹49',
+      label: '95% OFF Flash Pass (Actual ₹1,000 / mo)'
+    }
+  },
+  {
+    code: 'SPRINT69',
+    presetId: 'sprint_69',
+    name: 'Weekend Career Sprint (₹69 / mo)',
+    offerTitle: 'Weekend Career Sprint: 1-Month JobFlux Essentials for ₹69',
+    discountBadge: '93% OFF (ACTUAL ₹1,000)',
+    originalPrice: '₹1,000 / mo',
+    discountedPrice: '₹69 / mo',
+    amountPaise: 6900,
+    allowedPlans: ['pro', 'starter'],
+    durationDays: 30,
+    description: 'JobFlux Essentials - 93% Sprint Pass (30 Days)',
+    customMessage: 'Kickstart your interview pipeline this week with 600+ verified applications and daily smart scans across Naukri at 93% discount (Regular ₹1,000/mo) for only ₹69.',
+    pricingDisplay: {
+      displayPrice: '₹69',
+      label: '93% OFF Weekend Sprint (Actual ₹1,000 / mo)'
+    }
+  },
+  {
+    code: 'PRO199',
+    presetId: 'pro_199',
+    name: 'Professional 3-Month Plan (₹199 / 3 mos)',
+    offerTitle: 'Comprehensive 90-Day Pipeline: JobFlux Professional for ₹199',
+    discountBadge: '92% OFF (ACTUAL ₹2,500)',
+    originalPrice: '₹2,500 / 3 mos',
+    discountedPrice: '₹199 / 3 mos',
+    amountPaise: 19900,
+    allowedPlans: ['elite', 'professional'],
+    durationDays: 90,
+    description: 'JobFlux Professional - 92% 3-Month Pass (90 Days)',
+    customMessage: 'Get 90 days of continuous automated applications (1,800+ applies), on-demand sweeps up to 5x/week, and VIP queue priority at 92% off (Regular ₹2,500) for ₹199.',
+    pricingDisplay: {
+      displayPrice: '₹199',
+      label: '92% OFF 3-Month Full Pass (Actual ₹2,500 / 3 mos)'
+    }
+  },
+  {
+    code: 'PRO129',
+    presetId: 'pro_129',
+    name: 'Professional 3-Month Fast-Track (₹129)',
+    offerTitle: 'Career Fast-Track: 3 Months of JobFlux Professional for ₹129',
+    discountBadge: '95% OFF (ACTUAL ₹2,500)',
+    originalPrice: '₹2,500 / 3 mos',
+    discountedPrice: '₹129 / 3 mos',
+    amountPaise: 12900,
+    allowedPlans: ['elite', 'professional'],
+    durationDays: 90,
+    description: 'JobFlux Professional - 95% Fast-Track (90 Days)',
+    customMessage: 'Accelerate your interview shortlists with 90 days of continuous automated applies (1,800+ applications), on-demand sweeps up to 5x/week, and VIP priority queue at 95% off (Regular ₹2,500) for just ₹129.',
+    pricingDisplay: {
+      displayPrice: '₹129',
+      label: '95% OFF 3-Month Fast-Track (Actual ₹2,500 / 3 mos)'
+    }
+  },
+  {
+    code: 'VIP299',
+    presetId: 'vip_299',
+    name: 'Lifetime VIP Career Pass (₹299)',
+    offerTitle: 'Lifetime VIP Access: Autonomous Job Applications for ₹299',
+    discountBadge: '97% OFF (ACTUAL ₹10,000)',
+    originalPrice: '₹10,000',
+    discountedPrice: '₹299 One-Time',
+    amountPaise: 29900,
+    allowedPlans: ['elite', 'professional'],
+    durationDays: 365,
+    description: 'JobFlux Professional - 97% VIP Annual Pass (365 Days)',
+    customMessage: 'Get unlimited autonomous job applications and daily recruiter sweeps until you sign your dream offer, plus permanent VIP queue slot and priority placement assistance at 97% savings.',
+    pricingDisplay: {
+      displayPrice: '₹299',
+      label: '97% OFF Lifetime VIP Pass (Actual ₹10,000 Value)'
+    }
+  }
+]
+
+// ----------------------------------------------------------------------
+// 3. Derived Formats for Specialized Consumers
+// ----------------------------------------------------------------------
+
+/** UI Plans List for /pricing page */
+export const PLANS = MASTER_PLANS
+
+/**
+ * Backend Razorpay Plan Amounts Map
+ * Supports both canonical IDs and historical aliases (starter, professional).
+ */
+export const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: number }> = {
+  starter: { amount: 9900, name: 'JobFlux 1-Month Plan (30 Days)', days: 30 },
+  pro: { amount: 9900, name: 'JobFlux 1-Month Career Pro (30 Days)', days: 30 },
+  elite: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 },
+  professional: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 }
+}
+
+/**
+ * Plan duration in days map for payment verification
+ */
+export const PLAN_DAYS: Record<string, number> = {
+  starter: 30,
+  pro: 30,
+  elite: 90,
+  professional: 90
+}
+
+/**
+ * Razorpay Promo Discounts Map for Order Creation & Verification
+ */
+export const PROMO_DISCOUNTS: Record<
+  string,
+  { amount: number; name: string; allowedPlans: string[]; days: number }
+> = MASTER_PROMOS.reduce((acc, promo) => {
+  acc[promo.code] = {
+    amount: promo.amountPaise,
+    name: promo.description,
+    allowedPlans: promo.allowedPlans,
+    days: promo.durationDays
+  }
+  return acc
+}, {} as Record<string, { amount: number; name: string; allowedPlans: string[]; days: number }>)
+
+/**
+ * Admin Campaign Offer Presets List for /api/admin/offers
+ */
+export const OFFER_PRESETS = MASTER_PROMOS.map(p => ({
+  id: p.presetId,
+  name: p.name,
+  offerTitle: p.offerTitle,
+  discountBadge: p.discountBadge,
+  originalPrice: p.originalPrice,
+  discountedPrice: p.discountedPrice,
+  promoCode: p.code,
+  customMessage: p.customMessage
+}))
+
+/**
+ * Promo Definitions map for /pricing page client-side state
+ */
+export const PROMO_DEFINITIONS: Record<
+  string,
+  { displayPrice: string; label: string; allowedPlans: string[]; durationDays?: number }
+> = MASTER_PROMOS.reduce((acc, promo) => {
+  acc[promo.code] = {
+    displayPrice: promo.pricingDisplay.displayPrice,
+    label: promo.pricingDisplay.label,
+    allowedPlans: promo.allowedPlans,
+    durationDays: promo.durationDays
+  }
+  return acc
+}, {} as Record<string, { displayPrice: string; label: string; allowedPlans: string[]; durationDays?: number }>)
+
+// ----------------------------------------------------------------------
+// 4. Utility Helper Functions
+// ----------------------------------------------------------------------
+
+export function getPlan(planId: string): PlanDefinition | undefined {
+  return MASTER_PLANS.find(p => p.id === planId)
+}
+
+export function getPromo(promoCode: string): PromoDefinition | undefined {
+  const clean = (promoCode || '').trim().toUpperCase()
+  return MASTER_PROMOS.find(p => p.code === clean)
+}
+
+export function validatePromoForPlan(promoCode: string, planId: string): {
+  valid: boolean
+  error?: string
+  promo?: PromoDefinition
+} {
+  const promo = getPromo(promoCode)
+  if (!promo) {
+    return { valid: false, error: `Promo code "${promoCode}" is invalid or expired.` }
+  }
+  if (!promo.allowedPlans.includes(planId)) {
+    return {
+      valid: false,
+      error: `Promo code "${promo.code}" is valid for ${promo.allowedPlans.join('/')}, not ${planId}.`
+    }
+  }
+  return { valid: true, promo }
+}
+
+export function getPlanDurationDays(planId: string, promoCode?: string): number {
+  if (promoCode) {
+    const promo = getPromo(promoCode)
+    if (promo) return promo.durationDays
+  }
+  return PLAN_DAYS[planId] || 30
+}

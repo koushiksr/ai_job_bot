@@ -42,6 +42,8 @@ import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
 import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 import AiResumeBuilder from '@/components/AiResumeBuilder'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
+import { sendBrowserNotification } from '@/lib/notifications'
+import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
@@ -135,84 +137,60 @@ export default function UserDashboard() {
     }
   }, [])
 
-  const sendBrowserNotification = (title: string, options?: NotificationOptions) => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        const n = new Notification(title, {
-          icon: '/images/icon.png',
-          badge: '/images/icon.png',
-          ...options
-        })
-        n.onclick = () => {
-          window.focus()
-          n.close()
-        }
-      } catch (e) {
-        console.warn('Could not dispatch browser notification:', e)
-      }
-    }
-  }
-
   const loadUserOffers = async (email: string) => {
     if (!email) return
     try {
-      const clean = email.toLowerCase().trim()
-      const res = await fetch(`/api/user/offers?email=${encodeURIComponent(clean)}&t=${Date.now()}`)
-      if (res.ok) {
-        const data = await res.json()
-        const offers = data.assigned_offers || []
-        setAssignedOffers(offers)
-        if (offers.length > 0) {
-          const latest = offers[0]
-          setActiveOfferBanner(latest)
+      const data = await fetchCandidateOffers(email)
+      const offers = data.assigned_offers || []
+      setAssignedOffers(offers)
+      if (offers.length > 0) {
+        const latest = offers[0]
+        setActiveOfferBanner(latest)
 
-          // Dispatch native browser notification and in-app toast once per session per offer
-          const alertKey = `jobflux_alerted_offer_${latest.id || latest.promo_code}`
-          if (typeof window !== 'undefined' && !sessionStorage.getItem(alertKey)) {
-            sessionStorage.setItem(alertKey, 'true')
+        // Dispatch native browser notification and in-app toast once per session per offer
+        const alertKey = `jobflux_alerted_offer_${latest.id || latest.promo_code}`
+        if (typeof window !== 'undefined' && !sessionStorage.getItem(alertKey)) {
+          sessionStorage.setItem(alertKey, 'true')
 
-            // 1. Browser Push Notification with PNG Icon
-            sendBrowserNotification(`🎁 Special Offer Assigned: ${latest.discount_badge}!`, {
-              body: `Exclusive deal: ${latest.offer_title} at ${latest.discounted_price}. 1-click claim locked to your account.`
-            })
+          // 1. Browser Push Notification with PNG Icon
+          sendBrowserNotification(`🎁 Special Offer Assigned: ${latest.discount_badge}!`, {
+            body: `Exclusive deal: ${latest.offer_title} at ${latest.discounted_price}. 1-click claim locked to your account.`
+          })
 
-            // 2. Real-time In-App Slide-over Toast
-            setInAppToast({
-              id: latest.id,
-              title: `🎁 Exclusive Offer Assigned to You: ${latest.discount_badge}!`,
-              message: `${latest.offer_title} (${latest.original_price} → ${latest.discounted_price}). Promo code: ${latest.promo_code}`,
-              promo_code: latest.promo_code,
-              claim_url: latest.claim_url || `/pricing?promo=${latest.promo_code}`
-            })
-          }
-        } else {
-          setActiveOfferBanner(null)
+          // 2. Real-time In-App Slide-over Toast
+          setInAppToast({
+            id: latest.id,
+            title: `🎁 Exclusive Offer Assigned to You: ${latest.discount_badge}!`,
+            message: `${latest.offer_title} (${latest.original_price} → ${latest.discounted_price}). Promo code: ${latest.promo_code}`,
+            promo_code: latest.promo_code,
+            claim_url: latest.claim_url || `/pricing?promo=${latest.promo_code}`
+          })
         }
+      } else {
+        setActiveOfferBanner(null)
+      }
 
-        // 3. Process any real-time push notifications dispatched by administrator
-        const notifs = data.notifications || []
-        for (const notif of notifs) {
-          const notifKey = `jobflux_seen_notif_${notif.id}`
-          if (typeof window !== 'undefined' && !sessionStorage.getItem(notifKey)) {
-            sessionStorage.setItem(notifKey, 'true')
+      // 3. Process any real-time push notifications dispatched by administrator
+      const notifs = data.notifications || []
+      for (const notif of notifs) {
+        const notifKey = `jobflux_seen_notif_${notif.id}`
+        if (typeof window !== 'undefined' && !sessionStorage.getItem(notifKey)) {
+          sessionStorage.setItem(notifKey, 'true')
 
-            // Dispatch native OS browser push notification with high-res PNG icon
-            sendBrowserNotification(notif.title || '⚡ JobFlux AI Radar Alert', {
-              body: notif.message,
-              icon: '/images/icon.png',
-              badge: '/images/icon.png'
-            })
+          // Dispatch native OS browser push notification with high-res PNG icon
+          sendBrowserNotification(notif.title || '⚡ JobFlux AI Radar Alert', {
+            body: notif.message
+          })
 
-            // Dispatch floating slide-over in-app toast
-            setInAppToast({
-              id: notif.id,
-              title: notif.title || '⚡ JobFlux Priority Alert',
-              message: notif.message,
-              promo_code: notif.promo_code,
-              claim_url: notif.claim_url
-            })
-            break // Present one priority alert at a time
-          }
+          // Dispatch floating slide-over in-app toast
+          setInAppToast({
+            id: notif.id,
+            title: notif.title || '⚡ JobFlux Priority Alert',
+            message: notif.message,
+            promo_code: notif.promo_code,
+            claim_url: notif.claim_url
+          })
+          break // Present one priority alert at a time
         }
       }
     } catch (e) {
@@ -222,11 +200,7 @@ export default function UserDashboard() {
 
   const dismissToast = (notifId?: string) => {
     if (notifId) {
-      fetch('/api/user/offers', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notification_id: notifId })
-      }).catch(() => {})
+      markNotificationAsRead(notifId, userEmail)
     }
     setInAppToast(null)
   }

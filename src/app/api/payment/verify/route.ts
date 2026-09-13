@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { getDb } from '@/lib/mongodb'
-import { PROMO_DISCOUNTS } from '../order/route'
-
-export const dynamic = 'force-dynamic'
-
-const PLAN_DAYS: Record<string, number> = {
-  starter: 30,
-  pro: 30,
-  elite: 90,
-  professional: 90
-}
+import { PLAN_DAYS, PROMO_DISCOUNTS } from '@/config/plans'
 
 export async function POST(req: NextRequest) {
   try {

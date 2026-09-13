@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,19 +24,16 @@ export async function POST(req: NextRequest) {
     // 1. Admin login check
     if (
       (
-        emailClean === 'technohmsit@gmail.com' ||
-        emailClean === 'technohmsit' ||
-        emailClean === 'admin' ||
-        emailClean === 'admin@jobfluxai.com' ||
+        isAdminUser(emailClean) ||
         emailClean === 'admin@jobflux.ai' ||
         emailClean === 'admin@jobbot.ai' ||
         emailClean === 'admin@admin.com'
       ) &&
       pwdClean === 'admin'
     ) {
-      const isTechnohm = emailClean === 'technohmsit@gmail.com' || emailClean === 'technohmsit'
-      const adminUid = isTechnohm ? 'technohmsit' : 'admin'
-      const adminMail = isTechnohm ? 'technohmsit@gmail.com' : (emailClean.includes('@') ? emailClean : 'admin@jobfluxai.com')
+      const isTechnohm = emailClean === APP_CONFIG.supportEmail || emailClean === APP_CONFIG.masterAdminId
+      const adminUid = isTechnohm ? APP_CONFIG.masterAdminId : 'admin'
+      const adminMail = isTechnohm ? APP_CONFIG.supportEmail : (emailClean.includes('@') ? emailClean : 'admin@jobfluxai.com')
 
       if (db) {
         await logUserActivity(db, {
@@ -75,10 +73,9 @@ export async function POST(req: NextRequest) {
     if (profile) {
       if (profile.password === pwdClean) {
         const assignedRole = (
-          emailClean === 'technohmsit@gmail.com' ||
-          emailClean === 'technohmsit' ||
-          profile.user_id === 'technohmsit' ||
-          (profile.email && profile.email.toLowerCase() === 'technohmsit@gmail.com') ||
+          isAdminUser(emailClean) ||
+          isAdminUser(profile.user_id) ||
+          isAdminUser(profile.email) ||
           profile.role === 'admin'
         ) ? 'admin' : 'user'
 

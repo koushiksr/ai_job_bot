@@ -27,102 +27,8 @@ import {
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import LiquidFlowMesh from '@/components/LiquidFlowMesh'
+import { PLANS, PROMO_DEFINITIONS, PlanDefinition as Plan } from '@/config/plans'
 
-interface Plan {
-  id: string
-  name: string
-  subtitle: string
-  badge?: string
-  price: string
-  originalPrice?: string
-  period: string
-  featuresIntro: string
-  features: { text: string; isAddon?: boolean }[]
-  cta: string
-  highlight?: boolean
-  popular?: boolean
-}
-
-const PLANS: Plan[] = [
-  {
-    id: 'trial',
-    name: 'Free',
-    subtitle: 'No credit card needed. Start testing for free.',
-    price: '₹0',
-    period: '/ 24 hours',
-    featuresIntro: 'Up to 15 verified job applications with zero risk, plus...',
-    features: [
-      { text: '1 Full Day of Autonomous Auto-Apply' },
-      { text: 'Up to 15 Verified Job Applications' },
-      { text: 'Automated screening questions answered' },
-      { text: 'Real-time application telemetry dashboard' },
-      { text: 'Zero credit card required to start' }
-    ],
-    cta: 'Start free trial',
-    highlight: false
-  },
-  {
-    id: 'pro',
-    name: 'Essentials',
-    subtitle: 'For candidates with daily proactive application demands.',
-    badge: 'POPULAR',
-    price: '₹99',
-    originalPrice: '₹1,000',
-    period: '/ month',
-    featuresIntro: 'Everything in Free, with 600+ monthly applications, plus...',
-    features: [
-      { text: '30 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 600+ Verified Job Applications' },
-      { text: 'Daily Autonomous Application Sweeps' },
-      { text: 'AI Tailored Responses for Recruiter Screening' },
-      { text: 'Target Role, Location & Salary Filters' },
-      { text: 'Priority Cloud Worker Queue' },
-      { text: 'Live Application History & Recruiter Links' }
-    ],
-    cta: 'Get 1 Month for ₹99',
-    popular: true,
-    highlight: true
-  },
-  {
-    id: 'elite',
-    name: 'Professional',
-    subtitle: 'Best for comprehensive pipeline until you sign an offer.',
-    price: '₹199',
-    originalPrice: '₹2,500',
-    period: '/ 3 months',
-    featuresIntro: 'Everything in Essentials, with extended 90-day pipeline, plus...',
-    features: [
-      { text: '90 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 1,800+ Verified Job Applications' },
-      { text: 'VIP Priority Server Queue Slot' },
-      { text: 'AI Resume Optimization & Keyword Match' },
-      { text: 'On-Demand Real-Time Sweeps (Up to 5x / week)' },
-      { text: 'Continuous Applications Until Hired' },
-      { text: 'Dedicated Recruiter Response Priority' }
-    ],
-    cta: 'Get 3 Months (₹199)',
-    highlight: false
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    subtitle: 'For staffing agencies and colleges needing cohort scale.',
-    price: 'Custom',
-    period: '/ volume quote',
-    featuresIntro: 'Everything in Professional, with bulk candidate controls, plus...',
-    features: [
-      { text: 'Bulk Candidate Licensing (10 to 500+ Seats)' },
-      { text: 'Candidate Cohort Grouping & Batching' },
-      { text: 'Multi-User Telemetry & Aggregated Stats' },
-      { text: 'Dedicated Cloud Automation Workers' },
-      { text: 'Priority SLA & Dedicated Support Desk' },
-      { text: 'Custom ATS Integration & Webhooks', isAddon: true },
-      { text: 'Dedicated Placement Coordinator', isAddon: true }
-    ],
-    cta: 'Contact sales',
-    highlight: false
-  }
-]
 
 export default function PricingPage() {
   const [useCase, setUseCase] = useState<'b2c' | 'b2b'>('b2c')
@@ -163,47 +69,7 @@ export default function PricingPage() {
   const [validatingPromo, setValidatingPromo] = useState(false)
   const [promoSuccessMsg, setPromoSuccessMsg] = useState('')
 
-  const PROMO_DEFINITIONS: Record<
-    string,
-    { displayPrice: string; label: string; allowedPlans: string[]; durationDays?: number }
-  > = {
-    FLASH49: {
-      displayPrice: '₹49',
-      label: '95% OFF Flash Pass (Actual ₹1,000 / mo)',
-      allowedPlans: ['pro', 'starter'],
-      durationDays: 30
-    },
-    SPRINT69: {
-      displayPrice: '₹69',
-      label: '93% OFF Weekend Sprint (Actual ₹1,000 / mo)',
-      allowedPlans: ['pro', 'starter'],
-      durationDays: 30
-    },
-    OFFER90: {
-      displayPrice: '₹99',
-      label: '90% OFF Special Pass (Actual ₹1,000 / mo)',
-      allowedPlans: ['pro', 'starter'],
-      durationDays: 30
-    },
-    PRO199: {
-      displayPrice: '₹199',
-      label: '92% OFF 3-Month Full Pass (Actual ₹2,500 / 3 mos)',
-      allowedPlans: ['elite', 'professional'],
-      durationDays: 90
-    },
-    PRO129: {
-      displayPrice: '₹129',
-      label: '95% OFF 3-Month Fast-Track (Actual ₹2,500 / 3 mos)',
-      allowedPlans: ['elite', 'professional'],
-      durationDays: 90
-    },
-    VIP299: {
-      displayPrice: '₹299',
-      label: '97% OFF Lifetime VIP Pass (Actual ₹10,000 Value)',
-      allowedPlans: ['elite', 'professional'],
-      durationDays: 365
-    }
-  }
+
 
   const applyPromoToPlan = async (code: string, plan: Plan | null, emailToCheck?: string) => {
     const clean = code.trim().toUpperCase()

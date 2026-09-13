@@ -1,9 +1,11 @@
 import { NextRequest } from 'next/server'
 import { Db } from 'mongodb'
 
+import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
+
 /**
  * Verify whether the incoming request is from an authenticated Administrator.
- * technohmsit@gmail.com (user_id: technohmsit) is the designated Administrator.
+ * Master administrator and designated accounts are configured in APP_CONFIG.
  * Checks header 'x-user-id' or query 'auth_user_id' against database records.
  */
 export async function verifyAdminRequest(
@@ -24,13 +26,13 @@ export async function verifyAdminRequest(
     return { authorized: false, userId: '' }
   }
 
-  // 1. Master admin or designated technohmsit@gmail.com
+  // 1. Master admin or designated admin account
   if (userId === 'admin') {
     return { authorized: true, userId: 'admin', email: 'admin@jobfluxai.com' }
   }
 
-  if (userId === 'technohmsit' || userId.toLowerCase() === 'technohmsit@gmail.com') {
-    return { authorized: true, userId: 'technohmsit', email: 'technohmsit@gmail.com' }
+  if (isAdminUser(userId)) {
+    return { authorized: true, userId: APP_CONFIG.masterAdminId, email: APP_CONFIG.supportEmail }
   }
 
   // 2. Check in database users and profiles collections
@@ -38,7 +40,7 @@ export async function verifyAdminRequest(
                await db.collection('profiles').findOne({ user_id: userId })
 
   if (user) {
-    if (user.role === 'admin' || (user.email && user.email.toLowerCase() === 'technohmsit@gmail.com')) {
+    if (user.role === 'admin' || isAdminUser(user.email)) {
       return { authorized: true, userId, email: user.email }
     }
   }

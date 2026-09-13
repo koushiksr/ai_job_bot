@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
 import { getClientInfo, logUserActivity } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { APP_CONFIG } from '@/config/appConfig'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
           priority: t.priority || 'normal',
           subject: t.subject || 'Support Inquiry',
           message: t.message,
-          target_email: t.target_email || 'technohmsit@gmail.com',
+          target_email: t.target_email || APP_CONFIG.supportEmail,
           status: t.status || 'open',
           admin_response: t.admin_response || null,
           resolved_at: t.resolved_at || null,
@@ -108,7 +109,7 @@ export async function GET(req: NextRequest) {
         priority: t.priority || 'normal',
         subject: t.subject || 'Support Inquiry',
         message: t.message,
-        target_email: t.target_email || 'technohmsit@gmail.com',
+        target_email: t.target_email || APP_CONFIG.supportEmail,
         status: t.status || 'open',
         admin_response: t.admin_response || null,
         resolved_at: t.resolved_at || null,
@@ -173,7 +174,7 @@ export async function POST(req: NextRequest) {
       priority: ['urgent', 'high', 'normal', 'low'].includes(priority) ? priority : 'normal',
       subject: subject || `Query from ${name || email}`,
       message: message,
-      target_email: 'technohmsit@gmail.com',
+      target_email: APP_CONFIG.supportEmail,
       status: 'open',
       admin_response: null,
       resolved_at: null,
@@ -191,7 +192,7 @@ export async function POST(req: NextRequest) {
         userId: userId,
         email: email,
         eventType: 'plan_update',
-        description: `Submitted query #${ticketId} [${priority.toUpperCase()}]: "${subject || category}" to technohmsit@gmail.com`,
+        description: `Submitted query #${ticketId} [${priority.toUpperCase()}]: "${subject || category}" to ${APP_CONFIG.supportEmail}`,
         ipAddress: ip,
         userAgent: userAgent,
         metadata: {
@@ -206,8 +207,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       ticket_id: ticketId,
-      target_email: 'technohmsit@gmail.com',
-      message: 'Your query has been logged in our priority queue. Administrator technohmsit@gmail.com will review and respond directly.'
+      target_email: APP_CONFIG.supportEmail,
+      message: `Your query has been logged in our priority queue. Administrator ${APP_CONFIG.supportEmail} will review and respond directly.`
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
@@ -248,7 +249,7 @@ export async function PATCH(req: NextRequest) {
     }
     if (admin_response !== undefined) {
       updates.admin_response = admin_response
-      updates.responded_by = adminEmail || 'technohmsit@gmail.com'
+      updates.responded_by = adminEmail || APP_CONFIG.supportEmail
     }
 
     const result = await db.collection('support_requests').updateOne(
