@@ -46,7 +46,10 @@ import {
   Settings,
   Lock,
   CheckCheck,
-  Eye
+  Eye,
+  AlertCircle,
+  Filter,
+  HelpCircle
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -153,6 +156,9 @@ export default function AdminDashboard() {
   const [loadingExpirySweep, setLoadingExpirySweep] = useState<boolean>(false)
   const [sweepResult, setSweepResult] = useState<any | null>(null)
   const [inspectCandidate, setInspectCandidate] = useState<any | null>(null)
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null)
+  const [candidateStatusFilter, setCandidateStatusFilter] = useState<string>('all')
+  const [showStatusGuide, setShowStatusGuide] = useState<boolean>(false)
 
   // Live Email Diagnostic State
   const [mailDiagnosticLoading, setMailDiagnosticLoading] = useState<boolean>(false)
@@ -992,6 +998,22 @@ export default function AdminDashboard() {
       // Ensure user_role is set to 'admin' in localStorage
       localStorage.setItem('user_role', 'admin')
 
+      // Restore saved admin navigation & filter preferences
+      try {
+        const savedTab = localStorage.getItem('admin_active_tab')
+        if (savedTab && ['candidates', 'requests', 'queue', 'payments', 'offers', 'enterprise_leads', 'logs'].includes(savedTab)) {
+          setActiveAdminTab(savedTab as any)
+        }
+        const savedSearch = localStorage.getItem('admin_candidate_search')
+        if (savedSearch) setUserSearch(savedSearch)
+
+        const savedFilter = localStorage.getItem('admin_candidate_status_filter')
+        if (savedFilter) setCandidateStatusFilter(savedFilter)
+
+        const savedSelectedId = localStorage.getItem('admin_selected_candidate_id')
+        if (savedSelectedId) setSelectedCandidateId(savedSelectedId)
+      } catch {}
+
       // 4. Verify server-side against MongoDB
       fetchOverviewAndUsers()
       fetchPayments()
@@ -999,6 +1021,80 @@ export default function AdminDashboard() {
       fetchSupportTickets()
     }
   }, [])
+
+  // Window scroll position persistence
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    let timer: any = null
+    const handleScroll = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        try {
+          localStorage.setItem('admin_scroll_y', String(window.scrollY))
+        } catch {}
+      }, 150)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      clearTimeout(timer)
+    }
+  }, [])
+
+  // Auto-restore scroll position and open inspection modal after candidate list loads
+  const hasRestoredScrollRef = React.useRef(false)
+  useEffect(() => {
+    if (usersList.length > 0 && typeof window !== 'undefined') {
+      try {
+        // Restore inspecting candidate if one was open prior to refresh
+        const savedInspectId = localStorage.getItem('admin_inspecting_candidate_id')
+        if (savedInspectId && !inspectCandidate) {
+          const found = usersList.find(u => u.user_id === savedInspectId || u.email === savedInspectId)
+          if (found) setInspectCandidate(found)
+        }
+
+        // Restore selected candidate highlight
+        const savedSelected = localStorage.getItem('admin_selected_candidate_id')
+        if (savedSelected && !selectedCandidateId) {
+          setSelectedCandidateId(savedSelected)
+        }
+
+        // Restore scroll position once on initial load
+        if (!hasRestoredScrollRef.current) {
+          hasRestoredScrollRef.current = true
+          const savedScroll = localStorage.getItem('admin_scroll_y')
+          if (savedScroll) {
+            const y = parseInt(savedScroll, 10)
+            if (!isNaN(y) && y > 0) {
+              setTimeout(() => {
+                window.scrollTo({ top: y, behavior: 'instant' })
+              }, 80)
+            }
+          }
+        }
+      } catch {}
+    }
+  }, [usersList])
+
+  const handleTabChange = (tab: 'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'logs') => {
+    setActiveAdminTab(tab)
+    try {
+      localStorage.setItem('admin_active_tab', tab)
+    } catch {}
+  }
+
+  const handleInspectCandidate = (u: any | null) => {
+    setInspectCandidate(u)
+    try {
+      if (u) {
+        localStorage.setItem('admin_inspecting_candidate_id', u.user_id || u.email)
+        localStorage.setItem('admin_selected_candidate_id', u.user_id || u.email)
+        setSelectedCandidateId(u.user_id || u.email)
+      } else {
+        localStorage.removeItem('admin_inspecting_candidate_id')
+      }
+    } catch {}
+  }
 
   const handleToggleDaily = async (userId: string, currentStatus: boolean) => {
     const newStatus = !currentStatus
@@ -1088,11 +1184,22 @@ export default function AdminDashboard() {
     window.location.href = '/'
   }
 
-  const filteredUsers = usersList.filter(u =>
-    (u.name || '').toLowerCase().includes(userSearch.toLowerCase()) ||
-    (u.email || '').toLowerCase().includes(userSearch.toLowerCase()) ||
-    (u.user_id || '').toLowerCase().includes(userSearch.toLowerCase())
-  )
+  const filteredUsers = usersList.filter(u => {
+    const matchesSearch =
+      (u.name || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+      (u.email || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+      (u.user_id || '').toLowerCase().includes(userSearch.toLowerCase())
+    if (!matchesSearch) return false
+
+    if (candidateStatusFilter === 'all') return true
+    if (candidateStatusFilter === 'active') return u.plan_expiry_status === 'active'
+    if (candidateStatusFilter === 'expiring') return u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d'
+    if (candidateStatusFilter === 'urgent') return u.plan_expiry_status === 'expiring_soon_1d'
+    if (candidateStatusFilter === 'expired') return u.plan_expiry_status === 'expired'
+    if (candidateStatusFilter === 'vip') return Boolean(u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime')
+    if (candidateStatusFilter === 'no_plan') return u.plan_expiry_status === 'no_plan' || u.plan === 'none' || u.plan === 'no_plan'
+    return true
+  })
 
   if (authChecking) {
     return (
@@ -1352,8 +1459,8 @@ export default function AdminDashboard() {
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b border-zinc-900 pb-3 flex-wrap">
           <button
-            onClick={() => setActiveAdminTab('candidates')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+            onClick={() => handleTabChange('candidates')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
               activeAdminTab === 'candidates'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
@@ -1363,10 +1470,10 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => {
-              setActiveAdminTab('requests')
+              handleTabChange('requests')
               fetchSupportTickets()
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
               activeAdminTab === 'requests'
                 ? 'bg-zinc-800 text-white shadow-sm'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
@@ -1386,10 +1493,10 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => {
-              setActiveAdminTab('queue')
+              handleTabChange('queue')
               fetchQueueData()
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
               activeAdminTab === 'queue'
                 ? 'bg-zinc-800 text-white shadow-sm ring-1 ring-sky-500/30'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
@@ -1408,10 +1515,10 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => {
-              setActiveAdminTab('payments')
+              handleTabChange('payments')
               fetchPayments()
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
               activeAdminTab === 'payments'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
@@ -1421,10 +1528,10 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => {
-              setActiveAdminTab('offers')
+              handleTabChange('offers')
               fetchOffersData()
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
               activeAdminTab === 'offers'
                 ? 'bg-zinc-800 text-white shadow-sm'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
@@ -1435,10 +1542,10 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => {
-              setActiveAdminTab('enterprise_leads')
+              handleTabChange('enterprise_leads')
               fetchEnterpriseLeads()
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
               activeAdminTab === 'enterprise_leads'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
@@ -1448,11 +1555,11 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => {
-              setActiveAdminTab('logs')
+              handleTabChange('logs')
               fetchActivityLogs()
               fetchSupportTickets()
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
               activeAdminTab === 'logs'
                 ? 'bg-zinc-800 text-white'
                 : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
@@ -1465,30 +1572,180 @@ export default function AdminDashboard() {
         {/* TAB 1: CANDIDATES LIST */}
         {activeAdminTab === 'candidates' && (
           <div className="space-y-4">
-            {/* Search Header */}
-            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="relative w-full md:w-96">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                <input
-                  type="text"
-                  placeholder="Search by name, email, or candidate ID..."
-                  value={userSearch}
-                  onChange={e => setUserSearch(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
+            {/* Search & Status Filters Header */}
+            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3 shadow-xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="relative w-full md:w-96">
+                  <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, or candidate ID..."
+                    value={userSearch}
+                    onChange={e => {
+                      const val = e.target.value
+                      setUserSearch(val)
+                      try {
+                        localStorage.setItem('admin_candidate_search', val)
+                      } catch {}
+                    }}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  />
+                  {userSearch && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserSearch('')
+                        try {
+                          localStorage.removeItem('admin_candidate_search')
+                        } catch {}
+                      }}
+                      className="absolute right-3 top-2.5 text-zinc-500 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="text-xs text-slate-400 hidden lg:block">
+                    Auto-scheduled runs: <span className="text-emerald-400 font-semibold">Daily at 06:00 AM & 08:00 AM IST</span>
+                  </div>
+                  <button
+                    onClick={() => setEditingUser({ isNew: true, user_id: '' })}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-500/25 cursor-pointer"
+                  >
+                    <User className="w-4 h-4" /> Create Candidate
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="text-xs text-slate-400 hidden lg:block">
-                  Auto-scheduled runs: <span className="text-emerald-400 font-semibold">Daily at 06:00 AM & 08:00 AM IST</span>
+              {/* Status Filter Pills & Legend Toggle */}
+              <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1 border-t border-zinc-900">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[11px] font-mono text-zinc-500 uppercase mr-1 flex items-center gap-1">
+                    <Filter className="w-3 h-3 text-zinc-400" /> Filter:
+                  </span>
+                  {[
+                    { key: 'all', label: 'All Candidates', count: usersList.length, color: 'text-zinc-300' },
+                    { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400' },
+                    { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300' },
+                    { key: 'urgent', label: 'Urgent <24h', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-rose-300' },
+                    { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400' },
+                    { key: 'vip', label: 'Lifetime VIP', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length, color: 'text-amber-400' },
+                    { key: 'no_plan', label: 'No Plan', count: usersList.filter(u => u.plan_expiry_status === 'no_plan' || u.plan === 'none' || u.plan === 'no_plan').length, color: 'text-zinc-400' }
+                  ].map(f => (
+                    <button
+                      key={f.key}
+                      type="button"
+                      onClick={() => {
+                        setCandidateStatusFilter(f.key)
+                        try {
+                          localStorage.setItem('admin_candidate_status_filter', f.key)
+                        } catch {}
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
+                        candidateStatusFilter === f.key
+                          ? 'bg-zinc-800 text-white border border-zinc-700 font-bold shadow-sm'
+                          : 'bg-zinc-950/60 text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800'
+                      }`}
+                    >
+                      <span>{f.label}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 font-bold ${f.color}`}>
+                        {f.count}
+                      </span>
+                    </button>
+                  ))}
                 </div>
+
                 <button
-                  onClick={() => setEditingUser({ isNew: true, user_id: '' })}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-500/25"
+                  type="button"
+                  onClick={() => setShowStatusGuide(!showStatusGuide)}
+                  className="text-xs text-zinc-400 hover:text-amber-300 flex items-center gap-1 transition-colors font-mono cursor-pointer ml-auto"
                 >
-                  <User className="w-4 h-4" /> Create Candidate
+                  <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{showStatusGuide ? 'Hide Status Legend' : 'Status Guide & Legend'}</span>
                 </button>
               </div>
+
+              {/* Expandable Status Legend Guide */}
+              {showStatusGuide && (
+                <div className="p-4 rounded-xl bg-black/80 border border-amber-500/30 text-xs space-y-2.5 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <span>Candidate Plan Expiry Status & Visual Indicator Guide</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowStatusGuide(false)}
+                      className="text-zinc-400 hover:text-white cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-emerald-900/40 space-y-1">
+                      <div className="flex items-center gap-1.5 text-emerald-300 font-bold font-mono">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Active (Xd left)</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Paid plan with &gt; 48 hours remaining. Protected from discount offers to avoid cannibalizing subscription value.
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-amber-800/40 space-y-1">
+                      <div className="flex items-center gap-1.5 text-amber-300 font-bold font-mono">
+                        <Clock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Expiring: 1-2d (36h left)</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Plan expiring within 24–48 hours. Prime window to send retention renewal offers and automated reminders.
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-rose-800/50 space-y-1">
+                      <div className="flex items-center gap-1.5 text-rose-300 font-bold font-mono">
+                        <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
+                        <span>Expiring: &lt;24h left (Red Pulse)</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Urgent final 24-hour expiration countdown. Critical retention period before candidate's daily apply halts.
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-rose-900/60 space-y-1">
+                      <div className="flex items-center gap-1.5 text-rose-400 font-bold font-mono">
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+                        <span>Plan Expired</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Validity ended. Candidate is paused and eligible for win-back discount offers and immediate reactivation.
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-amber-500/30 space-y-1">
+                      <div className="flex items-center gap-1.5 text-amber-300 font-bold font-mono">
+                        <Crown className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Lifetime VIP (Permanent)</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Candidate holds permanent VIP free access. No expiration date; billing is waived permanently.
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 space-y-1">
+                      <div className="flex items-center gap-1.5 text-zinc-400 font-bold font-mono">
+                        <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                        <span>No Active Plan</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Free tier / unsubscribed account. Prime prospect for first-time conversion offers.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Candidates Table */}
@@ -1523,13 +1780,33 @@ export default function AdminDashboard() {
                       </tr>
                     ) : (
                       filteredUsers.map((u, idx) => (
-                        <tr key={u.user_id || idx} className="hover:bg-slate-800/30 transition-colors">
+                        <tr
+                          key={u.user_id || idx}
+                          onClick={() => {
+                            setSelectedCandidateId(u.user_id)
+                            try {
+                              localStorage.setItem('admin_selected_candidate_id', u.user_id)
+                            } catch {}
+                          }}
+                          className={`transition-colors cursor-pointer ${
+                            selectedCandidateId === u.user_id
+                              ? 'bg-indigo-950/40 border-l-2 border-l-indigo-500 ring-1 ring-indigo-500/30'
+                              : 'hover:bg-slate-800/30'
+                          }`}
+                        >
                           <td className="py-4 px-4 font-bold text-white flex items-center gap-3">
                             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
                               {u.name ? u.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'C'}
                             </div>
                             <div>
-                              <div className="font-bold text-white">{u.name || u.user_id}</div>
+                              <div className="font-bold text-white flex items-center gap-1.5">
+                                <span>{u.name || u.user_id}</span>
+                                {selectedCandidateId === u.user_id && (
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 font-mono font-bold">
+                                    SELECTED
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-[11px] text-slate-500 font-mono">{u.user_id}</div>
                             </div>
                           </td>
@@ -1574,7 +1851,7 @@ export default function AdminDashboard() {
 
                               <button
                                 onClick={() => handleToggleVip(u.user_id, !u.is_vip)}
-                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                                   u.is_vip
                                     ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
                                     : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
@@ -1585,27 +1862,100 @@ export default function AdminDashboard() {
                                 {u.is_vip ? 'Revoke VIP' : 'Grant VIP Pass'}
                               </button>
 
-                              {/* Expiry Countdown & Status */}
-                              {u.plan_expires_at && (
-                                <div className="text-[10px] font-mono mt-1 flex items-center gap-1">
-                                  <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
-                                  <span className={
-                                    u.plan_expiry_status === 'expired'
-                                      ? 'text-rose-400 font-bold'
-                                      : u.plan_expiry_status === 'expiring_soon_1d'
-                                      ? 'text-rose-400 font-bold animate-pulse'
-                                      : u.plan_expiry_status === 'expiring_soon_2d'
-                                      ? 'text-amber-400 font-bold'
-                                      : 'text-zinc-400'
-                                  }>
-                                    {u.plan_expiry_status === 'expired'
-                                      ? 'Plan Expired'
-                                      : u.hours_until_expiry !== null && u.hours_until_expiry !== undefined
-                                      ? `${u.hours_until_expiry <= 24 ? `Expires: ${u.hours_until_expiry}h` : `Expires: ${Math.ceil(u.hours_until_expiry / 24)}d`}`
-                                      : 'Active'}
-                                  </span>
-                                </div>
-                              )}
+                              {/* Crystal-Clear Expiry Countdown & Visual Status */}
+                              {(() => {
+                                if (u.is_vip || u.plan === 'vip') {
+                                  return (
+                                    <div
+                                      className="text-[10px] font-mono mt-1 flex items-center gap-1 text-amber-300 bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-500/30"
+                                      title="Candidate has permanent VIP access with no billing expiry."
+                                    >
+                                      <Crown className="w-3 h-3 text-amber-400 shrink-0" />
+                                      <span className="font-semibold">Lifetime VIP (Permanent)</span>
+                                    </div>
+                                  )
+                                }
+
+                                if (u.plan === 'none' || u.plan === 'no_plan' || u.plan_expiry_status === 'no_plan') {
+                                  return (
+                                    <div
+                                      className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800"
+                                      title="Candidate has no active plan. Prime prospect for conversion offer."
+                                    >
+                                      <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                                      <span>No Active Plan</span>
+                                    </div>
+                                  )
+                                }
+
+                                const hoursLeft = u.plan_hours_left ?? u.hours_until_expiry
+
+                                if (u.plan_expiry_status === 'expired' || (hoursLeft !== null && hoursLeft !== undefined && hoursLeft <= 0)) {
+                                  return (
+                                    <div
+                                      className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/40 text-rose-300 border border-rose-800/60"
+                                      title={`Plan expired on ${u.plan_expires_at ? formatTimestamp(u.plan_expires_at) : 'recently'}. Eligible for renewal retention offer.`}
+                                    >
+                                      <AlertCircle className="w-3 h-3 text-rose-400 shrink-0" />
+                                      <span className="font-bold">Plan Expired</span>
+                                    </div>
+                                  )
+                                }
+
+                                if (u.plan_expiry_status === 'expiring_soon_1d' || (hoursLeft !== null && hoursLeft !== undefined && hoursLeft <= 24)) {
+                                  return (
+                                    <div
+                                      className="text-[10px] font-mono mt-1 flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-950/50 text-rose-300 border border-rose-800"
+                                      title={`Expires in ${hoursLeft} hours (${u.plan_expires_at ? formatTimestamp(u.plan_expires_at) : ''}). Urgent renewal retention window.`}
+                                    >
+                                      <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping shrink-0" />
+                                      <span className="font-bold text-rose-200">Expiring: {hoursLeft}h left</span>
+                                    </div>
+                                  )
+                                }
+
+                                if (u.plan_expiry_status === 'expiring_soon_2d' || (hoursLeft !== null && hoursLeft !== undefined && hoursLeft <= 48)) {
+                                  const days = Math.ceil((hoursLeft || 1) / 24)
+                                  return (
+                                    <div
+                                      className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/40 text-amber-300 border border-amber-800/60"
+                                      title={`Expires in ${hoursLeft} hours (${days}d). Within 1-2 days renewal retention window.`}
+                                    >
+                                      <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                                      <span className="font-bold text-amber-300">Expiring: {days}d ({hoursLeft}h left)</span>
+                                    </div>
+                                  )
+                                }
+
+                                if (hoursLeft !== null && hoursLeft !== undefined && hoursLeft > 48) {
+                                  const days = Math.ceil(hoursLeft / 24)
+                                  return (
+                                    <div
+                                      className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950/30 text-emerald-300 border border-emerald-800/40"
+                                      title={`Active plan until ${u.plan_expires_at ? formatTimestamp(u.plan_expires_at) : ''} (${days} days left). Protected from discount offers.`}
+                                    >
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                                      <span className="font-medium text-emerald-300">Active ({days}d left)</span>
+                                    </div>
+                                  )
+                                }
+
+                                if (u.plan_expires_at) {
+                                  return (
+                                    <div className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
+                                      <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                                      <span>Expires: {formatTimestamp(u.plan_expires_at)}</span>
+                                    </div>
+                                  )
+                                }
+
+                                return (
+                                  <div className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
+                                    <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                                    <span>Trial (Standard)</span>
+                                  </div>
+                                )
+                              })()}
 
                               {/* Assigned Offers Chips */}
                               {u.assigned_offers && u.assigned_offers.length > 0 && (
@@ -1631,7 +1981,7 @@ export default function AdminDashboard() {
                           <td className="py-4 px-4 text-center">
                             <button
                               onClick={() => handleToggleDaily(u.user_id, u.enabled_for_daily_run !== false)}
-                              className="text-xs transition-colors"
+                              className="text-xs transition-colors cursor-pointer"
                               title="Toggle automated daily apply"
                             >
                               {u.enabled_for_daily_run !== false ? (
@@ -1664,26 +2014,25 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="py-4 px-4">
-                            <div className="space-y-1 text-[11px]">
-                              <div className="text-zinc-300 flex items-center gap-1">
-                                <FileText className="w-3 h-3 text-amber-400 shrink-0" />
-                                <span className="truncate max-w-[120px]" title={u.resume_filename || 'No resume PDF uploaded'}>
+                            <div className="space-y-1 text-xs">
+                              <div className="flex items-center gap-1 text-slate-300">
+                                <FileText className="w-3 h-3 text-slate-500 shrink-0" />
+                                <span className="truncate max-w-[120px]" title={u.resume_filename || 'No resume file recorded'}>
                                   {u.resume_filename || 'No PDF'}
                                 </span>
                               </div>
-                              <div className="text-[10px] text-zinc-500 font-mono">
+                              <div className="text-[10px] text-slate-500">
                                 {u.last_resume_updated_at ? `PDF: ${formatTimestamp(u.last_resume_updated_at)}` : (u.last_profile_updated_at ? `Profile: ${formatTimestamp(u.last_profile_updated_at)}` : 'Synced')}
                               </div>
                             </div>
                           </td>
                           <td className="py-4 px-4 text-center">
-                            <div className="font-mono font-bold text-white text-xs">
-                              {u.applied_today || 0} <span className="text-zinc-600 font-normal">/</span> <span className="text-indigo-400">{u.total_applied || 0}</span>
-                            </div>
-                            <div className="text-[9px] text-zinc-500 uppercase font-mono">Today / Total</div>
+                            <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-slate-900 text-slate-200 font-mono text-[11px] font-bold border border-slate-800">
+                              {u.applied_today || 0} / {u.total_applied || 0}
+                            </span>
                           </td>
                           <td className="py-4 px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-end gap-1.5">
                               <button
                                 onClick={() => {
                                   localStorage.setItem('user_id', u.user_id)
@@ -1691,14 +2040,14 @@ export default function AdminDashboard() {
                                   localStorage.setItem('user_role', 'admin')
                                   window.open('/dashboard', '_blank')
                                 }}
-                                className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+                                className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors cursor-pointer"
                                 title="Open Candidate Dashboard"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setInspectCandidate(u)}
+                                onClick={() => handleInspectCandidate(u)}
                                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-amber-300 font-bold text-xs transition-colors border border-amber-500/30 shadow-sm cursor-pointer"
                                 title="Inspect candidate plan validity, assigned offers & reminder telemetry"
                               >
@@ -1707,13 +2056,13 @@ export default function AdminDashboard() {
                               </button>
                               <button
                                 onClick={() => setEditingUser(u)}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-md"
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-md cursor-pointer"
                               >
                                 <Edit className="w-3.5 h-3.5" /> Edit Profile
                               </button>
                               <button
                                 onClick={() => handleDeleteUser(u.user_id)}
-                                className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
+                                className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors cursor-pointer"
                                 title="Delete Candidate"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1741,7 +2090,7 @@ export default function AdminDashboard() {
                       <p className="text-xs text-zinc-400 font-mono mt-0.5">{inspectCandidate.email}</p>
                     </div>
                     <button
-                      onClick={() => setInspectCandidate(null)}
+                      onClick={() => handleInspectCandidate(null)}
                       className="p-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
                     >
                       <X className="w-5 h-5" />
@@ -1763,25 +2112,36 @@ export default function AdminDashboard() {
                         <span className="text-zinc-500">Expiry Status:</span>
                         <div className={`font-bold ${
                           inspectCandidate.plan_expiry_status === 'expired' ? 'text-rose-400' :
-                          inspectCandidate.plan_expiry_status === 'expiring_soon_1d' ? 'text-rose-400' :
+                          inspectCandidate.plan_expiry_status === 'expiring_soon_1d' ? 'text-rose-400 animate-pulse' :
                           inspectCandidate.plan_expiry_status === 'expiring_soon_2d' ? 'text-amber-400' :
+                          inspectCandidate.plan_expiry_status === 'vip_lifetime' ? 'text-amber-300' :
+                          inspectCandidate.plan_expiry_status === 'no_plan' ? 'text-zinc-400' :
                           'text-emerald-400'
                         }`}>
-                          {inspectCandidate.plan_expiry_status || 'Active'}
+                          {inspectCandidate.plan_expiry_status === 'vip_lifetime' ? 'Lifetime VIP (Permanent)' :
+                           inspectCandidate.plan_expiry_status === 'expiring_soon_1d' ? 'Expiring Soon (<24h Left)' :
+                           inspectCandidate.plan_expiry_status === 'expiring_soon_2d' ? 'Expiring (1-2 Days Left)' :
+                           inspectCandidate.plan_expiry_status === 'expired' ? 'Plan Expired' :
+                           inspectCandidate.plan_expiry_status === 'no_plan' ? 'No Active Plan' :
+                           'Active Subscription'}
                         </div>
                       </div>
                       <div>
                         <span className="text-zinc-500">Plan Expires At:</span>
                         <div className="font-mono text-zinc-300">
-                          {inspectCandidate.plan_expires_at ? formatTimestamp(inspectCandidate.plan_expires_at) : 'No fixed expiration (Lifetime / Trial)'}
+                          {inspectCandidate.plan_expires_at ? formatTimestamp(inspectCandidate.plan_expires_at) : (inspectCandidate.is_vip ? 'Permanent (Lifetime VIP)' : 'No fixed expiration')}
                         </div>
                       </div>
                       <div>
                         <span className="text-zinc-500">Hours Remaining:</span>
                         <div className="font-mono text-zinc-300">
-                          {inspectCandidate.hours_until_expiry !== null && inspectCandidate.hours_until_expiry !== undefined
-                            ? `${inspectCandidate.hours_until_expiry} hours (${Math.round(inspectCandidate.hours_until_expiry / 24 * 10) / 10} days)`
-                            : 'N/A'}
+                          {(() => {
+                            const h = inspectCandidate.plan_hours_left ?? inspectCandidate.hours_until_expiry
+                            if (h !== null && h !== undefined) {
+                              return `${h} hours (${Math.round(h / 24 * 10) / 10} days)`
+                            }
+                            return inspectCandidate.is_vip ? '∞ (Permanent)' : 'N/A'
+                          })()}
                         </div>
                       </div>
                     </div>
@@ -1871,7 +2231,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setInspectCandidate(null)}
+                        onClick={() => handleInspectCandidate(null)}
                         className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs cursor-pointer"
                       >
                         Close

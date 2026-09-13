@@ -67,10 +67,18 @@ export async function GET(req: NextRequest) {
       const s = statsMap[p.user_id] || {}
       const emailClean = (p.email || '').toLowerCase().trim()
       const rawExp = p.plan_expires_at || p.trial_expires_at || null
-      let planExpiryStatus: 'active' | 'expiring_soon_2d' | 'expiring_soon_1d' | 'expired' | 'no_expiry' = 'no_expiry'
-      let planHoursLeft = 0
+      const isVip = Boolean(p.is_vip || p.vip_access || p.free_privilege || p.plan === 'vip')
+      const planClean = (p.plan || 'trial').toLowerCase()
+      const isNoPlan = planClean === 'none' || planClean === 'no_plan'
 
-      if (rawExp) {
+      let planExpiryStatus: 'active' | 'expiring_soon_2d' | 'expiring_soon_1d' | 'expired' | 'no_expiry' | 'vip_lifetime' | 'no_plan' = 'no_expiry'
+      let planHoursLeft: number | null = null
+
+      if (isVip) {
+        planExpiryStatus = 'vip_lifetime'
+      } else if (isNoPlan) {
+        planExpiryStatus = 'no_plan'
+      } else if (rawExp) {
         const expDate = new Date(rawExp)
         planHoursLeft = Math.round((expDate.getTime() - now.getTime()) / 3600000)
         if (planHoursLeft <= 0) {
@@ -82,6 +90,8 @@ export async function GET(req: NextRequest) {
         } else {
           planExpiryStatus = 'active'
         }
+      } else {
+        planExpiryStatus = 'no_expiry'
       }
 
       const userOffers = offersByEmail[emailClean] || []
@@ -102,6 +112,7 @@ export async function GET(req: NextRequest) {
         trial_expires_at: p.trial_expires_at || null,
         plan_expiry_status: planExpiryStatus,
         plan_hours_left: planHoursLeft,
+        hours_until_expiry: planHoursLeft,
         offer_eligibility: evaluateOfferEligibility(p),
         assigned_offers: userOffers,
         reminders_sent: userReminders,
