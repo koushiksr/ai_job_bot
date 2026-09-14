@@ -142,7 +142,10 @@ export async function GET(req: NextRequest) {
       isProfessional = false
     }
 
-    const query: any = { user_id: userId }
+    const query: any = {
+      user_id: userId,
+      job_url: { $not: { $regex: /developer-jobs|-jobs-in-|\/search\?/i } }
+    }
 
     if (statusFilter && statusFilter !== 'all') {
       query.status = statusFilter
@@ -210,18 +213,20 @@ export async function GET(req: NextRequest) {
       }
 
       // Resolve company: use stored value; if it is a placeholder, try to extract from URL
-      const storedCompany = doc.company || ''
+      const storedCompany = (doc.company || '').trim()
       const isUnknownCompany = !storedCompany ||
-        storedCompany === 'Unknown Company' ||
-        storedCompany === 'Unknown' ||
-        storedCompany === 'Confidential'
+        storedCompany.toLowerCase() === 'unknown company' ||
+        storedCompany.toLowerCase() === 'unknown' ||
+        storedCompany.toLowerCase() === 'confidential'
 
       let resolvedCompany = storedCompany
       if (isUnknownCompany && doc.job_url) {
         const extracted = extractCompanyFromNaukriUrl(doc.job_url, doc.job_title || '')
         if (extracted) resolvedCompany = extracted
       }
-      if (!resolvedCompany) resolvedCompany = 'Unknown Company'
+      if (!resolvedCompany || resolvedCompany.toLowerCase() === 'unknown company' || resolvedCompany.toLowerCase() === 'unknown') {
+        resolvedCompany = 'Confidential Hiring Partner'
+      }
 
       return {
         id: String(doc._id),
