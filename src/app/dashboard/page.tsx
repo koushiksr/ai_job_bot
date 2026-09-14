@@ -42,6 +42,7 @@ import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
 import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 import AiResumeBuilder from '@/components/AiResumeBuilder'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
+import BeginnerOnboardingGuide, { ProfileCompleteness } from '@/components/BeginnerOnboardingGuide'
 import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 
@@ -132,6 +133,21 @@ export default function UserDashboard() {
     promo_code?: string
     claim_url?: string
   } | null>(null)
+
+  // Candidate Profile Completeness & Beginner Onboarding State
+  const [profileCompleteness, setProfileCompleteness] = useState<ProfileCompleteness>({
+    hasResume: false,
+    hasNaukriCredentials: false,
+    hasTargetRoles: false,
+    hasExperienceOrCtc: false,
+    percent: 0,
+    missingFields: [
+      'Resume PDF (Upload to enable 1-Click AI auto-fill & applications)',
+      'Naukri.com Login Credentials (Email & Password)',
+      'Target Job Roles or Skills',
+      'Total Experience or Expected CTC'
+    ]
+  })
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -599,6 +615,43 @@ export default function UserDashboard() {
           }
           loadUserOffers(pData.email)
         }
+
+        // Calculate Profile Completeness for Beginner Onboarding & Automation Readiness
+        const hasResume = Boolean(
+          pData.has_resume ||
+          pData.last_resume_updated_at ||
+          (pData.resume_upload_count && pData.resume_upload_count > 0) ||
+          (pData.resume_filename && !pData.resume_filename.includes('_Resume.pdf') && pData.resume_filename !== 'Candidate_Resume.pdf')
+        )
+        const hasNaukriCredentials = Boolean(pData.email && pData.password && pData.password.trim().length > 0)
+        const hasTargetRoles = Boolean(
+          (Array.isArray(pData.job_filters?.target_roles) && pData.job_filters.target_roles.length > 0) ||
+          (Array.isArray(pData.skills) && pData.skills.length > 0)
+        )
+        const hasExperienceOrCtc = Boolean(
+          (Number(pData.experience) > 0) || (Number(pData.expected_ctc) > 0)
+        )
+
+        const missing: string[] = []
+        if (!hasResume) missing.push('Resume PDF (Upload to enable AI Auto-Fill & applications)')
+        if (!hasNaukriCredentials) missing.push('Naukri.com Login Credentials (Email & Password)')
+        if (!hasTargetRoles) missing.push('Target Job Roles or Skills')
+        if (!hasExperienceOrCtc) missing.push('Total Experience or Expected CTC')
+
+        let score = 0
+        if (hasResume) score += 30
+        if (hasNaukriCredentials) score += 30
+        if (hasTargetRoles) score += 20
+        if (hasExperienceOrCtc) score += 20
+
+        setProfileCompleteness({
+          hasResume,
+          hasNaukriCredentials,
+          hasTargetRoles,
+          hasExperienceOrCtc,
+          percent: score,
+          missingFields: missing
+        })
       }
 
       const sRes = await fetch(`/api/stats?user_id=${uid}`)
@@ -1691,6 +1744,14 @@ export default function UserDashboard() {
             </span>
           </div>
         </div>
+
+        {/* Beginner Onboarding & Autonomous Workflow Guide */}
+        <BeginnerOnboardingGuide
+          completeness={profileCompleteness}
+          userPlan={userPlan}
+          isProfessional={isProfessional}
+          totalApplied={metrics.total_applied}
+        />
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-zinc-950/90 border border-zinc-800/80 rounded-xl overflow-x-auto scrollbar-none flex-nowrap">

@@ -29,8 +29,12 @@ import {
   FileText,
   Sliders,
   Check,
-  Radio
+  Radio,
+  Coffee,
+  Zap,
+  ArrowRight
 } from 'lucide-react'
+import ProfileSaveCelebrationModal from '@/components/ProfileSaveCelebrationModal'
 
 interface CandidateProfileEditorProps {
   userId?: string
@@ -128,6 +132,8 @@ export default function CandidateProfileEditor({
   const [savingProfile, setSavingProfile] = useState<boolean>(false)
   const [saveSuccess, setSaveSuccess] = useState<string>('')
   const [saveError, setSaveError] = useState<string>('')
+  const [showCelebrationModal, setShowCelebrationModal] = useState<boolean>(false)
+  const [hasResumeUploaded, setHasResumeUploaded] = useState<boolean>(false)
 
   // Advanced Raw JSON View
   const [showRawJson, setShowRawJson] = useState<boolean>(false)
@@ -135,6 +141,20 @@ export default function CandidateProfileEditor({
   const [jsonError, setJsonError] = useState<string>('')
 
   const effectiveUserId = isNew ? newUserId : userId
+
+  // Curated presets for Indian tech market
+  const POPULAR_ROLE_PRESETS = [
+    'Full Stack Developer',
+    'Frontend Developer',
+    'Backend Developer',
+    'React Developer',
+    'Python Developer',
+    'Node.js Developer',
+    'Java Developer',
+    'DevOps Engineer',
+    'QA Automation Engineer',
+    'Data Engineer'
+  ]
 
   // Curated Indian mass consultancy & IT services presets
   const MASS_CONSULTANCY_PRESETS = [
@@ -417,6 +437,7 @@ export default function CandidateProfileEditor({
         const data = await res.json()
         setResumeFilename(data.resume_filename || `${uid}_Resume.pdf`)
         setResumeVersion(Date.now())
+        setHasResumeUploaded(Boolean(data.has_resume || data.last_resume_updated_at || (data.resume_filename && !data.resume_filename.includes('_Resume.pdf') && data.resume_filename !== 'Candidate_Resume.pdf')))
         populateStateFromObject(data)
       } else {
         const err = await res.json().catch(() => ({}))
@@ -552,6 +573,7 @@ export default function CandidateProfileEditor({
       if (res.ok) {
         setSaveSuccess('Profile saved successfully and synced with the JobFlux Bot!')
         setErrors({})
+        setShowCelebrationModal(true)
         if (!isNew && userId) loadProfileData(userId)
         if (onSaveSuccess) onSaveSuccess()
         setTimeout(() => setSaveSuccess(''), 5000)
@@ -696,6 +718,7 @@ export default function CandidateProfileEditor({
           const data = await res.json()
           setResumeFilename(data.filename)
           setResumeVersion(data.timestamp || Date.now())
+          setHasResumeUploaded(true)
           setResumeSuccess(`Resume "${data.filename}" saved to JobFlux Cloud! Tap "Auto-Fill with AI" to extract your details.`)
           setTimeout(() => setResumeSuccess(''), 6000)
 
@@ -984,6 +1007,131 @@ export default function CandidateProfileEditor({
               <AlertCircle className="w-3 h-3" /> {errors.newUserId}
             </span>
           )}
+        </div>
+      )}
+
+      {/* 4-STEP VISUAL JOURNEY & SIT BACK & RELAX ENGINE */}
+      <div className="rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0a0d14] to-zinc-950 border border-zinc-800 p-4 sm:p-5 space-y-4 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                <Sparkles className="w-3 h-3 text-sky-400" />
+                <span>4-Step Quick Flow</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>High Chance of Job Getting</span>
+              </span>
+            </div>
+            <h3 className="text-sm sm:text-base font-bold text-white mt-1">
+              How JobFlux Autonomous Job Apply Works
+            </h3>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Follow these simple steps once. After saving, our autonomous cloud bot applies on your behalf every morning!
+            </p>
+          </div>
+
+          <div className="px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2 shrink-0">
+            <Coffee className="w-4 h-4 text-emerald-400" />
+            <span>Sit Back & Relax Engine</span>
+          </div>
+        </div>
+
+        {/* 4 Step Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          <div className={`p-3 rounded-xl border transition-all ${
+            hasResumeUploaded
+              ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-300'
+              : 'bg-black/60 border-zinc-800 text-zinc-300'
+          }`}>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+                STEP 1
+              </span>
+              {hasResumeUploaded ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <Upload className="w-4 h-4 text-sky-400" />
+              )}
+            </div>
+            <h4 className="text-xs font-bold text-white">Upload Resume PDF</h4>
+            <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
+              Upload your PDF resume. Recruiters on Naukri receive this exact file.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-xl border bg-black/60 border-zinc-800 text-zinc-300">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+                STEP 2
+              </span>
+              <Sparkles className="w-4 h-4 text-purple-400" />
+            </div>
+            <h4 className="text-xs font-bold text-white">1-Click AI Auto-Fill</h4>
+            <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
+              Click &quot;Auto-Fill with AI&quot; to instantly extract skills, CTC, and roles.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-xl border bg-black/60 border-zinc-800 text-zinc-300">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+                STEP 3
+              </span>
+              <Save className="w-4 h-4 text-emerald-400" />
+            </div>
+            <h4 className="text-xs font-bold text-white">Review & Save Profile</h4>
+            <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
+              Verify your Naukri credentials & compensation, then click Save.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-xl border bg-gradient-to-br from-emerald-950/40 via-black to-emerald-950/20 border-emerald-500/40 text-emerald-300">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-900/60 border border-emerald-700 text-emerald-200">
+                STEP 4
+              </span>
+              <Coffee className="w-4 h-4 text-emerald-400 animate-bounce" />
+            </div>
+            <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>Sit Back & Relax</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            </h4>
+            <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+              AI applies on your behalf twice daily at 06:00 AM & 08:00 AM IST!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* SMART MISSING DATA SUGGESTIONS CALLOUT */}
+      {(!hasResumeUploaded || !naukriEmail || !naukriPassword || targetRoles.length === 0) && (
+        <div className="p-4 rounded-xl bg-amber-950/20 border border-amber-500/40 space-y-2 text-xs animate-in fade-in">
+          <div className="flex items-center gap-2 text-amber-300 font-semibold">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+            <span>Profile Incomplete — Suggestions to maximize your job callback rate:</span>
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px] text-zinc-300">
+            {!hasResumeUploaded && (
+              <li className="p-2.5 rounded-lg bg-black/60 border border-amber-500/30 flex items-start gap-2">
+                <span className="text-amber-400 font-bold shrink-0">1.</span>
+                <span>Upload your <strong>Resume PDF</strong> below so AI can extract your details and attach it to job applications.</span>
+              </li>
+            )}
+            {(!naukriEmail || !naukriPassword) && (
+              <li className="p-2.5 rounded-lg bg-black/60 border border-amber-500/30 flex items-start gap-2">
+                <span className="text-amber-400 font-bold shrink-0">2.</span>
+                <span>Enter your <strong>Naukri Email & Password</strong> so the autonomous worker can sign in to apply on your behalf.</span>
+              </li>
+            )}
+            {targetRoles.length === 0 && (
+              <li className="p-2.5 rounded-lg bg-black/60 border border-amber-500/30 flex items-start gap-2">
+                <span className="text-amber-400 font-bold shrink-0">3.</span>
+                <span>Add at least 1 <strong>Target Role</strong> so the bot targets matching recruiter openings.</span>
+              </li>
+            )}
+          </ul>
         </div>
       )}
 
@@ -1502,6 +1650,43 @@ export default function CandidateProfileEditor({
             <span className="text-[11px] text-rose-400 font-medium flex items-center gap-1">
               <AlertCircle className="w-3 h-3 shrink-0" /> {errors.targetRoles}
             </span>
+          )}
+
+          {/* Quick presets for Target Roles */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-[10px] text-zinc-500 uppercase font-mono mr-1">Quick Add Roles:</span>
+            {POPULAR_ROLE_PRESETS.map(preset => {
+              const active = targetRoles.some(r => r.toLowerCase() === preset.toLowerCase())
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => {
+                    if (active) {
+                      removeTag(targetRoles, setTargetRoles, preset)
+                    } else {
+                      if (!targetRoles.some(r => r.toLowerCase() === preset.toLowerCase())) {
+                        setTargetRoles(prev => [...prev, preset])
+                        clearError('targetRoles')
+                      }
+                    }
+                  }}
+                  className={`text-[11px] px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                    active
+                      ? 'bg-sky-950/80 border border-sky-500/50 text-sky-300 font-semibold'
+                      : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                  }`}
+                >
+                  {active ? `✓ ${preset}` : `+ ${preset}`}
+                </button>
+              )
+            })}
+          </div>
+          {targetRoles.length === 0 && (
+            <p className="text-[11px] text-amber-400/90 flex items-center gap-1 pt-1">
+              <AlertCircle className="w-3 h-3 shrink-0" />
+              <span>Tip: Click any role title above to instantly add it to your profile.</span>
+            </p>
           )}
         </div>
 
@@ -2227,6 +2412,14 @@ export default function CandidateProfileEditor({
           </div>
         )}
       </div>
+
+      {/* Celebration Modal on Successful Profile Save */}
+      <ProfileSaveCelebrationModal
+        isOpen={showCelebrationModal}
+        onClose={() => setShowCelebrationModal(false)}
+        userEmail={naukriEmail || effectiveUserId}
+        isProfessional={isAdmin}
+      />
     </div>
   )
 }

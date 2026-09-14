@@ -99,6 +99,7 @@ export async function GET(req: NextRequest) {
       job_filters: profile.job_filters,
       predefined_answers: profile.predefined_answers || {},
       resume_filename: profile.resume_filename || `${userId}_Resume.pdf`,
+      has_resume: Boolean(profile.has_resume || profile.last_resume_updated_at || (profile.resume_upload_count && profile.resume_upload_count > 0)),
       enabled_for_daily_run: profile.enabled_for_daily_run !== false,
       last_login_at: profile.last_login_at || null,
       last_login_ip: profile.last_login_ip || null,
