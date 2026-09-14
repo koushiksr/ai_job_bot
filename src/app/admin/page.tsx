@@ -567,11 +567,6 @@ export default function AdminDashboard() {
 
       const data = await res.json()
       setPushDiagnosticResult(data)
-      if (data.success) {
-        sendBrowserNotification(customPushTitle.trim() || '⚡ Push Dispatched!', {
-          body: `Push notification sent to ${targetType === 'all' ? 'all candidates' : targetEmail}!`
-        })
-      }
       fetchPushDiagnostics()
     } catch (err: any) {
       setPushDiagnosticResult({

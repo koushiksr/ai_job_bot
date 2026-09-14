@@ -159,10 +159,12 @@ export default function UserDashboard() {
         if (typeof window !== 'undefined' && !sessionStorage.getItem(alertKey)) {
           sessionStorage.setItem(alertKey, 'true')
 
-          // 1. Browser Push Notification with PNG Icon
-          sendBrowserNotification(`🎁 Special Offer Assigned: ${latest.discount_badge}!`, {
-            body: `Exclusive deal: ${latest.offer_title} at ${latest.discounted_price}. 1-click claim locked to your account.`
-          })
+          // 1. Browser Push Notification (only if user is not actively viewing this tab)
+          if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+            sendBrowserNotification(`🎁 Special Offer Assigned: ${latest.discount_badge}!`, {
+              body: `Exclusive deal: ${latest.offer_title} at ${latest.discounted_price}. 1-click claim locked to your account.`
+            })
+          }
 
           // 2. Real-time In-App Slide-over Toast
           setInAppToast({
@@ -184,10 +186,12 @@ export default function UserDashboard() {
         if (typeof window !== 'undefined' && !sessionStorage.getItem(notifKey)) {
           sessionStorage.setItem(notifKey, 'true')
 
-          // Dispatch native OS browser push notification with high-res PNG icon
-          sendBrowserNotification(notif.title || '⚡ JobFlux AI Radar Alert', {
-            body: notif.message
-          })
+          // Dispatch native OS browser push notification only if tab is hidden (avoid double alert with in-app toast)
+          if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+            sendBrowserNotification(notif.title || '⚡ JobFlux AI Radar Alert', {
+              body: notif.message
+            })
+          }
 
           // Dispatch floating slide-over in-app toast
           setInAppToast({
