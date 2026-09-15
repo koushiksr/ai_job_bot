@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import Groq from 'groq-sdk'
+import { logLlmTelemetry } from '@/lib/llmLogger'
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY || 'dummy_key'
@@ -152,24 +153,61 @@ Incorporate custom user instructions only if they do not contradict the candidat
     userMessage += `\n\nOutput only valid JSON matching the schema.`
 
     let resultText = '{}';
+    const groqModel = process.env.GROQ_MODEL || 'llama-3.1-70b-versatile';
+    const t0Groq = Date.now();
     try {
       const completion = await groq.chat.completions.create({
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
         ],
-        model: process.env.GROQ_MODEL || 'llama-3.1-70b-versatile',
+        model: groqModel,
         temperature: 0.1,
         response_format: { type: 'json_object' }
       });
+      const durationMs = Date.now() - t0Groq;
       resultText = completion.choices[0]?.message?.content || '{}';
+
+      logLlmTelemetry({
+        userId: user_id,
+        userEmail: existingProfile?.email || user_id,
+        provider: 'groq',
+        model: groqModel,
+        taskType: 'resume_parsing',
+        question: 'Extract structured candidate profile from uploaded resume PDF',
+        prompt: userMessage.slice(0, 1500),
+        answer: resultText,
+        durationMs,
+        status: 'success',
+        promptTokens: completion.usage?.prompt_tokens || 0,
+        completionTokens: completion.usage?.completion_tokens || 0,
+        totalTokens: completion.usage?.total_tokens || 0,
+      }).catch(() => {});
     } catch (groqErr: any) {
+      const groqDurationMs = Date.now() - t0Groq;
       console.warn("Groq API failed, falling back to OpenRouter:", groqErr.message);
+
+      logLlmTelemetry({
+        userId: user_id,
+        userEmail: existingProfile?.email || user_id,
+        provider: 'groq',
+        model: groqModel,
+        taskType: 'resume_parsing',
+        question: 'Extract structured candidate profile from uploaded resume PDF',
+        prompt: userMessage.slice(0, 1500),
+        answer: '',
+        durationMs: groqDurationMs,
+        status: 'error',
+        error: groqErr?.message || String(groqErr),
+      }).catch(() => {});
+
       const openRouterKey = process.env.OPENROUTER_API_KEY;
       if (!openRouterKey) {
         throw new Error("Groq API failed and no OPENROUTER_API_KEY is available for fallback.");
       }
       
+      const openRouterModel = process.env.MODEL || "openrouter/free";
+      const t0Or = Date.now();
       const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -177,7 +215,7 @@ Incorporate custom user instructions only if they do not contradict the candidat
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: process.env.MODEL || "openrouter/free",
+          model: openRouterModel,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userMessage }
@@ -187,7 +225,8 @@ Incorporate custom user instructions only if they do not contradict the candidat
         })
       });
 
-      let openRouterData;
+      const orDurationMs = Date.now() - t0Or;
+      let openRouterData: any;
       let openRouterErrorText = "";
       try {
         openRouterData = await openRouterRes.json();
@@ -197,6 +236,20 @@ Incorporate custom user instructions only if they do not contradict the candidat
 
       if (!openRouterRes.ok) {
         const errorDetail = openRouterData?.error?.message || openRouterErrorText || openRouterRes.statusText;
+        logLlmTelemetry({
+          userId: user_id,
+          userEmail: existingProfile?.email || user_id,
+          provider: 'openrouter',
+          model: openRouterModel,
+          taskType: 'resume_parsing',
+          question: 'Extract structured candidate profile from uploaded resume PDF',
+          prompt: userMessage.slice(0, 1500),
+          answer: '',
+          durationMs: orDurationMs,
+          status: 'error',
+          error: `HTTP ${openRouterRes.status}: ${errorDetail}`,
+        }).catch(() => {});
+
         if (openRouterRes.status === 429) {
           throw new Error(`Rate Limit Exceeded. Both Groq and OpenRouter are currently busy or rate-limited. Please wait a minute and try again. (OpenRouter: ${errorDetail})`);
         }
@@ -204,6 +257,22 @@ Incorporate custom user instructions only if they do not contradict the candidat
       }
       
       resultText = openRouterData.choices?.[0]?.message?.content || '{}';
+      const orUsage = openRouterData?.usage || {};
+      logLlmTelemetry({
+        userId: user_id,
+        userEmail: existingProfile?.email || user_id,
+        provider: 'openrouter',
+        model: openRouterModel,
+        taskType: 'resume_parsing',
+        question: 'Extract structured candidate profile from uploaded resume PDF',
+        prompt: userMessage.slice(0, 1500),
+        answer: resultText,
+        durationMs: orDurationMs,
+        status: 'fallback',
+        promptTokens: orUsage.prompt_tokens || 0,
+        completionTokens: orUsage.completion_tokens || 0,
+        totalTokens: orUsage.total_tokens || 0,
+      }).catch(() => {});
     }
     
     let resultJson: any = {}

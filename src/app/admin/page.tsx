@@ -49,7 +49,14 @@ import {
   Eye,
   AlertCircle,
   Filter,
-  HelpCircle
+  HelpCircle,
+  Cpu,
+  Zap,
+  Brain,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -212,7 +219,30 @@ export default function AdminDashboard() {
   const [requestStatusFilter, setRequestStatusFilter] = useState<string>('all')
   const [ticketNotes, setTicketNotes] = useState<{ [id: string]: string }>({})
   const [savingTicketId, setSavingTicketId] = useState<string | null>(null)
-  const [logsSubTab, setLogsSubTab] = useState<'activity' | 'job_history' | 'tickets'>('activity')
+  const [logsSubTab, setLogsSubTab] = useState<'activity' | 'llm_telemetry' | 'job_history' | 'tickets'>('activity')
+  const [llmLogs, setLlmLogs] = useState<any[]>([])
+  const [loadingLlmLogs, setLoadingLlmLogs] = useState<boolean>(false)
+  const [llmStats, setLlmStats] = useState<{
+    total_calls: number
+    avg_duration_ms: number
+    success_rate: number
+    total_tokens: number
+    providers: Array<{ provider: string; count: number; avg_duration_ms: number; share_percent: number }>
+    top_questions: Array<{ question: string; count: number; sample_answer: string }>
+  }>({
+    total_calls: 0,
+    avg_duration_ms: 0,
+    success_rate: 100,
+    total_tokens: 0,
+    providers: [],
+    top_questions: []
+  })
+  const [llmFilterUser, setLlmFilterUser] = useState<string>('all')
+  const [llmFilterProvider, setLlmFilterProvider] = useState<string>('all')
+  const [llmFilterDate, setLlmFilterDate] = useState<string>('all')
+  const [llmSearchQuery, setLlmSearchQuery] = useState<string>('')
+  const [selectedLlmLog, setSelectedLlmLog] = useState<any | null>(null)
+  const [llmCopiedId, setLlmCopiedId] = useState<string | null>(null)
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
 
   // Enterprise Leads State
@@ -853,6 +883,35 @@ export default function AdminDashboard() {
       console.error('Failed to fetch activity logs:', e)
     } finally {
       setLoadingActivity(false)
+    }
+  }
+
+  const fetchLlmLogs = async (overrideParams?: { user?: string; provider?: string; date?: string; search?: string }) => {
+    setLoadingLlmLogs(true)
+    try {
+      const user = overrideParams?.user !== undefined ? overrideParams.user : llmFilterUser
+      const prov = overrideParams?.provider !== undefined ? overrideParams.provider : llmFilterProvider
+      const dt = overrideParams?.date !== undefined ? overrideParams.date : llmFilterDate
+      const qSearch = overrideParams?.search !== undefined ? overrideParams.search : llmSearchQuery
+
+      const params = new URLSearchParams({ limit: '100' })
+      if (user && user !== 'all') params.set('user_id', user)
+      if (prov && prov !== 'all') params.set('provider', prov)
+      if (dt && dt !== 'all') params.set('date', dt)
+      if (qSearch && qSearch.trim()) params.set('search', qSearch.trim())
+
+      const res = await fetch(`/api/admin/llm-logs?${params.toString()}`, {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setLlmLogs(data.logs || [])
+        if (data.stats) setLlmStats(data.stats)
+      }
+    } catch (e) {
+      console.error('Failed to fetch LLM telemetry logs:', e)
+    } finally {
+      setLoadingLlmLogs(false)
     }
   }
 
@@ -1553,6 +1612,7 @@ export default function AdminDashboard() {
               handleTabChange('logs')
               fetchActivityLogs()
               fetchSupportTickets()
+              fetchLlmLogs()
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
               activeAdminTab === 'logs'
@@ -4921,6 +4981,20 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   onClick={() => {
+                    setLogsSubTab('llm_telemetry')
+                    fetchLlmLogs()
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                    logsSubTab === 'llm_telemetry'
+                      ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-lg shadow-indigo-500/20 font-semibold'
+                      : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                  }`}
+                >
+                  <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>AI Q&A & Inference Telemetry ({llmStats.total_calls || llmLogs.length})</span>
+                </button>
+                <button
+                  onClick={() => {
                     setLogsSubTab('tickets')
                     fetchSupportTickets()
                   }}
@@ -5069,6 +5143,462 @@ export default function AdminDashboard() {
                     </table>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* VIEW: AI Q&A & INFERENCE TELEMETRY */}
+            {logsSubTab === 'llm_telemetry' && (
+              <div className="space-y-5">
+                {/* 5 KPI Metric Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                  {/* Card 1: Inferences */}
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1.5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-mono text-zinc-400">Total Inferences</span>
+                      <Brain className="w-4 h-4 text-purple-400" />
+                    </div>
+                    <div className="text-2xl font-bold font-mono text-white">
+                      {llmStats.total_calls.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-zinc-500 truncate">
+                      Job Screening & ATS Tasks
+                    </div>
+                  </div>
+
+                  {/* Card 2: Average Latency (Speed) */}
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1.5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-mono text-zinc-400">Avg Speed / Latency</span>
+                      <Zap className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <div className="text-2xl font-bold font-mono text-amber-300 flex items-baseline gap-1">
+                      {llmStats.avg_duration_ms}
+                      <span className="text-xs font-normal text-zinc-400">ms</span>
+                    </div>
+                    <div className="text-[10px] text-emerald-400 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      {llmStats.avg_duration_ms < 500 ? '⚡ Ultra-Fast LPU Speed' : 'Standard Speed'}
+                    </div>
+                  </div>
+
+                  {/* Card 3: Success Rate */}
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1.5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-mono text-zinc-400">Success Rate</span>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div className="text-2xl font-bold font-mono text-emerald-400">
+                      {llmStats.success_rate}%
+                    </div>
+                    <div className="text-[10px] text-zinc-500 truncate">
+                      Zero DOM modal timeouts
+                    </div>
+                  </div>
+
+                  {/* Card 4: Tokens Consumed */}
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1.5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-mono text-zinc-400">Total Tokens</span>
+                      <Database className="w-4 h-4 text-sky-400" />
+                    </div>
+                    <div className="text-2xl font-bold font-mono text-sky-400">
+                      {llmStats.total_tokens.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-zinc-500 truncate">
+                      Est. spend &lt; ₹15 / 1k queries
+                    </div>
+                  </div>
+
+                  {/* Card 5: Providers Split */}
+                  <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1.5 shadow-sm col-span-2 lg:col-span-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-mono text-zinc-400">Provider Split</span>
+                      <Cpu className="w-4 h-4 text-indigo-400" />
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                      {llmStats.providers.length === 0 ? (
+                        <span className="text-xs text-zinc-500 font-mono">Groq LPU (100%)</span>
+                      ) : (
+                        llmStats.providers.map(p => (
+                          <span
+                            key={p.provider}
+                            className="px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold bg-zinc-800 text-zinc-300 border border-zinc-700"
+                          >
+                            {p.provider}: {p.share_percent}%
+                          </span>
+                        ))
+                      )}
+                    </div>
+                    <div className="text-[10px] text-zinc-500">
+                      Auto-fallback enabled
+                    </div>
+                  </div>
+                </div>
+
+                {/* Filter Controls Bar */}
+                <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    {/* Search Query */}
+                    <div className="relative flex-1 min-w-[240px]">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <input
+                        type="text"
+                        placeholder="Search question, answer, candidate, or model..."
+                        value={llmSearchQuery}
+                        onChange={e => setLlmSearchQuery(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            fetchLlmLogs({ search: llmSearchQuery })
+                          }
+                        }}
+                        className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-black border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 font-mono"
+                      />
+                    </div>
+
+                    {/* Candidate User Filter */}
+                    <select
+                      value={llmFilterUser}
+                      onChange={e => {
+                        setLlmFilterUser(e.target.value)
+                        fetchLlmLogs({ user: e.target.value })
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-black border border-zinc-800 text-xs text-zinc-300 font-mono focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="all">All Candidates (Users)</option>
+                      {usersList.map((u: any) => (
+                        <option key={u.user_id} value={u.user_id}>
+                          {u.name || u.user_id} ({u.user_id})
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Provider Filter */}
+                    <select
+                      value={llmFilterProvider}
+                      onChange={e => {
+                        setLlmFilterProvider(e.target.value)
+                        fetchLlmLogs({ provider: e.target.value })
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-black border border-zinc-800 text-xs text-zinc-300 font-mono focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="all">All Providers</option>
+                      <option value="groq">⚡ Groq (LPU)</option>
+                      <option value="openrouter">🌐 OpenRouter</option>
+                      <option value="openai">🤖 OpenAI (GPT)</option>
+                      <option value="gemini">✨ Google Gemini</option>
+                    </select>
+
+                    {/* Date Filter */}
+                    <div className="flex items-center gap-1 bg-black p-1 rounded-lg border border-zinc-800">
+                      {[
+                        { id: 'all', label: 'All Time' },
+                        { id: 'today', label: 'Today' },
+                        { id: '7d', label: '7 Days' },
+                        { id: '30d', label: '30 Days' }
+                      ].map(d => (
+                        <button
+                          key={d.id}
+                          onClick={() => {
+                            setLlmFilterDate(d.id)
+                            fetchLlmLogs({ date: d.id })
+                          }}
+                          className={`px-2.5 py-1 rounded text-[11px] font-mono transition-colors ${
+                            llmFilterDate === d.id
+                              ? 'bg-indigo-600 text-white font-semibold'
+                              : 'text-zinc-400 hover:text-white'
+                          }`}
+                        >
+                          {d.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Refresh Button */}
+                    <button
+                      onClick={() => fetchLlmLogs()}
+                      disabled={loadingLlmLogs}
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                      title="Refresh Telemetry"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${loadingLlmLogs ? 'animate-spin' : ''}`} />
+                      <span>Refresh</span>
+                    </button>
+                  </div>
+
+                  {/* Top Screening Questions Quick Pills */}
+                  {llmStats.top_questions && llmStats.top_questions.length > 0 && (
+                    <div className="pt-2 border-t border-zinc-800/60 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                      <span className="text-[10px] uppercase font-mono text-zinc-500 shrink-0">
+                        Frequent Questions:
+                      </span>
+                      {llmStats.top_questions.slice(0, 5).map((tq, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setLlmSearchQuery(tq.question)
+                            fetchLlmLogs({ search: tq.question })
+                          }}
+                          className="px-2 py-0.5 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-[11px] font-mono truncate max-w-[260px] shrink-0 transition-colors"
+                          title={`Asked ${tq.count} times. Sample answer: ${tq.sample_answer}`}
+                        >
+                          <span className="text-indigo-400 font-bold mr-1">#{tq.count}</span>
+                          {tq.question}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Main Telemetry Table */}
+                <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-slate-300">
+                      <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                        <tr>
+                          <th className="py-3 px-4">Time & Candidate</th>
+                          <th className="py-3 px-4 min-w-[240px]">Screening Question & AI Answer</th>
+                          <th className="py-3 px-4">Provider / Model</th>
+                          <th className="py-3 px-4 text-center">Latency</th>
+                          <th className="py-3 px-4 text-center">Tokens</th>
+                          <th className="py-3 px-4 text-center">Status</th>
+                          <th className="py-3 px-4 text-right">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/50">
+                        {loadingLlmLogs ? (
+                          <tr>
+                            <td colSpan={7} className="py-14 text-center text-slate-400">
+                              <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
+                              Querying AI inference telemetry & Q&A records...
+                            </td>
+                          </tr>
+                        ) : llmLogs.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="py-14 text-center text-slate-500">
+                              <Brain className="w-8 h-8 mx-auto text-zinc-600 mb-2" />
+                              No LLM inference logs found matching your filters.
+                              <div className="text-[11px] text-zinc-600 mt-1">
+                                Questions answered by the bot on Naukri will automatically appear here in real-time.
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          llmLogs.map((log, idx) => (
+                            <tr key={log.id || idx} className="hover:bg-slate-800/30 transition-colors">
+                              {/* Time & Candidate */}
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <div className="font-mono text-[11px] text-zinc-300 font-semibold">
+                                  {formatTimestamp(log.created_at)}
+                                </div>
+                                <div className="font-mono text-[10px] text-indigo-400 truncate max-w-[130px]" title={log.user_id}>
+                                  @{log.user_id}
+                                </div>
+                              </td>
+
+                              {/* Question & Answer */}
+                              <td className="py-3 px-4">
+                                <div className="text-xs font-semibold text-white leading-snug">
+                                  {log.question || 'Application Screening Question'}
+                                </div>
+                                <div className="text-[11px] text-emerald-400 font-mono mt-1 flex items-center gap-1.5">
+                                  <span className="text-zinc-500 font-bold">Ans:</span>
+                                  <span className="bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 font-semibold">
+                                    {log.answer || '(Empty or fallback)'}
+                                  </span>
+                                </div>
+                              </td>
+
+                              {/* Provider & Model */}
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider ${
+                                    (log.provider || '').includes('groq')
+                                      ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                                      : (log.provider || '').includes('openai')
+                                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                      : 'bg-purple-500/10 text-purple-400 border border-purple-500/30'
+                                  }`}>
+                                    {log.provider}
+                                  </span>
+                                </div>
+                                <div className="text-[10px] font-mono text-zinc-400 mt-1 truncate max-w-[140px]" title={log.model}>
+                                  {log.model}
+                                </div>
+                              </td>
+
+                              {/* Latency */}
+                              <td className="py-3 px-4 text-center whitespace-nowrap">
+                                <span className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
+                                  log.duration_ms < 450
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                    : log.duration_ms < 1500
+                                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                                    : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                                }`}>
+                                  ⚡ {log.duration_ms}ms
+                                </span>
+                              </td>
+
+                              {/* Tokens */}
+                              <td className="py-3 px-4 text-center whitespace-nowrap font-mono text-[11px] text-zinc-400">
+                                {log.total_tokens ? `${log.total_tokens} tok` : '—'}
+                              </td>
+
+                              {/* Status */}
+                              <td className="py-3 px-4 text-center whitespace-nowrap">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold ${
+                                  log.status === 'success'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                    : log.status === 'fallback'
+                                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                                    : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                                }`}>
+                                  {log.status}
+                                </span>
+                              </td>
+
+                              {/* Action: View Full Context */}
+                              <td className="py-3 px-4 text-right whitespace-nowrap">
+                                <button
+                                  onClick={() => setSelectedLlmLog(log)}
+                                  className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-[11px] font-mono inline-flex items-center gap-1 transition-colors"
+                                >
+                                  <Eye className="w-3 h-3 text-indigo-400" />
+                                  <span>Inspect</span>
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Inspect Context Modal */}
+                {selectedLlmLog && (
+                  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+                      <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-5 h-5 text-indigo-400" />
+                          <h3 className="font-bold text-sm text-white">
+                            LLM Inference Inspection & Candidate Context
+                          </h3>
+                        </div>
+                        <button
+                          onClick={() => setSelectedLlmLog(null)}
+                          className="p-1 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Header Summary */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
+                        <div className="p-2.5 rounded-lg bg-black border border-zinc-800">
+                          <span className="text-[10px] text-zinc-500 uppercase block">Candidate</span>
+                          <span className="text-white font-semibold truncate block">@{selectedLlmLog.user_id}</span>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-black border border-zinc-800">
+                          <span className="text-[10px] text-zinc-500 uppercase block">Provider & Model</span>
+                          <span className="text-amber-400 font-semibold truncate block">{selectedLlmLog.provider} / {selectedLlmLog.model}</span>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-black border border-zinc-800">
+                          <span className="text-[10px] text-zinc-500 uppercase block">Latency</span>
+                          <span className="text-emerald-400 font-semibold block">⚡ {selectedLlmLog.duration_ms}ms</span>
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-black border border-zinc-800">
+                          <span className="text-[10px] text-zinc-500 uppercase block">Tokens</span>
+                          <span className="text-sky-400 font-semibold block">{selectedLlmLog.total_tokens || 0} tokens</span>
+                        </div>
+                      </div>
+
+                      {/* Question */}
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                          Screening Question Asked:
+                        </span>
+                        <div className="p-3 rounded-xl bg-black border border-zinc-800 text-xs font-medium text-white">
+                          {selectedLlmLog.question}
+                        </div>
+                      </div>
+
+                      {/* Answer */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                            Answer Returned by LLM:
+                          </span>
+                          <button
+                            onClick={() => {
+                              if (navigator?.clipboard) {
+                                navigator.clipboard.writeText(selectedLlmLog.answer || '')
+                                setLlmCopiedId(selectedLlmLog.id)
+                                setTimeout(() => setLlmCopiedId(null), 2000)
+                              }
+                            }}
+                            className="text-[11px] text-zinc-400 hover:text-white flex items-center gap-1 font-mono"
+                          >
+                            {llmCopiedId === selectedLlmLog.id ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-400" />
+                                <span className="text-emerald-400">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>Copy Answer</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs font-mono text-emerald-300 font-semibold">
+                          {selectedLlmLog.answer || '(No answer text)'}
+                        </div>
+                      </div>
+
+                      {/* Candidate Context Fed to AI */}
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                          Candidate Context Fed to AI:
+                        </span>
+                        <div className="p-3 rounded-xl bg-black border border-zinc-800 text-xs font-mono text-zinc-300 overflow-x-auto max-h-40">
+                          {Object.keys(selectedLlmLog.candidate_context || {}).length > 0 ? (
+                            <pre className="text-[11px] leading-relaxed whitespace-pre-wrap">
+                              {JSON.stringify(selectedLlmLog.candidate_context, null, 2)}
+                            </pre>
+                          ) : (
+                            <span className="text-zinc-500 italic">
+                              Default candidate profile parameters loaded from profile database.
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Prompt Snippet if available */}
+                      {selectedLlmLog.prompt && (
+                        <div className="space-y-1">
+                          <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                            Prompt Snippet:
+                          </span>
+                          <div className="p-3 rounded-xl bg-black border border-zinc-800 text-[11px] font-mono text-zinc-400 overflow-x-auto max-h-32 whitespace-pre-wrap">
+                            {selectedLlmLog.prompt}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          onClick={() => setSelectedLlmLog(null)}
+                          className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-white transition-colors"
+                        >
+                          Close Inspection
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

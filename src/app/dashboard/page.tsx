@@ -1012,37 +1012,13 @@ export default function UserDashboard() {
               )}
             </div>
 
-            {/* Mobile Profile Trigger Button (Left on Mobile) */}
-            <button
-              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="flex md:hidden items-center gap-2 pl-1 pr-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all text-white cursor-pointer"
-              aria-label="Toggle profile menu"
-            >
-              <div className="w-7 h-7 rounded-md bg-zinc-800 border border-zinc-700/60 flex items-center justify-center font-bold text-[10px] text-white shrink-0 relative overflow-hidden">
-                {userPicture ? (
-                  <img src={userPicture} alt={userName || 'Candidate'} className="w-full h-full object-cover" onError={() => setUserPicture('')} />
-                ) : (
-                  userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
-                )}
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
-              </div>
-              <span className="text-xs font-semibold text-white truncate max-w-[80px]">
-                {userName ? userName.split(' ')[0] : 'Profile'}
-              </span>
-              {(isVip || userPlan === 'vip') ? (
-                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1 py-0.2 rounded-full">
-                  VIP
-                </span>
-              ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
-                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1 py-0.2 rounded-full">
-                  {userPlan === 'elite' ? 'PRO' : userPlan === 'trial' ? 'TRIAL' : userPlan.toUpperCase()}
-                </span>
-              ) : null}
-              <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
-            </button>
+            {/* Mobile Brand Logo (Anchored Cleanly on Left for Mobile) */}
+            <Link href="/dashboard" className="flex md:hidden items-center hover:opacity-90 transition-opacity">
+              <JobFluxLogo size="sm" showText={true} />
+            </Link>
           </div>
 
-          {/* RIGHT: Actions, Telemetry Refresh & Brand Logo (Swapped to Right) */}
+          {/* RIGHT: Actions, Telemetry Refresh & Controls */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Telemetry Refresh (Desktop) */}
             <button
@@ -1059,17 +1035,17 @@ export default function UserDashboard() {
             {activeOfferBanner ? (
               <Link
                 href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-black transition-colors shrink-0 shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-black transition-colors shrink-0 shadow-sm"
                 title={`Claim offer: ${activeOfferBanner.offer_title}`}
               >
                 <Sparkles className="w-3.5 h-3.5 fill-black/20" />
                 <span className="hidden sm:inline">Claim Deal ({activeOfferBanner.discounted_price})</span>
-                <span className="sm:hidden">Deal ({activeOfferBanner.discounted_price})</span>
+                <span className="sm:hidden">Deal</span>
               </Link>
             ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
               <Link
                 href="/pricing"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
                 title="Upgrade to unlock automated applications"
               >
                 <Sparkles className="w-3.5 h-3.5 text-zinc-800" />
@@ -1079,7 +1055,7 @@ export default function UserDashboard() {
             ) : userPlan === 'pro' ? (
               <Link
                 href="/pricing?plan=elite"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 text-white transition-colors shrink-0"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 text-white transition-colors shrink-0"
                 title="Upgrade to Professional"
               >
                 <Crown className="w-3.5 h-3.5 text-amber-400" />
@@ -1089,17 +1065,17 @@ export default function UserDashboard() {
             ) : (
               <Link
                 href="/pricing"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors shrink-0"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors shrink-0"
                 title="View membership plans"
               >
-                <Crown className="w-3.5 h-3.5 text-zinc-400" />
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
                 <span className="hidden sm:inline">Plans & Upgrades</span>
                 <span className="sm:hidden">Plans</span>
               </Link>
             )}
 
-            {/* Brand Logo & Radar Status (Clean on Right) */}
-            <div className="flex items-center gap-2.5 pl-2 border-l border-zinc-800 shrink-0">
+            {/* Desktop Brand Logo & Radar Status (Right on Desktop) */}
+            <div className="hidden md:flex items-center gap-2.5 pl-2 border-l border-zinc-800 shrink-0">
               <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
                 <JobFluxLogo size="sm" showText={true} />
               </Link>
@@ -1108,6 +1084,32 @@ export default function UserDashboard() {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </div>
             </div>
+
+            {/* Mobile Profile Trigger Button (Right on Mobile, Compact & Balanced) */}
+            <button
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="flex md:hidden items-center gap-1.5 pl-1 pr-1.5 py-1 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all text-white cursor-pointer shrink-0"
+              aria-label="Toggle profile menu"
+            >
+              <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700/70 flex items-center justify-center font-bold text-[10px] text-white shrink-0 relative overflow-hidden">
+                {userPicture ? (
+                  <img src={userPicture} alt={userName || 'Candidate'} className="w-full h-full object-cover" onError={() => setUserPicture('')} />
+                ) : (
+                  userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
+                )}
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
+              </div>
+              {(isVip || userPlan === 'vip') ? (
+                <span className="inline-flex items-center text-[9px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded-md">
+                  VIP
+                </span>
+              ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
+                <span className="inline-flex items-center text-[9px] font-mono font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded-md">
+                  {userPlan === 'elite' ? 'PRO' : userPlan === 'trial' ? 'TRIAL' : userPlan.toUpperCase()}
+                </span>
+              ) : null}
+              <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
+            </button>
           </div>
 
         </div>
