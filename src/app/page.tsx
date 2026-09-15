@@ -26,11 +26,9 @@ import {
   Zap
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
-import JobFluxSplash from '@/components/JobFluxSplash'
 import AiEngineVisualizer from '@/components/AiEngineVisualizer'
 import HomeInteractiveToolsCard from '@/components/HomeInteractiveToolsCard'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
-import LiquidFlowMesh from '@/components/LiquidFlowMesh'
 import Footer from '@/components/Footer'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 
@@ -62,7 +60,6 @@ const FAQS = [
 ]
 
 export default function Home() {
-  const [showSplash, setShowSplash] = useState(true)
   const [authMode, setAuthMode] = useState<'signin' | 'trial' | 'forgot'>('signin')
   const [forgotSent, setForgotSent] = useState(false)
   const [forgotLoading, setForgotLoading] = useState(false)
@@ -296,36 +293,11 @@ export default function Home() {
 
   return (
     <>
-      {showSplash && (
-        <JobFluxSplash
-          onComplete={() => {
-            setShowSplash(false)
-            if (typeof window !== 'undefined') {
-              const p = new URLSearchParams(window.location.search)
-              const modeParam = p.get('mode')
-              const hash = window.location.hash
-              if (modeParam === 'signin' || hash === '#signin' || hash === '#auth-card') {
-                scrollToAuth('signin')
-              } else if (modeParam === 'trial' || hash === '#trial') {
-                scrollToAuth('trial')
-              }
-            }
-          }}
-        />
-      )}
-      
       <div className="min-h-screen flex flex-col bg-[#000000] text-zinc-100 selection:bg-zinc-800 selection:text-white relative">
         
-        {/* Interactive Organic Dark Liquid Flow Mesh */}
-        <LiquidFlowMesh
-          className="h-[760px] w-full top-0 left-0"
-          opacity={0.65}
-          speedMultiplier={0.9}
-          interactive={true}
-        />
-
-        {/* Subtle Auth0/Gladia top ambient radial light */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[420px] bg-spotlight pointer-events-none" />
+        {/* Clean static radial gradient — calm, purposeful, no swirling distractions */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none" style={{background:'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%)'}} />
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-700/40 to-transparent pointer-events-none" />
 
         {/* Top Sticky Minimalist Header */}
         <header className="sticky top-0 z-40 w-full bg-black/80 backdrop-blur-xl border-b border-zinc-900/80">
@@ -452,6 +424,34 @@ export default function Home() {
             </div>
           </div>
         </header>
+
+        {/* Welcome Guide Strip — only shown to guests (non-logged-in) */}
+        {!existingUser && (
+          <div className="w-full border-b border-zinc-900/60 bg-zinc-950/60 backdrop-blur-sm z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-zinc-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span>New here? Start with a <strong className="text-zinc-200">1-Day Free Trial</strong> — no credit card needed.</span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => scrollToAuth('signin')}
+                  className="text-zinc-400 hover:text-white transition-colors px-2.5 py-1 rounded-md hover:bg-zinc-800/70 cursor-pointer"
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollToAuth('trial')}
+                  className="px-3 py-1 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold transition-colors cursor-pointer"
+                >
+                  Start Free →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Main Hero Section */}
         <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-20 flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 z-10">
@@ -465,16 +465,16 @@ export default function Home() {
           >
             <div>
               {/* Sleek Autonomous Radar Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-sky-500/30 text-zinc-300 text-xs font-mono mb-5 relative overflow-hidden backdrop-blur-md shadow-[0_0_20px_rgba(56,189,248,0.15)]">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-zinc-800/60 text-zinc-300 text-xs font-mono mb-5 relative overflow-hidden backdrop-blur-md">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                 </span>
-                <span className="text-zinc-200">Autonomous Engine Active</span>
-                <span className="text-zinc-600">·</span>
-                <span className="text-zinc-400 font-medium">Dual Runs (06:00 & 08:00 AM IST)</span>
-                {/* Subtle top border accent */}
-                <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent" />
+                <span className="text-zinc-300">Autonomous Engine Active</span>
+                <span className="text-zinc-700">·</span>
+                <span className="text-zinc-500 font-medium">Daily Runs (06:00 &amp; 08:00 AM IST)</span>
+                {/* Subtle bottom line accent */}
+                <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-700/40 to-transparent" />
               </div>
               
               <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-white leading-[1.1]">

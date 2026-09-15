@@ -26,7 +26,6 @@ import {
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
-import LiquidFlowMesh from '@/components/LiquidFlowMesh'
 import Footer from '@/components/Footer'
 import { PLANS, PROMO_DEFINITIONS, PlanDefinition as Plan } from '@/config/plans'
 
@@ -352,16 +351,9 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
       
-      {/* Interactive Liquid Flow Mesh */}
-      <LiquidFlowMesh
-        className="h-[650px] w-full top-0 left-0"
-        opacity={0.5}
-        speedMultiplier={0.8}
-        interactive={true}
-      />
-
-      {/* Subtle Auth0 ambient radial light */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-spotlight pointer-events-none" />
+      {/* Clean static radial gradient — calm, enterprise aesthetic */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] pointer-events-none" style={{background:'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%)'}} />
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-700/40 to-transparent pointer-events-none" />
 
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-6 py-3 sm:py-4">

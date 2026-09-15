@@ -1828,6 +1828,67 @@ export default function UserDashboard() {
           </div>
         </div>
 
+        {/* ── New User Setup Required ── Only shows when profile incomplete & 0 apps ── */}
+        {!pageLoading && !profileCompleteness.hasResume && metrics.total_applied === 0 && (
+          <div className="rounded-2xl bg-[#09090b] border border-zinc-700/80 overflow-hidden relative">
+            {/* Accent top line */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-500/50 to-transparent pointer-events-none" />
+            
+            <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-4">
+                {/* Step indicator */}
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                  1
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-white">Complete your profile to activate auto-apply</span>
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 uppercase tracking-wide">Setup Required</span>
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-1 max-w-xl">
+                    Upload your resume PDF — our AI auto-fills your profile in seconds. Then add your credentials and target roles to start receiving daily job applications.
+                  </p>
+                  {/* Mini checklist */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5 text-[11px]">
+                    <span className={`flex items-center gap-1.5 ${profileCompleteness.hasResume ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${profileCompleteness.hasResume ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
+                      Resume PDF
+                    </span>
+                    <span className={`flex items-center gap-1.5 ${profileCompleteness.hasNaukriCredentials ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${profileCompleteness.hasNaukriCredentials ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
+                      Credentials
+                    </span>
+                    <span className={`flex items-center gap-1.5 ${profileCompleteness.hasTargetRoles ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${profileCompleteness.hasTargetRoles ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
+                      Target Roles
+                    </span>
+                    <span className={`flex items-center gap-1.5 ${profileCompleteness.hasExperienceOrCtc ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${profileCompleteness.hasExperienceOrCtc ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
+                      Experience &amp; CTC
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <Link
+                href="/profile"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-2 shadow-sm"
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Set Up Profile &amp; Upload Resume</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Progress bar */}
+            <div className="h-0.5 bg-zinc-900">
+              <div
+                className="h-full bg-emerald-500/60 transition-all duration-500"
+                style={{ width: `${profileCompleteness.percent}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Beginner Onboarding & Autonomous Workflow Guide */}
         <BeginnerOnboardingGuide
           completeness={profileCompleteness}
