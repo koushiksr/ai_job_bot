@@ -85,9 +85,10 @@ Return STRICTLY valid JSON without Markdown blocks:
   "summary": "A 180-250 word rich, keyword-optimized Naukri Profile Summary with key technical competencies, notable achievements, and availability details."
 }`
 
+        const groqModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
         const completion = await groq.chat.completions.create({
           messages: [{ role: 'user', content: prompt }],
-          model: 'llama-3.3-70b-versatile',
+          model: groqModel,
           temperature: 0.3,
           response_format: { type: 'json_object' }
         })

@@ -208,42 +208,87 @@ export default function CandidateProfileEditor({
     return `₹ ${inRupees.toLocaleString('en-IN')} / year`
   }
 
-  // Populate visual state from a loaded profile document object
-  const populateStateFromObject = (data: any) => {
-    setCandidateName(data.name || '')
-    setNaukriEmail(data.email || '')
-    setNaukriPassword(data.password || '')
-    setCurrentLocation(data.current_location || '')
-    setCurrentCompany(data.current_company || '')
+  // Populate visual state from a loaded profile document object (supports smart merge)
+  const populateStateFromObject = (data: any, isMerge: boolean = false) => {
+    if (data.name || !isMerge) setCandidateName(data.name || '')
+    if (data.email || !isMerge) setNaukriEmail(data.email || '')
+    if (data.password || !isMerge) setNaukriPassword(data.password || '')
+    if (data.current_location || !isMerge) setCurrentLocation(data.current_location || '')
+    if (data.current_company || !isMerge) setCurrentCompany(data.current_company || '')
 
     // Experience
-    setExperienceYears(data.experience !== undefined ? data.experience : 0)
+    if (data.experience !== undefined && data.experience !== null && !isNaN(Number(data.experience))) {
+      setExperienceYears(Number(data.experience))
+    } else if (!isMerge) {
+      setExperienceYears(0)
+    }
 
     // CTC: convert rupees to LPA if >= 1000
-    if (data.current_ctc !== undefined && data.current_ctc !== null) {
+    if (data.current_ctc !== undefined && data.current_ctc !== null && Number(data.current_ctc) > 0) {
       const num = Number(data.current_ctc)
       setCurrentCtcLpa(num >= 1000 ? +(num / 100000).toFixed(2) : num)
+    } else if (!isMerge) {
+      setCurrentCtcLpa(0)
     }
-    if (data.expected_ctc !== undefined && data.expected_ctc !== null) {
+    if (data.expected_ctc !== undefined && data.expected_ctc !== null && Number(data.expected_ctc) > 0) {
       const num = Number(data.expected_ctc)
       setExpectedCtcLpa(num >= 1000 ? +(num / 100000).toFixed(2) : num)
+    } else if (!isMerge) {
+      setExpectedCtcLpa(0)
     }
 
     // Job Filters
     const filters = data.job_filters || {}
-    setTargetRoles(Array.isArray(filters.roles) ? filters.roles : [])
-    setTargetLocations(Array.isArray(filters.location) ? filters.location : (Array.isArray(data.location) ? data.location : []))
-    setSkills(Array.isArray(data.skills) ? data.skills : (Array.isArray(filters.keywords) ? filters.keywords : []))
-    setMustHaveKeywords(Array.isArray(filters.must_have_keywords) ? filters.must_have_keywords : [])
+    const newRoles = Array.isArray(filters.roles) ? filters.roles : []
+    if (isMerge && newRoles.length > 0) {
+      setTargetRoles(prev => Array.from(new Set([...prev, ...newRoles])))
+    } else if (!isMerge) {
+      setTargetRoles(newRoles)
+    }
+
+    const newLocs = Array.isArray(filters.location) ? filters.location : (Array.isArray(data.location) ? data.location : [])
+    if (isMerge && newLocs.length > 0) {
+      setTargetLocations(prev => Array.from(new Set([...prev, ...newLocs])))
+    } else if (!isMerge) {
+      setTargetLocations(newLocs)
+    }
+
+    const incomingSkills = Array.isArray(data.skills) ? data.skills : (Array.isArray(filters.keywords) ? filters.keywords : [])
+    if (isMerge && incomingSkills.length > 0) {
+      setSkills(prev => {
+        const seen = new Set(prev.map(s => s.toLowerCase()))
+        const merged = [...prev]
+        for (const s of incomingSkills) {
+          const trimmed = String(s || '').trim()
+          if (trimmed && !seen.has(trimmed.toLowerCase())) {
+            seen.add(trimmed.toLowerCase())
+            merged.push(trimmed)
+          }
+        }
+        return merged
+      })
+    } else if (!isMerge) {
+      setSkills(incomingSkills)
+    }
+
+    if (Array.isArray(filters.must_have_keywords) && filters.must_have_keywords.length > 0) {
+      setMustHaveKeywords(prev => isMerge ? Array.from(new Set([...prev, ...filters.must_have_keywords])) : filters.must_have_keywords)
+    } else if (!isMerge) {
+      setMustHaveKeywords([])
+    }
     
     // Avoid companies
     const avoid = Array.isArray(filters.avoid_companies)
       ? filters.avoid_companies
       : (Array.isArray(data.avoid_companies) ? data.avoid_companies : [])
-    setAvoidCompanies(avoid)
+    if (isMerge && avoid.length > 0) {
+      setAvoidCompanies(prev => Array.from(new Set([...prev, ...avoid])))
+    } else if (!isMerge) {
+      setAvoidCompanies(avoid)
+    }
 
     // Employment History: ENFORCE EXACTLY AT MOST 1 CURRENT EMPLOYER
-    if (Array.isArray(data.employment_history)) {
+    if (Array.isArray(data.employment_history) && data.employment_history.length > 0) {
       let foundCurrent = false
       const normalizedHistory = data.employment_history.map((job: any) => {
         const isEndPresent = ['present', 'current', 'ongoing', 'now'].includes(String(job.end_date || '').trim().toLowerCase())
@@ -291,12 +336,12 @@ export default function CandidateProfileEditor({
       }
     })
 
-    setNoticePeriod(notice)
-    setWillingToRelocate(relocate)
-    setCareerBreak(breakAnswer)
-    setActiveBacklogs(backlogAnswer)
-    setPreferredLocation(prefLoc)
-    setCustomQaList(customList)
+    if (notice || !isMerge) setNoticePeriod(notice)
+    if (relocate || !isMerge) setWillingToRelocate(relocate)
+    if (breakAnswer || !isMerge) setCareerBreak(breakAnswer)
+    if (backlogAnswer || !isMerge) setActiveBacklogs(backlogAnswer)
+    if (prefLoc || !isMerge) setPreferredLocation(prefLoc)
+    if (customList.length > 0 || !isMerge) setCustomQaList(customList)
 
     // Picture
     if (data.picture) {
@@ -601,7 +646,7 @@ export default function CandidateProfileEditor({
     }
   }
 
-  // AI Auto-Fill Handler with Strict Invariant Enforcement
+  // AI Auto-Fill Handler with Strict Invariant Enforcement & Timeout Protection
   const handleAiAutoFill = async () => {
     if (isNew && !newUserId.trim()) {
       setSaveError('Candidate Unique ID is required before running AI Auto-Fill.')
@@ -612,6 +657,9 @@ export default function CandidateProfileEditor({
     setSaveError('')
     setSaveSuccess('')
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 25000)
+
     try {
       const res = await fetch('/api/profile/analyze', {
         method: 'POST',
@@ -619,8 +667,10 @@ export default function CandidateProfileEditor({
         body: JSON.stringify({
           user_id: effectiveUserId,
           custom_prompt: aiPrompt
-        })
+        }),
+        signal: controller.signal
       })
+      clearTimeout(timeoutId)
 
       if (res.ok) {
         const result = await res.json()
@@ -668,12 +718,14 @@ export default function CandidateProfileEditor({
           }
         }
 
-        populateStateFromObject(aiData)
+        // Smart merge into state to protect existing fields
+        populateStateFromObject(aiData, true)
         setErrors({})
         setShowAiPrompt(false)
         setAiPrompt('')
-        setSaveSuccess('✨ AI successfully analyzed your resume and auto-filled your profile! Review details below, verify your password, and click "Save Profile".')
-        setTimeout(() => setSaveSuccess(''), 6000)
+        setSaveSuccess('✨ AI successfully analyzed your resume and updated your profile! All fields synced.')
+        if (onSaveSuccess) onSaveSuccess()
+        setTimeout(() => setSaveSuccess(''), 7000)
       } else {
         let errMessage = 'Failed to analyze resume with AI.'
         try {
@@ -683,7 +735,12 @@ export default function CandidateProfileEditor({
         setSaveError(errMessage)
       }
     } catch (e: any) {
-      setSaveError(`AI analysis failed: ${e.message}`)
+      clearTimeout(timeoutId)
+      if (e.name === 'AbortError') {
+        setSaveError('AI extraction took longer than 25 seconds and timed out. Please try again or fill in the details manually.')
+      } else {
+        setSaveError(`AI analysis failed: ${e.message}`)
+      }
     } finally {
       setIsAnalyzing(false)
     }

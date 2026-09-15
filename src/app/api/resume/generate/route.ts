@@ -299,12 +299,13 @@ Return ONLY valid JSON matching this schema:
   ]
 }`
 
+        const groqModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
         const completion = await groq.chat.completions.create({
           messages: [
             { role: 'system', content: 'You are an expert ATS resume writer. Output ONLY raw JSON.' },
             { role: 'user', content: prompt }
           ],
-          model: 'llama-3.3-70b-versatile',
+          model: groqModel,
           temperature: 0.2,
           response_format: { type: 'json_object' }
         })
