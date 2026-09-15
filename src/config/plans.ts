@@ -168,6 +168,24 @@ export const MASTER_PROMOS: PromoDefinition[] = [
     }
   },
   {
+    code: 'CHOC29',
+    presetId: 'choc_29',
+    name: '7-Day Career Sprint (₹29 / week)',
+    offerTitle: 'Chocolate Price Special: 7-Day JobFlux Sprint for ₹29',
+    discountBadge: '97% OFF (CHOC PRICE)',
+    originalPrice: '₹500 / week',
+    discountedPrice: '₹29 / week',
+    amountPaise: 2900,
+    allowedPlans: ['pro', 'starter'],
+    durationDays: 7,
+    description: 'JobFlux 7-Day Sprint (150 Applications)',
+    customMessage: 'Claim the ₹29 Chocolate Sprint! Get 7 days of autonomous job applications across Naukri (150+ applications) for less than the price of a KitKat.',
+    pricingDisplay: {
+      displayPrice: '₹29',
+      label: 'Chocolate Price Sprint (Actual ₹500)'
+    }
+  },
+  {
     code: 'FLASH49',
     presetId: 'flash_49',
     name: 'Essentials Flash Pass (₹49 / mo)',

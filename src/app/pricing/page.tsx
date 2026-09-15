@@ -27,6 +27,7 @@ import {
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import LiquidFlowMesh from '@/components/LiquidFlowMesh'
+import Footer from '@/components/Footer'
 import { PLANS, PROMO_DEFINITIONS, PlanDefinition as Plan } from '@/config/plans'
 
 
@@ -181,9 +182,9 @@ export default function PricingPage() {
         }
       } else if (promoParam) {
         const clean = promoParam.trim().toUpperCase()
-        if (clean === 'FLASH49' || clean === 'SPRINT69') {
+        if (clean === 'FLASH49' || clean === 'SPRINT69' || clean === 'CHOC29' || clean === 'OFFER90') {
           initialPlan = PLANS.find(p => p.id === 'pro') || null
-        } else if (clean === 'PRO129' || clean === 'VIP299') {
+        } else if (clean === 'PRO129' || clean === 'PRO199' || clean === 'VIP299') {
           initialPlan = PLANS.find(p => p.id === 'elite') || null
         }
       }
@@ -725,6 +726,9 @@ export default function PricingPage() {
         </section>
 
       </main>
+
+      {/* Universal Footer with Legal Non-Affiliation & Disclaimers */}
+      <Footer />
 
       {/* Plan Purchase & Activation Modal */}
       <AnimatePresence>
