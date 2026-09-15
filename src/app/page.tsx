@@ -271,6 +271,9 @@ export default function Home() {
                 localStorage.setItem('user_email', data.email)
                 localStorage.setItem('user_role', data.role || 'user')
                 localStorage.setItem('user_plan', data.plan || 'trial')
+                if (data.picture) {
+                  localStorage.setItem('user_picture', data.picture)
+                }
                 window.location.href = data.role === 'admin' ? '/admin' : '/dashboard'
               }
             }

@@ -99,6 +99,7 @@ export async function GET(req: NextRequest) {
       job_filters: profile.job_filters,
       predefined_answers: profile.predefined_answers || {},
       resume_filename: profile.resume_filename || `${userId}_Resume.pdf`,
+      picture: profile.picture || profile.avatar_url || '',
       has_resume: Boolean(profile.has_resume || profile.last_resume_updated_at || (profile.resume_upload_count && profile.resume_upload_count > 0)),
       enabled_for_daily_run: profile.enabled_for_daily_run !== false,
       last_login_at: profile.last_login_at || null,
@@ -162,6 +163,7 @@ export async function POST(req: NextRequest) {
       current_location: body.current_location !== undefined ? body.current_location : (parsedRaw.current_location || existing?.current_location || ''),
       employment_history: body.employment_history !== undefined ? body.employment_history : (parsedRaw.employment_history || existing?.employment_history || []),
       resume_filename: body.resume_filename || parsedRaw.resume_filename || existing?.resume_filename || `${userId}_Resume.pdf`,
+      picture: body.picture !== undefined ? body.picture : (parsedRaw.picture !== undefined ? parsedRaw.picture : (existing?.picture || '')),
       updated_at: now
     }
 

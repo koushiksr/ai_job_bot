@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     let emailClean = (body.email || '').trim().toLowerCase()
     let name = (body.name || '').trim()
+    let picture = (body.picture || '').trim()
 
     // Support Google Identity Services (GIS) JWT ID token
     if (body.credential) {
@@ -47,6 +48,9 @@ export async function POST(req: NextRequest) {
           }
           if (payload.name && !name) {
             name = payload.name.trim()
+          }
+          if (payload.picture && !picture) {
+            picture = payload.picture.trim()
           }
         }
       } catch (e) {
@@ -123,6 +127,7 @@ export async function POST(req: NextRequest) {
         name: name || userId.replace('_', ' '),
         email: emailClean,
         password: '', // Authenticated via Google
+        picture: picture || '',
         auth_provider: 'google',
         experience: 1,
         current_ctc: 0,
@@ -151,6 +156,16 @@ export async function POST(req: NextRequest) {
       const insertResult = await db.collection('profiles').insertOne(newProfile)
       await db.collection('users').insertOne({ ...newProfile })
       profile = { ...newProfile, _id: insertResult.insertedId }
+    } else if (picture && !profile.picture) {
+      await db.collection('profiles').updateOne(
+        { user_id: profile.user_id },
+        { $set: { picture } }
+      )
+      await db.collection('users').updateOne(
+        { user_id: profile.user_id },
+        { $set: { picture } }
+      )
+      profile.picture = picture
     }
 
     if (!profile) {
@@ -211,6 +226,7 @@ export async function POST(req: NextRequest) {
       user_id: profile.user_id,
       email: profile.email,
       name: profile.name || profile.user_id.replace('_', ' '),
+      picture: profile.picture || picture || '',
       plan: verifiedPlan,
       plan_name: planName,
       is_plan_active: isPlanActive,

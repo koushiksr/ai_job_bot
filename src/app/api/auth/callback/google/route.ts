@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
 
     const emailClean = (userData.email || '').trim().toLowerCase()
     const name = (userData.name || emailClean.split('@')[0]).trim()
+    const picture = (userData.picture || '').trim()
 
     if (!emailClean) {
       throw new Error('Google did not return a valid email address.')
@@ -117,6 +118,7 @@ export async function GET(req: NextRequest) {
         name: name,
         email: emailClean,
         password: '',
+        picture: picture || '',
         auth_provider: 'google',
         experience: 1,
         current_ctc: 0,
@@ -164,6 +166,17 @@ export async function GET(req: NextRequest) {
         { upsert: true }
       )
       profile = { ...newProfile, _id: insertResult.insertedId }
+    } else if (picture && !profile.picture) {
+      // Sync Google picture if candidate doesn't have a custom picture
+      await db.collection('profiles').updateOne(
+        { user_id: profile.user_id },
+        { $set: { picture } }
+      )
+      await db.collection('users').updateOne(
+        { user_id: profile.user_id },
+        { $set: { picture } }
+      )
+      profile.picture = picture
     }
 
     // 4. Redirect to dashboard with authentication params
@@ -210,6 +223,9 @@ export async function GET(req: NextRequest) {
     targetUrl.searchParams.set('name', profile.name || profile.user_id.replace(/_/g, ' '))
     targetUrl.searchParams.set('plan', verifiedPlan)
     targetUrl.searchParams.set('role', role)
+    if (profile.picture || picture) {
+      targetUrl.searchParams.set('picture', profile.picture || picture)
+    }
 
     return NextResponse.redirect(targetUrl)
   } catch (err: any) {

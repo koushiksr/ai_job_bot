@@ -50,6 +50,7 @@ export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
   const [userEmail, setUserEmail] = useState<string>('')
   const [userName, setUserName] = useState<string>('')
+  const [userPicture, setUserPicture] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
   const [userPlan, setUserPlan] = useState<string>('trial')
   const [userPlanName, setUserPlanName] = useState<string>('JobFlux 1-Day Free Trial')
@@ -319,11 +320,22 @@ export default function UserDashboard() {
         const gEmail = p.get('email') || ''
         const gRole = p.get('role') || 'user'
         const gPlan = p.get('plan') || 'trial'
+        const gPicture = p.get('picture') || ''
         localStorage.setItem('user_id', gUid)
         localStorage.setItem('user_email', gEmail)
         localStorage.setItem('user_role', gRole)
         localStorage.setItem('user_plan', gPlan)
+        if (gPicture) {
+          localStorage.setItem('user_picture', gPicture)
+          setUserPicture(gPicture)
+        }
         window.history.replaceState({}, document.title, '/dashboard')
+      }
+
+      const directPic = p.get('picture')
+      if (directPic) {
+        localStorage.setItem('user_picture', directPic)
+        setUserPicture(directPic)
       }
 
       const noticeParam = p.get('notice')
@@ -339,6 +351,8 @@ export default function UserDashboard() {
     const storedEmail = localStorage.getItem('user_email')
     const storedRole = localStorage.getItem('user_role')
     const storedVip = localStorage.getItem('user_is_vip') === 'true'
+    const storedPicture = localStorage.getItem('user_picture')
+    const storedName = localStorage.getItem('user_name')
 
     if (!storedUid) {
       window.location.href = '/'
@@ -349,6 +363,8 @@ export default function UserDashboard() {
     setUserEmail(storedEmail || '')
     setUserRole(storedRole || 'user')
     if (storedVip) setIsVip(true)
+    if (storedPicture) setUserPicture(storedPicture)
+    if (storedName) setUserName(storedName)
 
     if (storedEmail) {
       loadUserOffers(storedEmail)
@@ -592,7 +608,18 @@ export default function UserDashboard() {
       const pRes = await fetch(`/api/profile?user_id=${uid}&t=${Date.now()}`)
       if (pRes.ok) {
         const pData = await pRes.json()
-        setUserName(pData.name || '')
+        if (pData.name) {
+          setUserName(pData.name)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user_name', pData.name)
+          }
+        }
+        if (pData.picture) {
+          setUserPicture(pData.picture)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user_picture', pData.picture)
+          }
+        }
         const verifiedPlan = (pData.plan || 'trial').toLowerCase()
         const active = pData.is_plan_active !== false
         const vip = Boolean(pData.is_vip || verifiedPlan === 'vip')
@@ -803,121 +830,117 @@ export default function UserDashboard() {
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3.5 sm:px-6 py-2.5 sm:py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3.5 sm:px-6 py-2 sm:py-2.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
           
-          {/* Left: Brand Logo & Status */}
-          <div className="flex items-center gap-3 shrink-0">
-            <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
-              <JobFluxLogo size="sm" showText={true} />
-            </Link>
-            <div className="hidden sm:flex items-center gap-2 border-l border-zinc-800 pl-3">
-              <span className="text-[11px] font-mono text-zinc-400">Autonomous Radar</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            </div>
-          </div>
-
-          {/* Right Desktop Actions (Clean, Premium & Uncluttered) */}
-          <div className="hidden md:flex items-center gap-2.5 shrink-0">
-            {/* Refresh Live Telemetry (Minimal Icon Button) */}
-            <button
-              onClick={() => refreshAllDashboardData(userId)}
-              disabled={isRefreshing}
-              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
-              title="Refresh live application telemetry"
-              aria-label="Refresh telemetry"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-white' : ''}`} />
-            </button>
-
-            {/* Sales & Upgrade Action Button - Always Prominent */}
-            {activeOfferBanner ? (
-              <Link
-                href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-black transition-all shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse"
-                title={`Claim your exclusive offer: ${activeOfferBanner.offer_title}`}
-              >
-                <Sparkles className="w-3.5 h-3.5 fill-black/20" />
-                <span>🎁 Claim Deal ({activeOfferBanner.discounted_price})</span>
-              </Link>
-            ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
-              <Link
-                href="/pricing"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-zinc-200 text-black transition-all shrink-0 shadow-sm"
-                title="Upgrade to unlock automated applications"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <span>⚡ Upgrade to Pro</span>
-              </Link>
-            ) : userPlan === 'pro' ? (
-              <Link
-                href="/pricing?plan=elite"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black transition-all shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
-                title="Upgrade to Professional (3-Month Fast-Track)"
-              >
-                <Crown className="w-3.5 h-3.5 fill-black/20" />
-                <span>⭐ Upgrade to Professional (₹199)</span>
-              </Link>
-            ) : (
-              <Link
-                href="/pricing"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/40 transition-colors shrink-0 shadow-sm"
-                title="View membership plans or extend coverage"
-              >
-                <Crown className="w-3.5 h-3.5 text-amber-400" />
-                <span>⭐ Plans & Upgrades</span>
-              </Link>
-            )}
-
-            {/* Candidate Identity & Account Menu Dropdown */}
-            <div className="relative">
+          {/* LEFT: Candidate Profile Section (Swapped to Left for Instant Trust & Easy Profile Access) */}
+          <div className="relative flex items-center shrink-0">
+            {/* Desktop Profile Trigger Button */}
+            <div className="hidden md:block relative">
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className={`flex items-center gap-2.5 pl-2 pr-2.5 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                className={`group flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-xl border transition-all cursor-pointer text-left ${
                   isUserMenuOpen
-                    ? 'bg-zinc-800 border-zinc-700 text-white shadow-sm'
-                    : 'bg-zinc-900 hover:bg-zinc-800/80 border-zinc-800 text-zinc-300 hover:text-white'
+                    ? 'bg-zinc-800/90 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30 text-white'
+                    : 'bg-zinc-900/90 hover:bg-zinc-800/80 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white'
                 }`}
-                title="Account settings and profile"
+                title="Candidate Profile & Settings - Click to update profile & credentials"
+                aria-label="Candidate account menu"
               >
-                <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center justify-center font-bold text-white text-[11px] shrink-0 relative">
-                  {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
+                {/* Profile Photo / Avatar with Live Active Pulse */}
+                <div className="relative shrink-0">
+                  {userPicture ? (
+                    <img
+                      src={userPicture}
+                      alt={userName || 'Candidate'}
+                      className="w-8 h-8 rounded-lg object-cover border border-zinc-700/80 group-hover:border-emerald-500/50 transition-colors shadow-sm"
+                      onError={() => setUserPicture('')}
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 group-hover:border-emerald-500/50 flex items-center justify-center font-bold text-white text-xs shrink-0 transition-colors">
+                      {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+                    </div>
+                  )}
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black animate-pulse" />
                 </div>
-                <span className="text-xs font-semibold text-white truncate max-w-[130px]">
-                  {userName ? userName.split(' ')[0] : 'Account'}
-                </span>
-                {(isVip || userPlan === 'vip') ? (
-                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold">
-                    VIP
-                  </span>
-                ) : isProfessional ? (
-                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold">
-                    PRO
-                  </span>
-                ) : null}
-                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+
+                {/* Candidate Name, Plan Badge, and 'Click to Edit Profile' Callout */}
+                <div className="flex flex-col min-w-0 pr-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-white truncate max-w-[130px] lg:max-w-[160px] group-hover:text-emerald-300 transition-colors">
+                      {userName ? userName.split(' ')[0] : 'Candidate'}
+                    </span>
+                    {(isVip || userPlan === 'vip') ? (
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold shrink-0">
+                        VIP
+                      </span>
+                    ) : isProfessional ? (
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold shrink-0">
+                        PRO
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 shrink-0">
+                        FREE
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-zinc-400 group-hover:text-zinc-300 transition-colors">
+                    <span className="text-emerald-400 font-medium">● Active</span>
+                    <span className="text-zinc-600">·</span>
+                    <span className="text-zinc-400 group-hover:text-emerald-300 transition-colors">
+                      Edit Profile ↗
+                    </span>
+                  </div>
+                </div>
+
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 group-hover:text-white ${isUserMenuOpen ? 'rotate-180 text-emerald-400' : ''}`} />
               </button>
 
-              {/* Luxury Dropdown Menu */}
+              {/* Luxury Left-Aligned Dropdown Menu */}
               {isUserMenuOpen && (
                 <>
                   <div
                     className="fixed inset-0 z-40"
                     onClick={() => setIsUserMenuOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0c0c0e] border border-zinc-800 shadow-2xl py-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute left-0 mt-2 w-72 rounded-xl bg-[#0c0c0e] border border-zinc-800 shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150">
                     {/* Header / Identity Info */}
-                    <div className="px-3.5 py-2.5 border-b border-zinc-800/80 space-y-0.5">
-                      <div className="font-semibold text-white truncate">{userName || 'Candidate'}</div>
-                      <div className="text-[11px] text-zinc-400 font-mono truncate">{userEmail}</div>
-                      <div className="pt-1 flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono text-zinc-500">Plan:</span>
-                        <span className="text-[10px] font-mono text-emerald-400 font-semibold uppercase">
-                          {isVip ? 'VIP Lifetime Pass' : userPlan || 'Standard'}
-                        </span>
+                    <div className="px-3.5 py-2.5 border-b border-zinc-800/80 flex items-center gap-3">
+                      {userPicture ? (
+                        <img
+                          src={userPicture}
+                          alt={userName || 'Candidate'}
+                          className="w-10 h-10 rounded-full object-cover border border-zinc-700 shrink-0 shadow-sm"
+                          onError={() => setUserPicture('')}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-white text-sm shrink-0">
+                          {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="font-semibold text-white truncate">{userName || 'Candidate'}</div>
+                        <div className="text-[11px] text-zinc-400 font-mono truncate">{userEmail}</div>
+                        <div className="pt-0.5 flex items-center gap-1.5">
+                          <span className="text-[10px] font-mono text-zinc-500">Plan:</span>
+                          <span className="text-[10px] font-mono text-emerald-400 font-semibold uppercase">
+                            {isVip ? 'VIP Lifetime Pass' : userPlan || 'Standard'}
+                          </span>
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Prominent Quick-Action Callout */}
+                    <div className="p-2 border-b border-zinc-800/80">
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold transition-all text-xs"
+                      >
+                        <User className="w-3.5 h-3.5" />
+                        <span>Edit Profile, Photo & Credentials ↗</span>
+                      </Link>
                     </div>
 
                     {/* Navigation Items */}
@@ -929,8 +952,8 @@ export default function UserDashboard() {
                       >
                         <User className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium">Profile & Credentials</div>
-                          <div className="text-[10px] text-zinc-500">Naukri login, resume & filters</div>
+                          <div className="font-medium">Naukri Login & Credentials</div>
+                          <div className="text-[10px] text-zinc-500">Resume, password & targeting filters</div>
                         </div>
                         <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-emerald-400 border border-zinc-700">1-Time</span>
                       </Link>
@@ -988,65 +1011,105 @@ export default function UserDashboard() {
                 </>
               )}
             </div>
+
+            {/* Mobile Profile Trigger Button (Left on Mobile) */}
+            <button
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="flex md:hidden items-center gap-2 pl-1 pr-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all text-white cursor-pointer"
+              aria-label="Toggle profile menu"
+            >
+              <div className="w-7 h-7 rounded-md bg-zinc-800 border border-zinc-700/60 flex items-center justify-center font-bold text-[10px] text-white shrink-0 relative overflow-hidden">
+                {userPicture ? (
+                  <img src={userPicture} alt={userName || 'Candidate'} className="w-full h-full object-cover" onError={() => setUserPicture('')} />
+                ) : (
+                  userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
+                )}
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black animate-pulse" />
+              </div>
+              <span className="text-xs font-semibold text-white truncate max-w-[80px]">
+                {userName ? userName.split(' ')[0] : 'Profile'}
+              </span>
+              {(isVip || userPlan === 'vip') ? (
+                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 px-1 py-0.2 rounded-full">
+                  VIP
+                </span>
+              ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
+                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 px-1 py-0.2 rounded-full">
+                  {userPlan === 'elite' ? 'PRO' : userPlan === 'trial' ? 'TRIAL' : userPlan.toUpperCase()}
+                </span>
+              ) : null}
+              <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
+            </button>
           </div>
 
-          {/* Right Mobile Actions: Clean, Smart & Uncluttered */}
-          <div className="flex md:hidden items-center gap-2 shrink-0">
+          {/* RIGHT: Actions, Telemetry Refresh & Brand Logo (Swapped to Right) */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Telemetry Refresh (Desktop) */}
+            <button
+              onClick={() => refreshAllDashboardData(userId)}
+              disabled={isRefreshing}
+              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer disabled:opacity-50 hidden md:inline-flex"
+              title="Refresh live application telemetry"
+              aria-label="Refresh telemetry"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-white' : ''}`} />
+            </button>
+
+            {/* Sales / Upgrade Action Button */}
             {activeOfferBanner ? (
               <Link
                 href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-400 text-black shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.4)] animate-pulse"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-black transition-all shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse"
+                title={`Claim your exclusive offer: ${activeOfferBanner.offer_title}`}
               >
-                <Sparkles className="w-3 h-3 fill-black/20" />
-                <span>Offer: {activeOfferBanner.discounted_price}</span>
+                <Sparkles className="w-3.5 h-3.5 fill-black/20" />
+                <span className="hidden sm:inline">🎁 Claim Deal ({activeOfferBanner.discounted_price})</span>
+                <span className="sm:hidden font-bold">🎁 Deal</span>
               </Link>
             ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
               <Link
                 href="/pricing"
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white text-black shrink-0 shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-zinc-200 text-black transition-all shrink-0 shadow-sm"
+                title="Upgrade to unlock automated applications"
               >
-                <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500" />
-                <span>Upgrade</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span className="hidden sm:inline">⚡ Upgrade to Pro</span>
+                <span className="sm:hidden font-bold">Upgrade</span>
               </Link>
             ) : userPlan === 'pro' ? (
               <Link
                 href="/pricing?plan=elite"
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-400 text-black shrink-0"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black transition-all shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
+                title="Upgrade to Professional (3-Month Fast-Track)"
               >
-                <Crown className="w-3 h-3 fill-black/20" />
-                <span>₹199 Pro</span>
+                <Crown className="w-3.5 h-3.5 fill-black/20" />
+                <span className="hidden sm:inline">⭐ Upgrade to Professional (₹199)</span>
+                <span className="sm:hidden font-bold">₹199 Pro</span>
               </Link>
             ) : (
               <Link
                 href="/pricing"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold bg-zinc-800 text-amber-300 border border-amber-500/40 shrink-0"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/40 transition-colors shrink-0 shadow-sm"
+                title="View membership plans or extend coverage"
               >
-                <Crown className="w-3 h-3 text-amber-400" />
-                <span>Plans</span>
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">⭐ Plans & Upgrades</span>
+                <span className="sm:hidden font-medium">Plans</span>
               </Link>
             )}
 
-            <button
-              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all text-white cursor-pointer"
-              aria-label="Toggle profile menu"
-            >
-              <span className="w-6 h-6 rounded-md bg-zinc-800 border border-zinc-700/60 flex items-center justify-center font-bold text-[10px] text-white">
-                {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
-              </span>
-              {(isVip || userPlan === 'vip') ? (
-                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 px-1.5 py-0.2 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.25)]">
-                  <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40" /> VIP
-                </span>
-              ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
-                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 px-1.5 py-0.2 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.2)]">
-                  <Sparkles className="w-2 h-2 text-amber-400" /> {userPlan === 'elite' ? 'PRO' : userPlan === 'trial' ? 'TRIAL' : userPlan.toUpperCase()}
-                </span>
-              ) : null}
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
-            </button>
+            {/* Brand Logo & Radar Status (Clean on Right) */}
+            <div className="flex items-center gap-2.5 pl-2 border-l border-zinc-800 shrink-0">
+              <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
+                <JobFluxLogo size="sm" showText={true} />
+              </Link>
+              <div className="hidden lg:flex items-center gap-2 border-l border-zinc-800/80 pl-2.5">
+                <span className="text-[11px] font-mono text-zinc-400">Autonomous Radar</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+            </div>
           </div>
+
         </div>
       </header>
 
@@ -1069,9 +1132,18 @@ export default function UserDashboard() {
                 className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity cursor-pointer"
                 title="Click to manage Candidate Profile & Resume"
               >
-                <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0 relative">
-                  {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black" />
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0 relative overflow-hidden">
+                  {userPicture ? (
+                    <img
+                      src={userPicture}
+                      alt={userName || 'Candidate'}
+                      className="w-full h-full object-cover"
+                      onError={() => setUserPicture('')}
+                    />
+                  ) : (
+                    userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
+                  )}
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black animate-pulse" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -1128,6 +1200,16 @@ export default function UserDashboard() {
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
+
+            {/* Direct Edit Profile Action Banner in Mobile */}
+            <Link
+              href="/profile"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold transition-all text-xs"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Edit Profile, Photo & Credentials ↗</span>
+            </Link>
 
             {/* Quick Actions List */}
             <div className="space-y-1 text-xs">

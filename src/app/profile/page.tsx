@@ -25,6 +25,7 @@ export default function CandidateProfilePage() {
   const [userId, setUserId] = useState<string>('')
   const [userEmail, setUserEmail] = useState<string>('')
   const [userName, setUserName] = useState<string>('')
+  const [userPicture, setUserPicture] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
   const [userPlan, setUserPlan] = useState<string>('free')
   const [isVip, setIsVip] = useState<boolean>(false)
@@ -44,6 +45,7 @@ export default function CandidateProfilePage() {
     const storedRole = localStorage.getItem('user_role')
     const storedPlan = localStorage.getItem('user_plan')
     const storedVip = localStorage.getItem('user_is_vip') === 'true'
+    const storedPicture = localStorage.getItem('user_picture')
 
     if (!storedUid) {
       window.location.href = '/'
@@ -55,12 +57,24 @@ export default function CandidateProfilePage() {
     setUserRole(storedRole || 'user')
     setUserPlan(storedPlan || 'free')
     setIsVip(storedVip)
+    if (storedPicture) setUserPicture(storedPicture)
 
-    // Load candidate info
-    fetch(`/api/stats?user_id=${encodeURIComponent(storedUid)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.candidate_name) setUserName(data.candidate_name)
+    // Load candidate info & picture
+    Promise.allSettled([
+      fetch(`/api/stats?user_id=${encodeURIComponent(storedUid)}`).then(res => res.json()),
+      fetch(`/api/profile?user_id=${encodeURIComponent(storedUid)}`).then(res => res.json())
+    ])
+      .then(([statsRes, profileRes]) => {
+        if (statsRes.status === 'fulfilled' && statsRes.value.candidate_name) {
+          setUserName(statsRes.value.candidate_name)
+        }
+        if (profileRes.status === 'fulfilled' && profileRes.value) {
+          if (profileRes.value.name) setUserName(profileRes.value.name)
+          if (profileRes.value.picture) {
+            setUserPicture(profileRes.value.picture)
+            localStorage.setItem('user_picture', profileRes.value.picture)
+          }
+        }
       })
       .catch(() => {})
       .finally(() => {
@@ -90,7 +104,7 @@ export default function CandidateProfilePage() {
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-8 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          {/* Left: Return to Dashboard & Brand Logo */}
+          {/* Left: Back to Dashboard & Candidate Identity with Photo */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <Link
               href="/dashboard"
@@ -98,33 +112,53 @@ export default function CandidateProfilePage() {
               title="Return to applications dashboard"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Dashboard</span>
+              <span className="hidden sm:inline">Dashboard</span>
             </Link>
 
-            <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
+            <div className="h-4 w-px bg-zinc-800" />
 
-            <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
-              <JobFluxLogo size="sm" showText={true} />
-            </Link>
-          </div>
-
-          {/* Right: Candidate Identity & Quick Actions */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="hidden sm:flex items-center gap-2 text-xs">
-              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-[11px] shrink-0">
-                {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
+            {/* Candidate Identity with Photo & Status */}
+            <div className="flex items-center gap-2.5 text-xs">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-[11px] shrink-0 relative overflow-hidden">
+                {userPicture ? (
+                  <img
+                    src={userPicture}
+                    alt={userName || 'Candidate'}
+                    className="w-full h-full object-cover"
+                    onError={() => setUserPicture('')}
+                  />
+                ) : (
+                  userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
+                )}
+                <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black animate-pulse" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-white truncate max-w-[120px]">{userName || 'Candidate'}</span>
-                  {isVip && (
+                  <span className="font-semibold text-white truncate max-w-[120px] sm:max-w-[160px]">
+                    {userName || 'Candidate'}
+                  </span>
+                  {isVip ? (
                     <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold">
                       VIP
                     </span>
-                  )}
+                  ) : isProfessional ? (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold">
+                      PRO
+                    </span>
+                  ) : null}
                 </div>
+                <div className="text-[10px] text-emerald-400 font-mono">● Profile Setup</div>
               </div>
             </div>
+          </div>
+
+          {/* Right: Brand Logo & Sign Out */}
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
+              <JobFluxLogo size="sm" showText={true} />
+            </Link>
+
+            <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
 
             <button
               onClick={handleLogout}
