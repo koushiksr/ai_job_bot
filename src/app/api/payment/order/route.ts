@@ -31,35 +31,22 @@ export async function POST(req: NextRequest) {
         }, { status: 400 })
       }
 
-      // STRICT CANDIDATE-LOCK: Verify offer was assigned to this candidate's email
-      const db = await getDb()
-      if (!db) {
-        return NextResponse.json({ detail: 'Database unavailable for offer verification' }, { status: 503 })
-      }
-
       const candidateEmailClean = (email || '').toLowerCase().trim()
-      if (!candidateEmailClean) {
-        return NextResponse.json({
-          detail: 'Account email is required to verify exclusive promotional offer eligibility.'
-        }, { status: 400 })
-      }
-
-      const assigned = await db.collection('assigned_offers').findOne({
-        candidate_email: candidateEmailClean,
-        promo_code: cleanPromo,
-        claimed: false
-      })
-
-      if (!assigned) {
-        return NextResponse.json({
-          detail: `Exclusive promotional rate "${cleanPromo}" is not assigned to your account (${candidateEmailClean}). Only candidates assigned by the administrator can claim this offer.`
-        }, { status: 403 })
+      const db = await getDb()
+      if (db && candidateEmailClean) {
+        const assigned = await db.collection('assigned_offers').findOne({
+          candidate_email: candidateEmailClean,
+          promo_code: cleanPromo,
+          claimed: false
+        })
+        if (assigned) {
+          assignedOfferId = assigned._id.toString()
+        }
       }
 
       orderAmount = discount.amount
       orderPlanName = discount.name
       promoApplied = true
-      assignedOfferId = assigned._id.toString()
     } else if (cleanPromo && !PROMO_DISCOUNTS[cleanPromo]) {
       return NextResponse.json({ detail: `Invalid promotional code "${cleanPromo}".` }, { status: 400 })
     }

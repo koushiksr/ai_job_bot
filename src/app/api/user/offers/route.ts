@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
-import { PROMO_DISCOUNTS } from '@/config/plans'
+import { PROMO_DISCOUNTS, MASTER_PROMOS } from '@/config/plans'
 
 export const dynamic = 'force-dynamic'
 
@@ -154,6 +154,23 @@ export async function POST(req: NextRequest) {
     })
 
     if (!assigned) {
+      const publicPromo = MASTER_PROMOS.find(p => p.code === cleanPromo)
+      if (publicPromo) {
+        return NextResponse.json({
+          valid: true,
+          assigned_to_user: true,
+          offer: {
+            promo_code: publicPromo.code,
+            offer_title: publicPromo.offerTitle,
+            discount_badge: publicPromo.discountBadge,
+            discounted_price: publicPromo.discountedPrice,
+            original_price: publicPromo.originalPrice,
+            amount_paise: discountConfig.amount
+          },
+          message: `✓ Offer verified! ${publicPromo.discountBadge} applied to your account.`
+        })
+      }
+
       return NextResponse.json({
         valid: false,
         assigned_to_user: false,
