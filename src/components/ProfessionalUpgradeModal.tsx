@@ -40,11 +40,8 @@ export default function ProfessionalUpgradeModal({
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-[#09090b] border border-zinc-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl card-featured-glow text-zinc-100"
         >
-          {/* Laser beam sweep accent */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-laser-sweep pointer-events-none" />
-
-          {/* Background Ambient Blue Spotlight */}
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+          {/* Subtle top accent */}
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 
           {/* Close button */}
           <button
@@ -57,8 +54,8 @@ export default function ProfessionalUpgradeModal({
           {/* Modal Header */}
           <div className="flex items-center gap-3 mb-2">
             <JobFluxLogo size="sm" showText={false} />
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-blue-950/80 border border-blue-700/60 text-blue-300 font-semibold flex items-center gap-1.5">
-              <Crown className="w-3 h-3 text-blue-400" />
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium flex items-center gap-1.5">
+              <Crown className="w-3 h-3 text-amber-400" />
               Professional Tier Exclusive
             </span>
           </div>
@@ -75,12 +72,12 @@ export default function ProfessionalUpgradeModal({
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
-                    <Zap className="w-3.5 h-3.5" />
+                  <div className="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+                    <Zap className="w-3.5 h-3.5 text-zinc-400" />
                   </div>
                   <h4 className="text-xs font-semibold text-white">On-Demand Real-Time Sweeps</h4>
                 </div>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-600/50 text-emerald-300 uppercase tracking-wider font-semibold">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 uppercase tracking-wider font-semibold">
                   5x / Week
                 </span>
               </div>
@@ -91,8 +88,8 @@ export default function ProfessionalUpgradeModal({
 
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
-                  <Cpu className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+                  <Cpu className="w-3.5 h-3.5 text-zinc-400" />
                 </div>
                 <h4 className="text-xs font-semibold text-white">Neural ATS Keyword Injector</h4>
               </div>
@@ -103,8 +100,8 @@ export default function ProfessionalUpgradeModal({
 
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
-                  <Send className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+                  <Send className="w-3.5 h-3.5 text-zinc-400" />
                 </div>
                 <h4 className="text-xs font-semibold text-white">Zero-Queue Recruiter Fast-Path</h4>
               </div>
@@ -115,8 +112,8 @@ export default function ProfessionalUpgradeModal({
 
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-300">
-                  <Shield className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+                  <Shield className="w-3.5 h-3.5 text-zinc-400" />
                 </div>
                 <h4 className="text-xs font-semibold text-white">Stealth Employer Blacklist</h4>
               </div>
@@ -127,16 +124,16 @@ export default function ProfessionalUpgradeModal({
           </div>
 
           {/* Pricing Highlight Card */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/30 via-zinc-950 to-blue-950/20 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-white uppercase tracking-wider">Professional Plan</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300">
+                <span className="text-xs font-semibold text-white uppercase tracking-wider">Professional Plan</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold">
                   SAVE 92% · BEST VALUE
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-2xl font-extrabold text-white font-mono">₹199</span>
+                <span className="text-2xl font-bold text-white font-mono">₹199</span>
                 <span className="text-xs text-zinc-500 line-through">₹2,500</span>
                 <span className="text-xs text-zinc-400 font-mono">/ 3 Full Months (1,800+ Applications)</span>
               </div>
@@ -145,7 +142,7 @@ export default function ProfessionalUpgradeModal({
             <Link
               href="/pricing?plan=elite"
               onClick={onClose}
-              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs transition-all flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-white/10"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
             >
               <span>{featureTitle.toLowerCase().includes('download') ? 'Buy Subscription to Download' : 'Upgrade to Professional'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -155,7 +152,7 @@ export default function ProfessionalUpgradeModal({
           {/* Footer Note */}
           <div className="mt-4 flex items-center justify-between text-[11px] text-zinc-500">
             <span>Or start with 1-Month Essentials for ₹99 (was ₹1,000)</span>
-            <Link href="/pricing" onClick={onClose} className="text-blue-400 hover:text-blue-300 transition-colors font-medium">
+            <Link href="/pricing" onClick={onClose} className="text-zinc-300 hover:text-white underline transition-colors font-medium">
               View All Tiers →
             </Link>
           </div>

@@ -54,22 +54,22 @@ export default function HomeInteractiveToolsCard({
 
   return (
     <div className="w-full rounded-2xl border border-zinc-800 bg-[#09090b]/90 backdrop-blur-xl p-5 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden card-featured-glow">
-      {/* Laser beam top sweep */}
-      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+      {/* Subtle top border accent */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 
       {/* Header with Live Badge */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-medium">
+            <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
             Interactive Career Lab & Free Diagnostics
           </div>
           <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
             Test Your Profile Readiness Before Applying
           </h2>
         </div>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold self-start sm:self-auto">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold self-start sm:self-auto">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
           <span>Live AI Model Online</span>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function HomeInteractiveToolsCard({
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <FileCheck2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <FileCheck2 className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
           <span className="truncate">ATS & JD Match</span>
         </button>
 
@@ -98,7 +98,7 @@ export default function HomeInteractiveToolsCard({
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <TrendingUp className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+          <TrendingUp className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
           <span className="truncate">Naukri Resdex Rank</span>
         </button>
 
@@ -111,7 +111,7 @@ export default function HomeInteractiveToolsCard({
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <Mail className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <Mail className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
           <span className="truncate">Recruiter Pitch</span>
         </button>
       </div>
@@ -129,7 +129,7 @@ export default function HomeInteractiveToolsCard({
                 value={targetRole}
                 onChange={(e) => setTargetRole(e.target.value)}
                 placeholder="e.g. Python Backend Engineer"
-                className="w-full bg-slate-950 border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 text-xs font-mono"
+                className="w-full bg-slate-950 border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-xs font-mono"
               />
             </div>
             <div>
@@ -139,13 +139,13 @@ export default function HomeInteractiveToolsCard({
                 value={userSkills}
                 onChange={(e) => setUserSkills(e.target.value)}
                 placeholder="e.g. Python, FastAPI, Docker, AWS"
-                className="w-full bg-slate-950 border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 text-xs font-mono"
+                className="w-full bg-slate-950 border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-xs font-mono"
               />
             </div>
           </div>
 
           <div className="flex items-center justify-between gap-3 pt-1">
-            <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+            <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
               <span>Quick Role Presets:</span>
               <button
                 type="button"
@@ -153,7 +153,7 @@ export default function HomeInteractiveToolsCard({
                   setTargetRole('Lead Full Stack Engineer')
                   setUserSkills('React 19, Next.js, Node.js, TypeScript, AWS, MongoDB')
                 }}
-                className="text-cyan-400 hover:underline cursor-pointer"
+                className="text-zinc-300 hover:text-white underline cursor-pointer"
               >
                 MERN
               </button>
@@ -164,7 +164,7 @@ export default function HomeInteractiveToolsCard({
                   setTargetRole('Senior Data Engineer')
                   setUserSkills('PySpark, SQL, Airflow, Snowflake, AWS, Python, ETL')
                 }}
-                className="text-cyan-400 hover:underline cursor-pointer"
+                className="text-zinc-300 hover:text-white underline cursor-pointer"
               >
                 Data
               </button>
@@ -174,7 +174,7 @@ export default function HomeInteractiveToolsCard({
               type="button"
               onClick={handleScanAts}
               disabled={atsScanning}
-              className="px-3.5 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               {atsScanning ? (
                 <>
@@ -183,7 +183,7 @@ export default function HomeInteractiveToolsCard({
                 </>
               ) : (
                 <>
-                  <Zap className="w-3.5 h-3.5" />
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
                   <span>Scan ATS Match</span>
                 </>
               )}
@@ -195,7 +195,7 @@ export default function HomeInteractiveToolsCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-zinc-400">ATS Parsing Match:</span>
-                <span className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+                <span className="text-xl font-bold text-white font-mono">
                   {atsScore}%
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -225,14 +225,14 @@ export default function HomeInteractiveToolsCard({
             {/* Gating Callout */}
             <div className="pt-2 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
               <div className="text-zinc-400 text-[11px] flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <Lock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                 <span>Sign in to unlock full keyword gap analysis & auto-apply to 50 jobs</span>
               </div>
 
               {isLoggedIn ? (
                 <a
                   href="/tools/ats-score-checker"
-                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-all text-center"
+                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors text-center"
                 >
                   Open Full ATS Scanner
                 </a>
@@ -240,7 +240,7 @@ export default function HomeInteractiveToolsCard({
                 <button
                   type="button"
                   onClick={() => onTriggerAuth('trial')}
-                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs transition-all shadow-md shadow-cyan-500/20 cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   <span>Unlock & Auto-Apply Free</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -271,7 +271,7 @@ export default function HomeInteractiveToolsCard({
                     onClick={() => setLastUpdate(item.id as any)}
                     className={`py-1.5 rounded-lg border text-center transition-all cursor-pointer ${
                       lastUpdate === item.id
-                        ? 'bg-sky-500/20 border-sky-500/60 text-sky-300 font-semibold'
+                        ? 'bg-zinc-800 border-zinc-700 text-white font-semibold'
                         : 'bg-black border-zinc-800 text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -295,7 +295,7 @@ export default function HomeInteractiveToolsCard({
                     onClick={() => setNoticePeriod(item.id as any)}
                     className={`py-1.5 rounded-lg border text-center transition-all cursor-pointer ${
                       noticePeriod === item.id
-                        ? 'bg-sky-500/20 border-sky-500/60 text-sky-300 font-semibold'
+                        ? 'bg-zinc-800 border-zinc-700 text-white font-semibold'
                         : 'bg-black border-zinc-800 text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
@@ -317,15 +317,15 @@ export default function HomeInteractiveToolsCard({
                       <Flame className="w-4 h-4" /> Top 5% (Page 1 Inbound Magnet)
                     </span>
                   ) : lastUpdate === 'week' ? (
-                    <span className="text-amber-400">Page 2–3 (Moderate Inbound)</span>
+                    <span className="text-zinc-300">Page 2–3 (Moderate Inbound)</span>
                   ) : (
-                    <span className="text-rose-400">Page 5+ (Buried Behind 500+ Candidates)</span>
+                    <span className="text-zinc-400">Page 5+ (Buried Behind 500+ Candidates)</span>
                   )}
                 </div>
               </div>
               <div className="text-right">
                 <span className="text-[10px] text-zinc-500 block uppercase font-mono">Inbound Call Rate</span>
-                <span className="text-base font-black text-sky-400 font-mono">
+                <span className="text-base font-bold text-white font-mono">
                   {lastUpdate === 'today' ? '4.8x Calls' : lastUpdate === 'week' ? '1.6x Calls' : '0.2x Calls'}
                 </span>
               </div>
@@ -343,7 +343,7 @@ export default function HomeInteractiveToolsCard({
               {isLoggedIn ? (
                 <a
                   href="/dashboard"
-                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-sky-400 hover:bg-sky-300 text-black font-bold text-xs transition-all text-center"
+                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors text-center shadow-sm"
                 >
                   Activate in Dashboard
                 </a>
@@ -351,7 +351,7 @@ export default function HomeInteractiveToolsCard({
                 <button
                   type="button"
                   onClick={() => onTriggerAuth('trial')}
-                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-gradient-to-r from-sky-400 to-cyan-400 hover:from-sky-300 hover:to-cyan-300 text-black font-bold text-xs transition-all shadow-md shadow-sky-500/20 cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   <span>Sign In to Activate 9 AM Bump</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -375,14 +375,14 @@ export default function HomeInteractiveToolsCard({
                 value={targetCompany}
                 onChange={(e) => setTargetCompany(e.target.value)}
                 placeholder="e.g. PhonePe, Razorpay, Swiggy"
-                className="w-full bg-slate-950 border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 text-xs font-mono"
+                className="w-full bg-slate-950 border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 text-xs font-mono"
               />
             </div>
             <div className="self-end w-full sm:w-auto pt-1">
               <button
                 type="button"
                 onClick={() => setTargetCompany(targetCompany === 'PhonePe' ? 'Razorpay' : 'PhonePe')}
-                className="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-amber-400 hover:text-amber-300 text-xs font-medium transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium transition-colors cursor-pointer"
               >
                 Switch Company
               </button>
@@ -393,7 +393,7 @@ export default function HomeInteractiveToolsCard({
           <div className="p-4 rounded-xl bg-black/60 border border-zinc-800/90 space-y-2.5">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-white">AI-Crafted HR InMail Outreach Message:</span>
-              <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+              <span className="text-[10px] font-mono text-zinc-300 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
                 84% Response Rate
               </span>
             </div>
@@ -404,7 +404,7 @@ export default function HomeInteractiveToolsCard({
               </p>
               <div className="h-6 bg-gradient-to-b from-transparent to-zinc-950 absolute inset-x-0 bottom-0 flex items-center justify-center">
                 <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-sans">
-                  <Lock className="w-3 h-3 text-amber-400" /> Remainder of pitch locked
+                  <Lock className="w-3 h-3 text-zinc-400" /> Remainder of pitch locked
                 </span>
               </div>
             </div>
@@ -416,7 +416,7 @@ export default function HomeInteractiveToolsCard({
               {isLoggedIn ? (
                 <a
                   href="/dashboard"
-                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs transition-all text-center"
+                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors text-center shadow-sm"
                 >
                   Generate in Dashboard
                 </a>
@@ -424,7 +424,7 @@ export default function HomeInteractiveToolsCard({
                 <button
                   type="button"
                   onClick={() => onTriggerAuth('trial')}
-                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-bold text-xs transition-all shadow-md shadow-amber-500/20 cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   <span>Sign In to Unlock Pitch</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -442,7 +442,7 @@ export default function HomeInteractiveToolsCard({
           <span>Over <strong>1,800+ tech applications</strong> dispatched each week across India</span>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <a href="/tools" className="text-cyan-400 hover:underline font-semibold">
+          <a href="/tools" className="text-zinc-300 hover:text-white underline font-semibold">
             Explore All Free Tools →
           </a>
         </div>

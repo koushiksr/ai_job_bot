@@ -1075,56 +1075,52 @@ export default function CandidateProfileEditor({
       )}
 
       {/* 4-STEP VISUAL JOURNEY & SIT BACK & RELAX ENGINE */}
-      <div className="rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0a0d14] to-zinc-950 border border-zinc-800 p-4 sm:p-5 space-y-4 shadow-xl relative overflow-hidden">
+      <div className="rounded-2xl bg-zinc-950 border border-zinc-800 p-4 sm:p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                <Sparkles className="w-3 h-3 text-sky-400" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-800">
+                <Sparkles className="w-3 h-3 text-zinc-400" />
                 <span>4-Step Quick Flow</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>High Chance of Job Getting</span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span>Sit Back & Relax Engine</span>
               </span>
             </div>
-            <h3 className="text-sm sm:text-base font-bold text-white mt-1">
+            <h3 className="text-sm sm:text-base font-bold text-white mt-1.5">
               How JobFlux Autonomous Job Apply Works
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Follow these simple steps once. After saving, our autonomous cloud bot applies on your behalf every morning!
+              Configure once. After saving, our autonomous cloud bot searches and applies on your behalf every morning.
             </p>
           </div>
 
-          <div className="px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2 shrink-0">
-            <Coffee className="w-4 h-4 text-emerald-400" />
-            <span>Sit Back & Relax Engine</span>
+          <div className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-medium flex items-center gap-2 shrink-0">
+            <Coffee className="w-4 h-4 text-zinc-400" />
+            <span>Dual Morning Runs: 6 & 8 AM</span>
           </div>
         </div>
 
         {/* 4 Step Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           {/* Step 1 */}
-          <div className={`p-3.5 rounded-xl border transition-all ${
-            hasResumeUploaded
-              ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-300'
-              : 'bg-black/60 border-amber-500/40 text-zinc-300'
-          }`}>
+          <div className="p-3.5 rounded-xl border bg-zinc-900/40 border-zinc-800/80 transition-colors hover:border-zinc-700">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+              <span className="text-[10px] font-mono font-medium text-zinc-500">
                 STEP 1
               </span>
               {hasResumeUploaded ? (
-                <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> ✓ Completed
+                <span className="text-[10px] font-mono text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                  <CheckCircle2 className="w-3 h-3" /> ✓ Completed
                 </span>
               ) : (
-                <span className="text-[10px] font-mono text-amber-400 font-bold animate-pulse flex items-center gap-1">
-                  <Upload className="w-3 h-3" /> ● Incomplete
+                <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
+                  <Upload className="w-3 h-3 text-zinc-500" /> ● Incomplete
                 </span>
               )}
             </div>
-            <h4 className="text-xs font-bold text-white">Upload Resume PDF</h4>
+            <h4 className="text-xs font-semibold text-white">Upload Resume PDF</h4>
             <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
               {hasResumeUploaded ? 'Resume synced to cloud. Recruiters receive this document.' : 'Upload your PDF resume below to enable auto-apply.'}
             </p>
@@ -1134,26 +1130,22 @@ export default function CandidateProfileEditor({
           {(() => {
             const step2Done = skills.length > 0 || Number(expectedCtcLpa) > 0
             return (
-              <div className={`p-3.5 rounded-xl border transition-all ${
-                step2Done
-                  ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-300'
-                  : 'bg-black/60 border-zinc-800 text-zinc-300'
-              }`}>
+              <div className="p-3.5 rounded-xl border bg-zinc-900/40 border-zinc-800/80 transition-colors hover:border-zinc-700">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+                  <span className="text-[10px] font-mono font-medium text-zinc-500">
                     STEP 2
                   </span>
                   {step2Done ? (
-                    <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> ✓ Completed
+                    <span className="text-[10px] font-mono text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                      <CheckCircle2 className="w-3 h-3" /> ✓ Completed
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono text-zinc-400 font-semibold flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-purple-400" /> ● Incomplete
+                    <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
+                      <Sparkles className="w-3 h-3 text-zinc-500" /> ● Incomplete
                     </span>
                   )}
                 </div>
-                <h4 className="text-xs font-bold text-white">1-Click AI Auto-Fill</h4>
+                <h4 className="text-xs font-semibold text-white">1-Click AI Auto-Fill</h4>
                 <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
                   {step2Done ? 'Credentials & skills populated by AI parser.' : 'Click "Auto-Fill with AI" to extract parameters in 5s.'}
                 </p>
@@ -1165,26 +1157,22 @@ export default function CandidateProfileEditor({
           {(() => {
             const step3Done = Boolean(naukriEmail && naukriPassword && targetRoles.length > 0)
             return (
-              <div className={`p-3.5 rounded-xl border transition-all ${
-                step3Done
-                  ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-300'
-                  : 'bg-black/60 border-amber-500/40 text-zinc-300'
-              }`}>
+              <div className="p-3.5 rounded-xl border bg-zinc-900/40 border-zinc-800/80 transition-colors hover:border-zinc-700">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+                  <span className="text-[10px] font-mono font-medium text-zinc-500">
                     STEP 3
                   </span>
                   {step3Done ? (
-                    <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> ✓ Completed
+                    <span className="text-[10px] font-mono text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                      <CheckCircle2 className="w-3 h-3" /> ✓ Completed
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono text-amber-400 font-bold flex items-center gap-1">
-                      <Save className="w-3 h-3" /> ● Incomplete
+                    <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
+                      <Save className="w-3 h-3 text-zinc-500" /> ● Incomplete
                     </span>
                   )}
                 </div>
-                <h4 className="text-xs font-bold text-white">Review & Save Profile</h4>
+                <h4 className="text-xs font-semibold text-white">Review & Save Profile</h4>
                 <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
                   {step3Done ? 'Naukri login & target criteria saved and synced.' : 'Verify login credentials & roles, then click Save.'}
                 </p>
@@ -1196,18 +1184,14 @@ export default function CandidateProfileEditor({
           {(() => {
             const step4Done = Boolean(hasResumeUploaded && naukriEmail && naukriPassword && targetRoles.length > 0)
             return (
-              <div className={`p-3.5 rounded-xl border transition-all ${
-                step4Done
-                  ? 'bg-gradient-to-br from-emerald-950/50 via-black to-emerald-950/30 border-emerald-500/50 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-                  : 'bg-zinc-950/60 border-zinc-800 text-zinc-400 opacity-80'
-              }`}>
+              <div className="p-3.5 rounded-xl border bg-zinc-900/40 border-zinc-800/80 transition-colors hover:border-zinc-700">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+                  <span className="text-[10px] font-mono font-medium text-zinc-500">
                     STEP 4
                   </span>
                   {step4Done ? (
-                    <span className="text-[10px] font-mono text-emerald-300 font-bold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ✓ Active & Ready
+                    <span className="text-[10px] font-mono text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> ✓ Active & Ready
                     </span>
                   ) : (
                     <span className="text-[10px] font-mono text-zinc-500 font-medium">
@@ -1215,13 +1199,13 @@ export default function CandidateProfileEditor({
                     </span>
                   )}
                 </div>
-                <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <h4 className="text-xs font-semibold text-white flex items-center gap-1.5">
                   <span>Sit Back & Relax</span>
-                  {step4Done && <Coffee className="w-3.5 h-3.5 text-emerald-400 animate-bounce" />}
+                  <Coffee className="w-3.5 h-3.5 text-zinc-400" />
                 </h4>
-                <p className="text-[11px] text-zinc-300 mt-0.5 leading-snug">
+                <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
                   {step4Done
-                    ? 'AI applies on your behalf twice daily at 06:00 AM & 08:00 AM IST!'
+                    ? 'AI applies on your behalf twice daily at 06:00 AM & 08:00 AM IST.'
                     : 'Complete Steps 1-3 above to activate autonomous daily runs.'}
                 </p>
               </div>
@@ -1232,28 +1216,28 @@ export default function CandidateProfileEditor({
 
       {/* SMART MISSING DATA SUGGESTIONS CALLOUT */}
       {(!hasResumeUploaded || !naukriEmail || !naukriPassword || targetRoles.length === 0) && (
-        <div className="p-4 rounded-xl bg-amber-950/20 border border-amber-500/40 space-y-2 text-xs animate-in fade-in">
-          <div className="flex items-center gap-2 text-amber-300 font-semibold">
-            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
-            <span>Profile Incomplete — Suggestions to maximize your job callback rate:</span>
+        <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2 text-xs">
+          <div className="flex items-center gap-2 text-zinc-200 font-semibold">
+            <AlertCircle className="w-4 h-4 shrink-0 text-zinc-400" />
+            <span>Profile Incomplete — Checklist to activate autonomous job application:</span>
           </div>
-          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px] text-zinc-300">
+          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px] text-zinc-400">
             {!hasResumeUploaded && (
-              <li className="p-2.5 rounded-lg bg-black/60 border border-amber-500/30 flex items-start gap-2">
-                <span className="text-amber-400 font-bold shrink-0">1.</span>
-                <span>Upload your <strong>Resume PDF</strong> below so AI can extract your details and attach it to job applications.</span>
+              <li className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 flex items-start gap-2">
+                <span className="text-zinc-300 font-bold shrink-0">1.</span>
+                <span>Upload your <strong className="text-white">Resume PDF</strong> below so AI can extract details and attach to applications.</span>
               </li>
             )}
             {(!naukriEmail || !naukriPassword) && (
-              <li className="p-2.5 rounded-lg bg-black/60 border border-amber-500/30 flex items-start gap-2">
-                <span className="text-amber-400 font-bold shrink-0">2.</span>
-                <span>Enter your <strong>Naukri Email & Password</strong> so the autonomous worker can sign in to apply on your behalf.</span>
+              <li className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 flex items-start gap-2">
+                <span className="text-zinc-300 font-bold shrink-0">2.</span>
+                <span>Enter your <strong className="text-white">Naukri Email & Password</strong> so the cloud bot can sign in to apply.</span>
               </li>
             )}
             {targetRoles.length === 0 && (
-              <li className="p-2.5 rounded-lg bg-black/60 border border-amber-500/30 flex items-start gap-2">
-                <span className="text-amber-400 font-bold shrink-0">3.</span>
-                <span>Add at least 1 <strong>Target Role</strong> so the bot targets matching recruiter openings.</span>
+              <li className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 flex items-start gap-2">
+                <span className="text-zinc-300 font-bold shrink-0">3.</span>
+                <span>Add at least 1 <strong className="text-white">Target Role</strong> so the bot targets matching recruiter openings.</span>
               </li>
             )}
           </ul>
@@ -1437,11 +1421,11 @@ export default function CandidateProfileEditor({
                   onError={() => setCandidatePicture('')}
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white text-base">
+                <div className="w-full h-full bg-zinc-800 flex items-center justify-center font-bold text-white text-sm">
                   {candidateName ? candidateName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
                 </div>
               )}
-              <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 absolute bottom-0 right-0 border-2 border-black animate-pulse" />
+              <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 absolute bottom-0 right-0 border-2 border-black" />
             </div>
 
             <div className="space-y-0.5">

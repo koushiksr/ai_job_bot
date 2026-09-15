@@ -467,13 +467,13 @@ export default function Home() {
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-sky-500/30 text-zinc-300 text-xs font-mono mb-5 relative overflow-hidden backdrop-blur-md shadow-[0_0_20px_rgba(56,189,248,0.15)]">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                 </span>
-                <span className="text-zinc-200">Autonomous Radar Active</span>
+                <span className="text-zinc-200">Autonomous Engine Active</span>
                 <span className="text-zinc-600">·</span>
-                <span className="text-sky-400 font-medium">Dual Runs (06:00 & 08:00 AM IST)</span>
-                {/* Laser scanline */}
-                <div className="absolute inset-x-0 bottom-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/90 to-transparent animate-laser-sweep" />
+                <span className="text-zinc-400 font-medium">Dual Runs (06:00 & 08:00 AM IST)</span>
+                {/* Subtle top border accent */}
+                <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent" />
               </div>
               
               <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-white leading-[1.1]">
@@ -489,7 +489,7 @@ export default function Home() {
             {/* Benefit Badges in Monochromatic Glass Style */}
             <div className="flex flex-wrap gap-2.5 items-center justify-center lg:justify-start text-xs text-zinc-300">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
-                <Clock className="w-3.5 h-3.5 text-sky-400" />
+                <Clock className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Dual Morning Runs (6 & 8 AM IST)</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
@@ -544,8 +544,8 @@ export default function Home() {
           >
             {existingUser ? (
               <div className="p-7 w-full border border-zinc-800 bg-[#09090b] rounded-2xl shadow-xl space-y-5 text-center relative overflow-hidden card-featured-glow">
-                {/* Laser beam sweep accent */}
-                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+                {/* Subtle top border accent */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
                 <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center mx-auto">
                   <User className="w-6 h-6 text-zinc-400" />
                 </div>
@@ -580,11 +580,11 @@ export default function Home() {
             ) : (
               <div className={`p-6 sm:p-7 w-full border bg-[#09090b] rounded-2xl shadow-xl space-y-5 relative overflow-hidden transition-all duration-500 ${
                 cardHighlighted
-                  ? 'border-sky-500/80 ring-2 ring-sky-500/50 shadow-[0_0_35px_rgba(56,189,248,0.25)]'
+                  ? 'border-zinc-700 ring-1 ring-zinc-700'
                   : 'border-zinc-800 card-featured-glow'
               }`}>
-                {/* Laser beam sweep accent */}
-                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
+                {/* Subtle top border accent */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
                 
                 {/* Auth0-Style Segmented Control */}
                 <div className="flex items-center bg-black p-1 rounded-lg border border-zinc-800">
@@ -1075,7 +1075,7 @@ export default function Home() {
                   <td className="p-4 sm:p-5 font-medium text-white">Monthly Investment</td>
                   <td className="p-4 sm:p-5 text-zinc-400">₹45,000+ (in lost dev time)</td>
                   <td className="p-4 sm:p-5 text-zinc-400">₹1,500 - ₹3,000/mo ($20-$40)</td>
-                  <td className="p-4 sm:p-5 font-bold text-white bg-sky-950/40">Just ₹99 / Month (was ₹1,000 · ₹3.3 / day)</td>
+                  <td className="p-4 sm:p-5 font-bold text-white bg-zinc-900/60">Just ₹99 / Month (was ₹1,000 · ₹3.3 / day)</td>
                 </tr>
               </tbody>
             </table>
@@ -1083,9 +1083,9 @@ export default function Home() {
 
           {/* 14-Day Interview Callback Guarantee & ROI Box */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-            <div className="p-6 sm:p-7 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 to-zinc-950 flex flex-col justify-between space-y-4">
+            <div className="p-6 sm:p-7 rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between space-y-4">
               <div className="space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-emerald-400">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white">
@@ -1100,10 +1100,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="p-6 sm:p-7 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-950/20 to-zinc-950 flex flex-col justify-between space-y-4">
+            <div className="p-6 sm:p-7 rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between space-y-4">
               <div className="space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                  <Zap className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+                  <Zap className="w-6 h-6 text-zinc-300" />
                 </div>
                 <h3 className="text-lg font-bold text-white">
                   The ROI: Why ₹99 is a Complete No-Brainer

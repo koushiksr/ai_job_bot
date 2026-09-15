@@ -842,59 +842,59 @@ export default function UserDashboard() {
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className={`group flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-xl border transition-all cursor-pointer text-left ${
                   isUserMenuOpen
-                    ? 'bg-zinc-800/90 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30 text-white'
-                    : 'bg-zinc-900/90 hover:bg-zinc-800/80 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white'
+                    ? 'bg-zinc-800 border-zinc-700 text-white shadow-sm'
+                    : 'bg-zinc-900 hover:bg-zinc-850 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white'
                 }`}
                 title="Candidate Profile & Settings - Click to update profile & credentials"
                 aria-label="Candidate account menu"
               >
-                {/* Profile Photo / Avatar with Live Active Pulse */}
+                {/* Profile Photo / Avatar */}
                 <div className="relative shrink-0">
                   {userPicture ? (
                     <img
                       src={userPicture}
                       alt={userName || 'Candidate'}
-                      className="w-8 h-8 rounded-lg object-cover border border-zinc-700/80 group-hover:border-emerald-500/50 transition-colors shadow-sm"
+                      className="w-8 h-8 rounded-lg object-cover border border-zinc-700 group-hover:border-zinc-600 transition-colors shadow-sm"
                       onError={() => setUserPicture('')}
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 group-hover:border-emerald-500/50 flex items-center justify-center font-bold text-white text-xs shrink-0 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 group-hover:border-zinc-600 flex items-center justify-center font-bold text-white text-xs shrink-0 transition-colors">
                       {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
                     </div>
                   )}
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
                 </div>
 
                 {/* Candidate Name, Plan Badge, and 'Click to Edit Profile' Callout */}
                 <div className="flex flex-col min-w-0 pr-0.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-white truncate max-w-[130px] lg:max-w-[160px] group-hover:text-emerald-300 transition-colors">
+                    <span className="text-xs font-semibold text-white truncate max-w-[130px] lg:max-w-[160px]">
                       {userName ? userName.split(' ')[0] : 'Candidate'}
                     </span>
                     {(isVip || userPlan === 'vip') ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-semibold shrink-0">
                         VIP
                       </span>
                     ) : isProfessional ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold shrink-0">
                         PRO
                       </span>
                     ) : (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 shrink-0">
                         FREE
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-1 text-[10px] text-zinc-400 group-hover:text-zinc-300 transition-colors">
-                    <span className="text-emerald-400 font-medium">● Active</span>
+                    <span className="text-zinc-400">● Active</span>
                     <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-400 group-hover:text-emerald-300 transition-colors">
+                    <span className="text-zinc-400 group-hover:text-white transition-colors">
                       Edit Profile ↗
                     </span>
                   </div>
                 </div>
 
-                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 group-hover:text-white ${isUserMenuOpen ? 'rotate-180 text-emerald-400' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 group-hover:text-white ${isUserMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Luxury Left-Aligned Dropdown Menu */}
@@ -924,7 +924,7 @@ export default function UserDashboard() {
                         <div className="text-[11px] text-zinc-400 font-mono truncate">{userEmail}</div>
                         <div className="pt-0.5 flex items-center gap-1.5">
                           <span className="text-[10px] font-mono text-zinc-500">Plan:</span>
-                          <span className="text-[10px] font-mono text-emerald-400 font-semibold uppercase">
+                          <span className="text-[10px] font-mono text-zinc-300 font-semibold uppercase">
                             {isVip ? 'VIP Lifetime Pass' : userPlan || 'Standard'}
                           </span>
                         </div>
@@ -936,9 +936,9 @@ export default function UserDashboard() {
                       <Link
                         href="/profile"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold transition-all text-xs"
+                        className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white font-medium transition-all text-xs"
                       >
-                        <User className="w-3.5 h-3.5" />
+                        <User className="w-3.5 h-3.5 text-zinc-400" />
                         <span>Edit Profile, Photo & Credentials ↗</span>
                       </Link>
                     </div>
@@ -955,7 +955,7 @@ export default function UserDashboard() {
                           <div className="font-medium">Naukri Login & Credentials</div>
                           <div className="text-[10px] text-zinc-500">Resume, password & targeting filters</div>
                         </div>
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-emerald-400 border border-zinc-700">1-Time</span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">1-Time</span>
                       </Link>
 
                       <Link
@@ -963,12 +963,12 @@ export default function UserDashboard() {
                         onClick={() => setIsUserMenuOpen(false)}
                         className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <Sparkles className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="font-medium">AI ATS Resume Studio</div>
                           <div className="text-[10px] text-zinc-500">FAANG Harvard ATS generator</div>
                         </div>
-                        <span className="text-[9px] font-mono px-1 rounded bg-amber-950 border border-amber-800/60 text-amber-400 font-semibold">PRO</span>
+                        <span className="text-[9px] font-mono px-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 font-medium">PRO</span>
                       </Link>
 
                       <button
@@ -1024,17 +1024,17 @@ export default function UserDashboard() {
                 ) : (
                   userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
                 )}
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
               </div>
               <span className="text-xs font-semibold text-white truncate max-w-[80px]">
                 {userName ? userName.split(' ')[0] : 'Profile'}
               </span>
               {(isVip || userPlan === 'vip') ? (
-                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 px-1 py-0.2 rounded-full">
+                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1 py-0.2 rounded-full">
                   VIP
                 </span>
               ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
-                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 px-1 py-0.2 rounded-full">
+                <span className="inline-flex items-center gap-0.5 text-[8px] font-mono font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1 py-0.2 rounded-full">
                   {userPlan === 'elite' ? 'PRO' : userPlan === 'trial' ? 'TRIAL' : userPlan.toUpperCase()}
                 </span>
               ) : null}
@@ -1059,42 +1059,42 @@ export default function UserDashboard() {
             {activeOfferBanner ? (
               <Link
                 href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-black transition-all shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse"
-                title={`Claim your exclusive offer: ${activeOfferBanner.offer_title}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-black transition-colors shrink-0 shadow-sm"
+                title={`Claim offer: ${activeOfferBanner.offer_title}`}
               >
                 <Sparkles className="w-3.5 h-3.5 fill-black/20" />
-                <span className="hidden sm:inline">🎁 Claim Deal ({activeOfferBanner.discounted_price})</span>
-                <span className="sm:hidden font-bold">🎁 Deal</span>
+                <span className="hidden sm:inline">Claim Deal ({activeOfferBanner.discounted_price})</span>
+                <span className="sm:hidden">Deal ({activeOfferBanner.discounted_price})</span>
               </Link>
             ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
               <Link
                 href="/pricing"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-zinc-200 text-black transition-all shrink-0 shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
                 title="Upgrade to unlock automated applications"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <span className="hidden sm:inline">⚡ Upgrade to Pro</span>
-                <span className="sm:hidden font-bold">Upgrade</span>
+                <Sparkles className="w-3.5 h-3.5 text-zinc-800" />
+                <span className="hidden sm:inline">Upgrade to Pro</span>
+                <span className="sm:hidden">Upgrade</span>
               </Link>
             ) : userPlan === 'pro' ? (
               <Link
                 href="/pricing?plan=elite"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black transition-all shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.25)]"
-                title="Upgrade to Professional (3-Month Fast-Track)"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 text-white transition-colors shrink-0"
+                title="Upgrade to Professional"
               >
-                <Crown className="w-3.5 h-3.5 fill-black/20" />
-                <span className="hidden sm:inline">⭐ Upgrade to Professional (₹199)</span>
-                <span className="sm:hidden font-bold">₹199 Pro</span>
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Upgrade to Professional (₹199)</span>
+                <span className="sm:hidden">₹199 Pro</span>
               </Link>
             ) : (
               <Link
                 href="/pricing"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/40 transition-colors shrink-0 shadow-sm"
-                title="View membership plans or extend coverage"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors shrink-0"
+                title="View membership plans"
               >
-                <Crown className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">⭐ Plans & Upgrades</span>
-                <span className="sm:hidden font-medium">Plans</span>
+                <Crown className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="hidden sm:inline">Plans & Upgrades</span>
+                <span className="sm:hidden">Plans</span>
               </Link>
             )}
 
@@ -1105,7 +1105,7 @@ export default function UserDashboard() {
               </Link>
               <div className="hidden lg:flex items-center gap-2 border-l border-zinc-800/80 pl-2.5">
                 <span className="text-[11px] font-mono text-zinc-400">Autonomous Radar</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </div>
             </div>
           </div>
@@ -1143,16 +1143,16 @@ export default function UserDashboard() {
                   ) : (
                     userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
                   )}
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs font-semibold text-white truncate max-w-[140px]">{userName || 'Candidate'}</span>
 
-                    {/* VIP Badge in Radiant Gold Color */}
+                    {/* VIP Badge in Standard Muted Amber */}
                     {(isVip || userPlan === 'vip') && (
                       <span
-                        className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-mono font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.3)] shrink-0"
+                        className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 font-mono font-semibold uppercase tracking-wider shrink-0"
                         title="VIP Lifetime Access Pass Active"
                       >
                         <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
@@ -1160,17 +1160,17 @@ export default function UserDashboard() {
                       </span>
                     )}
 
-                    {/* Subscription Badge in Gold Color */}
+                    {/* Subscription Badge */}
                     {userPlan !== 'vip' && (
                       <span className={`inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold shrink-0 transition-all ${
                         isPlanActive && (userPlan === 'starter' || userPlan === 'pro' || userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise')
-                          ? 'border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.25)]'
+                          ? 'border border-amber-500/30 bg-amber-500/10 text-amber-300 font-medium'
                           : userPlan === 'trial' && isPlanActive
-                          ? 'border border-amber-500/60 bg-amber-950/60 text-amber-300 font-medium shadow-[0_0_8px_rgba(245,158,11,0.15)]'
+                          ? 'border border-zinc-800 bg-zinc-900 text-zinc-300 font-medium'
                           : userPlan === 'none' || userPlan === 'no_plan'
                           ? 'bg-zinc-900 border border-zinc-800 text-zinc-500'
                           : !isPlanActive
-                          ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                          ? 'bg-red-950/80 border-red-800 text-red-300'
                           : 'bg-zinc-900 border-zinc-800 text-zinc-300'
                       }`}>
                         {isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' && (
@@ -1493,30 +1493,29 @@ export default function UserDashboard() {
 
         {/* Administrator Assigned Exclusive Promotional Offer Banner */}
         {activeOfferBanner ? (
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/50 via-[#0d1520] to-amber-950/50 border-2 border-amber-400/80 shadow-[0_0_30px_rgba(245,158,11,0.3)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 transform translate-x-6 -translate-y-6 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950 border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
             <div className="flex items-start sm:items-center gap-3.5 z-10">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-500/20 border border-amber-400/60 flex items-center justify-center text-amber-300 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.35)]">
-                <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+                <Sparkles className="w-5 h-5 text-zinc-300" />
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[10px] font-mono font-extrabold uppercase px-2.5 py-0.5 rounded-md bg-amber-400 text-black shadow-sm tracking-wide">
+                  <span className="text-[10px] font-mono font-semibold uppercase px-2.5 py-0.5 rounded-md bg-zinc-900 text-zinc-300 border border-zinc-800 tracking-wide">
                     {activeOfferBanner.discount_badge || 'SPECIAL OFFER'}
                   </span>
-                  <span className="text-xs font-mono font-bold text-cyan-300">
+                  <span className="text-xs font-mono font-medium text-zinc-400">
                     Locked to Your Email ({userEmail || 'Account'})
                   </span>
-                  <span className="text-[11px] font-mono text-zinc-300 bg-black/70 px-2 py-0.5 rounded border border-zinc-700">
-                    Code: <strong className="text-amber-300 font-bold">{activeOfferBanner.promo_code}</strong>
+                  <span className="text-[11px] font-mono text-zinc-300 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                    Code: <strong className="text-white font-semibold">{activeOfferBanner.promo_code}</strong>
                   </span>
                   {activeOfferBanner.expires_at && (
                     <span className={`text-[10px] font-mono px-2 py-0.5 rounded border flex items-center gap-1 ${
                       activeOfferBanner.is_expired
-                        ? 'bg-rose-950/80 border-rose-800 text-rose-300 font-bold'
+                        ? 'bg-zinc-900 border-zinc-800 text-zinc-500 font-medium'
                         : activeOfferBanner.hours_left !== undefined && activeOfferBanner.hours_left <= 24
-                        ? 'bg-red-950/80 border-red-800 text-red-300 font-bold animate-pulse'
-                        : 'bg-black/70 border-amber-500/40 text-amber-300'
+                        ? 'bg-zinc-900 border-zinc-800 text-amber-400 font-medium'
+                        : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                     }`}>
                       <Clock className="w-2.5 h-2.5" />
                       {activeOfferBanner.is_expired
@@ -1528,9 +1527,9 @@ export default function UserDashboard() {
                 <h4 className="text-sm sm:text-base font-bold text-white mt-1.5 flex items-center gap-2.5">
                   <span>{activeOfferBanner.offer_title}</span>
                   <span className="text-zinc-500 line-through text-xs sm:text-sm font-mono">{activeOfferBanner.original_price}</span>
-                  <span className="text-emerald-400 font-extrabold text-sm sm:text-base font-mono">{activeOfferBanner.discounted_price}</span>
+                  <span className="text-white font-extrabold text-sm sm:text-base font-mono">{activeOfferBanner.discounted_price}</span>
                 </h4>
-                <p className="text-[11px] sm:text-xs text-zinc-300 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
                   {activeOfferBanner.custom_message || 'Administrator assigned deal locked to your email address. 1-click instant unlock.'}
                 </p>
               </div>
@@ -1539,7 +1538,7 @@ export default function UserDashboard() {
               {activeOfferBanner.is_expired ? (
                 <Link
                   href="/pricing"
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-zinc-800 text-zinc-400 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-400 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>Offer Expired · View Pricing</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -1547,7 +1546,7 @@ export default function UserDashboard() {
               ) : (
                 <Link
                   href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-400 text-black text-xs font-extrabold transition-all shadow-[0_0_20px_rgba(245,158,11,0.45)] hover:scale-102 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
                 >
                   <span>Claim & Upgrade ({activeOfferBanner.discounted_price})</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -1556,10 +1555,10 @@ export default function UserDashboard() {
             </div>
           </div>
         ) : (!isProfessional) ? (
-          <div className="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-[#09090b] to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-zinc-300">
-                <Sparkles className="w-4 h-4 text-blue-400" />
+                <Sparkles className="w-4 h-4 text-zinc-400" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -1576,13 +1575,13 @@ export default function UserDashboard() {
                   </span>
                   <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${
                     userPlan === 'none' || userPlan === 'no_plan'
-                      ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                      ? 'bg-zinc-900 text-zinc-400 border-zinc-800'
                       : !isPlanActive
-                      ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                      ? 'bg-red-950/80 border-red-800 text-red-300'
                       : userPlan === 'pro'
-                      ? 'bg-blue-950/80 border-blue-700/60 text-blue-300'
+                      ? 'bg-zinc-900 border-zinc-800 text-zinc-300'
                       : metrics.total_applied >= 15
-                      ? 'bg-red-950/80 border-red-700/60 text-red-300'
+                      ? 'bg-zinc-900 border-zinc-800 text-amber-400'
                       : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                   }`}>
                     {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
@@ -1954,11 +1953,11 @@ export default function UserDashboard() {
 
             {/* New User Onboarding Checklist (Shown when 0 applications dispatched) */}
             {historyTotalCount === 0 && !historySearch && !loadingHistory && (
-              <div className="p-5 rounded-xl bg-gradient-to-r from-zinc-950 via-[#0a0a0d] to-zinc-950 border border-zinc-800/90 space-y-4 shadow-lg">
+              <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
-                      <Target className="w-4 h-4 text-sky-400" />
+                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+                      <Target className="w-4 h-4 text-zinc-400" />
                     </div>
                     <div>
                       <h3 className="text-xs font-semibold text-white">
