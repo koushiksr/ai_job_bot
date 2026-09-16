@@ -45,6 +45,8 @@ import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 import AiResumeBuilder from '@/components/AiResumeBuilder'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
 import BeginnerOnboardingGuide, { ProfileCompleteness } from '@/components/BeginnerOnboardingGuide'
+import CandidateOfferModal from '@/components/CandidateOfferModal'
+import PwaInstallPromptModal from '@/components/PwaInstallPromptModal'
 import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 
@@ -130,6 +132,8 @@ export default function UserDashboard() {
   // Candidate Exclusive Assigned Offers & Real-Time Alert State
   const [assignedOffers, setAssignedOffers] = useState<any[]>([])
   const [activeOfferBanner, setActiveOfferBanner] = useState<any | null>(null)
+  const [isOfferModalOpen, setIsOfferModalOpen] = useState<boolean>(false)
+  const [isPwaModalOpen, setIsPwaModalOpen] = useState<boolean>(false)
   const [inAppToast, setInAppToast] = useState<{
     id?: string
     title: string
@@ -161,6 +165,23 @@ export default function UserDashboard() {
       } else {
         setNotificationPermission(Notification.permission)
       }
+
+      // Check if user is not running in standalone PWA mode, and prompt after small delay
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true ||
+        document.referrer.includes('android-app://')
+
+      if (!isStandalone) {
+        const pwaDismissedAt = localStorage.getItem('jobflux_pwa_dismissed_at')
+        const daysSinceDismissed = pwaDismissedAt ? (Date.now() - Number(pwaDismissedAt)) / (1000 * 60 * 60 * 24) : 999
+        if (daysSinceDismissed > 3) {
+          const timer = setTimeout(() => {
+            setIsPwaModalOpen(true)
+          }, 3500)
+          return () => clearTimeout(timer)
+        }
+      }
     }
   }, [])
 
@@ -173,6 +194,14 @@ export default function UserDashboard() {
       if (offers.length > 0) {
         const latest = offers[0]
         setActiveOfferBanner(latest)
+
+        // Automatically show Offer Modal once per session
+        if (typeof window !== 'undefined' && !sessionStorage.getItem('jobflux_offer_modal_shown')) {
+          sessionStorage.setItem('jobflux_offer_modal_shown', 'true')
+          setTimeout(() => {
+            setIsOfferModalOpen(true)
+          }, 1500)
+        }
 
         // Dispatch native browser notification and in-app toast once per session per offer
         const alertKey = `jobflux_alerted_offer_${latest.id || latest.promo_code}`
@@ -234,6 +263,20 @@ export default function UserDashboard() {
       markNotificationAsRead(notifId, userEmail)
     }
     setInAppToast(null)
+  }
+
+  const handleCloseOfferModal = () => {
+    setIsOfferModalOpen(false)
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('jobflux_offer_modal_shown', 'true')
+    }
+  }
+
+  const handleClosePwaModal = () => {
+    setIsPwaModalOpen(false)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('jobflux_pwa_dismissed_at', String(Date.now()))
+    }
   }
 
   const handleRequestNotification = async () => {
@@ -977,6 +1020,36 @@ export default function UserDashboard() {
                       <button
                         onClick={() => {
                           setIsUserMenuOpen(false)
+                          setIsPwaModalOpen(true)
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-cyan-300">Install JobFlux App</div>
+                          <div className="text-[10px] text-zinc-500">Standalone App & push alerts</div>
+                        </div>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">PWA</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
+                          setIsOfferModalOpen(true)
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-amber-300">Promotional Offers</div>
+                          <div className="text-[10px] text-zinc-500">Exclusive discounts & coupon</div>
+                        </div>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">50% OFF</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
                           setIsHelpOpen(true)
                         }}
                         className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
@@ -1023,6 +1096,30 @@ export default function UserDashboard() {
 
           {/* RIGHT: Actions, Telemetry Refresh & Controls */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Install App Button */}
+            <button
+              type="button"
+              onClick={() => setIsPwaModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all shrink-0 cursor-pointer shadow-sm"
+              title="Install JobFlux as a native app and enable push alerts"
+            >
+              <Download className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Install App</span>
+              <span className="sm:hidden">App</span>
+            </button>
+
+            {/* Candidate Offer Button */}
+            <button
+              type="button"
+              onClick={() => setIsOfferModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-400/40 transition-all shrink-0 cursor-pointer shadow-sm"
+              title="View exclusive candidate offers and discounts"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span className="hidden sm:inline">{activeOfferBanner ? `Deal: ${activeOfferBanner.discount_badge}` : 'Special Offer'}</span>
+              <span className="sm:hidden">Offer</span>
+            </button>
+
             {/* Telemetry Refresh (Desktop) */}
             <button
               onClick={() => refreshAllDashboardData(userId)}
@@ -1267,6 +1364,28 @@ export default function UserDashboard() {
                 <Sparkles className="w-4 h-4 text-zinc-400 shrink-0" />
                 <span>Compare Pricing & Plans</span>
               </Link>
+
+              <button
+                onClick={() => { setIsMobileNavOpen(false); setIsPwaModalOpen(true) }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-cyan-300 hover:text-white hover:bg-cyan-950/30 transition-colors cursor-pointer text-left"
+              >
+                <Download className="w-4 h-4 text-cyan-400 shrink-0" />
+                <span>Install JobFlux App (PWA)</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 ml-auto font-semibold">
+                  APP
+                </span>
+              </button>
+
+              <button
+                onClick={() => { setIsMobileNavOpen(false); setIsOfferModalOpen(true) }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 hover:text-white hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Candidate Offers & Discounts</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 ml-auto font-semibold">
+                  OFFER
+                </span>
+              </button>
 
               {userRole === 'admin' && (
                 <Link
@@ -2558,6 +2677,22 @@ export default function UserDashboard() {
         initialName={userName}
         initialUserId={userId}
         onTicketSubmitted={() => loadUserTickets(userId)}
+      />
+
+      {/* Exclusive Candidate Promotional Offer Popup Modal */}
+      <CandidateOfferModal
+        isOpen={isOfferModalOpen}
+        onClose={handleCloseOfferModal}
+        offer={assignedOffers.length > 0 ? assignedOffers[0] : null}
+        userEmail={userEmail}
+      />
+
+      {/* Official Standalone PWA Installation & Push Notification Activation Modal */}
+      <PwaInstallPromptModal
+        isOpen={isPwaModalOpen}
+        onClose={handleClosePwaModal}
+        userEmail={userEmail}
+        userId={userId}
       />
     </div>
   )

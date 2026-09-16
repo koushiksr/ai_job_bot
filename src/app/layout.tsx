@@ -61,6 +61,12 @@ export const metadata: Metadata = {
     shortcut: "/icon.svg?v=5",
     apple: "/icon.svg?v=5"
   },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "JobFlux AI"
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
