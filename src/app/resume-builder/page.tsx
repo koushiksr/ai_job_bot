@@ -442,9 +442,10 @@ export default function ResumeBuilderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col selection:bg-zinc-800 selection:text-white">
+    <div className={`min-h-screen bg-[#000000] text-zinc-100 flex flex-col selection:bg-zinc-800 selection:text-white ${!isProfessional && userRole !== 'admin' ? 'free-ats-hide' : 'pro-ats-show'}`}>
       {/* Print stylesheet to enforce Harvard single-column ATS format on print for PRO, and block free export */}
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           body {
             background: #ffffff !important;
@@ -457,19 +458,17 @@ export default function ResumeBuilderPage() {
           .no-print {
             display: none !important;
           }
-          ${!isProfessional && userRole !== 'admin' ? `
-          #ats-resume-sheet {
+          .free-ats-hide #ats-resume-sheet {
             display: none !important;
           }
-          #print-upgrade-lock-screen {
+          .free-ats-hide #print-upgrade-lock-screen {
             display: block !important;
             padding: 2.5in 0.8in !important;
             text-align: center !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
             color: #111111 !important;
           }
-          ` : `
-          #ats-resume-sheet {
+          .pro-ats-show #ats-resume-sheet {
             display: block !important;
             box-shadow: none !important;
             border: none !important;
@@ -480,12 +479,11 @@ export default function ResumeBuilderPage() {
             background: #ffffff !important;
             color: #000000 !important;
           }
-          #print-upgrade-lock-screen {
+          .pro-ats-show #print-upgrade-lock-screen {
             display: none !important;
           }
-          `}
         }
-      `}</style>
+      `}} />
 
       {/* Hidden print upgrade lock screen displayed only during print if user is not PRO */}
       <div id="print-upgrade-lock-screen" className="hidden">
