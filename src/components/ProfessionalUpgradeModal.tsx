@@ -16,6 +16,7 @@ import {
   Crown
 } from 'lucide-react'
 import JobFluxLogo from './JobFluxLogo'
+import { trackPaymentClick } from '@/lib/tracker'
 
 interface ProfessionalUpgradeModalProps {
   isOpen: boolean
@@ -162,7 +163,13 @@ export default function ProfessionalUpgradeModal({
 
             <Link
               href="/pricing?plan=elite"
-              onClick={onClose}
+              onClick={() => {
+                trackPaymentClick('elite', 'JobFlux Professional', 199, {
+                  step: 'professional_upgrade_modal_click',
+                  feature_trigger: featureTitle
+                })
+                onClose()
+              }}
               className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
             >
               <span>{featureTitle.toLowerCase().includes('download') ? 'Buy Subscription to Download' : 'Upgrade to Professional'}</span>

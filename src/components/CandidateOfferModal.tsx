@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Sparkles, X, Check, Copy, ArrowRight, Tag, Clock, Flame, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { CandidateOffer } from '@/lib/candidateOffers'
+import { trackPaymentClick } from '@/lib/tracker'
 
 interface CandidateOfferModalProps {
   isOpen: boolean
@@ -196,7 +197,19 @@ export default function CandidateOfferModal({
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <Link
               href={claimHref}
-              onClick={onClose}
+              onClick={() => {
+                trackPaymentClick(
+                  activeOffer.preset_id || 'offer',
+                  activeOffer.offer_title || 'Candidate Offer',
+                  Number(activeOffer.discounted_price?.replace(/\D/g, '')) || 99,
+                  {
+                    step: 'candidate_offer_modal_claim',
+                    promo_code: activeOffer.promo_code,
+                    email: userEmail
+                  }
+                )
+                onClose()
+              }}
               className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-black font-extrabold text-sm shadow-[0_8px_25px_rgba(245,158,11,0.4)] transition-all hover:scale-[1.02] active:scale-[0.99] cursor-pointer text-center"
             >
               <span>Claim Offer ({activeOffer.discounted_price})</span>

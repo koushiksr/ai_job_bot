@@ -28,6 +28,7 @@ import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import Footer from '@/components/Footer'
 import { PLANS, PROMO_DEFINITIONS, PlanDefinition as Plan } from '@/config/plans'
+import { trackPaymentClick, sendTrackEvent } from '@/lib/tracker'
 
 
 export default function PricingPage() {
@@ -241,6 +242,12 @@ export default function PricingPage() {
     const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : ''
     setCandidateEmail(storedEmail || currentUserEmail)
 
+    trackPaymentClick(plan.id, plan.name, plan.price, {
+      step: 'plan_selected',
+      promo_code: appliedPromoCode || undefined,
+      email: storedEmail || currentUserEmail || undefined
+    })
+
     if (appliedPromoCode) {
       applyPromoToPlan(appliedPromoCode, plan, storedEmail || currentUserEmail)
     }
@@ -275,6 +282,14 @@ export default function PricingPage() {
       if (typeof window === 'undefined' || !(window as any).Razorpay) {
         throw new Error('Razorpay gateway is still loading. Please refresh and try again.')
       }
+
+      // Track payment checkout modal launched
+      trackPaymentClick(selectedPlan.id, selectedPlan.name, orderData.amount ? orderData.amount / 100 : selectedPlan.price, {
+        step: 'checkout_modal_opened',
+        order_id: orderData.order_id,
+        email: candidateEmail,
+        promo_code: appliedPromoCode || undefined
+      })
 
       const options = {
         key: orderData.key_id,
@@ -313,6 +328,18 @@ export default function PricingPage() {
               if (typeof window !== 'undefined') {
                 localStorage.setItem('user_plan', selectedPlan.id)
               }
+              // Track successful payment conversion
+              sendTrackEvent({
+                event_type: 'payment_success',
+                email: candidateEmail,
+                metadata: {
+                  plan_id: selectedPlan.id,
+                  plan_name: selectedPlan.name,
+                  order_id: response.razorpay_order_id,
+                  payment_id: response.razorpay_payment_id,
+                  promo_code: appliedPromoCode || undefined
+                }
+              })
               setPaymentStep('success')
             } else {
               alert(verifyData.detail || 'Payment verification failed. Plan could not be activated.')
@@ -332,6 +359,14 @@ export default function PricingPage() {
 
       const rzp = new (window as any).Razorpay(options)
       rzp.on('payment.failed', (response: any) => {
+        sendTrackEvent({
+          event_type: 'payment_fail',
+          email: candidateEmail,
+          metadata: {
+            plan_id: selectedPlan.id,
+            error: response.error?.description || response.error?.reason || 'Payment failed'
+          }
+        })
         alert(`Payment failed: ${response.error?.description || response.error?.reason || 'Unknown error'}`)
         setActivating(false)
       })

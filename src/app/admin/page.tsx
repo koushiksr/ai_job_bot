@@ -21,6 +21,7 @@ import PaymentsTab from './components/tabs/PaymentsTab'
 import OffersTab from './components/tabs/OffersTab'
 import EnterpriseLeadsTab from './components/tabs/EnterpriseLeadsTab'
 import LogsTab from './components/tabs/LogsTab'
+import VisitorsTab from './components/tabs/VisitorsTab'
 
 // Modular Modals
 import InspectCandidateModal from './components/modals/InspectCandidateModal'
@@ -54,7 +55,7 @@ export default function AdminDashboard() {
   })
 
   // Admin Active Tab
-  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'logs'>('candidates')
+  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'logs' | 'visitors'>('candidates')
 
   // Queue & Live Executions State
   const [queueTasks, setQueueTasks] = useState<any[]>([])
@@ -1889,6 +1890,11 @@ export default function AdminDashboard() {
             fetchSupportTickets={fetchSupportTickets}
             adminEmail={adminEmail}
           />
+        )}
+
+        {/* TAB 8: LIVE VISITORS & INTERACTION TELEMETRY */}
+        {activeAdminTab === 'visitors' && (
+          <VisitorsTab />
         )}
       </main>
 

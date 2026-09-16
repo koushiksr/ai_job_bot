@@ -1,4 +1,4 @@
-export type AdminTabType = 'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'logs'
+export type AdminTabType = 'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'logs' | 'visitors'
 
 export type LogsSubTabType = 'activity' | 'llm_telemetry' | 'job_history' | 'tickets'
 
@@ -154,4 +154,44 @@ export interface TicketStats {
   in_progress: number
   resolved: number
   closed: number
+}
+
+export interface VisitorEventRecord {
+  id: string
+  visitor_id: string
+  session_id: string
+  event_type: 'page_view' | 'payment_click' | 'payment_success' | 'payment_fail' | 'pwa_install_click' | 'cta_click' | 'custom'
+  path: string
+  full_url?: string
+  referrer?: string
+  title?: string
+  email?: string
+  user_id?: string
+  user_name?: string
+  is_authenticated: boolean
+  ip_address: string
+  country?: string
+  country_name?: string
+  city?: string
+  region?: string
+  user_agent: string
+  device_type: 'desktop' | 'mobile' | 'tablet' | 'unknown'
+  os: string
+  browser: string
+  screen_resolution?: string
+  language?: string
+  metadata: Record<string, any>
+  created_at: string
+}
+
+export interface VisitorMetrics {
+  total_unique_visitors: number
+  total_page_views: number
+  total_payment_intents: number
+  identified_visitors_count: number
+  today_visitors: number
+  today_page_views: number
+  today_payment_clicks: number
+  top_pages: Array<{ path: string; count: number }>
+  devices_breakdown: { desktop: number; mobile: number; tablet: number }
 }

@@ -8,7 +8,8 @@ import {
   CreditCard,
   Tag,
   Building2,
-  History
+  History,
+  Compass
 } from 'lucide-react'
 import { AdminTabType, AdminQueueMetrics, AdminWorkerStatus, TicketStats } from '../types'
 
@@ -137,6 +138,20 @@ export default function AdminTabsNav({
         }`}
       >
         <History className="w-3.5 h-3.5" /> Activity Audit &amp; System Logs
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onTabChange('visitors')}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
+          activeTab === 'visitors'
+            ? 'bg-zinc-800 text-white shadow-sm ring-1 ring-cyan-500/40'
+            : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+        }`}
+      >
+        <Compass className="w-3.5 h-3.5 text-cyan-400" />
+        <span>Live Visitors &amp; Telemetry</span>
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Live tracking active" />
       </button>
     </div>
   )
