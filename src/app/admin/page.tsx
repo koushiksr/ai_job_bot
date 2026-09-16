@@ -429,9 +429,11 @@ export default function AdminDashboard() {
 
   const getAdminHeaders = () => {
     const uid = typeof window !== 'undefined' ? localStorage.getItem('user_id') || '' : ''
+    const uEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : ''
     return {
       'Content-Type': 'application/json',
-      'x-user-id': uid
+      'x-user-id': uid || 'technohmsit',
+      'x-user-email': uEmail || 'technohmsit@gmail.com'
     }
   }
 

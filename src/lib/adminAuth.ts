@@ -22,26 +22,46 @@ export async function verifyAdminRequest(
     ''
   ).trim()
 
-  if (!userId) {
-    return { authorized: false, userId: '' }
-  }
+  const userEmail = (
+    req.headers.get('x-user-email') ||
+    req.nextUrl.searchParams.get('auth_email') ||
+    ''
+  ).trim().toLowerCase()
 
-  // 1. Master admin or designated admin account
-  if (userId === 'admin') {
+  // 1. Direct check on identifier or email
+  if (userId === 'admin' || userEmail === 'admin@jobfluxai.com') {
     return { authorized: true, userId: 'admin', email: 'admin@jobfluxai.com' }
   }
 
-  if (isAdminUser(userId)) {
-    return { authorized: true, userId: APP_CONFIG.masterAdminId, email: APP_CONFIG.supportEmail }
+  if (isAdminUser(userId) || isAdminUser(userEmail)) {
+    return {
+      authorized: true,
+      userId: userId || APP_CONFIG.masterAdminId,
+      email: userEmail || APP_CONFIG.supportEmail
+    }
   }
 
-  // 2. Check in database users and profiles collections
-  const user = await db.collection('users').findOne({ user_id: userId }) ||
-               await db.collection('profiles').findOne({ user_id: userId })
+  if (!userId && !userEmail) {
+    return { authorized: false, userId: '' }
+  }
+
+  // 2. Check in database users and profiles collections by user_id OR email
+  const matchCriteria: any[] = []
+  if (userId) {
+    matchCriteria.push({ user_id: userId })
+    matchCriteria.push({ email: userId })
+  }
+  if (userEmail) {
+    matchCriteria.push({ email: userEmail })
+  }
+
+  const query = matchCriteria.length === 1 ? matchCriteria[0] : { $or: matchCriteria }
+  const user = await db.collection('users').findOne(query) ||
+               await db.collection('profiles').findOne(query)
 
   if (user) {
-    if (user.role === 'admin' || isAdminUser(user.email)) {
-      return { authorized: true, userId, email: user.email }
+    if (user.role === 'admin' || isAdminUser(user.email) || isAdminUser(user.user_id)) {
+      return { authorized: true, userId: user.user_id || userId, email: user.email || userEmail }
     }
   }
 

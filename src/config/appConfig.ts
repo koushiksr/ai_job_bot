@@ -20,7 +20,9 @@ export const APP_CONFIG = {
   masterAdminId: 'technohmsit',
   adminEmails: [
     'technohmsit@gmail.com',
-    'admin@jobfluxai.com'
+    'admin@jobfluxai.com',
+    'koushiksr1999@gmail.com',
+    'koushiksrmedala@gmail.com'
   ] as string[],
 
   // Default testing and preview recipients
@@ -45,6 +47,11 @@ export const APP_CONFIG = {
 export function isAdminUser(identifier?: string | null): boolean {
   if (!identifier) return false
   const clean = identifier.toLowerCase().trim()
-  if (clean === 'admin' || clean === APP_CONFIG.masterAdminId.toLowerCase()) return true
+  if (
+    clean === 'admin' ||
+    clean === 'technohmsit' ||
+    clean === 'candidate1_koushiksr' ||
+    clean === 'koushiksrmedala'
+  ) return true
   return APP_CONFIG.adminEmails.some(email => email.toLowerCase() === clean)
 }
