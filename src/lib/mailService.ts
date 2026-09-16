@@ -548,9 +548,14 @@ export function generatePurchaseOfferHtml({
 export interface JobDispatchReportOptions {
   candidateName: string
   appliedCount: number
+  totalApplied?: number
   totalTargetCount?: number
   matchScore?: number
   recruiterViews?: number
+  isPaidPlan?: boolean
+  planName?: string
+  planExpiresAt?: string | Date | null
+  daysRemaining?: number
   freeTrialUsed?: number
   freeTrialLimit?: number
   topCompanies?: Array<{
@@ -576,8 +581,13 @@ export interface JobDispatchReportOptions {
 export function generateJobDispatchReportHtml({
   candidateName = 'Candidate',
   appliedCount = 47,
+  totalApplied = 0,
   matchScore = 96,
   recruiterViews = 4,
+  isPaidPlan = false,
+  planName = 'JobFlux Professional',
+  planExpiresAt = null,
+  daysRemaining = 0,
   freeTrialUsed = 47,
   freeTrialLimit = 50,
   topCompanies = [
@@ -597,7 +607,15 @@ export function generateJobDispatchReportHtml({
 }: JobDispatchReportOptions): string {
   const remainingFree = Math.max(0, freeTrialLimit - freeTrialUsed)
   const percentUsed = Math.min(100, Math.round((freeTrialUsed / freeTrialLimit) * 100))
-  const previewText = `JobFlux AI: ${appliedCount} jobs applied today · ${recruiterViews} recruiter profile views · ${remainingFree} free applications remaining`
+  const previewText = `JobFlux AI: ${appliedCount} jobs applied today · ${isPaidPlan ? `${planName} Active` : `${remainingFree} free applications remaining`} · ${recruiterViews} recruiter views`
+
+  let formattedExpiry = 'Active'
+  if (planExpiresAt) {
+    try {
+      const d = new Date(planExpiresAt)
+      formattedExpiry = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    } catch (_) {}
+  }
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -664,7 +682,7 @@ export function generateJobDispatchReportHtml({
                     </div>
                     <div style="margin-top:10px;">
                       <span style="display:inline-block;font-size:10px;font-family:monospace;font-weight:600;background-color:#1a1c20;color:#94a3b8;border:1px solid #2d3036;padding:3px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:0.5px;">
-                        Daily Dispatch Digest &bull; ${dateString}
+                        ${isPaidPlan ? `👑 ${planName} Active` : 'Daily Dispatch Digest'} &bull; ${dateString}
                       </span>
                     </div>
                   </td>
@@ -682,7 +700,7 @@ export function generateJobDispatchReportHtml({
                 ${appliedCount} Jobs Dispatched Today
               </h1>
               <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#9ca3af;">
-                Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's scheduled recruiter sweep across active listings. Here is your daily momentum briefing:
+                Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's scheduled recruiter sweep on Naukri. Here is your individual application briefing:
               </p>
 
               <!-- Metric Grid (2x2 table) -->
@@ -697,7 +715,7 @@ export function generateJobDispatchReportHtml({
                         ${appliedCount}
                       </div>
                       <div style="font-size:11px;color:#71717a;margin-top:3px;">
-                        Dispatched Today
+                        Dispatched Today ${totalApplied > 0 ? `(${totalApplied} Total)` : ''}
                       </div>
                     </div>
                   </td>
@@ -778,7 +796,64 @@ export function generateJobDispatchReportHtml({
                 </div>
               </div>
 
-              <!-- Comprehensive Upgrade & Capacity Analysis -->
+              <!-- DYNAMIC PACKAGE STATUS & INTELLIGENT OFFER -->
+              ${isPaidPlan ? `
+              <!-- ALREADY HAS ACTIVE PACKAGE -->
+              <div style="background-color:#16171a;border:1px solid #26282d;border-radius:12px;padding:18px;margin-bottom:22px;">
+                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td valign="middle">
+                      <div style="font-size:11px;font-weight:700;font-family:monospace;color:#38bdf8;text-transform:uppercase;letter-spacing:0.5px;">
+                        👑 Active Membership Status
+                      </div>
+                      <div style="font-size:16px;font-weight:700;color:#ffffff;margin:3px 0 4px 0;">
+                        ${planName}
+                      </div>
+                      <div style="font-size:12px;color:#9ca3af;">
+                        Coverage active until <strong style="color:#ffffff;">${formattedExpiry}</strong> (${daysRemaining} days remaining)
+                      </div>
+                    </td>
+                    <td align="right" valign="middle">
+                      <span style="display:inline-block;font-size:10px;font-weight:700;font-family:monospace;color:#38bdf8;background-color:#082f49;border:1px solid #0369a1;padding:3px 8px;border-radius:4px;">
+                        ACTIVE PRO
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid #222428;">
+                  <ul style="margin:0;padding-left:18px;font-size:12px;color:#9ca3af;line-height:1.8;">
+                    <li><strong style="color:#ffffff;">Daily Auto-Apply:</strong> Active (Dispatched ${appliedCount} jobs today${totalApplied > 0 ? `, ${totalApplied} total` : ''})</li>
+                    <li><strong style="color:#ffffff;">On-Demand Sweeps:</strong> 5x/Week real-time radar sweeps unlocked</li>
+                    <li><strong style="color:#ffffff;">Harvard ATS Resume:</strong> PDF Print &amp; Export Unlocked</li>
+                    <li><strong style="color:#ffffff;">Recruiter Telemetry:</strong> Live recruiter application links enabled</li>
+                  </ul>
+                </div>
+
+                <!-- VIP Opportunity for Active Subscribers -->
+                <div style="margin-top:14px;background-color:#0b0c0e;border:1px solid #2e3035;border-radius:8px;padding:12px;">
+                  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td valign="middle">
+                        <div style="font-size:10px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">
+                          Subscriber VIP Opportunity
+                        </div>
+                        <div style="font-size:13px;font-weight:700;color:#ffffff;">
+                          Lifetime VIP Career Pass &bull; ₹299 <span style="font-size:11px;color:#71717a;text-decoration:line-through;">₹10,000</span>
+                        </div>
+                        <div style="font-size:11px;color:#9ca3af;margin-top:2px;">
+                          Never worry about renewals. Permanent automated sweeps until you sign an offer.
+                        </div>
+                      </td>
+                      <td align="right" valign="middle">
+                        <span style="font-size:10px;font-family:monospace;color:#38bdf8;border:1px solid #28303d;padding:2px 6px;border-radius:4px;">CODE: VIP299</span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              ` : `
+              <!-- FREE TRIAL / EXPIRED USER -->
               <div style="background-color:#16171a;border:1px solid #26282d;border-radius:12px;padding:18px;margin-bottom:22px;">
                 <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
@@ -851,15 +926,15 @@ export function generateJobDispatchReportHtml({
                     </table>
                   </div>
                 </div>
-
               </div>
+              `}
 
               <!-- Main Call to Action Button -->
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="${upgradeUrl}" class="mobile-btn" style="display:inline-block;background-color:#ffffff;color:#0b0c0e;font-size:14px;font-weight:700;text-decoration:none;padding:14px 34px;border-radius:8px;letter-spacing:-0.2px;">
-                      Upgrade to Professional (${discountedPrice}) &rarr;
+                    <a href="${isPaidPlan ? `${upgradeUrl}?promo=VIP299` : `${upgradeUrl}?promo=${promoCode}`}" class="mobile-btn" style="display:inline-block;background-color:#ffffff;color:#0b0c0e;font-size:14px;font-weight:700;text-decoration:none;padding:14px 34px;border-radius:8px;letter-spacing:-0.2px;">
+                      ${isPaidPlan ? 'Upgrade to Lifetime VIP Pass (₹299) &rarr;' : `Upgrade to Professional (${discountedPrice}) &rarr;`}
                     </a>
                   </td>
                 </tr>
@@ -875,18 +950,18 @@ export function generateJobDispatchReportHtml({
             </td>
           </tr>
 
-          <!-- JobFlux Helpdesk Footer -->
+          <!-- JobFlux AI Footer -->
           <tr>
             <td style="padding:18px 22px;background-color:#0e0f11;border-top:1px solid #222428;text-align:center;">
               <p style="margin:0 0 4px 0;font-size:12px;font-weight:600;color:#e4e4e7;">
-                JobFlux Helpdesk
+                JobFlux AI
               </p>
               <p style="margin:0 0 6px 0;font-size:11px;color:#71717a;line-height:1.5;">
                 Autonomous Career &amp; Recruitment Intelligence &bull; Bengaluru, India
               </p>
               <p style="margin:0;font-size:11px;color:#52525b;">
-                Helpdesk: <a href="mailto:support@jobfluxai.com" style="color:#38bdf8;text-decoration:none;">support@jobfluxai.com</a> &bull; 
-                <a href="${dashboardUrl}" style="color:#71717a;text-decoration:underline;">Manage Preferences</a>
+                Questions or Feedback: <a href="mailto:support@jobfluxai.com" style="color:#38bdf8;text-decoration:none;">support@jobfluxai.com</a> &bull; 
+                <a href="${dashboardUrl}" style="color:#71717a;text-decoration:underline;">Candidate Cockpit</a>
               </p>
             </td>
           </tr>
@@ -898,4 +973,5 @@ export function generateJobDispatchReportHtml({
 </body>
 </html>`
 }
+
 

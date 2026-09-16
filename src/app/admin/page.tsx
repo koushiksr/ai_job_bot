@@ -157,6 +157,18 @@ export default function AdminDashboard() {
   const [assignedOfferFilter, setAssignedOfferFilter] = useState<string>('all')
   const [offerNotification, setOfferNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
+  // Purchase Offers Collapsible & Pagination State
+  const [offersCollapsedWatchdog, setOffersCollapsedWatchdog] = useState<boolean>(false)
+  const [offersCollapsedDesigner, setOffersCollapsedDesigner] = useState<boolean>(false)
+  const [offersCollapsedAssigned, setOffersCollapsedAssigned] = useState<boolean>(false)
+  const [offersCollapsedHistory, setOffersCollapsedHistory] = useState<boolean>(false)
+  const [offersCollapsedPreview, setOffersCollapsedPreview] = useState<boolean>(false)
+  const [assignedOffersPage, setAssignedOffersPage] = useState<number>(1)
+  const [assignedOffersPerPage, setAssignedOffersPerPage] = useState<number>(10)
+  const [campaignHistoryPage, setCampaignHistoryPage] = useState<number>(1)
+  const [campaignHistoryPerPage, setCampaignHistoryPerPage] = useState<number>(10)
+  const [candidatePickerPage, setCandidatePickerPage] = useState<number>(1)
+
   // Plan & Offer Expiry Telemetry State
   const [expiryStats, setExpiryStats] = useState<any | null>(null)
   const [loadingExpiryStats, setLoadingExpiryStats] = useState<boolean>(false)
@@ -192,6 +204,12 @@ export default function AdminDashboard() {
   const [deviceWebPushActive, setDeviceWebPushActive] = useState<boolean>(false)
   const [closedTabTestActive, setClosedTabTestActive] = useState<boolean>(false)
   const [closedTabCountdown, setClosedTabCountdown] = useState<number>(0)
+
+  // Individual Candidate Daily Dispatch Report State
+  const [dispatchReportLoading, setDispatchReportLoading] = useState<boolean>(false)
+  const [dispatchReportResult, setDispatchReportResult] = useState<any | null>(null)
+  const [dispatchReportChannel, setDispatchReportChannel] = useState<'both' | 'email' | 'push'>('both')
+  const [dispatchReportTarget, setDispatchReportTarget] = useState<string>('koushiksr1999@gmail.com')
 
   // Activity Audit & Telemetry State
   const [activityLogs, setActivityLogs] = useState<any[]>([])
@@ -685,6 +703,50 @@ export default function AdminDashboard() {
       })
     } finally {
       setSavingPass(false)
+    }
+  }
+
+  const handleDispatchCareerReport = async (overrideEmail?: string, channelOverride?: 'both' | 'email' | 'push') => {
+    setDispatchReportLoading(true)
+    setDispatchReportResult(null)
+    try {
+      let targetEmail = overrideEmail || dispatchReportTarget
+      if (targetEmail === 'custom') {
+        targetEmail = customPushRecipient.trim()
+      }
+      if (!targetEmail || targetEmail === 'all') {
+        alert('Please enter or select a specific candidate email address to dispatch their individual report.')
+        setDispatchReportLoading(false)
+        return
+      }
+
+      const channel = channelOverride || dispatchReportChannel
+
+      const res = await fetch('/api/admin/send-dispatch-report', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          targetEmail: targetEmail.trim(),
+          channel
+        })
+      })
+
+      const data = await res.json()
+      setDispatchReportResult(data)
+      if (data.success) {
+        sendBrowserNotification('🚀 Daily Report Dispatched!', {
+          body: `Live career report sent to ${data.candidate?.email || targetEmail} via ${channel.toUpperCase()}!`
+        })
+        fetchPushDiagnostics()
+        fetchMailDiagnostics()
+      }
+    } catch (err: any) {
+      setDispatchReportResult({
+        success: false,
+        error: err.message || 'Failed to dispatch career report'
+      })
+    } finally {
+      setDispatchReportLoading(false)
     }
   }
 
@@ -2293,6 +2355,27 @@ export default function AdminDashboard() {
                       </button>
                       <button
                         type="button"
+                        disabled={dispatchReportLoading}
+                        onClick={async () => {
+                          await handleDispatchCareerReport(inspectCandidate.email, 'both')
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        title="Dispatches live daily report with real DB stats and applied companies via email and web push"
+                      >
+                        {dispatchReportLoading ? (
+                          <>
+                            <RefreshCw className="w-3 h-3 animate-spin" />
+                            <span>Dispatching Report...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3 h-3" />
+                            <span>Dispatch Report (Email + Push)</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
                         disabled={loadingExpirySweep}
                         onClick={async () => {
                           await handleRunExpirySweep(inspectCandidate.email)
@@ -3349,34 +3432,43 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* Metrics Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800">
-                <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Total Candidate Base</span>
-                <div className="text-xl font-bold text-white mt-1">{offersData.metrics.total_candidates}</div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">Registered accounts</p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#09090b] border border-amber-500/20 bg-amber-500/5">
-                <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider">Prime Target Audience</span>
-                <div className="text-xl font-bold text-amber-300 mt-1">{offersData.metrics.unsubscribed_count}</div>
-                <p className="text-[11px] text-amber-400/80 mt-0.5">Unsubscribed & expired candidates</p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800">
-                <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Subscribed Pro/VIP</span>
-                <div className="text-xl font-bold text-emerald-400 mt-1">{offersData.metrics.subscribed_count}</div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">Active paid candidates</p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#09090b] border border-sky-500/20 bg-sky-500/5">
-                <span className="text-[11px] font-mono text-sky-400 uppercase tracking-wider">Active Assigned Offers</span>
-                <div className="text-xl font-bold text-sky-300 mt-1">
-                  {offersData.metrics.active_assigned_offers ?? (offersData.assigned_offers || []).filter((o: any) => !o.claimed && !o.is_expired && !o.revoked).length}
+            {/* Sticky Metrics Overview Bar - Stays pinned when scrolling */}
+            <div className="sticky top-2 z-20 backdrop-blur-xl bg-[#09090b]/90 p-3 rounded-2xl border border-zinc-800 shadow-2xl transition-all space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Live Conversion &amp; Campaign Stats</span>
                 </div>
-                <p className="text-[11px] text-sky-400/80 mt-0.5">
-                  {offersData.metrics.revoked_offers || (offersData.assigned_offers || []).filter((o: any) => o.revoked).length} revoked / purged
-                </p>
+                <span className="text-[10px] font-mono text-zinc-500">Pinned on Scroll</span>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
+                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">Total Candidate Base</span>
+                  <div className="text-xl font-bold text-white mt-0.5">{offersData.metrics.total_candidates}</div>
+                  <p className="text-[10px] text-zinc-500">Registered accounts</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
+                  <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block font-semibold">Prime Target Audience</span>
+                  <div className="text-xl font-bold text-amber-300 mt-0.5">{offersData.metrics.unsubscribed_count}</div>
+                  <p className="text-[10px] text-amber-400/80">Unsubscribed &amp; expired</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
+                  <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block font-semibold">Subscribed Pro/VIP</span>
+                  <div className="text-xl font-bold text-emerald-400 mt-0.5">{offersData.metrics.subscribed_count}</div>
+                  <p className="text-[10px] text-zinc-400">Active paid candidates</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/25">
+                  <span className="text-[10px] font-mono text-sky-400 uppercase tracking-wider block font-semibold">Active Assigned Offers</span>
+                  <div className="text-xl font-bold text-sky-300 mt-0.5">
+                    {offersData.metrics.active_assigned_offers ?? (offersData.assigned_offers || []).filter((o: any) => !o.claimed && !o.is_expired && !o.revoked).length}
+                  </div>
+                  <p className="text-[10px] text-sky-400/80">
+                    {offersData.metrics.revoked_offers || (offersData.assigned_offers || []).filter((o: any) => o.revoked).length} revoked / purged
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -3405,102 +3497,187 @@ export default function AdminDashboard() {
                     type="button"
                     disabled={loadingExpirySweep}
                     onClick={() => handleRunExpirySweep()}
-                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all"
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${loadingExpirySweep ? 'animate-spin' : ''}`} />
                     <span>{loadingExpirySweep ? 'Running Sweep...' : 'Run Automated Expiry Sweep Now'}</span>
                   </button>
-                </div>
-              </div>
-
-              {sweepResult && (
-                <div className={`p-3 rounded-xl text-xs flex items-center justify-between border ${
-                  sweepResult.success ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300' : 'bg-rose-950/40 border-rose-800/50 text-rose-300'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    {sweepResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertTriangle className="w-4 h-4 text-rose-400" />}
-                    <span>{sweepResult.message || (sweepResult.success ? `Sweep complete: ${sweepResult.summary?.plan_reminders_sent || 0} plan alerts & ${sweepResult.summary?.offer_reminders_sent || 0} offer alerts dispatched!` : sweepResult.error)}</span>
-                  </div>
-                  <button onClick={() => setSweepResult(null)} className="text-zinc-400 hover:text-white cursor-pointer">
-                    <X className="w-4 h-4" />
+                  <button
+                    type="button"
+                    onClick={() => setOffersCollapsedWatchdog(!offersCollapsedWatchdog)}
+                    className="px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                    title={offersCollapsedWatchdog ? 'Expand section' : 'Collapse section'}
+                  >
+                    {offersCollapsedWatchdog ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
                   </button>
                 </div>
-              )}
-
-              {/* Expiry Quick Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
-                  <span className="text-[10px] uppercase font-mono text-rose-400 font-bold block">1-Day Plan Expiry</span>
-                  <div className="text-lg font-bold text-white mt-0.5">
-                    {expiryStats?.summary?.expiring_in_24h ?? 0}
-                  </div>
-                  <span className="text-[10px] text-zinc-500">&le; 24h Remaining</span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
-                  <span className="text-[10px] uppercase font-mono text-amber-400 font-bold block">2-Day Plan Expiry</span>
-                  <div className="text-lg font-bold text-white mt-0.5">
-                    {expiryStats?.summary?.expiring_in_48h ?? 0}
-                  </div>
-                  <span className="text-[10px] text-zinc-500">24h - 48h Remaining</span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
-                  <span className="text-[10px] uppercase font-mono text-zinc-400 font-bold block">Expired Plans</span>
-                  <div className="text-lg font-bold text-zinc-300 mt-0.5">
-                    {expiryStats?.summary?.expired_count ?? 0}
-                  </div>
-                  <span className="text-[10px] text-zinc-500">Ready for Special Offer</span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
-                  <span className="text-[10px] uppercase font-mono text-sky-400 font-bold block">Expiring Offers</span>
-                  <div className="text-lg font-bold text-sky-300 mt-0.5">
-                    {expiryStats?.summary?.offers_expiring_soon ?? 0}
-                  </div>
-                  <span className="text-[10px] text-zinc-500">&le; 48h Offer Validity</span>
-                </div>
               </div>
 
-              {/* List of candidates expiring within 48h */}
-              {expiryStats?.candidates_expiring_48h && expiryStats.candidates_expiring_48h.length > 0 && (
-                <div className="mt-3 p-3 rounded-xl bg-black/40 border border-zinc-800/80">
-                  <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block mb-2">
-                    Priority Candidates Expiring Within 48 Hours:
-                  </span>
-                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                    {expiryStats.candidates_expiring_48h.map((c: any) => (
-                      <div key={c.email || c.user_id} className="flex items-center justify-between p-2 rounded-lg bg-zinc-900/70 border border-zinc-800 text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-white">{c.name || c.user_id}</span>
-                          <span className="text-[11px] font-mono text-zinc-400">{c.email}</span>
-                          <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase ${
-                            c.hours_left <= 24 ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300'
-                          }`}>
-                            {c.hours_left <= 24 ? '1-Day Warning' : '2-Day Warning'} ({c.hours_left}h left)
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRunExpirySweep(c.email)}
-                          disabled={loadingExpirySweep}
-                          className="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-medium cursor-pointer disabled:opacity-50"
-                        >
-                          Trigger Alert Now
-                        </button>
-                      </div>
-                    ))}
+              {offersCollapsedWatchdog ? (
+                <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-black/50 border border-zinc-800/80 text-xs font-mono">
+                  <div className="flex flex-wrap items-center gap-3 text-zinc-300">
+                    <span>1D Expiry: <strong className="text-rose-400 font-bold">{expiryStats?.summary?.expiring_in_24h ?? 0}</strong></span>
+                    <span className="text-zinc-600">•</span>
+                    <span>2D Expiry: <strong className="text-amber-400 font-bold">{expiryStats?.summary?.expiring_in_48h ?? 0}</strong></span>
+                    <span className="text-zinc-600">•</span>
+                    <span>Expired Plans: <strong className="text-zinc-200 font-bold">{expiryStats?.summary?.expired_count ?? 0}</strong></span>
+                    <span className="text-zinc-600">•</span>
+                    <span>Expiring Offers: <strong className="text-sky-300 font-bold">{expiryStats?.summary?.offers_expiring_soon ?? 0}</strong></span>
                   </div>
+                  <span className="text-[10px] text-zinc-500">18h Anti-Flooding Active</span>
                 </div>
+              ) : (
+                <>
+                  {sweepResult && (
+                    <div className={`p-3 rounded-xl text-xs flex items-center justify-between border ${
+                      sweepResult.success ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300' : 'bg-rose-950/40 border-rose-800/50 text-rose-300'
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        {sweepResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertTriangle className="w-4 h-4 text-rose-400" />}
+                        <span>{sweepResult.message || (sweepResult.success ? `Sweep complete: ${sweepResult.summary?.plan_reminders_sent || 0} plan alerts & ${sweepResult.summary?.offer_reminders_sent || 0} offer alerts dispatched!` : sweepResult.error)}</span>
+                      </div>
+                      <button onClick={() => setSweepResult(null)} className="text-zinc-400 hover:text-white cursor-pointer">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Expiry Quick Stats */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                    <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+                      <span className="text-[10px] uppercase font-mono text-rose-400 font-bold block">1-Day Plan Expiry</span>
+                      <div className="text-lg font-bold text-white mt-0.5">
+                        {expiryStats?.summary?.expiring_in_24h ?? 0}
+                      </div>
+                      <span className="text-[10px] text-zinc-500">&le; 24h Remaining</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+                      <span className="text-[10px] uppercase font-mono text-amber-400 font-bold block">2-Day Plan Expiry</span>
+                      <div className="text-lg font-bold text-white mt-0.5">
+                        {expiryStats?.summary?.expiring_in_48h ?? 0}
+                      </div>
+                      <span className="text-[10px] text-zinc-500">24h - 48h Remaining</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+                      <span className="text-[10px] uppercase font-mono text-zinc-400 font-bold block">Expired Plans</span>
+                      <div className="text-lg font-bold text-zinc-300 mt-0.5">
+                        {expiryStats?.summary?.expired_count ?? 0}
+                      </div>
+                      <span className="text-[10px] text-zinc-500">Ready for Special Offer</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+                      <span className="text-[10px] uppercase font-mono text-sky-400 font-bold block">Expiring Offers</span>
+                      <div className="text-lg font-bold text-sky-300 mt-0.5">
+                        {expiryStats?.summary?.offers_expiring_soon ?? 0}
+                      </div>
+                      <span className="text-[10px] text-zinc-500">&le; 48h Offer Validity</span>
+                    </div>
+                  </div>
+
+                  {/* List of candidates expiring within 48h */}
+                  {expiryStats?.candidates_expiring_48h && expiryStats.candidates_expiring_48h.length > 0 && (
+                    <div className="mt-3 p-3 rounded-xl bg-black/40 border border-zinc-800/80">
+                      <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block mb-2">
+                        Priority Candidates Expiring Within 48 Hours:
+                      </span>
+                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                        {expiryStats.candidates_expiring_48h.map((c: any) => (
+                          <div key={c.email || c.user_id} className="flex items-center justify-between p-2 rounded-lg bg-zinc-900/70 border border-zinc-800 text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-white">{c.name || c.user_id}</span>
+                              <span className="text-[11px] font-mono text-zinc-400">{c.email}</span>
+                              <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase ${
+                                c.hours_left <= 24 ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300'
+                              }`}>
+                                {c.hours_left <= 24 ? '1-Day Warning' : '2-Day Warning'} ({c.hours_left}h left)
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRunExpirySweep(c.email)}
+                              disabled={loadingExpirySweep}
+                              className="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-medium cursor-pointer disabled:opacity-50"
+                            >
+                              Trigger Alert Now
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             {/* Campaign Designer & Live Preview */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left Column: Form Settings */}
-              <div className="lg:col-span-7 space-y-5 p-5 rounded-2xl bg-[#09090b] border border-zinc-800">
-                <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>1. Select Offer Preset</span>
-                  </h4>
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2 flex-wrap">
+                      <span>Campaign Designer &amp; Live Email Preview</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-zinc-900 text-amber-300 border border-zinc-750">
+                        Code: {promoCode} ({discountBadge})
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      Audience: <strong className="text-zinc-200 capitalize">{targetType.replace('_', ' ')}</strong> &bull; Validity: <strong className="text-zinc-200">{validityHours}h</strong> &bull; Hero Price: <strong className="text-emerald-400 font-mono">{discountedPrice}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setOffersCollapsedPreview(!offersCollapsedPreview)}
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                    title={offersCollapsedPreview ? 'Show email preview column' : 'Hide preview to expand form width'}
+                  >
+                    <Eye className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>{offersCollapsedPreview ? 'Show Preview' : 'Hide Preview'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOffersCollapsedDesigner(!offersCollapsedDesigner)}
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {offersCollapsedDesigner ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand Designer</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {!offersCollapsedDesigner && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left Column: Form Settings (dynamic full width if preview hidden) */}
+                  <div className={`${offersCollapsedPreview ? 'lg:col-span-12' : 'lg:col-span-7'} space-y-5 p-5 rounded-2xl bg-[#09090b] border border-zinc-800`}>
+                    <div>
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <span>1. Select Offer Preset</span>
+                      </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                     {offersData.presets.map((p) => (
                       <button
@@ -3695,59 +3872,109 @@ export default function AdminDashboard() {
                               )
                             }
 
-                            return filtered.map(u => {
-                              const email = (u.email || (u.user_id?.includes('@') ? u.user_id : '')).toLowerCase().trim()
-                              if (!email) return null
-                              const isChecked = selectedCandidates.includes(email)
-                              return (
-                                <div
-                                  key={email}
-                                  onClick={() => {
-                                    setSelectedCandidates(prev =>
-                                      prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email]
-                                    )
-                                  }}
-                                  className={`p-2 rounded-lg flex items-center justify-between gap-3 text-xs cursor-pointer transition-colors ${
-                                    isChecked ? 'bg-amber-500/10 border border-amber-500/30' : 'hover:bg-zinc-900 border border-transparent'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={() => {}}
-                                      className="rounded text-amber-500 focus:ring-amber-500 shrink-0 cursor-pointer"
-                                    />
-                                    <div className="min-w-0">
-                                      <div className="font-medium text-white truncate text-xs">
-                                        {u.name || email.split('@')[0]}
+                            const totalPickerPages = Math.max(1, Math.ceil(filtered.length / 10))
+                            const pagedCandidates = filtered.slice((candidatePickerPage - 1) * 10, candidatePickerPage * 10)
+
+                            return (
+                              <>
+                                {pagedCandidates.map(u => {
+                                  const email = (u.email || (u.user_id?.includes('@') ? u.user_id : '')).toLowerCase().trim()
+                                  if (!email) return null
+                                  const isChecked = selectedCandidates.includes(email)
+                                  return (
+                                    <div
+                                      key={email}
+                                      onClick={() => {
+                                        setSelectedCandidates(prev =>
+                                          prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email]
+                                        )
+                                      }}
+                                      className={`p-2 rounded-lg flex items-center justify-between gap-3 text-xs cursor-pointer transition-colors ${
+                                        isChecked ? 'bg-amber-500/10 border border-amber-500/30' : 'hover:bg-zinc-900 border border-transparent'
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-2.5 min-w-0">
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          onChange={() => {}}
+                                          className="rounded text-amber-500 focus:ring-amber-500 shrink-0 cursor-pointer"
+                                        />
+                                        <div className="min-w-0">
+                                          <div className="font-medium text-white truncate text-xs">
+                                            {u.name || email.split('@')[0]}
+                                          </div>
+                                          <div className="text-[11px] text-zinc-400 font-mono truncate">
+                                            {email}
+                                          </div>
+                                        </div>
                                       </div>
-                                      <div className="text-[11px] text-zinc-400 font-mono truncate">
-                                        {email}
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        {u.offer_eligibility ? (
+                                          <span
+                                            className={`px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 ${
+                                              u.offer_eligibility.eligible
+                                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                                : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                            }`}
+                                            title={u.offer_eligibility.reason}
+                                          >
+                                            {u.offer_eligibility.badge}
+                                          </span>
+                                        ) : (
+                                          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase shrink-0 bg-zinc-800 text-zinc-400">
+                                            {u.plan || 'Free'}
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
-                                  </div>
-                                  <div className="flex items-center gap-1.5 shrink-0">
-                                    {u.offer_eligibility ? (
-                                      <span
-                                        className={`px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 ${
-                                          u.offer_eligibility.eligible
-                                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                        }`}
-                                        title={u.offer_eligibility.reason}
+                                  )
+                                })}
+
+                                {totalPickerPages > 1 && (
+                                  <div className="p-2 bg-black/60 border-t border-zinc-850 flex items-center justify-between text-[11px] text-zinc-400">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        const pageEmails = pagedCandidates
+                                          .map(u => (u.email || (u.user_id?.includes('@') ? u.user_id : '')).toLowerCase().trim())
+                                          .filter(Boolean)
+                                        setSelectedCandidates(Array.from(new Set([...selectedCandidates, ...pageEmails])))
+                                      }}
+                                      className="text-amber-400 hover:text-amber-300 font-medium underline cursor-pointer"
+                                    >
+                                      + Select 10 on this page
+                                    </button>
+                                    <div className="flex items-center gap-2 font-mono">
+                                      <button
+                                        type="button"
+                                        disabled={candidatePickerPage <= 1}
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setCandidatePickerPage(prev => Math.max(1, prev - 1))
+                                        }}
+                                        className="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 disabled:opacity-40 cursor-pointer"
                                       >
-                                        {u.offer_eligibility.badge}
-                                      </span>
-                                    ) : (
-                                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase shrink-0 bg-zinc-800 text-zinc-400">
-                                        {u.plan || 'Free'}
-                                      </span>
-                                    )}
+                                        &larr; Prev
+                                      </button>
+                                      <span>Page {candidatePickerPage} of {totalPickerPages}</span>
+                                      <button
+                                        type="button"
+                                        disabled={candidatePickerPage >= totalPickerPages}
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setCandidatePickerPage(prev => Math.min(totalPickerPages, prev + 1))
+                                        }}
+                                        className="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 disabled:opacity-40 cursor-pointer"
+                                      >
+                                        Next &rarr;
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
-                              )
-                            })
+                                )}
+                              </>
+                            )
                           })()}
                         </div>
 
@@ -3949,12 +4176,13 @@ export default function AdminDashboard() {
               </div>
 
               {/* Right Column: Live Luxury Email Preview */}
-              <div className="lg:col-span-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Live Candidate Email Preview</span>
-                  </h4>
+              {!offersCollapsedPreview && (
+                <div className="lg:col-span-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Live Candidate Email Preview</span>
+                    </h4>
                   <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
                     HTML Luxury Template
                   </span>
@@ -4017,7 +4245,10 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+          </div>
+        )}
+      </div>
 
             {/* Live Assigned Candidate Offers Hub */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl space-y-0">
@@ -4035,14 +4266,17 @@ export default function AdminDashboard() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800 text-[11px] font-medium">
                     {(['all', 'active', 'claimed', 'expired'] as const).map((filter) => (
                       <button
                         key={filter}
                         type="button"
-                        onClick={() => setAssignedOfferFilter(filter)}
-                        className={`px-2.5 py-1 rounded-md capitalize transition-colors ${
+                        onClick={() => {
+                          setAssignedOfferFilter(filter)
+                          setAssignedOffersPage(1)
+                        }}
+                        className={`px-2.5 py-1 rounded-md capitalize transition-colors cursor-pointer ${
                           assignedOfferFilter === filter
                             ? 'bg-amber-500/20 text-amber-300 font-bold'
                             : 'text-zinc-400 hover:text-white'
@@ -4052,41 +4286,66 @@ export default function AdminDashboard() {
                       </button>
                     ))}
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setOffersCollapsedAssigned(!offersCollapsedAssigned)}
+                    className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {offersCollapsedAssigned ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
-                      <th className="py-3 px-4">Candidate</th>
-                      <th className="py-3 px-4">Offer Title & Code</th>
-                      <th className="py-3 px-4">Price</th>
-                      <th className="py-3 px-4">Validity Countdown</th>
-                      <th className="py-3 px-4 text-center">Status</th>
-                      <th className="py-3 px-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-800/60">
-                    {(() => {
-                      const list = (offersData.assigned_offers || []).filter((off: any) => {
-                        if (assignedOfferFilter === 'active') return !off.claimed && !off.is_expired && !off.revoked
-                        if (assignedOfferFilter === 'claimed') return off.claimed && !off.revoked
-                        if (assignedOfferFilter === 'expired') return off.is_expired && !off.revoked
-                        return true
-                      })
+              {!offersCollapsedAssigned && (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
+                          <th className="py-3 px-4">Candidate</th>
+                          <th className="py-3 px-4">Offer Title & Code</th>
+                          <th className="py-3 px-4">Price</th>
+                          <th className="py-3 px-4">Validity Countdown</th>
+                          <th className="py-3 px-4 text-center">Status</th>
+                          <th className="py-3 px-4 text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800/60">
+                        {(() => {
+                          const filtered = (offersData.assigned_offers || []).filter((off: any) => {
+                            if (assignedOfferFilter === 'active') return !off.claimed && !off.is_expired && !off.revoked
+                            if (assignedOfferFilter === 'claimed') return off.claimed && !off.revoked
+                            if (assignedOfferFilter === 'expired') return off.is_expired && !off.revoked
+                            return true
+                          })
 
-                      if (list.length === 0) {
-                        return (
-                          <tr>
-                            <td colSpan={6} className="py-8 text-center text-zinc-500 italic">
-                              No candidate offers found matching "{assignedOfferFilter}" filter.
-                            </td>
-                          </tr>
-                        )
-                      }
+                          if (filtered.length === 0) {
+                            return (
+                              <tr>
+                                <td colSpan={6} className="py-8 text-center text-zinc-500 italic">
+                                  No candidate offers found matching "{assignedOfferFilter}" filter.
+                                </td>
+                              </tr>
+                            )
+                          }
 
-                      return list.map((off: any, idx: number) => (
+                          const paginated = filtered.slice(
+                            (assignedOffersPage - 1) * assignedOffersPerPage,
+                            assignedOffersPage * assignedOffersPerPage
+                          )
+
+                          return paginated.map((off: any, idx: number) => (
                         <tr key={off.id || `${off.candidate_email}_${off.promo_code}_${idx}`} className="hover:bg-zinc-900/40 transition-colors">
                           <td className="py-3.5 px-4">
                             <div className="font-semibold text-white">{off.candidate_name || off.candidate_email?.split('@')[0] || 'Candidate'}</div>
@@ -4160,7 +4419,67 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
-            </div>
+
+              {(() => {
+                const filtered = (offersData.assigned_offers || []).filter((off: any) => {
+                  if (assignedOfferFilter === 'active') return !off.claimed && !off.is_expired && !off.revoked
+                  if (assignedOfferFilter === 'claimed') return off.claimed && !off.revoked
+                  if (assignedOfferFilter === 'expired') return off.is_expired && !off.revoked
+                  return true
+                })
+                const totalPages = Math.max(1, Math.ceil(filtered.length / assignedOffersPerPage))
+                if (filtered.length === 0) return null
+
+                return (
+                  <div className="px-5 py-3 bg-zinc-950 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-400">
+                    <div className="flex items-center gap-3">
+                      <span>
+                        Showing <strong className="text-white">{filtered.length === 0 ? 0 : (assignedOffersPage - 1) * assignedOffersPerPage + 1}</strong> to <strong className="text-white">{Math.min(assignedOffersPage * assignedOffersPerPage, filtered.length)}</strong> of <strong className="text-white">{filtered.length}</strong> offers
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] text-zinc-500">Per page:</span>
+                        <select
+                          value={assignedOffersPerPage}
+                          onChange={(e) => {
+                            setAssignedOffersPerPage(Number(e.target.value))
+                            setAssignedOffersPage(1)
+                          }}
+                          className="px-2 py-0.5 rounded bg-black border border-zinc-800 text-zinc-300 text-xs font-mono"
+                        >
+                          <option value={10}>10</option>
+                          <option value={25}>25</option>
+                          <option value={50}>50</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={assignedOffersPage <= 1}
+                        onClick={() => setAssignedOffersPage(prev => Math.max(1, prev - 1))}
+                        className="px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed font-medium"
+                      >
+                        Previous
+                      </button>
+                      <span className="text-xs font-mono text-zinc-300 px-1">
+                        Page {assignedOffersPage} of {totalPages}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={assignedOffersPage >= totalPages}
+                        onClick={() => setAssignedOffersPage(prev => Math.min(totalPages, prev + 1))}
+                        className="px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed font-medium"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )
+              })()}
+            </>
+          )}
+        </div>
 
             {/* Campaign History */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
@@ -4174,62 +4493,140 @@ export default function AdminDashboard() {
                     Log of past purchase offers sent to single candidates or cohorts.
                   </p>
                 </div>
-                <span className="text-xs font-mono text-zinc-500">
-                  {offersData.history.length} logged campaigns
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-mono text-zinc-500 hidden sm:inline">
+                    {offersData.history.length} logged campaigns
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setOffersCollapsedHistory(!offersCollapsedHistory)}
+                    className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {offersCollapsedHistory ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
-                      <th className="py-3 px-4">Campaign Name</th>
-                      <th className="py-3 px-4">Target Audience</th>
-                      <th className="py-3 px-4">Offer Price & Code</th>
-                      <th className="py-3 px-4">Recipients</th>
-                      <th className="py-3 px-4">Dispatched At</th>
-                      <th className="py-3 px-4 text-center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-800/60">
-                    {offersData.history.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="py-8 text-center text-zinc-500 italic">
-                          No promotional campaigns dispatched yet. Use the builder above to launch your first offer.
-                        </td>
-                      </tr>
-                    ) : (
-                      offersData.history.map((h: any) => (
-                        <tr key={h.id} className="hover:bg-zinc-900/40 transition-colors">
-                          <td className="py-3.5 px-4 font-semibold text-white">
-                            {h.campaign_name}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className="capitalize text-zinc-300">{h.target_type.replace('_', ' ')}</span>
-                          </td>
-                          <td className="py-3.5 px-4 font-mono text-amber-300">
-                            {h.discounted_price} <span className="text-zinc-500">({h.promo_code})</span>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] bg-zinc-800 font-mono text-zinc-300">
-                              {h.recipient_count} recipient{h.recipient_count > 1 ? 's' : ''}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-zinc-400 text-[11px]">
-                            {new Date(h.created_at).toLocaleString()}
-                          </td>
-                          <td className="py-3.5 px-4 text-center">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                              <CheckCircle2 className="w-3 h-3" />
-                              DISPATCHED
-                            </span>
-                          </td>
+              {!offersCollapsedHistory && (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
+                          <th className="py-3 px-4">Campaign Name</th>
+                          <th className="py-3 px-4">Target Audience</th>
+                          <th className="py-3 px-4">Offer Price & Code</th>
+                          <th className="py-3 px-4">Recipients</th>
+                          <th className="py-3 px-4">Dispatched At</th>
+                          <th className="py-3 px-4 text-center">Status</th>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800/60">
+                        {offersData.history.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-zinc-500 italic">
+                              No promotional campaigns dispatched yet. Use the builder above to launch your first offer.
+                            </td>
+                          </tr>
+                        ) : (
+                          (() => {
+                            const totalHistoryPages = Math.max(1, Math.ceil(offersData.history.length / campaignHistoryPerPage))
+                            const pagedHistory = offersData.history.slice(
+                              (campaignHistoryPage - 1) * campaignHistoryPerPage,
+                              campaignHistoryPage * campaignHistoryPerPage
+                            )
+
+                            return pagedHistory.map((h: any) => (
+                              <tr key={h.id} className="hover:bg-zinc-900/40 transition-colors">
+                                <td className="py-3.5 px-4 font-semibold text-white">
+                                  {h.campaign_name}
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className="capitalize text-zinc-300">{h.target_type.replace('_', ' ')}</span>
+                                </td>
+                                <td className="py-3.5 px-4 font-mono text-amber-300">
+                                  {h.discounted_price} <span className="text-zinc-500">({h.promo_code})</span>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-zinc-800 font-mono text-zinc-300">
+                                    {h.recipient_count} recipient{h.recipient_count > 1 ? 's' : ''}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 text-zinc-400 text-[11px]">
+                                  {new Date(h.created_at).toLocaleString()}
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    DISPATCHED
+                                  </span>
+                                </td>
+                              </tr>
+                            ))
+                          })()
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {offersData.history.length > 0 && (
+                    <div className="px-5 py-3 bg-zinc-950 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-400">
+                      <div className="flex items-center gap-3">
+                        <span>
+                          Showing <strong className="text-white">{(campaignHistoryPage - 1) * campaignHistoryPerPage + 1}</strong> to <strong className="text-white">{Math.min(campaignHistoryPage * campaignHistoryPerPage, offersData.history.length)}</strong> of <strong className="text-white">{offersData.history.length}</strong> campaigns
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] text-zinc-500">Per page:</span>
+                          <select
+                            value={campaignHistoryPerPage}
+                            onChange={(e) => {
+                              setCampaignHistoryPerPage(Number(e.target.value))
+                              setCampaignHistoryPage(1)
+                            }}
+                            className="px-2 py-0.5 rounded bg-black border border-zinc-800 text-zinc-300 text-xs font-mono"
+                          >
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={campaignHistoryPage <= 1}
+                          onClick={() => setCampaignHistoryPage(prev => Math.max(1, prev - 1))}
+                          className="px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed font-medium"
+                        >
+                          Previous
+                        </button>
+                        <span className="text-xs font-mono text-zinc-300 px-1">
+                          Page {campaignHistoryPage} of {Math.max(1, Math.ceil(offersData.history.length / campaignHistoryPerPage))}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={campaignHistoryPage >= Math.max(1, Math.ceil(offersData.history.length / campaignHistoryPerPage))}
+                          onClick={() => setCampaignHistoryPage(prev => Math.min(Math.max(1, Math.ceil(offersData.history.length / campaignHistoryPerPage)), prev + 1))}
+                          className="px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed font-medium"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Live Email Diagnostic & Delivery Audit */}
@@ -4288,6 +4685,194 @@ export default function AdminDashboard() {
                     <FileText className="w-3.5 h-3.5" />
                     <span>Download SVG Logo</span>
                   </a>
+                </div>
+
+                {/* Personalized Candidate Daily Dispatch Report Generator (Live Telemetry) */}
+                <div className="p-4 rounded-xl bg-gradient-to-br from-[#0c0d12] via-[#09090b] to-[#0c0d12] border border-sky-500/30 space-y-3.5 shadow-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h5 className="text-xs font-bold text-white tracking-tight">
+                            Candidate Daily Career Report Dispatcher (Live DB Data)
+                          </h5>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                            Live Telemetry
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-zinc-400 mt-0.5">
+                          Queries candidate's actual applications from <code className="text-sky-300">applied_jobs</code>, checks plan expiry status, formats intelligent Pro vs Trial offer packages, and delivers via Google SMTP & Web Push.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Input & Dispatch Controls */}
+                  <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                    <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+                      <span className="text-[11px] font-semibold text-zinc-400 shrink-0">Candidate:</span>
+                      <select
+                        value={dispatchReportTarget}
+                        onChange={(e) => setDispatchReportTarget(e.target.value)}
+                        className="flex-1 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500"
+                      >
+                        <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com (Koushik · Pro Plan)</option>
+                        <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
+                        {usersList
+                          .filter(u => u.email && u.email !== 'koushiksr1999@gmail.com' && u.email !== 'koushiksrmedala@gmail.com')
+                          .map(u => (
+                            <option key={u.email} value={u.email}>{u.name ? `${u.name} (${u.email})` : u.email}</option>
+                          ))}
+                        <option value="custom">-- Custom Specific Email --</option>
+                      </select>
+                    </div>
+
+                    {dispatchReportTarget === 'custom' && (
+                      <input
+                        type="email"
+                        value={customPushRecipient}
+                        onChange={(e) => setCustomPushRecipient(e.target.value)}
+                        placeholder="candidate@gmail.com"
+                        className="px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 min-w-[200px]"
+                      />
+                    )}
+
+                    {/* Channel Selection */}
+                    <div className="flex items-center gap-1 bg-zinc-900/90 p-1 rounded-lg border border-zinc-800">
+                      <button
+                        type="button"
+                        onClick={() => setDispatchReportChannel('both')}
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
+                          dispatchReportChannel === 'both' ? 'bg-sky-500 text-black font-bold shadow' : 'text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        Email + Push
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDispatchReportChannel('email')}
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
+                          dispatchReportChannel === 'email' ? 'bg-sky-500 text-black font-bold shadow' : 'text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        Email Only
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDispatchReportChannel('push')}
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
+                          dispatchReportChannel === 'push' ? 'bg-amber-400 text-black font-bold shadow' : 'text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        Push Only
+                      </button>
+                    </div>
+
+                    {/* Primary Dispatch Action Button */}
+                    <button
+                      type="button"
+                      disabled={dispatchReportLoading}
+                      onClick={() => handleDispatchCareerReport()}
+                      className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                      title="Fetch live DB stats and send candidate dispatch report"
+                    >
+                      {dispatchReportLoading ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Dispatching...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Dispatch Report</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* 1-Click Fast Action for Koushik */}
+                  <div className="flex items-center gap-2 text-xs text-zinc-400 pt-1 border-t border-zinc-800/80">
+                    <span className="text-[11px] text-zinc-500">Quick Test:</span>
+                    <button
+                      type="button"
+                      disabled={dispatchReportLoading}
+                      onClick={() => {
+                        setDispatchReportTarget('koushiksr1999@gmail.com')
+                        handleDispatchCareerReport('koushiksr1999@gmail.com', 'both')
+                      }}
+                      className="text-sky-400 hover:text-sky-300 text-[11px] font-medium underline cursor-pointer"
+                    >
+                      ⚡ Send Real DB Report to koushiksr1999@gmail.com (Email + Push)
+                    </button>
+                  </div>
+
+                  {/* Result Banner / Telemetry Drawer */}
+                  {dispatchReportResult && (
+                    <div className={`p-3.5 rounded-lg text-xs border ${
+                      dispatchReportResult.success ? 'bg-sky-950/25 border-sky-500/40 text-sky-200' : 'bg-rose-950/30 border-rose-800/50 text-rose-200'
+                    }`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-2 flex-1">
+                          <div className="flex items-center gap-2">
+                            {dispatchReportResult.success ? (
+                              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
+                            ) : (
+                              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                            )}
+                            <strong className="text-white text-xs">
+                              {dispatchReportResult.success
+                                ? `✓ Individual Report Dispatched via ${dispatchReportResult.channel?.toUpperCase()}`
+                                : `❌ Dispatch Failed: ${dispatchReportResult.error}`}
+                            </strong>
+                          </div>
+
+                          {dispatchReportResult.candidate && (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] bg-black/50 p-2.5 rounded-lg border border-zinc-800">
+                              <div>
+                                <span className="text-zinc-500 block text-[10px]">Candidate</span>
+                                <span className="text-white font-semibold">{dispatchReportResult.candidate.name}</span>
+                              </div>
+                              <div>
+                                <span className="text-zinc-500 block text-[10px]">Plan Status</span>
+                                <span className={dispatchReportResult.candidate.isPaidPlan ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
+                                  {dispatchReportResult.candidate.planName}
+                                  {dispatchReportResult.candidate.daysRemaining ? ` (${dispatchReportResult.candidate.daysRemaining}d left)` : ''}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-zinc-500 block text-[10px]">Applied Today</span>
+                                <span className="text-white font-mono font-bold">{dispatchReportResult.candidate.todayApplied} roles</span>
+                              </div>
+                              <div>
+                                <span className="text-zinc-500 block text-[10px]">Total Dispatched</span>
+                                <span className="text-sky-300 font-mono font-bold">{dispatchReportResult.candidate.totalApplied} roles</span>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-mono text-zinc-400">
+                            {dispatchReportResult.emailResult?.messageId && (
+                              <span>SMTP Message-ID: <span className="text-zinc-300">{dispatchReportResult.emailResult.messageId}</span></span>
+                            )}
+                            {dispatchReportResult.pushResult && (
+                              <span>Push Status: <span className="text-zinc-300">{dispatchReportResult.pushResult.delivered > 0 ? `Delivered to ${dispatchReportResult.pushResult.delivered} device(s)` : (dispatchReportResult.pushResult.error || 'No active device subscription')}</span></span>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setDispatchReportResult(null)}
+                          className="text-zinc-400 hover:text-white p-1 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Diagnostic Dispatch Bar */}

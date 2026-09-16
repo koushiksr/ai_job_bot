@@ -121,9 +121,9 @@ export async function POST(req: NextRequest) {
 
     // 2. Send Live Test Message
     const info = await transporter.sendMail({
-      from: `"JobFlux Helpdesk" <${user}>`,
+      from: `"JobFlux AI" <${user}>`,
       to: target,
-      subject: '⚡ JobFlux Helpdesk: Live SMTP Delivery Confirmed',
+      subject: '⚡ JobFlux AI: Live SMTP Delivery Confirmed',
       text: `Hi Koushik,\n\nVerified! Your Gmail SMTP connection for ${user} is operational.\n\nAutonomous dispatch gateway is active for JobFlux AI.\n\nRecipient: ${target}\nServer Response: 250 OK`,
       html: `
 <!DOCTYPE html>
@@ -219,7 +219,7 @@ export async function POST(req: NextRequest) {
           <tr>
             <td style="padding:16px 22px;background-color:#0e0f11;border-top:1px solid #222428;text-align:center;">
               <p style="margin:0 0 3px 0;font-size:11px;font-weight:600;color:#e4e4e7;">
-                JobFlux Helpdesk
+                JobFlux AI
               </p>
               <p style="margin:0;font-size:10px;color:#71717a;">
                 Autonomous Career &amp; Recruitment Intelligence &bull; support@jobfluxai.com
