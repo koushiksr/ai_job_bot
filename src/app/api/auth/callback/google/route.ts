@@ -216,7 +216,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const targetUrl = new URL(role === 'admin' ? '/admin' : '/dashboard', req.url)
+    const targetUrl = new URL(
+      (profile.user_id === 'technohmsit' || profile.email === 'technohmsit@gmail.com') ? '/admin' : '/dashboard',
+      req.url
+    )
     targetUrl.searchParams.set('auth', 'google')
     targetUrl.searchParams.set('user_id', profile.user_id)
     targetUrl.searchParams.set('email', profile.email)

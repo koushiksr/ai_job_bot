@@ -1120,6 +1120,19 @@ export default function UserDashboard() {
               <span className="sm:hidden">Offer</span>
             </button>
 
+            {/* Direct Admin Console Link for authorized administrator accounts */}
+            {userRole === 'admin' && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 transition-all shrink-0 cursor-pointer shadow-sm"
+                title="Open System Administrator Console"
+              >
+                <Shield className="w-3.5 h-3.5 text-purple-400" />
+                <span className="hidden sm:inline">Admin Console ↗</span>
+                <span className="sm:hidden">Admin</span>
+              </Link>
+            )}
+
             {/* Telemetry Refresh (Desktop) */}
             <button
               onClick={() => refreshAllDashboardData(userId)}

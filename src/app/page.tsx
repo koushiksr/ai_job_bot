@@ -141,13 +141,8 @@ export default function Home() {
 
       if (storedUid) {
         setExistingUser({ id: storedUid, email: storedEmail, role: storedRole })
-        // If already logged in, navigate immediately to appropriate portal
-        const destination = (
-          storedRole === 'admin' ||
-          isAdminUser(storedUid) ||
-          isAdminUser(storedEmail)
-        ) ? '/admin' : '/dashboard'
-        window.location.replace(destination)
+        // If already logged in, navigate to candidate dashboard by default
+        window.location.replace('/dashboard')
         return
       }
 
@@ -194,19 +189,22 @@ export default function Home() {
     const cleanEmail = email.trim().toLowerCase()
     const cleanPwd = password.trim()
 
-    // Direct Admin check
+    // Direct Master Administrator credentials bypass check
     if (
       authMode === 'signin' &&
       (
-        isAdminUser(cleanEmail) ||
+        cleanEmail === 'admin' ||
+        cleanEmail === 'technohmsit' ||
+        cleanEmail === 'technohmsit@gmail.com' ||
         cleanEmail === 'admin@jobflux.ai' ||
-        cleanEmail === 'admin@jobbot.ai' ||
-        cleanEmail === 'admin@admin.com'
+        cleanEmail === 'admin@jobfluxai.com'
       ) &&
       cleanPwd === 'admin'
     ) {
-      localStorage.setItem('user_id', APP_CONFIG.masterAdminId)
-      localStorage.setItem('user_email', APP_CONFIG.supportEmail)
+      const masterUid = (cleanEmail === 'admin' || cleanEmail.startsWith('admin@')) ? 'admin' : APP_CONFIG.masterAdminId
+      const masterEmail = cleanEmail.includes('@') ? cleanEmail : APP_CONFIG.supportEmail
+      localStorage.setItem('user_id', masterUid)
+      localStorage.setItem('user_email', masterEmail)
       localStorage.setItem('user_role', 'admin')
       window.location.href = '/admin'
       return
@@ -232,7 +230,9 @@ export default function Home() {
         if (data.plan) {
           localStorage.setItem('user_plan', data.plan)
         }
-        if (data.role === 'admin') {
+        // If user explicitly signed in with primary master admin credentials, navigate to /admin.
+        // For all candidate accounts and users, navigate directly to candidate /dashboard!
+        if (data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com' || data.user_id === 'admin') {
           window.location.href = '/admin'
         } else {
           window.location.href = '/dashboard'
@@ -272,7 +272,7 @@ export default function Home() {
                 if (data.picture) {
                   localStorage.setItem('user_picture', data.picture)
                 }
-                window.location.href = data.role === 'admin' ? '/admin' : '/dashboard'
+                window.location.href = (data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com') ? '/admin' : '/dashboard'
               }
             }
           },

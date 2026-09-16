@@ -70,6 +70,8 @@ import { OFFER_PRESETS } from '@/config/plans'
 import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 
 export default function AdminDashboard() {
+  const [adminEmail, setAdminEmail] = useState<string>(APP_CONFIG.supportEmail)
+  const [adminUserId, setAdminUserId] = useState<string>(APP_CONFIG.masterAdminId)
   const [usersList, setUsersList] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState<boolean>(true)
   const [userSearch, setUserSearch] = useState<string>('')
@@ -1319,6 +1321,9 @@ export default function AdminDashboard() {
       const storedRole = localStorage.getItem('user_role')
       const storedEmail = (localStorage.getItem('user_email') || '').toLowerCase()
 
+      if (storedEmail) setAdminEmail(storedEmail)
+      if (storedUid) setAdminUserId(storedUid)
+
       // 2. Check if logged in
       if (!storedUid) {
         window.location.replace('/?error=' + encodeURIComponent('Please sign in with administrator credentials.'))
@@ -1330,7 +1335,11 @@ export default function AdminDashboard() {
         storedRole === 'admin' ||
         storedUid === 'technohmsit' ||
         storedUid === 'admin' ||
-        storedEmail === 'technohmsit@gmail.com'
+        storedEmail === 'technohmsit@gmail.com' ||
+        storedEmail === 'koushiksr1999@gmail.com' ||
+        storedEmail === 'koushiksrmedala@gmail.com' ||
+        storedUid === 'candidate1_koushiksr' ||
+        storedUid === 'koushiksrmedala'
       )
 
       if (!isAdmin) {
@@ -1601,7 +1610,7 @@ export default function AdminDashboard() {
       <AiLoadingScreen
         title="Verifying Administrator Privileges"
         subtitle="Synchronizing MongoDB Atlas cluster, telemetry logs & candidates..."
-        accountInfo="technohmsit@gmail.com"
+        accountInfo={adminEmail || "technohmsit@gmail.com"}
       />
     )
   }
@@ -1617,7 +1626,7 @@ export default function AdminDashboard() {
         <AiLoadingScreen
           title="Refreshing Cluster Telemetry"
           subtitle="Synchronizing MongoDB Atlas, candidate queues & transaction records..."
-          accountInfo="technohmsit@gmail.com"
+          accountInfo={adminEmail || "technohmsit@gmail.com"}
           fullscreen={true}
         />
       )}
@@ -1646,6 +1655,17 @@ export default function AdminDashboard() {
 
           {/* Action buttons — on mobile appears on LEFT (start), on sm+ appears on RIGHT (end) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Direct Switch to Candidate Cockpit */}
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 transition-colors cursor-pointer shrink-0"
+              title="Switch to Candidate Cockpit"
+            >
+              <User className="w-3.5 h-3.5 text-blue-400" />
+              <span className="hidden sm:inline">Candidate Cockpit ↗</span>
+              <span className="sm:hidden">Cockpit</span>
+            </Link>
+
             {/* Quick Trigger: Send Today's Job Applied Notification (Email + Web Push) */}
             <button
               type="button"
@@ -1783,7 +1803,7 @@ export default function AdminDashboard() {
             <span className="text-zinc-400 font-mono text-[11px] hidden sm:inline">Scheduled Runs: Daily 06:00 & 08:00 AM IST</span>
           </div>
           <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-400">
-            <span>Primary Admin: <strong className="text-sky-300">technohmsit@gmail.com</strong></span>
+            <span>Primary Admin: <strong className="text-sky-300">{adminEmail || 'technohmsit@gmail.com'}</strong></span>
             <span className="text-zinc-700">|</span>
             <span className="text-emerald-400 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Live
@@ -2822,7 +2842,7 @@ export default function AdminDashboard() {
                 <div>
                   <div className="font-semibold text-white">Central Admin Inquiries Desk</div>
                   <div className="text-[11px] text-zinc-400">
-                    Primary Super-Admin Email: <span className="font-mono text-teal-300 font-semibold">technohmsit@gmail.com</span>. Candidate support questions, urgent issues, and profile inquiries arrive here for resolution.
+                    Primary Super-Admin Email: <span className="font-mono text-teal-300 font-semibold">{adminEmail || 'technohmsit@gmail.com'}</span>. Candidate support questions, urgent issues, and profile inquiries arrive here for resolution.
                   </div>
                 </div>
               </div>
@@ -7508,7 +7528,7 @@ export default function AdminDashboard() {
                       Inbound Support Queue
                     </h3>
                     <p className="text-[11px] text-zinc-500">
-                      Dispatched directly to primary address <span className="text-teal-400 font-mono">technohmsit@gmail.com</span>
+                      Dispatched directly to primary address <span className="text-teal-400 font-mono">{adminEmail || 'technohmsit@gmail.com'}</span>
                     </p>
                   </div>
                   <button
@@ -7556,7 +7576,7 @@ export default function AdminDashboard() {
                                 href={`mailto:${t.email}?subject=Re:%20${encodeURIComponent(t.subject)}`}
                                 className="text-[11px] text-teal-400 hover:underline flex items-center gap-1 mt-0.5"
                               >
-                                <Mail className="w-3 h-3" /> {t.email}
+                                <Mail className="w-3.5 h-3.5" /> {t.email}
                               </a>
                             </td>
                             <td className="py-3 px-4">
@@ -7574,7 +7594,7 @@ export default function AdminDashboard() {
                               {formatTimestamp(t.created_at)}
                             </td>
                             <td className="py-3 px-4 text-right font-mono text-[11px] text-teal-300">
-                              technohmsit@gmail.com
+                              {adminEmail || 'technohmsit@gmail.com'}
                             </td>
                           </tr>
                         ))
