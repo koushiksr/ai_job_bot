@@ -32,7 +32,9 @@ import {
   BellOff,
   BellRing,
   Settings,
-  AlertTriangle
+  AlertTriangle,
+  Check,
+  Copy
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
@@ -103,6 +105,7 @@ export default function UserDashboard() {
 
   // AI Application Audit Modal
   const [selectedJobAudit, setSelectedJobAudit] = useState<any | null>(null)
+  const [copiedReport, setCopiedReport] = useState<boolean>(false)
 
   // Professional Tier Feature Gating & Perks Modal
   const [showProModal, setShowProModal] = useState<boolean>(false)
@@ -1610,24 +1613,24 @@ export default function UserDashboard() {
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 
           {/* Section 1: Cockpit Header */}
-          <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-950/50">
-            <div className="flex items-center gap-3.5">
+          <div className="p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3.5 bg-zinc-950/50">
+            <div className="flex items-center gap-3.5 min-w-0">
               <div className="relative shrink-0">
                 <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                   <Cpu className="w-5 h-5 text-zinc-300" />
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-sm font-semibold text-white tracking-tight">
                     Autonomous Engine Cockpit
                   </h2>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono flex items-center gap-1.5">
+                  <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono flex items-center gap-1.5 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                     Daemon Active
                   </span>
                 </div>
-                <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2 flex-wrap">
+                <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
                   <span>Schedule: <strong className="text-zinc-300">Daily Autonomous Sweeps</strong></span>
                   <span className="text-zinc-600 hidden sm:inline">•</span>
                   <span className="text-zinc-400 font-medium">Applies Daily</span>
@@ -1637,19 +1640,12 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <div className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs flex items-center justify-center gap-2 font-mono shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                <span className="text-zinc-300">Radar Active</span>
-                <span className="text-zinc-600">•</span>
-                <span className="text-zinc-400">Daily Sweeps</span>
-              </div>
-
+            <div className="w-full lg:w-auto flex items-center justify-start lg:justify-end gap-2 pt-1 lg:pt-0">
               <button
                 type="button"
                 onClick={handleTriggerOnDemandScout}
                 disabled={isTriggeringScout || (activeTask && (activeTask.status === 'pending' || activeTask.status === 'running')) || (isProfessional && weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0)}
-                className="w-full sm:w-auto px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white hover:bg-zinc-200 text-black disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white hover:bg-zinc-200 text-black disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
                 title={!isProfessional ? "Upgrade to Professional to run on-demand sweeps" : (weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0) ? "Weekly on-demand sweep quota reached (5/5). Resets in rolling 7 days." : "Trigger instant real-time job application sweep"}
               >
                 {activeTask?.status === 'running' ? (
@@ -1838,6 +1834,117 @@ export default function UserDashboard() {
         {/* TAB 1: JOB APPLYING HISTORY */}
         {activeTab === 'history' && (
           <div className="space-y-4">
+            {/* Daily Autonomous Job Apply Dispatch Report & Engagement Summary */}
+            {metrics.total_applied > 0 && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3.5 relative overflow-hidden">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+                      <FileCheck className="w-4 h-4 text-zinc-300" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-sm font-semibold text-white tracking-tight">
+                          Autonomous Job Dispatch Report
+                        </h3>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold">
+                          {metrics.today > 0 ? `${metrics.today} Applied Today` : `${metrics.total_applied} Applications Dispatched`}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-400 mt-0.5">
+                        Verified recruiter delivery via cloud workers with human pacing &amp; tailored ATS screening answers.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const topCompanies = Array.from(new Set(historyJobs.slice(0, 6).map(j => j.company || 'Tech Employer'))).join(', ')
+                        const text = `JobFlux AI Job Dispatch Report:\n✅ Dispatched: ${metrics.total_applied} applications (${metrics.today} today)\n🏢 Top Companies: ${topCompanies}\n⚡ Status: Verified Recruiter ATS Delivery\nTrack live: https://jobfluxai.vercel.app/dashboard`
+                        navigator.clipboard.writeText(text)
+                        setCopiedReport(true)
+                        setTimeout(() => setCopiedReport(false), 2500)
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-750 text-zinc-300 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      {copiedReport ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-zinc-300" />
+                          <span className="text-zinc-200">Report Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                          <span>Copy Report</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Company Chips from latest run */}
+                {historyJobs.length > 0 && (
+                  <div className="space-y-1.5 pt-1 border-t border-zinc-800/80">
+                    <span className="text-[11px] text-zinc-400 font-mono block">
+                      Recently Dispatched Employers:
+                    </span>
+                    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-nowrap pb-1">
+                      {Array.from(new Set(historyJobs.map(j => j.company || 'Tech Partner'))).slice(0, 7).map((comp, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-lg bg-black border border-zinc-800 text-xs text-zinc-300 font-medium shrink-0 flex items-center gap-1.5"
+                        >
+                          <CheckCircle2 className="w-3 h-3 text-zinc-400" />
+                          <span>{comp}</span>
+                        </span>
+                      ))}
+                      {historyJobs.length > 7 && (
+                        <span className="text-[11px] text-zinc-500 font-mono self-center px-1">
+                          +{historyJobs.length - 7} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* High-Converting Upgrade Pull for Free/Trial Users */}
+                {!isProfessional ? (
+                  <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-750 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Crown className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-xs font-semibold text-white">Free Trial Capacity: {metrics.total_applied} / 50 Dispatched</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                          {Math.max(0, 50 - metrics.total_applied)} Remaining
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 leading-relaxed">
+                        Free tier caps at 50 applications. Upgrade to <strong className="text-white">Professional</strong> for 1,800+ continuous applications, daily automated morning sweeps &amp; zero-queue recruiter delivery.
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/pricing?promo=WELCOMEPRO"
+                      className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span>Upgrade for ₹199 (Save 90%)</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-black border border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400 font-mono">
+                    <span className="flex items-center gap-2">
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="text-zinc-300 font-medium">Professional Plan Active:</span> Unlimited 1,800+ Applications Pool · Fast-Path Priority Queue
+                    </span>
+                    <span className="text-zinc-500 hidden sm:inline">Active Recruiter Sync</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Search & Filter Header */}
             <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="relative w-full md:w-80">

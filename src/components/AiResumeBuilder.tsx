@@ -222,6 +222,10 @@ export default function AiResumeBuilder({
   }
 
   const handlePrintDownload = () => {
+    if (!isProfessional) {
+      onUpgradeClick('Download Print-Ready Harvard ATS PDF')
+      return
+    }
     window.print()
   }
 
@@ -590,10 +594,27 @@ export default function AiResumeBuilder({
                     <div className="flex items-center gap-2.5">
                       <button
                         onClick={handlePrintDownload}
-                        className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-white/10"
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-lg ${
+                          isProfessional
+                            ? 'bg-white hover:bg-zinc-200 text-black shadow-white/10'
+                            : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700'
+                        }`}
+                        title={isProfessional ? "Download or Print ATS PDF" : "Upgrade to Professional to export PDF"}
                       >
-                        <Download className="w-4 h-4" />
-                        <span>Download / Save PDF</span>
+                        {isProfessional ? (
+                          <>
+                            <Download className="w-4 h-4" />
+                            <span>Download / Save PDF</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Unlock PDF Export</span>
+                            <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 ml-0.5 font-bold">
+                              PRO
+                            </span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>

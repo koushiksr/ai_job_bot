@@ -386,6 +386,21 @@ export default function ResumeBuilderPage() {
     window.print()
   }
 
+  // Intercept Ctrl+P / Cmd+P to prevent free users bypassing print paywall
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        if (!isProfessional && userRole !== 'admin') {
+          e.preventDefault()
+          setUpgradeFeature('Print-Ready Harvard ATS PDF Download')
+          setShowUpgradeModal(true)
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isProfessional, userRole])
+
   // Bullet Point Editor Handlers
   const handleAddMetric = (expIdx: number) => {
     setResumeData((prev: any) => {
@@ -428,7 +443,7 @@ export default function ResumeBuilderPage() {
 
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col selection:bg-zinc-800 selection:text-white">
-      {/* Print stylesheet to enforce Harvard single-column ATS format on print */}
+      {/* Print stylesheet to enforce Harvard single-column ATS format on print for PRO, and block free export */}
       <style jsx global>{`
         @media print {
           body {
@@ -442,6 +457,18 @@ export default function ResumeBuilderPage() {
           .no-print {
             display: none !important;
           }
+          ${!isProfessional && userRole !== 'admin' ? `
+          #ats-resume-sheet {
+            display: none !important;
+          }
+          #print-upgrade-lock-screen {
+            display: block !important;
+            padding: 2.5in 0.8in !important;
+            text-align: center !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            color: #111111 !important;
+          }
+          ` : `
           #ats-resume-sheet {
             display: block !important;
             box-shadow: none !important;
@@ -453,8 +480,28 @@ export default function ResumeBuilderPage() {
             background: #ffffff !important;
             color: #000000 !important;
           }
+          #print-upgrade-lock-screen {
+            display: none !important;
+          }
+          `}
         }
       `}</style>
+
+      {/* Hidden print upgrade lock screen displayed only during print if user is not PRO */}
+      <div id="print-upgrade-lock-screen" className="hidden">
+        <div style={{ maxWidth: '500px', margin: '0 auto', border: '2px solid #e5e7eb', borderRadius: '12px', padding: '32px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '10px' }}>JobFlux AI · Harvard ATS Resume Studio</h2>
+          <p style={{ fontSize: '14px', color: '#4b5563', lineHeight: '1.6', marginBottom: '16px' }}>
+            PDF Export, Print Preview, and Cloud Bot Synchronization are exclusively reserved for <strong>Professional Plan</strong> members.
+          </p>
+          <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px' }}>
+            Upgrade today for ₹199 to unlock unlimited, unwatermarked PDF downloads and 1,800+ automated job applications.
+          </p>
+          <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#000000', fontFamily: 'monospace' }}>
+            https://jobfluxai.vercel.app/pricing
+          </div>
+        </div>
+      </div>
 
       {/* Top Navigation Bar */}
       <header className="no-print border-b border-zinc-900 bg-black/80 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
@@ -538,13 +585,22 @@ export default function ResumeBuilderPage() {
           {/* Print/Download Button */}
           <button
             onClick={handleDownloadPdf}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-zinc-200 text-black transition-all cursor-pointer shadow-sm"
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm ${
+              isProfessional
+                ? 'bg-white hover:bg-zinc-200 text-black'
+                : 'bg-zinc-900 hover:bg-zinc-850 text-zinc-200 border border-zinc-750'
+            }`}
+            title={isProfessional ? "Download or Print ATS PDF" : "Upgrade to Professional to export PDF"}
           >
-            <Printer className="w-3.5 h-3.5" />
+            {isProfessional ? (
+              <Printer className="w-3.5 h-3.5" />
+            ) : (
+              <Lock className="w-3.5 h-3.5 text-amber-400" />
+            )}
             <span className="hidden sm:inline">Download ATS PDF</span>
             <span className="sm:hidden">PDF</span>
             {!isProfessional && (
-              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-black text-white ml-0.5">
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 ml-0.5 font-bold">
                 PRO
               </span>
             )}
@@ -914,7 +970,7 @@ export default function ResumeBuilderPage() {
           {/* Header Bar above Preview */}
           <div className="no-print flex items-center justify-between px-2 text-xs text-zinc-400">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
               <span className="font-semibold text-white">Live Harvard/FAANG Standard Layout</span>
               <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">
                 · A4 Single-Column (Workday, Greenhouse & Lever 100% Compliant)
@@ -924,10 +980,23 @@ export default function ResumeBuilderPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleDownloadPdf}
-                className="text-xs text-zinc-300 hover:text-white flex items-center gap-1 cursor-pointer font-medium"
+                className="text-xs text-zinc-300 hover:text-white flex items-center gap-1.5 cursor-pointer font-medium px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
+                title={isProfessional ? "Export Harvard ATS Resume as PDF" : "Upgrade to Professional to export print-ready PDF"}
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Preview</span>
+                {isProfessional ? (
+                  <>
+                    <Printer className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Print / Save PDF</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3 h-3 text-amber-400" />
+                    <span>Export ATS PDF</span>
+                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold ml-0.5">
+                      PRO
+                    </span>
+                  </>
+                )}
               </button>
             </div>
           </div>

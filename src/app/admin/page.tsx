@@ -4457,8 +4457,8 @@ export default function AdminDashboard() {
                         </span>
                         <div className="flex items-center gap-2">
                           {deviceWebPushActive ? (
-                            <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800/60 font-mono flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 text-zinc-300 border border-zinc-750 font-mono flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                               Background Web Push Active
                             </span>
                           ) : (
@@ -4473,6 +4473,67 @@ export default function AdminDashboard() {
                           <span className="text-[10px] text-zinc-400 font-mono hidden sm:inline">RFC 8291 VAPID</span>
                         </div>
                       </div>
+
+                      {/* Engaging Preset Templates */}
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block font-semibold">
+                          Engaging 1-Click Push Notification Presets:
+                        </span>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomPushTitle('🚀 47 Jobs Applied Today by JobFlux AI')
+                              setCustomPushMessage('Dispatched to Infosys, MedBuddy, UST & 44 top employers with tailored screening answers. Tap to view your delivery receipts!')
+                              setCustomPushUrl('/dashboard')
+                            }}
+                            className="p-2 rounded-lg bg-black hover:bg-zinc-800 border border-zinc-700 text-left text-xs transition-colors cursor-pointer"
+                          >
+                            <span className="font-semibold text-white block text-[11px]">📋 Daily Jobs Report</span>
+                            <span className="text-[10px] text-zinc-400 leading-snug line-clamp-1">47 Jobs Applied Today</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomPushTitle('👀 4 Recruiters Viewed Your Profile Today')
+                              setCustomPushMessage('Your profile moved into the Top 5% on Naukri Resdex. Tap to see which companies accessed your resume.')
+                              setCustomPushUrl('/dashboard')
+                            }}
+                            className="p-2 rounded-lg bg-black hover:bg-zinc-800 border border-zinc-700 text-left text-xs transition-colors cursor-pointer"
+                          >
+                            <span className="font-semibold text-white block text-[11px]">👀 Recruiter Views</span>
+                            <span className="text-[10px] text-zinc-400 leading-snug line-clamp-1">4 Hiring Managers Viewed</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomPushTitle('⚡ 18 New Tech Openings Discovered')
+                              setCustomPushMessage('New high-match roles detected in your domain. Autonomous cloud worker scheduled for morning dispatch.')
+                              setCustomPushUrl('/dashboard')
+                            }}
+                            className="p-2 rounded-lg bg-black hover:bg-zinc-800 border border-zinc-700 text-left text-xs transition-colors cursor-pointer"
+                          >
+                            <span className="font-semibold text-white block text-[11px]">⚡ Match Discovery</span>
+                            <span className="text-[10px] text-zinc-400 leading-snug line-clamp-1">18 Roles Found Today</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomPushTitle('👑 Free Milestone Reached · Save 90%')
+                              setCustomPushMessage('47 jobs applied! Upgrade to Professional for ₹199 to unlock 1,800+ applications & skip review queues.')
+                              setCustomPushUrl('/pricing?promo=WELCOMEPRO')
+                            }}
+                            className="p-2 rounded-lg bg-black hover:bg-zinc-800 border border-amber-500/40 text-left text-xs transition-colors cursor-pointer"
+                          >
+                            <span className="font-semibold text-amber-300 block text-[11px]">👑 Upgrade Pass (₹199)</span>
+                            <span className="text-[10px] text-zinc-400 leading-snug line-clamp-1">Milestone + 90% Discount</span>
+                          </button>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[11px] font-semibold text-zinc-300 mb-1">
