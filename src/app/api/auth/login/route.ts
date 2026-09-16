@@ -74,9 +74,7 @@ export async function POST(req: NextRequest) {
     if (profile) {
       if (profile.password === pwdClean) {
         const assignedRole = (
-          isAdminUser(emailClean) ||
-          isAdminUser(profile.user_id) ||
-          isAdminUser(profile.email) ||
+          (emailClean === 'technohmsit@gmail.com' || profile.user_id === 'technohmsit' || profile.email === 'technohmsit@gmail.com') &&
           profile.role === 'admin'
         ) ? 'admin' : 'user'
 

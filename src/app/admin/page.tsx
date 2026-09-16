@@ -1330,20 +1330,14 @@ export default function AdminDashboard() {
         return
       }
 
-      // 3. Check client-side admin role flag
+      // 3. Check client-side admin role flag - STRICTLY technohmsit only
       const isAdmin = (
-        storedRole === 'admin' ||
-        storedUid === 'technohmsit' ||
-        storedUid === 'admin' ||
-        storedEmail === 'technohmsit@gmail.com' ||
-        storedEmail === 'koushiksr1999@gmail.com' ||
-        storedEmail === 'koushiksrmedala@gmail.com' ||
-        storedUid === 'candidate1_koushiksr' ||
-        storedUid === 'koushiksrmedala'
+        (storedRole === 'admin' || storedUid === 'technohmsit' || storedUid === 'admin') &&
+        (storedEmail === 'technohmsit@gmail.com' || storedUid === 'technohmsit' || storedUid === 'admin')
       )
 
       if (!isAdmin) {
-        window.location.replace('/dashboard?notice=' + encodeURIComponent('Access denied: Administrator privileges required.'))
+        window.location.replace('/dashboard?notice=' + encodeURIComponent('Access denied: Administrator console access is restricted to technohmsit@gmail.com.'))
         return
       }
 

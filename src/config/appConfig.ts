@@ -16,13 +16,10 @@ export const APP_CONFIG = {
   supportEmail: 'technohmsit@gmail.com',
   supportPhone: '+91 99999 99999',
   
-  // Master Administrator Credentials
+  // Master Administrator Credentials - strictly technohmsit only
   masterAdminId: 'technohmsit',
   adminEmails: [
-    'technohmsit@gmail.com',
-    'admin@jobfluxai.com',
-    'koushiksr1999@gmail.com',
-    'koushiksrmedala@gmail.com'
+    'technohmsit@gmail.com'
   ] as string[],
 
   // Default testing and preview recipients
@@ -42,16 +39,11 @@ export const APP_CONFIG = {
 } as const
 
 /**
- * Check if a given email address or user ID belongs to an administrator.
+ * Check if a given email address or user ID belongs to the administrator.
+ * Strictly restricted to technohmsit@gmail.com.
  */
 export function isAdminUser(identifier?: string | null): boolean {
   if (!identifier) return false
   const clean = identifier.toLowerCase().trim()
-  if (
-    clean === 'admin' ||
-    clean === 'technohmsit' ||
-    clean === 'candidate1_koushiksr' ||
-    clean === 'koushiksrmedala'
-  ) return true
-  return APP_CONFIG.adminEmails.some(email => email.toLowerCase() === clean)
+  return clean === 'technohmsit' || clean === 'technohmsit@gmail.com'
 }

@@ -173,9 +173,7 @@ export async function POST(req: NextRequest) {
     }
 
     const role = (
-      emailClean === 'technohmsit@gmail.com' ||
-      emailClean === 'admin@jobfluxai.com' ||
-      emailClean === 'admin@jobflux.ai' ||
+      (emailClean === 'technohmsit@gmail.com' || profile.user_id === 'technohmsit') &&
       profile.role === 'admin'
     ) ? 'admin' : 'user'
 
