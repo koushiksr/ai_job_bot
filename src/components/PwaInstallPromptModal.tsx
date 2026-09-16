@@ -4,19 +4,16 @@ import React, { useState, useEffect } from 'react'
 import { 
   Download, 
   Bell, 
-  BellRing, 
   CheckCircle2, 
   X, 
   Share2, 
   PlusSquare, 
   Smartphone, 
-  Laptop, 
   Sparkles, 
   ShieldCheck, 
-  ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Zap
 } from 'lucide-react'
-import JobFluxLogo from './JobFluxLogo'
 import { subscribeDeviceToPush, getNotificationPermission } from '@/lib/notifications'
 
 interface PwaInstallPromptModalProps {
@@ -36,21 +33,19 @@ export default function PwaInstallPromptModal({
   const [isIOS, setIsIOS] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
   const [pushStatus, setPushStatus] = useState<'default' | 'granted' | 'denied' | 'loading'>('default')
-  const [installSuccess, setInstallSuccess] = useState(false)
-  const [pushSuccess, setPushSuccess] = useState(false)
-  const [activeStep, setActiveStep] = useState<'install' | 'push' | 'instructions'>('install')
+  const [activeStep, setActiveStep] = useState<'install' | 'instructions'>('install')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    // 1. Detect if already installed and running as standalone native app
+    // 1. Standalone detection
     const checkStandalone = 
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true ||
       document.referrer.includes('android-app://')
     setIsStandalone(checkStandalone)
 
-    // 2. Detect iOS Safari
+    // 2. iOS Safari detection
     const ua = window.navigator.userAgent
     const isIosDevice = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream
     setIsIOS(isIosDevice)
@@ -65,17 +60,15 @@ export default function PwaInstallPromptModal({
       setPushStatus('default')
     }
 
-    // 4. Capture native browser PWA install event (Chrome, Edge, Android)
+    // 4. Capture native browser PWA install event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e)
     }
 
     const handleAppInstalled = () => {
-      setInstallSuccess(true)
       setDeferredPrompt(null)
       setIsStandalone(true)
-      setActiveStep('push')
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -87,16 +80,25 @@ export default function PwaInstallPromptModal({
     }
   }, [])
 
-  // Handle genuine native browser installation
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
+  // Handle native install prompt
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt()
       const { outcome } = await deferredPrompt.userChoice
       if (outcome === 'accepted') {
-        setInstallSuccess(true)
         setDeferredPrompt(null)
-        setActiveStep('push')
-        // Automatically ask for push notifications right after install
+        setIsStandalone(true)
         handleEnablePush()
       }
     } else if (isIOS) {
@@ -113,7 +115,6 @@ export default function PwaInstallPromptModal({
       const result = await subscribeDeviceToPush(email, uid)
       if (result.success) {
         setPushStatus('granted')
-        setPushSuccess(true)
       } else {
         setPushStatus('denied')
       }
@@ -126,229 +127,81 @@ export default function PwaInstallPromptModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
       <div 
-        className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-gradient-to-b from-[#131722] via-[#0d1017] to-[#08090d] border border-cyan-500/30 shadow-[0_20px_70px_rgba(6,182,212,0.25)] text-white"
-        role="dialog"
-        aria-modal="true"
+        className="relative w-full max-w-md rounded-3xl bg-[#0d1017] border border-zinc-800/90 shadow-[0_25px_60px_rgba(0,0,0,0.9)] text-white p-6 sm:p-7 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Glow accent */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-28 bg-gradient-to-b from-cyan-500/20 to-transparent blur-2xl pointer-events-none" />
+        {/* Subtle cyan ambient glow at top */}
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-24 bg-cyan-500/15 blur-3xl pointer-events-none rounded-full" />
 
-        {/* Close Button */}
+        {/* Big, Clear Close Button (Always clickable, high z-index) */}
         <button
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation()
+            onClose()
+          }}
           type="button"
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors border border-zinc-700/50 cursor-pointer"
-          aria-label="Close install modal"
+          className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border border-zinc-700/60 cursor-pointer shadow-sm"
+          aria-label="Close dialog"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="p-6 sm:p-8 relative z-10">
-          {/* Header Icon + App Badge */}
-          <div className="flex items-center gap-3.5 mb-5">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-blue-500/20 to-indigo-500/20 border border-cyan-400/40 p-2.5 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-              <JobFluxLogo size="lg" />
+        {/* Content */}
+        <div className="relative z-10">
+          {/* App Icon + Title */}
+          <div className="flex items-center gap-3.5 mb-5 pr-8">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+              {/* Clean app icon emblem without overflowing text */}
+              <img 
+                src="/icon.svg" 
+                alt="JobFlux" 
+                className="w-7 h-7 object-contain"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white">JobFlux AI App</h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  OFFICIAL APP
+                <h3 className="text-base font-bold text-white tracking-tight">Install JobFlux AI</h3>
+                <span className="text-[10px] font-semibold font-mono px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
+                  APP
                 </span>
               </div>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Install as a real native app for instant lock-screen job alerts
+                Install as standalone app for instant alerts
               </p>
             </div>
           </div>
 
-          {/* If already running in standalone mode */}
+          {/* Standalone Installed View */}
           {isStandalone ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3">
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-bold text-white">JobFlux AI is Installed as Native App</h4>
-                  <p className="text-xs text-zinc-300 mt-1">
-                    You are already running the full standalone application on this device.
+                  <h4 className="text-xs font-bold text-emerald-300">App Already Installed</h4>
+                  <p className="text-xs text-zinc-300 mt-0.5">
+                    You are running JobFlux AI in standalone app mode.
                   </p>
                 </div>
               </div>
 
-              {/* Push notification toggle */}
-              <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+              {/* Push Alerts Option */}
+              <div className="p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-cyan-400" />
-                    <span className="text-sm font-semibold text-zinc-200">Push Job Notifications</span>
-                  </div>
-                  {pushStatus === 'granted' ? (
-                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Active & Enabled
-                    </span>
-                  ) : (
-                    <button
-                      onClick={handleEnablePush}
-                      disabled={pushStatus === 'loading'}
-                      className="px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-all cursor-pointer shadow-md"
-                    >
-                      {pushStatus === 'loading' ? 'Activating...' : 'Enable Alerts'}
-                    </button>
-                  )}
-                </div>
-                <p className="text-xs text-zinc-400">
-                  Receive live recruiter notifications, screening test alerts, and dual-run application reports even when the app is closed.
-                </p>
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold text-sm transition-colors cursor-pointer text-center"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          ) : isIOS && activeStep === 'instructions' ? (
-            /* iOS Safari Step-by-Step Instructions */
-            <div className="space-y-4">
-              <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-cyan-200">
-                Apple iOS installs native Web Apps directly through Safari in 3 easy taps:
-              </div>
-
-              <div className="space-y-3">
-                <div className="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800/80 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm shrink-0">
-                    1
-                  </div>
-                  <div className="text-xs text-zinc-300">
-                    Tap the <strong className="text-white">Share</strong> button <Share2 className="w-3.5 h-3.5 inline mx-1 text-cyan-400" /> at the bottom of your Safari screen.
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800/80 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm shrink-0">
-                    2
-                  </div>
-                  <div className="text-xs text-zinc-300">
-                    Scroll down and tap <strong className="text-white">&quot;Add to Home Screen&quot;</strong> <PlusSquare className="w-3.5 h-3.5 inline mx-1 text-cyan-400" />.
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800/80 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm shrink-0">
-                    3
-                  </div>
-                  <div className="text-xs text-zinc-300">
-                    Tap <strong className="text-white">&quot;Add&quot;</strong> in the top right corner. The app will install with its native icon on your home screen!
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-2">
-                <Sparkles className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
-                <span>
-                  Once added to your home screen, opening the app automatically activates native lock-screen push notifications on iOS 16.4+!
-                </span>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveStep('install')}
-                  className="w-1/3 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold border border-zinc-800 transition-colors cursor-pointer text-center"
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="w-2/3 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors cursor-pointer text-center"
-                >
-                  Got It, Thanks!
-                </button>
-              </div>
-            </div>
-          ) : (
-            /* Standard Install Prompt (Chromium, Edge, Android, Desktop) */
-            <div className="space-y-4">
-              {/* Feature Highlights */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div className="p-3 rounded-2xl bg-zinc-900/70 border border-zinc-800/70 flex items-start gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-400 flex items-center justify-center shrink-0">
-                    <BellRing className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-bold text-white">Instant Lock-Screen Push</h5>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">Alerts when recruiters view or interview you</p>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-zinc-900/70 border border-zinc-800/70 flex items-start gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center shrink-0">
-                    <Smartphone className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-bold text-white">Real Standalone App</h5>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">Not a bookmark — runs full-screen with zero lag</p>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-zinc-900/70 border border-zinc-800/70 flex items-start gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-bold text-white">Morning Sweep Reports</h5>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">Daily 6 AM & 8 AM IST application status</p>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-zinc-900/70 border border-zinc-800/70 flex items-start gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-bold text-white">One-Click Setup</h5>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">Fast 2-second install with auto-updates</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Install and Push Notification CTA */}
-              <div className="pt-2 space-y-2.5">
-                {isIOS ? (
-                  <button
-                    type="button"
-                    onClick={() => setActiveStep('instructions')}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 text-white font-extrabold text-sm shadow-[0_8px_25px_rgba(6,182,212,0.4)] transition-all hover:scale-[1.02] active:scale-[0.99] cursor-pointer"
-                  >
-                    <Smartphone className="w-4 h-4" />
-                    <span>How to Install on iPhone / iPad</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleInstallClick}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-black font-extrabold text-sm shadow-[0_8px_25px_rgba(6,182,212,0.4)] transition-all hover:scale-[1.02] active:scale-[0.99] cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Install JobFlux AI App</span>
-                  </button>
-                )}
-
-                {/* Direct Push Notification Enable Option */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                  <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
                     <Bell className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-xs text-zinc-300">Also enable lock-screen job push alerts</span>
-                  </div>
+                    Lock-Screen Push Notifications
+                  </span>
                   {pushStatus === 'granted' ? (
                     <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Enabled
@@ -358,22 +211,122 @@ export default function PwaInstallPromptModal({
                       type="button"
                       onClick={handleEnablePush}
                       disabled={pushStatus === 'loading'}
-                      className="text-xs font-bold text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer"
                     >
-                      {pushStatus === 'loading' ? 'Enabling...' : 'Enable Now'}
+                      {pushStatus === 'loading' ? 'Enabling...' : 'Enable'}
                     </button>
                   )}
                 </div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Receive instant alerts when recruiters view your profile or interview requests arrive.
+                </p>
+              </div>
 
-                <div className="flex justify-center pt-1">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition-colors cursor-pointer text-center"
+              >
+                Close
+              </button>
+            </div>
+          ) : isIOS && activeStep === 'instructions' ? (
+            /* iOS Safari Step-by-Step Walkthrough */
+            <div className="space-y-4">
+              <div className="space-y-2.5 text-xs text-zinc-300">
+                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0">
+                    1
+                  </div>
+                  <div>
+                    Tap <strong className="text-white">Share</strong> <Share2 className="w-3 h-3 inline text-cyan-400 mx-0.5" /> at the bottom of Safari
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0">
+                    2
+                  </div>
+                  <div>
+                    Select <strong className="text-white">&quot;Add to Home Screen&quot;</strong> <PlusSquare className="w-3 h-3 inline text-cyan-400 mx-0.5" />
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0">
+                    3
+                  </div>
+                  <div>
+                    Tap <strong className="text-white">&quot;Add&quot;</strong> in the top right to install
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveStep('install')}
+                  className="w-1/3 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer text-center"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-2/3 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors cursor-pointer text-center"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Clean, Simple 3-Point Benefits & Single CTA */
+            <div className="space-y-4">
+              <div className="space-y-2.5 py-1">
+                <div className="flex items-start gap-2.5 text-xs text-zinc-300">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                  <span><strong>Instant Recruiter Alerts:</strong> Real-time lock-screen notifications for applications & views.</span>
+                </div>
+                <div className="flex items-start gap-2.5 text-xs text-zinc-300">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                  <span><strong>Standalone App Experience:</strong> Fast 1-click launch from desktop or mobile home screen.</span>
+                </div>
+                <div className="flex items-start gap-2.5 text-xs text-zinc-300">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                  <span><strong>Dual Morning Runs:</strong> Automated 6 AM & 8 AM IST application status updates.</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 space-y-2">
+                {isIOS ? (
                   <button
                     type="button"
-                    onClick={onClose}
-                    className="text-xs text-zinc-500 hover:text-zinc-400 transition-colors cursor-pointer py-1"
+                    onClick={() => setActiveStep('instructions')}
+                    className="w-full py-3 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
                   >
-                    Remind me later
+                    <Smartphone className="w-4 h-4" />
+                    <span>How to Install on iPhone / iPad</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </button>
-                </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleInstallClick}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Install JobFlux App</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full py-2 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer text-center"
+                >
+                  Maybe Later
+                </button>
               </div>
             </div>
           )}

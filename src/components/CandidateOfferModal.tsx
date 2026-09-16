@@ -65,28 +65,50 @@ export default function CandidateOfferModal({
     }
   }
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   const claimHref = activeOffer.claim_url || `/pricing?promo=${activeOffer.promo_code}`
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
       <div 
         className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-gradient-to-b from-[#161a29] via-[#0d101a] to-[#08090e] border-2 border-amber-400/40 shadow-[0_20px_70px_rgba(245,158,11,0.25)] text-white"
-        role="dialog"
-        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Ambient Top Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-gradient-to-b from-amber-500/25 to-transparent blur-2xl pointer-events-none" />
 
-        {/* Close Button */}
+        {/* Close Button with high z-index */}
         <button
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation()
+            onClose()
+          }}
           type="button"
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors border border-zinc-700/50 cursor-pointer"
+          className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border border-zinc-700/50 cursor-pointer shadow-sm"
           aria-label="Close offer popup"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         <div className="p-6 sm:p-8 relative z-10">

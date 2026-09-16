@@ -28,12 +28,28 @@ export default function ProfessionalUpgradeModal({
   onClose,
   featureTitle = 'On-Demand Turbo Scout'
 }: ProfessionalUpgradeModalProps) {
+  // Close on Escape key
+  React.useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+      <div 
+        onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200"
+        role="dialog"
+        aria-modal="true"
+      >
         <motion.div
+          onClick={(e) => e.stopPropagation()}
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -45,8 +61,13 @@ export default function ProfessionalUpgradeModal({
 
           {/* Close button */}
           <button
-            onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer z-10"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onClose()
+            }}
+            aria-label="Close modal"
+            className="absolute top-5 right-5 p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer z-50"
           >
             <X className="w-4 h-4" />
           </button>

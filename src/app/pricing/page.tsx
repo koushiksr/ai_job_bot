@@ -203,6 +203,23 @@ export default function PricingPage() {
     }
   }, [])
 
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selectedPlan) {
+          setSelectedPlan(null)
+          setPromoError('')
+        }
+        if (showEnterpriseModal) {
+          setShowEnterpriseModal(false)
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedPlan, showEnterpriseModal])
+
   const handleOpenPlanModal = (plan: Plan) => {
     if (plan.id === 'enterprise') {
       setShowEnterpriseModal(true)
@@ -725,8 +742,19 @@ export default function PricingPage() {
       {/* Plan Purchase & Activation Modal */}
       <AnimatePresence>
         {selectedPlan && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div 
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setSelectedPlan(null)
+                setPromoError('')
+              }
+            }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+          >
             <motion.div
+              onClick={(e) => e.stopPropagation()}
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
@@ -748,11 +776,14 @@ export default function PricingPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
                     setSelectedPlan(null)
                     setPromoError('')
                   }}
-                  className="p-1 rounded-lg text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                  aria-label="Close modal"
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer z-50"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -922,8 +953,13 @@ export default function PricingPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowEnterpriseModal(false)}
-                  className="p-1 rounded-lg text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowEnterpriseModal(false)
+                  }}
+                  aria-label="Close enterprise inquiry"
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer z-50"
                 >
                   <X className="w-4 h-4" />
                 </button>

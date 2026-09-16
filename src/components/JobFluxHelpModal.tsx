@@ -89,6 +89,16 @@ export default function JobFluxHelpModal({
     }
   }, [email, name])
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!isModalOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isModalOpen])
+
   const handleCopyEmail = async () => {
     try {
       await navigator.clipboard.writeText(supportEmail)
@@ -198,6 +208,7 @@ export default function JobFluxHelpModal({
             className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md"
           >
             <motion.div
+              onClick={(e) => e.stopPropagation()}
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -220,8 +231,13 @@ export default function JobFluxHelpModal({
                   </div>
                 </div>
                 <button
-                  onClick={handleClose}
-                  className="w-8 h-8 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleClose()
+                  }}
+                  aria-label="Close help modal"
+                  className="w-8 h-8 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer z-50 shadow-sm"
                 >
                   <X className="w-4 h-4" />
                 </button>

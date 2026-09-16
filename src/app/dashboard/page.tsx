@@ -439,17 +439,19 @@ export default function UserDashboard() {
     }
   }, [activeTab])
 
-  // ESC key dismiss handler for user menu and audit dialog
+  // ESC key dismiss handler for user menu, mobile nav, audit dialog, and unblock guide
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (isUserMenuOpen) setIsUserMenuOpen(false)
+        if (isMobileNavOpen) setIsMobileNavOpen(false)
         if (selectedJobAudit) setSelectedJobAudit(null)
+        if (showUnblockGuide) setShowUnblockGuide(false)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isUserMenuOpen, selectedJobAudit])
+  }, [isUserMenuOpen, isMobileNavOpen, selectedJobAudit, showUnblockGuide])
 
   const refreshAllDashboardData = async (uid: string, isInitial = false) => {
     if (!uid) return
@@ -1491,8 +1493,18 @@ export default function UserDashboard() {
 
         {/* Unblock Instructions Modal */}
         {showUnblockGuide && (
-          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black space-y-5">
+          <div 
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowUnblockGuide(false)
+            }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black space-y-5"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
@@ -1505,8 +1517,12 @@ export default function UserDashboard() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowUnblockGuide(false)}
-                  className="text-zinc-500 hover:text-white p-1 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowUnblockGuide(false)
+                  }}
+                  aria-label="Close unblock guide"
+                  className="text-zinc-500 hover:text-white p-1 cursor-pointer z-50"
                 >
                   <X className="w-4 h-4" />
                 </button>
