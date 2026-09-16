@@ -44,9 +44,9 @@ export default function PrivacyPage() {
 
         {/* Zero Data Selling Guarantee */}
         <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
-          <div className="flex items-center gap-2.5 text-emerald-400">
-            <EyeOff className="w-5 h-5 shrink-0" />
-            <h2 className="text-sm font-semibold tracking-wide">Our Zero-Data-Monetization Guarantee</h2>
+          <div className="flex items-center gap-2.5 text-zinc-200">
+            <EyeOff className="w-5 h-5 text-zinc-400 shrink-0" />
+            <h2 className="text-sm font-semibold tracking-wide text-white">Our Zero-Data-Monetization Guarantee</h2>
           </div>
           <p className="text-xs text-zinc-400 leading-relaxed">
             We do <strong className="text-white">NOT</strong> sell, rent, license, or monetize candidate contact details, resumes, work history, or compensation figures to third-party headhunters, data brokers, or advertising networks. Your data is used exclusively to power your own automated job applications.

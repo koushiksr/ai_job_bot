@@ -93,13 +93,13 @@ export default function NaukriProfileScorePage() {
             <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
               Your Resdex Inbound Score
             </span>
-            <div className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-400">
+            <div className="text-5xl font-black text-white">
               {score} <span className="text-2xl text-zinc-500 font-normal">/ 100</span>
             </div>
             <p className="text-xs text-zinc-300 mt-2">
               {score >= 80 ? (
-                <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                  <Flame className="w-4 h-4" /> Top 5% (Page 1 in Recruiter Search Results)
+                <span className="text-white font-semibold flex items-center gap-1.5">
+                  <Flame className="w-4 h-4 text-amber-400" /> Top 5% (Page 1 in Recruiter Search Results)
                 </span>
               ) : score >= 60 ? (
                 <span className="text-amber-400 font-semibold flex items-center gap-1.5">

@@ -68,9 +68,9 @@ export default function HomeInteractiveToolsCard({
             Test Your Profile Readiness Before Applying
           </h2>
         </div>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold self-start sm:self-auto">
-          <span className="w-2 h-2 rounded-full bg-emerald-400" />
-          <span>Live AI Model Online</span>
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono self-start sm:self-auto">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+          <span>Diagnostic Model</span>
         </div>
       </div>
 
@@ -86,7 +86,7 @@ export default function HomeInteractiveToolsCard({
           }`}
         >
           <FileCheck2 className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
-          <span className="truncate">ATS & JD Match</span>
+          <span className="truncate">ATS &amp; JD Match</span>
         </button>
 
         <button
@@ -150,23 +150,23 @@ export default function HomeInteractiveToolsCard({
               <button
                 type="button"
                 onClick={() => {
-                  setTargetRole('Lead Full Stack Engineer')
-                  setUserSkills('React 19, Next.js, Node.js, TypeScript, AWS, MongoDB')
+                  setTargetRole('Senior React Frontend Developer')
+                  setUserSkills('React, Next.js, TypeScript, Tailwind, Redux')
                 }}
-                className="text-zinc-300 hover:text-white underline cursor-pointer"
+                className="hover:text-white underline cursor-pointer"
               >
-                MERN
+                Frontend
               </button>
-              <span>·</span>
+              <span className="text-zinc-600">•</span>
               <button
                 type="button"
                 onClick={() => {
-                  setTargetRole('Senior Data Engineer')
-                  setUserSkills('PySpark, SQL, Airflow, Snowflake, AWS, Python, ETL')
+                  setTargetRole('DevOps & Cloud Engineer')
+                  setUserSkills('Kubernetes, Terraform, AWS, CI/CD, Docker')
                 }}
-                className="text-zinc-300 hover:text-white underline cursor-pointer"
+                className="hover:text-white underline cursor-pointer"
               >
-                Data
+                DevOps
               </button>
             </div>
 
@@ -174,32 +174,23 @@ export default function HomeInteractiveToolsCard({
               type="button"
               onClick={handleScanAts}
               disabled={atsScanning}
-              className="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 disabled:opacity-50"
             >
-              {atsScanning ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Scanning...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Scan ATS Match</span>
-                </>
-              )}
+              <RefreshCw className={`w-3 h-3 ${atsScanning ? 'animate-spin' : ''}`} />
+              <span>{atsScanning ? 'Scanning ATS...' : 'Calculate ATS Match'}</span>
             </button>
           </div>
 
-          {/* Result Card Preview with Locked Gating */}
-          <div className="p-4 rounded-xl bg-black/60 border border-zinc-800/90 space-y-3">
+          {/* ATS Score Results Card */}
+          <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-zinc-400">ATS Parsing Match:</span>
                 <span className="text-xl font-bold text-white font-mono">
                   {atsScore}%
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Workday & Taleo Tested
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                  Workday &amp; Taleo Tested
                 </span>
               </div>
               <span className="text-[11px] text-zinc-500 font-mono">2 / 6 Keywords Extracted</span>
@@ -207,10 +198,10 @@ export default function HomeInteractiveToolsCard({
 
             {/* Keyword tags */}
             <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md font-medium">
+              <span className="bg-zinc-800 text-zinc-200 border border-zinc-700 px-2 py-0.5 rounded-md font-medium">
                 ✓ Python (High Priority)
               </span>
-              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md font-medium">
+              <span className="bg-zinc-800 text-zinc-200 border border-zinc-700 px-2 py-0.5 rounded-md font-medium">
                 ✓ FastAPI (Found in JD)
               </span>
               <span className="bg-zinc-900 border border-zinc-800 text-zinc-500 px-2 py-0.5 rounded-md flex items-center gap-1 select-none blur-[1px]">
@@ -313,8 +304,8 @@ export default function HomeInteractiveToolsCard({
                 <span className="text-xs text-zinc-400">Recruiter Resdex Visibility Tier:</span>
                 <div className="text-lg font-bold text-white flex items-center gap-2 mt-0.5">
                   {lastUpdate === 'today' && noticePeriod === 'immediate' ? (
-                     <span className="text-emerald-400 flex items-center gap-1">
-                      <Flame className="w-4 h-4" /> Top 5% (Page 1 Inbound Magnet)
+                     <span className="text-white font-semibold flex items-center gap-1">
+                      <Flame className="w-4 h-4 text-amber-400" /> Top 5% (Page 1 Inbound Magnet)
                     </span>
                   ) : lastUpdate === 'week' ? (
                     <span className="text-zinc-300">Page 2–3 (Moderate Inbound)</span>
@@ -337,7 +328,7 @@ export default function HomeInteractiveToolsCard({
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1 text-xs">
               <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
                 Automatic 9 AM Silent Touch included in all plans
               </span>
               {isLoggedIn ? (
@@ -438,7 +429,7 @@ export default function HomeInteractiveToolsCard({
       {/* Bottom Conversion Strip */}
       <div className="pt-2 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <CheckCircle2 className="w-4 h-4 text-zinc-400 shrink-0" />
           <span>Over <strong>1,800+ tech applications</strong> dispatched each week across India</span>
         </div>
         <div className="flex items-center gap-3 text-xs">

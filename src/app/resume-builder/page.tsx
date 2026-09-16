@@ -491,7 +491,7 @@ export default function ResumeBuilderPage() {
             className="hidden md:flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 bg-zinc-950 px-2.5 py-1 rounded-md border border-zinc-800"
             title="Zero Data-Leak Guarantee: Automatically scrubs and anonymizes sensitive PII (Home address, Aadhaar/PAN, internal IDs, personal phone) before cloud processing"
           >
-            <Shield className="w-3 text-emerald-400 shrink-0" />
+            <Shield className="w-3 text-zinc-400 shrink-0" />
             <span>Auto PII Sanitized</span>
           </div>
 
@@ -554,8 +554,8 @@ export default function ResumeBuilderPage() {
 
       {/* Sync Status Banner */}
       {syncSuccess && (
-        <div className="no-print bg-emerald-950/70 border-b border-emerald-800/60 px-4 py-2 text-xs text-emerald-200 flex items-center justify-center gap-2 font-medium">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="no-print bg-zinc-900 border-b border-zinc-800 px-4 py-2 text-xs text-zinc-200 flex items-center justify-center gap-2 font-medium">
+          <CheckCircle2 className="w-4 h-4 text-zinc-300 shrink-0" />
           <span>{syncSuccess}</span>
         </div>
       )}

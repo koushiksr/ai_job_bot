@@ -1091,8 +1091,8 @@ export default function CandidateProfileEditor({
 
       {/* SUCCESS / ERROR ALERTS */}
       {saveSuccess && (
-        <div className="p-3.5 rounded-xl bg-zinc-900/90 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2.5 font-medium animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs flex items-center gap-2.5 font-medium animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-zinc-300 shrink-0" />
           <span>{saveSuccess}</span>
         </div>
       )}
@@ -1140,8 +1140,8 @@ export default function CandidateProfileEditor({
                 <Sparkles className="w-3 h-3 text-zinc-400" />
                 <span>4-Step Quick Flow</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                 <span>Sit Back & Relax Engine</span>
               </span>
             </div>
@@ -1168,8 +1168,8 @@ export default function CandidateProfileEditor({
                 STEP 1
               </span>
               {hasResumeUploaded ? (
-                <span className="text-[10px] font-mono text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                  <CheckCircle2 className="w-3 h-3" /> ✓ Completed
+                <span className="text-[10px] font-mono text-zinc-200 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-750 px-1.5 py-0.5 rounded">
+                  <CheckCircle2 className="w-3 h-3 text-zinc-400" /> ✓ Completed
                 </span>
               ) : (
                 <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
@@ -1193,8 +1193,8 @@ export default function CandidateProfileEditor({
                     STEP 2
                   </span>
                   {step2Done ? (
-                    <span className="text-[10px] font-mono text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                      <CheckCircle2 className="w-3 h-3" /> ✓ Completed
+                    <span className="text-[10px] font-mono text-zinc-200 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-750 px-1.5 py-0.5 rounded">
+                      <CheckCircle2 className="w-3 h-3 text-zinc-400" /> ✓ Completed
                     </span>
                   ) : (
                     <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
@@ -1220,8 +1220,8 @@ export default function CandidateProfileEditor({
                     STEP 3
                   </span>
                   {step3Done ? (
-                    <span className="text-[10px] font-mono text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                      <CheckCircle2 className="w-3 h-3" /> ✓ Completed
+                    <span className="text-[10px] font-mono text-zinc-200 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-750 px-1.5 py-0.5 rounded">
+                      <CheckCircle2 className="w-3 h-3 text-zinc-400" /> ✓ Completed
                     </span>
                   ) : (
                     <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
@@ -1247,8 +1247,8 @@ export default function CandidateProfileEditor({
                     STEP 4
                   </span>
                   {step4Done ? (
-                    <span className="text-[10px] font-mono text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> ✓ Active & Ready
+                    <span className="text-[10px] font-mono text-zinc-200 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-750 px-1.5 py-0.5 rounded">
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" /> ✓ Active & Ready
                     </span>
                   ) : (
                     <span className="text-[10px] font-mono text-zinc-500 font-medium">
@@ -1429,8 +1429,8 @@ export default function CandidateProfileEditor({
         )}
 
         {resumeSuccess && (
-          <div className="text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5" /> {resumeSuccess}
+          <div className="text-xs text-zinc-200 flex items-center gap-1.5 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400" /> {resumeSuccess}
           </div>
         )}
 
@@ -1442,7 +1442,7 @@ export default function CandidateProfileEditor({
 
         {/* Minimal PII Shield */}
         <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-black/60 px-3 py-2 rounded-xl border border-zinc-800/80 w-fit">
-          <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <Shield className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
           <span className="font-medium text-zinc-300">Auto PII Sanitized</span>
           <span className="text-zinc-500 text-[10px] hidden sm:inline">
             · Zero Data-Leak: Sensitive home address, Aadhaar/PAN, and internal IDs scrubbed before cloud sync
@@ -1461,7 +1461,7 @@ export default function CandidateProfileEditor({
               Configure your Naukri.com login credentials once. The automated bot securely uses them for daily application runs.
             </p>
           </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
             One-Time Setup
           </span>
         </div>
@@ -1482,14 +1482,14 @@ export default function CandidateProfileEditor({
                   {candidateName ? candidateName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
                 </div>
               )}
-              <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 absolute bottom-0 right-0 border-2 border-black" />
+              <span className="w-3.5 h-3.5 rounded-full bg-zinc-400 absolute bottom-0 right-0 border-2 border-black" />
             </div>
 
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white">Profile Photo</span>
                 {candidatePicture ? (
-                  <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold flex items-center gap-1">
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold flex items-center gap-1">
                     <Check className="w-2.5 h-2.5" /> Photo Active
                   </span>
                 ) : (
@@ -1796,8 +1796,8 @@ export default function CandidateProfileEditor({
           <div className="flex items-center gap-2 pt-2 border-t border-zinc-800/60 text-xs flex-wrap">
             <span className="text-zinc-400 text-[11px]">Employer Application Shield:</span>
             {avoidCompanies.some(c => c.toLowerCase() === currentCompany.trim().toLowerCase()) ? (
-              <span className="text-emerald-400 flex items-center gap-1 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded-lg font-mono text-[10px]">
-                <Shield className="w-3 h-3 text-emerald-400" /> "{currentCompany}" is Blacklisted (Bot will never apply)
+              <span className="text-zinc-300 flex items-center gap-1 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded-lg font-mono text-[10px]">
+                <Shield className="w-3 h-3 text-zinc-400" /> "{currentCompany}" is Blacklisted (Bot will never apply)
               </span>
             ) : (
               <button
@@ -2392,7 +2392,7 @@ export default function CandidateProfileEditor({
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-semibold text-white">{emp.company}</span>
                       {emp.is_current ? (
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-emerald-400 flex items-center gap-1 font-semibold">
+                        <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-200 flex items-center gap-1 font-semibold">
                           <Check className="w-2.5 h-2.5" /> Current Employer (Payroll)
                         </span>
                       ) : (

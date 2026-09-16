@@ -62,7 +62,7 @@ export default function NeuralAtsDiagnosticCard({
         <div className="flex items-center gap-2 self-end sm:self-auto">
           <div className="text-right">
             <div className="text-sm font-bold font-mono text-white flex items-center gap-1">
-              <span className="text-emerald-400">94.8%</span>
+              <span className="text-zinc-200">94.8%</span>
               <span className="text-[10px] text-zinc-500 font-normal">ATS Score</span>
             </div>
             <span className="text-[10px] text-zinc-500 font-mono">Senior Candidate Tier</span>
@@ -76,12 +76,12 @@ export default function NeuralAtsDiagnosticCard({
         <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> ATS Parser Pass Rate
+              <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400" /> ATS Parser Pass Rate
             </span>
-            <span className="font-mono text-emerald-400 font-semibold">98.4%</span>
+            <span className="font-mono text-zinc-200 font-semibold">98.4%</span>
           </div>
           <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-            <div className="w-[98.4%] h-full bg-emerald-500 rounded-full" />
+            <div className="w-[98.4%] h-full bg-zinc-300 rounded-full" />
           </div>
           <p className="text-[10px] text-zinc-500">
             Resume formatted cleanly for ATS table & column parsing.
@@ -137,7 +137,7 @@ export default function NeuralAtsDiagnosticCard({
               <Shield className="w-3.5 h-3.5 text-zinc-400" /> Stealth Employer Shield
             </span>
             {isProfessional ? (
-              <span className="font-mono text-emerald-400 text-[11px]">UNLIMITED</span>
+              <span className="font-mono text-zinc-200 text-[11px]">UNLIMITED</span>
             ) : (
               <span className="font-mono text-zinc-400 text-[10px] flex items-center gap-1 group-hover:underline">
                 <Lock className="w-2.5 h-2.5" /> PRO ONLY

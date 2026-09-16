@@ -44,24 +44,25 @@ export default function BeginnerOnboardingGuide({
 }: BeginnerOnboardingGuideProps) {
   const [showRoiComparison, setShowRoiComparison] = useState(false)
   const isFullyConfigured = completeness.percent >= 100
+  const [isExpanded, setIsExpanded] = useState(!isFullyConfigured && totalApplied === 0)
 
   return (
-    <div className="rounded-2xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6 space-y-5 relative">
-      {/* Top Header: Welcome & Mission Statement */}
+    <div className="rounded-2xl bg-zinc-950 border border-zinc-800 p-4 sm:p-5 space-y-4 relative">
+      {/* Top Header: Welcome & Mission Statement with Collapse Toggle */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-800">
               <Sparkles className="w-3 h-3 text-zinc-400" />
-              <span>Autonomous Onboarding Guide</span>
+              <span>Onboarding Guide</span>
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>Dual Daily Sweeps (6 & 8 AM IST)</span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+              <span>Daily Sweeps (6 &amp; 8 AM IST)</span>
             </span>
           </div>
 
-          <h2 className="text-base sm:text-lg font-bold text-white tracking-tight mt-2 flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-semibold text-white tracking-tight mt-1.5 flex items-center gap-2">
             <span>How JobFlux Works: 4 Simple Steps to Getting Hired</span>
           </h2>
           <p className="text-xs text-zinc-400 mt-0.5 max-w-2xl leading-relaxed">
@@ -70,15 +71,13 @@ export default function BeginnerOnboardingGuide({
           </p>
         </div>
 
-        {/* Profile Completeness Pill */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0 bg-zinc-900/60 sm:bg-transparent p-2 sm:p-0 rounded-xl border sm:border-0 border-zinc-800">
+        {/* Profile Completeness & Toggle */}
+        <div className="flex items-center sm:flex-col items-end justify-between gap-2 shrink-0 bg-zinc-900/60 sm:bg-transparent p-2 sm:p-0 rounded-xl border sm:border-0 border-zinc-800">
           <div className="text-right">
             <div className="text-[10px] uppercase font-mono text-zinc-400">Setup Status</div>
-            <div className={`text-xs font-bold font-mono flex items-center gap-1.5 ${
-              isFullyConfigured ? 'text-emerald-400' : 'text-zinc-300'
-            }`}>
+            <div className="text-xs font-bold font-mono flex items-center gap-1.5 text-zinc-200">
               {isFullyConfigured ? (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
               ) : (
                 <AlertCircle className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
               )}
@@ -86,180 +85,195 @@ export default function BeginnerOnboardingGuide({
             </div>
           </div>
 
-          {/* Mini Progress Bar */}
-          <div className="w-24 sm:w-28 h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
-            <div
-              className={`h-full transition-all duration-500 rounded-full ${
-                isFullyConfigured ? 'bg-emerald-500' : 'bg-zinc-400'
-              }`}
-              style={{ width: `${completeness.percent}%` }}
-            />
+          <div className="flex items-center gap-2">
+            {/* Mini Progress Bar */}
+            <div className="w-20 sm:w-24 h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+              <div
+                className="h-full transition-all duration-500 rounded-full bg-zinc-300"
+                style={{ width: `${completeness.percent}%` }}
+              />
+            </div>
+
+            {/* Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="px-2 py-1 rounded-md text-[11px] bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 hover:text-white flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+              title={isExpanded ? "Collapse guide" : "Expand guide"}
+            >
+              <span>{isExpanded ? 'Hide' : 'View'}</span>
+              {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* 4-Step Interactive Visual Flow */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative z-10">
-        {/* Step 1: Upload Resume PDF */}
-        <div className="p-4 rounded-xl border bg-zinc-900/40 border-zinc-800/80 flex flex-col justify-between space-y-3 transition-colors hover:border-zinc-700">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">Step 1</span>
-              {completeness.hasResume ? (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> ✓ Completed
-                </span>
-              ) : (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> ● Incomplete
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 font-semibold text-xs text-white">
-              <FileText className="w-4 h-4 text-zinc-300 shrink-0" />
-              <span>Upload Resume PDF</span>
-            </div>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              {completeness.hasResume
-                ? 'Resume PDF uploaded and synced to cloud. Attached to all recruiter applications.'
-                : 'Upload your resume PDF. The AI extracts your credentials and attaches it to recruiter applications.'}
-            </p>
-          </div>
-
-          <Link
-            href="/profile#resume"
-            className={`w-full py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-              completeness.hasResume
-                ? 'bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300'
-                : 'bg-white hover:bg-zinc-200 text-black font-semibold'
-            }`}
-          >
-            <span>{completeness.hasResume ? 'View / Change PDF' : 'Upload Resume PDF →'}</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-
-        {/* Step 2: 1-Tap AI Auto-Fill */}
-        {(() => {
-          const step2Completed = completeness.hasTargetRoles && completeness.hasExperienceOrCtc
-          return (
-            <div className="p-4 rounded-xl border bg-zinc-900/40 border-zinc-800/80 flex flex-col justify-between space-y-3 transition-colors hover:border-zinc-700">
+      {isExpanded && (
+        <>
+          {/* 4-Step Interactive Visual Flow */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative z-10 pt-1">
+            {/* Step 1: Upload Resume PDF */}
+            <div className="p-3.5 sm:p-4 rounded-xl border bg-zinc-900/40 border-zinc-800/80 flex flex-col justify-between space-y-3 transition-colors hover:border-zinc-700">
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">Step 2</span>
-                  {step2Completed ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> ✓ Completed
+                  <span className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">Step 1</span>
+                  {completeness.hasResume ? (
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-medium flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-zinc-400" /> Completed
                     </span>
                   ) : (
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium flex items-center gap-1">
-                      <Zap className="w-3 h-3" /> ● Incomplete
+                      <AlertCircle className="w-3 h-3" /> Incomplete
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 font-semibold text-xs text-white">
-                  <Sparkles className="w-4 h-4 text-zinc-300 shrink-0" />
-                  <span>1-Tap AI Auto-Fill</span>
+                  <FileText className="w-4 h-4 text-zinc-300 shrink-0" />
+                  <span>Upload Resume PDF</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  {step2Completed
-                    ? 'AI extraction complete: Skills, CTC & experience parameters are extracted and populated.'
-                    : 'Click "Auto-Fill with AI". The neural parser extracts your roles, skills, & experience in 5 seconds.'}
+                  {completeness.hasResume
+                    ? 'Resume PDF uploaded and synced to cloud. Attached to all recruiter applications.'
+                    : 'Upload your resume PDF. The AI extracts your credentials and attaches it to recruiter applications.'}
                 </p>
               </div>
 
               <Link
                 href="/profile#resume"
-                className="w-full py-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>{step2Completed ? 'Re-run AI Extraction' : 'Run Auto-Fill with AI'}</span>
-                <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          )
-        })()}
-
-        {/* Step 3: Review & Save Profile */}
-        {(() => {
-          const step3Completed = completeness.hasNaukriCredentials && completeness.hasTargetRoles
-          return (
-            <div className="p-4 rounded-xl border bg-zinc-900/40 border-zinc-800/80 flex flex-col justify-between space-y-3 transition-colors hover:border-zinc-700">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">Step 3</span>
-                  {step3Completed ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> ✓ Completed
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> ● Incomplete
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-semibold text-xs text-white">
-                  <User className="w-4 h-4 text-zinc-300 shrink-0" />
-                  <span>Review & Click Save</span>
-                </div>
-                <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  {step3Completed
-                    ? 'Profile parameters saved. Naukri credentials, target roles, and automation preferences are locked in.'
-                    : 'Review credentials, target roles & blacklist, then click "Save Profile" to synchronize your bot.'}
-                </p>
-              </div>
-
-              <Link
-                href="/profile"
                 className={`w-full py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                  step3Completed
+                  completeness.hasResume
                     ? 'bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300'
                     : 'bg-white hover:bg-zinc-200 text-black font-semibold'
                 }`}
               >
-                <span>{step3Completed ? 'Modify Settings' : 'Review & Save Profile →'}</span>
+                <span>{completeness.hasResume ? 'View / Change PDF' : 'Upload Resume PDF →'}</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
-          )
-        })()}
 
-        {/* Step 4: The Golden Promise - Sit Back & Relax */}
-        {(() => {
-          const step4Active = completeness.hasResume && completeness.hasNaukriCredentials && completeness.hasTargetRoles
-          return (
-            <div className="p-4 rounded-xl border bg-zinc-900/40 border-zinc-800/80 flex flex-col justify-between space-y-3 transition-colors hover:border-zinc-700">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">Step 4</span>
-                  {step4Active ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> ✓ Active & Ready
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-500 font-medium flex items-center gap-1">
-                      ● Incomplete (Waiting 1-3)
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-semibold text-xs text-white">
-                  <Coffee className="w-4 h-4 text-zinc-300 shrink-0" />
-                  <span>Sit Back & Relax</span>
-                </div>
-                <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  {step4Active
-                    ? '100% Autonomous. The cloud bot searches jobs, tailors answers, and applies on your behalf twice daily.'
-                    : 'Finish Steps 1–3 above to activate autonomous daily applications on your behalf.'}
-                </p>
-              </div>
+            {/* Step 2: 1-Tap AI Auto-Fill */}
+            {(() => {
+              const step2Completed = completeness.hasTargetRoles && completeness.hasExperienceOrCtc
+              return (
+                <div className="p-3.5 sm:p-4 rounded-xl border bg-zinc-900/40 border-zinc-800/80 flex flex-col justify-between space-y-3 transition-colors hover:border-zinc-700">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">Step 2</span>
+                      {step2Completed ? (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-medium flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-zinc-400" /> Completed
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium flex items-center gap-1">
+                          <Zap className="w-3 h-3" /> Incomplete
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 font-semibold text-xs text-white">
+                      <Sparkles className="w-4 h-4 text-zinc-300 shrink-0" />
+                      <span>1-Tap AI Auto-Fill</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      {step2Completed
+                        ? 'AI extraction complete: Skills, CTC & experience parameters are extracted and populated.'
+                        : 'Click "Auto-Fill with AI". The neural parser extracts your roles, skills, & experience in 5 seconds.'}
+                    </p>
+                  </div>
 
-              <div className="w-full py-1.5 px-2.5 rounded-lg border border-zinc-800 bg-zinc-900/70 text-zinc-400 text-xs font-mono flex items-center justify-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-zinc-400" />
-                <span>Runs: 6 & 8 AM IST</span>
-              </div>
-            </div>
-          )
-        })()}
-      </div>
+                  <Link
+                    href="/profile#resume"
+                    className="w-full py-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span>{step2Completed ? 'Re-run AI Extraction' : 'Run Auto-Fill with AI'}</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              )
+            })()}
+
+            {/* Step 3: Review & Save Profile */}
+            {(() => {
+              const step3Completed = completeness.hasNaukriCredentials && completeness.hasTargetRoles
+              return (
+                <div className="p-3.5 sm:p-4 rounded-xl border bg-zinc-900/40 border-zinc-800/80 flex flex-col justify-between space-y-3 transition-colors hover:border-zinc-700">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">Step 3</span>
+                      {step3Completed ? (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-medium flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-zinc-400" /> Completed
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> Incomplete
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 font-semibold text-xs text-white">
+                      <User className="w-4 h-4 text-zinc-300 shrink-0" />
+                      <span>Review &amp; Save Profile</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      {step3Completed
+                        ? 'Profile parameters saved. Naukri credentials, target roles, and automation preferences are locked in.'
+                        : 'Review credentials, target roles & blacklist, then click "Save Profile" to synchronize your bot.'}
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/profile"
+                    className={`w-full py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      step3Completed
+                        ? 'bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300'
+                        : 'bg-white hover:bg-zinc-200 text-black font-semibold'
+                    }`}
+                  >
+                    <span>{step3Completed ? 'Modify Settings' : 'Review & Save Profile →'}</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              )
+            })()}
+
+            {/* Step 4: The Golden Promise - Sit Back & Relax */}
+            {(() => {
+              const step4Active = completeness.hasResume && completeness.hasNaukriCredentials && completeness.hasTargetRoles
+              return (
+                <div className="p-3.5 sm:p-4 rounded-xl border bg-zinc-900/40 border-zinc-800/80 flex flex-col justify-between space-y-3 transition-colors hover:border-zinc-700">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-zinc-500 font-semibold">Step 4</span>
+                      {step4Active ? (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-medium flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" /> Active &amp; Ready
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-500 font-medium flex items-center gap-1">
+                          Waiting 1-3
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 font-semibold text-xs text-white">
+                      <Coffee className="w-4 h-4 text-zinc-300 shrink-0" />
+                      <span>Sit Back &amp; Relax</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      {step4Active
+                        ? '100% Autonomous. The cloud bot searches jobs, tailors answers, and applies on your behalf twice daily.'
+                        : 'Finish Steps 1–3 above to activate autonomous daily applications on your behalf.'}
+                    </p>
+                  </div>
+
+                  <div className="w-full py-1.5 px-2.5 rounded-lg border border-zinc-800 bg-zinc-900/70 text-zinc-400 text-xs font-mono flex items-center justify-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Runs: 6 &amp; 8 AM IST</span>
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        </>
+      )}
 
       {/* Smart Missing Data Callout (If Anything is Incomplete) */}
       {!isFullyConfigured && (
@@ -315,13 +329,13 @@ export default function BeginnerOnboardingGuide({
       {isFullyConfigured && (
         <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 text-zinc-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-emerald-400 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-300 shrink-0">
               <CheckCircle2 className="w-4 h-4" />
             </div>
             <div>
               <div className="text-xs font-semibold text-white flex items-center gap-2">
-                <span>Autonomous Cloud Bot is Configured & Ready</span>
-                <span className="px-1.5 py-0.2 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">100% READY</span>
+                <span>Autonomous Cloud Bot is Configured &amp; Ready</span>
+                <span className="px-1.5 py-0.2 rounded text-[10px] bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono font-medium">100% READY</span>
               </div>
               <p className="text-[11px] text-zinc-400 mt-0.5">
                 Next sweep executes tomorrow morning at <strong>06:00 AM IST</strong>. You can close your browser and relax.
@@ -369,7 +383,7 @@ export default function BeginnerOnboardingGuide({
                   <li>• <strong>2 hours wasted</strong> every evening searching job boards</li>
                   <li>• Only <strong>60–80 jobs/month</strong> applied before burnout</li>
                   <li>• Submissions buried under 500+ competing applicants</li>
-                  <li>• Repetitive screening forms typed manually again & again</li>
+                  <li>• Repetitive screening forms typed manually again &amp; again</li>
                   <li>• <strong>Average result:</strong> 1–2 recruiter callbacks per month</li>
                 </ul>
               </div>
@@ -381,14 +395,14 @@ export default function BeginnerOnboardingGuide({
                     <Sparkles className="w-3.5 h-3.5 text-zinc-300" />
                     <span>JobFlux AI Autonomous Bot</span>
                   </span>
-                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded font-medium">10x Advantage</span>
+                  <span className="text-[10px] font-mono text-zinc-200 bg-zinc-800 border border-zinc-700 px-1.5 py-0.2 rounded font-medium">10x Advantage</span>
                 </div>
                 <ul className="space-y-1.5 text-[11px] text-zinc-300">
                   <li>• <strong className="text-white">0 minutes wasted</strong> — runs 100% in secure cloud background</li>
-                  <li>• <strong className="text-emerald-400 font-medium">600–1,800 verified applications/month</strong> submitted automatically</li>
-                  <li>• <strong className="text-white">6 AM & 8 AM IST delivery</strong> — your resume lands at the top of recruiter inboxes</li>
-                  <li>• AI formulates context-aware answers for notice period & salary Q&As</li>
-                  <li>• <strong className="text-emerald-400 font-medium">Average result:</strong> 6–12 interview calls in first 14 days</li>
+                  <li>• <strong className="text-white font-medium">600–1,800 verified applications/month</strong> submitted automatically</li>
+                  <li>• <strong className="text-white">6 AM &amp; 8 AM IST delivery</strong> — your resume lands at the top of recruiter inboxes</li>
+                  <li>• AI formulates context-aware answers for notice period &amp; salary Q&amp;As</li>
+                  <li>• <strong className="text-white font-medium">Average result:</strong> 6–12 interview calls in first 14 days</li>
                 </ul>
               </div>
             </div>

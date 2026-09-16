@@ -547,7 +547,7 @@ export default function PricingPage() {
                             </span>
                           )}
                           {plan.id === 'elite' && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700">
                               92% OFF
                             </span>
                           )}
@@ -610,8 +610,8 @@ export default function PricingPage() {
 
         {/* Risk Reversal & Interview Assurance Banner */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-5 rounded-2xl bg-[#09090b] border border-emerald-500/30 flex items-start gap-4 shadow-xl">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+          <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="space-y-1 text-xs">
@@ -818,7 +818,7 @@ export default function PricingPage() {
                     </div>
                     {appliedPromoCode && promoDiscount && (
                       <div className="mt-2 space-y-1">
-                        <div className="flex items-center justify-between text-[11px] bg-emerald-500/10 border border-emerald-500/30 rounded-md px-2.5 py-1.5 text-emerald-300">
+                        <div className="flex items-center justify-between text-[11px] bg-zinc-900 border border-zinc-750 rounded-md px-2.5 py-1.5 text-zinc-200">
                           <span className="font-medium">✓ {appliedPromoCode}: {promoDiscount.label}</span>
                           <button
                             type="button"
@@ -835,7 +835,7 @@ export default function PricingPage() {
                           </button>
                         </div>
                         {promoSuccessMsg && (
-                          <p className="text-[11px] text-emerald-400 font-medium px-1">{promoSuccessMsg}</p>
+                          <p className="text-[11px] text-zinc-300 font-medium px-1">{promoSuccessMsg}</p>
                         )}
                       </div>
                     )}
@@ -853,7 +853,7 @@ export default function PricingPage() {
                     </span>
                     <div className="flex items-center justify-between text-xs text-zinc-300">
                       <span>UPI, Cards, NetBanking (Razorpay)</span>
-                      <span className="text-emerald-400 font-mono text-[10px]">256-BIT SSL</span>
+                      <span className="text-zinc-400 font-mono text-[10px]">256-BIT SSL</span>
                     </div>
                   </div>
 
@@ -874,7 +874,7 @@ export default function PricingPage() {
                 </form>
               ) : (
                 <div className="text-center py-6 space-y-4">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 text-emerald-400 flex items-center justify-center mx-auto">
+                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 flex items-center justify-center mx-auto">
                     <Check className="w-5 h-5" />
                   </div>
                   <div>
@@ -931,7 +931,7 @@ export default function PricingPage() {
 
               {enterpriseSuccess ? (
                 <div className="p-6 rounded-xl bg-zinc-950 border border-zinc-800 text-center space-y-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 text-emerald-400 flex items-center justify-center mx-auto">
+                  <div className="w-10 h-10 rounded-full bg-zinc-900 text-zinc-200 flex items-center justify-center mx-auto">
                     <CheckCheck className="w-5 h-5" />
                   </div>
                   <h4 className="text-sm font-semibold text-white">Inquiry Received</h4>

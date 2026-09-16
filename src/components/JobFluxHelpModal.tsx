@@ -182,11 +182,11 @@ export default function JobFluxHelpModal({
           aria-label="Help & Support"
           className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border border-zinc-700/80 hover:border-teal-500/50 text-white shadow-2xl backdrop-blur-md transition-all text-xs font-medium cursor-pointer group pointer-events-auto select-none"
         >
-          <div className="w-5 h-5 rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
+          <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-300 group-hover:scale-110 transition-transform">
             <HelpCircle className="w-3.5 h-3.5" />
           </div>
           <span className="font-semibold tracking-wide">Help & Support</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-zinc-400" />
         </motion.button>
       )}
 
@@ -207,7 +207,7 @@ export default function JobFluxHelpModal({
               {/* Header */}
               <div className="p-4 sm:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/60">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+                  <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                     <MessageSquare className="w-4 h-4" />
                   </div>
                   <div>
@@ -232,11 +232,11 @@ export default function JobFluxHelpModal({
                 <div className="p-4 rounded-xl bg-black border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-teal-500/10 border border-teal-500/30 text-teal-300">
+                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
                         Primary Preference
                       </span>
                       <span className="text-[10px] text-zinc-500 font-mono flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-emerald-400" /> 2-4h response
+                        <Clock className="w-3 h-3 text-zinc-400" /> 2-4h response
                       </span>
                     </div>
                     <div className="text-sm font-mono font-semibold text-white tracking-wide">
@@ -258,8 +258,8 @@ export default function JobFluxHelpModal({
                     >
                       {copied ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400">Copied</span>
+                          <Check className="w-3.5 h-3.5 text-zinc-200" />
+                          <span className="text-zinc-200">Copied</span>
                         </>
                       ) : (
                         <>
@@ -302,7 +302,7 @@ export default function JobFluxHelpModal({
                   <div>
                     {submittedTicket ? (
                       <div className="p-6 rounded-xl bg-zinc-950 border border-zinc-800 text-center space-y-4">
-                        <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+                        <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 flex items-center justify-center mx-auto">
                           <Check className="w-6 h-6" />
                         </div>
                         <div>
@@ -464,7 +464,7 @@ export default function JobFluxHelpModal({
               {/* Footer */}
               <div className="p-3.5 border-t border-zinc-800 bg-zinc-950 text-center text-[11px] text-zinc-500 flex items-center justify-between px-5">
                 <span className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 256-Bit SSL Encrypted Support
+                  <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" /> 256-Bit SSL Encrypted Support
                 </span>
                 <a
                   href={`mailto:${supportEmail}`}

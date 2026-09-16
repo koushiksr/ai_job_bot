@@ -37,7 +37,7 @@ const TOOLS = [
     slug: '/tools/naukri-headline-generator',
     icon: Sparkles,
     badge: 'Trending · 3x Inbound Calls',
-    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    badgeColor: 'bg-zinc-800 text-zinc-200 border-zinc-700',
     description:
       'Generate click-through optimized Naukri headlines under 100 characters strictly tuned to pass the Resdex recruiter search algorithm. Includes a keyword-rich 250-word profile summary.',
     features: ['Strictly < 100 Char Cutoff', 'Resdex Keyword Magnet', '1-Click Instant Copy', 'Experience & Notice Period Formats']
@@ -118,7 +118,7 @@ export default function ToolsHubPage() {
                   <ul className="space-y-2.5 mb-6">
                     {tool.features.map((feat, i) => (
                       <li key={i} className="flex items-center gap-2 text-xs text-zinc-300">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                         <span>{feat}</span>
                       </li>
                     ))}

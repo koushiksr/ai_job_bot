@@ -383,7 +383,7 @@ export default function Home() {
               {existingUser ? (
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                     <span className="text-zinc-300 font-mono text-[11px] max-w-[150px] truncate">
                       {existingUser.email || existingUser.id}
                     </span>
@@ -427,24 +427,24 @@ export default function Home() {
 
         {/* Welcome Guide Strip — only shown to guests (non-logged-in) */}
         {!existingUser && (
-          <div className="w-full border-b border-zinc-900/60 bg-zinc-950/60 backdrop-blur-sm z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-zinc-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>New here? Start with a <strong className="text-zinc-200">1-Day Free Trial</strong> — no credit card needed.</span>
+          <div className="w-full border-b border-zinc-900 bg-zinc-950/90 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2 text-zinc-400 text-center sm:text-left">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0 hidden sm:inline-block" />
+                <span>Start with a <strong className="text-zinc-200">1-Day Free Trial</strong> (15 autonomous applications included).</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => scrollToAuth('signin')}
-                  className="text-zinc-400 hover:text-white transition-colors px-2.5 py-1 rounded-md hover:bg-zinc-800/70 cursor-pointer"
+                  className="text-xs text-zinc-400 hover:text-white transition-colors px-2.5 py-1 rounded-md hover:bg-zinc-900 cursor-pointer"
                 >
                   Sign in
                 </button>
                 <button
                   type="button"
                   onClick={() => scrollToAuth('trial')}
-                  className="px-3 py-1 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold transition-colors cursor-pointer"
+                  className="px-3 py-1 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Start Free →
                 </button>
@@ -454,51 +454,46 @@ export default function Home() {
         )}
         
         {/* Main Hero Section */}
-        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-20 flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 z-10">
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 md:py-16 flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 z-10">
           
           {/* Left Column: Clean Value Proposition */}
           <motion.div 
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex-1 w-full text-center lg:text-left space-y-7"
+            className="flex-1 w-full text-center lg:text-left space-y-6"
           >
             <div>
-              {/* Sleek Autonomous Radar Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-zinc-800/60 text-zinc-300 text-xs font-mono mb-5 relative overflow-hidden backdrop-blur-md">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                </span>
-                <span className="text-zinc-300">Autonomous Engine Active</span>
-                <span className="text-zinc-700">·</span>
-                <span className="text-zinc-500 font-medium">Daily Runs (06:00 &amp; 08:00 AM IST)</span>
-                {/* Subtle bottom line accent */}
-                <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-700/40 to-transparent" />
+              {/* Sleek Autonomous Radar Pill - Subtle Monochrome */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs font-mono mb-4 sm:mb-5">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
+                <span className="text-zinc-300">Autonomous Engine</span>
+                <span className="text-zinc-600">·</span>
+                <span className="text-zinc-400 font-normal">Runs Daily (06:00 &amp; 08:00 AM IST)</span>
               </div>
               
-              <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-white leading-[1.1]">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.15]">
                 Autonomous job applications, <br className="hidden sm:inline" />
                 <span className="text-zinc-400">engineered for precision.</span>
               </h1>
               
-              <p className="text-base sm:text-lg text-zinc-400 mt-5 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                JobFlux AI monitors verified hiring feeds, formulates context-aware answers to employer screening questions, and delivers your verified applications twice daily at 6:00 AM & 8:00 AM IST.
+              <p className="text-sm sm:text-base text-zinc-400 mt-4 sm:mt-5 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                JobFlux AI monitors verified hiring feeds, formulates context-aware answers to employer screening questions, and delivers your verified applications twice daily at 6:00 AM &amp; 8:00 AM IST.
               </p>
             </div>
 
-            {/* Benefit Badges in Monochromatic Glass Style */}
-            <div className="flex flex-wrap gap-2.5 items-center justify-center lg:justify-start text-xs text-zinc-300">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
+            {/* Benefit Badges in Clean Monochrome */}
+            <div className="flex flex-wrap gap-2 sm:gap-2.5 items-center justify-center lg:justify-start text-xs text-zinc-300">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
                 <Clock className="w-3.5 h-3.5 text-zinc-400" />
-                <span>Dual Morning Runs (6 & 8 AM IST)</span>
+                <span>Dual Morning Runs (6 &amp; 8 AM IST)</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400" />
                 <span>1-Day Free Trial (₹0)</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
-                <ShieldCheck className="w-3.5 h-3.5 text-zinc-300" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Direct Recruiter Delivery</span>
               </div>
             </div>
@@ -638,9 +633,9 @@ export default function Home() {
 
                     {forgotSent ? (
                       <div className="space-y-4 py-2">
-                        <div className="p-3.5 bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 rounded-xl text-xs space-y-1">
-                          <p className="font-semibold text-emerald-200">Email Dispatched Successfully</p>
-                          <p className="text-emerald-400/90 text-[11px] leading-relaxed">
+                        <div className="p-3.5 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-xl text-xs space-y-1">
+                          <p className="font-semibold text-white">Email Dispatched Successfully</p>
+                          <p className="text-zinc-400 text-[11px] leading-relaxed">
                             {forgotSuccessMessage || `We sent reset instructions and a 6-digit code to ${email}.`}
                           </p>
                         </div>
@@ -908,23 +903,22 @@ export default function Home() {
           />
         </section>
 
-        {/* Live Social Proof Ticker */}
-        <div className="w-full border-y border-zinc-900 bg-black/80 backdrop-blur-xl py-3 z-20 shadow-inner">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-zinc-400">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span className="font-semibold text-white">Live Inbound Ticker:</span>
-              <span className="text-zinc-300">
-                🎉 Rahul M. (Bengaluru) received 3 interview shortlists for Senior Backend at <strong className="text-white">Swiggy & Zepto (₹32 LPA)</strong> · 18m ago
+        {/* Minimalist Platform Telemetry Bar */}
+        <div className="w-full border-y border-zinc-900 bg-zinc-950/70 py-2.5 z-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2 text-zinc-400 text-center sm:text-left">
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0 hidden sm:inline-block" />
+              <span className="text-zinc-400">Scheduled Dispatch:</span>
+              <span className="text-zinc-200 font-medium">
+                Dual morning runs at 06:00 AM &amp; 08:00 AM IST directly to hiring managers
               </span>
             </div>
-            <div className="flex items-center gap-5 text-[11px] text-zinc-400 font-mono">
-              <span className="text-emerald-400 font-medium">✓ 14,820+ Applications Submitted</span>
-              <span className="hidden sm:inline text-zinc-400">⚡ 98.6% ATS Pass Rate</span>
-              <span className="text-emerald-400 font-semibold hidden md:inline">🔒 0 Account Bans Guaranteed</span>
+            <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-400 font-mono">
+              <span>14,820+ Submitted</span>
+              <span className="text-zinc-700">·</span>
+              <span>98.6% ATS Pass Rate</span>
+              <span className="text-zinc-700 hidden sm:inline">·</span>
+              <span className="hidden sm:inline">Zero Account Bans</span>
             </div>
           </div>
         </div>
@@ -1032,7 +1026,7 @@ export default function Home() {
                   <th className="p-4 sm:p-5 font-semibold">Key Capabilities</th>
                   <th className="p-4 sm:p-5 font-semibold text-zinc-500">Manual Applying</th>
                   <th className="p-4 sm:p-5 font-semibold text-zinc-500">Cheap Chrome Extensions</th>
-                  <th className="p-4 sm:p-5 font-bold text-sky-300 bg-sky-950/40">JobFlux AI Autopilot</th>
+                  <th className="p-4 sm:p-5 font-bold text-white bg-zinc-900/80">JobFlux AI Autopilot</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
@@ -1040,37 +1034,37 @@ export default function Home() {
                   <td className="p-4 sm:p-5 font-medium text-white">Daily Application Velocity</td>
                   <td className="p-4 sm:p-5 text-zinc-500">5-10 / day (Exhausting)</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Unreliable (Crashes often)</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">50 / day Guaranteed (Dual 6 & 8 AM runs)</td>
+                  <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">50 / day Guaranteed (Dual 6 &amp; 8 AM runs)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Naukri Resdex 24h Profile Bump</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Must remember every morning</td>
                   <td className="p-4 sm:p-5 text-zinc-500">None</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">Automatic 9 AM Silent Touch (3x more calls)</td>
+                  <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">Automatic 9 AM Silent Touch (3x more calls)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">AI Screening Questionnaire Solver</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Manual typing on every job</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Leaves blank or random guesses</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">Context-Aware AI Answers from Resume</td>
+                  <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">Context-Aware AI Answers from Resume</td>
                 </tr>
                 <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Naukri Account Safety & Ban Risk</td>
-                  <td className="p-4 sm:p-5 text-emerald-400">Safe (Manual)</td>
+                  <td className="p-4 sm:p-5 font-medium text-white">Naukri Account Safety &amp; Ban Risk</td>
+                  <td className="p-4 sm:p-5 text-zinc-400">Safe (Manual)</td>
                   <td className="p-4 sm:p-5 text-rose-400">High Risk (Datacenter IP bans)</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">100% Safe (Local Residential IP + Stealth)</td>
+                  <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">100% Safe (Local Residential IP + Stealth)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Harvard ATS Resume Studio</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Pay ₹2,000+ for external writers</td>
                   <td className="p-4 sm:p-5 text-zinc-500">None</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">Included Free (99.7% ATS pass rate)</td>
+                  <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">Included Free (99.7% ATS pass rate)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Time Invested Per Month</td>
                   <td className="p-4 sm:p-5 text-rose-400 font-semibold">60 - 75 Hours Wasted</td>
                   <td className="p-4 sm:p-5 text-zinc-400">15 Hours debugging errors</td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-sky-950/20">0 Hours (100% Automated Background)</td>
+                  <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">0 Hours (100% Automated Background)</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">Monthly Investment</td>
@@ -1086,7 +1080,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
             <div className="p-6 sm:p-7 rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between space-y-4">
               <div className="space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-emerald-400">
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white">
@@ -1096,7 +1090,7 @@ export default function Home() {
                   We are so confident in our dual-run engine and 9 AM profile booster that we offer a 100% money-back guarantee. If you don&apos;t receive at least 3 recruiter profile shortlists or interview calls within 14 days, email us for an immediate, full refund. Zero hassle.
                 </p>
               </div>
-              <div className="pt-2 text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 font-semibold">
+              <div className="pt-2 text-[11px] font-mono text-zinc-300 flex items-center gap-1.5 font-semibold">
                 <Check className="w-4 h-4" /> 100% Risk-Free Guarantee
               </div>
             </div>

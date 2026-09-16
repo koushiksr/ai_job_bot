@@ -862,7 +862,7 @@ export default function UserDashboard() {
                       {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
                     </div>
                   )}
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
+                  <span className="w-2 h-2 rounded-full bg-zinc-400 absolute -bottom-0.5 -right-0.5 border border-black" />
                 </div>
 
                 {/* Candidate Name, Plan Badge, and 'Click to Edit Profile' Callout */}
@@ -1081,7 +1081,7 @@ export default function UserDashboard() {
               </Link>
               <div className="hidden lg:flex items-center gap-2 border-l border-zinc-800/80 pl-2.5">
                 <span className="text-[11px] font-mono text-zinc-400">Autonomous Radar</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
               </div>
             </div>
 
@@ -1097,7 +1097,7 @@ export default function UserDashboard() {
                 ) : (
                   userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
                 )}
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 absolute -bottom-0.5 -right-0.5 border border-black" />
               </div>
               {(isVip || userPlan === 'vip') ? (
                 <span className="inline-flex items-center text-[9px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded-md">
@@ -1145,7 +1145,7 @@ export default function UserDashboard() {
                   ) : (
                     userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
                   )}
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-zinc-400 absolute -bottom-0.5 -right-0.5 border-2 border-black" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -1207,10 +1207,10 @@ export default function UserDashboard() {
             <Link
               href="/profile"
               onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold transition-all text-xs"
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-semibold transition-all text-xs"
             >
-              <User className="w-3.5 h-3.5" />
-              <span>Edit Profile, Photo & Credentials ↗</span>
+              <User className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Edit Profile &amp; Credentials ↗</span>
             </Link>
 
             {/* Quick Actions List */}
@@ -1221,8 +1221,8 @@ export default function UserDashboard() {
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
               >
                 <User className="w-4 h-4 text-zinc-400 shrink-0" />
-                <span>Candidate Profile & Credentials</span>
-                <span className="text-[10px] text-emerald-400 font-mono ml-auto">1-Time</span>
+                <span>Candidate Profile &amp; Credentials</span>
+                <span className="text-[10px] text-zinc-400 font-mono ml-auto">1-Time</span>
               </Link>
 
               <button
@@ -1452,7 +1452,7 @@ export default function UserDashboard() {
                   ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
                   : 'bg-amber-500/20 border-amber-500/40 text-amber-300'
               }`}>
-                <Clock className={`w-4 h-4 ${!isPlanExpired ? 'animate-pulse' : ''}`} />
+                <Clock className="w-4 h-4" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -1616,37 +1616,33 @@ export default function UserDashboard() {
                 <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
                   <Cpu className="w-5 h-5 text-zinc-300" />
                 </div>
-                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-                </span>
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-sm font-semibold text-white tracking-tight">
                     Autonomous Engine Cockpit
                   </h2>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-emerald-400 font-mono flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                     Daemon Active
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2 flex-wrap">
                   <span>Schedule: <strong className="text-zinc-300">Daily Autonomous Sweeps</strong></span>
                   <span className="text-zinc-600 hidden sm:inline">•</span>
-                  <span className="text-emerald-400 font-medium">Applies Daily</span>
+                  <span className="text-zinc-400 font-medium">Applies Daily</span>
                   <span className="text-zinc-600 hidden sm:inline">•</span>
-                  <span>Autonomous Radar: <strong className="text-zinc-200 font-mono">Active</strong></span>
+                  <span>Radar: <strong className="text-zinc-200 font-mono">06:00 &amp; 08:00 AM IST</strong></span>
                 </p>
               </div>
             </div>
 
-            <div className="w-full sm:w-auto flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
-              <div className="px-3 py-2 rounded-lg bg-zinc-900/90 border border-zinc-800 text-xs flex items-center justify-center gap-2 font-mono shrink-0">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-zinc-300">Radar</span>
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs flex items-center justify-center gap-2 font-mono shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+                <span className="text-zinc-300">Radar Active</span>
                 <span className="text-zinc-600">•</span>
-                <span className="text-emerald-400 font-semibold">Daily Sweeps Active</span>
+                <span className="text-zinc-400">Daily Sweeps</span>
               </div>
 
               <button
@@ -1679,7 +1675,7 @@ export default function UserDashboard() {
                         </span>
                       )
                     ) : (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-950/80 border border-blue-700/50 text-blue-300 font-semibold">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">
                         PRO
                       </span>
                     )}
@@ -1689,56 +1685,11 @@ export default function UserDashboard() {
             </div>
           </div>
 
-          {/* Active Radar Telemetry Animation (Visible during Scouting — PRO only) */}
-          {isTriggeringScout && isProfessional && (
-            <div className="p-4 bg-zinc-950/95 border-t border-b border-sky-500/40 relative overflow-hidden space-y-3">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
-                    <div className="absolute inset-0 rounded-full border border-sky-500/30 animate-radar-pulse" />
-                    <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8 drop-shadow-[0_0_12px_rgba(56,189,248,0.5)]">
-                      <polygon points="42,5 17,21 28,24" fill="#38bdf8" />
-                      <polygon points="42,5 28,24 31,34" fill="#0284c7" />
-                      <line x1="42" y1="5" x2="28" y2="24" stroke="#ffffff" strokeWidth="1.2" opacity="0.9" />
-                      <circle cx="42" cy="5" r="2" fill="#ffffff" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-white">
-                        {activeTask?.status === 'pending'
-                          ? (queueStatus && queueStatus.queue_position > 1
-                              ? `Task Queued · Position #${queueStatus.queue_position} in line`
-                              : 'Task Enqueued · Awaiting Cloud Worker')
-                          : 'Autonomous Sweep Active'}
-                      </span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${
-                        activeTask?.status === 'pending'
-                          ? 'bg-amber-950/80 border border-amber-700/60 text-amber-300'
-                          : 'bg-sky-950/80 border border-sky-700/60 text-sky-300 animate-pulse'
-                      }`}>
-                        {activeTask?.status === 'pending' ? 'FIFO QUEUE' : 'SWEEP ACTIVE'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">
-                      {activeTask?.status === 'pending'
-                        ? 'Worker daemon processes candidate tasks sequentially one by one to safeguard candidate accounts.'
-                        : 'Targeting recruiter feeds, auto-formulating screening Q&As, and submitting verified applications...'}
-                    </p>
-                  </div>
-                </div>
-                <div className="w-full sm:w-44 h-2 bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden relative shrink-0">
-                  <div className="w-20 h-full bg-gradient-to-r from-sky-600 via-cyan-400 to-sky-600 rounded-full animate-laser-sweep" />
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Feedback Toast */}
           {taskFeedback && isProfessional && (
             <div className={`p-3 text-xs flex items-center justify-between border-t border-b ${
               taskFeedback.type === 'success'
-                ? 'bg-zinc-950 border-emerald-500/30 text-emerald-300'
+                ? 'bg-zinc-950 border-zinc-700 text-zinc-200'
                 : taskFeedback.type === 'error'
                 ? 'bg-zinc-950 border-red-500/30 text-red-300'
                 : 'bg-zinc-950 border-zinc-800 text-zinc-300'
@@ -1756,41 +1707,41 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {/* Section 2: Integrated 4 Metrics Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-zinc-800/80 border-t border-zinc-800/80 bg-black/30">
-            <div className="p-3.5 sm:p-4 space-y-1">
+          {/* Section 2: Integrated 4 Metrics Bar - Clean Responsive Card Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 p-3 sm:p-4 border-t border-zinc-800/80 bg-black/40">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">
               <div className="flex items-center justify-between text-xs text-zinc-400">
                 <span className="text-[11px] flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-zinc-500" /> Today</span>
                 <span className="text-[10px] font-mono text-zinc-500">24h</span>
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-white font-mono">{metrics.today}</div>
+              <div className="text-lg sm:text-2xl font-bold text-white font-mono">{metrics.today}</div>
               <p className="text-[10px] text-zinc-500">Delivered today</p>
             </div>
 
-            <div className="p-3.5 sm:p-4 space-y-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">
               <div className="flex items-center justify-between text-xs text-zinc-400">
                 <span className="text-[11px] flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-zinc-500" /> This Week</span>
                 <span className="text-[10px] font-mono text-zinc-500">7d</span>
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-white font-mono">{metrics.this_week}</div>
+              <div className="text-lg sm:text-2xl font-bold text-white font-mono">{metrics.this_week}</div>
               <p className="text-[10px] text-zinc-500">7-day outreach</p>
             </div>
 
-            <div className="p-3.5 sm:p-4 space-y-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">
               <div className="flex items-center justify-between text-xs text-zinc-400">
                 <span className="text-[11px] flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-zinc-500" /> This Month</span>
                 <span className="text-[10px] font-mono text-zinc-500">30d</span>
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-white font-mono">{metrics.this_month}</div>
+              <div className="text-lg sm:text-2xl font-bold text-white font-mono">{metrics.this_month}</div>
               <p className="text-[10px] text-zinc-500">Monthly volume</p>
             </div>
 
-            <div className="p-3.5 sm:p-4 space-y-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">
               <div className="flex items-center justify-between text-xs text-zinc-400">
                 <span className="text-[11px] flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-zinc-500" /> Total Verified</span>
-                <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">100%</span>
+                <span className="text-[9px] font-mono text-zinc-300 bg-zinc-800 px-1.5 py-0.2 rounded border border-zinc-700 font-medium">100%</span>
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-white font-mono">{metrics.total_applied}</div>
+              <div className="text-lg sm:text-2xl font-bold text-white font-mono">{metrics.total_applied}</div>
               <p className="text-[10px] text-zinc-500">All-time submissions</p>
             </div>
           </div>
@@ -1799,7 +1750,7 @@ export default function UserDashboard() {
           <div className="px-4 py-2.5 bg-black border-t border-zinc-800/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-zinc-400">
             <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
                 <span>Pacing: <strong className="text-zinc-300">Human (4s-8s)</strong></span>
               </span>
               <span className="text-zinc-800 hidden sm:inline">|</span>
@@ -1807,18 +1758,18 @@ export default function UserDashboard() {
                 onClick={() => { if (!isProfessional) { setProModalFeature('Neural LLM Screening Tailor'); setShowProModal(true) } }}
                 className="flex items-center gap-1.5 hover:text-zinc-200 transition-colors cursor-pointer"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
                 <span>Screening: <strong className="text-zinc-300">Contextual AI</strong></span>
-                {!isProfessional && <span className="text-[9px] font-mono text-blue-400 ml-0.5">🔒 PRO</span>}
+                {!isProfessional && <span className="text-[9px] font-mono text-zinc-400 ml-0.5">🔒 PRO</span>}
               </button>
               <span className="text-zinc-800 hidden sm:inline">|</span>
               <button
                 onClick={() => { if (!isProfessional) { setProModalFeature('Zero-Queue Recruiter Fast-Path'); setShowProModal(true) } }}
                 className="flex items-center gap-1.5 hover:text-zinc-200 transition-colors cursor-pointer"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
                 <span>Delivery: <strong className="text-zinc-300">Recruiter ATS</strong></span>
-                {!isProfessional && <span className="text-[9px] font-mono text-blue-400 ml-0.5">🔒 PRO</span>}
+                {!isProfessional && <span className="text-[9px] font-mono text-zinc-400 ml-0.5">🔒 PRO</span>}
               </button>
             </div>
 
@@ -1827,67 +1778,6 @@ export default function UserDashboard() {
             </span>
           </div>
         </div>
-
-        {/* ── New User Setup Required ── Only shows when profile incomplete & 0 apps ── */}
-        {!pageLoading && !profileCompleteness.hasResume && metrics.total_applied === 0 && (
-          <div className="rounded-2xl bg-[#09090b] border border-zinc-700/80 overflow-hidden relative">
-            {/* Accent top line */}
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-500/50 to-transparent pointer-events-none" />
-            
-            <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-4">
-                {/* Step indicator */}
-                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                  1
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-white">Complete your profile to activate auto-apply</span>
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 uppercase tracking-wide">Setup Required</span>
-                  </div>
-                  <p className="text-xs text-zinc-400 mt-1 max-w-xl">
-                    Upload your resume PDF — our AI auto-fills your profile in seconds. Then add your credentials and target roles to start receiving daily job applications.
-                  </p>
-                  {/* Mini checklist */}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5 text-[11px]">
-                    <span className={`flex items-center gap-1.5 ${profileCompleteness.hasResume ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${profileCompleteness.hasResume ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
-                      Resume PDF
-                    </span>
-                    <span className={`flex items-center gap-1.5 ${profileCompleteness.hasNaukriCredentials ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${profileCompleteness.hasNaukriCredentials ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
-                      Credentials
-                    </span>
-                    <span className={`flex items-center gap-1.5 ${profileCompleteness.hasTargetRoles ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${profileCompleteness.hasTargetRoles ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
-                      Target Roles
-                    </span>
-                    <span className={`flex items-center gap-1.5 ${profileCompleteness.hasExperienceOrCtc ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${profileCompleteness.hasExperienceOrCtc ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
-                      Experience &amp; CTC
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <Link
-                href="/profile"
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-2 shadow-sm"
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>Set Up Profile &amp; Upload Resume</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            {/* Progress bar */}
-            <div className="h-0.5 bg-zinc-900">
-              <div
-                className="h-full bg-emerald-500/60 transition-all duration-500"
-                style={{ width: `${profileCompleteness.percent}%` }}
-              />
-            </div>
-          </div>
-        )}
 
         {/* Beginner Onboarding & Autonomous Workflow Guide */}
         <BeginnerOnboardingGuide
@@ -2014,117 +1904,6 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            {/* New User Onboarding Checklist (Shown when 0 applications dispatched) */}
-            {historyTotalCount === 0 && !historySearch && !loadingHistory && (
-              <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
-                      <Target className="w-4 h-4 text-zinc-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-semibold text-white">
-                        Autonomous Agent Setup · 3 Steps to Go Live
-                      </h3>
-                      <p className="text-[11px] text-zinc-400">
-                        Complete your calibration so the autonomous engine can submit verified applications during daily sweeps.
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
-                    CALIBRATION
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {/* Step 1 */}
-                  <div className="p-3.5 rounded-lg bg-[#09090b] border border-zinc-800/90 flex flex-col justify-between space-y-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono text-zinc-500 uppercase">Step 1</span>
-                        <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> Ready
-                        </span>
-                      </div>
-                      <h4 className="text-xs font-semibold text-zinc-200">ATS Resume & Profile</h4>
-                      <p className="text-[11px] text-zinc-400 leading-relaxed">
-                        Upload your PDF or construct an ATS-optimized resume using our Google XYZ AI builder.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('resume_builder')}
-                      className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Sparkles className="w-3 h-3 text-zinc-400" />
-                      <span>AI Resume Builder</span>
-                    </button>
-                  </div>
-
-                  {/* Step 2 */}
-                  <div className="p-3.5 rounded-lg bg-[#09090b] border border-zinc-800/90 flex flex-col justify-between space-y-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono text-zinc-500 uppercase">Step 2</span>
-                        <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
-                          <Shield className="w-3 h-3" /> Shield Active
-                        </span>
-                      </div>
-                      <h4 className="text-xs font-semibold text-zinc-200">Preferences & Blacklist</h4>
-                      <p className="text-[11px] text-zinc-400 leading-relaxed">
-                        Configure target job keywords, salary brackets, and exclude current employers.
-                      </p>
-                    </div>
-                    <Link
-                      href="/profile"
-                      className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <User className="w-3 h-3 text-zinc-400" />
-                      <span>Configure Filters & Credentials</span>
-                      <span className="text-[10px] font-mono text-emerald-400 font-semibold">(One-Time)</span>
-                    </Link>
-                  </div>
-
-                  {/* Step 3 */}
-                  <div className="p-3.5 rounded-lg bg-[#09090b] border border-zinc-800/90 flex flex-col justify-between space-y-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono text-zinc-500 uppercase">Step 3</span>
-                        <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Scheduled
-                        </span>
-                      </div>
-                      <h4 className="text-xs font-semibold text-zinc-200">Autonomous Execution</h4>
-                      <p className="text-[11px] text-zinc-400 leading-relaxed">
-                        Daily autonomous sweeps run automatically. Dispatched applications will log below.
-                      </p>
-                    </div>
-                    <div className="w-full flex flex-col gap-2">
-                      <div className="w-full py-1.5 px-2.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 text-xs font-mono flex items-center justify-between">
-                        <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-zinc-400" /> Schedule</span>
-                        <span className="text-emerald-400 font-semibold text-[11px]">Daily Sweeps</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleTriggerOnDemandScout}
-                        disabled={isTriggeringScout || (activeTask && (activeTask.status === 'pending' || activeTask.status === 'running')) || (isProfessional && weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0)}
-                        className="w-full py-1.5 px-2.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Zap className="w-3 h-3 text-amber-400 fill-amber-400" />
-                        <span>Run On-Demand Sweep</span>
-                        {isProfessional ? (
-                          weeklyQuota && !weeklyQuota.is_unlimited ? (
-                            <span className="text-[10px] font-mono text-zinc-400">({weeklyQuota.remaining}/5)</span>
-                          ) : null
-                        ) : (
-                          <span className="text-[9px] font-mono px-1 rounded bg-blue-950/80 border border-blue-700/50 text-blue-300">PRO</span>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Applications Table (Desktop) & Cards (Mobile) */}
             <div className="rounded-xl bg-[#09090b] border border-zinc-800 overflow-hidden">
               {/* Desktop Table View */}
@@ -2151,7 +1930,7 @@ export default function UserDashboard() {
                         <td colSpan={4} className="py-16 text-center">
                           <div className="max-w-md mx-auto space-y-3">
                             <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
-                              <Cpu className="w-6 h-6 text-sky-400" />
+                              <Cpu className="w-6 h-6 text-zinc-400" />
                             </div>
                             <div className="space-y-1">
                               <h4 className="text-xs font-semibold text-white">
@@ -2204,7 +1983,7 @@ export default function UserDashboard() {
                                 title="Upgrade to Professional to open direct portal job listing"
                               >
                                 <span className="text-zinc-300 group-hover:text-white transition-colors">{job.title || 'Job Opening'}</span>
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-blue-950/80 border border-blue-700/50 text-blue-300 group-hover:bg-blue-900/60 transition-colors">
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 group-hover:bg-zinc-700 transition-colors">
                                   <Lock className="w-2.5 h-2.5" />
                                   PRO
                                 </span>
@@ -2217,8 +1996,8 @@ export default function UserDashboard() {
                             {formatJobDate(job)}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-emerald-950/60 text-emerald-400 border border-emerald-800/50">
-                              <CheckCircle2 className="w-3 h-3" /> APPLIED
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-zinc-900 text-zinc-300 border border-zinc-800">
+                              <CheckCircle2 className="w-3 h-3 text-zinc-400" /> APPLIED
                             </span>
                           </td>
                         </tr>
@@ -2237,7 +2016,7 @@ export default function UserDashboard() {
                   </div>
                 ) : historyJobs.length === 0 ? (
                   <div className="p-8 text-center space-y-2">
-                    <Cpu className="w-5 h-5 text-sky-400 mx-auto" />
+                    <Cpu className="w-5 h-5 text-zinc-400 mx-auto" />
                     <h4 className="text-xs font-semibold text-white">
                       {historySearch ? 'No Results Found' : 'Engine Standing By'}
                     </h4>
@@ -2268,8 +2047,8 @@ export default function UserDashboard() {
                             </p>
                           </div>
                         </div>
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 shrink-0">
-                          <CheckCircle2 className="w-2.5 h-2.5" /> APPLIED
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-zinc-900 text-zinc-300 border border-zinc-800 shrink-0">
+                          <CheckCircle2 className="w-2.5 h-2.5 text-zinc-400" /> APPLIED
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono pt-1">
@@ -2316,7 +2095,7 @@ export default function UserDashboard() {
         {/* TAB 2 (FALLBACK): CANDIDATE PROFILE & CREDENTIALS */}
         {activeTab === 'profile' && (
           <div className="p-8 rounded-2xl bg-[#09090b] border border-zinc-800 text-center space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-emerald-400">
+            <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-300">
               <User className="w-6 h-6" />
             </div>
             <div>
@@ -2438,7 +2217,7 @@ export default function UserDashboard() {
                       <div className="flex items-center gap-2">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
                           t.status === 'resolved'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                            ? 'bg-zinc-800 text-zinc-200 border border-zinc-700'
                             : t.status === 'in_progress'
                             ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
                             : t.status === 'closed'
@@ -2512,7 +2291,7 @@ export default function UserDashboard() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-semibold text-white">Application Delivery Receipt</h3>
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-emerald-400">
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium">
                         Verified
                       </span>
                     </div>
@@ -2622,7 +2401,7 @@ export default function UserDashboard() {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
-                <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                <Sparkles className="w-4 h-4 text-amber-300" />
               </div>
               <div>
                 <div className="text-xs font-bold text-white flex items-center gap-1.5">

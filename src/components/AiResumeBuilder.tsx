@@ -284,7 +284,7 @@ export default function AiResumeBuilder({
       {/* Subtle Minimal PII Privacy Shield & Dedicated Studio Link */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
         <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-950/80 px-3 py-1.5 rounded-xl border border-zinc-800/80 w-fit" title="Zero Data-Leak Guarantee: Automatically scrubs and anonymizes sensitive PII (Home address, Aadhaar/PAN, internal IDs, personal phone) before cloud processing">
-          <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <Shield className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
           <span className="font-medium text-zinc-300">Auto PII Sanitized</span>
           <span className="text-zinc-500 text-[10px] hidden sm:inline">· Sensitive PII scrubbed before ATS parsing</span>
         </div>
@@ -314,7 +314,7 @@ export default function AiResumeBuilder({
                 }`}
               >
                 <span>{s.title}</span>
-                <span className="text-[9px] sm:text-[10px] font-mono text-emerald-400 px-1.5 py-0.2 rounded bg-emerald-950/60 border border-emerald-800/40">
+                <span className="text-[9px] sm:text-[10px] font-mono text-zinc-300 px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800">
                   {s.bracket}
                 </span>
               </button>
@@ -330,8 +330,8 @@ export default function AiResumeBuilder({
                 <p className="text-xs text-amber-400 font-medium mt-0.5">{activeSample.title} · {activeSample.companyTier}</p>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-                <span className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-zinc-900 border border-zinc-750 text-zinc-200 font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400" />
                   {activeSample.score}% ATS RATING
                 </span>
                 <button
@@ -550,7 +550,7 @@ export default function AiResumeBuilder({
           {/* Intermediate Synthesizing Card with Ref for immediate scroll */}
           <div ref={resultSectionRef} id="ats-resume-synthesis-anchor">
             {isGenerating && (
-              <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-amber-500/40 text-center space-y-3.5 shadow-2xl card-featured-glow animate-pulse">
+              <div className="p-6 sm:p-8 rounded-2xl bg-zinc-950 border border-amber-500/40 text-center space-y-3.5 shadow-2xl card-featured-glow">
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-amber-950/80 border border-amber-600/60 flex items-center justify-center text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                   <RefreshCw className="w-6 h-6 animate-spin text-amber-400" />
                 </div>
@@ -580,7 +580,7 @@ export default function AiResumeBuilder({
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-xl font-bold text-white">{generatedResult.resume.name}</h3>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 font-semibold">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-750 text-zinc-200 font-semibold">
                           {generatedResult.resume.ats_score}% ATS OPTIMIZED
                         </span>
                       </div>
@@ -599,8 +599,8 @@ export default function AiResumeBuilder({
                   </div>
 
                   {syncSuccess && (
-                    <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-zinc-300 shrink-0" />
                       <span>Successfully auto-attached to your candidate profile! Your Naukri Auto-Apply Bot will now dispatch this resume on morning runs.</span>
                     </div>
                   )}
@@ -662,7 +662,7 @@ export default function AiResumeBuilder({
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-bold text-white">{targetRole}</h3>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 font-semibold">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-750 text-zinc-200 font-semibold">
                           {generatedResult.ats_score}% ATS PASS RATING
                         </span>
                       </div>

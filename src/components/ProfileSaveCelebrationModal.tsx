@@ -70,8 +70,8 @@ export default function ProfileSaveCelebrationModal({
 
           {/* Celebration Header */}
           <div className="text-center space-y-2 relative z-10 pt-2">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+            <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-6 h-6 text-zinc-200" />
             </div>
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono font-medium tracking-wider uppercase">
@@ -81,7 +81,7 @@ export default function ProfileSaveCelebrationModal({
 
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               You&apos;re All Set! <br />
-              <span className="text-emerald-400">
+              <span className="text-zinc-200">
                 Sit Back & Relax.
               </span>
             </h2>
@@ -113,7 +113,7 @@ export default function ProfileSaveCelebrationModal({
             </div>
 
             <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-900/80 p-2 rounded-lg font-mono border border-zinc-800/60">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <ShieldCheck className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
               <span>Safety Guarantee: Human-like pacing & 0 account bans guaranteed.</span>
             </div>
           </div>

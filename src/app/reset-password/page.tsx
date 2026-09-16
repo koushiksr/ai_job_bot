@@ -148,13 +148,13 @@ function ResetPasswordForm() {
               className={`p-3.5 rounded-xl text-xs mb-5 flex items-start gap-2.5 border ${
                 statusMessage.type === 'error'
                   ? 'bg-rose-950/40 border-rose-800/50 text-rose-300'
-                  : 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
+                  : 'bg-zinc-900 border-zinc-750 text-zinc-200'
               }`}
             >
               {statusMessage.type === 'error' ? (
                 <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
               ) : (
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-zinc-300 mt-0.5" />
               )}
               <div className="leading-relaxed">{statusMessage.text}</div>
             </div>
@@ -162,7 +162,7 @@ function ResetPasswordForm() {
 
           {resetSuccess ? (
             <div className="py-4 text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>

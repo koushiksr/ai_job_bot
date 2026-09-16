@@ -176,18 +176,15 @@ export default function AiEngineVisualizer() {
 
       {/* Top Cockpit Header */}
       <div className="p-4 sm:px-6 bg-[#050507] border-b border-zinc-800/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-          </div>
+        <div className="flex items-center gap-2.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs sm:text-sm font-semibold text-white tracking-tight">
                 Autonomous Engine Live Simulation
               </span>
               <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-400">
-                06:00 & 08:00 AM IST
+                06:00 &amp; 08:00 AM IST
               </span>
             </div>
           </div>
@@ -199,7 +196,7 @@ export default function AiEngineVisualizer() {
             Scanned: <span className="text-white font-medium">{scanPulse.toLocaleString()}</span>
           </div>
           <div className="text-zinc-200 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800 flex items-center gap-1.5 text-[11px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
             <span>Applications: {applicationsCount}</span>
           </div>
         </div>
@@ -279,11 +276,11 @@ export default function AiEngineVisualizer() {
         <div
           className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
             stage === 'applied'
-              ? 'bg-zinc-900 text-emerald-400 border-emerald-500/40 font-medium'
+              ? 'bg-zinc-900 text-white border-zinc-700 font-medium'
               : 'bg-black/40 text-zinc-500 border-zinc-900'
           }`}
         >
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-zinc-300" />
           <span className="truncate">4. Verified Delivery</span>
         </div>
       </div>
@@ -315,7 +312,7 @@ export default function AiEngineVisualizer() {
                 <Terminal className="w-3.5 h-3.5 text-zinc-400" />
                 <span className="text-zinc-200 font-sans font-medium">Engine Execution Telemetry</span>
               </div>
-              <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+              <span className="text-[10px] text-zinc-300 bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-700">
                 ACTIVE
               </span>
             </div>
@@ -404,7 +401,7 @@ export default function AiEngineVisualizer() {
           {/* Dispatch Confirmation Card */}
           <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <div>

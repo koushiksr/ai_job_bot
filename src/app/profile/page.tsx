@@ -130,7 +130,7 @@ export default function CandidateProfilePage() {
                 ) : (
                   userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
                 )}
-                <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-zinc-400 absolute -bottom-0.5 -right-0.5 border border-black" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -147,7 +147,7 @@ export default function CandidateProfilePage() {
                     </span>
                   ) : null}
                 </div>
-                <div className="text-[10px] text-emerald-400 font-mono">● Profile Setup</div>
+                <div className="text-[10px] text-zinc-400 font-mono">Profile Settings</div>
               </div>
             </div>
           </div>
@@ -191,7 +191,7 @@ export default function CandidateProfilePage() {
                 <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                   Candidate Profile & Naukri Credentials
                 </h1>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 font-semibold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold">
                   ONE-TIME SETUP
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
@@ -226,21 +226,21 @@ export default function CandidateProfilePage() {
             </div>
             <div className="p-3 rounded-lg bg-black/60 border border-zinc-800/60 flex items-center justify-between">
               <span className="text-zinc-500 font-mono">Schedule:</span>
-              <span className="font-mono text-emerald-400 font-medium">06:00 AM IST Sweeps</span>
+              <span className="font-mono text-zinc-200 font-medium">06:00 AM IST Sweeps</span>
             </div>
           </div>
         </div>
 
         {/* Save Confirmation Banner */}
         {showSaveBanner && (
-          <div className="p-4 rounded-xl bg-zinc-900/90 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between gap-3 font-medium animate-in fade-in">
+          <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs flex items-center justify-between gap-3 font-medium animate-in fade-in">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-zinc-300 shrink-0" />
               <span>Candidate profile and Naukri credentials successfully synchronized with the autonomous bot!</span>
             </div>
             <Link
               href="/dashboard"
-              className="px-3 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold transition-colors shrink-0"
+              className="px-3 py-1 rounded bg-white hover:bg-zinc-200 text-black text-xs font-semibold transition-colors shrink-0"
             >
               Go to Dashboard →
             </Link>

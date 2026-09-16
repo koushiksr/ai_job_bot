@@ -77,7 +77,7 @@ export default function ProfessionalUpgradeModal({
                   </div>
                   <h4 className="text-xs font-semibold text-white">On-Demand Real-Time Sweeps</h4>
                 </div>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 uppercase tracking-wider font-semibold">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 uppercase tracking-wider font-semibold">
                   5x / Week
                 </span>
               </div>
@@ -128,7 +128,7 @@ export default function ProfessionalUpgradeModal({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-white uppercase tracking-wider">Professional Plan</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-semibold">
                   SAVE 92% · BEST VALUE
                 </span>
               </div>
