@@ -15,8 +15,8 @@
  *    Offers are blocked by default to protect subscription revenues, prevent customer confusion,
  *    and avoid devaluing full-price plans. Can be bypassed only with explicit admin override.
  * 
- * 5. Candidates with LIFETIME VIP PASS -> INELIGIBLE.
- *    VIP candidates have permanent lifetime access; payment offers are irrelevant.
+ * 5. Candidates with VIP PASS -> INELIGIBLE.
+ *    VIP candidates have active VIP access; payment offers are unnecessary.
  */
 
 export interface OfferEligibility {
@@ -46,7 +46,7 @@ export function evaluateOfferEligibility(user: any): OfferEligibility {
   if (isVip) {
     return {
       eligible: false,
-      reason: "Candidate holds an active Lifetime VIP Free Pass. Upgrade offers are unnecessary.",
+      reason: "Candidate holds an active VIP Access Pass (90d). Upgrade offers are unnecessary.",
       badge: "Ineligible: VIP Pass",
       plan: "vip",
       hoursRemaining: null,

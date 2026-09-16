@@ -547,7 +547,7 @@ export default function ResumeBuilderPage() {
             {(isVip || userPlan === 'vip') && (
               <span
                 className="inline-flex items-center gap-1 text-[9px] font-mono px-2.5 py-0.5 rounded-full border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.25)] shrink-0"
-                title="VIP Lifetime Access Pass Active"
+                title="VIP Professional Pass Active (90d)"
               >
                 <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
                 <span>VIP</span>

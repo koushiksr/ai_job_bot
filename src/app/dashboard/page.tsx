@@ -928,7 +928,7 @@ export default function UserDashboard() {
                         <div className="pt-0.5 flex items-center gap-1.5">
                           <span className="text-[10px] font-mono text-zinc-500">Plan:</span>
                           <span className="text-[10px] font-mono text-zinc-300 font-semibold uppercase">
-                            {isVip ? 'VIP Lifetime Pass' : userPlan || 'Standard'}
+                            {isVip ? 'VIP Professional Pass' : userPlan || 'Standard'}
                           </span>
                         </div>
                       </div>
@@ -1158,7 +1158,7 @@ export default function UserDashboard() {
                     {(isVip || userPlan === 'vip') && (
                       <span
                         className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 font-mono font-semibold uppercase tracking-wider shrink-0"
-                        title="VIP Lifetime Access Pass Active"
+                        title="VIP Access Pass Active (90d)"
                       >
                         <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
                         <span>VIP</span>

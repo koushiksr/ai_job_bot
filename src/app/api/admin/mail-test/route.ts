@@ -19,15 +19,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { user, pass } = await getDynamicSmtpCredentials(db)
+    const [{ user, pass }, recentLogs] = await Promise.all([
+      getDynamicSmtpCredentials(db),
+      db.collection('emails').find({}).sort({ created_at: -1 }).limit(15).toArray()
+    ])
     const maskedPass = pass ? `${pass.slice(0, 4)} **** **** ${pass.slice(-4)}` : 'MISSING'
-
-    // Fetch latest 15 email records from MongoDB
-    const recentLogs = await db.collection('emails')
-      .find({})
-      .sort({ created_at: -1 })
-      .limit(15)
-      .toArray()
 
     return NextResponse.json({
       sender: user,

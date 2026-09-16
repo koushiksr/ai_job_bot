@@ -21,18 +21,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const stats = await getExpiryReminderStats(db)
-
-    // Also fetch detailed candidates expiring within 48h
     const now = new Date()
     const in48h = new Date(now.getTime() + 48 * 60 * 60 * 1000)
 
-    const profiles = await db.collection("profiles").find({
-      $or: [
-        { plan_expires_at: { $exists: true, $ne: null } },
-        { trial_expires_at: { $exists: true, $ne: null } }
-      ]
-    }).toArray()
+    const [stats, profiles] = await Promise.all([
+      getExpiryReminderStats(db),
+      db.collection("profiles").find({
+        $or: [
+          { plan_expires_at: { $exists: true, $ne: null } },
+          { trial_expires_at: { $exists: true, $ne: null } }
+        ]
+      }).toArray()
+    ])
 
     const expiringCandidates = profiles
       .map(p => {

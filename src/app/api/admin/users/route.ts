@@ -18,11 +18,14 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const userDocs = await db.collection('users').find({}).toArray()
-    const profiles = userDocs.length > 0 ? userDocs : await db.collection('profiles').find({}).toArray()
-    const statsList = await db.collection('user_stats').find({}).toArray()
-    const assignedOffersList = await db.collection('assigned_offers').find({}).toArray()
-    const remindersList = await db.collection('expiry_reminders_sent').find({}).toArray()
+    const [userDocs, profileDocs, statsList, assignedOffersList, remindersList] = await Promise.all([
+      db.collection('users').find({}).toArray(),
+      db.collection('profiles').find({}).toArray(),
+      db.collection('user_stats').find({}).toArray(),
+      db.collection('assigned_offers').find({}).toArray(),
+      db.collection('expiry_reminders_sent').find({}).toArray()
+    ])
+    const profiles = userDocs.length > 0 ? userDocs : profileDocs
 
     const now = new Date()
 
@@ -177,11 +180,12 @@ export async function PATCH(req: NextRequest) {
       updates.plan = plan
       updates.plan_activated_at = now
       if (plan === 'vip') {
-        updates.plan_name = 'JobFlux VIP Elite'
+        const days = extend_days || 90
+        updates.plan_name = 'JobFlux VIP Professional (90d)'
         updates.is_vip = true
         updates.vip_access = true
         updates.free_privilege = true
-        updates.plan_expires_at = new Date(now.getTime() + 3650 * 24 * 60 * 60 * 1000)
+        updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
       } else if (plan === 'elite' || plan === 'professional') {
         const days = extend_days || 90
         updates.plan_name = 'JobFlux PROFESSIONAL'

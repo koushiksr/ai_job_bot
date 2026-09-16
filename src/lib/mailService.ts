@@ -836,13 +836,13 @@ export function generateJobDispatchReportHtml({
                     <tr>
                       <td valign="middle">
                         <div style="font-size:10px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">
-                          Subscriber VIP Opportunity
+                          Subscriber Extension Opportunity
                         </div>
                         <div style="font-size:13px;font-weight:700;color:#ffffff;">
-                          Lifetime VIP Career Pass &bull; ₹299 <span style="font-size:11px;color:#71717a;text-decoration:line-through;">₹10,000</span>
+                          3-Month VIP Professional Extension &bull; ₹299 <span style="font-size:11px;color:#71717a;text-decoration:line-through;">₹2,500</span>
                         </div>
                         <div style="font-size:11px;color:#9ca3af;margin-top:2px;">
-                          Never worry about renewals. Permanent automated sweeps until you sign an offer.
+                          Add 90 days of continuous automated sweeps, priority queue slot, and on-demand radar sweeps.
                         </div>
                       </td>
                       <td align="right" valign="middle">
@@ -934,7 +934,7 @@ export function generateJobDispatchReportHtml({
                 <tr>
                   <td align="center">
                     <a href="${isPaidPlan ? `${upgradeUrl}?promo=VIP299` : `${upgradeUrl}?promo=${promoCode}`}" class="mobile-btn" style="display:inline-block;background-color:#ffffff;color:#0b0c0e;font-size:14px;font-weight:700;text-decoration:none;padding:14px 34px;border-radius:8px;letter-spacing:-0.2px;">
-                      ${isPaidPlan ? 'Upgrade to Lifetime VIP Pass (₹299) &rarr;' : `Upgrade to Professional (${discountedPrice}) &rarr;`}
+                      ${isPaidPlan ? 'Extend 3 Months with VIP Pass (₹299) &rarr;' : `Upgrade to Professional (${discountedPrice}) &rarr;`}
                     </a>
                   </td>
                 </tr>

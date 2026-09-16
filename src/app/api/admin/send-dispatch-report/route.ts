@@ -92,6 +92,19 @@ export async function POST(req: NextRequest) {
 
     const dateString = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })
 
+    // Query active assigned offers for candidate
+    const activeAssignedOffer = await db.collection('assigned_offers').findOne({
+      candidate_email: { $regex: `^${targetEmail}$`, $options: 'i' },
+      revoked: { $ne: true },
+      is_expired: { $ne: true }
+    })
+
+    // Resolve Offer Package (Custom override > Assigned DB offer > Intelligent smart default)
+    const promoCode = body.promoCode || activeAssignedOffer?.promo_code || (isPaidPlan ? 'VIP299' : 'WELCOMEPRO')
+    const discountedPrice = body.discountedPrice || activeAssignedOffer?.discounted_price || (isPaidPlan ? '₹299' : '₹149')
+    const originalPrice = body.originalPrice || activeAssignedOffer?.original_price || (isPaidPlan ? '₹2,500' : '₹999')
+    const offerTitle = body.offerTitle || activeAssignedOffer?.title || (isPaidPlan ? '3-Month VIP Professional Extension' : '1-Month Essentials Unlimited Access')
+
     let emailResult: any = null
     let pushResult: any = null
 
@@ -111,9 +124,9 @@ export async function POST(req: NextRequest) {
         dateString,
         dashboardUrl: 'https://jobfluxai.vercel.app/dashboard',
         upgradeUrl: 'https://jobfluxai.vercel.app/pricing',
-        promoCode: isPaidPlan ? 'VIP299' : 'WELCOMEPRO',
-        discountedPrice: isPaidPlan ? '₹299' : '₹199',
-        originalPrice: isPaidPlan ? '₹10,000' : '₹2,500'
+        promoCode,
+        discountedPrice,
+        originalPrice
       })
 
       const subject = `JobFlux AI · Daily Dispatch Report (${todayApplied} Jobs Applied Today · ${isPaidPlan ? `${planName} Active` : 'Review Activity'})`
@@ -183,6 +196,12 @@ export async function POST(req: NextRequest) {
         todayApplied,
         totalApplied: totalAppliedCount,
         recentCompaniesCount: topCompanies.length
+      },
+      offer: {
+        promoCode,
+        discountedPrice,
+        originalPrice,
+        offerTitle
       },
       emailResult,
       pushResult

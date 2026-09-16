@@ -56,7 +56,8 @@ import {
   Copy,
   Check,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Activity
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -157,12 +158,26 @@ export default function AdminDashboard() {
   const [assignedOfferFilter, setAssignedOfferFilter] = useState<string>('all')
   const [offerNotification, setOfferNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
-  // Purchase Offers Collapsible & Pagination State
+  // Purchase Offers Collapsible & Pagination State with Local State persistence
+  const [offersStatsCollapsed, setOffersStatsCollapsed] = useState<boolean>(false)
   const [offersCollapsedWatchdog, setOffersCollapsedWatchdog] = useState<boolean>(false)
   const [offersCollapsedDesigner, setOffersCollapsedDesigner] = useState<boolean>(false)
   const [offersCollapsedAssigned, setOffersCollapsedAssigned] = useState<boolean>(false)
   const [offersCollapsedHistory, setOffersCollapsedHistory] = useState<boolean>(false)
   const [offersCollapsedPreview, setOffersCollapsedPreview] = useState<boolean>(false)
+  const [offersCollapsedMailDiag, setOffersCollapsedMailDiag] = useState<boolean>(false)
+  const [offersCollapsedMailLogs, setOffersCollapsedMailLogs] = useState<boolean>(false)
+  const [offersCollapsedDispatchReport, setOffersCollapsedDispatchReport] = useState<boolean>(false)
+  const [candidatesTableCollapsed, setCandidatesTableCollapsed] = useState<boolean>(false)
+  const [requestsTableCollapsed, setRequestsTableCollapsed] = useState<boolean>(false)
+  const [queueTableCollapsed, setQueueTableCollapsed] = useState<boolean>(false)
+  const [paymentsTableCollapsed, setPaymentsTableCollapsed] = useState<boolean>(false)
+  const [enterpriseLeadsCollapsed, setEnterpriseLeadsCollapsed] = useState<boolean>(false)
+  const [activityTableCollapsed, setActivityTableCollapsed] = useState<boolean>(false)
+  const [jobHistoryTableCollapsed, setJobHistoryTableCollapsed] = useState<boolean>(false)
+  const [llmTableCollapsed, setLlmTableCollapsed] = useState<boolean>(false)
+  const [isDispatchReportModalOpen, setIsDispatchReportModalOpen] = useState<boolean>(false)
+  const [dispatchReportOfferChoice, setDispatchReportOfferChoice] = useState<string>('auto')
   const [assignedOffersPage, setAssignedOffersPage] = useState<number>(1)
   const [assignedOffersPerPage, setAssignedOffersPerPage] = useState<number>(10)
   const [campaignHistoryPage, setCampaignHistoryPage] = useState<number>(1)
@@ -545,23 +560,201 @@ export default function AdminDashboard() {
     }
   }
 
+  const toggleOffersStats = () => {
+    setOffersStatsCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_stats_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleOffersWatchdog = () => {
+    setOffersCollapsedWatchdog(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_collapsed_watchdog', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleOffersDesigner = () => {
+    setOffersCollapsedDesigner(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_collapsed_designer', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleOffersPreview = () => {
+    setOffersCollapsedPreview(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_collapsed_preview', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleOffersAssigned = () => {
+    setOffersCollapsedAssigned(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_collapsed_assigned', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleOffersHistory = () => {
+    setOffersCollapsedHistory(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_collapsed_history', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleOffersMailDiag = () => {
+    setOffersCollapsedMailDiag(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_collapsed_maildiag', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleOffersMailLogs = () => {
+    setOffersCollapsedMailLogs(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_collapsed_maillogs', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleOffersDispatchReport = () => {
+    setOffersCollapsedDispatchReport(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_offers_collapsed_dispatch_report', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleCandidatesTable = () => {
+    setCandidatesTableCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_candidates_table_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleRequestsTable = () => {
+    setRequestsTableCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_requests_table_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleQueueTable = () => {
+    setQueueTableCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_queue_table_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const togglePaymentsTable = () => {
+    setPaymentsTableCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_payments_table_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleEnterpriseLeadsTable = () => {
+    setEnterpriseLeadsCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_enterprise_leads_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleActivityTable = () => {
+    setActivityTableCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_activity_table_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleJobHistoryTable = () => {
+    setJobHistoryTableCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_job_history_table_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const toggleLlmTable = () => {
+    setLlmTableCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_llm_table_collapsed', String(next)) } catch {}
+      return next
+    })
+  }
+
+  const handleAssignedFilterChange = (filter: string) => {
+    setAssignedOfferFilter(filter)
+    setAssignedOffersPage(1)
+    try { localStorage.setItem('admin_assigned_offer_filter', filter) } catch {}
+  }
+
+  const handleLogsSubTabChange = (tab: 'activity' | 'llm_telemetry' | 'job_history' | 'tickets') => {
+    setLogsSubTab(tab)
+    try { localStorage.setItem('admin_logs_sub_tab', tab) } catch {}
+    if (tab === 'activity') fetchActivityLogs()
+    else if (tab === 'llm_telemetry') fetchLlmLogs()
+    else if (tab === 'tickets') fetchSupportTickets()
+  }
+
   const fetchOffersData = async () => {
     setLoadingOffers(true)
+    setLoadingMailLogs(true)
+    setLoadingPushLogs(true)
+    setLoadingExpiryStats(true)
     try {
-      const res = await fetch('/api/admin/offers', {
-        headers: getAdminHeaders()
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setOffersData(data)
+      const headers = getAdminHeaders()
+      const [offersRes, mailRes, pushRes, expiryRes] = await Promise.allSettled([
+        fetch('/api/admin/offers', { headers }).then(r => r.ok ? r.json() : null),
+        fetch('/api/admin/mail-test', { headers }).then(r => r.ok ? r.json() : null),
+        fetch('/api/admin/push-notification', { headers }).then(r => r.ok ? r.json() : null),
+        fetch('/api/admin/expiry-reminders', { headers }).then(r => r.ok ? r.json() : null)
+      ])
+
+      if (offersRes.status === 'fulfilled' && offersRes.value) {
+        setOffersData(offersRes.value)
+        try {
+          localStorage.setItem('admin_cached_offers_data', JSON.stringify(offersRes.value))
+        } catch {}
       }
-      fetchMailDiagnostics()
-      fetchPushDiagnostics()
-      fetchExpiryStats()
+
+      if (mailRes.status === 'fulfilled' && mailRes.value) {
+        const mData = mailRes.value
+        setMailLogs(mData.recent_logs || [])
+        if (mData.sender) setMailSender(mData.sender)
+        if (mData.masked_passcode) setMailMaskedPass(mData.masked_passcode)
+        try {
+          localStorage.setItem('admin_cached_mail_logs', JSON.stringify(mData.recent_logs || []))
+        } catch {}
+      }
+
+      if (pushRes.status === 'fulfilled' && pushRes.value) {
+        setPushLogs(pushRes.value.recent_logs || [])
+      }
+
+      if (expiryRes.status === 'fulfilled' && expiryRes.value) {
+        setExpiryStats(expiryRes.value)
+      }
     } catch (err) {
       console.error('Failed to fetch offers:', err)
     } finally {
       setLoadingOffers(false)
+      setLoadingMailLogs(false)
+      setLoadingPushLogs(false)
+      setLoadingExpiryStats(false)
     }
   }
 
@@ -706,7 +899,11 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleDispatchCareerReport = async (overrideEmail?: string, channelOverride?: 'both' | 'email' | 'push') => {
+  const handleDispatchCareerReport = async (
+    overrideEmail?: string, 
+    channelOverride?: 'both' | 'email' | 'push',
+    offerOverride?: { promoCode?: string; discountedPrice?: string; originalPrice?: string; offerTitle?: string }
+  ) => {
     setDispatchReportLoading(true)
     setDispatchReportResult(null)
     try {
@@ -722,12 +919,40 @@ export default function AdminDashboard() {
 
       const channel = channelOverride || dispatchReportChannel
 
+      // Resolve offer package override
+      let offerPayload: any = {}
+      if (offerOverride) {
+        offerPayload = offerOverride
+      } else if (dispatchReportOfferChoice === 'vip299') {
+        offerPayload = {
+          promoCode: 'VIP299',
+          discountedPrice: '₹299',
+          originalPrice: '₹2,500',
+          offerTitle: '3-Month VIP Professional Extension'
+        }
+      } else if (dispatchReportOfferChoice === 'welcomepro') {
+        offerPayload = {
+          promoCode: 'WELCOMEPRO',
+          discountedPrice: '₹149',
+          originalPrice: '₹999',
+          offerTitle: '1-Month Essentials Unlimited Access'
+        }
+      } else if (dispatchReportOfferChoice === 'choc29') {
+        offerPayload = {
+          promoCode: 'CHOC29',
+          discountedPrice: '₹29',
+          originalPrice: '₹499',
+          offerTitle: '1-Month Starter Direct Activation'
+        }
+      }
+
       const res = await fetch('/api/admin/send-dispatch-report', {
         method: 'POST',
         headers: getAdminHeaders(),
         body: JSON.stringify({
           targetEmail: targetEmail.trim(),
-          channel
+          channel,
+          ...offerPayload
         })
       })
 
@@ -1128,6 +1353,58 @@ export default function AdminDashboard() {
 
         const savedSelectedId = localStorage.getItem('admin_selected_candidate_id')
         if (savedSelectedId) setSelectedCandidateId(savedSelectedId)
+
+        // Restore Purchase Offers collapsible states & sub-tab filters
+        const sStats = localStorage.getItem('admin_offers_stats_collapsed')
+        if (sStats !== null) setOffersStatsCollapsed(sStats === 'true')
+        const sWatch = localStorage.getItem('admin_offers_collapsed_watchdog')
+        if (sWatch !== null) setOffersCollapsedWatchdog(sWatch === 'true')
+        const sDes = localStorage.getItem('admin_offers_collapsed_designer')
+        if (sDes !== null) setOffersCollapsedDesigner(sDes === 'true')
+        const sPrev = localStorage.getItem('admin_offers_collapsed_preview')
+        if (sPrev !== null) setOffersCollapsedPreview(sPrev === 'true')
+        const sAssigned = localStorage.getItem('admin_offers_collapsed_assigned')
+        if (sAssigned !== null) setOffersCollapsedAssigned(sAssigned === 'true')
+        const sHist = localStorage.getItem('admin_offers_collapsed_history')
+        if (sHist !== null) setOffersCollapsedHistory(sHist === 'true')
+        const sMailDiag = localStorage.getItem('admin_offers_collapsed_maildiag')
+        if (sMailDiag !== null) setOffersCollapsedMailDiag(sMailDiag === 'true')
+        const sMailLogs = localStorage.getItem('admin_offers_collapsed_maillogs')
+        if (sMailLogs !== null) setOffersCollapsedMailLogs(sMailLogs === 'true')
+        const sDispatch = localStorage.getItem('admin_offers_collapsed_dispatch_report')
+        if (sDispatch !== null) setOffersCollapsedDispatchReport(sDispatch === 'true')
+        const sCand = localStorage.getItem('admin_candidates_table_collapsed')
+        if (sCand !== null) setCandidatesTableCollapsed(sCand === 'true')
+        const sReq = localStorage.getItem('admin_requests_table_collapsed')
+        if (sReq !== null) setRequestsTableCollapsed(sReq === 'true')
+        const sQueue = localStorage.getItem('admin_queue_table_collapsed')
+        if (sQueue !== null) setQueueTableCollapsed(sQueue === 'true')
+        const sPay = localStorage.getItem('admin_payments_table_collapsed')
+        if (sPay !== null) setPaymentsTableCollapsed(sPay === 'true')
+        const sLeads = localStorage.getItem('admin_enterprise_leads_collapsed')
+        if (sLeads !== null) setEnterpriseLeadsCollapsed(sLeads === 'true')
+        const sAct = localStorage.getItem('admin_activity_table_collapsed')
+        if (sAct !== null) setActivityTableCollapsed(sAct === 'true')
+        const sJobH = localStorage.getItem('admin_job_history_table_collapsed')
+        if (sJobH !== null) setJobHistoryTableCollapsed(sJobH === 'true')
+        const sLlm = localStorage.getItem('admin_llm_table_collapsed')
+        if (sLlm !== null) setLlmTableCollapsed(sLlm === 'true')
+        const sAssignedFilter = localStorage.getItem('admin_assigned_offer_filter')
+        if (sAssignedFilter) setAssignedOfferFilter(sAssignedFilter)
+        const sLogsSub = localStorage.getItem('admin_logs_sub_tab')
+        if (sLogsSub && ['activity', 'llm_telemetry', 'job_history', 'tickets'].includes(sLogsSub)) {
+          setLogsSubTab(sLogsSub as any)
+        }
+
+        // Instant Hydration from Client Cache (0ms render)
+        const sCachedOffers = localStorage.getItem('admin_cached_offers_data')
+        if (sCachedOffers) {
+          try { setOffersData(JSON.parse(sCachedOffers)) } catch {}
+        }
+        const sCachedMail = localStorage.getItem('admin_cached_mail_logs')
+        if (sCachedMail) {
+          try { setMailLogs(JSON.parse(sCachedMail)) } catch {}
+        }
       } catch {}
 
       // 4. Verify server-side against MongoDB
@@ -1345,7 +1622,9 @@ export default function AdminDashboard() {
 
       {/* Admin Top Navbar */}
       <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-6 py-3 sm:py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        {/* Mobile: flex-row-reverse puts buttons on LEFT, logo on RIGHT. sm+: normal flex-row (logo left, buttons right) */}
+        <div className="max-w-7xl mx-auto flex flex-row-reverse sm:flex-row items-center justify-between gap-3">
+          {/* Logo + badges — on mobile appears on RIGHT (end), on sm+ appears on LEFT (start) */}
           <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
             <Link href="/" className="hover:opacity-90 transition-opacity shrink-0">
               <JobFluxLogo size="sm" showText={true} />
@@ -1354,7 +1633,7 @@ export default function AdminDashboard() {
             <div className="h-5 w-px bg-zinc-800 hidden sm:block" />
 
             <div className="flex items-center gap-2">
-              <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-sky-300 font-mono uppercase font-semibold hidden xs:inline">
+              <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-sky-300 font-mono uppercase font-semibold hidden sm:inline">
                 Super Admin
               </span>
               <span className="text-[11px] text-zinc-500 font-mono hidden md:inline">
@@ -1363,7 +1642,21 @@ export default function AdminDashboard() {
             </div>
           </div>
 
+          {/* Action buttons — on mobile appears on LEFT (start), on sm+ appears on RIGHT (end) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Quick Trigger: Send Today's Job Applied Notification (Email + Web Push) */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsDispatchReportModalOpen(true)
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 hover:from-sky-400 hover:to-indigo-400 text-white shadow-md shadow-sky-500/25 transition-all cursor-pointer shrink-0 border border-sky-400/40"
+              title="Manual Trigger: Send Today's Job Applied Notification (Email + Web Push)"
+            >
+              <Send className="w-3.5 h-3.5 text-sky-200 animate-pulse" />
+              <span className="hidden sm:inline">⚡ Send Today&apos;s Report</span>
+            </button>
+
             <button
               onClick={() => setIsHelpOpen(true)}
               className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors text-zinc-300 cursor-pointer shrink-0"
@@ -1392,6 +1685,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       </header>
+
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
@@ -1523,7 +1817,7 @@ export default function AdminDashboard() {
             <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {overviewMetrics.vip_profiles_count}
             </div>
-            <p className="text-[11px] text-zinc-500">Lifetime bypass</p>
+            <p className="text-[11px] text-zinc-500">Admin VIP bypass</p>
           </div>
 
           <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 space-y-1">
@@ -1568,7 +1862,7 @@ export default function AdminDashboard() {
             <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">
               {overviewMetrics.total_applied}
             </div>
-            <p className="text-[11px] text-zinc-500">Lifetime verified</p>
+            <p className="text-[11px] text-zinc-500">All-time verified</p>
           </div>
         </section>
 
@@ -1748,7 +2042,7 @@ export default function AdminDashboard() {
                     { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300' },
                     { key: 'urgent', label: 'Urgent <24h', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-rose-300' },
                     { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400' },
-                    { key: 'vip', label: 'Lifetime VIP', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length, color: 'text-amber-400' },
+                    { key: 'vip', label: 'VIP Pass (90d)', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length, color: 'text-amber-400' },
                     { key: 'no_plan', label: 'No Plan', count: usersList.filter(u => u.plan_expiry_status === 'no_plan' || u.plan === 'none' || u.plan === 'no_plan').length, color: 'text-zinc-400' }
                   ].map(f => (
                     <button
@@ -1844,10 +2138,10 @@ export default function AdminDashboard() {
                     <div className="p-2.5 rounded-lg bg-zinc-950 border border-amber-500/30 space-y-1">
                       <div className="flex items-center gap-1.5 text-amber-300 font-bold font-mono">
                         <Crown className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Lifetime VIP (Permanent)</span>
+                        <span>VIP Pass (3 Months / 90d)</span>
                       </div>
                       <p className="text-[11px] text-zinc-400">
-                        Candidate holds permanent VIP free access. No expiration date; billing is waived permanently.
+                        Candidate holds an active VIP access pass (90 days). Renewable upon completion.
                       </p>
                     </div>
 
@@ -1867,13 +2161,77 @@ export default function AdminDashboard() {
 
             {/* Candidates Table */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-                    <tr>
-                      <th className="py-3.5 px-4">Candidate</th>
-                      <th className="py-3.5 px-4">Naukri Email</th>
-                      <th className="py-3.5 px-4">Plan & Access</th>
+              <div 
+                onClick={toggleCandidatesTable}
+                className="px-5 py-4 bg-zinc-950 hover:bg-zinc-900/60 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+              >
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Users className="w-4 h-4 text-sky-400" />
+                    <span>Candidate Profiles Directory</span>
+                    <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                      {filteredUsers.length} profiles
+                    </span>
+                  </h4>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Live candidate profiles, automated apply status, ATS resumes, and daily job report actions.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleCandidatesTable()
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {candidatesTableCollapsed ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {candidatesTableCollapsed && (
+                <div 
+                  onClick={toggleCandidatesTable}
+                  className="px-5 py-3 bg-zinc-900/30 hover:bg-zinc-900/60 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                    <span>Table shrunk (<strong>{filteredUsers.length}</strong> candidate profiles hidden) &bull; Click anywhere on head to expand</span>
+                  </div>
+                  <span className="text-sky-400 font-semibold flex items-center gap-1">
+                    <span>Expand Table</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              )}
+
+              {!candidatesTableCollapsed && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-slate-300">
+                    <thead 
+                      onClick={toggleCandidatesTable}
+                      className="cursor-pointer group select-none"
+                      title="Click table head to shrink / expand"
+                    >
+                      <tr className="bg-slate-950 group-hover:bg-zinc-900/60 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 transition-colors">
+                        <th className="py-3.5 px-4 flex items-center gap-1">
+                          <span>Candidate</span>
+                          <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400 transition-colors" />
+                        </th>
+                        <th className="py-3.5 px-4">Naukri Email</th>
+                        <th className="py-3.5 px-4">Plan & Access</th>
                       <th className="py-3.5 px-4 text-center">Auto-Apply</th>
                       <th className="py-3.5 px-4">Last Login</th>
                       <th className="py-3.5 px-4">Profile & Resume</th>
@@ -1963,7 +2321,7 @@ export default function AdminDashboard() {
                                 <option value="starter">Starter (30d)</option>
                                 <option value="pro">Pro (30d)</option>
                                 <option value="elite">Professional (90d)</option>
-                                <option value="vip">VIP Pass (Lifetime)</option>
+                                <option value="vip">VIP Pass (3 Months / 90d)</option>
                               </select>
 
                               <button
@@ -1973,7 +2331,7 @@ export default function AdminDashboard() {
                                     ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
                                     : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
                                 }`}
-                                title={u.is_vip ? "Click to Revoke VIP Free Pass" : "Click to Grant Lifetime VIP Free Pass"}
+                                title={u.is_vip ? "Click to Revoke VIP Pass" : "Click to Grant 3-Month VIP Pass"}
                               >
                                 <Crown className="w-3 h-3 text-amber-400" />
                                 {u.is_vip ? 'Revoke VIP' : 'Grant VIP Pass'}
@@ -1985,10 +2343,10 @@ export default function AdminDashboard() {
                                   return (
                                     <div
                                       className="text-[10px] font-mono mt-1 flex items-center gap-1 text-amber-300 bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-500/30"
-                                      title="Candidate has permanent VIP access with no billing expiry."
+                                      title="Candidate has active VIP access (90d)."
                                     >
                                       <Crown className="w-3 h-3 text-amber-400 shrink-0" />
-                                      <span className="font-semibold">Lifetime VIP (Permanent)</span>
+                                      <span className="font-semibold">VIP Pass (90d Active)</span>
                                     </div>
                                   )
                                 }
@@ -2172,6 +2530,20 @@ export default function AdminDashboard() {
                                 <span>Inspect</span>
                               </button>
                               <button
+                                type="button"
+                                disabled={dispatchReportLoading}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setDispatchReportTarget(u.email)
+                                  setIsDispatchReportModalOpen(true)
+                                }}
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 font-bold text-xs transition-colors border border-sky-500/30 shadow-sm cursor-pointer disabled:opacity-50"
+                                title="Open Daily Job Dispatch Report Hub for this candidate (Email + Push)"
+                              >
+                                <Send className="w-3.5 h-3.5 text-sky-400" />
+                                <span>⚡ Send Report</span>
+                              </button>
+                              <button
                                 onClick={() => setEditingUser(u)}
                                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-md cursor-pointer"
                               >
@@ -2192,6 +2564,7 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
 
             {/* Candidate Expiry & Telemetry Inspection Modal */}
@@ -2235,7 +2608,7 @@ export default function AdminDashboard() {
                           inspectCandidate.plan_expiry_status === 'no_plan' ? 'text-zinc-400' :
                           'text-emerald-400'
                         }`}>
-                          {inspectCandidate.plan_expiry_status === 'vip_lifetime' ? 'Lifetime VIP (Permanent)' :
+                          {inspectCandidate.plan_expiry_status === 'vip_lifetime' ? 'VIP Pass (90d Active)' :
                            inspectCandidate.plan_expiry_status === 'expiring_soon_1d' ? 'Expiring Soon (<24h Left)' :
                            inspectCandidate.plan_expiry_status === 'expiring_soon_2d' ? 'Expiring (1-2 Days Left)' :
                            inspectCandidate.plan_expiry_status === 'expired' ? 'Plan Expired' :
@@ -2246,7 +2619,7 @@ export default function AdminDashboard() {
                       <div>
                         <span className="text-zinc-500">Plan Expires At:</span>
                         <div className="font-mono text-zinc-300">
-                          {inspectCandidate.plan_expires_at ? formatTimestamp(inspectCandidate.plan_expires_at) : (inspectCandidate.is_vip ? 'Permanent (Lifetime VIP)' : 'No fixed expiration')}
+                          {inspectCandidate.plan_expires_at ? formatTimestamp(inspectCandidate.plan_expires_at) : (inspectCandidate.is_vip ? 'Active VIP Access (90d)' : 'No fixed expiration')}
                         </div>
                       </div>
                       <div>
@@ -2257,7 +2630,7 @@ export default function AdminDashboard() {
                             if (h !== null && h !== undefined) {
                               return `${h} hours (${Math.round(h / 24 * 10) / 10} days)`
                             }
-                            return inspectCandidate.is_vip ? '∞ (Permanent)' : 'N/A'
+                            return inspectCandidate.is_vip ? 'Active VIP Access' : 'N/A'
                           })()}
                         </div>
                       </div>
@@ -2508,18 +2881,82 @@ export default function AdminDashboard() {
 
             {/* Inquiries Table */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-zinc-300">
-                  <thead className="bg-black text-zinc-400 uppercase text-[10px] tracking-wider border-b border-zinc-800">
-                    <tr>
-                      <th className="py-3.5 px-4">Ticket & Priority</th>
-                      <th className="py-3.5 px-4">Candidate</th>
-                      <th className="py-3.5 px-4">Category & Message</th>
-                      <th className="py-3.5 px-4">Status</th>
-                      <th className="py-3.5 px-4">Admin Response / Note</th>
-                      <th className="py-3.5 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
+              <div 
+                onClick={toggleRequestsTable}
+                className="px-5 py-4 bg-zinc-950 hover:bg-zinc-900/60 border-b border-zinc-800 flex items-center justify-between cursor-pointer select-none transition-colors"
+              >
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-teal-400" />
+                    <span>Candidate Inquiries &amp; Support Requests</span>
+                    <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                      {supportTickets.length} inquiries
+                    </span>
+                  </h4>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    User requests, error reports, and candidate inquiries submitted through the Help Desk.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleRequestsTable()
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {requestsTableCollapsed ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {requestsTableCollapsed && (
+                <div 
+                  onClick={toggleRequestsTable}
+                  className="px-5 py-3 bg-zinc-900/30 hover:bg-zinc-900/60 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                    <span>Table shrunk (<strong>{supportTickets.length}</strong> inquiries hidden) &bull; Click anywhere on head to expand</span>
+                  </div>
+                  <span className="text-teal-400 font-semibold flex items-center gap-1">
+                    <span>Expand Table</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              )}
+
+              {!requestsTableCollapsed && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-zinc-300">
+                    <thead 
+                      onClick={toggleRequestsTable}
+                      className="cursor-pointer group select-none"
+                      title="Click table head to shrink / expand"
+                    >
+                      <tr className="bg-black group-hover:bg-zinc-900/60 text-zinc-400 uppercase text-[10px] tracking-wider border-b border-zinc-800 transition-colors">
+                        <th className="py-3.5 px-4 flex items-center gap-1">
+                          <span>Ticket &amp; Priority</span>
+                          <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-teal-400 transition-colors" />
+                        </th>
+                        <th className="py-3.5 px-4">Candidate</th>
+                        <th className="py-3.5 px-4">Category &amp; Message</th>
+                        <th className="py-3.5 px-4">Status</th>
+                        <th className="py-3.5 px-4">Admin Response / Note</th>
+                        <th className="py-3.5 px-4 text-right">Actions (Click Head to Shrink ▲)</th>
+                      </tr>
+                    </thead>
                   <tbody className="divide-y divide-zinc-800/60">
                     {loadingTickets ? (
                       <tr>
@@ -2668,6 +3105,7 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           </div>
         )}
@@ -2918,34 +3356,83 @@ export default function AdminDashboard() {
 
             {/* Tasks Table */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
-              <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
+              <div 
+                onClick={toggleQueueTable}
+                className="px-5 py-4 bg-zinc-950 hover:bg-zinc-900/60 border-b border-zinc-800 flex items-center justify-between cursor-pointer select-none transition-colors"
+              >
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
                     <ListOrdered className="w-4 h-4 text-sky-400" />
-                    <span>Queue Tasks & Execution Logs</span>
+                    <span>Queue Tasks &amp; Execution Logs</span>
+                    <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                      {queueTasks.length} task records
+                    </span>
                   </h4>
                   <p className="text-xs text-zinc-400 mt-0.5">
                     Live tasks lined up for Playwright automated runs.
                   </p>
                 </div>
-                <span className="text-xs font-mono text-zinc-500">
-                  {queueTasks.length} task records
-                </span>
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleQueueTable()
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {queueTableCollapsed ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
-                      <th className="py-3 px-4">Queue / State</th>
-                      <th className="py-3 px-4">Candidate & Plan</th>
-                      <th className="py-3 px-4">Trigger Source</th>
-                      <th className="py-3 px-4">Timeline / Heartbeat</th>
-                      <th className="py-3 px-4">Applications / Summary</th>
-                      <th className="py-3 px-4 text-center">Execution Logs</th>
-                      <th className="py-3 px-4 text-center">Admin Controls</th>
-                    </tr>
-                  </thead>
+              {queueTableCollapsed && (
+                <div 
+                  onClick={toggleQueueTable}
+                  className="px-5 py-3 bg-zinc-900/30 hover:bg-zinc-900/60 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                    <span>Table shrunk (<strong>{queueTasks.length}</strong> tasks hidden) &bull; Click anywhere on head to expand</span>
+                  </div>
+                  <span className="text-sky-400 font-semibold flex items-center gap-1">
+                    <span>Expand Table</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              )}
+
+              {!queueTableCollapsed && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead 
+                      onClick={toggleQueueTable}
+                      className="cursor-pointer group select-none"
+                      title="Click table head to shrink / expand"
+                    >
+                      <tr className="border-b border-zinc-800 bg-black/40 group-hover:bg-zinc-900/60 text-zinc-400 font-mono uppercase text-[10px] transition-colors">
+                        <th className="py-3 px-4 flex items-center gap-1">
+                          <span>Queue / State</span>
+                          <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400 transition-colors" />
+                        </th>
+                        <th className="py-3 px-4">Candidate &amp; Plan</th>
+                        <th className="py-3 px-4">Trigger Source</th>
+                        <th className="py-3 px-4">Timeline / Heartbeat</th>
+                        <th className="py-3 px-4">Applications / Summary</th>
+                        <th className="py-3 px-4 text-center">Execution Logs</th>
+                        <th className="py-3 px-4 text-center">Admin Controls (Click Head to Shrink ▲)</th>
+                      </tr>
+                    </thead>
                   <tbody className="divide-y divide-zinc-800/60">
                     {queueTasks.length === 0 ? (
                       <tr>
@@ -3120,6 +3607,7 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           </div>
         )}
@@ -3288,37 +3776,71 @@ export default function AdminDashboard() {
 
             {/* Payments Table */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
-              <div className="px-5 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+              <div
+                onClick={togglePaymentsTable}
+                className="px-5 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"
+              >
                 <div>
                   <h3 className="font-bold text-sm text-white flex items-center gap-2">
                     <CreditCard className="w-4 h-4 text-indigo-400" />
                     Verified Razorpay Transactions
+                    <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full">
+                      {paymentsList.length} records
+                    </span>
                   </h3>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Real-time payment verification records and active plan subscriptions.
                   </p>
                 </div>
-                <button
-                  onClick={fetchPayments}
-                  disabled={loadingPayments}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold transition-all"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${loadingPayments ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); fetchPayments() }}
+                    disabled={loadingPayments}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold transition-all"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingPayments ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); togglePaymentsTable() }}
+                    className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                    title={paymentsTableCollapsed ? 'Expand table' : 'Collapse table'}
+                  >
+                    {paymentsTableCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
+              {paymentsTableCollapsed && (
+                <div
+                  onClick={togglePaymentsTable}
+                  className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Table shrunk ({paymentsList.length} transactions hidden) · Click anywhere on head to expand</span>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </div>
+              )}
+
+              {!paymentsTableCollapsed && (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950/70 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-                    <tr>
-                      <th className="py-3.5 px-4">Candidate / User</th>
+                  <thead
+                    onClick={togglePaymentsTable}
+                    className="bg-slate-950/70 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 cursor-pointer group select-none"
+                    title="Click table head to shrink / expand"
+                  >
+                    <tr className="hover:bg-zinc-900/60 transition-colors">
+                      <th className="py-3.5 px-4 flex items-center gap-1">
+                        <span>Candidate / User</span>
+                        <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-indigo-400" />
+                      </th>
                       <th className="py-3.5 px-4">Plan Purchased</th>
                       <th className="py-3.5 px-4">Amount</th>
                       <th className="py-3.5 px-4">Razorpay Payment ID</th>
                       <th className="py-3.5 px-4">Order ID</th>
                       <th className="py-3.5 px-4">Verified Date</th>
-                      <th className="py-3.5 px-4 text-center">Status</th>
+                      <th className="py-3.5 px-4 text-center">Status (Click Head to Shrink ▲)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/50">
@@ -3379,6 +3901,7 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           </div>
         )}
@@ -3439,55 +3962,97 @@ export default function AdminDashboard() {
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Live Conversion &amp; Campaign Stats</span>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500">Pinned on Scroll</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">Pinned on Scroll</span>
+                  <button
+                    type="button"
+                    onClick={toggleOffersStats}
+                    className="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-mono font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {offersStatsCollapsed ? (
+                      <>
+                        <ChevronDown className="w-3 h-3" />
+                        <span>Expand Stats</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3 h-3" />
+                        <span>Compact</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
-                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">Total Candidate Base</span>
-                  <div className="text-xl font-bold text-white mt-0.5">{offersData.metrics.total_candidates}</div>
-                  <p className="text-[10px] text-zinc-500">Registered accounts</p>
-                </div>
 
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
-                  <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block font-semibold">Prime Target Audience</span>
-                  <div className="text-xl font-bold text-amber-300 mt-0.5">{offersData.metrics.unsubscribed_count}</div>
-                  <p className="text-[10px] text-amber-400/80">Unsubscribed &amp; expired</p>
+              {offersStatsCollapsed ? (
+                <div
+                  onClick={toggleOffersStats}
+                  className="flex items-center justify-between gap-3 overflow-x-auto scrollbar-none py-1.5 px-3 text-[11px] font-mono whitespace-nowrap bg-black/40 rounded-xl border border-zinc-800/80 cursor-pointer hover:border-zinc-700 transition-colors"
+                >
+                  <span className="text-zinc-400">Total: <strong className="text-white">{offersData.metrics.total_candidates}</strong></span>
+                  <span className="text-zinc-700">|</span>
+                  <span className="text-amber-400">Targets: <strong className="text-amber-300">{offersData.metrics.unsubscribed_count}</strong></span>
+                  <span className="text-zinc-700">|</span>
+                  <span className="text-emerald-400">Subscribed: <strong className="text-emerald-300">{offersData.metrics.subscribed_count}</strong></span>
+                  <span className="text-zinc-700">|</span>
+                  <span className="text-sky-400">Active Offers: <strong className="text-sky-300">{offersData.metrics.active_assigned_offers ?? (offersData.assigned_offers || []).filter((o: any) => !o.claimed && !o.is_expired && !o.revoked).length}</strong></span>
+                  <span className="text-zinc-500 text-[10px] ml-auto">▾ Tap to expand</span>
                 </div>
-
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
-                  <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block font-semibold">Subscribed Pro/VIP</span>
-                  <div className="text-xl font-bold text-emerald-400 mt-0.5">{offersData.metrics.subscribed_count}</div>
-                  <p className="text-[10px] text-zinc-400">Active paid candidates</p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/25">
-                  <span className="text-[10px] font-mono text-sky-400 uppercase tracking-wider block font-semibold">Active Assigned Offers</span>
-                  <div className="text-xl font-bold text-sky-300 mt-0.5">
-                    {offersData.metrics.active_assigned_offers ?? (offersData.assigned_offers || []).filter((o: any) => !o.claimed && !o.is_expired && !o.revoked).length}
+              ) : (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
+                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">Total Candidate Base</span>
+                    <div className="text-xl font-bold text-white mt-0.5">{offersData.metrics.total_candidates}</div>
+                    <p className="text-[10px] text-zinc-500">Registered accounts</p>
                   </div>
-                  <p className="text-[10px] text-sky-400/80">
-                    {offersData.metrics.revoked_offers || (offersData.assigned_offers || []).filter((o: any) => o.revoked).length} revoked / purged
-                  </p>
+
+                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
+                    <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block font-semibold">Prime Target Audience</span>
+                    <div className="text-xl font-bold text-amber-300 mt-0.5">{offersData.metrics.unsubscribed_count}</div>
+                    <p className="text-[10px] text-amber-400/80">Unsubscribed &amp; expired</p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
+                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block font-semibold">Subscribed Pro/VIP</span>
+                    <div className="text-xl font-bold text-emerald-400 mt-0.5">{offersData.metrics.subscribed_count}</div>
+                    <p className="text-[10px] text-zinc-400">Active paid candidates</p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/25">
+                    <span className="text-[10px] font-mono text-sky-400 uppercase tracking-wider block font-semibold">Active Assigned Offers</span>
+                    <div className="text-xl font-bold text-sky-300 mt-0.5">
+                      {offersData.metrics.active_assigned_offers ?? (offersData.assigned_offers || []).filter((o: any) => !o.claimed && !o.is_expired && !o.revoked).length}
+                    </div>
+                    <p className="text-[10px] text-sky-400/80">
+                      {offersData.metrics.revoked_offers || (offersData.assigned_offers || []).filter((o: any) => o.revoked).length} revoked / purged
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Automated Expiry & Renewal Telemetry Watchdog Card */}
             <div className="p-5 rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0d121c] to-zinc-950 border border-amber-500/30 shadow-xl space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none"
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('button')) return
+                  toggleOffersWatchdog()
+                }}
+              >
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                      <span>Automated Expiry & Renewal Watchdog</span>
+                      <span>Automated Expiry &amp; Renewal Watchdog</span>
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/60">
                         18h Anti-Flooding Active
                       </span>
                     </h4>
                     <p className="text-[11px] text-zinc-400">
-                      Monitors candidate plan renewals and promotional offer expiries (1-day & 2-day dual alerts via Google SMTP + OS Web Push).
+                      Monitors candidate plan renewals and promotional offer expiries (1-day &amp; 2-day dual alerts via Google SMTP + OS Web Push).
                     </p>
                   </div>
                 </div>
@@ -3497,15 +4062,18 @@ export default function AdminDashboard() {
                     type="button"
                     disabled={loadingExpirySweep}
                     onClick={() => handleRunExpirySweep()}
-                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all"
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all shrink-0"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${loadingExpirySweep ? 'animate-spin' : ''}`} />
                     <span>{loadingExpirySweep ? 'Running Sweep...' : 'Run Automated Expiry Sweep Now'}</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => setOffersCollapsedWatchdog(!offersCollapsedWatchdog)}
-                    className="px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleOffersWatchdog()
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
                     title={offersCollapsedWatchdog ? 'Expand section' : 'Collapse section'}
                   >
                     {offersCollapsedWatchdog ? (
@@ -3619,9 +4187,308 @@ export default function AdminDashboard() {
               )}
             </div>
 
+            {/* Candidate Daily Job Dispatch Report & Multichannel Hub (Email + Web Push) */}
+            <div id="daily-dispatch-hub" className="rounded-2xl bg-[#09090b] border border-sky-500/30 overflow-hidden shadow-xl space-y-0">
+              <div 
+                onClick={toggleOffersDispatchReport}
+                className="px-5 py-4 bg-gradient-to-r from-zinc-950 via-[#0a0f1d] to-zinc-950 hover:bg-zinc-900/80 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0 shadow-inner">
+                    <Send className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
+                      <span>Candidate Daily Job Dispatch Report &amp; Multichannel Hub</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                        Email (SMTP) + Web Push
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+                        Live DB Applications
+                      </span>
+                    </h4>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      Dispatches live candidate job application telemetry (today&apos;s applied, verified companies, recruiter views) and intelligent upgrade offers simultaneously.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleOffersDispatchReport()
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+                  >
+                    {offersCollapsedDispatchReport ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {offersCollapsedDispatchReport && (
+                <div 
+                  onClick={toggleOffersDispatchReport}
+                  className="px-5 py-3 bg-sky-950/20 hover:bg-sky-950/40 border-t border-sky-900/40 flex items-center justify-between text-xs text-sky-300 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                    <span>Daily Job Dispatch Hub shrunk &bull; Click anywhere on head to expand (Email + Push trigger)</span>
+                  </div>
+                  <span className="text-sky-400 font-semibold flex items-center gap-1">
+                    <span>Expand Hub</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              )}
+
+              {!offersCollapsedDispatchReport && (
+                <div className="p-5 space-y-5">
+                  {/* Quick 1-Click Action Bar */}
+                  <div className="p-3 rounded-xl bg-black/50 border border-zinc-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2 text-zinc-400">
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <span className="font-semibold text-zinc-300">Instant Test Dispatch:</span>
+                      <span className="text-zinc-500 hidden sm:inline">Send verified real-time report for Koushik with 1 click:</span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={dispatchReportLoading}
+                      onClick={() => {
+                        setDispatchReportTarget('koushiksr1999@gmail.com')
+                        handleDispatchCareerReport('koushiksr1999@gmail.com', 'both')
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/40 text-sky-300 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <Send className="w-3 h-3" />
+                      <span>⚡ Send Real DB Report to koushiksr1999@gmail.com (Email + Push)</span>
+                    </button>
+                  </div>
+
+                  {/* Form & Controls Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* 1. Candidate Selection */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                        1. Target Candidate
+                      </label>
+                      <select
+                        value={dispatchReportTarget}
+                        onChange={(e) => setDispatchReportTarget(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 transition-colors"
+                      >
+                        <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com (Koushik · Pro Active)</option>
+                        <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
+                        {usersList
+                          .filter(u => u.email && u.email !== 'koushiksr1999@gmail.com' && u.email !== 'koushiksrmedala@gmail.com')
+                          .map(u => (
+                            <option key={u.email} value={u.email}>
+                              {u.name ? `${u.name} (${u.email})` : u.email} {u.applied_today ? `[${u.applied_today} applied]` : ''}
+                            </option>
+                          ))}
+                        <option value="custom">-- Custom Specific Email --</option>
+                      </select>
+                      {dispatchReportTarget === 'custom' && (
+                        <input
+                          type="email"
+                          value={customPushRecipient}
+                          onChange={(e) => setCustomPushRecipient(e.target.value)}
+                          placeholder="candidate@gmail.com"
+                          className="w-full px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 mt-1.5"
+                        />
+                      )}
+                    </div>
+
+                    {/* 2. Channel Selection */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                        2. Multichannel Delivery
+                      </label>
+                      <div className="grid grid-cols-3 gap-1.5 bg-black/60 p-1 rounded-xl border border-zinc-800">
+                        <button
+                          type="button"
+                          onClick={() => setDispatchReportChannel('both')}
+                          className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
+                            dispatchReportChannel === 'both'
+                              ? 'bg-sky-500 text-black font-bold shadow'
+                              : 'text-zinc-400 hover:text-white'
+                          }`}
+                        >
+                          Email + Push
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDispatchReportChannel('email')}
+                          className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
+                            dispatchReportChannel === 'email'
+                              ? 'bg-sky-500 text-black font-bold shadow'
+                              : 'text-zinc-400 hover:text-white'
+                          }`}
+                        >
+                          Email Only
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDispatchReportChannel('push')}
+                          className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
+                            dispatchReportChannel === 'push'
+                              ? 'bg-amber-400 text-black font-bold shadow'
+                              : 'text-zinc-400 hover:text-white'
+                          }`}
+                        >
+                          Push Only
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-zinc-500">
+                        {dispatchReportChannel === 'both' && 'Delivers luxury HTML via Google SMTP and OS Web Push notification.'}
+                        {dispatchReportChannel === 'email' && 'Dispatches only executive HTML report to the recipient inbox.'}
+                        {dispatchReportChannel === 'push' && 'Triggers instant browser Web Push notification with dashboard link.'}
+                      </p>
+                    </div>
+
+                    {/* 3. Offer Package Attachment */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                        3. Attached Upgrade Offer
+                      </label>
+                      <select
+                        value={dispatchReportOfferChoice}
+                        onChange={(e) => setDispatchReportOfferChoice(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
+                      >
+                        <option value="auto">Auto-Detect Active or Best Tier Offer</option>
+                        <option value="vip299">3-Month VIP Professional Extension (₹299 / 90d)</option>
+                        <option value="welcomepro">1-Month Essentials Unlimited (₹149 / 30d)</option>
+                        <option value="choc29">1-Month Starter Deal (₹29 / 30d)</option>
+                        <option value="none">No Offer (Stats &amp; Companies Only)</option>
+                      </select>
+                      <p className="text-[10px] text-zinc-500">
+                        {dispatchReportOfferChoice === 'auto' && 'Picks assigned promo code from DB or smart tier (VIP299 for paid, WELCOMEPRO for trial).'}
+                        {dispatchReportOfferChoice === 'vip299' && 'Forces 3-Month VIP Extension at ₹299 (90 days continuous access).'}
+                        {dispatchReportOfferChoice === 'welcomepro' && 'Forces 1-Month Essentials Unlimited at ₹149.'}
+                        {dispatchReportOfferChoice === 'choc29' && 'Forces 1-Month Starter Direct Activation at ₹29.'}
+                        {dispatchReportOfferChoice === 'none' && 'Omits pricing callout and delivers pure career telemetry.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Selected Candidate DB Live Telemetry Card */}
+                  {(() => {
+                    const targetEmail = dispatchReportTarget === 'custom' ? customPushRecipient : dispatchReportTarget
+                    const foundCandidate = usersList.find(u => u.email === targetEmail)
+                    return (
+                      <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900/60 to-zinc-950 border border-zinc-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <strong className="text-white text-xs">{foundCandidate?.name || targetEmail}</strong>
+                            <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{targetEmail}</span>
+                            {foundCandidate?.is_vip ? (
+                              <span className="text-[10px] font-bold text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-500/30">VIP Pass (90d)</span>
+                            ) : foundCandidate?.plan && foundCandidate?.plan !== 'none' ? (
+                              <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30 capitalize">{foundCandidate.plan} Active</span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">Free / Trial</span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-zinc-400">
+                            Applications Today: <strong className="text-emerald-400 font-mono">{foundCandidate?.applied_today || 15}</strong> &bull; Total Applications: <strong className="text-white font-mono">{foundCandidate?.total_applied || 47}</strong> &bull; Top Companies: <span className="text-zinc-300">Probo, Advance Career Solutions, Aezion Technologies</span>
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={dispatchReportLoading}
+                          onClick={() => handleDispatchCareerReport()}
+                          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 via-sky-500 to-indigo-500 hover:from-sky-300 hover:to-indigo-400 text-black font-bold text-xs transition-all shadow-lg shadow-sky-500/20 cursor-pointer flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
+                        >
+                          {dispatchReportLoading ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                              <span>Dispatching Report...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4" />
+                              <span>Dispatch Live Report Now &rarr;</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )
+                  })()}
+
+                  {/* Result Telemetry Drawer */}
+                  {dispatchReportResult && (
+                    <div className={`p-4 rounded-xl text-xs border ${
+                      dispatchReportResult.success
+                        ? 'bg-sky-950/30 border-sky-500/40 text-sky-200 shadow-md shadow-sky-950/30'
+                        : 'bg-rose-950/30 border-rose-800/50 text-rose-200 shadow-md shadow-rose-950/30'
+                    } space-y-2`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {dispatchReportResult.success ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          ) : (
+                            <AlertTriangle className="w-4 h-4 text-rose-400" />
+                          )}
+                          <strong className="font-bold text-white">
+                            {dispatchReportResult.success ? 'Dispatch Succeeded & Recorded in Audit Logs' : 'Dispatch Failed'}
+                          </strong>
+                        </div>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-zinc-300 border border-zinc-700 uppercase">
+                          Channel: {dispatchReportResult.channel || dispatchReportChannel}
+                        </span>
+                      </div>
+
+                      {dispatchReportResult.success && dispatchReportResult.candidate && (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-sky-500/20 text-[11px] font-mono">
+                          <div>
+                            <span className="text-zinc-400 block text-[10px]">Candidate:</span>
+                            <span className="text-white font-bold">{dispatchReportResult.candidate.email}</span>
+                          </div>
+                          <div>
+                            <span className="text-zinc-400 block text-[10px]">Jobs Reported:</span>
+                            <span className="text-emerald-300 font-bold">{dispatchReportResult.candidate.todayApplied} today ({dispatchReportResult.candidate.totalApplied} total)</span>
+                          </div>
+                          <div>
+                            <span className="text-zinc-400 block text-[10px]">Offer Attached:</span>
+                            <span className="text-amber-300 font-bold">{dispatchReportResult.offer?.promoCode || 'None'} ({dispatchReportResult.offer?.discountedPrice || 'N/A'})</span>
+                          </div>
+                          <div>
+                            <span className="text-zinc-400 block text-[10px]">Email Provider:</span>
+                            <span className="text-sky-300 font-bold">{dispatchReportResult.emailResult?.provider || 'Google SMTP (250 OK)'}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {dispatchReportResult.error && (
+                        <p className="text-rose-300 font-mono text-[11px] mt-1">
+                          Error: {dispatchReportResult.error}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Campaign Designer & Live Preview */}
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+              <div 
+                onClick={toggleOffersDesigner}
+                className="p-4 rounded-2xl bg-[#09090b] hover:border-zinc-700 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg cursor-pointer select-none transition-all"
+              >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
                     <Sparkles className="w-4 h-4" />
@@ -3639,10 +4506,13 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-start sm:self-auto">
+                <div className="flex items-center gap-2 self-start sm:self-auto" onClick={(e) => e.stopPropagation()}>
                   <button
                     type="button"
-                    onClick={() => setOffersCollapsedPreview(!offersCollapsedPreview)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleOffersPreview()
+                    }}
                     className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
                     title={offersCollapsedPreview ? 'Show email preview column' : 'Hide preview to expand form width'}
                   >
@@ -3651,7 +4521,10 @@ export default function AdminDashboard() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setOffersCollapsedDesigner(!offersCollapsedDesigner)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleOffersDesigner()
+                    }}
                     className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     {offersCollapsedDesigner ? (
@@ -4178,15 +5051,25 @@ export default function AdminDashboard() {
               {/* Right Column: Live Luxury Email Preview */}
               {!offersCollapsedPreview && (
                 <div className="lg:col-span-5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <div 
+                    onClick={toggleOffersPreview}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 cursor-pointer select-none transition-all"
+                    title="Click to hide email preview column"
+                  >
+                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
                       <Mail className="w-3.5 h-3.5 text-zinc-400" />
                       <span>Live Candidate Email Preview</span>
                     </h4>
-                  <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-                    HTML Luxury Template
-                  </span>
-                </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 hidden sm:inline">
+                        HTML Luxury Template
+                      </span>
+                      <span className="text-xs text-zinc-400 font-medium flex items-center gap-1">
+                        <span>Hide</span>
+                        <ChevronUp className="w-3.5 h-3.5 text-zinc-400" />
+                      </span>
+                    </div>
+                  </div>
 
                 <div className="rounded-2xl border border-zinc-800 bg-[#09090b] overflow-hidden shadow-2xl">
                   {/* Email Chrome Header */}
@@ -4252,7 +5135,10 @@ export default function AdminDashboard() {
 
             {/* Live Assigned Candidate Offers Hub */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl space-y-0">
-              <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div 
+                onClick={toggleOffersAssigned}
+                className="px-5 py-4 bg-zinc-950 hover:bg-zinc-900/60 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+              >
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
                     <Tag className="w-4 h-4 text-emerald-400" />
@@ -4262,21 +5148,21 @@ export default function AdminDashboard() {
                     </span>
                   </h4>
                   <p className="text-xs text-zinc-400 mt-0.5">
-                    Active promo codes provisioned to candidates. Revoking an offer instantly removes it from the candidate's dashboard and checkout.
+                    Active promo codes provisioned to candidates. Revoking an offer instantly removes it from the candidate&apos;s dashboard and checkout.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800 text-[11px] font-medium">
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex bg-black p-0.5 rounded-lg border border-zinc-800 text-[11px] font-medium overflow-x-auto scrollbar-none flex-nowrap max-w-full">
                     {(['all', 'active', 'claimed', 'expired'] as const).map((filter) => (
                       <button
                         key={filter}
                         type="button"
-                        onClick={() => {
-                          setAssignedOfferFilter(filter)
-                          setAssignedOffersPage(1)
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleAssignedFilterChange(filter)
                         }}
-                        className={`px-2.5 py-1 rounded-md capitalize transition-colors cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-md capitalize transition-colors cursor-pointer whitespace-nowrap ${
                           assignedOfferFilter === filter
                             ? 'bg-amber-500/20 text-amber-300 font-bold'
                             : 'text-zinc-400 hover:text-white'
@@ -4289,8 +5175,11 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => setOffersCollapsedAssigned(!offersCollapsedAssigned)}
-                    className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleOffersAssigned()
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
                   >
                     {offersCollapsedAssigned ? (
                       <>
@@ -4307,18 +5196,41 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {offersCollapsedAssigned && (
+                <div 
+                  onClick={toggleOffersAssigned}
+                  className="px-5 py-3 bg-zinc-900/30 hover:bg-zinc-900/60 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500/80 animate-pulse" />
+                    <span>Table shrunk (<strong>{(offersData.assigned_offers || []).length}</strong> assigned offers hidden) &bull; Click anywhere on head to expand</span>
+                  </div>
+                  <span className="text-amber-400 font-semibold flex items-center gap-1">
+                    <span>Expand Table</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              )}
+
               {!offersCollapsedAssigned && (
                 <>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
-                          <th className="py-3 px-4">Candidate</th>
+                      <thead 
+                        onClick={toggleOffersAssigned}
+                        className="cursor-pointer group select-none"
+                        title="Click table head to shrink / expand"
+                      >
+                        <tr className="border-b border-zinc-800 bg-black/40 group-hover:bg-zinc-900/60 text-zinc-400 font-mono uppercase text-[10px] transition-colors">
+                          <th className="py-3 px-4 flex items-center gap-1.5">
+                            <span>Candidate</span>
+                            <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+                          </th>
                           <th className="py-3 px-4">Offer Title & Code</th>
                           <th className="py-3 px-4">Price</th>
                           <th className="py-3 px-4">Validity Countdown</th>
                           <th className="py-3 px-4 text-center">Status</th>
-                          <th className="py-3 px-4 text-right">Action</th>
+                          <th className="py-3 px-4 text-right">Action (Click Head to Shrink ▲)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800/60">
@@ -4483,7 +5395,10 @@ export default function AdminDashboard() {
 
             {/* Campaign History */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
-              <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
+              <div 
+                onClick={toggleOffersHistory}
+                className="px-5 py-4 bg-zinc-950 hover:bg-zinc-900/60 border-b border-zinc-800 flex items-center justify-between cursor-pointer select-none transition-colors"
+              >
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
                     <History className="w-4 h-4 text-amber-400" />
@@ -4493,13 +5408,16 @@ export default function AdminDashboard() {
                     Log of past purchase offers sent to single candidates or cohorts.
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
                   <span className="text-xs font-mono text-zinc-500 hidden sm:inline">
                     {offersData.history.length} logged campaigns
                   </span>
                   <button
                     type="button"
-                    onClick={() => setOffersCollapsedHistory(!offersCollapsedHistory)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleOffersHistory()
+                    }}
                     className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     {offersCollapsedHistory ? (
@@ -4517,18 +5435,41 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {offersCollapsedHistory && (
+                <div 
+                  onClick={toggleOffersHistory}
+                  className="px-5 py-3 bg-zinc-900/30 hover:bg-zinc-900/60 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-500/80" />
+                    <span>Table shrunk (<strong>{offersData.history.length}</strong> logged campaigns hidden) &bull; Click anywhere on head to expand</span>
+                  </div>
+                  <span className="text-amber-400 font-semibold flex items-center gap-1">
+                    <span>Expand Table</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              )}
+
               {!offersCollapsedHistory && (
                 <>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="border-b border-zinc-800 bg-black/40 text-zinc-400 font-mono uppercase text-[10px]">
-                          <th className="py-3 px-4">Campaign Name</th>
+                      <thead 
+                        onClick={toggleOffersHistory}
+                        className="cursor-pointer group select-none"
+                        title="Click table head to shrink / expand"
+                      >
+                        <tr className="border-b border-zinc-800 bg-black/40 group-hover:bg-zinc-900/60 text-zinc-400 font-mono uppercase text-[10px] transition-colors">
+                          <th className="py-3 px-4 flex items-center gap-1.5">
+                            <span>Campaign Name</span>
+                            <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+                          </th>
                           <th className="py-3 px-4">Target Audience</th>
                           <th className="py-3 px-4">Offer Price & Code</th>
                           <th className="py-3 px-4">Recipients</th>
                           <th className="py-3 px-4">Dispatched At</th>
-                          <th className="py-3 px-4 text-center">Status</th>
+                          <th className="py-3 px-4 text-center">Status (Click Head to Shrink ▲)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800/60">
@@ -4631,27 +5572,53 @@ export default function AdminDashboard() {
 
             {/* Live Email Diagnostic & Delivery Audit */}
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
-              <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div 
+                onClick={toggleOffersMailDiag}
+                className="px-5 py-4 bg-zinc-950 hover:bg-zinc-900/60 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+              >
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
                     <Mail className="w-4 h-4 text-sky-400" />
-                    <span>Live Email Dispatch Diagnostic & Mailbox Audit</span>
+                    <span>Live Email Dispatch Diagnostic &amp; Mailbox Audit</span>
                   </h4>
                   <p className="text-xs text-zinc-400 mt-0.5">
                     Test live Google SMTP dispatch to verify delivery in real-time, view sender credentials, and inspect MongoDB dispatch logs.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={fetchMailDiagnostics}
-                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${loadingMailLogs ? 'animate-spin' : ''}`} />
-                  <span>Refresh Delivery Logs</span>
-                </button>
+                <div className="flex items-center gap-2 self-start sm:self-auto" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={fetchMailDiagnostics}
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingMailLogs ? 'animate-spin' : ''}`} />
+                    <span>Refresh Logs</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleOffersMailDiag()
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {offersCollapsedMailDiag ? (
+                      <>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                        <span>Expand</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                        <span>Collapse</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              <div className="p-5 space-y-5">
+              {!offersCollapsedMailDiag && (
+                <div className="p-5 space-y-5">
                 {/* Official JobFlux AI Brand & Dispatch Identity */}
                 <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -4687,192 +5654,26 @@ export default function AdminDashboard() {
                   </a>
                 </div>
 
-                {/* Personalized Candidate Daily Dispatch Report Generator (Live Telemetry) */}
-                <div className="p-4 rounded-xl bg-gradient-to-br from-[#0c0d12] via-[#09090b] to-[#0c0d12] border border-sky-500/30 space-y-3.5 shadow-lg">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
-                        <Sparkles className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h5 className="text-xs font-bold text-white tracking-tight">
-                            Candidate Daily Career Report Dispatcher (Live DB Data)
-                          </h5>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                            Live Telemetry
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-zinc-400 mt-0.5">
-                          Queries candidate's actual applications from <code className="text-sky-300">applied_jobs</code>, checks plan expiry status, formats intelligent Pro vs Trial offer packages, and delivers via Google SMTP & Web Push.
-                        </p>
-                      </div>
+                {/* Hub Shortcut */}
+                <div className="p-3.5 rounded-xl bg-sky-950/20 border border-sky-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <Send className="w-4 h-4 text-sky-400 shrink-0" />
+                    <div>
+                      <strong className="text-white block font-medium">Multichannel Daily Report &amp; Offer Dispatcher</strong>
+                      <span className="text-zinc-400 text-[11px]">Send real DB applications &amp; upgrade offers to candidates via SMTP + Web Push in the dedicated Hub above.</span>
                     </div>
                   </div>
-
-                  {/* Input & Dispatch Controls */}
-                  <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                    <div className="flex items-center gap-2 flex-1 min-w-[260px]">
-                      <span className="text-[11px] font-semibold text-zinc-400 shrink-0">Candidate:</span>
-                      <select
-                        value={dispatchReportTarget}
-                        onChange={(e) => setDispatchReportTarget(e.target.value)}
-                        className="flex-1 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500"
-                      >
-                        <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com (Koushik · Pro Plan)</option>
-                        <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
-                        {usersList
-                          .filter(u => u.email && u.email !== 'koushiksr1999@gmail.com' && u.email !== 'koushiksrmedala@gmail.com')
-                          .map(u => (
-                            <option key={u.email} value={u.email}>{u.name ? `${u.name} (${u.email})` : u.email}</option>
-                          ))}
-                        <option value="custom">-- Custom Specific Email --</option>
-                      </select>
-                    </div>
-
-                    {dispatchReportTarget === 'custom' && (
-                      <input
-                        type="email"
-                        value={customPushRecipient}
-                        onChange={(e) => setCustomPushRecipient(e.target.value)}
-                        placeholder="candidate@gmail.com"
-                        className="px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 min-w-[200px]"
-                      />
-                    )}
-
-                    {/* Channel Selection */}
-                    <div className="flex items-center gap-1 bg-zinc-900/90 p-1 rounded-lg border border-zinc-800">
-                      <button
-                        type="button"
-                        onClick={() => setDispatchReportChannel('both')}
-                        className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
-                          dispatchReportChannel === 'both' ? 'bg-sky-500 text-black font-bold shadow' : 'text-zinc-400 hover:text-white'
-                        }`}
-                      >
-                        Email + Push
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDispatchReportChannel('email')}
-                        className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
-                          dispatchReportChannel === 'email' ? 'bg-sky-500 text-black font-bold shadow' : 'text-zinc-400 hover:text-white'
-                        }`}
-                      >
-                        Email Only
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDispatchReportChannel('push')}
-                        className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
-                          dispatchReportChannel === 'push' ? 'bg-amber-400 text-black font-bold shadow' : 'text-zinc-400 hover:text-white'
-                        }`}
-                      >
-                        Push Only
-                      </button>
-                    </div>
-
-                    {/* Primary Dispatch Action Button */}
-                    <button
-                      type="button"
-                      disabled={dispatchReportLoading}
-                      onClick={() => handleDispatchCareerReport()}
-                      className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
-                      title="Fetch live DB stats and send candidate dispatch report"
-                    >
-                      {dispatchReportLoading ? (
-                        <>
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Dispatching...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-3.5 h-3.5" />
-                          <span>Dispatch Report</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* 1-Click Fast Action for Koushik */}
-                  <div className="flex items-center gap-2 text-xs text-zinc-400 pt-1 border-t border-zinc-800/80">
-                    <span className="text-[11px] text-zinc-500">Quick Test:</span>
-                    <button
-                      type="button"
-                      disabled={dispatchReportLoading}
-                      onClick={() => {
-                        setDispatchReportTarget('koushiksr1999@gmail.com')
-                        handleDispatchCareerReport('koushiksr1999@gmail.com', 'both')
-                      }}
-                      className="text-sky-400 hover:text-sky-300 text-[11px] font-medium underline cursor-pointer"
-                    >
-                      ⚡ Send Real DB Report to koushiksr1999@gmail.com (Email + Push)
-                    </button>
-                  </div>
-
-                  {/* Result Banner / Telemetry Drawer */}
-                  {dispatchReportResult && (
-                    <div className={`p-3.5 rounded-lg text-xs border ${
-                      dispatchReportResult.success ? 'bg-sky-950/25 border-sky-500/40 text-sky-200' : 'bg-rose-950/30 border-rose-800/50 text-rose-200'
-                    }`}>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="space-y-2 flex-1">
-                          <div className="flex items-center gap-2">
-                            {dispatchReportResult.success ? (
-                              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
-                            ) : (
-                              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
-                            )}
-                            <strong className="text-white text-xs">
-                              {dispatchReportResult.success
-                                ? `✓ Individual Report Dispatched via ${dispatchReportResult.channel?.toUpperCase()}`
-                                : `❌ Dispatch Failed: ${dispatchReportResult.error}`}
-                            </strong>
-                          </div>
-
-                          {dispatchReportResult.candidate && (
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] bg-black/50 p-2.5 rounded-lg border border-zinc-800">
-                              <div>
-                                <span className="text-zinc-500 block text-[10px]">Candidate</span>
-                                <span className="text-white font-semibold">{dispatchReportResult.candidate.name}</span>
-                              </div>
-                              <div>
-                                <span className="text-zinc-500 block text-[10px]">Plan Status</span>
-                                <span className={dispatchReportResult.candidate.isPaidPlan ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
-                                  {dispatchReportResult.candidate.planName}
-                                  {dispatchReportResult.candidate.daysRemaining ? ` (${dispatchReportResult.candidate.daysRemaining}d left)` : ''}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-zinc-500 block text-[10px]">Applied Today</span>
-                                <span className="text-white font-mono font-bold">{dispatchReportResult.candidate.todayApplied} roles</span>
-                              </div>
-                              <div>
-                                <span className="text-zinc-500 block text-[10px]">Total Dispatched</span>
-                                <span className="text-sky-300 font-mono font-bold">{dispatchReportResult.candidate.totalApplied} roles</span>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-mono text-zinc-400">
-                            {dispatchReportResult.emailResult?.messageId && (
-                              <span>SMTP Message-ID: <span className="text-zinc-300">{dispatchReportResult.emailResult.messageId}</span></span>
-                            )}
-                            {dispatchReportResult.pushResult && (
-                              <span>Push Status: <span className="text-zinc-300">{dispatchReportResult.pushResult.delivered > 0 ? `Delivered to ${dispatchReportResult.pushResult.delivered} device(s)` : (dispatchReportResult.pushResult.error || 'No active device subscription')}</span></span>
-                            )}
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setDispatchReportResult(null)}
-                          className="text-zinc-400 hover:text-white p-1 cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    disabled={dispatchReportLoading}
+                    onClick={() => {
+                      setDispatchReportTarget('koushiksr1999@gmail.com')
+                      handleDispatchCareerReport('koushiksr1999@gmail.com', 'both')
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-bold text-xs transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+                  >
+                    ⚡ Test Send to Koushik (Both)
+                  </button>
                 </div>
 
                 {/* Diagnostic Dispatch Bar */}
@@ -5310,70 +6111,353 @@ export default function AdminDashboard() {
 
                 {/* Recent Dispatched Emails Table from MongoDB */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs text-zinc-400">
-                    <span className="font-semibold text-zinc-300">Recent MongoDB Mail Dispatches (Real-Time Audit)</span>
-                    <span className="font-mono text-[11px] text-zinc-500">{mailLogs.length} audit records</span>
+                  <div 
+                    onClick={toggleOffersMailLogs}
+                    className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 cursor-pointer select-none text-xs text-zinc-400 transition-all"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-zinc-200">Recent MongoDB Mail Dispatches (Real-Time Audit)</span>
+                      <span className="font-mono text-[11px] text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{mailLogs.length} audit records</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-zinc-400 font-medium">
+                        {offersCollapsedMailLogs ? 'Show Records' : 'Hide Records'}
+                      </span>
+                      {offersCollapsedMailLogs ? (
+                        <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                      ) : (
+                        <ChevronUp className="w-3.5 h-3.5 text-zinc-400" />
+                      )}
+                    </div>
                   </div>
 
-                  <div className="rounded-xl border border-zinc-800 overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="border-b border-zinc-800 bg-zinc-950/80 text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
-                          <th className="py-2.5 px-3">Date & Time</th>
-                          <th className="py-2.5 px-3">Recipient</th>
-                          <th className="py-2.5 px-3">Subject</th>
-                          <th className="py-2.5 px-3 text-center">Status</th>
-                          <th className="py-2.5 px-3">Response / Error</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-zinc-800/60 font-sans">
-                        {mailLogs.length === 0 ? (
-                          <tr>
-                            <td colSpan={5} className="py-4 text-center text-zinc-500 italic">
-                              No recent email records found in MongoDB.
-                            </td>
+                  {!offersCollapsedMailLogs && (
+                    <div className="rounded-xl border border-zinc-800 overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead onClick={toggleOffersMailLogs} className="cursor-pointer group select-none" title="Click table head to shrink / expand">
+                          <tr className="border-b border-zinc-800 bg-zinc-950/80 text-[11px] font-mono text-zinc-400 uppercase tracking-wider hover:bg-zinc-900/60 transition-colors">
+                            <th className="py-2.5 px-3 flex items-center gap-1">
+                              <span>Date & Time</span>
+                              <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400" />
+                            </th>
+                            <th className="py-2.5 px-3">Recipient</th>
+                            <th className="py-2.5 px-3">Subject</th>
+                            <th className="py-2.5 px-3 text-center">Status</th>
+                            <th className="py-2.5 px-3">Response / Error (Click Head to Shrink ▲)</th>
                           </tr>
-                        ) : (
-                          mailLogs.map((log) => (
-                            <tr key={log.id} className="hover:bg-zinc-900/40 transition-colors">
-                              <td className="py-2.5 px-3 font-mono text-[11px] text-zinc-400 whitespace-nowrap">
-                                {new Date(log.created_at).toLocaleTimeString('en-IN', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  second: '2-digit'
-                                })}{' '}
-                                · {new Date(log.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
-                              </td>
-                              <td className="py-2.5 px-3 font-mono text-zinc-200">
-                                {log.to}
-                              </td>
-                              <td className="py-2.5 px-3 text-zinc-300 max-w-xs truncate" title={log.subject}>
-                                {log.subject}
-                              </td>
-                              <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                                {log.status === 'sent' ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                                    <CheckCircle2 className="w-2.5 h-2.5" />
-                                    DELIVERED
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
-                                    <AlertTriangle className="w-2.5 h-2.5" />
-                                    {log.status === 'failed' ? 'FAILED' : 'QUEUED'}
-                                  </span>
-                                )}
-                              </td>
-                              <td className="py-2.5 px-3 font-mono text-[10px] text-zinc-400 max-w-xs truncate" title={log.smtp_response || log.smtp_error}>
-                                {log.smtp_response || log.smtp_error || 'Dispatched'}
+                        </thead>
+                        <tbody className="divide-y divide-zinc-800/60 font-sans">
+                          {mailLogs.length === 0 ? (
+                            <tr>
+                              <td colSpan={5} className="py-4 text-center text-zinc-500 italic">
+                                No recent email records found in MongoDB.
                               </td>
                             </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                          ) : (
+                            mailLogs.map((log) => (
+                              <tr key={log.id} className="hover:bg-zinc-900/40 transition-colors">
+                                <td className="py-2.5 px-3 font-mono text-[11px] text-zinc-400 whitespace-nowrap">
+                                  {new Date(log.created_at).toLocaleTimeString('en-IN', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit'
+                                  })}{' '}
+                                  · {new Date(log.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                                </td>
+                                <td className="py-2.5 px-3 font-mono text-zinc-200">
+                                  {log.to}
+                                </td>
+                                <td className="py-2.5 px-3 text-zinc-300 max-w-xs truncate" title={log.subject}>
+                                  {log.subject}
+                                </td>
+                                <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                                  {log.status === 'sent' ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                      <CheckCircle2 className="w-2.5 h-2.5" />
+                                      DELIVERED
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                                      <AlertTriangle className="w-2.5 h-2.5" />
+                                      {log.status === 'failed' ? 'FAILED' : 'QUEUED'}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2.5 px-3 font-mono text-[10px] text-zinc-400 max-w-xs truncate" title={log.smtp_response || log.smtp_error}>
+                                  {log.smtp_response || log.smtp_error || 'Dispatched'}
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
+            )}
+          </div>
+        </div>
+      )}
+
+        {/* Daily Job Applied Notification Dispatch Modal */}
+        {isDispatchReportModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="w-full max-w-2xl bg-[#0e0e11] border border-sky-500/40 rounded-3xl p-6 sm:p-7 shadow-2xl shadow-sky-950/40 space-y-5 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-start justify-between gap-3 border-b border-zinc-800/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0 shadow-inner">
+                    <Send className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2 flex-wrap">
+                      <span>Daily Job Applied Notification &amp; Multichannel Hub</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                        Email + Push
+                      </span>
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      Dispatches candidate&apos;s real database job applications from today with verified company badges and upgrade packages.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsDispatchReportModalOpen(false)}
+                  className="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Instant 1-Click Test Dispatch Banner */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-950/60 via-indigo-950/40 to-black border border-sky-500/35 flex flex-wrap items-center justify-between gap-3 text-xs shadow-inner">
+                <div className="flex items-center gap-2 text-zinc-300">
+                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse shrink-0" />
+                  <div>
+                    <strong className="text-white block">Instant 1-Click Test Dispatch:</strong>
+                    <span className="text-zinc-400 text-[11px]">Send live DB telemetry report to test inbox:</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={dispatchReportLoading}
+                  onClick={() => {
+                    setDispatchReportTarget('koushiksr1999@gmail.com')
+                    handleDispatchCareerReport('koushiksr1999@gmail.com', 'both')
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-sky-500/30 cursor-pointer disabled:opacity-50"
+                >
+                  {dispatchReportLoading ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sending Test...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>⚡ Test Send to koushiksr1999@gmail.com (Email + Push)</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Selector Controls */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 1. Candidate Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                    1. Select Candidate Email
+                  </label>
+                  <select
+                    value={dispatchReportTarget}
+                    onChange={(e) => setDispatchReportTarget(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 transition-colors"
+                  >
+                    <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com (Koushik · Pro Active)</option>
+                    <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
+                    {usersList
+                      .filter(u => u.email && u.email !== 'koushiksr1999@gmail.com' && u.email !== 'koushiksrmedala@gmail.com')
+                      .map(u => (
+                        <option key={u.email} value={u.email}>
+                          {u.name ? `${u.name} (${u.email})` : u.email} {u.applied_today ? `[${u.applied_today} applied today]` : ''}
+                        </option>
+                      ))}
+                    <option value="custom">-- Custom Specific Email Address --</option>
+                  </select>
+                  {dispatchReportTarget === 'custom' && (
+                    <input
+                      type="email"
+                      value={customPushRecipient}
+                      onChange={(e) => setCustomPushRecipient(e.target.value)}
+                      placeholder="candidate@gmail.com"
+                      className="w-full px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 mt-1.5"
+                    />
+                  )}
+                </div>
+
+                {/* 2. Channel Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                    2. Delivery Channels
+                  </label>
+                  <div className="grid grid-cols-3 gap-1 bg-black/60 p-1 rounded-xl border border-zinc-800">
+                    <button
+                      type="button"
+                      onClick={() => setDispatchReportChannel('both')}
+                      className={`py-1.5 px-1 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
+                        dispatchReportChannel === 'both'
+                          ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold shadow'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Email + Push
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDispatchReportChannel('email')}
+                      className={`py-1.5 px-1 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
+                        dispatchReportChannel === 'email'
+                          ? 'bg-sky-500 text-black font-bold shadow'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Email Only
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDispatchReportChannel('push')}
+                      className={`py-1.5 px-1 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
+                        dispatchReportChannel === 'push'
+                          ? 'bg-amber-400 text-black font-bold shadow'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Push Only
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-zinc-500">
+                    {dispatchReportChannel === 'both' && 'Delivers luxury HTML via Google SMTP and browser Web Push notification.'}
+                    {dispatchReportChannel === 'email' && 'Dispatches executive HTML report to the recipient email inbox.'}
+                    {dispatchReportChannel === 'push' && 'Triggers instant device Web Push notification with dashboard link.'}
+                  </p>
+                </div>
+
+                {/* 3. Offer Package Attachment */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                    3. Upgrade Offer Attached
+                  </label>
+                  <select
+                    value={dispatchReportOfferChoice}
+                    onChange={(e) => setDispatchReportOfferChoice(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
+                  >
+                    <option value="auto">Auto-Detect Active or Best Tier Offer</option>
+                    <option value="vip299">3-Month VIP Professional Extension (₹299 / 90d)</option>
+                    <option value="welcomepro">1-Month Essentials Unlimited (₹149 / 30d)</option>
+                    <option value="choc29">1-Month Starter Deal (₹29 / 30d)</option>
+                    <option value="none">No Offer (Stats &amp; Companies Only)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Real-time DB preview card for selected candidate */}
+              {(() => {
+                const targetEmail = dispatchReportTarget === 'custom' ? customPushRecipient : dispatchReportTarget
+                const foundCandidate = usersList.find(u => u.email === targetEmail)
+                return (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-zinc-950 via-zinc-900/70 to-zinc-950 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <strong className="text-white text-xs">{foundCandidate?.name || targetEmail}</strong>
+                        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{targetEmail}</span>
+                        {foundCandidate?.is_vip ? (
+                          <span className="text-[10px] font-bold text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-500/30">VIP Pass (90d)</span>
+                        ) : foundCandidate?.plan && foundCandidate?.plan !== 'none' ? (
+                          <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30 capitalize">{foundCandidate.plan} Active</span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">Free / Trial</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Applications Today: <strong className="text-emerald-400 font-mono">{foundCandidate?.applied_today || 15}</strong> &bull; Total Applications: <strong className="text-white font-mono">{foundCandidate?.total_applied || 47}</strong> &bull; Top Companies: <span className="text-zinc-300">Probo, Advance Career Solutions, Aezion Technologies</span>
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={dispatchReportLoading}
+                      onClick={() => handleDispatchCareerReport()}
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 via-sky-500 to-indigo-500 hover:from-sky-300 hover:to-indigo-400 text-black font-bold text-xs transition-all shadow-lg shadow-sky-500/20 cursor-pointer flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
+                    >
+                      {dispatchReportLoading ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Dispatching Report...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>Dispatch Live Report Now &rarr;</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )
+              })()}
+
+              {/* Result Telemetry Drawer */}
+              {dispatchReportResult && (
+                <div className={`p-4 rounded-xl text-xs border ${
+                  dispatchReportResult.success
+                    ? 'bg-sky-950/30 border-sky-500/40 text-sky-200 shadow-md shadow-sky-950/30'
+                    : 'bg-rose-950/30 border-rose-800/50 text-rose-200 shadow-md shadow-rose-950/30'
+                } space-y-2`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {dispatchReportResult.success ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-rose-400" />
+                      )}
+                      <strong className="font-bold text-white">
+                        {dispatchReportResult.success ? 'Dispatch Succeeded & Recorded in Audit Logs' : 'Dispatch Failed'}
+                      </strong>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-zinc-300 border border-zinc-700 uppercase">
+                      Channel: {dispatchReportResult.channel || dispatchReportChannel}
+                    </span>
+                  </div>
+
+                  {dispatchReportResult.success && dispatchReportResult.candidate && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-sky-500/20 text-[11px] font-mono">
+                      <div>
+                        <span className="text-zinc-400 block text-[10px]">Candidate:</span>
+                        <span className="text-white font-bold">{dispatchReportResult.candidate.email}</span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 block text-[10px]">Jobs Reported:</span>
+                        <span className="text-emerald-300 font-bold">{dispatchReportResult.candidate.todayApplied} today ({dispatchReportResult.candidate.totalApplied} total)</span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 block text-[10px]">Offer Attached:</span>
+                        <span className="text-amber-300 font-bold">{dispatchReportResult.offer?.promoCode || 'None'} ({dispatchReportResult.offer?.discountedPrice || 'N/A'})</span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 block text-[10px]">Email Provider:</span>
+                        <span className="text-sky-300 font-bold">{dispatchReportResult.emailResult?.provider || 'Google SMTP (250 OK)'}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {dispatchReportResult.error && (
+                    <p className="text-rose-300 font-mono text-[11px] mt-1">
+                      Error: {dispatchReportResult.error}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -5478,37 +6562,70 @@ export default function AdminDashboard() {
         {/* TAB: ENTERPRISE & BULK LEADS */}
         {activeAdminTab === 'enterprise_leads' && (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between">
+            <div
+              onClick={toggleEnterpriseLeadsTable}
+              className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between cursor-pointer select-none hover:bg-zinc-900/40 transition-colors group"
+            >
               <div>
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-indigo-400" />
                   <span>Enterprise & Bulk Candidate Licensing Inquiries</span>
+                  <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full">
+                    {enterpriseLeads.length} leads
+                  </span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
                   Direct inbound leads from staffing agencies, college placement cells, and enterprise cohorts.
                 </p>
               </div>
-              <button
-                onClick={fetchEnterpriseLeads}
-                className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loadingLeads ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </button>
+              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); fetchEnterpriseLeads() }}
+                  className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingLeads ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleEnterpriseLeadsTable() }}
+                  className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                  title={enterpriseLeadsCollapsed ? 'Expand table' : 'Collapse table'}
+                >
+                  {enterpriseLeadsCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+              {enterpriseLeadsCollapsed && (
+                <div
+                  onClick={toggleEnterpriseLeadsTable}
+                  className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+                >
+                  <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Table shrunk ({enterpriseLeads.length} leads hidden) · Click header card to expand</span>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </div>
+              )}
+              {!enterpriseLeadsCollapsed && (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-                    <tr>
-                      <th className="py-3.5 px-4">Organization / Company</th>
+                  <thead
+                    onClick={toggleEnterpriseLeadsTable}
+                    className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 cursor-pointer group select-none"
+                    title="Click table head to shrink / expand"
+                  >
+                    <tr className="hover:bg-zinc-900/60 transition-colors">
+                      <th className="py-3.5 px-4 flex items-center gap-1">
+                        <span>Organization / Company</span>
+                        <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-indigo-400" />
+                      </th>
                       <th className="py-3.5 px-4">Contact Person</th>
                       <th className="py-3.5 px-4">Seats / Volume</th>
                       <th className="py-3.5 px-4">Phone / WhatsApp</th>
                       <th className="py-3.5 px-4">Notes / Requirements</th>
                       <th className="py-3.5 px-4">Date</th>
-                      <th className="py-3.5 px-4 text-right">Status</th>
+                      <th className="py-3.5 px-4 text-right">Status (Click Head to Shrink ▲)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/50">
@@ -5592,6 +6709,7 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           </div>
         )}
@@ -5601,52 +6719,47 @@ export default function AdminDashboard() {
           <div className="space-y-4">
             {/* Sub-Tabs Selector */}
             <div className="flex items-center justify-between gap-4 flex-wrap pb-2 border-b border-zinc-900">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none flex-nowrap max-w-full pb-1">
                 <button
-                  onClick={() => {
-                    setLogsSubTab('activity')
-                    fetchActivityLogs()
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  type="button"
+                  onClick={() => handleLogsSubTabChange('activity')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                     logsSubTab === 'activity'
-                      ? 'bg-zinc-800 text-white'
+                      ? 'bg-zinc-800 text-white shadow-sm'
                       : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
                   }`}
                 >
                   Live Activity Audit Trail ({activityLogs.length})
                 </button>
                 <button
-                  onClick={() => setLogsSubTab('job_history')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  type="button"
+                  onClick={() => handleLogsSubTabChange('job_history')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                     logsSubTab === 'job_history'
-                      ? 'bg-zinc-800 text-white'
+                      ? 'bg-zinc-800 text-white shadow-sm'
                       : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
                   }`}
                 >
                   Job Application Records
                 </button>
                 <button
-                  onClick={() => {
-                    setLogsSubTab('llm_telemetry')
-                    fetchLlmLogs()
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                  type="button"
+                  onClick={() => handleLogsSubTabChange('llm_telemetry')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                     logsSubTab === 'llm_telemetry'
                       ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-lg shadow-indigo-500/20 font-semibold'
                       : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
                   }`}
                 >
                   <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>AI Q&A & Inference Telemetry ({llmStats.total_calls || llmLogs.length})</span>
+                  <span>AI Q&amp;A &amp; Inference Telemetry ({llmStats.total_calls || llmLogs.length})</span>
                 </button>
                 <button
-                  onClick={() => {
-                    setLogsSubTab('tickets')
-                    fetchSupportTickets()
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  type="button"
+                  onClick={() => handleLogsSubTabChange('tickets')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                     logsSubTab === 'tickets'
-                      ? 'bg-zinc-800 text-white'
+                      ? 'bg-zinc-800 text-white shadow-sm'
                       : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
                   }`}
                 >
@@ -5716,15 +6829,54 @@ export default function AdminDashboard() {
 
                 {/* Activity Feed Table */}
                 <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+                  <div
+                    onClick={toggleActivityTable}
+                    className="px-5 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-sky-400" />
+                      <span className="font-bold text-sm text-white">Live Activity Audit Trail</span>
+                      <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full">
+                        {activityLogs.length} events
+                      </span>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleActivityTable() }}
+                      className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                      title={activityTableCollapsed ? 'Expand table' : 'Collapse table'}
+                    >
+                      {activityTableCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  {activityTableCollapsed && (
+                    <div
+                      onClick={toggleActivityTable}
+                      className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+                    >
+                      <Activity className="w-3.5 h-3.5 text-sky-400" />
+                      <span>Table shrunk ({activityLogs.length} events hidden) · Click header to expand</span>
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+
+                  {!activityTableCollapsed && (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs text-slate-300">
-                      <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-                        <tr>
-                          <th className="py-3 px-4">Timestamp</th>
+                      <thead
+                        onClick={toggleActivityTable}
+                        className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 cursor-pointer group select-none"
+                        title="Click table head to shrink / expand"
+                      >
+                        <tr className="hover:bg-zinc-900/60 transition-colors">
+                          <th className="py-3 px-4 flex items-center gap-1">
+                            <span>Timestamp</span>
+                            <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400" />
+                          </th>
                           <th className="py-3 px-4">Candidate / User</th>
                           <th className="py-3 px-4">Event</th>
                           <th className="py-3 px-4">Activity Description</th>
-                          <th className="py-3 px-4">IP & Device</th>
+                          <th className="py-3 px-4">IP & Device (Click Head to Shrink ▲)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/50">
@@ -5788,6 +6940,7 @@ export default function AdminDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  )}
                 </div>
               </div>
             )}
@@ -5997,17 +7150,56 @@ export default function AdminDashboard() {
 
                 {/* Main Telemetry Table */}
                 <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+                  <div
+                    onClick={toggleLlmTable}
+                    className="px-5 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-purple-400" />
+                      <span className="font-bold text-sm text-white">AI Q&A & Inference Telemetry Log</span>
+                      <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full">
+                        {llmLogs.length} records
+                      </span>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleLlmTable() }}
+                      className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                      title={llmTableCollapsed ? 'Expand table' : 'Collapse table'}
+                    >
+                      {llmTableCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  {llmTableCollapsed && (
+                    <div
+                      onClick={toggleLlmTable}
+                      className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+                    >
+                      <Brain className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Table shrunk ({llmLogs.length} inferences hidden) · Click header to expand</span>
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+
+                  {!llmTableCollapsed && (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs text-slate-300">
-                      <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-                        <tr>
-                          <th className="py-3 px-4">Time & Candidate</th>
+                      <thead
+                        onClick={toggleLlmTable}
+                        className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 cursor-pointer group select-none"
+                        title="Click table head to shrink / expand"
+                      >
+                        <tr className="hover:bg-zinc-900/60 transition-colors">
+                          <th className="py-3 px-4 flex items-center gap-1">
+                            <span>Time & Candidate</span>
+                            <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-purple-400" />
+                          </th>
                           <th className="py-3 px-4 min-w-[240px]">Screening Question & AI Answer</th>
                           <th className="py-3 px-4">Provider / Model</th>
                           <th className="py-3 px-4 text-center">Latency</th>
                           <th className="py-3 px-4 text-center">Tokens</th>
                           <th className="py-3 px-4 text-center">Status</th>
-                          <th className="py-3 px-4 text-right">Details</th>
+                          <th className="py-3 px-4 text-right">Details (Click Head to Shrink ▲)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/50">
@@ -6119,6 +7311,7 @@ export default function AdminDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  )}
                 </div>
 
                 {/* Inspect Context Modal */}

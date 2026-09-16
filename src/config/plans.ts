@@ -128,7 +128,7 @@ export const MASTER_PLANS: PlanDefinition[] = [
     price: 'Custom',
     amountPaise: 0,
     period: '/ volume quote',
-    durationDays: 365,
+    durationDays: 90,
     featuresIntro: 'Everything in Professional, with bulk candidate controls, plus...',
     features: [
       { text: 'Bulk Candidate Licensing (10 to 500+ Seats)' },
@@ -170,19 +170,19 @@ export const MASTER_PROMOS: PromoDefinition[] = [
   {
     code: 'CHOC29',
     presetId: 'choc_29',
-    name: '7-Day Career Sprint (₹29 / week)',
-    offerTitle: 'Chocolate Price Special: 7-Day JobFlux Sprint for ₹29',
-    discountBadge: '97% OFF (CHOC PRICE)',
-    originalPrice: '₹500 / week',
-    discountedPrice: '₹29 / week',
+    name: '1-Month Starter Sprint (₹29 / mo)',
+    offerTitle: 'Introductory Special: 1-Month JobFlux Sprint for ₹29',
+    discountBadge: '97% OFF (INTRO SPECIAL)',
+    originalPrice: '₹1,000 / mo',
+    discountedPrice: '₹29 / mo',
     amountPaise: 2900,
     allowedPlans: ['pro', 'starter'],
-    durationDays: 7,
-    description: 'JobFlux 7-Day Sprint (150 Applications)',
-    customMessage: 'Claim the ₹29 Chocolate Sprint! Get 7 days of autonomous job applications across Naukri (150+ applications) for less than the price of a KitKat.',
+    durationDays: 30,
+    description: 'JobFlux Essentials - 1-Month Special Sprint (30 Days)',
+    customMessage: 'Claim the ₹29 introductory sprint! Get 30 days of autonomous job applications across Naukri (600+ applications) for just ₹29.',
     pricingDisplay: {
       displayPrice: '₹29',
-      label: 'Chocolate Price Sprint (Actual ₹500)'
+      label: 'Special 1-Month Sprint (Actual ₹1,000 / mo)'
     }
   },
   {
@@ -260,19 +260,19 @@ export const MASTER_PROMOS: PromoDefinition[] = [
   {
     code: 'VIP299',
     presetId: 'vip_299',
-    name: 'Lifetime VIP Career Pass (₹299)',
-    offerTitle: 'Lifetime VIP Access: Autonomous Job Applications for ₹299',
-    discountBadge: '97% OFF (ACTUAL ₹10,000)',
-    originalPrice: '₹10,000',
-    discountedPrice: '₹299 One-Time',
+    name: '3-Month VIP Professional Extension (₹299)',
+    offerTitle: '3-Month VIP Extension: Continuous Autonomous Job Applications for ₹299',
+    discountBadge: '88% OFF (ACTUAL ₹2,500)',
+    originalPrice: '₹2,500 / 3 mos',
+    discountedPrice: '₹299 / 3 mos',
     amountPaise: 29900,
     allowedPlans: ['elite', 'professional'],
-    durationDays: 365,
-    description: 'JobFlux Professional - 97% VIP Annual Pass (365 Days)',
-    customMessage: 'Get unlimited autonomous job applications and daily recruiter sweeps until you sign your dream offer, plus permanent VIP queue slot and priority placement assistance at 97% savings.',
+    durationDays: 90,
+    description: 'JobFlux Professional - 88% VIP 3-Month Extension (90 Days)',
+    customMessage: 'Extend your autonomous job applications for 3 full months (90 days / 1,800+ applications) with VIP priority server queue and on-demand sweeps at 88% discount (Regular ₹2,500) for only ₹299.',
     pricingDisplay: {
       displayPrice: '₹299',
-      label: '97% OFF Lifetime VIP Pass (Actual ₹10,000 Value)'
+      label: '88% OFF 3-Month VIP Extension (Actual ₹2,500 Value)'
     }
   }
 ]

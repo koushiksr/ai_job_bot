@@ -24,9 +24,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ detail: 'Forbidden: Administrator privileges required.' }, { status: 403 })
     }
 
-    // Get candidate audience breakdown
-    const allUsers = await db.collection('users').find({}).toArray()
-    const allProfiles = allUsers.length > 0 ? allUsers : await db.collection('profiles').find({}).toArray()
+    // Get candidate audience breakdown, campaign history, and assigned offers in parallel
+    const [allUsers, allProfilesRaw, history, assignedOffersList] = await Promise.all([
+      db.collection('users').find({}, { projection: { plan: 1, trial_expires_at: 1, user_id: 1, email: 1 } }).toArray(),
+      db.collection('profiles').find({}, { projection: { plan: 1, trial_expires_at: 1, user_id: 1, email: 1 } }).toArray(),
+      db.collection('admin_offers').find({}).sort({ created_at: -1 }).limit(30).toArray(),
+      db.collection('assigned_offers').find({}).sort({ created_at: -1 }).limit(100).toArray()
+    ])
+    const allProfiles = allUsers.length > 0 ? allUsers : allProfilesRaw
 
     const now = new Date()
     const unsubscribedOrTrial = allProfiles.filter(p => {
@@ -38,20 +43,6 @@ export async function GET(req: NextRequest) {
       }
       return false
     })
-
-    // Get past campaigns history
-    const history = await db.collection('admin_offers')
-      .find({})
-      .sort({ created_at: -1 })
-      .limit(30)
-      .toArray()
-
-    // Get active candidate assigned offers with expiry status
-    const assignedOffersList = await db.collection('assigned_offers')
-      .find({})
-      .sort({ created_at: -1 })
-      .limit(100)
-      .toArray()
 
     const activeAssignedOffers = assignedOffersList.map(o => {
       const exp = o.expires_at ? new Date(o.expires_at) : null
