@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { 
   Download, 
   Bell, 
@@ -12,9 +12,22 @@ import {
   Sparkles, 
   ShieldCheck, 
   ChevronRight,
-  Zap
+  Laptop,
+  Monitor,
+  Check,
+  RotateCcw,
+  Compass,
+  ArrowRight
 } from 'lucide-react'
-import { subscribeDeviceToPush, getNotificationPermission } from '@/lib/notifications'
+import { subscribeDeviceToPush, getNotificationPermission, sendBrowserNotification } from '@/lib/notifications'
+import { 
+  getDeviceEnvironment, 
+  checkIsPwaInstalled, 
+  markPwaAsInstalled, 
+  unmarkPwaAsInstalled, 
+  markPwaAsDismissed,
+  DeviceEnvironment 
+} from '@/lib/pwaHelper'
 
 interface PwaInstallPromptModalProps {
   isOpen: boolean
@@ -30,27 +43,29 @@ export default function PwaInstallPromptModal({
   userId
 }: PwaInstallPromptModalProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
-  const [isIOS, setIsIOS] = useState(false)
+  const [deviceEnv, setDeviceEnv] = useState<DeviceEnvironment>(() => getDeviceEnvironment())
+  const [isInstalled, setIsInstalled] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
   const [pushStatus, setPushStatus] = useState<'default' | 'granted' | 'denied' | 'loading'>('default')
-  const [activeStep, setActiveStep] = useState<'install' | 'instructions'>('install')
+  const [activeStep, setActiveStep] = useState<'prompt' | 'ios_instructions' | 'desktop_instructions'>('prompt')
+  const [testAlertSent, setTestAlertSent] = useState(false)
 
-  useEffect(() => {
+  // Verify device environment and installation status
+  const refreshInstallStatus = useCallback(async () => {
     if (typeof window === 'undefined') return
+    const env = getDeviceEnvironment()
+    setDeviceEnv(env)
 
-    // 1. Standalone detection
-    const checkStandalone = 
+    const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true ||
       document.referrer.includes('android-app://')
-    setIsStandalone(checkStandalone)
+    setIsStandalone(standalone)
 
-    // 2. iOS Safari detection
-    const ua = window.navigator.userAgent
-    const isIosDevice = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream
-    setIsIOS(isIosDevice)
+    const installed = await checkIsPwaInstalled()
+    setIsInstalled(installed)
 
-    // 3. Notification permission check
+    // Check notification permission
     const perm = getNotificationPermission()
     if (perm === 'granted') {
       setPushStatus('granted')
@@ -59,8 +74,12 @@ export default function PwaInstallPromptModal({
     } else {
       setPushStatus('default')
     }
+  }, [])
 
-    // 4. Capture native browser PWA install event
+  useEffect(() => {
+    refreshInstallStatus()
+
+    // 4. Capture native browser PWA install event (Chrome, Edge, Brave, etc.)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e)
@@ -68,7 +87,10 @@ export default function PwaInstallPromptModal({
 
     const handleAppInstalled = () => {
       setDeferredPrompt(null)
-      setIsStandalone(true)
+      setIsInstalled(true)
+      markPwaAsInstalled()
+      // Automatically attempt to activate push notifications when user completes installation
+      handleEnablePush()
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -78,31 +100,71 @@ export default function PwaInstallPromptModal({
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
     }
-  }, [])
+  }, [refreshInstallStatus])
+
+  // Refresh status whenever modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      refreshInstallStatus()
+      setActiveStep('prompt')
+      setTestAlertSent(false)
+    }
+  }, [isOpen, refreshInstallStatus])
 
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        onClose()
+        handleDismiss()
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  }, [isOpen])
 
-  // Handle native install prompt
+  const handleDismiss = () => {
+    markPwaAsDismissed()
+    onClose()
+  }
+
+  // Handle native install prompt or route to platform guide
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null)
-        setIsStandalone(true)
-        handleEnablePush()
+      try {
+        deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        if (outcome === 'accepted') {
+          markPwaAsInstalled()
+          setDeferredPrompt(null)
+          setIsInstalled(true)
+          await handleEnablePush()
+        }
+      } catch (err) {
+        console.warn('Deferred prompt error:', err)
+        // If native prompt fails, show visual guide
+        if (deviceEnv.isDesktop) {
+          setActiveStep('desktop_instructions')
+        } else if (deviceEnv.isIOS) {
+          setActiveStep('ios_instructions')
+        }
       }
-    } else if (isIOS) {
-      setActiveStep('instructions')
+    } else if (deviceEnv.isIOS) {
+      setActiveStep('ios_instructions')
+    } else if (deviceEnv.isDesktop) {
+      setActiveStep('desktop_instructions')
+    } else {
+      // Android / mobile without prompt
+      setActiveStep('desktop_instructions')
+    }
+  }
+
+  // Handle manual "I've Installed It" confirmation
+  const handleConfirmInstalled = async () => {
+    markPwaAsInstalled()
+    setIsInstalled(true)
+    setActiveStep('prompt')
+    if (pushStatus !== 'granted') {
+      await handleEnablePush()
     }
   }
 
@@ -115,6 +177,10 @@ export default function PwaInstallPromptModal({
       const result = await subscribeDeviceToPush(email, uid)
       if (result.success) {
         setPushStatus('granted')
+        sendBrowserNotification('⚡ JobFlux AI Notifications Active', {
+          body: 'You will receive real-time recruiter alerts and daily morning dispatch updates.',
+          icon: '/icon.svg'
+        })
       } else {
         setPushStatus('denied')
       }
@@ -124,6 +190,16 @@ export default function PwaInstallPromptModal({
     }
   }
 
+  // Handle sending a quick test alert
+  const handleSendTestAlert = () => {
+    sendBrowserNotification('🚀 JobFlux AI Alert System', {
+      body: 'Verified! Push alerts are functioning seamlessly on your device.',
+      icon: '/icon.svg'
+    })
+    setTestAlertSent(true)
+    setTimeout(() => setTestAlertSent(false), 4000)
+  }
+
   if (!isOpen) return null
 
   return (
@@ -131,24 +207,24 @@ export default function PwaInstallPromptModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
-          onClose()
+          handleDismiss()
         }
       }}
       role="dialog"
       aria-modal="true"
     >
       <div 
-        className="relative w-full max-w-md rounded-3xl bg-[#0d1017] border border-zinc-800/90 shadow-[0_25px_60px_rgba(0,0,0,0.9)] text-white p-6 sm:p-7 overflow-hidden"
+        className="relative w-full max-w-lg rounded-3xl bg-[#0d1017] border border-zinc-800/90 shadow-[0_25px_60px_rgba(0,0,0,0.9)] text-white p-6 sm:p-7 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle cyan ambient glow at top */}
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-24 bg-cyan-500/15 blur-3xl pointer-events-none rounded-full" />
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-56 h-28 bg-cyan-500/15 blur-3xl pointer-events-none rounded-full" />
 
-        {/* Big, Clear Close Button (Always clickable, high z-index) */}
+        {/* Big, Clear Close Button */}
         <button
           onClick={(e) => {
             e.stopPropagation()
-            onClose()
+            handleDismiss()
           }}
           type="button"
           className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border border-zinc-700/60 cursor-pointer shadow-sm"
@@ -157,12 +233,10 @@ export default function PwaInstallPromptModal({
           <X className="w-4 h-4" />
         </button>
 
-        {/* Content */}
+        {/* Header: App Emblem + Title + Platform Tag */}
         <div className="relative z-10">
-          {/* App Icon + Title */}
           <div className="flex items-center gap-3.5 mb-5 pr-8">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-              {/* Clean app icon emblem without overflowing text */}
               <img 
                 src="/icon.svg" 
                 alt="JobFlux" 
@@ -170,68 +244,218 @@ export default function PwaInstallPromptModal({
               />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white tracking-tight">Install JobFlux AI</h3>
-                <span className="text-[10px] font-semibold font-mono px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
-                  APP
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  {isInstalled || isStandalone ? 'JobFlux AI App' : 'Install JobFlux AI'}
+                </h3>
+                <span className="text-[10px] font-semibold font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 flex items-center gap-1">
+                  {deviceEnv.isDesktop ? <Laptop className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
+                  {deviceEnv.osName}
                 </span>
+                {isInstalled && (
+                  <span className="text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800 flex items-center gap-1">
+                    <Check className="w-2.5 h-2.5" /> INSTALLED
+                  </span>
+                )}
               </div>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Install as standalone app for instant alerts
+                {isInstalled 
+                  ? 'Application is verified & installed on this device' 
+                  : deviceEnv.isDesktop 
+                    ? 'Install as a standalone desktop app on your laptop' 
+                    : 'Install as a native home-screen app'}
               </p>
             </div>
           </div>
 
-          {/* Standalone Installed View */}
-          {isStandalone ? (
+          {/* ========================================================================= */}
+          {/* VIEW 1: VERIFIED APP INSTALLED (Standalone or Persistent Verification) */}
+          {/* ========================================================================= */}
+          {isInstalled || isStandalone ? (
             <div className="space-y-4">
-              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-xs font-bold text-emerald-300">App Already Installed</h4>
-                  <p className="text-xs text-zinc-300 mt-0.5">
-                    You are running JobFlux AI in standalone app mode.
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-xs font-bold text-emerald-300">Application Verified on this Device</h4>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-900/60 text-emerald-200">
+                      {isStandalone ? 'Active Window' : 'Dock / App Library'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-300 mt-1 leading-relaxed">
+                    JobFlux AI is installed. You can launch it directly from your {deviceEnv.os === 'mac' ? 'Mac Dock, Spotlight, or Launchpad' : deviceEnv.os === 'windows' ? 'Windows Taskbar or Start Menu' : 'desktop or home screen'} without opening browser tabs.
                   </p>
                 </div>
               </div>
 
-              {/* Push Alerts Option */}
-              <div className="p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2">
+              {/* Push Alerts & Notification Center Option */}
+              <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
-                    <Bell className="w-3.5 h-3.5 text-cyan-400" />
-                    Lock-Screen Push Notifications
+                  <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-cyan-400" />
+                    Real-Time Push Alerts & Recruiter Updates
                   </span>
                   {pushStatus === 'granted' ? (
-                    <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Enabled
+                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Enabled
                     </span>
                   ) : (
                     <button
                       type="button"
                       onClick={handleEnablePush}
                       disabled={pushStatus === 'loading'}
-                      className="px-2.5 py-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                     >
-                      {pushStatus === 'loading' ? 'Enabling...' : 'Enable'}
+                      {pushStatus === 'loading' ? 'Enabling...' : 'Enable Alerts'}
                     </button>
                   )}
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Receive instant alerts when recruiters view your profile or interview requests arrive.
+                  Receive instant desktop & lock-screen notifications when recruiters view your resume, shortlists occur, or the daily 6 AM & 8 AM IST dispatch runs complete.
                 </p>
+
+                {pushStatus === 'granted' && (
+                  <div className="pt-1 flex items-center justify-between border-t border-zinc-800/80">
+                    <span className="text-[11px] text-zinc-400">Verify push delivery:</span>
+                    <button
+                      type="button"
+                      onClick={handleSendTestAlert}
+                      disabled={testAlertSent}
+                      className="text-xs text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer transition-colors"
+                    >
+                      {testAlertSent ? '✓ Sent to Desktop!' : 'Send Test Notification'}
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition-colors cursor-pointer text-center"
-              >
-                Close
-              </button>
+              {/* Bottom Buttons */}
+              <div className="flex gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={handleDismiss}
+                  className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors cursor-pointer text-center shadow-md"
+                >
+                  Done
+                </button>
+              </div>
+
+              {/* Reset/Troubleshoot link */}
+              <div className="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    unmarkPwaAsInstalled()
+                    setIsInstalled(false)
+                    setIsStandalone(false)
+                    setActiveStep('prompt')
+                  }}
+                  className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer inline-flex items-center gap-1"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Not installed or uninstalled? Reset install state
+                </button>
+              </div>
             </div>
-          ) : isIOS && activeStep === 'instructions' ? (
-            /* iOS Safari Step-by-Step Walkthrough */
+          ) : activeStep === 'desktop_instructions' ? (
+            /* ========================================================================= */
+            /* VIEW 2: LAPTOP / DESKTOP STEP-BY-STEP INSTALLATION GUIDE                  */
+            /* ========================================================================= */
+            <div className="space-y-4">
+              <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-800/60 text-xs text-cyan-200 flex items-center gap-2.5">
+                <Laptop className="w-4 h-4 text-cyan-400 shrink-0" />
+                <span>
+                  Installing on <strong>{deviceEnv.osName}</strong> via <strong>{deviceEnv.browserName}</strong>
+                </span>
+              </div>
+
+              {deviceEnv.isMacSafari ? (
+                /* macOS Safari "Add to Dock" instructions (macOS Sonoma 14+) */
+                <div className="space-y-2.5 text-xs text-zinc-300">
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      1
+                    </div>
+                    <div>
+                      In the top Mac menu bar, click <strong className="text-white">File</strong> (or click the <strong className="text-white">Share</strong> <Share2 className="w-3.5 h-3.5 inline text-cyan-400 mx-0.5" /> button in Safari).
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      2
+                    </div>
+                    <div>
+                      Click <strong className="text-white">&quot;Add to Dock...&quot;</strong> from the dropdown menu.
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      3
+                    </div>
+                    <div>
+                      Click <strong className="text-white">&quot;Add&quot;</strong> in the dialog. JobFlux AI will now launch directly from your Mac Dock as a standalone native app!
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Chrome, Edge, Brave on Mac/Windows/Linux */
+                <div className="space-y-2.5 text-xs text-zinc-300">
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      1
+                    </div>
+                    <div>
+                      Look at the right side of your browser <strong>Address bar (URL bar)</strong>. Click the <strong className="text-white">Install JobFlux AI</strong> icon (<Download className="w-3 h-3 inline text-cyan-400 mx-0.5" /> computer/monitor with down arrow).
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      2
+                    </div>
+                    <div>
+                      <em>Alternatively:</em> Click the browser menu (<strong className="text-white">⋮</strong> or <strong className="text-white">⋯</strong> in top right) &rarr; select <strong className="text-white">&quot;Save and share&quot;</strong> or <strong className="text-white">&quot;Apps&quot;</strong> &rarr; <strong className="text-white">&quot;Install JobFlux AI...&quot;</strong>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      3
+                    </div>
+                    <div>
+                      Click <strong className="text-white">&quot;Install&quot;</strong> in the popup. JobFlux AI will open in its own clean window, free from browser tabs!
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveStep('prompt')}
+                  className="w-1/3 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer text-center"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmInstalled}
+                  className="w-2/3 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5 shadow-md"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>I&apos;ve Installed It ✓</span>
+                </button>
+              </div>
+            </div>
+          ) : activeStep === 'ios_instructions' ? (
+            /* ========================================================================= */
+            /* VIEW 3: iOS SAFARI STEP-BY-STEP GUIDE                                     */
+            /* ========================================================================= */
             <div className="space-y-4">
               <div className="space-y-2.5 text-xs text-zinc-300">
                 <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
@@ -265,31 +489,35 @@ export default function PwaInstallPromptModal({
               <div className="flex gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => setActiveStep('install')}
+                  onClick={() => setActiveStep('prompt')}
                   className="w-1/3 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer text-center"
                 >
                   Back
                 </button>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleConfirmInstalled}
                   className="w-2/3 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors cursor-pointer text-center"
                 >
-                  Done
+                  I&apos;ve Installed It ✓
                 </button>
               </div>
             </div>
           ) : (
-            /* Clean, Simple 3-Point Benefits & Single CTA */
+            /* ========================================================================= */
+            /* VIEW 4: DEFAULT BENEFIT OVERVIEW & INSTALL TRIGGER                        */
+            /* ========================================================================= */
             <div className="space-y-4">
               <div className="space-y-2.5 py-1">
                 <div className="flex items-start gap-2.5 text-xs text-zinc-300">
                   <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                  <span><strong>Instant Recruiter Alerts:</strong> Real-time lock-screen notifications for applications & views.</span>
+                  <span><strong>Instant Recruiter Alerts:</strong> Real-time lock-screen & desktop push notifications for profile views.</span>
                 </div>
                 <div className="flex items-start gap-2.5 text-xs text-zinc-300">
                   <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                  <span><strong>Standalone App Experience:</strong> Fast 1-click launch from desktop or mobile home screen.</span>
+                  <span>
+                    <strong>{deviceEnv.isDesktop ? 'Standalone Desktop App:' : 'Home Screen App:'}</strong> Launch in 1 click from your {deviceEnv.os === 'mac' ? 'Mac Dock' : deviceEnv.os === 'windows' ? 'Windows Taskbar' : 'home screen'} with dedicated window.
+                  </span>
                 </div>
                 <div className="flex items-start gap-2.5 text-xs text-zinc-300">
                   <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
@@ -299,16 +527,46 @@ export default function PwaInstallPromptModal({
 
               {/* Action Buttons */}
               <div className="pt-2 space-y-2">
-                {isIOS ? (
+                {deviceEnv.isIOS ? (
                   <button
                     type="button"
-                    onClick={() => setActiveStep('instructions')}
+                    onClick={() => setActiveStep('ios_instructions')}
                     className="w-full py-3 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
                   >
                     <Smartphone className="w-4 h-4" />
                     <span>How to Install on iPhone / iPad</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
+                ) : deferredPrompt ? (
+                  <button
+                    type="button"
+                    onClick={handleInstallClick}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Install JobFlux App Now</span>
+                  </button>
+                ) : deviceEnv.isDesktop ? (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveStep('desktop_instructions')}
+                      className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
+                    >
+                      <Laptop className="w-4 h-4" />
+                      <span>How to Install on {deviceEnv.osName} ({deviceEnv.browserName})</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleConfirmInstalled}
+                      className="w-full py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-[11px] font-medium transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-zinc-800/80"
+                    >
+                      <Check className="w-3 h-3 text-emerald-400" />
+                      <span>Already installed on this laptop? Click here</span>
+                    </button>
+                  </div>
                 ) : (
                   <button
                     type="button"
@@ -322,7 +580,7 @@ export default function PwaInstallPromptModal({
 
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleDismiss}
                   className="w-full py-2 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer text-center"
                 >
                   Maybe Later

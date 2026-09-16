@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { findActivePaymentForEmail, syncUserPaymentPlan } from '@/lib/paymentSync'
 
 export const dynamic = 'force-dynamic'
 
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!profile) {
-      // 2. New Google user -> Initialize with 1-Day Free Trial
+      // 2. New Google user -> Check if an active purchased plan already exists for this email
       let baseId = emailClean.split('@')[0].replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()
       let userId = baseId
       let counter = 1
@@ -121,6 +122,28 @@ export async function POST(req: NextRequest) {
       }
 
       const trialExpires = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+      const activePayment = await findActivePaymentForEmail(db, emailClean)
+
+      let initialPlan = 'trial'
+      let initialPlanName = '1-Day Free Trial'
+      let planActivatedAt: Date | null = null
+      let planExpiresAt: Date | null = null
+      let lastPaymentId: string | null = null
+      let lastOrderId: string | null = null
+
+      if (activePayment.payment && activePayment.isActive && activePayment.expiresAt) {
+        const p = activePayment.payment
+        const rawPlanId = p.plan_id || 'pro'
+        initialPlan = rawPlanId === 'starter' ? 'pro' : rawPlanId
+        initialPlanName =
+          initialPlan === 'elite' || initialPlan === 'professional'
+            ? 'JobFlux Professional'
+            : 'JobFlux Essentials'
+        planActivatedAt = p.verified_at ? new Date(p.verified_at) : now
+        planExpiresAt = activePayment.expiresAt
+        lastPaymentId = p.payment_id || null
+        lastOrderId = p.order_id || null
+      }
 
       const newProfile: any = {
         user_id: userId,
@@ -145,27 +168,43 @@ export async function POST(req: NextRequest) {
           'Are you on a career break?': 'No'
         },
         enabled_for_daily_run: true,
-        plan: 'trial',
-        plan_name: '1-Day Free Trial',
+        plan: initialPlan,
+        plan_name: initialPlanName,
         trial_started_at: now,
         trial_expires_at: trialExpires,
+        plan_activated_at: planActivatedAt,
+        plan_expires_at: planExpiresAt,
+        last_payment_id: lastPaymentId,
+        last_order_id: lastOrderId,
         created_at: now,
         updated_at: now
       }
 
       const insertResult = await db.collection('profiles').insertOne(newProfile)
       await db.collection('users').insertOne({ ...newProfile })
+
+      // Link any existing payments to the new Google user_id
+      await db.collection('payments').updateMany(
+        { email: { $regex: `^${emailClean}$`, $options: 'i' } },
+        { $set: { user_id: userId } }
+      )
+
       profile = { ...newProfile, _id: insertResult.insertedId }
-    } else if (picture && !profile.picture) {
-      await db.collection('profiles').updateOne(
-        { user_id: profile.user_id },
-        { $set: { picture } }
-      )
-      await db.collection('users').updateOne(
-        { user_id: profile.user_id },
-        { $set: { picture } }
-      )
-      profile.picture = picture
+    } else {
+      if (picture && !profile.picture) {
+        await db.collection('profiles').updateOne(
+          { user_id: profile.user_id },
+          { $set: { picture } }
+        )
+        await db.collection('users').updateOne(
+          { user_id: profile.user_id },
+          { $set: { picture } }
+        )
+        profile.picture = picture
+      }
+
+      // Sync any unlinked or recent payment for existing candidate
+      await syncUserPaymentPlan(db, profile.user_id, emailClean, profile)
     }
 
     if (!profile) {

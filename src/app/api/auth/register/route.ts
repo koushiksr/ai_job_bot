@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
+import { findActivePaymentForEmail } from '@/lib/paymentSync'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,8 +51,29 @@ export async function POST(req: NextRequest) {
     // 1-Day Trial expires 24 hours from now
     const trialExpires = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
-    // Security: Any new registration is strictly initiated on 'trial'.
-    // Paid tiers (Starter, Pro, Elite) activate exclusively via verified payment confirmation.
+    // Check if this email has an active purchased plan in the payments collection
+    const activePayment = await findActivePaymentForEmail(db, emailClean)
+    let initialPlan = 'trial'
+    let initialPlanName = 'JobFlux 1-Day Free Trial'
+    let planActivatedAt: Date | null = null
+    let planExpiresAt: Date | null = null
+    let lastPaymentId: string | null = null
+    let lastOrderId: string | null = null
+
+    if (activePayment.payment && activePayment.isActive && activePayment.expiresAt) {
+      const p = activePayment.payment
+      const rawPlanId = p.plan_id || 'pro'
+      initialPlan = rawPlanId === 'starter' ? 'pro' : rawPlanId
+      initialPlanName =
+        initialPlan === 'elite' || initialPlan === 'professional'
+          ? 'JobFlux Professional'
+          : 'JobFlux Essentials'
+      planActivatedAt = p.verified_at ? new Date(p.verified_at) : now
+      planExpiresAt = activePayment.expiresAt
+      lastPaymentId = p.payment_id || null
+      lastOrderId = p.order_id || null
+    }
+
     const newProfile = {
       user_id: userId,
       name: name || userId.replace('_', ' '),
@@ -75,20 +97,26 @@ export async function POST(req: NextRequest) {
       enabled_for_daily_run: true,
       role: 'user',
       is_vip: false,
-      plan: 'trial',
-      plan_name: 'JobFlux 1-Day Free Trial',
+      plan: initialPlan,
+      plan_name: initialPlanName,
       trial_started_at: now,
       trial_expires_at: trialExpires,
-      plan_activated_at: null,
-      plan_expires_at: null,
-      last_payment_id: null,
-      last_order_id: null,
+      plan_activated_at: planActivatedAt,
+      plan_expires_at: planExpiresAt,
+      last_payment_id: lastPaymentId,
+      last_order_id: lastOrderId,
       created_at: now,
       updated_at: now
     }
 
     await db.collection('profiles').insertOne({ ...newProfile })
     await db.collection('users').insertOne({ ...newProfile })
+
+    // Link any existing payments for this email to the new user_id
+    await db.collection('payments').updateMany(
+      { email: { $regex: `^${emailClean}$`, $options: 'i' } },
+      { $set: { user_id: userId } }
+    )
 
     // Initialize clean user_stats record
     await db.collection('user_stats').updateOne(
@@ -107,16 +135,20 @@ export async function POST(req: NextRequest) {
       { upsert: true }
     )
 
+    const isPaid = initialPlan !== 'trial'
     return NextResponse.json({
       status: 'success',
       role: 'user',
       user_id: userId,
       email: emailClean,
       name: newProfile.name,
-      plan: 'trial',
-      plan_name: 'JobFlux 1-Day Free Trial',
+      plan: initialPlan,
+      plan_name: initialPlanName,
+      plan_expires_at: planExpiresAt ? planExpiresAt.toISOString() : null,
       trial_expires_at: trialExpires.toISOString(),
-      message: 'Your 1-Day Free Trial has been activated!'
+      message: isPaid
+        ? `Your verified purchase (${initialPlanName}) has been automatically linked and activated!`
+        : 'Your 1-Day Free Trial has been activated!'
     })
   } catch (err: any) {
     return NextResponse.json(

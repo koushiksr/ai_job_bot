@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
+import { syncUserPaymentPlan } from '@/lib/paymentSync'
 
 export async function POST(req: NextRequest) {
   try {
@@ -73,6 +74,9 @@ export async function POST(req: NextRequest) {
 
     if (profile) {
       if (profile.password === pwdClean) {
+        // Sync any unlinked or newly purchased plan from payments collection
+        await syncUserPaymentPlan(db, profile.user_id, emailClean, profile)
+
         const assignedRole = (
           (emailClean === 'technohmsit@gmail.com' || profile.user_id === 'technohmsit' || profile.email === 'technohmsit@gmail.com') &&
           profile.role === 'admin'

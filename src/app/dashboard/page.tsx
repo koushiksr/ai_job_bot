@@ -49,6 +49,7 @@ import CandidateOfferModal from '@/components/CandidateOfferModal'
 import PwaInstallPromptModal from '@/components/PwaInstallPromptModal'
 import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
+import { checkIsPwaInstalled, shouldShowPwaAutoPrompt, markPwaAsDismissed } from '@/lib/pwaHelper'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
@@ -134,6 +135,7 @@ export default function UserDashboard() {
   const [activeOfferBanner, setActiveOfferBanner] = useState<any | null>(null)
   const [isOfferModalOpen, setIsOfferModalOpen] = useState<boolean>(false)
   const [isPwaModalOpen, setIsPwaModalOpen] = useState<boolean>(false)
+  const [isAppInstalled, setIsAppInstalled] = useState<boolean>(false)
   const [inAppToast, setInAppToast] = useState<{
     id?: string
     title: string
@@ -166,21 +168,31 @@ export default function UserDashboard() {
         setNotificationPermission(Notification.permission)
       }
 
-      // Check if user is not running in standalone PWA mode, and prompt after small delay
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true ||
-        document.referrer.includes('android-app://')
-
-      if (!isStandalone) {
-        const pwaDismissedAt = localStorage.getItem('jobflux_pwa_dismissed_at')
-        const daysSinceDismissed = pwaDismissedAt ? (Date.now() - Number(pwaDismissedAt)) / (1000 * 60 * 60 * 24) : 999
-        if (daysSinceDismissed > 3) {
-          const timer = setTimeout(() => {
-            setIsPwaModalOpen(true)
-          }, 3500)
-          return () => clearTimeout(timer)
+      // Smart PWA verification: Only show popup if user has NOT installed the app
+      let autoPromptTimer: NodeJS.Timeout | null = null
+      checkIsPwaInstalled().then((installed) => {
+        setIsAppInstalled(installed)
+        if (!installed) {
+          shouldShowPwaAutoPrompt().then((shouldShow) => {
+            if (shouldShow) {
+              autoPromptTimer = setTimeout(() => {
+                setIsPwaModalOpen(true)
+              }, 3500)
+            }
+          })
         }
+      })
+
+      const handleAppInstalled = () => {
+        setIsAppInstalled(true)
+        if (autoPromptTimer) clearTimeout(autoPromptTimer)
+      }
+
+      window.addEventListener('appinstalled', handleAppInstalled)
+
+      return () => {
+        if (autoPromptTimer) clearTimeout(autoPromptTimer)
+        window.removeEventListener('appinstalled', handleAppInstalled)
       }
     }
   }, [])
@@ -274,9 +286,8 @@ export default function UserDashboard() {
 
   const handleClosePwaModal = () => {
     setIsPwaModalOpen(false)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('jobflux_pwa_dismissed_at', String(Date.now()))
-    }
+    markPwaAsDismissed()
+    checkIsPwaInstalled().then(setIsAppInstalled)
   }
 
   const handleRequestNotification = async () => {
@@ -1026,12 +1037,26 @@ export default function UserDashboard() {
                         }}
                         className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
                       >
-                        <Download className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        {isAppInstalled ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        ) : (
+                          <Download className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        )}
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-cyan-300">Install JobFlux App</div>
-                          <div className="text-[10px] text-zinc-500">Standalone App & push alerts</div>
+                          <div className={`font-medium ${isAppInstalled ? 'text-emerald-300' : 'text-cyan-300'}`}>
+                            {isAppInstalled ? 'JobFlux App Installed' : 'Install JobFlux App'}
+                          </div>
+                          <div className="text-[10px] text-zinc-500">
+                            {isAppInstalled ? 'Verified on device • Push alerts' : 'Standalone App & push alerts'}
+                          </div>
                         </div>
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">PWA</span>
+                        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                          isAppInstalled 
+                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' 
+                            : 'bg-cyan-950 text-cyan-300 border border-cyan-800'
+                        }`}>
+                          {isAppInstalled ? 'ACTIVE' : 'PWA'}
+                        </span>
                       </button>
 
                       <button
@@ -1098,16 +1123,34 @@ export default function UserDashboard() {
 
           {/* RIGHT: Actions, Telemetry Refresh & Controls */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Install App Button */}
+            {/* Install App / Installed Status Button */}
             <button
               type="button"
               onClick={() => setIsPwaModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all shrink-0 cursor-pointer shadow-sm"
-              title="Install JobFlux as a native app and enable push alerts"
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer shadow-sm ${
+                isAppInstalled
+                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+              }`}
+              title={
+                isAppInstalled
+                  ? 'JobFlux AI is installed on this device • Click to view status or alerts'
+                  : 'Install JobFlux as a native app and enable push alerts'
+              }
             >
-              <Download className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden sm:inline">Install App</span>
-              <span className="sm:hidden">App</span>
+              {isAppInstalled ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="hidden sm:inline">App Installed</span>
+                  <span className="sm:hidden">App ✓</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="hidden sm:inline">Install App</span>
+                  <span className="sm:hidden">App</span>
+                </>
+              )}
             </button>
 
             {/* Candidate Offer Button */}
@@ -1382,12 +1425,24 @@ export default function UserDashboard() {
 
               <button
                 onClick={() => { setIsMobileNavOpen(false); setIsPwaModalOpen(true) }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-cyan-300 hover:text-white hover:bg-cyan-950/30 transition-colors cursor-pointer text-left"
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors cursor-pointer text-left ${
+                  isAppInstalled
+                    ? 'text-emerald-300 hover:text-white hover:bg-emerald-950/30'
+                    : 'text-cyan-300 hover:text-white hover:bg-cyan-950/30'
+                }`}
               >
-                <Download className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span>Install JobFlux App (PWA)</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 ml-auto font-semibold">
-                  APP
+                {isAppInstalled ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                ) : (
+                  <Download className="w-4 h-4 text-cyan-400 shrink-0" />
+                )}
+                <span>{isAppInstalled ? 'JobFlux App (Installed)' : 'Install JobFlux App (PWA)'}</span>
+                <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ml-auto font-semibold ${
+                  isAppInstalled
+                    ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                    : 'bg-cyan-950 text-cyan-300 border border-cyan-800'
+                }`}>
+                  {isAppInstalled ? 'INSTALLED' : 'APP'}
                 </span>
               </button>
 

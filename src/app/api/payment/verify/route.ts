@@ -65,18 +65,29 @@ export async function POST(req: NextRequest) {
 
     const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000)
 
+    const cleanEmail = (email || '').toLowerCase().trim()
+    let resolvedUserId = user_id || null
+    if (!resolvedUserId && cleanEmail) {
+      const existingProfile = await db.collection('profiles').findOne({
+        email: { $regex: `^${cleanEmail}$`, $options: 'i' }
+      })
+      if (existingProfile) {
+        resolvedUserId = existingProfile.user_id
+      }
+    }
+
     let query: any = null
-    if (user_id && email) {
+    if (resolvedUserId && cleanEmail) {
       query = {
         $or: [
-          { user_id: user_id },
-          { email: { $regex: `^${email.trim()}$`, $options: 'i' } }
+          { user_id: resolvedUserId },
+          { email: { $regex: `^${cleanEmail}$`, $options: 'i' } }
         ]
       }
-    } else if (user_id) {
-      query = { user_id: user_id }
-    } else if (email) {
-      query = { email: { $regex: `^${email.trim()}$`, $options: 'i' } }
+    } else if (resolvedUserId) {
+      query = { user_id: resolvedUserId }
+    } else if (cleanEmail) {
+      query = { email: { $regex: `^${cleanEmail}$`, $options: 'i' } }
     }
 
     const updateFields: any = {
@@ -100,7 +111,7 @@ export async function POST(req: NextRequest) {
       await db.collection('assigned_offers').updateMany(
         {
           promo_code: cleanPromo,
-          candidate_email: (email || '').toLowerCase().trim(),
+          candidate_email: cleanEmail,
           claimed: false
         },
         {
@@ -118,8 +129,8 @@ export async function POST(req: NextRequest) {
     await db.collection('payments').insertOne({
       order_id: razorpay_order_id,
       payment_id: razorpay_payment_id,
-      user_id: user_id || null,
-      email: email || null,
+      user_id: resolvedUserId,
+      email: cleanEmail || null,
       plan_id: plan_id,
       promo_code: cleanPromo || null,
       amount: recordedAmount,
