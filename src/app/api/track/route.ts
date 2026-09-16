@@ -65,10 +65,16 @@ export async function POST(req: NextRequest) {
   try {
     let body: any = {}
     try {
-      body = await req.json()
+      const text = await req.text()
+      if (text && text.trim()) {
+        body = JSON.parse(text)
+      }
     } catch {
-      // In case sendBeacon sends plain text or empty
-      return NextResponse.json({ status: 'ignored' }, { status: 200 })
+      try {
+        body = await req.json()
+      } catch {
+        body = {}
+      }
     }
 
     const { ip, userAgent } = getClientInfo(req)

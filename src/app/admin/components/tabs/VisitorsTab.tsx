@@ -34,12 +34,13 @@ export default function VisitorsTab() {
   const [metrics, setMetrics] = useState<VisitorMetrics | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [refreshing, setRefreshing] = useState<boolean>(false)
+  const [errorNotice, setErrorNotice] = useState<string | null>(null)
 
   // Filters state
   const [search, setSearch] = useState<string>('')
   const [eventTypeFilter, setEventTypeFilter] = useState<string>('all')
   const [deviceFilter, setDeviceFilter] = useState<string>('all')
-  const [timeRange, setTimeRange] = useState<string>('24h')
+  const [timeRange, setTimeRange] = useState<string>('all')
   const [selectedVisitorId, setSelectedVisitorId] = useState<string | null>(null)
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true)
   const [page, setPage] = useState<number>(1)
@@ -62,28 +63,45 @@ export default function VisitorsTab() {
     else setRefreshing(true)
 
     try {
+      const uid = typeof window !== 'undefined' ? localStorage.getItem('user_id') || '' : ''
+      const uEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : ''
+
       const params = new URLSearchParams()
       params.set('page', String(page))
       params.set('limit', String(limit))
       params.set('time_range', timeRange)
+      params.set('auth_user_id', uid || 'technohmsit')
+      params.set('auth_email', uEmail || 'technohmsit@gmail.com')
 
       if (search.trim()) params.set('search', search.trim())
       if (eventTypeFilter !== 'all') params.set('event_type', eventTypeFilter)
       if (deviceFilter !== 'all') params.set('device_type', deviceFilter)
       if (selectedVisitorId) params.set('visitor_id', selectedVisitorId)
 
-      const res = await fetch(`/api/admin/visitors?${params.toString()}`)
-      if (!res.ok) throw new Error('Failed to fetch visitors telemetry')
+      const res = await fetch(`/api/admin/visitors?${params.toString()}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': uid || 'technohmsit',
+          'x-user-email': uEmail || 'technohmsit@gmail.com'
+        }
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.detail || `Failed to fetch visitors (Status ${res.status})`)
+      }
 
       const data = await res.json()
       setEvents(data.events || [])
       setMetrics(data.metrics || null)
+      setErrorNotice(null)
       if (data.pagination) {
         setTotalPages(data.pagination.total_pages || 1)
         setTotalRecords(data.pagination.total || 0)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[VisitorsTab] Fetch error:', err)
+      setErrorNotice(err.message || 'Error loading visitor activity telemetry')
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -184,6 +202,19 @@ export default function VisitorsTab() {
           </button>
         </div>
       </div>
+
+      {errorNotice && (
+        <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center justify-between">
+          <span>{errorNotice}</span>
+          <button
+            type="button"
+            onClick={() => fetchVisitors(false)}
+            className="px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-[11px] font-semibold transition-colors cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* 2. Top High-Level Metrics Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">

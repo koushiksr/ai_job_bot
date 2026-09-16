@@ -136,21 +136,20 @@ export function sendTrackEvent(payload: TrackEventPayload): void {
 
     const jsonString = JSON.stringify(fullPayload)
 
-    // 1. Prefer sendBeacon for non-blocking transmission (especially during unloads / clicks)
-    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
-      const blob = new Blob([jsonString], { type: 'application/json' })
-      const queued = navigator.sendBeacon('/api/track', blob)
-      if (queued) return
-    }
-
-    // 2. Fallback to fetch with keepalive: true
+    // Primary transport: Reliable first-party fetch with keepalive (guaranteed standard JSON)
     fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: jsonString,
       keepalive: true
-    }).catch(() => {
-      // Silently ignore telemetry transmission errors
+    }).catch((err) => {
+      // Fallback: sendBeacon if page is unloading or fetch fails
+      try {
+        if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+          const blob = new Blob([jsonString], { type: 'application/json' })
+          navigator.sendBeacon('/api/track', blob)
+        }
+      } catch {}
     })
   } catch (err) {
     console.debug('[Tracker] Non-fatal tracking error:', err)

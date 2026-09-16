@@ -125,7 +125,8 @@ export async function GET(req: NextRequest) {
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
     const [
-      totalUniqueVisitors,
+      summaryCount,
+      distinctVisitorIds,
       totalPageViews,
       totalPaymentClicks,
       identifiedLeadsCount,
@@ -136,6 +137,7 @@ export async function GET(req: NextRequest) {
       devicesAgg
     ] = await Promise.all([
       db.collection('visitors_summary').countDocuments({}),
+      db.collection('visitor_events').distinct('visitor_id'),
       db.collection('visitor_events').countDocuments({ event_type: 'page_view' }),
       db.collection('visitor_events').countDocuments({ event_type: 'payment_click' }),
       db.collection('visitors_summary').countDocuments({ identified_email: { $exists: true, $ne: null } }),
@@ -160,6 +162,8 @@ export async function GET(req: NextRequest) {
         { $group: { _id: '$device_type', count: { $sum: 1 } } }
       ]).toArray()
     ])
+
+    const totalUniqueVisitors = Math.max(summaryCount, distinctVisitorIds.length)
 
     const deviceCounts: Record<string, number> = { desktop: 0, mobile: 0, tablet: 0 }
     devicesAgg.forEach((d: any) => {
