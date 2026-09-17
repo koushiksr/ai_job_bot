@@ -18,7 +18,7 @@ export interface ReviewItem {
 export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   {
     user_name: 'Aditya Nambiar',
-    user_avatar: '/images/candidates/aditya_nambiar.jpg',
+    user_avatar: '/images/candidates/aditya_nambiar.svg',
     role_title: 'Senior AI & Full-Stack Systems Engineer',
     company: 'Fintech Cloud Systems · Bengaluru',
     rating: 5,
@@ -31,7 +31,7 @@ export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   },
   {
     user_name: 'Meera Krishnan',
-    user_avatar: '/images/candidates/meera_krishnan.jpg',
+    user_avatar: '/images/candidates/meera_krishnan.svg',
     role_title: 'Lead Machine Learning & NLP Specialist',
     company: 'Applied AI Labs · Hyderabad',
     rating: 5,
@@ -44,7 +44,7 @@ export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   },
   {
     user_name: 'Rohit Deshmukh',
-    user_avatar: '/images/candidates/rohit_deshmukh.jpg',
+    user_avatar: '/images/candidates/rohit_deshmukh.svg',
     role_title: 'Cloud DevOps & Platform Architect',
     company: 'Enterprise SaaS Infrastructure · Pune',
     rating: 5,
@@ -57,7 +57,7 @@ export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   },
   {
     user_name: 'Ananya Sengupta',
-    user_avatar: '/images/candidates/ananya_sengupta.jpg',
+    user_avatar: '/images/candidates/ananya_sengupta.svg',
     role_title: 'Senior Product & Growth Lead',
     company: 'Consumer Tech Platforms · Gurugram',
     rating: 5,
@@ -70,7 +70,7 @@ export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   },
   {
     user_name: 'Karthik Venkataraman',
-    user_avatar: '/images/candidates/karthik_venkataraman.jpg',
+    user_avatar: '/images/candidates/karthik_venkataraman.svg',
     role_title: 'Principal Backend Engineer (Go / Distributed Systems)',
     company: 'NextGen Financial Cloud · Chennai',
     rating: 5,
