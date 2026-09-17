@@ -38,7 +38,7 @@ import { trackSignUp } from '@/lib/tracker'
 const FAQS = [
   {
     q: 'How does the JobFlux autonomous auto-apply bot work?',
-    a: 'JobFlux AI connects to verified employer hiring feeds, searches for job openings matching your specified skills, role titles, and CTC brackets, intelligently answers recruiter screening questionnaires using your candidate profile context, and delivers verified applications during high-visibility morning windows at 6:00 AM & 8:00 AM IST.'
+    a: 'JobFlux AI scans active employer listings matching your target roles, skills, and preferences, accurately completes recruiter questionnaires using your background context, and submits verified applications directly to hiring managers.'
   },
   {
     q: 'What makes the Harvard & FAANG ATS resume standard different?',
@@ -58,7 +58,7 @@ const FAQS = [
   },
   {
     q: 'Can I start using JobFlux AI for free?',
-    a: 'Yes! You can start for free with autonomous job applications included at zero cost. No credit card required. Dual morning sweeps run automatically at 6:00 AM & 8:00 AM IST.'
+    a: 'Yes! You can start completely free with zero payment details required. Simply create your account, configure your target roles, and let the autopilot begin applying on your behalf.'
   }
 ]
 
@@ -442,7 +442,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2 text-zinc-400 text-center sm:text-left">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 hidden sm:inline-block animate-pulse" />
-                <span>Automate your job applications <strong className="text-zinc-200">100% Free</strong> • Zero credit card required.</span>
+                <span>Automate your job search on autopilot • <span className="text-zinc-200 font-medium">Free to start</span></span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -475,12 +475,12 @@ export default function Home() {
             className="flex-1 w-full text-center lg:text-left space-y-6"
           >
             <div>
-              {/* Sleek Autonomous Radar Pill - Subtle Monochrome */}
+              {/* Sleek Autonomous Radar Pill */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs font-mono mb-4 sm:mb-5">
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
-                <span className="text-zinc-300">Autonomous Engine</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                <span className="text-zinc-300 font-medium">Autonomous Job Search</span>
                 <span className="text-zinc-600">·</span>
-                <span className="text-zinc-400 font-normal">Runs Daily (06:00 &amp; 08:00 AM IST)</span>
+                <span className="text-zinc-400 font-normal">Daily Automated Sweeps</span>
               </div>
               
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.15]">
@@ -489,23 +489,23 @@ export default function Home() {
               </h1>
               
               <p className="text-sm sm:text-base text-zinc-400 mt-4 sm:mt-5 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                JobFlux AI monitors verified hiring feeds, formulates context-aware answers to employer screening questions, and delivers your verified applications twice daily at 6:00 AM &amp; 8:00 AM IST.
+                JobFlux AI continuously matches open tech roles, answers employer screening questions using your background, and delivers verified applications on autopilot.
               </p>
             </div>
 
-            {/* Benefit Badges in Clean Monochrome */}
+            {/* Value Highlights */}
             <div className="flex flex-wrap gap-2 sm:gap-2.5 items-center justify-center lg:justify-start text-xs text-zinc-300">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
-                <Clock className="w-3.5 h-3.5 text-zinc-400" />
-                <span>Dual Morning Runs (6 &amp; 8 AM IST)</span>
+                <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                <span>Smart Questionnaire Solver</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>100% Free to Start (₹0)</span>
+                <Send className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Verified Recruiter Delivery</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
                 <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-                <span>Direct Recruiter Delivery</span>
+                <span>Safe Local Stealth</span>
               </div>
             </div>
 
@@ -730,19 +730,19 @@ export default function Home() {
                     <div>
                       <div className="flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-white">
-                          {authMode === 'trial' ? 'Start for Free' : 'Sign In to JobFlux'}
+                          {authMode === 'trial' ? 'Start for Free' : 'Sign In'}
                         </h2>
                         <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                           authMode === 'trial'
                             ? 'text-emerald-400 bg-emerald-950/40 border-emerald-800/60 font-semibold'
                             : 'text-zinc-400 bg-zinc-900 border-zinc-800'
                         }`}>
-                          {authMode === 'trial' ? '100% Free • No Card' : 'Engine Ready'}
+                          {authMode === 'trial' ? 'Instant Access' : 'Engine Ready'}
                         </span>
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
                         {authMode === 'trial'
-                          ? 'Autonomous job applications • Dual morning runs • Zero credit card required.'
+                          ? 'Set up your profile in 30 seconds to begin automating applications.'
                           : 'Access your candidate telemetry and application audit.'}
                       </p>
                     </div>
@@ -872,15 +872,13 @@ export default function Home() {
                       </button>
 
                       {authMode === 'trial' && (
-                        <div className="flex items-center justify-center gap-2.5 pt-1 text-[11px] text-zinc-400">
-                          <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                        <div className="flex items-center justify-center gap-2 pt-1 text-[11px] text-zinc-400">
+                          <span className="flex items-center gap-1 text-zinc-300">
                             <Check className="w-3 h-3 text-emerald-400" />
-                            100% Free
+                            No credit card required
                           </span>
                           <span className="text-zinc-600">•</span>
-                          <span>No card required</span>
-                          <span className="text-zinc-600">•</span>
-                          <span>Instant Setup</span>
+                          <span>Instant setup</span>
                         </div>
                       )}
                     </form>
@@ -906,7 +904,7 @@ export default function Home() {
                             onClick={() => scrollToAuth('trial')}
                             className="text-emerald-400 hover:underline font-semibold cursor-pointer"
                           >
-                            Start for Free (₹0)
+                            Start for Free
                           </button>
                         </p>
                       )}
@@ -927,14 +925,6 @@ export default function Home() {
             )}
           </motion.div>
         </main>
-
-        {/* Interactive ATS Scorer & Mini-Tools Suite (Free Diagnostic & Login Gate Hook) */}
-        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 pb-12 z-10">
-          <HomeInteractiveToolsCard
-            onTriggerAuth={scrollToAuth}
-            isLoggedIn={!!existingUser}
-          />
-        </section>
 
         {/* Minimalist Platform Telemetry Bar */}
         <div className="w-full border-y border-zinc-900 bg-zinc-950/70 py-2.5 z-20">
@@ -1011,7 +1001,7 @@ export default function Home() {
               </div>
               <h3 className="text-sm font-semibold text-white">3. Morning Inbox Delivery</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Dispatches applications early at 06:00 AM & 08:00 AM IST so your candidate packet sits at the very top of recruiter review queues.
+                Dispatches early each morning so your application sits at the top of the recruiter&apos;s inbox when they begin reviewing candidates.
               </p>
             </div>
           </div>
@@ -1035,6 +1025,26 @@ export default function Home() {
               <div className="text-[11px] text-zinc-500 mt-1 uppercase tracking-wider font-mono">Safe Automation</div>
             </div>
           </div>
+        </section>
+
+        {/* Section 4: Interactive ATS Scorer & Mini-Tools Suite */}
+        <section id="tools-preview" className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 border-t border-zinc-900 z-10 space-y-8 scroll-mt-20">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+              Free Candidate Diagnostics
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
+              Test your profile before you apply.
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-400">
+              Run a free ATS compatibility check, calculate your recruiter search ranking, or generate direct cold outreach templates.
+            </p>
+          </div>
+
+          <HomeInteractiveToolsCard
+            onTriggerAuth={scrollToAuth}
+            isLoggedIn={!!existingUser}
+          />
         </section>
 
         {/* Section: Why Buy JobFlux AI — The Comparison & Math */}
@@ -1067,7 +1077,7 @@ export default function Home() {
                   <td className="p-4 sm:p-5 font-medium text-white">Daily Application Velocity</td>
                   <td className="p-4 sm:p-5 text-zinc-500">5-10 / day (Exhausting)</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Unreliable (Crashes often)</td>
-                  <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">50 / day Guaranteed (Dual 6 &amp; 8 AM runs)</td>
+                  <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">Up to 50 / day on Autopilot</td>
                 </tr>
                 <tr>
                   <td className="p-4 sm:p-5 font-medium text-white">24h Recruiter Profile Bump</td>
