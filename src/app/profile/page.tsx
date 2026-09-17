@@ -153,8 +153,8 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* Right: Brand Logo & Sign Out */}
-          <div className="flex items-center gap-3 shrink-0">
-            <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link href="/dashboard" className="hidden sm:flex items-center hover:opacity-90 transition-opacity">
               <JobFluxLogo size="sm" showText={true} />
             </Link>
 
@@ -162,11 +162,11 @@ export default function CandidateProfilePage() {
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 hover:text-red-200 transition-colors cursor-pointer shrink-0 shadow-sm"
               title="Sign out of JobFlux"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sign Out</span>
+              <LogOut className="w-3.5 h-3.5 text-red-400" />
+              <span>Sign Out</span>
             </button>
           </div>
         </div>
@@ -273,12 +273,22 @@ export default function CandidateProfilePage() {
           <div className="text-zinc-400">
             Finished calibrating your profile? All changes take effect on the next scheduled application run.
           </div>
-          <Link
-            href="/dashboard"
-            className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0"
-          >
-            Back to Application Cockpit
-          </Link>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Link
+              href="/dashboard"
+              className="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0"
+            >
+              Back to Application Cockpit
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-semibold text-xs transition-colors cursor-pointer shrink-0"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </div>
       </main>
 

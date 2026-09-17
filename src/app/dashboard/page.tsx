@@ -1122,12 +1122,12 @@ export default function UserDashboard() {
           </div>
 
           {/* RIGHT: Actions, Telemetry Refresh & Controls */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Install App / Installed Status Button */}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {/* Install App / Installed Status Button (Desktop & Tablet) */}
             <button
               type="button"
               onClick={() => setIsPwaModalOpen(true)}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer shadow-sm ${
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer shadow-sm ${
                 isAppInstalled
                   ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                   : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
@@ -1141,14 +1141,12 @@ export default function UserDashboard() {
               {isAppInstalled ? (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="hidden sm:inline">App Installed</span>
-                  <span className="sm:hidden">App ✓</span>
+                  <span>App Installed</span>
                 </>
               ) : (
                 <>
                   <Download className="w-3.5 h-3.5 text-cyan-400" />
-                  <span className="hidden sm:inline">Install App</span>
-                  <span className="sm:hidden">App</span>
+                  <span>Install App</span>
                 </>
               )}
             </button>
@@ -1157,24 +1155,23 @@ export default function UserDashboard() {
             <button
               type="button"
               onClick={() => setIsOfferModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-400/40 transition-all shrink-0 cursor-pointer shadow-sm"
+              className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-400/40 transition-all shrink-0 cursor-pointer shadow-sm"
               title="View exclusive candidate offers and discounts"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
               <span className="hidden sm:inline">{activeOfferBanner ? `Deal: ${activeOfferBanner.discount_badge}` : 'Special Offer'}</span>
-              <span className="sm:hidden">Offer</span>
+              <span className="sm:hidden text-[11px] font-bold">Offer</span>
             </button>
 
             {/* Direct Admin Console Link strictly for technohmsit administrator */}
             {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
               <Link
                 href="/admin"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 transition-all shrink-0 cursor-pointer shadow-sm"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 transition-all shrink-0 cursor-pointer shadow-sm"
                 title="Open System Administrator Console"
               >
                 <Shield className="w-3.5 h-3.5 text-purple-400" />
-                <span className="hidden sm:inline">Admin Console ↗</span>
-                <span className="sm:hidden">Admin</span>
+                <span>Admin</span>
               </Link>
             )}
 
@@ -1189,48 +1186,46 @@ export default function UserDashboard() {
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-white' : ''}`} />
             </button>
 
-            {/* Sales / Upgrade Action Button */}
-            {activeOfferBanner ? (
-              <Link
-                href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-black transition-colors shrink-0 shadow-sm"
-                title={`Claim offer: ${activeOfferBanner.offer_title}`}
-              >
-                <Sparkles className="w-3.5 h-3.5 fill-black/20" />
-                <span className="hidden sm:inline">Claim Deal ({activeOfferBanner.discounted_price})</span>
-                <span className="sm:hidden">Deal</span>
-              </Link>
-            ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
-              <Link
-                href="/pricing"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
-                title="Upgrade to unlock automated applications"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-zinc-800" />
-                <span className="hidden sm:inline">Upgrade to Pro</span>
-                <span className="sm:hidden">Upgrade</span>
-              </Link>
-            ) : userPlan === 'pro' ? (
-              <Link
-                href="/pricing?plan=elite"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 text-white transition-colors shrink-0"
-                title="Upgrade to Professional"
-              >
-                <Crown className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Upgrade to Professional (₹199)</span>
-                <span className="sm:hidden">₹199 Pro</span>
-              </Link>
-            ) : (
-              <Link
-                href="/pricing"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors shrink-0"
-                title="View membership plans"
-              >
-                <Crown className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Plans & Upgrades</span>
-                <span className="sm:hidden">Plans</span>
-              </Link>
-            )}
+            {/* Sales / Upgrade Action Button (Desktop & Tablet) */}
+            <div className="hidden sm:flex items-center">
+              {activeOfferBanner ? (
+                <Link
+                  href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-black transition-colors shrink-0 shadow-sm"
+                  title={`Claim offer: ${activeOfferBanner.offer_title}`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 fill-black/20" />
+                  <span>Claim Deal ({activeOfferBanner.discounted_price})</span>
+                </Link>
+              ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
+                <Link
+                  href="/pricing"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
+                  title="Upgrade to unlock automated applications"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-zinc-800" />
+                  <span>Upgrade to Pro</span>
+                </Link>
+              ) : userPlan === 'pro' ? (
+                <Link
+                  href="/pricing?plan=elite"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 text-white transition-colors shrink-0"
+                  title="Upgrade to Professional"
+                >
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Upgrade to Professional (₹199)</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/pricing"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors shrink-0"
+                  title="View membership plans"
+                >
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Plans & Upgrades</span>
+                </Link>
+              )}
+            </div>
 
             {/* Desktop Brand Logo & Radar Status (Right on Desktop) */}
             <div className="hidden md:flex items-center gap-2.5 pl-2 border-l border-zinc-800 shrink-0">
@@ -1243,11 +1238,13 @@ export default function UserDashboard() {
               </div>
             </div>
 
-            {/* Mobile Profile Trigger Button (Right on Mobile, Compact & Balanced) */}
+            {/* Mobile Profile Trigger Button (ALWAYS VISIBLE & UNCLIPPED ON MOBILE) */}
             <button
+              type="button"
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="flex md:hidden items-center gap-1.5 pl-1 pr-1.5 py-1 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all text-white cursor-pointer shrink-0"
+              className="flex md:hidden items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all text-white cursor-pointer shrink-0 shadow-sm"
               aria-label="Toggle profile menu"
+              title="Candidate Profile & Settings"
             >
               <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700/70 flex items-center justify-center font-bold text-[10px] text-white shrink-0 relative overflow-hidden">
                 {userPicture ? (
@@ -1255,14 +1252,17 @@ export default function UserDashboard() {
                 ) : (
                   userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
                 )}
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 absolute -bottom-0.5 -right-0.5 border border-black" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
               </div>
+              <span className="text-xs font-semibold text-zinc-200 max-w-[65px] truncate">
+                {userName ? userName.split(' ')[0] : 'Profile'}
+              </span>
               {(isVip || userPlan === 'vip') ? (
-                <span className="inline-flex items-center text-[9px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded-md">
+                <span className="inline-flex items-center text-[9px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1 py-0.2 rounded-md shrink-0">
                   VIP
                 </span>
               ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
-                <span className="inline-flex items-center text-[9px] font-mono font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1.5 py-0.5 rounded-md">
+                <span className="hidden min-[380px]:inline-flex items-center text-[9px] font-mono font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1 py-0.2 rounded-md shrink-0">
                   {userPlan === 'elite' ? 'PRO' : userPlan === 'trial' ? 'TRIAL' : userPlan.toUpperCase()}
                 </span>
               ) : null}
@@ -1468,13 +1468,16 @@ export default function UserDashboard() {
                 </Link>
               )}
 
-              <button
-                onClick={() => { setIsMobileNavOpen(false); handleLogout() }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-950/20 transition-colors cursor-pointer text-left pt-2.5 border-t border-zinc-800/80"
-              >
-                <LogOut className="w-4 h-4 shrink-0" />
-                <span>Sign Out of Account</span>
-              </button>
+              <div className="pt-2 border-t border-zinc-800/80">
+                <button
+                  type="button"
+                  onClick={() => { setIsMobileNavOpen(false); handleLogout() }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 hover:text-white font-semibold text-xs transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-red-400" />
+                  <span>Sign Out of JobFlux</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2581,6 +2584,53 @@ export default function UserDashboard() {
             )}
           </div>
         )}
+
+        {/* Mobile Dedicated Candidate Account & Quick Actions Footer Card */}
+        <div className="block md:hidden p-4 rounded-2xl bg-[#0a0a0c] border border-zinc-800/90 shadow-xl space-y-3.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0 relative overflow-hidden">
+                {userPicture ? (
+                  <img src={userPicture} alt={userName || 'Candidate'} className="w-full h-full object-cover" onError={() => setUserPicture('')} />
+                ) : (
+                  userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'
+                )}
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border-2 border-black" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-xs font-bold text-white truncate max-w-[140px]">{userName || 'Candidate'}</span>
+                  {(isVip || userPlan === 'vip') ? (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold">VIP</span>
+                  ) : isProfessional ? (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold">PRO</span>
+                  ) : (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-semibold">{userPlan ? userPlan.toUpperCase() : 'FREE'}</span>
+                  )}
+                </div>
+                <p className="text-[11px] text-zinc-400 font-mono truncate">{userEmail}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-zinc-800/60">
+            <Link
+              href="/profile"
+              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-200 font-medium text-xs transition-colors"
+            >
+              <User className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Profile Settings</span>
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-medium text-xs transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5 text-red-400" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
 
         {/* AI Application Audit Receipt Modal */}
         {selectedJobAudit && (
