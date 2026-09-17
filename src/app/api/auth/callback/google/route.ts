@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
         counter++
       }
 
-      const trialExpires = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+      const trialExpires = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
 
       const newProfile: any = {
         user_id: userId,
@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
         role: 'user',
         is_vip: false,
         plan: 'trial',
-        plan_name: 'JobFlux 1-Day Free Trial',
+        plan_name: 'JobFlux 3-Day Free Access',
         trial_started_at: now,
         trial_expires_at: trialExpires,
         created_at: now,

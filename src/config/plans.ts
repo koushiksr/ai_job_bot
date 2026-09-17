@@ -62,12 +62,13 @@ export const MASTER_PLANS: PlanDefinition[] = [
     subtitle: '100% Free. No credit card needed. Start in 30 seconds.',
     price: '₹0',
     amountPaise: 0,
-    period: 'to test',
-    durationDays: 1,
-    featuresIntro: '15 verified job applications with zero risk, plus...',
+    period: '/ 3 days',
+    durationDays: 3,
+    featuresIntro: 'Up to 150 verified job applications (50/day) with zero risk, plus...',
     features: [
-      { text: '1 Full Day of Autonomous Auto-Apply' },
-      { text: 'Up to 15 Verified Job Applications' },
+      { text: '3 Full Days of Autonomous Auto-Apply' },
+      { text: 'Up to 150 Verified Job Applications (50 / Day)' },
+      { text: 'Dual Morning Sweeps (6:00 AM & 8:00 AM IST)' },
       { text: 'Automated screening questions answered' },
       { text: 'Real-time application telemetry dashboard' },
       { text: 'Zero credit card required' }

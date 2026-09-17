@@ -163,7 +163,7 @@ export default function ProfileSaveCelebrationModal({
                   <span className="text-sm font-bold text-white font-mono">₹199 / mo</span>
                 </h4>
                 <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
-                  Free Trial stops after 15 applications. Professional unlocks <strong className="text-white font-medium">1,800+ continuous applications</strong>, zero-queue recruiter priority delivery, and the FAANG ATS Resume Studio.
+                  Free Access includes up to 150 applications across 3 days (50/day). Professional unlocks <strong className="text-white font-medium">1,800+ continuous applications</strong>, zero-queue recruiter priority delivery, and the FAANG ATS Resume Studio.
                 </p>
               </div>
 

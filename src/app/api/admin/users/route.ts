@@ -195,9 +195,9 @@ export async function PATCH(req: NextRequest) {
         updates.plan_name = 'JobFlux PRO'
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
       } else if (plan === 'trial') {
-        updates.plan_name = 'JobFlux 1-Day Free Trial'
+        updates.plan_name = 'JobFlux 3-Day Free Access'
         updates.trial_started_at = now
-        updates.trial_expires_at = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+        updates.trial_expires_at = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
         updates.plan_expires_at = null
         updates.is_vip = false
         updates.vip_access = false

@@ -61,7 +61,7 @@ export default function UserDashboard() {
   const [userPicture, setUserPicture] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
   const [userPlan, setUserPlan] = useState<string>('trial')
-  const [userPlanName, setUserPlanName] = useState<string>('JobFlux 1-Day Free Trial')
+  const [userPlanName, setUserPlanName] = useState<string>('JobFlux 3-Day Free Access')
   const [isPlanActive, setIsPlanActive] = useState<boolean>(true)
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
   const [isVip, setIsVip] = useState<boolean>(false)
@@ -689,7 +689,7 @@ export default function UserDashboard() {
         const vip = Boolean(pData.is_vip || verifiedPlan === 'vip')
         setIsVip(vip)
         setUserPlan(verifiedPlan)
-        setUserPlanName(pData.plan_name || (verifiedPlan === 'trial' ? 'JobFlux 1-Day Free Trial' : `JobFlux ${verifiedPlan.toUpperCase()}`))
+        setUserPlanName(pData.plan_name || (verifiedPlan === 'trial' ? 'JobFlux 3-Day Free Access' : `JobFlux ${verifiedPlan.toUpperCase()}`))
         setIsPlanActive(active)
         setPlanExpiresAt(pData.plan_expires_at || pData.trial_expires_at || null)
 
@@ -1811,9 +1811,9 @@ export default function UserDashboard() {
                       ? 'Subscription Expired · Renew to Resume Automated Applications'
                       : userPlan === 'pro'
                       ? 'Essentials Active · Upgrade to Professional for 1,800+ Applications'
-                      : metrics.total_applied >= 15
-                      ? 'Free Trial Quota Reached (15/15)'
-                      : `Free Trial Active · ${metrics.total_applied}/15 Dispatched`}
+                      : metrics.total_applied >= 150
+                      ? 'Free Access Quota Reached (150/150)'
+                      : `Free Access Active · ${metrics.total_applied}/150 Dispatched`}
                   </span>
                   <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${
                     userPlan === 'none' || userPlan === 'no_plan'
@@ -1822,11 +1822,11 @@ export default function UserDashboard() {
                       ? 'bg-red-950/80 border-red-800 text-red-300'
                       : userPlan === 'pro'
                       ? 'bg-zinc-900 border-zinc-800 text-zinc-300'
-                      : metrics.total_applied >= 15
+                      : metrics.total_applied >= 150
                       ? 'bg-zinc-900 border-zinc-800 text-amber-400'
                       : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                   }`}>
-                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.total_applied >= 15 ? 'EXHAUSTED' : '1-DAY TRIAL'}
+                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.total_applied >= 150 ? 'EXHAUSTED' : '3-DAY FREE'}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">

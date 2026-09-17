@@ -121,11 +121,11 @@ export async function POST(req: NextRequest) {
         counter++
       }
 
-      const trialExpires = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+      const trialExpires = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
       const activePayment = await findActivePaymentForEmail(db, emailClean)
 
       let initialPlan = 'trial'
-      let initialPlanName = '1-Day Free Trial'
+      let initialPlanName = '3-Day Free Access'
       let planActivatedAt: Date | null = null
       let planExpiresAt: Date | null = null
       let lastPaymentId: string | null = null
@@ -234,7 +234,7 @@ export async function POST(req: NextRequest) {
 
     const rawPlan = (profile.plan || 'trial').toLowerCase()
     let verifiedPlan = 'trial'
-    let planName = 'JobFlux 1-Day Free Trial'
+    let planName = 'JobFlux 3-Day Free Access'
     let isPlanActive = true
 
     if (rawPlan === 'vip') {
@@ -249,7 +249,7 @@ export async function POST(req: NextRequest) {
         isPlanActive = true
       } else {
         verifiedPlan = 'trial'
-        planName = 'JobFlux 1-Day Free Trial (Plan Expired)'
+        planName = 'JobFlux 3-Day Free Access (Plan Expired)'
         isPlanActive = false
       }
     } else {
