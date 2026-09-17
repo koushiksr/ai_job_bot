@@ -543,7 +543,7 @@ export default function PricingPage() {
             />
 
             <div className="flex justify-between text-[10px] text-zinc-500 font-mono">
-              <span>100 (Trial)</span>
+              <span>Free to Start</span>
               <span>600 (1-Month)</span>
               <span>1,800+ (Elite)</span>
             </div>

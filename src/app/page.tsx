@@ -58,7 +58,7 @@ const FAQS = [
   },
   {
     q: 'Can I start using JobFlux AI for free?',
-    a: 'Yes! You can start for free with 3 days of autonomous job applications (up to 150 verified applications, 50/day) on Naukri included at zero cost. No credit card required. Dual morning sweeps run automatically at 6:00 AM & 8:00 AM IST.'
+    a: 'Yes! You can start for free with autonomous job applications on Naukri included at zero cost. No credit card required. Dual morning sweeps run automatically at 6:00 AM & 8:00 AM IST.'
   }
 ]
 
@@ -442,7 +442,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2 text-zinc-400 text-center sm:text-left">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 hidden sm:inline-block animate-pulse" />
-                <span>Get <strong className="text-zinc-200">up to 150 autonomous applications</strong> (50/day for 3 days) on Naukri completely free • No credit card required.</span>
+                <span>Automate your job applications on Naukri <strong className="text-zinc-200">100% Free</strong> • Zero credit card required.</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -501,7 +501,7 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>3 Days Free (Up to 150 Jobs)</span>
+                <span>100% Free to Start (₹0)</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
                 <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
@@ -730,19 +730,19 @@ export default function Home() {
                     <div>
                       <div className="flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-white">
-                          {authMode === 'trial' ? 'Start for Free (3 Days)' : 'Sign In to JobFlux'}
+                          {authMode === 'trial' ? 'Start for Free' : 'Sign In to JobFlux'}
                         </h2>
                         <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                           authMode === 'trial'
                             ? 'text-emerald-400 bg-emerald-950/40 border-emerald-800/60 font-semibold'
                             : 'text-zinc-400 bg-zinc-900 border-zinc-800'
                         }`}>
-                          {authMode === 'trial' ? '₹0 • Up to 150 Jobs' : 'Engine Ready'}
+                          {authMode === 'trial' ? '100% Free • No Card' : 'Engine Ready'}
                         </span>
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
                         {authMode === 'trial'
-                          ? 'Get up to 150 autonomous job applications on Naukri (50/day for 3 days) • Zero cost • No card.'
+                          ? 'Autonomous job applications on Naukri • Dual morning runs • Zero credit card required.'
                           : 'Access your candidate telemetry and application audit.'}
                       </p>
                     </div>
@@ -866,7 +866,7 @@ export default function Home() {
                            <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           <>
-                            <span>{authMode === 'trial' ? 'Start for Free (3 Days) →' : 'Sign In →'}</span>
+                            <span>{authMode === 'trial' ? 'Start for Free →' : 'Sign In →'}</span>
                           </>
                         )}
                       </button>
@@ -875,12 +875,12 @@ export default function Home() {
                         <div className="flex items-center justify-center gap-2.5 pt-1 text-[11px] text-zinc-400">
                           <span className="flex items-center gap-1 text-emerald-400 font-medium">
                             <Check className="w-3 h-3 text-emerald-400" />
-                            3 Days Free
+                            100% Free
                           </span>
                           <span className="text-zinc-600">•</span>
                           <span>No card required</span>
                           <span className="text-zinc-600">•</span>
-                          <span>Up to 150 applies (50/day)</span>
+                          <span>Instant Setup</span>
                         </div>
                       )}
                     </form>
@@ -906,7 +906,7 @@ export default function Home() {
                             onClick={() => scrollToAuth('trial')}
                             className="text-emerald-400 hover:underline font-semibold cursor-pointer"
                           >
-                            Start for Free (150 Jobs / ₹0)
+                            Start for Free (₹0)
                           </button>
                         </p>
                       )}
