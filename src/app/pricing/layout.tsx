@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   description:
     'Start for free (₹0, no credit card required). Upgrade to 1-Month Essentials (₹99, was ₹1,000) or 3-Month Professional (₹199, was ₹2,500 / 1,800+ applications) for dual daily 6 AM & 8 AM automated recruiter applications.',
   keywords: [
-    'naukri bot pricing',
-    'naukri auto apply cost',
+    'job apply bot pricing',
+    'auto apply bot cost',
     'ai job apply bot price',
     'automated job application plans india',
     'jobflux ai subscription',
-    'naukri profile booster price'
+    'profile booster price'
   ],
   alternates: {
     canonical: '/pricing'

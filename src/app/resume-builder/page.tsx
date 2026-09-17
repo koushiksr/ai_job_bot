@@ -327,7 +327,7 @@ export default function ResumeBuilderPage() {
   // Handle 1-Click Sync to Auto-Apply Bot
   const handleSyncToBot = async () => {
     if (!isProfessional && userRole !== 'admin') {
-      setUpgradeFeature('1-Click Sync to Naukri Auto-Apply Bot')
+      setUpgradeFeature('1-Click Sync to Auto-Apply Bot')
       setShowUpgradeModal(true)
       return
     }
@@ -361,7 +361,7 @@ export default function ResumeBuilderPage() {
       } else {
         const err = await res.json()
         if (err.requires_upgrade) {
-          setUpgradeFeature('1-Click Sync to Naukri Auto-Apply Bot')
+          setUpgradeFeature('1-Click Sync to Auto-Apply Bot')
           setShowUpgradeModal(true)
         } else {
           setSyncError(err.detail || 'Failed to sync resume with bot.')
@@ -563,7 +563,7 @@ export default function ResumeBuilderPage() {
             </span>
           </div>
 
-          {/* Sync to Naukri Bot Button */}
+          {/* Sync to Auto-Apply Bot Button */}
           <button
             onClick={handleSyncToBot}
             disabled={syncingBot}

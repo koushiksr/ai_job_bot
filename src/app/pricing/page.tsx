@@ -694,7 +694,7 @@ export default function PricingPage() {
             <div className="space-y-1 text-xs">
               <h3 className="font-bold text-white text-sm">100% Local Stealth & 0 Bans</h3>
               <p className="text-zinc-400 leading-relaxed text-[11px]">
-                Runs using your real home IP address and human-like delays. Completely undetectable by Cloudflare or Naukri firewalls.
+                Runs using your real home IP address and human-like delays. Completely undetectable by Cloudflare or bot protection firewalls.
               </p>
             </div>
           </div>

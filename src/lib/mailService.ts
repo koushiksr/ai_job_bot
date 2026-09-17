@@ -496,7 +496,7 @@ export function generatePurchaseOfferHtml({
 
                 <div style="margin-top:16px;padding-top:14px;border-top:1px solid #1c1d21;">
                   <ul style="margin:0;padding-left:18px;font-size:12px;color:#9ca3af;line-height:1.8;">
-                    <li>Daily Autonomous Application Sweeps on Naukri (600+ monthly applies)</li>
+                    <li>Daily Autonomous Application Sweeps (600+ monthly applies)</li>
                     <li>Up to 5 On-Demand Real-Time Sweeps per Week</li>
                     <li>Verified Direct Job Portal Link Access &amp; Status Logs</li>
                     <li>Application Records Export to CSV Spreadsheet</li>
@@ -622,9 +622,9 @@ export function generateJobDispatchReportHtml({
     : (topCompanies.length > 0 ? 'Daily Recruiter Sweep Synchronized' : 'Autonomous Recruiter Sweep Queued')
 
   const emailOverview = appliedCount > 0
-    ? `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's scheduled recruiter sweep on Naukri. Here is your individual application briefing:`
+    ? `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's scheduled recruiter sweep. Here is your individual application briefing:`
     : (topCompanies.length > 0
-        ? `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's recruiter sweep on Naukri. All active matching vacancies are up-to-date (0 new applications required in this cycle; ${totalApplied} total applications active). Here are your recent verified dispatches:`
+        ? `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's recruiter sweep. All active matching vacancies are up-to-date (0 new applications required in this cycle; ${totalApplied} total applications active). Here are your recent verified dispatches:`
         : `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your candidate profile and Harvard-standard ATS resume are synchronized. Your next scheduled autonomous recruiter sweep will run at 06:00 AM IST.`
       )
 
@@ -817,7 +817,7 @@ export function generateJobDispatchReportHtml({
                     ⏳ Daily Recruiter Sweep Queued
                   </div>
                   <div style="font-size:12px;color:#9ca3af;line-height:1.5;max-width:440px;margin:0 auto;">
-                    Your profile is queued for the automated <strong>06:00 AM IST</strong> morning run. Matched openings on Naukri will be scored against your Harvard ATS resume and dispatched automatically.
+                    Your profile is queued for the automated <strong>06:00 AM IST</strong> morning run. Matched job openings will be scored against your Harvard ATS resume and dispatched automatically.
                   </div>
                 </div>
                 `}

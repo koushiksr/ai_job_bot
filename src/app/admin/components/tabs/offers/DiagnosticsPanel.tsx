@@ -422,7 +422,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
                       type="button"
                       onClick={() => {
                         setCustomPushTitle('👀 4 Recruiters Viewed Your Profile Today')
-                        setCustomPushMessage('Your profile moved into the Top 5% on Naukri Resdex. Tap to see which companies accessed your resume.')
+                        setCustomPushMessage('Your profile moved into the Top 5% in recruiter searches. Tap to see which companies accessed your resume.')
                         setCustomPushUrl('/dashboard')
                       }}
                       className="p-2 rounded-lg bg-black hover:bg-zinc-800 border border-zinc-700 text-left text-xs transition-colors cursor-pointer"

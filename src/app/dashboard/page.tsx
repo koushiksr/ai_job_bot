@@ -2445,7 +2445,7 @@ export default function UserDashboard() {
             <div>
               <h3 className="text-base font-semibold text-white">Candidate Profile & Credentials</h3>
               <p className="text-xs text-zinc-400 mt-1 max-w-md mx-auto">
-                Candidate Profile, Resume, and Naukri Credentials are now managed on the dedicated Profile Settings page.
+                Candidate Profile, Resume, and Portal Credentials are now managed on the dedicated Profile Settings page.
               </p>
             </div>
             <Link

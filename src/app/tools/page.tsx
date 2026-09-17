@@ -15,16 +15,16 @@ import ToolsHeader from '@/components/ToolsHeader'
 import ToolsFooter from '@/components/ToolsFooter'
 
 export const metadata: Metadata = {
-  title: 'Free Career & Naukri Automation Tools | JobFlux AI',
+  title: 'Free AI Career & Profile Optimization Tools | JobFlux AI',
   description:
-    'Free AI career tools for Indian tech job seekers: Naukri Profile Headline Generator, Harvard ATS Resume Match Checker, and Resdex Profile Visibility Calculator.',
+    'Free AI career tools for Indian tech job seekers: Recruiter Profile Headline Generator, Harvard ATS Resume Match Checker, and Recruiter Search Visibility Calculator.',
   keywords: [
-    'naukri headline generator',
+    'recruiter headline generator',
     'free ats resume checker',
-    'naukri profile visibility calculator',
-    'resdex algorithm ranking',
+    'profile visibility calculator',
+    'recruiter algorithm ranking',
     'job apply automation tools',
-    'naukri resume builder'
+    'ai resume builder'
   ],
   alternates: {
     canonical: '/tools'
@@ -33,14 +33,14 @@ export const metadata: Metadata = {
 
 const TOOLS = [
   {
-    title: 'Naukri Headline & Summary AI Generator',
-    slug: '/tools/naukri-headline-generator',
+    title: 'Recruiter Headline & Summary AI Generator',
+    slug: '/tools/headline-generator',
     icon: Sparkles,
     badge: 'Trending · 3x Inbound Calls',
     badgeColor: 'bg-zinc-800 text-zinc-200 border-zinc-700',
     description:
-      'Generate click-through optimized Naukri headlines under 100 characters strictly tuned to pass the Resdex recruiter search algorithm. Includes a keyword-rich 250-word profile summary.',
-    features: ['Strictly < 100 Char Cutoff', 'Resdex Keyword Magnet', '1-Click Instant Copy', 'Experience & Notice Period Formats']
+      'Generate click-through optimized headlines under 100 characters strictly tuned to pass recruiter search algorithms. Includes a keyword-rich 250-word profile summary.',
+    features: ['Strictly < 100 Char Cutoff', 'Recruiter Keyword Magnet', '1-Click Instant Copy', 'Experience & Notice Period Formats']
   },
   {
     title: 'Harvard ATS Resume & Keyword Gap Scanner',
@@ -53,8 +53,8 @@ const TOOLS = [
     features: ['Percentage Match Score', 'Missing Keyword Extraction', 'Workday & Lever Compliant', 'Auto-fix in Harvard Studio']
   },
   {
-    title: 'Naukri Resdex Profile Visibility Calculator',
-    slug: '/tools/naukri-profile-score',
+    title: 'Recruiter Search Visibility Calculator',
+    slug: '/tools/profile-score',
     icon: TrendingUp,
     badge: 'Recruiter Search Ranking',
     badgeColor: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
@@ -80,11 +80,11 @@ export default function ToolsHubPage() {
             <Zap className="w-3.5 h-3.5 text-cyan-400" /> 100% Free · No Sign-Up Barrier
           </div>
           <h1 className="text-3xl sm:text-5xl font-semibold text-white tracking-tight leading-tight">
-            Free AI Career & Naukri <br className="hidden sm:inline" />
+            Free AI Career &amp; Profile <br className="hidden sm:inline" />
             <span className="text-zinc-400">Optimization Suite</span>
           </h1>
           <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
-            Engineered specifically for Indian software engineers and tech professionals. Optimize your Naukri.com visibility, beat ATS filters, and accelerate recruiter callbacks.
+            Engineered specifically for Indian software engineers and tech professionals. Optimize your recruiter visibility, beat ATS filters, and accelerate recruiter callbacks.
           </p>
         </div>
 
@@ -144,7 +144,7 @@ export default function ToolsHubPage() {
               Why apply manually when JobFlux AI can do it 24/7?
             </h2>
             <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-2xl">
-              Our automated Playwright engine runs dual morning batches at 6 AM & 8 AM IST, submits to 50 targeted jobs every day, solves dynamic recruiter questionnaires with AI, and touches your profile daily for top Resdex recruiter ranking.
+              Our automated Playwright engine runs dual morning batches at 6 AM & 8 AM IST, submits to 50 targeted jobs every day, solves dynamic recruiter questionnaires with AI, and touches your profile daily for top recruiter search ranking.
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
               <Link

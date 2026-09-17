@@ -27,7 +27,7 @@ export default function Footer() {
             Legal Disclaimer & Non-Affiliation Notice
           </p>
           <p>
-            JobFlux AI is an independent software automation tool that executes repetitive browser interactions exclusively at the direction and voluntary instruction of registered candidates. JobFlux AI is not affiliated with, sponsored by, authorized by, or endorsed by Info Edge (India) Ltd., Naukri.com, or any other job board. All registered trademarks, company names, and logos are the property of their respective owners and are used solely for identification and contextual compatibility purposes.
+            JobFlux AI is an independent software automation tool that executes repetitive browser interactions exclusively at the direction and voluntary instruction of registered candidates. JobFlux AI is not affiliated with, sponsored by, authorized by, or endorsed by any third-party job portal or hiring platform. All registered trademarks, company names, and logos are the property of their respective owners and are used solely for identification and contextual compatibility purposes.
           </p>
         </div>
       </div>

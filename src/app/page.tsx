@@ -37,8 +37,8 @@ import { trackSignUp } from '@/lib/tracker'
 
 const FAQS = [
   {
-    q: 'How does the JobFlux autonomous Naukri auto-apply bot work?',
-    a: 'JobFlux AI connects to verified hiring feeds on Naukri, searches for job openings matching your specified skills, role titles, and CTC brackets, intelligently answers recruiter screening questionnaires using your candidate profile context, and delivers verified applications during high-visibility morning windows at 6:00 AM & 8:00 AM IST.'
+    q: 'How does the JobFlux autonomous auto-apply bot work?',
+    a: 'JobFlux AI connects to verified employer hiring feeds, searches for job openings matching your specified skills, role titles, and CTC brackets, intelligently answers recruiter screening questionnaires using your candidate profile context, and delivers verified applications during high-visibility morning windows at 6:00 AM & 8:00 AM IST.'
   },
   {
     q: 'What makes the Harvard & FAANG ATS resume standard different?',
@@ -53,12 +53,12 @@ const FAQS = [
     a: 'Yes. JobFlux AI utilizes contextual profiling to formulate accurate responses for notice period (e.g. Immediate / 15 Days), expected CTC, current CTC, relocation preferences, and key technical stack depth, ensuring screening forms are never left blank.'
   },
   {
-    q: 'Is automated job applying safe for my Naukri candidate profile?',
-    a: 'JobFlux AI is engineered with human-like operational pacing, secure session encryption, and zero data-leak sanitization. Sensitive PII is anonymized prior to cloud processing, and the engine adheres strictly to Naukri application rate guidelines.'
+    q: 'Is automated job applying safe for my candidate profile?',
+    a: 'JobFlux AI is engineered with human-like operational pacing, secure session encryption, and zero data-leak sanitization. Sensitive PII is anonymized prior to cloud processing, and the engine adheres strictly to platform application rate guidelines.'
   },
   {
     q: 'Can I start using JobFlux AI for free?',
-    a: 'Yes! You can start for free with autonomous job applications on Naukri included at zero cost. No credit card required. Dual morning sweeps run automatically at 6:00 AM & 8:00 AM IST.'
+    a: 'Yes! You can start for free with autonomous job applications included at zero cost. No credit card required. Dual morning sweeps run automatically at 6:00 AM & 8:00 AM IST.'
   }
 ]
 
@@ -442,7 +442,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2 text-zinc-400 text-center sm:text-left">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 hidden sm:inline-block animate-pulse" />
-                <span>Automate your job applications on Naukri <strong className="text-zinc-200">100% Free</strong> • Zero credit card required.</span>
+                <span>Automate your job applications <strong className="text-zinc-200">100% Free</strong> • Zero credit card required.</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -742,7 +742,7 @@ export default function Home() {
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
                         {authMode === 'trial'
-                          ? 'Autonomous job applications on Naukri • Dual morning runs • Zero credit card required.'
+                          ? 'Autonomous job applications • Dual morning runs • Zero credit card required.'
                           : 'Access your candidate telemetry and application audit.'}
                       </p>
                     </div>
@@ -1070,7 +1070,7 @@ export default function Home() {
                   <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">50 / day Guaranteed (Dual 6 &amp; 8 AM runs)</td>
                 </tr>
                 <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Naukri Resdex 24h Profile Bump</td>
+                  <td className="p-4 sm:p-5 font-medium text-white">24h Recruiter Profile Bump</td>
                   <td className="p-4 sm:p-5 text-zinc-500">Must remember every morning</td>
                   <td className="p-4 sm:p-5 text-zinc-500">None</td>
                   <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">Automatic 9 AM Silent Touch (3x more calls)</td>
@@ -1082,7 +1082,7 @@ export default function Home() {
                   <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">Context-Aware AI Answers from Resume</td>
                 </tr>
                 <tr>
-                  <td className="p-4 sm:p-5 font-medium text-white">Naukri Account Safety &amp; Ban Risk</td>
+                  <td className="p-4 sm:p-5 font-medium text-white">Account Safety &amp; Ban Risk</td>
                   <td className="p-4 sm:p-5 text-zinc-400">Safe (Manual)</td>
                   <td className="p-4 sm:p-5 text-rose-400">High Risk (Datacenter IP bans)</td>
                   <td className="p-4 sm:p-5 font-semibold text-white bg-zinc-900/40">100% Safe (Local Residential IP + Stealth)</td>
@@ -1222,7 +1222,7 @@ export default function Home() {
                 ATS Platforms & Screeners Supported
               </h4>
               <p className="text-zinc-500 leading-relaxed text-[11px]">
-                Workday · Greenhouse · Lever · Taleo · iCIMS · SmartRecruiters · Naukri Rapid Apply · SuccessFactors · Ashby
+                Workday · Greenhouse · Lever · Taleo · iCIMS · SmartRecruiters · Rapid Recruiter Apply · SuccessFactors · Ashby
               </p>
             </div>
           </div>

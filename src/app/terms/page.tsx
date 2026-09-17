@@ -49,7 +49,7 @@ export default function TermsPage() {
             <h2 className="text-sm font-semibold tracking-wide">Independent Platform Disclaimer</h2>
           </div>
           <p className="text-xs text-zinc-400 leading-relaxed">
-            JobFlux AI is an independent software productivity suite designed to assist job candidates in formatting, tracking, and automating repetitive application submissions. JobFlux AI is <strong className="text-white">NOT</strong> affiliated with, associated with, authorized by, endorsed by, or in any way officially connected with <strong className="text-white">Info Edge (India) Ltd.</strong>, <strong className="text-white">Naukri.com</strong>, or any of their subsidiaries or affiliates. All official product and company names are registered trademarks of their respective owners.
+            JobFlux AI is an independent software productivity suite designed to assist job candidates in formatting, tracking, and automating repetitive application submissions. JobFlux AI is <strong className="text-white">NOT</strong> affiliated with, associated with, authorized by, endorsed by, or in any way officially connected with any third-party employment portal, recruitment marketplace, or applicant tracking system. All official product and company names are registered trademarks of their respective owners.
           </p>
         </div>
 
@@ -82,7 +82,7 @@ export default function TermsPage() {
             3. Third-Party Platform Policies & Limitation of Liability
           </h3>
           <p className="text-xs text-zinc-400 leading-relaxed">
-            Job boards and recruitment portals (including Naukri.com, LinkedIn, and others) maintain their own independent terms of service, which may restrict or prohibit automated tools. While JobFlux AI employs human-like pacing, randomized delays, and daily application limits (typically 15 to 25 applications per day) to simulate authentic candidate behavior, third-party platforms may update their anti-automation mechanisms, present CAPTCHA challenges, require two-factor verification, or temporarily restrict account access.
+            Job boards and recruitment portals maintain their own independent terms of service, which may restrict or prohibit automated tools. While JobFlux AI employs human-like pacing, randomized delays, and daily application limits (typically 15 to 25 applications per day) to simulate authentic candidate behavior, third-party platforms may update their anti-automation mechanisms, present CAPTCHA challenges, require two-factor verification, or temporarily restrict account access.
           </p>
           <p className="text-xs text-zinc-400 leading-relaxed">
             JobFlux AI provides its software on an &quot;AS-IS&quot; and &quot;AS-AVAILABLE&quot; basis. JobFlux AI, its developers, and operators shall not be liable for any third-party account restrictions, temporary logouts, shadowbans, application rejections, or hiring decisions made by employers.

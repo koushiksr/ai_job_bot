@@ -349,7 +349,7 @@ export default function CandidatesTab({
                     <span>Candidate</span>
                     <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400 transition-colors" />
                   </th>
-                  <th className="py-3.5 px-4">Naukri Email</th>
+                  <th className="py-3.5 px-4">Portal Email</th>
                   <th className="py-3.5 px-4">Plan &amp; Access</th>
                   <th className="py-3.5 px-4 text-center">Auto-Apply</th>
                   <th className="py-3.5 px-4">Last Login</th>

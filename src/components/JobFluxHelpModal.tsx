@@ -158,7 +158,7 @@ export default function JobFluxHelpModal({
   const faqs = [
     {
       q: 'How do the daily automated application runs work?',
-      a: 'JobFlux AI autonomous engines execute daily sweeps. The bot dynamically matches open vacancies on Naukri according to your exact target roles, experience, and location preferences, intelligently answering employer screening questions with your tailored ATS profile.'
+      a: 'JobFlux AI autonomous engines execute daily sweeps. The bot dynamically matches open vacancies across top hiring feeds according to your exact target roles, experience, and location preferences, intelligently answering employer screening questions with your tailored ATS profile.'
     },
     {
       q: 'How do I update or replace my candidate resume?',

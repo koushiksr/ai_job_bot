@@ -28,25 +28,25 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "JobFlux AI | Autonomous Naukri Job Apply Bot & Harvard ATS Resume Studio",
+    default: "JobFlux AI | Autonomous Job Apply Bot & Harvard ATS Resume Studio",
     template: "%s | JobFlux AI"
   },
   description:
-    "Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes. Safe, automated, dual morning runs at 6 AM & 8 AM IST.",
+    "Autonomous AI agent that applies to verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes. Safe, automated, dual morning runs at 6 AM & 8 AM IST.",
   applicationName: "JobFlux AI",
   keywords: [
-    "naukri auto apply bot",
-    "naukri automatic job application",
+    "auto apply bot",
+    "automatic job application bot",
     "ai job apply bot",
     "automated job application bot india",
-    "naukri bot python",
+    "autonomous job search agent",
     "harvard ats resume builder",
     "faang ats resume template",
     "single column ats resume",
     "workday ats parser compliant",
     "greenhouse lever ats bypass",
     "ai job search bot",
-    "naukri profile booster",
+    "career profile booster",
     "autonomous recruiter dispatch",
     "tech jobs auto apply bengaluru hyderabad"
   ],
@@ -75,9 +75,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteUrl,
     siteName: "JobFlux AI",
-    title: "JobFlux AI | Autonomous Naukri Job Apply Bot & Harvard ATS Resume Studio",
+    title: "JobFlux AI | Autonomous Job Apply Bot & Harvard ATS Resume Studio",
     description:
-      "Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes. Dual runs at 6 AM & 8 AM IST.",
+      "Autonomous AI agent that applies to verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes. Dual runs at 6 AM & 8 AM IST.",
     images: [
       {
         url: "/icon.svg",
@@ -89,9 +89,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "JobFlux AI | Autonomous Naukri Job Apply Bot & Harvard ATS Resume Studio",
+    title: "JobFlux AI | Autonomous Job Apply Bot & Harvard ATS Resume Studio",
     description:
-      "Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes.",
+      "Autonomous AI agent that applies to verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes.",
     images: ["/icon.svg"],
     creator: "@jobfluxai"
   },
@@ -119,7 +119,7 @@ const jsonLdData = {
       "applicationCategory": "BusinessApplication",
       "url": siteUrl,
       "description":
-        "Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes.",
+        "Autonomous AI agent that applies to verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes.",
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "INR",

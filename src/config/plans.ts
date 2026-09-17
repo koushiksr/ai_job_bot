@@ -180,7 +180,7 @@ export const MASTER_PROMOS: PromoDefinition[] = [
     allowedPlans: ['pro', 'starter'],
     durationDays: 30,
     description: 'JobFlux Essentials - 1-Month Special Sprint (30 Days)',
-    customMessage: 'Claim the ₹29 introductory sprint! Get 30 days of autonomous job applications across Naukri (600+ applications) for just ₹29.',
+    customMessage: 'Claim the ₹29 introductory sprint! Get 30 days of autonomous job applications (600+ applications) for just ₹29.',
     pricingDisplay: {
       displayPrice: '₹29',
       label: 'Special 1-Month Sprint (Actual ₹1,000 / mo)'
@@ -198,7 +198,7 @@ export const MASTER_PROMOS: PromoDefinition[] = [
     allowedPlans: ['pro', 'starter'],
     durationDays: 30,
     description: 'JobFlux Essentials - 95% Flash Pass (30 Days)',
-    customMessage: 'Claim an exclusive 95% flash pass! Get 30 days of autonomous job applications across Naukri for just ₹49 (Regular ₹1,000/mo).',
+    customMessage: 'Claim an exclusive 95% flash pass! Get 30 days of autonomous job applications for just ₹49 (Regular ₹1,000/mo).',
     pricingDisplay: {
       displayPrice: '₹49',
       label: '95% OFF Flash Pass (Actual ₹1,000 / mo)'
@@ -216,7 +216,7 @@ export const MASTER_PROMOS: PromoDefinition[] = [
     allowedPlans: ['pro', 'starter'],
     durationDays: 30,
     description: 'JobFlux Essentials - 93% Sprint Pass (30 Days)',
-    customMessage: 'Kickstart your interview pipeline this week with 600+ verified applications and daily smart scans across Naukri at 93% discount (Regular ₹1,000/mo) for only ₹69.',
+    customMessage: 'Kickstart your interview pipeline this week with 600+ verified applications and daily smart scans at 93% discount (Regular ₹1,000/mo) for only ₹69.',
     pricingDisplay: {
       displayPrice: '₹69',
       label: '93% OFF Weekend Sprint (Actual ₹1,000 / mo)'

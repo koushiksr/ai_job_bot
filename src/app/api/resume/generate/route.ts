@@ -232,9 +232,9 @@ export async function POST(req: NextRequest) {
           'Full Quantified XYZ Work Experience Bullets',
           'Direct Recruiter ATS Keyword Injector',
           'Print-Ready ATS PDF Export',
-          'One-Click Auto-Sync directly to Naukri Auto-Apply Bot'
+          'One-Click Auto-Sync directly to Auto-Apply Bot'
         ],
-        message: 'Your high-paying ATS resume outline is ready! Upgrade to Professional Plan to unlock full generation, download PDF, and auto-sync directly with your Naukri Bot.'
+        message: 'Your high-paying ATS resume outline is ready! Upgrade to Professional Plan to unlock full generation, download PDF, and auto-sync directly with your Auto-Apply Bot.'
       })
     }
 
@@ -447,7 +447,7 @@ Return ONLY valid JSON matching this schema:
       await logUserActivity(db, {
         userId: user_id,
         eventType: 'resume_upload',
-        description: `Generated AI ATS Resume and auto-attached directly to Naukri Auto-Apply Bot`,
+        description: `Generated AI ATS Resume and auto-attached directly to Auto-Apply Bot`,
         ipAddress: ip,
         userAgent: userAgent,
         metadata: {

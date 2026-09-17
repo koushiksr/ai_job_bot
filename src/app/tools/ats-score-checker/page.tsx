@@ -255,7 +255,7 @@ export default function AtsScoreCheckerPage() {
             {/* Direct Link to Harvard Resume Builder */}
             <div className="mt-8 pt-6 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-xs text-zinc-400 text-center sm:text-left">
-                Want a guaranteed 95%+ ATS parse score on Workday, Greenhouse, and Naukri?
+                Want a guaranteed 95%+ ATS parse score on Workday, Greenhouse, and top recruiter screeners?
               </div>
               <Link
                 href="/resume-builder"

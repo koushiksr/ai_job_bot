@@ -36,7 +36,7 @@ export default function CandidateOfferModal({
     original_price: '₹199',
     discounted_price: '₹99',
     claim_url: '/pricing?promo=FAST50',
-    custom_message: 'Exclusive candidate promotional discount for unlimited daily Naukri job applications and ATS optimization.',
+    custom_message: 'Exclusive candidate promotional discount for unlimited daily autonomous job applications and ATS optimization.',
     created_at: new Date().toISOString()
   }
 

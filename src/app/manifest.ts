@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'JobFlux AI — Autonomous Job Application Engine',
     short_name: 'JobFlux AI',
-    description: 'Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs on Naukri with custom screening Q&As and single-column Harvard ATS resumes.',
+    description: 'Autonomous AI agent that applies to 1,800+ verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes.',
     start_url: '/',
     id: '/',
     scope: '/',

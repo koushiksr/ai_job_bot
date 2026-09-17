@@ -1336,7 +1336,7 @@ export default function CandidateProfileEditor({
                 )}
               </div>
               <p className="text-[11px] text-zinc-500 mt-0.5">
-                Recruiters on Naukri receive this exact document during automated one-click applications.
+                Recruiters receive this exact document during automated one-click applications.
               </p>
             </div>
           </div>
@@ -1823,7 +1823,7 @@ export default function CandidateProfileEditor({
               <Sliders className="w-4 h-4 text-zinc-400" /> Target Job Search Criteria
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Specify what roles, locations, and technologies the bot should target when searching on Naukri.
+              Specify what roles, locations, and technologies the bot should target during automated sweeps.
             </p>
           </div>
           <span className="text-[10px] font-mono text-zinc-500">Step 4: Search Filters</span>
@@ -2123,7 +2123,7 @@ export default function CandidateProfileEditor({
               <CheckCircle2 className="w-4 h-4 text-zinc-400" /> Automated Recruiter Screening Q&A
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Naukri recruiters ask mandatory one-click questionnaire forms. The AI bot answers using these values.
+              Recruiters ask mandatory one-click questionnaire forms. The AI bot answers using these values.
             </p>
           </div>
           <span className="text-[10px] font-mono text-zinc-500">Step 5: Screening Q&A</span>
@@ -2543,7 +2543,7 @@ export default function CandidateProfileEditor({
           <div className="flex flex-wrap gap-2">
             {avoidCompanies.length === 0 ? (
               <p className="text-xs text-zinc-500 italic">
-                No companies currently blacklisted. All matching companies on Naukri are eligible for automated applications.
+                No companies currently blacklisted. All matching companies are eligible for automated applications.
               </p>
             ) : (
               avoidCompanies.map((comp, idx) => (
@@ -2576,7 +2576,7 @@ export default function CandidateProfileEditor({
               Autonomous Cloud Bot Run Schedule
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">
-              The daemon triggers every morning at 11:00 AM IST to scout and apply to fresh Naukri openings.
+              The daemon triggers every morning at 06:00 AM &amp; 08:00 AM IST to scout and apply to fresh openings.
             </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">

@@ -215,7 +215,7 @@ export default function BeginnerOnboardingGuide({
                     </div>
                     <p className="text-[11px] text-zinc-400 leading-relaxed">
                       {step3Completed
-                        ? 'Profile parameters saved. Naukri credentials, target roles, and automation preferences are locked in.'
+                        ? 'Profile parameters saved. Login credentials, target roles, and automation preferences are locked in.'
                         : 'Review credentials, target roles & blacklist, then click "Save Profile" to synchronize your bot.'}
                     </p>
                   </div>

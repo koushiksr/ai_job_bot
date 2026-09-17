@@ -99,7 +99,7 @@ export default function HomeInteractiveToolsCard({
           }`}
         >
           <TrendingUp className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
-          <span className="truncate">Naukri Resdex Rank</span>
+          <span className="truncate">Recruiter Rank Score</span>
         </button>
 
         <button
@@ -243,7 +243,7 @@ export default function HomeInteractiveToolsCard({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: NAUKRI RESDEX RANK ESTIMATOR                                       */}
+      {/* TAB 2: RECRUITER SEARCH RANK ESTIMATOR                                    */}
       {/* ========================================================================= */}
       {activeTab === 'resdex' && (
         <div className="space-y-4">
@@ -323,7 +323,7 @@ export default function HomeInteractiveToolsCard({
             </div>
 
             <p className="text-[11px] text-zinc-400 leading-relaxed border-t border-zinc-800/80 pt-2">
-              Naukri’s recruiter algorithm strictly sorts candidate resumes by <strong>Freshness Timestamp</strong>. JobFlux AI silently touches your profile every morning at 9:00 AM IST to ensure you stay permanently on Page 1.
+              Recruiter search algorithms strictly sort candidate resumes by <strong>Freshness Timestamp</strong>. JobFlux AI silently touches your profile every morning at 9:00 AM IST to ensure you stay permanently on Page 1.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1 text-xs">

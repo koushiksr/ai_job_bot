@@ -527,7 +527,7 @@ export default function AiResumeBuilder({
                   className="accent-amber-500 w-4 h-4 rounded cursor-pointer"
                 />
                 <label htmlFor="autoSyncBot" className="text-zinc-300 cursor-pointer">
-                  <strong className="text-white">Auto-attach generated ATS resume to Naukri Auto-Apply Bot</strong> (replaces older resume for daily runs)
+                  <strong className="text-white">Auto-attach generated ATS resume to Auto-Apply Bot</strong> (replaces older resume for daily runs)
                 </label>
               </div>
             )}
@@ -563,7 +563,7 @@ export default function AiResumeBuilder({
                     Synthesizing ATS-Optimized Resume with AI...
                   </h4>
                   <p className="text-xs text-zinc-400 mt-1 max-w-md mx-auto leading-relaxed">
-                    Injecting high-density keywords for Workday, Greenhouse & Naukri Resdex algorithms. Formatting quantified Google XYZ bullet points.
+                    Injecting high-density keywords for Workday, Greenhouse & Recruiter ATS algorithms. Formatting quantified Google XYZ bullet points.
                   </p>
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono bg-black border border-zinc-800 text-zinc-400">
@@ -622,7 +622,7 @@ export default function AiResumeBuilder({
                   {syncSuccess && (
                     <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-zinc-300 shrink-0" />
-                      <span>Successfully auto-attached to your candidate profile! Your Naukri Auto-Apply Bot will now dispatch this resume on morning runs.</span>
+                      <span>Successfully auto-attached to your candidate profile! Your Auto-Apply Bot will now dispatch this resume on morning runs.</span>
                     </div>
                   )}
 

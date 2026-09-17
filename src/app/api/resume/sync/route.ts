@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     if (!isPro) {
       return NextResponse.json(
         {
-          detail: '1-Click Cloud Sync to Naukri Auto-Apply Bot is exclusive to the Professional Plan.',
+          detail: '1-Click Cloud Sync to Auto-Apply Bot is exclusive to the Professional Plan.',
           requires_upgrade: true
         },
         { status: 403 }
@@ -203,7 +203,7 @@ export async function POST(req: NextRequest) {
     await logUserActivity(db, {
       userId: user_id,
       eventType: 'resume_upload',
-      description: `Synced Harvard/FAANG ATS Resume directly with Naukri Auto-Apply Bot`,
+      description: `Synced Harvard/FAANG ATS Resume directly with Auto-Apply Bot`,
       ipAddress: ip,
       userAgent,
       metadata: {
@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
       filename,
       ats_score: resume.ats_score || 99.4,
       synced_at: now.toISOString(),
-      message: 'Resume successfully synchronized with Naukri Auto-Apply Bot! Active for upcoming 06:00 AM & 08:00 AM IST runs.'
+      message: 'Resume successfully synchronized with Auto-Apply Bot! Active for upcoming 06:00 AM & 08:00 AM IST runs.'
     })
   } catch (err: any) {
     console.error('Resume Bot Sync Error:', err)

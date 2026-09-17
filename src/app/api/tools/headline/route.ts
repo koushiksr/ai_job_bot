@@ -62,9 +62,9 @@ export async function POST(req: NextRequest) {
     // Attempt Groq LLM Generation if Key Available
     if (process.env.GROQ_API_KEY) {
       try {
-        const prompt = `You are the world's best Indian tech recruiter and Naukri.com SEO optimization expert.
-Generate 5 diverse, click-through optimized headlines for a candidate's Naukri profile.
-CRITICAL CONSTRAINT: Each headline MUST be under 95 characters (Naukri has a strict 100-character cutoff).
+        const prompt = `You are the world's best Indian tech recruiter and candidate profile SEO optimization expert.
+Generate 5 diverse, click-through optimized headlines for a candidate's professional profile.
+CRITICAL CONSTRAINT: Each headline MUST be under 95 characters (strict 100-character cutoff).
 
 Candidate Info:
 - Target Role: ${cleanRole}
@@ -82,7 +82,7 @@ Return STRICTLY valid JSON without Markdown blocks:
     { "type": "Impact & Metric Driven", "text": "Under 95 char headline focused on deliverable business impact" },
     { "type": "Clean Modern Tech Stack", "text": "Under 95 char clean pipe-separated headline" }
   ],
-  "summary": "A 180-250 word rich, keyword-optimized Naukri Profile Summary with key technical competencies, notable achievements, and availability details."
+  "summary": "A 180-250 word rich, keyword-optimized Profile Summary with key technical competencies, notable achievements, and availability details."
 }`
 
         const groqModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'

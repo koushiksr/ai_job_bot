@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.95
     },
     {
-      url: `${baseUrl}/tools/naukri-headline-generator`,
+      url: `${baseUrl}/tools/headline-generator`,
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.95
@@ -30,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.95
     },
     {
-      url: `${baseUrl}/tools/naukri-profile-score`,
+      url: `${baseUrl}/tools/profile-score`,
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.95

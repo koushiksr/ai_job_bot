@@ -611,7 +611,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                         <Brain className="w-8 h-8 mx-auto text-zinc-600 mb-2" />
                         No LLM inference logs found matching your filters.
                         <div className="text-[11px] text-zinc-600 mt-1">
-                          Questions answered by the bot on Naukri will automatically appear here in real-time.
+                          Questions answered by the bot will automatically appear here in real-time.
                         </div>
                       </td>
                     </tr>
