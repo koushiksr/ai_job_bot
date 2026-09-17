@@ -564,6 +564,9 @@ export interface JobDispatchReportOptions {
     location?: string
     status?: string
     tag?: string
+    url?: string
+    appliedAtFormatted?: string
+    matchScore?: number
   }>
   dashboardUrl?: string
   upgradeUrl?: string
@@ -571,6 +574,7 @@ export interface JobDispatchReportOptions {
   promoCode?: string
   discountedPrice?: string
   originalPrice?: string
+  sectionTitle?: string
 }
 
 /**
@@ -580,34 +584,30 @@ export interface JobDispatchReportOptions {
  */
 export function generateJobDispatchReportHtml({
   candidateName = 'Candidate',
-  appliedCount = 47,
+  appliedCount = 0,
   totalApplied = 0,
-  matchScore = 96,
+  matchScore = 94,
   recruiterViews = 4,
   isPaidPlan = false,
   planName = 'JobFlux Professional',
   planExpiresAt = null,
   daysRemaining = 0,
-  freeTrialUsed = 47,
+  freeTrialUsed = 0,
   freeTrialLimit = 50,
-  topCompanies = [
-    { name: 'MedBuddy', role: 'Senior Full Stack Engineer', location: 'Bangalore / Hybrid', status: 'Fast-Track Dispatched', tag: 'Verified' },
-    { name: 'TIA Technology', role: 'Full Stack Developer', location: 'Remote', status: 'Direct Submission', tag: 'ATS Matched' },
-    { name: 'Infosys', role: 'Frontend Specialist (React/Next.js)', location: 'Bangalore', status: 'Resume Synced', tag: 'Priority' },
-    { name: 'Tipco Industries', role: 'React Developer', location: 'Bangalore', status: 'In Review', tag: 'Active' },
-    { name: 'Matrimony.com', role: 'Software Development Engineer', location: 'Chennai / Remote', status: 'Dispatched', tag: 'HR Queue' },
-    { name: 'UST Global', role: 'Cloud & Web Solutions Engineer', location: 'Trivandrum / Hybrid', status: 'Dispatched', tag: 'Applied' },
-  ],
+  topCompanies = [],
   dashboardUrl = 'https://jobfluxai.vercel.app/dashboard',
   upgradeUrl = 'https://jobfluxai.vercel.app/pricing',
   promoCode = 'WELCOMEPRO',
   discountedPrice = '₹199',
   originalPrice = '₹2,500',
-  dateString = 'Today'
+  dateString = 'Today',
+  sectionTitle
 }: JobDispatchReportOptions): string {
   const remainingFree = Math.max(0, freeTrialLimit - freeTrialUsed)
   const percentUsed = Math.min(100, Math.round((freeTrialUsed / freeTrialLimit) * 100))
-  const previewText = `JobFlux AI: ${appliedCount} jobs applied today · ${isPaidPlan ? `${planName} Active` : `${remainingFree} free applications remaining`} · ${recruiterViews} recruiter views`
+  const previewText = appliedCount > 0
+    ? `JobFlux AI: ${appliedCount} jobs applied today · ${isPaidPlan ? `${planName} Active` : `${remainingFree} free applications remaining`} · ${recruiterViews} recruiter views`
+    : `JobFlux AI: Daily recruiter sweep completed · ${totalApplied} total applications active · ${isPaidPlan ? `${planName} Active` : `${remainingFree} free applications remaining`}`
 
   let formattedExpiry = 'Active'
   if (planExpiresAt) {
@@ -617,6 +617,22 @@ export function generateJobDispatchReportHtml({
     } catch (_) {}
   }
 
+  const emailHeadline = appliedCount > 0
+    ? `${appliedCount} Jobs Dispatched Today`
+    : (topCompanies.length > 0 ? 'Daily Recruiter Sweep Synchronized' : 'Autonomous Recruiter Sweep Queued')
+
+  const emailOverview = appliedCount > 0
+    ? `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's scheduled recruiter sweep on Naukri. Here is your individual application briefing:`
+    : (topCompanies.length > 0
+        ? `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's recruiter sweep on Naukri. All active matching vacancies are up-to-date (0 new applications required in this cycle; ${totalApplied} total applications active). Here are your recent verified dispatches:`
+        : `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your candidate profile and Harvard-standard ATS resume are synchronized. Your next scheduled autonomous recruiter sweep will run at 06:00 AM IST.`
+      )
+
+  const resolvedSectionTitle = sectionTitle || (appliedCount > 0
+    ? `Top Dispatched Employers in this Sweep (${topCompanies.length})`
+    : (topCompanies.length > 0 ? `Recent Verified Applications (${topCompanies.length})` : 'Application Queue Status')
+  )
+
   return `<!DOCTYPE html>
 <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -625,7 +641,7 @@ export function generateJobDispatchReportHtml({
   <meta name="x-apple-disable-message-reformatting">
   <meta name="color-scheme" content="dark light">
   <meta name="supported-color-schemes" content="dark light">
-  <title>JobFlux AI · Daily Job Dispatch Report (${appliedCount} Applied)</title>
+  <title>JobFlux AI · Daily Job Dispatch Report (${appliedCount > 0 ? `${appliedCount} Applied Today` : 'Sweep Completed'})</title>
   <style type="text/css">
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
@@ -697,10 +713,10 @@ export function generateJobDispatchReportHtml({
               
               <!-- Greeting & Overview -->
               <h1 class="mobile-title" style="margin:0 0 10px 0;font-size:21px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;line-height:1.25;">
-                ${appliedCount} Jobs Dispatched Today
+                ${emailHeadline}
               </h1>
               <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#9ca3af;">
-                Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's scheduled recruiter sweep on Naukri. Here is your individual application briefing:
+                ${emailOverview}
               </p>
 
               <!-- Metric Grid (2x2 table) -->
@@ -715,7 +731,7 @@ export function generateJobDispatchReportHtml({
                         ${appliedCount}
                       </div>
                       <div style="font-size:11px;color:#71717a;margin-top:3px;">
-                        Dispatched Today ${totalApplied > 0 ? `(${totalApplied} Total)` : ''}
+                        ${appliedCount > 0 ? 'Dispatched Today' : 'Today'} ${totalApplied > 0 ? `(${totalApplied} Total)` : ''}
                       </div>
                     </div>
                   </td>
@@ -766,8 +782,9 @@ export function generateJobDispatchReportHtml({
               <!-- Verified Employers Section -->
               <div style="margin-bottom:24px;">
                 <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">
-                  Top Dispatched Employers in this Sweep
+                  ${resolvedSectionTitle}
                 </div>
+                ${topCompanies.length > 0 ? `
                 <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;overflow:hidden;">
                   ${topCompanies.map((c, idx) => `
                     <div class="mobile-company-card" style="padding:12px 16px;border-bottom:${idx === topCompanies.length - 1 ? 'none' : '1px solid #1a1b1f'};">
@@ -775,18 +792,18 @@ export function generateJobDispatchReportHtml({
                         <tr>
                           <td valign="middle">
                             <div style="font-size:13px;font-weight:600;color:#ffffff;margin-bottom:2px;">
-                              ${c.name}
+                              ${c.url ? `<a href="${c.url}" target="_blank" style="color:#ffffff;text-decoration:none;">${c.name} <span style="font-size:11px;color:#38bdf8;">&nearr;</span></a>` : c.name}
                             </div>
                             <div style="font-size:12px;color:#9ca3af;margin-bottom:2px;">
                               ${c.role}
                             </div>
                             <div style="font-size:11px;color:#71717a;">
-                              📍 ${c.location || 'India / Remote'}
+                              📍 ${c.location || 'India / Remote'} ${c.appliedAtFormatted ? `&bull; ⏱️ ${c.appliedAtFormatted}` : ''}
                             </div>
                           </td>
                           <td align="right" valign="middle" style="white-space:nowrap;padding-left:10px;">
-                            <span style="display:inline-block;font-size:10px;font-weight:600;font-family:monospace;background-color:#16171a;color:#94a3b8;border:1px solid #26282d;padding:2px 8px;border-radius:4px;">
-                              ${c.tag || 'Dispatched'}
+                            <span style="display:inline-block;font-size:10px;font-weight:600;font-family:monospace;background-color:#16171a;color:${c.matchScore ? '#38bdf8' : '#94a3b8'};border:1px solid #26282d;padding:2px 8px;border-radius:4px;">
+                              ${c.matchScore ? `${c.matchScore}% ATS` : (c.tag || 'Dispatched')}
                             </span>
                           </td>
                         </tr>
@@ -794,6 +811,16 @@ export function generateJobDispatchReportHtml({
                     </div>
                   `).join('')}
                 </div>
+                ` : `
+                <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:18px 16px;text-align:center;">
+                  <div style="font-size:13px;font-weight:600;color:#38bdf8;margin-bottom:4px;">
+                    ⏳ Daily Recruiter Sweep Queued
+                  </div>
+                  <div style="font-size:12px;color:#9ca3af;line-height:1.5;max-width:440px;margin:0 auto;">
+                    Your profile is queued for the automated <strong>06:00 AM IST</strong> morning run. Matched openings on Naukri will be scored against your Harvard ATS resume and dispatched automatically.
+                  </div>
+                </div>
+                `}
               </div>
 
               <!-- DYNAMIC PACKAGE STATUS & INTELLIGENT OFFER -->
