@@ -29,6 +29,8 @@ import JobFluxLogo from '@/components/JobFluxLogo'
 import AiEngineVisualizer from '@/components/AiEngineVisualizer'
 import HomeInteractiveToolsCard from '@/components/HomeInteractiveToolsCard'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
+import HeroReviewCarousel from '@/components/HeroReviewCarousel'
+import CandidateReviewModal from '@/components/CandidateReviewModal'
 import Footer from '@/components/Footer'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 
@@ -66,6 +68,7 @@ export default function Home() {
   const [forgotSuccessMessage, setForgotSuccessMessage] = useState('')
   const [existingUser, setExistingUser] = useState<{ id: string; email: string; role: string } | null>(null)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   
   // Form fields
@@ -526,6 +529,11 @@ export default function Home() {
                 <span>View Engine Simulation</span>
                 <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
               </a>
+            </div>
+
+            {/* Live Candidate Reviews & Satisfaction Social Proof Carousel */}
+            <div className="pt-4 sm:pt-6 border-t border-zinc-900/80">
+              <HeroReviewCarousel onOpenReviewModal={() => setIsReviewModalOpen(true)} />
             </div>
           </motion.div>
           
@@ -1204,6 +1212,14 @@ export default function Home() {
           onOpen={() => setIsHelpOpen(true)}
           onClose={() => setIsHelpOpen(false)}
           showFloatingTrigger={true}
+        />
+
+        {/* Candidate Satisfaction & Review Modal */}
+        <CandidateReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          initialEmail={existingUser?.email || ''}
+          initialUserId={existingUser?.id || ''}
         />
       </div>
 

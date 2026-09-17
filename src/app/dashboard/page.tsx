@@ -34,13 +34,15 @@ import {
   Settings,
   AlertTriangle,
   Check,
-  Copy
+  Copy,
+  Star
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
+import CandidateReviewModal from '@/components/CandidateReviewModal'
 import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 import AiResumeBuilder from '@/components/AiResumeBuilder'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
@@ -72,6 +74,7 @@ export default function UserDashboard() {
 
   // Help Modal State
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState<boolean>(false)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false)
 
@@ -1085,6 +1088,21 @@ export default function UserDashboard() {
                         <span>Help & Support Center</span>
                       </button>
 
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
+                          setIsReviewModalOpen(true)
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                      >
+                        <Star className="w-3.5 h-3.5 text-amber-400 shrink-0 fill-amber-400/30" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-amber-300">Rate &amp; Review JobFlux</div>
+                          <div className="text-[10px] text-zinc-500">Share your satisfaction score</div>
+                        </div>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">REVIEW</span>
+                      </button>
+
                       {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
                         <Link
                           href="/admin"
@@ -1454,6 +1472,17 @@ export default function UserDashboard() {
                 <span>Candidate Offers & Discounts</span>
                 <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 ml-auto font-semibold">
                   OFFER
+                </span>
+              </button>
+
+              <button
+                onClick={() => { setIsMobileNavOpen(false); setIsReviewModalOpen(true) }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 hover:text-white hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
+              >
+                <Star className="w-4 h-4 text-amber-400 shrink-0 fill-amber-400/20" />
+                <span>Rate &amp; Review JobFlux</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 ml-auto font-semibold">
+                  REVIEW
                 </span>
               </button>
 
@@ -2613,22 +2642,33 @@ export default function UserDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-zinc-800/60">
-            <Link
-              href="/profile"
-              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-200 font-medium text-xs transition-colors"
-            >
-              <User className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Profile Settings</span>
-            </Link>
+          <div className="pt-1 border-t border-zinc-800/60 space-y-2">
             <button
               type="button"
-              onClick={handleLogout}
-              className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-medium text-xs transition-colors cursor-pointer"
+              onClick={() => setIsReviewModalOpen(true)}
+              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-medium text-xs transition-colors cursor-pointer"
             >
-              <LogOut className="w-3.5 h-3.5 text-red-400" />
-              <span>Sign Out</span>
+              <Star className="w-3.5 h-3.5 fill-amber-400" />
+              <span>Rate &amp; Review Your Experience</span>
             </button>
+
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                href="/profile"
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-200 font-medium text-xs transition-colors"
+              >
+                <User className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Profile Settings</span>
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-medium text-xs transition-colors cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5 text-red-400" />
+                <span>Sign Out</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2827,6 +2867,16 @@ export default function UserDashboard() {
         onClose={handleClosePwaModal}
         userEmail={userEmail}
         userId={userId}
+      />
+
+      {/* Candidate Satisfaction & Review Modal */}
+      <CandidateReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        initialName={userName}
+        initialEmail={userEmail}
+        initialUserId={userId}
+        initialAvatar={userPicture}
       />
     </div>
   )

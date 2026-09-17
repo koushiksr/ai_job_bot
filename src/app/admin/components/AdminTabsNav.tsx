@@ -9,7 +9,8 @@ import {
   Tag,
   Building2,
   History,
-  Compass
+  Compass,
+  Star
 } from 'lucide-react'
 import { AdminTabType, AdminQueueMetrics, AdminWorkerStatus, TicketStats } from '../types'
 
@@ -22,6 +23,7 @@ interface AdminTabsNavProps {
   workerStatus: AdminWorkerStatus
   paymentsCount: number
   enterpriseLeadsCount: number
+  pendingReviewsCount?: number
 }
 
 export default function AdminTabsNav({
@@ -32,7 +34,8 @@ export default function AdminTabsNav({
   queueMetrics,
   workerStatus,
   paymentsCount,
-  enterpriseLeadsCount
+  enterpriseLeadsCount,
+  pendingReviewsCount
 }: AdminTabsNavProps) {
   return (
     <div className="flex items-center gap-2 border-b border-zinc-900 pb-3 flex-wrap">
@@ -152,6 +155,24 @@ export default function AdminTabsNav({
         <Compass className="w-3.5 h-3.5 text-cyan-400" />
         <span>Live Visitors &amp; Telemetry</span>
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Live tracking active" />
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onTabChange('reviews')}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
+          activeTab === 'reviews'
+            ? 'bg-zinc-800 text-white shadow-sm ring-1 ring-amber-500/40'
+            : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+        }`}
+      >
+        <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
+        <span>Reviews &amp; Feedback</span>
+        {typeof pendingReviewsCount === 'number' && pendingReviewsCount > 0 ? (
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-mono font-bold animate-pulse">
+            {pendingReviewsCount} pending
+          </span>
+        ) : null}
       </button>
     </div>
   )

@@ -22,6 +22,8 @@ import OffersTab from './components/tabs/OffersTab'
 import EnterpriseLeadsTab from './components/tabs/EnterpriseLeadsTab'
 import LogsTab from './components/tabs/LogsTab'
 import VisitorsTab from './components/tabs/VisitorsTab'
+import ReviewsTab from './components/ReviewsTab'
+import { AdminTabType } from './types'
 
 // Modular Modals
 import InspectCandidateModal from './components/modals/InspectCandidateModal'
@@ -55,7 +57,8 @@ export default function AdminDashboard() {
   })
 
   // Admin Active Tab
-  const [activeAdminTab, setActiveAdminTab] = useState<'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'logs' | 'visitors'>('candidates')
+  const [activeAdminTab, setActiveAdminTab] = useState<AdminTabType>('candidates')
+  const [pendingReviewsCount, setPendingReviewsCount] = useState<number>(0)
 
   // Queue & Live Executions State
   const [queueTasks, setQueueTasks] = useState<any[]>([])
@@ -444,6 +447,19 @@ export default function AdminDashboard() {
         total_applied: total
       })
       setIsAuthorized(true)
+
+      // Fetch reviews metrics for tab badge
+      try {
+        const revRes = await fetch('/api/admin/reviews', { headers: getAdminHeaders() })
+        if (revRes.ok) {
+          const revData = await revRes.json()
+          if (revData.metrics && typeof revData.metrics.pending === 'number') {
+            setPendingReviewsCount(revData.metrics.pending)
+          }
+        }
+      } catch (revErr) {
+        // Non-critical telemetry
+      }
     } catch (e) {
       console.error('Failed to fetch admin users:', e)
     } finally {
@@ -1622,6 +1638,7 @@ export default function AdminDashboard() {
           workerStatus={workerStatus}
           paymentsCount={paymentsList.length}
           enterpriseLeadsCount={enterpriseLeads.length}
+          pendingReviewsCount={pendingReviewsCount}
         />
 
         {/* TAB 1: CANDIDATES */}
@@ -1895,6 +1912,11 @@ export default function AdminDashboard() {
         {/* TAB 8: LIVE VISITORS & INTERACTION TELEMETRY */}
         {activeAdminTab === 'visitors' && (
           <VisitorsTab />
+        )}
+
+        {/* TAB 9: CANDIDATE REVIEWS & TESTIMONIALS MODERATION */}
+        {activeAdminTab === 'reviews' && (
+          <ReviewsTab getAdminHeaders={getAdminHeaders} />
         )}
       </main>
 
