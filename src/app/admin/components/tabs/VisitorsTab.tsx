@@ -387,7 +387,9 @@ export default function VisitorsTab() {
 
           {[
             { id: 'all', label: 'All Events' },
+            { id: 'payment_success', label: '🎉 Purchases', highlight: true },
             { id: 'payment_click', label: '💳 Payment Clicks', highlight: true },
+            { id: 'signup', label: '📝 Signups' },
             { id: 'page_view', label: '👁️ Page Views' },
             { id: 'cta_click', label: '🚀 CTA Clicks' },
             { id: 'pwa_install_click', label: '📲 PWA Actions' }
@@ -525,6 +527,30 @@ export default function VisitorsTab() {
                               <div className="text-[11px] font-semibold text-white">
                                 {evt.metadata.plan_name}
                                 {evt.metadata.amount ? ` (₹${evt.metadata.amount})` : ''}
+                              </div>
+                            )}
+                          </div>
+                        ) : evt.event_type === 'payment_success' ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700 text-[10px] font-bold">
+                              <Sparkles className="w-3 h-3 text-emerald-400" />
+                              PAID PURCHASE
+                            </span>
+                            {evt.metadata?.plan_name && (
+                              <div className="text-[11px] font-bold text-emerald-400">
+                                {evt.metadata.plan_name} (₹{evt.metadata.amount || 99})
+                              </div>
+                            )}
+                          </div>
+                        ) : evt.event_type === 'signup' || evt.event_type === 'lead' ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-950 text-green-300 border border-green-800 text-[10px] font-bold">
+                              <Sparkles className="w-3 h-3 text-green-400" />
+                              NEW SIGNUP
+                            </span>
+                            {evt.metadata?.plan && (
+                              <div className="text-[10px] text-zinc-400">
+                                {evt.metadata.plan} ({evt.metadata.method || 'form'})
                               </div>
                             )}
                           </div>

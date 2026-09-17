@@ -52,6 +52,7 @@ import PwaInstallPromptModal from '@/components/PwaInstallPromptModal'
 import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 import { checkIsPwaInstalled, shouldShowPwaAutoPrompt, markPwaAsDismissed } from '@/lib/pwaHelper'
+import { trackSignUp } from '@/lib/tracker'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
@@ -389,6 +390,7 @@ export default function UserDashboard() {
           localStorage.setItem('user_picture', gPicture)
           setUserPicture(gPicture)
         }
+        trackSignUp('google_oauth_redirect', gPlan, { email: gEmail, user_id: gUid })
         window.history.replaceState({}, document.title, '/dashboard')
       }
 

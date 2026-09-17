@@ -160,7 +160,7 @@ export interface VisitorEventRecord {
   id: string
   visitor_id: string
   session_id: string
-  event_type: 'page_view' | 'payment_click' | 'payment_success' | 'payment_fail' | 'pwa_install_click' | 'cta_click' | 'custom'
+  event_type: 'page_view' | 'payment_click' | 'payment_success' | 'payment_fail' | 'pwa_install_click' | 'cta_click' | 'signup' | 'lead' | 'custom'
   path: string
   full_url?: string
   referrer?: string

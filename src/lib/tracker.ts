@@ -1,10 +1,18 @@
 // Client-Side Visitor & Interaction Tracking Engine
 // Generates persistent visitor UUIDs, tracks pageviews, button interactions, and payment intents
 
+declare global {
+  interface Window {
+    fbq?: (...args: any[]) => void
+    gtag?: (...args: any[]) => void
+    dataLayer?: any[]
+  }
+}
+
 export interface TrackEventPayload {
   visitor_id?: string
   session_id?: string
-  event_type: 'page_view' | 'payment_click' | 'payment_success' | 'payment_fail' | 'pwa_install_click' | 'cta_click' | 'custom'
+  event_type: 'page_view' | 'payment_click' | 'payment_success' | 'payment_fail' | 'pwa_install_click' | 'cta_click' | 'signup' | 'lead' | 'custom'
   path?: string
   full_url?: string
   referrer?: string
@@ -134,6 +142,9 @@ export function sendTrackEvent(payload: TrackEventPayload): void {
       metadata: payload.metadata || {}
     }
 
+    // Mirror events to client-side ad networks (Meta Pixel, Google Analytics/Ads)
+    dispatchAdPixels(fullPayload)
+
     const jsonString = JSON.stringify(fullPayload)
 
     // Primary transport: Reliable first-party fetch with keepalive (guaranteed standard JSON)
@@ -153,6 +164,85 @@ export function sendTrackEvent(payload: TrackEventPayload): void {
     })
   } catch (err) {
     console.debug('[Tracker] Non-fatal tracking error:', err)
+  }
+}
+
+/**
+ * Dispatch events to Meta (Facebook) Pixel and Google Analytics (GA4) / Google Ads
+ */
+function dispatchAdPixels(payload: TrackEventPayload): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    const hasFbq = typeof window.fbq === 'function'
+    const hasGtag = typeof window.gtag === 'function'
+
+    if (payload.event_type === 'page_view') {
+      if (hasFbq) {
+        window.fbq!('track', 'PageView')
+      }
+      if (hasGtag) {
+        window.gtag!('event', 'page_view', {
+          page_path: payload.path || window.location.pathname,
+          page_title: payload.title || (typeof document !== 'undefined' ? document.title : '')
+        })
+      }
+    } else if (payload.event_type === 'payment_click') {
+      const planName = payload.metadata?.plan_name || payload.metadata?.plan_id || 'JobFlux Plan'
+      const amount = Number(payload.metadata?.amount) || 0
+      if (hasFbq) {
+        window.fbq!('track', 'InitiateCheckout', {
+          content_name: planName,
+          value: amount,
+          currency: 'INR'
+        })
+      }
+      if (hasGtag) {
+        window.gtag!('event', 'begin_checkout', {
+          value: amount,
+          currency: 'INR',
+          items: [{ item_name: planName, price: amount }]
+        })
+      }
+    } else if (payload.event_type === 'payment_success') {
+      const planName = payload.metadata?.plan_name || payload.metadata?.plan_id || 'JobFlux Plan'
+      const amount = Number(payload.metadata?.amount) || 99
+      const orderId = payload.metadata?.order_id || payload.metadata?.payment_id || 'order_unknown'
+      if (hasFbq) {
+        window.fbq!('track', 'Purchase', {
+          value: amount,
+          currency: 'INR',
+          content_name: planName
+        })
+      }
+      if (hasGtag) {
+        window.gtag!('event', 'purchase', {
+          transaction_id: orderId,
+          value: amount,
+          currency: 'INR',
+          items: [{ item_name: planName, price: amount }]
+        })
+      }
+    } else if (payload.event_type === 'signup' || payload.event_type === 'lead') {
+      const plan = payload.metadata?.plan || 'trial'
+      const method = payload.metadata?.method || 'form'
+      if (hasFbq) {
+        window.fbq!('track', 'CompleteRegistration', {
+          content_name: plan,
+          status: 'success'
+        })
+        window.fbq!('track', 'Lead', {
+          content_name: plan
+        })
+      }
+      if (hasGtag) {
+        window.gtag!('event', 'sign_up', {
+          method: method
+        })
+      }
+    }
+  } catch (err) {
+    console.debug('[Tracker] Ad pixel dispatch error:', err)
   }
 }
 
@@ -216,6 +306,52 @@ export function trackPwaInteraction(action: 'modal_opened' | 'prompt_accepted' |
     event_type: 'pwa_install_click',
     metadata: {
       pwa_action: action
+    }
+  })
+}
+
+/**
+ * Track candidate account creation / Free Trial registration
+ * Triggers Meta CompleteRegistration & Lead, and GA4 sign_up
+ */
+export function trackSignUp(
+  method: string = 'email',
+  plan: string = 'trial',
+  metadata?: Record<string, any>
+): void {
+  sendTrackEvent({
+    event_type: 'signup',
+    metadata: {
+      method,
+      plan,
+      registered_at: new Date().toISOString(),
+      ...metadata
+    }
+  })
+}
+
+/**
+ * Track successful candidate subscription purchase
+ * Triggers Meta Purchase and GA4 purchase
+ */
+export function trackPurchase(
+  orderId: string,
+  paymentId: string,
+  planName: string,
+  amount: number,
+  promoCode?: string,
+  metadata?: Record<string, any>
+): void {
+  sendTrackEvent({
+    event_type: 'payment_success',
+    metadata: {
+      order_id: orderId,
+      payment_id: paymentId,
+      plan_name: planName,
+      amount,
+      promo_code: promoCode,
+      purchased_at: new Date().toISOString(),
+      ...metadata
     }
   })
 }

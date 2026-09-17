@@ -335,6 +335,7 @@ export default function PricingPage() {
                 metadata: {
                   plan_id: selectedPlan.id,
                   plan_name: selectedPlan.name,
+                  amount: orderData.amount ? orderData.amount / 100 : 99,
                   order_id: response.razorpay_order_id,
                   payment_id: response.razorpay_payment_id,
                   promo_code: appliedPromoCode || undefined

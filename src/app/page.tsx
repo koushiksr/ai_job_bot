@@ -33,6 +33,7 @@ import HeroReviewCarousel from '@/components/HeroReviewCarousel'
 import CandidateReviewModal from '@/components/CandidateReviewModal'
 import Footer from '@/components/Footer'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
+import { trackSignUp } from '@/lib/tracker'
 
 const FAQS = [
   {
@@ -233,6 +234,12 @@ export default function Home() {
         if (data.plan) {
           localStorage.setItem('user_plan', data.plan)
         }
+
+        // Track signup/lead conversion event for Meta Pixel and GA4
+        if (authMode === 'trial') {
+          trackSignUp('email_form', data.plan || 'trial', { email: data.email, name })
+        }
+
         // If user explicitly signed in with primary master admin credentials, navigate to /admin.
         // For all candidate accounts and users, navigate directly to candidate /dashboard!
         if (data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com' || data.user_id === 'admin') {
@@ -275,6 +282,7 @@ export default function Home() {
                 if (data.picture) {
                   localStorage.setItem('user_picture', data.picture)
                 }
+                trackSignUp('google_one_tap', data.plan || 'trial', { email: data.email, user_id: data.user_id })
                 window.location.href = (data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com') ? '/admin' : '/dashboard'
               }
             }

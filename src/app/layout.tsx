@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import VisitorTracker from "@/components/VisitorTracker";
+import TrackingScripts from "@/components/TrackingScripts";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -179,6 +180,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ServiceWorkerRegistrar />
         <VisitorTracker />
+        <TrackingScripts />
         <Analytics />
         {children}
       </body>
