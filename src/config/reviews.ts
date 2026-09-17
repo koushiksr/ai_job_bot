@@ -18,7 +18,7 @@ export interface ReviewItem {
 export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   {
     user_name: 'Aditya Nambiar',
-    user_avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&auto=format&fit=crop&q=80',
+    user_avatar: '/images/candidates/aditya_nambiar.jpg',
     role_title: 'Senior AI & Full-Stack Systems Engineer',
     company: 'Fintech Cloud Systems · Bengaluru',
     rating: 5,
@@ -31,7 +31,7 @@ export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   },
   {
     user_name: 'Meera Krishnan',
-    user_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+    user_avatar: '/images/candidates/meera_krishnan.jpg',
     role_title: 'Lead Machine Learning & NLP Specialist',
     company: 'Applied AI Labs · Hyderabad',
     rating: 5,
@@ -44,12 +44,12 @@ export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   },
   {
     user_name: 'Rohit Deshmukh',
-    user_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+    user_avatar: '/images/candidates/rohit_deshmukh.jpg',
     role_title: 'Cloud DevOps & Platform Architect',
     company: 'Enterprise SaaS Infrastructure · Pune',
     rating: 5,
     satisfaction_level: '10x Better Screening Pass Rate',
-    review_text: 'The application audit receipts provide complete proof with exact timestamps and screening answers submitted. The targeting filters successfully excluded mass consultancies and focused strictly on high-growth product teams.',
+    review_text: 'The application audit receipts provide complete proof with exact timestamps and screening answers submitted. The targeting filters prioritized high-growth product teams with exact tech stack matches.',
     verified: true,
     featured: true,
     status: 'approved',
@@ -57,7 +57,7 @@ export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   },
   {
     user_name: 'Ananya Sengupta',
-    user_avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80',
+    user_avatar: '/images/candidates/ananya_sengupta.jpg',
     role_title: 'Senior Product & Growth Lead',
     company: 'Consumer Tech Platforms · Gurugram',
     rating: 5,
@@ -70,12 +70,12 @@ export const INITIAL_SAMPLE_REVIEWS: Array<Omit<ReviewItem, 'id'>> = [
   },
   {
     user_name: 'Karthik Venkataraman',
-    user_avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&auto=format&fit=crop&q=80',
+    user_avatar: '/images/candidates/karthik_venkataraman.jpg',
     role_title: 'Principal Backend Engineer (Go / Distributed Systems)',
     company: 'NextGen Financial Cloud · Chennai',
     rating: 5,
-    satisfaction_level: 'Pure Quality · Zero Spam Applications',
-    review_text: 'Most automation tools just spam resumes blindly. JobFlux’s suitability analysis verified tech stacks and experience requirements before submitting. Ended up accepting an offer through one of its verified dispatches.',
+    satisfaction_level: 'High Precision Matching · Verified Submissions',
+    review_text: 'JobFlux’s intelligent suitability analysis carefully evaluated tech stack alignments and experience criteria before submitting every application. The targeting accuracy was exceptional, and I received an offer through one of its verified dispatches within 3 weeks.',
     verified: true,
     featured: false,
     status: 'approved',
