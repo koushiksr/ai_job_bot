@@ -152,11 +152,11 @@ export default function ToolsHeader() {
                   Sign In
                 </Link>
                 <Link
-                  href="/?mode=trial"
+                  href="/?mode=free"
                   className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-all shadow-sm shrink-0 flex items-center gap-1"
                 >
-                  <span className="hidden sm:inline">Start Free Trial</span>
-                  <span className="sm:hidden">Try Free</span>
+                  <span className="hidden sm:inline">Start for Free</span>
+                  <span className="sm:hidden">Start Free</span>
                 </Link>
               </>
             )}

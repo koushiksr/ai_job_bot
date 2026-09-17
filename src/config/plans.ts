@@ -59,20 +59,20 @@ export const MASTER_PLANS: PlanDefinition[] = [
   {
     id: 'trial',
     name: 'Free',
-    subtitle: 'No credit card needed. Start testing for free.',
+    subtitle: '100% Free. No credit card needed. Start in 30 seconds.',
     price: '₹0',
     amountPaise: 0,
-    period: '/ 24 hours',
+    period: 'to test',
     durationDays: 1,
-    featuresIntro: 'Up to 15 verified job applications with zero risk, plus...',
+    featuresIntro: '15 verified job applications with zero risk, plus...',
     features: [
       { text: '1 Full Day of Autonomous Auto-Apply' },
       { text: 'Up to 15 Verified Job Applications' },
       { text: 'Automated screening questions answered' },
       { text: 'Real-time application telemetry dashboard' },
-      { text: 'Zero credit card required to start' }
+      { text: 'Zero credit card required' }
     ],
-    cta: 'Start free trial',
+    cta: 'Start for Free',
     highlight: false
   },
   {

@@ -57,13 +57,13 @@ const FAQS = [
     a: 'JobFlux AI is engineered with human-like operational pacing, secure session encryption, and zero data-leak sanitization. Sensitive PII is anonymized prior to cloud processing, and the engine adheres strictly to Naukri application rate guidelines.'
   },
   {
-    q: 'Is there a free trial available?',
-    a: 'Yes! Every candidate receives a 1-Day Free Trial (₹0) upon registration with access to 15 autonomous applications and full access to prepare and preview their Harvard ATS resume.'
+    q: 'Can I start using JobFlux AI for free?',
+    a: 'Yes! You can start for free with 15 autonomous job applications on Naukri included at zero cost. No credit card required. You get full access to test dual morning sweeps at 6:00 AM & 8:00 AM IST and preview your Harvard ATS resume.'
   }
 ]
 
 export default function Home() {
-  const [authMode, setAuthMode] = useState<'signin' | 'trial' | 'forgot'>('signin')
+  const [authMode, setAuthMode] = useState<'signin' | 'trial' | 'forgot'>('trial')
   const [forgotSent, setForgotSent] = useState(false)
   const [forgotLoading, setForgotLoading] = useState(false)
   const [forgotSuccessMessage, setForgotSuccessMessage] = useState('')
@@ -162,7 +162,7 @@ export default function Home() {
           setTimeout(() => setCardHighlighted(false), 1500)
           emailInputRef.current?.focus()
         }, 700)
-      } else if (modeParam === 'trial' || hash === '#trial') {
+      } else if (modeParam === 'trial' || modeParam === 'free' || hash === '#trial' || hash === '#free' || p.get('plan') === 'free' || p.get('plan') === 'trial') {
         setAuthMode('trial')
         setTimeout(() => {
           authCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -427,8 +427,8 @@ export default function Home() {
                     onClick={() => scrollToAuth('trial')}
                     className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-all shadow-sm cursor-pointer shrink-0"
                   >
-                    <span className="hidden sm:inline">Start Free Trial</span>
-                    <span className="sm:hidden">Try Free</span>
+                    <span className="hidden sm:inline">Start for Free</span>
+                    <span className="sm:hidden">Start Free</span>
                   </button>
                 </>
               )}
@@ -441,8 +441,8 @@ export default function Home() {
           <div className="w-full border-b border-zinc-900 bg-zinc-950/90 z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2 text-zinc-400 text-center sm:text-left">
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0 hidden sm:inline-block" />
-                <span>Start with a <strong className="text-zinc-200">1-Day Free Trial</strong> (15 autonomous applications included).</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 hidden sm:inline-block animate-pulse" />
+                <span>Get <strong className="text-zinc-200">15 autonomous applications</strong> on Naukri completely free • No credit card required.</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -457,7 +457,7 @@ export default function Home() {
                   onClick={() => scrollToAuth('trial')}
                   className="px-3 py-1 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors cursor-pointer"
                 >
-                  Start Free →
+                  Start for Free →
                 </button>
               </div>
             </div>
@@ -500,8 +500,8 @@ export default function Home() {
                 <span>Dual Morning Runs (6 &amp; 8 AM IST)</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
-                <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400" />
-                <span>1-Day Free Trial (₹0)</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>100% Free to Start (₹0)</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors">
                 <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
@@ -525,7 +525,7 @@ export default function Home() {
                   onClick={() => scrollToAuth('trial')}
                   className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-white/5"
                 >
-                  <span>Start 1-Day Free Trial</span>
+                  <span>Start for Free</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
@@ -614,13 +614,14 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => { setAuthMode('trial'); setError(''); setForgotSent(false) }}
-                    className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                    className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       authMode === 'trial'
-                        ? 'bg-white text-black shadow-sm'
+                        ? 'bg-white text-black shadow-sm font-semibold'
                         : 'text-zinc-400 hover:text-white'
                     }`}
                   >
-                    Start 1-Day Trial
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Start for Free</span>
                   </button>
                 </div>
 
@@ -729,15 +730,19 @@ export default function Home() {
                     <div>
                       <div className="flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-white">
-                          {authMode === 'trial' ? 'Start Free Trial' : 'Sign in to JobFlux'}
+                          {authMode === 'trial' ? 'Start for Free' : 'Sign In to JobFlux'}
                         </h2>
-                        <span className="text-[10px] text-zinc-400 font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800">
-                          {authMode === 'trial' ? 'Instant Access' : 'Engine Ready'}
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                          authMode === 'trial'
+                            ? 'text-emerald-400 bg-emerald-950/40 border-emerald-800/60 font-semibold'
+                            : 'text-zinc-400 bg-zinc-900 border-zinc-800'
+                        }`}>
+                          {authMode === 'trial' ? '₹0 • No Card Needed' : 'Engine Ready'}
                         </span>
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
                         {authMode === 'trial'
-                          ? '1 full day of autonomous applications at zero cost.'
+                          ? 'Get 15 autonomous job applications on Naukri • Zero cost • No credit card.'
                           : 'Access your candidate telemetry and application audit.'}
                       </p>
                     </div>
@@ -761,7 +766,7 @@ export default function Home() {
                         <path fill="#71717a" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                         <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                       </svg>
-                      <span>Continue with Google</span>
+                      <span>{authMode === 'trial' ? 'Start Free with Google' : 'Continue with Google'}</span>
                     </button>
 
                     {/* Minimalist Divider */}
@@ -861,11 +866,23 @@ export default function Home() {
                            <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           <>
-                            <span>{authMode === 'trial' ? 'Start 1-Day Trial (₹0)' : 'Sign In'}</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            <span>{authMode === 'trial' ? 'Start for Free →' : 'Sign In →'}</span>
                           </>
                         )}
                       </button>
+
+                      {authMode === 'trial' && (
+                        <div className="flex items-center justify-center gap-2.5 pt-1 text-[11px] text-zinc-400">
+                          <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                            <Check className="w-3 h-3 text-emerald-400" />
+                            100% Free
+                          </span>
+                          <span className="text-zinc-600">•</span>
+                          <span>No card required</span>
+                          <span className="text-zinc-600">•</span>
+                          <span>15 applications</span>
+                        </div>
+                      )}
                     </form>
 
                     {/* Quick Switch Helper */}
@@ -887,9 +904,9 @@ export default function Home() {
                           <button
                             type="button"
                             onClick={() => scrollToAuth('trial')}
-                            className="text-white hover:underline font-medium cursor-pointer"
+                            className="text-emerald-400 hover:underline font-semibold cursor-pointer"
                           >
-                            Start 1-Day Free Trial
+                            Start for Free (₹0)
                           </button>
                         </p>
                       )}

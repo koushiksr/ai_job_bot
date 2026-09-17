@@ -461,11 +461,11 @@ export default function PricingPage() {
                   Sign In
                 </Link>
                 <Link
-                  href="/?mode=trial"
+                  href="/?mode=free"
                   className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
                 >
-                  <span className="hidden sm:inline">Start Free Trial</span>
-                  <span className="sm:hidden">Try Free</span>
+                  <span className="hidden sm:inline">Start for Free</span>
+                  <span className="sm:hidden">Start Free</span>
                 </Link>
               </>
             )}
