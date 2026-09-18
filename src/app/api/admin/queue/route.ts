@@ -209,6 +209,79 @@ export async function POST(req: NextRequest) {
 
     const now = new Date()
 
+    // ACTION 0: Admin On-Demand Trigger for any chosen candidate or all candidates
+    if (action === 'trigger_on_demand' || action === 'enqueue_on_demand') {
+      const targetUserId = (body.userId || body.user_id || body.candidateId || '').trim()
+      if (!targetUserId) {
+        return NextResponse.json({ detail: 'Target candidate user_id is required.' }, { status: 400 })
+      }
+
+      // Check if candidate already has an active pending/running task unless force is requested
+      const activeTask = await db.collection('tasks').findOne({
+        user_id: targetUserId,
+        status: { $in: ['pending', 'running'] }
+      })
+
+      if (activeTask && !body.force) {
+        return NextResponse.json({
+          status: 'already_active',
+          detail: `Candidate '${targetUserId}' already has an active task (${activeTask.status}) in the queue (Task ID: ${activeTask.task_id}).`,
+          taskId: activeTask.task_id,
+          taskStatus: activeTask.status
+        }, { status: 409 })
+      }
+
+      const aheadPendingCount = await db.collection('tasks').countDocuments({ status: 'pending' })
+      const queuePosition = aheadPendingCount + 1
+      const taskId = `task_${targetUserId}_admin_${Date.now()}`
+
+      // Resolve candidate label for logging
+      let candidateLabel = targetUserId
+      if (targetUserId === 'admin') {
+        candidateLabel = 'All Candidates (Admin Autopilot Controller)'
+      } else {
+        const prof = await db.collection('profiles').findOne({ user_id: targetUserId }) ||
+                     await db.collection('users').findOne({ user_id: targetUserId })
+        if (prof) {
+          candidateLabel = `${prof.name || targetUserId} (${prof.email || targetUserId})`
+        }
+      }
+
+      const newTask = {
+        task_id: taskId,
+        user_id: targetUserId,
+        status: 'pending',
+        headless: false,
+        source: 'admin_on_demand',
+        created_at: now,
+        logs: [
+          `[${now.toLocaleTimeString()}] 🚀 On-demand application sweep enqueued by Administrator (${adminEmail || adminId}) for '${candidateLabel}'.`,
+          queuePosition > 1
+            ? `[${now.toLocaleTimeString()}] ⏳ Queued at position #${queuePosition} in line.`
+            : `[${now.toLocaleTimeString()}] ⏳ Ready in queue. Awaiting worker pickup...`
+        ]
+      }
+
+      await db.collection('tasks').insertOne(newTask)
+
+      await logUserActivity(db, {
+        userId: adminId || 'admin',
+        email: adminEmail || 'admin@jobfluxai.com',
+        eventType: 'task_run',
+        description: `Administrator triggered on-demand run for '${candidateLabel}' (Task: ${taskId})`,
+        ipAddress: ip,
+        userAgent: userAgent,
+        metadata: { action: 'trigger_on_demand', taskId, targetUserId }
+      })
+
+      return NextResponse.json({
+        status: 'success',
+        message: `Successfully enqueued on-demand run for ${candidateLabel} (Queue position #${queuePosition}).`,
+        taskId,
+        queuePosition
+      })
+    }
+
     // ACTION 1: Mark specific task NOT to execute (Cancel task)
     if (action === 'mark_not_to_execute' || action === 'cancel') {
       if (!taskId) {

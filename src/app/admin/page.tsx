@@ -1098,14 +1098,14 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleQueueAction = async (action: string, taskId?: string) => {
-    setActionProcessingId(taskId || action)
+  const handleQueueAction = async (action: string, taskId?: string, extra?: any) => {
+    setActionProcessingId(taskId || extra?.userId || action)
     setQueueNotification(null)
     try {
       const res = await fetch('/api/admin/queue', {
         method: 'POST',
         headers: getAdminHeaders(),
-        body: JSON.stringify({ action, taskId })
+        body: JSON.stringify({ action, taskId, ...extra })
       })
       const data = await res.json()
       if (!res.ok) {
@@ -1717,6 +1717,7 @@ export default function AdminDashboard() {
             handleQueueAction={handleQueueAction}
             onOpenConfirmCancelAll={() => setShowConfirmCancelAll(true)}
             onSelectExecutionLog={(task) => setSelectedExecutionLog(task)}
+            usersList={usersList}
           />
         )}
 

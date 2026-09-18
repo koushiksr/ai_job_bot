@@ -16,7 +16,9 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  Trash2
+  Trash2,
+  Zap,
+  Sparkles
 } from 'lucide-react'
 import { AdminQueueMetrics, AdminWorkerStatus } from '../../types'
 
@@ -35,9 +37,10 @@ interface QueueTabProps {
   setQueueNotification: (val: { type: 'success' | 'error'; message: string } | null) => void
   actionProcessingId: string | null
   fetchQueueData: (filter?: string, search?: string) => Promise<void>
-  handleQueueAction: (action: string, taskId?: string) => Promise<void>
+  handleQueueAction: (action: string, taskId?: string, extra?: any) => Promise<void>
   onOpenConfirmCancelAll: () => void
   onSelectExecutionLog: (task: any) => void
+  usersList?: any[]
 }
 
 export default function QueueTab({
@@ -57,8 +60,47 @@ export default function QueueTab({
   fetchQueueData,
   handleQueueAction,
   onOpenConfirmCancelAll,
-  onSelectExecutionLog
+  onSelectExecutionLog,
+  usersList = []
 }: QueueTabProps) {
+  const [selectedCandidate, setSelectedCandidate] = React.useState<string>('')
+  const [forceTrigger, setForceTrigger] = React.useState<boolean>(false)
+
+  // Deduplicated and sorted list of available candidates
+  const candidateOptions = React.useMemo(() => {
+    const list = [...(usersList || [])]
+    const seen = new Set(list.map((u: any) => u.user_id).filter(Boolean))
+    queueTasks.forEach((t) => {
+      if (t.user_id && t.user_id !== 'admin' && !seen.has(t.user_id)) {
+        seen.add(t.user_id)
+        list.push({
+          user_id: t.user_id,
+          name: t.candidate_name || t.user_id,
+          email: t.user_email || '',
+          plan: 'trial'
+        })
+      }
+    })
+    return list.sort((a, b) => (a.name || a.user_id || '').localeCompare(b.name || b.user_id || ''))
+  }, [usersList, queueTasks])
+
+  const selectedUserObj = React.useMemo(() => {
+    if (!selectedCandidate || selectedCandidate === 'admin') return null
+    return candidateOptions.find((u: any) => u.user_id === selectedCandidate)
+  }, [selectedCandidate, candidateOptions])
+
+  const selectedCandidateActive = React.useMemo(() => {
+    if (!selectedCandidate) return null
+    return queueTasks.find((t) => t.user_id === selectedCandidate && (t.status === 'pending' || t.status === 'running'))
+  }, [selectedCandidate, queueTasks])
+
+  const handleTriggerCandidate = async () => {
+    if (!selectedCandidate) return
+    await handleQueueAction('trigger_on_demand', undefined, {
+      userId: selectedCandidate,
+      force: forceTrigger || Boolean(selectedCandidateActive)
+    })
+  }
   return (
     <div className="space-y-6">
       {/* Header & Controls */}
@@ -133,6 +175,140 @@ export default function QueueTab({
           </button>
         </div>
       )}
+
+      {/* On-Demand Candidate Trigger Controller */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0b1017] to-zinc-950 border border-sky-500/30 shadow-lg shadow-sky-950/20 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 flex items-center justify-center shrink-0">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white flex items-center gap-2">
+                <span>Trigger Candidate Run On-Demand</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                  INSTANT ENQUEUE
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Select any candidate to immediately dispatch a live application sweep. Bypasses daily deduplication and delivers post-run dispatch reports upon completion.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono self-start sm:self-auto bg-zinc-900/90 px-3 py-1.5 rounded-xl border border-zinc-800">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Visible Headed Desktop Browser</span>
+          </div>
+        </div>
+
+        {/* Candidate Selector & Trigger Controls */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+          {/* Candidate Dropdown */}
+          <div className="md:col-span-8 space-y-1.5">
+            <label className="text-[11px] font-mono text-zinc-400 flex items-center justify-between">
+              <span>SELECT CANDIDATE TO EXECUTE:</span>
+              {selectedCandidate && (
+                <span className="text-sky-400 font-sans text-[11px]">
+                  {selectedCandidate === 'admin'
+                    ? '👑 All Configured Profiles'
+                    : selectedUserObj?.plan ? `${selectedUserObj.plan.toUpperCase()} Plan` : 'Candidate Profile'}
+                </span>
+              )}
+            </label>
+            <div className="relative">
+              <select
+                value={selectedCandidate}
+                onChange={(e) => setSelectedCandidate(e.target.value)}
+                disabled={actionProcessingId === 'trigger_on_demand' || actionProcessingId === selectedCandidate}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-black/90 border border-zinc-700 text-white text-xs font-mono focus:outline-none focus:border-sky-500 transition-colors appearance-none cursor-pointer pr-10"
+              >
+                <option value="">-- Choose Candidate to Run On-Demand ({candidateOptions.length} profiles available) --</option>
+                <option value="admin" className="font-bold text-amber-300">
+                  👑 All Candidates (Sequential Sweep Across Entire Database)
+                </option>
+                <optgroup label="Individual Candidate Profiles">
+                  {candidateOptions.map((u: any) => {
+                    const active = queueTasks.some(
+                      (t) => t.user_id === u.user_id && (t.status === 'pending' || t.status === 'running')
+                    )
+                    return (
+                      <option key={u.user_id} value={u.user_id}>
+                        {u.name || u.email || u.user_id} ({u.user_id}) {u.plan ? `• ${u.plan.toUpperCase()}` : ''} {active ? '⚠️ [IN QUEUE]' : ''}
+                      </option>
+                    )
+                  })}
+                </optgroup>
+              </select>
+              <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Action Trigger Button */}
+          <div className="md:col-span-4 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleTriggerCandidate}
+              disabled={!selectedCandidate || actionProcessingId === 'trigger_on_demand' || actionProcessingId === selectedCandidate}
+              className="w-full px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-400 hover:to-emerald-400 text-black text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {actionProcessingId === 'trigger_on_demand' || actionProcessingId === selectedCandidate ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-black" />
+                  <span>Enqueuing...</span>
+                </>
+              ) : (
+                <>
+                  <PlayCircle className="w-4 h-4 text-black" />
+                  <span>Run On-Demand</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Selected Candidate Metadata Card */}
+        {selectedCandidate && (
+          <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between gap-3 text-xs flex-wrap">
+            {selectedCandidate === 'admin' ? (
+              <div className="flex items-center gap-2 text-amber-300">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Enqueues an administrator run that sequentially automates applications for <strong>all enabled candidate profiles</strong>.</span>
+              </div>
+            ) : selectedUserObj ? (
+              <div className="flex items-center gap-2 text-zinc-300">
+                <span className="text-zinc-500 font-mono">Selected:</span>
+                <strong className="text-white">{selectedUserObj.name || selectedUserObj.user_id}</strong>
+                <span className="text-zinc-500 font-mono">({selectedUserObj.email})</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-zinc-400">
+                <span className="font-mono">User ID:</span>
+                <strong className="text-white font-mono">{selectedCandidate}</strong>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 font-mono text-[11px]">
+              {selectedCandidateActive ? (
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  Already in Queue ({selectedCandidateActive.status})
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Ready to Enqueue
+                </span>
+              )}
+
+              {selectedUserObj?.is_vip && (
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold">
+                  VIP ACCESS
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Live Worker Status Bar */}
       <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
