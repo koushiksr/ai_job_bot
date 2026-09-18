@@ -935,6 +935,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           targetEmail: targetEmail.trim(),
           channel,
+          source: 'admin_on_demand',
+          force: true,
           ...offerPayload
         })
       })

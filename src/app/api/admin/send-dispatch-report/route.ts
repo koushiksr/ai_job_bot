@@ -115,7 +115,8 @@ async function dispatchReportForCandidate(
   db: any,
   candidateInput: { userId?: string; email?: string; taskId?: string },
   channel: 'both' | 'email' | 'push' = 'both',
-  offerOverrides: any = {}
+  offerOverrides: any = {},
+  options: { source?: string; force?: boolean; isOnDemand?: boolean } = {}
 ) {
   const targetEmail = (candidateInput.email || '').toLowerCase().trim()
   const targetUserId = (candidateInput.userId || '').trim()
@@ -214,7 +215,41 @@ async function dispatchReportForCandidate(
     todayApplied = Math.max(todayApplied, stats.today)
   }
 
-  // C. Fallback to recent actual applied jobs if today's sweep had 0 dispatches
+  // 4. Deduplication Check: If already mailed today, do NOT mail again unless triggered on-demand
+  const isOnDemand = options.isOnDemand ?? (options.force || ['on_demand', 'web_dashboard_on_demand', 'manual_cli_on_demand', 'admin_on_demand'].includes(options.source || ''))
+
+  if (!isOnDemand && (channel === 'both' || channel === 'email')) {
+    const emailAlreadySent = await db.collection('emails').findOne({
+      to: { $regex: `^${resolvedEmail}$`, $options: 'i' },
+      status: 'sent',
+      created_at: { $gte: startOfTodayUtc }
+    })
+
+    const pushLogAlreadySent = !emailAlreadySent ? await db.collection('admin_push_logs').findOne({
+      target_email: { $regex: `^${resolvedEmail}$`, $options: 'i' },
+      channel: { $in: ['both', 'email'] },
+      status: 'delivered',
+      dispatched_at: { $gte: startOfTodayUtc }
+    }) : null
+
+    if (emailAlreadySent || pushLogAlreadySent) {
+      console.log(`ℹ️ [Dispatch] Candidate ${resolvedEmail} already received a report email today (${todayIstStr}). Skipping automated duplicate send.`)
+      return {
+        success: true,
+        skipped: true,
+        reason: `Already mailed today (${todayIstStr}). Automated duplicate email prevented.`,
+        candidate: {
+          name: candidateName,
+          email: resolvedEmail,
+          userId: resolvedUserId,
+          todayApplied,
+          totalApplied: totalAppliedCount
+        }
+      }
+    }
+  }
+
+  // 5. Fallback to recent actual applied jobs if today's sweep had 0 dispatches
   let displayJobs = sweepJobs
   let isHistorical = false
   if (displayJobs.length === 0) {
@@ -229,7 +264,7 @@ async function dispatchReportForCandidate(
     displayJobs = displayJobs.slice(0, 8)
   }
 
-  // 4. Plan status & package intelligence
+  // 6. Plan status & package intelligence
   const plan = user?.plan || profile?.plan || 'trial'
   const planName = user?.plan_name || profile?.plan_name || (
     plan === 'elite' || plan === 'professional' ? 'JobFlux Professional' :
@@ -448,6 +483,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}))
     const rawTarget = (body.targetEmail || body.email || body.userId || body.user_id || '').trim()
     const channel = (body.channel || 'both') as 'both' | 'email' | 'push'
+    const source = (body.source || 'daily_scheduled').toLowerCase()
+    const force = Boolean(body.force)
+    const isOnDemand = force || ['on_demand', 'web_dashboard_on_demand', 'manual_cli_on_demand', 'admin_on_demand'].includes(source)
+    const dispatchOptions = { source, force, isOnDemand }
 
     const offerOverrides = {
       promoCode: body.promoCode,
@@ -470,7 +509,8 @@ export async function POST(req: NextRequest) {
             db,
             { userId: p.user_id, email: p.email },
             channel,
-            offerOverrides
+            offerOverrides,
+            dispatchOptions
           )
           results.push(res)
         } catch (candidateErr: any) {
@@ -481,7 +521,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         broadcast: true,
-        dispatchedCount: results.filter((r: any) => r.success).length,
+        dispatchedCount: results.filter((r: any) => r.success && !r.skipped).length,
+        skippedCount: results.filter((r: any) => r.skipped).length,
         totalCandidates: activeProfiles.length,
         details: results
       })
@@ -494,7 +535,7 @@ export async function POST(req: NextRequest) {
       taskId: body.taskId || body.task_id
     }
 
-    const result = await dispatchReportForCandidate(db, candidateInput, channel, offerOverrides)
+    const result = await dispatchReportForCandidate(db, candidateInput, channel, offerOverrides, dispatchOptions)
 
     if (!result.success) {
       return NextResponse.json(result, { status: 400 })
