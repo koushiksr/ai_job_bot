@@ -24,7 +24,7 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
   )
   const [currentIndex, setCurrentIndex] = useState<number>(0)
   const [isPaused, setIsPaused] = useState<boolean>(false)
-  const [avgRating, setAvgRating] = useState<number>(5.0)
+  const [avgRating, setAvgRating] = useState<number>(4.8)
 
   useEffect(() => {
     let isMounted = true
@@ -165,7 +165,7 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
               {/* Star Rating */}
               <div className="flex items-center gap-0.5 text-amber-400 shrink-0 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
                 <Star className="w-3 h-3 fill-amber-400" />
-                <span className="text-[11px] font-bold font-mono text-amber-300 ml-0.5">{current.rating}.0</span>
+                <span className="text-[11px] font-bold font-mono text-amber-300 ml-0.5">{Number(current.rating).toFixed(1)}</span>
               </div>
             </div>
 

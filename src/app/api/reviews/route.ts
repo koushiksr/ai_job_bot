@@ -13,7 +13,7 @@ export async function GET() {
       return NextResponse.json({
         reviews: INITIAL_SAMPLE_REVIEWS.map((r, i) => ({ ...r, id: `sample-${i}` })),
         total_approved: INITIAL_SAMPLE_REVIEWS.length,
-        avg_rating: 5.0
+        avg_rating: 4.8
       })
     }
 
@@ -48,7 +48,7 @@ export async function GET() {
       user_avatar: doc.user_avatar || '',
       role_title: doc.role_title || 'Software Professional',
       company: doc.company || 'Verified Employer',
-      rating: typeof doc.rating === 'number' ? doc.rating : 5,
+      rating: typeof doc.rating === 'number' ? doc.rating : 4.8,
       satisfaction_level: doc.satisfaction_level || 'Highly Satisfied',
       review_text: doc.review_text || '',
       verified: Boolean(doc.verified ?? true),
@@ -58,7 +58,7 @@ export async function GET() {
     }))
 
     const totalRatings = reviews.reduce((sum, r) => sum + r.rating, 0)
-    const avgRating = reviews.length > 0 ? Number((totalRatings / reviews.length).toFixed(1)) : 5.0
+    const avgRating = reviews.length > 0 ? Number((totalRatings / reviews.length).toFixed(1)) : 4.8
 
     return NextResponse.json({
       reviews,
@@ -70,7 +70,7 @@ export async function GET() {
     return NextResponse.json({
       reviews: INITIAL_SAMPLE_REVIEWS.map((r, i) => ({ ...r, id: `sample-${i}` })),
       total_approved: INITIAL_SAMPLE_REVIEWS.length,
-      avg_rating: 5.0
+      avg_rating: 4.8
     })
   }
 }

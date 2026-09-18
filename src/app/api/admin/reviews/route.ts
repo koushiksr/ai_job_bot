@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   try {
     const db = await getDb()
     if (!db) {
-      return NextResponse.json({ reviews: [], metrics: { total: 0, pending: 0, approved: 0, rejected: 0, avg_rating: 5.0 } })
+      return NextResponse.json({ reviews: [], metrics: { total: 0, pending: 0, approved: 0, rejected: 0, avg_rating: 4.8 } })
     }
 
     const { authorized } = await verifyAdminRequest(req, db)
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       user_avatar: doc.user_avatar || '',
       role_title: doc.role_title || 'Software Professional',
       company: doc.company || 'Verified Employer',
-      rating: typeof doc.rating === 'number' ? doc.rating : 5,
+      rating: typeof doc.rating === 'number' ? doc.rating : 4.8,
       satisfaction_level: doc.satisfaction_level || 'Highly Satisfied',
       review_text: doc.review_text || '',
       verified: Boolean(doc.verified ?? true),
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     const rejected = reviews.filter(r => r.status === 'rejected').length
     const featured = reviews.filter(r => r.featured).length
     const totalRatings = reviews.reduce((sum, r) => sum + r.rating, 0)
-    const avgRating = reviews.length > 0 ? Number((totalRatings / reviews.length).toFixed(1)) : 5.0
+    const avgRating = reviews.length > 0 ? Number((totalRatings / reviews.length).toFixed(1)) : 4.8
 
     return NextResponse.json({
       reviews,

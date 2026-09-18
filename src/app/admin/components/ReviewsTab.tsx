@@ -58,7 +58,7 @@ export default function ReviewsTab({ getAdminHeaders }: ReviewsTabProps) {
     approved: 0,
     rejected: 0,
     featured: 0,
-    avg_rating: 5.0
+    avg_rating: 4.8
   })
   const [loading, setLoading] = useState<boolean>(true)
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
@@ -444,12 +444,12 @@ export default function ReviewsTab({ getAdminHeaders }: ReviewsTabProps) {
                             <Star
                               key={i}
                               className={`w-3.5 h-3.5 ${
-                                i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-zinc-700'
+                                i < Math.round(r.rating) ? 'fill-amber-400 text-amber-400' : 'text-zinc-700'
                               }`}
                             />
                           ))}
                         </div>
-                        <span className="text-xs font-mono font-bold text-amber-300">{r.rating}.0★</span>
+                        <span className="text-xs font-mono font-bold text-amber-300">{Number(r.rating).toFixed(1)}★</span>
                         {r.satisfaction_level && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-300">
                             {r.satisfaction_level}
