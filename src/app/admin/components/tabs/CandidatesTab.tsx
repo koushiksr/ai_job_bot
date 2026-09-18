@@ -27,7 +27,8 @@ import {
   Trash2,
   Server,
   Zap,
-  Cpu
+  Cpu,
+  Laptop
 } from 'lucide-react'
 import { CandidateUser } from '../../types'
 
@@ -129,8 +130,13 @@ export default function CandidatesTab({
       (u.phone && u.phone.includes(q)) ||
       (u.execution_summary?.device && u.execution_summary.device.toLowerCase().includes(q)) ||
       (u.execution_summary?.hostname && u.execution_summary.hostname.toLowerCase().includes(q)) ||
+      (u.execution_summary?.device_brand && u.execution_summary.device_brand.toLowerCase().includes(q)) ||
+      (u.execution_summary?.hardware_model && u.execution_summary.hardware_model.toLowerCase().includes(q)) ||
+      (u.execution_summary?.mac_address && u.execution_summary.mac_address.toLowerCase().includes(q)) ||
       (u.current_execution?.hostname && u.current_execution.hostname.toLowerCase().includes(q)) ||
-      (u.last_execution?.hostname && u.last_execution.hostname.toLowerCase().includes(q))
+      (u.last_execution?.hostname && u.last_execution.hostname.toLowerCase().includes(q)) ||
+      (u.last_execution?.device_brand && u.last_execution.device_brand.toLowerCase().includes(q)) ||
+      (u.last_execution?.mac_address && u.last_execution.mac_address.toLowerCase().includes(q))
     )
     if (!matchesSearch) return false
 
@@ -551,23 +557,40 @@ export default function CandidatesTab({
                           const platform = summary.platform || u.current_execution?.platform || u.last_execution?.platform
                           const completedAt = summary.last_completed_at || u.last_automated_run_at || u.last_execution?.completed_at
 
+                          const deviceBrand = summary.device_brand || u.last_execution?.device_brand || u.current_execution?.device_brand || (platform?.includes('Darwin') ? 'Apple Mac' : (platform?.includes('Windows') ? 'Windows PC' : (platform ? 'Linux Server' : null)))
+                          const hardwareModel = summary.hardware_model || summary.device_brand || u.last_execution?.hardware_model || u.current_execution?.hardware_model || deviceBrand
+                          const macAddress = summary.mac_address || u.last_execution?.mac_address || u.current_execution?.mac_address
+                          const pidVal = summary.pid || u.last_execution?.pid || u.current_execution?.pid
+
                           if (isApplying) {
                             return (
-                              <div className="space-y-1">
+                              <div className="space-y-1.5 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to inspect live device telemetry">
                                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_8px_rgba(56,189,248,0.3)] animate-pulse">
                                   <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
                                   <Sparkles className="w-3 h-3 text-sky-400" />
                                   <span>APPLYING NOW</span>
                                 </div>
-                                {device && (
-                                  <div
-                                    className="flex items-center gap-1 text-[10px] font-mono text-sky-200"
-                                    title={`Server Host: ${device}\nWorker ID: ${workerId || 'N/A'}${platform ? `\nPlatform: ${platform}` : ''}`}
-                                  >
-                                    <Server className="w-3 h-3 text-sky-400 shrink-0" />
-                                    <span className="truncate max-w-[130px] font-semibold">{device}</span>
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-1 text-[11px] font-bold text-white group-hover:text-sky-300 transition-colors">
+                                    <Laptop className="w-3 h-3 text-sky-400 shrink-0" />
+                                    <span className="truncate max-w-[145px]">{hardwareModel || 'Apple Mac'}</span>
                                   </div>
-                                )}
+                                  {device && (
+                                    <div
+                                      className="flex items-center gap-1 text-[10px] font-mono text-sky-200/90"
+                                      title={`Server: ${device}\nPID: ${pidVal || 'N/A'}\nWorker: ${workerId || 'N/A'}`}
+                                    >
+                                      <Server className="w-2.5 h-2.5 text-sky-400 shrink-0" />
+                                      <span className="truncate max-w-[145px]">{device}</span>
+                                    </div>
+                                  )}
+                                  {macAddress && (
+                                    <div className="flex items-center gap-1 text-[9px] font-mono text-amber-300/90">
+                                      <Cpu className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                                      <span>MAC: {macAddress}</span>
+                                    </div>
+                                  )}
+                                </div>
                                 {summary.locked_at && (
                                   <div className="text-[9px] font-mono text-zinc-500">
                                     Started {formatTimestamp(summary.locked_at)}
@@ -593,20 +616,32 @@ export default function CandidatesTab({
 
                           if (isAppliedToday) {
                             return (
-                              <div className="space-y-1">
+                              <div className="space-y-1.5 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to inspect execution device details">
                                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                                   <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                                   <span>APPLIED TODAY</span>
                                 </div>
-                                {device && (
-                                  <div
-                                    className="flex items-center gap-1 text-[10px] font-mono text-zinc-300"
-                                    title={`Executed on Server: ${device}\nWorker ID: ${workerId || 'N/A'}${platform ? `\nPlatform: ${platform}` : ''}`}
-                                  >
-                                    <Server className="w-3 h-3 text-emerald-400 shrink-0" />
-                                    <span className="truncate max-w-[130px]">{device}</span>
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-1 text-[11px] font-bold text-white group-hover:text-emerald-300 transition-colors">
+                                    <Laptop className="w-3 h-3 text-emerald-400 shrink-0" />
+                                    <span className="truncate max-w-[145px]">{hardwareModel || 'Apple Mac'}</span>
                                   </div>
-                                )}
+                                  {device && (
+                                    <div
+                                      className="flex items-center gap-1 text-[10px] font-mono text-zinc-300"
+                                      title={`Server: ${device}\nWorker: ${workerId || 'N/A'}${platform ? `\nPlatform: ${platform}` : ''}`}
+                                    >
+                                      <Server className="w-2.5 h-2.5 text-zinc-400 shrink-0" />
+                                      <span className="truncate max-w-[145px]">{device}</span>
+                                    </div>
+                                  )}
+                                  {macAddress && (
+                                    <div className="flex items-center gap-1 text-[9px] font-mono text-amber-300/80">
+                                      <Cpu className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                                      <span>MAC: {macAddress}</span>
+                                    </div>
+                                  )}
+                                </div>
                                 {completedAt && (
                                   <div className="text-[9px] font-mono text-zinc-500">
                                     {formatTimestamp(completedAt)}
@@ -641,12 +676,17 @@ export default function CandidatesTab({
                           }
 
                           return (
-                            <div className="space-y-1">
+                            <div className="space-y-1 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to view candidate details">
                               <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-amber-300 bg-amber-950/20 border border-amber-800/40">
                                 <Clock className="w-3 h-3 text-amber-400" />
                                 <span>NOT APPLIED TODAY</span>
                               </div>
                               <div className="text-[10px] font-mono text-zinc-500">Next cycle: 06:00 AM</div>
+                              {(hardwareModel || device) && (
+                                <div className="text-[9px] font-mono text-zinc-500 truncate max-w-[140px]">
+                                  Last: {hardwareModel || device}
+                                </div>
+                              )}
                             </div>
                           )
                         })()}

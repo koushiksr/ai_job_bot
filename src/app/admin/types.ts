@@ -28,6 +28,16 @@ export interface AdminWorkerStatus {
   started_at: string | null
 }
 
+export interface AdminExecutionCounts {
+  all: number
+  applying: number
+  applied_today: number
+  in_queue: number
+  not_applied_today: number
+  disabled: number
+  payment_required: number
+}
+
 export interface CandidateExecutionInfo {
   status: 'applying' | 'applied_today' | 'in_queue' | 'not_applied_today' | 'disabled' | 'payment_required'
   is_applying: boolean
@@ -35,8 +45,12 @@ export interface CandidateExecutionInfo {
   is_in_queue?: boolean
   device: string | null
   hostname?: string | null
+  device_brand?: string | null
+  hardware_model?: string | null
+  mac_address?: string | null
   worker_id: string | null
   platform?: string | null
+  pid?: number | string | null
   last_run_date?: string | null
   completed_at?: string | null
   locked_at?: string | null

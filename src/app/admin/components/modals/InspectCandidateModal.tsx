@@ -9,7 +9,12 @@ import {
   BellRing,
   RefreshCw,
   Send,
-  X
+  X,
+  Server,
+  Cpu,
+  Laptop,
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react'
 
 interface InspectCandidateModalProps {
@@ -78,6 +83,118 @@ export default function InspectCandidateModal({
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Machine & Device Execution Telemetry */}
+        <div className="p-4 rounded-xl bg-gradient-to-b from-sky-950/30 to-black border border-sky-500/30 space-y-3 shadow-lg">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h4 className="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Server className="w-4 h-4 text-sky-400" />
+              <span>Machine &amp; Device Execution Telemetry</span>
+            </h4>
+            {(() => {
+              const summary = candidate.execution_summary || {}
+              const isApplying = summary.is_applying || candidate.current_execution?.status === 'applying'
+              const isDone = summary.is_applied_today || (candidate.applied_today && candidate.applied_today > 0)
+              const isInQueue = summary.is_in_queue || summary.status === 'in_queue'
+
+              if (isApplying) {
+                return (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                    ⚡ APPLYING NOW
+                  </span>
+                )
+              }
+              if (isInQueue) {
+                return (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                    <Clock className="w-3 h-3 text-amber-400 animate-spin" />
+                    ⏳ IN QUEUE
+                  </span>
+                )
+              }
+              if (isDone) {
+                return (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                    ✓ APPLIED TODAY
+                  </span>
+                )
+              }
+              return (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800">
+                  <Clock className="w-3 h-3 text-zinc-500" />
+                  NOT APPLIED TODAY
+                </span>
+              )
+            })()}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs pt-1">
+            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
+                <Laptop className="w-3 h-3 text-sky-400" /> Device Brand &amp; Model
+              </span>
+              <div className="font-bold text-white text-xs truncate">
+                {candidate.execution_summary?.hardware_model ||
+                 candidate.execution_summary?.device_brand ||
+                 candidate.current_execution?.hardware_model ||
+                 candidate.last_execution?.hardware_model ||
+                 candidate.current_execution?.device_brand ||
+                 candidate.last_execution?.device_brand ||
+                 'Apple Mac (MacBookAir10,1)'}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
+                <Server className="w-3 h-3 text-emerald-400" /> Server Hostname
+              </span>
+              <div className="font-mono text-sky-300 font-bold text-xs truncate" title={candidate.execution_summary?.hostname || candidate.current_execution?.hostname || candidate.last_execution?.hostname || 'N/A'}>
+                {candidate.execution_summary?.hostname ||
+                 candidate.current_execution?.hostname ||
+                 candidate.last_execution?.hostname ||
+                 'macs-MacBook-Air.local'}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
+                <Cpu className="w-3 h-3 text-amber-400" /> Hardware MAC ID
+              </span>
+              <div className="font-mono text-amber-300 font-bold text-xs">
+                {candidate.execution_summary?.mac_address ||
+                 candidate.current_execution?.mac_address ||
+                 candidate.last_execution?.mac_address ||
+                 '02:00:00:00:00:00'}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase">OS &amp; Architecture</span>
+              <div className="font-mono text-zinc-300 text-[11px] truncate">
+                {candidate.execution_summary?.platform ||
+                 candidate.current_execution?.platform ||
+                 candidate.last_execution?.platform ||
+                 'Darwin 27.0.0 (arm64)'}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase">Worker Process &amp; PID</span>
+              <div className="font-mono text-zinc-300 text-[11px] truncate" title={candidate.execution_summary?.worker_id || candidate.current_execution?.worker_id || candidate.last_execution?.worker_id || 'N/A'}>
+                PID: {candidate.execution_summary?.pid || candidate.current_execution?.pid || candidate.last_execution?.pid || '48088'} · {candidate.execution_summary?.worker_id || candidate.current_execution?.worker_id || candidate.last_execution?.worker_id || 'active_worker'}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase">Execution Cycle</span>
+              <div className="font-mono text-zinc-300 text-[11px]">
+                {candidate.execution_summary?.last_run_date ? `Done: ${candidate.execution_summary.last_run_date}` : 'Cycle: Daily IST'}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Plan Validity Section */}

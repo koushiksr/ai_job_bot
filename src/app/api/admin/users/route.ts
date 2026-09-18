@@ -198,15 +198,24 @@ export async function GET(req: NextRequest) {
         executionStatus = 'not_applied_today'
       }
 
+      const deviceBrand = curExec.device_brand || lastExec.device_brand || curExec.last_device_brand || activeTask?.worker_device_brand || (executionPlatform?.includes('Darwin') ? 'Apple Mac' : (executionPlatform?.includes('Windows') ? 'Windows PC' : (executionPlatform ? 'Linux Server' : null)))
+      const hardwareModel = curExec.hardware_model || lastExec.hardware_model || curExec.last_hardware_model || activeTask?.worker_hardware_model || deviceBrand || null
+      const macAddress = curExec.mac_address || lastExec.mac_address || curExec.last_mac_address || activeTask?.worker_mac_address || null
+      const pidVal = curExec.pid || lastExec.pid || curExec.last_pid || activeTask?.worker_pid || null
+
       const executionSummary = {
         status: executionStatus,
         is_applying: isApplying,
         is_applied_today: isAppliedToday,
         is_in_queue: isInQueue,
         device: executionDevice,
-        hostname: curExec.hostname || lastExec.hostname || curExec.last_hostname || null,
+        hostname: curExec.hostname || lastExec.hostname || curExec.last_hostname || activeTask?.worker_host || null,
+        device_brand: deviceBrand,
+        hardware_model: hardwareModel,
+        mac_address: macAddress,
         worker_id: executionWorkerId,
         platform: executionPlatform,
+        pid: pidVal,
         last_run_date: p.last_automated_run_date || lastExec.date_ist || null,
         last_completed_at: p.last_automated_run_at || lastExec.completed_at || null,
         locked_at: curExec.locked_at || null,

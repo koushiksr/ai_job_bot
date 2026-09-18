@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
@@ -23,7 +23,7 @@ import EnterpriseLeadsTab from './components/tabs/EnterpriseLeadsTab'
 import LogsTab from './components/tabs/LogsTab'
 import VisitorsTab from './components/tabs/VisitorsTab'
 import ReviewsTab from './components/ReviewsTab'
-import { AdminTabType } from './types'
+import { AdminTabType, AdminExecutionCounts } from './types'
 
 // Modular Modals
 import InspectCandidateModal from './components/modals/InspectCandidateModal'
@@ -58,7 +58,32 @@ export default function AdminDashboard() {
 
   // Admin Active Tab
   const [activeAdminTab, setActiveAdminTab] = useState<AdminTabType>('candidates')
+  const [executionStatusFilter, setExecutionStatusFilter] = useState<string>('all')
   const [pendingReviewsCount, setPendingReviewsCount] = useState<number>(0)
+
+  // Real-time Automated Execution Telemetry Pipeline Counts across distributed server nodes
+  const executionCounts: AdminExecutionCounts = useMemo(() => {
+    const applying = usersList.filter(u => u.execution_summary?.status === 'applying' || u.current_execution?.status === 'applying').length
+    const applied_today = usersList.filter(u => u.execution_summary?.status === 'applied_today' || u.execution_summary?.is_applied_today || (u.applied_today && u.applied_today > 0)).length
+    const in_queue = usersList.filter(u => u.execution_summary?.status === 'in_queue' || u.execution_summary?.is_in_queue).length
+    const disabled = usersList.filter(u => u.enabled_for_daily_run === false).length
+    const payment_required = usersList.filter(u => u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan').length
+    const not_applied_today = usersList.filter(u => {
+      const st = u.execution_summary?.status
+      if (st) return st === 'not_applied_today'
+      return u.current_execution?.status !== 'applying' && (!u.applied_today || u.applied_today === 0) && u.enabled_for_daily_run !== false && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan'
+    }).length
+
+    return {
+      all: usersList.length,
+      applying,
+      applied_today,
+      in_queue,
+      not_applied_today,
+      disabled,
+      payment_required
+    }
+  }, [usersList])
 
   // Queue & Live Executions State
   const [queueTasks, setQueueTasks] = useState<any[]>([])
@@ -1620,6 +1645,11 @@ export default function AdminDashboard() {
         {/* Overview Stats & Telemetry */}
         <AdminOverviewStats
           overviewMetrics={overviewMetrics}
+          executionCounts={executionCounts}
+          onFilterByExecutionStatus={(status: string) => {
+            setActiveAdminTab('candidates')
+            setExecutionStatusFilter(status)
+          }}
           notificationPermission={notificationPermission}
           notificationBannerDismissed={notificationBannerDismissed}
           onDismissBanner={() => setNotificationBannerDismissed(true)}
@@ -1652,6 +1682,8 @@ export default function AdminDashboard() {
             loadingUsers={loadingUsers}
             candidateStatusFilter={candidateStatusFilter}
             setCandidateStatusFilter={setCandidateStatusFilter}
+            executionStatusFilter={executionStatusFilter}
+            setExecutionStatusFilter={setExecutionStatusFilter}
             showStatusGuide={showStatusGuide}
             setShowStatusGuide={setShowStatusGuide}
             candidatesTableCollapsed={candidatesTableCollapsed}
