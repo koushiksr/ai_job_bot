@@ -24,7 +24,10 @@ import {
   Eye,
   Send,
   Edit,
-  Trash2
+  Trash2,
+  Server,
+  Zap,
+  Cpu
 } from 'lucide-react'
 import { CandidateUser } from '../../types'
 
@@ -35,6 +38,8 @@ interface CandidatesTabProps {
   loadingUsers: boolean
   candidateStatusFilter: string
   setCandidateStatusFilter: (val: string) => void
+  executionStatusFilter?: string
+  setExecutionStatusFilter?: (val: string) => void
   showStatusGuide: boolean
   setShowStatusGuide: (val: boolean) => void
   candidatesTableCollapsed: boolean
@@ -50,6 +55,8 @@ interface CandidatesTabProps {
   setEditingUser: (u: any) => void
   dispatchReportLoading: boolean
   onOpenDispatchReportForUser: (email: string) => void
+  onTriggerOnDemand?: (userId: string, force: boolean) => Promise<void>
+  actionProcessingId?: string | null
 }
 
 export default function CandidatesTab({
@@ -59,6 +66,8 @@ export default function CandidatesTab({
   loadingUsers,
   candidateStatusFilter,
   setCandidateStatusFilter,
+  executionStatusFilter,
+  setExecutionStatusFilter,
   showStatusGuide,
   setShowStatusGuide,
   candidatesTableCollapsed,
@@ -73,9 +82,43 @@ export default function CandidatesTab({
   handleDeleteUser,
   setEditingUser,
   dispatchReportLoading,
-  onOpenDispatchReportForUser
+  onOpenDispatchReportForUser,
+  onTriggerOnDemand,
+  actionProcessingId
 }: CandidatesTabProps) {
-  // Filter users by search and status
+  // Execution status filter state
+  const [internalExecFilter, setInternalExecFilter] = React.useState<string>(() => {
+    try {
+      return localStorage.getItem('admin_candidate_exec_filter') || 'all'
+    } catch {
+      return 'all'
+    }
+  })
+  const activeExecFilter = executionStatusFilter ?? internalExecFilter
+  const handleSetExecFilter = (val: string) => {
+    if (setExecutionStatusFilter) {
+      setExecutionStatusFilter(val)
+    } else {
+      setInternalExecFilter(val)
+    }
+    try {
+      localStorage.setItem('admin_candidate_exec_filter', val)
+    } catch {}
+  }
+
+  // Pre-calculate real-time execution counts for filters
+  const countApplying = usersList.filter(u => u.execution_summary?.status === 'applying' || u.current_execution?.status === 'applying').length
+  const countAppliedToday = usersList.filter(u => u.execution_summary?.status === 'applied_today' || u.execution_summary?.is_applied_today || (u.applied_today && u.applied_today > 0)).length
+  const countInQueue = usersList.filter(u => u.execution_summary?.status === 'in_queue' || u.execution_summary?.is_in_queue).length
+  const countDisabled = usersList.filter(u => u.enabled_for_daily_run === false).length
+  const countPaymentRequired = usersList.filter(u => u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan').length
+  const countNotAppliedToday = usersList.filter(u => {
+    const st = u.execution_summary?.status
+    if (st) return st === 'not_applied_today'
+    return u.current_execution?.status !== 'applying' && (!u.applied_today || u.applied_today === 0) && u.enabled_for_daily_run !== false && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan'
+  }).length
+
+  // Filter users by search, execution status, and plan status
   const filteredUsers = usersList.filter(u => {
     // 1. Search Query Match
     const q = userSearch.toLowerCase().trim()
@@ -83,11 +126,34 @@ export default function CandidatesTab({
       (u.name && u.name.toLowerCase().includes(q)) ||
       (u.email && u.email.toLowerCase().includes(q)) ||
       (u.user_id && u.user_id.toLowerCase().includes(q)) ||
-      (u.phone && u.phone.includes(q))
+      (u.phone && u.phone.includes(q)) ||
+      (u.execution_summary?.device && u.execution_summary.device.toLowerCase().includes(q)) ||
+      (u.execution_summary?.hostname && u.execution_summary.hostname.toLowerCase().includes(q)) ||
+      (u.current_execution?.hostname && u.current_execution.hostname.toLowerCase().includes(q)) ||
+      (u.last_execution?.hostname && u.last_execution.hostname.toLowerCase().includes(q))
     )
     if (!matchesSearch) return false
 
-    // 2. Expiry & Plan Status Filter
+    // 2. Execution Status Filter
+    if (activeExecFilter !== 'all') {
+      const summary = u.execution_summary
+      const isApp = summary?.is_applying || u.current_execution?.status === 'applying'
+      const isDone = summary?.is_applied_today || (u.applied_today && u.applied_today > 0)
+      const isQueued = summary?.is_in_queue || summary?.status === 'in_queue'
+
+      if (activeExecFilter === 'applying' && !isApp) return false
+      if (activeExecFilter === 'applied_today' && (!isDone || isApp)) return false
+      if (activeExecFilter === 'in_queue' && !isQueued) return false
+      if (activeExecFilter === 'disabled' && u.enabled_for_daily_run !== false) return false
+      if (activeExecFilter === 'payment_required' && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan' && summary?.status !== 'payment_required') return false
+      if (activeExecFilter === 'not_applied_today') {
+        if (isApp || isDone || isQueued || u.enabled_for_daily_run === false || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan') {
+          return false
+        }
+      }
+    }
+
+    // 3. Plan & Expiry Status Filter
     if (candidateStatusFilter === 'all') return true
     if (candidateStatusFilter === 'active') return u.plan_expiry_status === 'active'
     if (candidateStatusFilter === 'expiring') return u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d'
@@ -108,7 +174,7 @@ export default function CandidatesTab({
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
             <input
               type="text"
-              placeholder="Search by name, email, or candidate ID..."
+              placeholder="Search by name, email, user ID, or server hostname..."
               value={userSearch}
               onChange={e => {
                 const val = e.target.value
@@ -149,14 +215,58 @@ export default function CandidatesTab({
           </div>
         </div>
 
-        {/* Status Filter Pills & Legend Toggle */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1 border-t border-zinc-900">
+        {/* Bot Execution & Multi-Server Status Filters */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-zinc-900">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-mono text-zinc-500 uppercase mr-1 flex items-center gap-1">
-              <Filter className="w-3 h-3 text-zinc-400" /> Filter:
+            <span className="text-[11px] font-mono text-sky-400 uppercase mr-1 flex items-center gap-1 font-bold">
+              <Cpu className="w-3 h-3 text-sky-400" /> Bot Execution:
             </span>
             {[
               { key: 'all', label: 'All Candidates', count: usersList.length, color: 'text-zinc-300' },
+              { key: 'applying', label: '⚡ Applying Live', count: countApplying, color: 'text-sky-400 font-bold', pulse: true },
+              { key: 'applied_today', label: '✓ Applied Today', count: countAppliedToday, color: 'text-emerald-400 font-bold' },
+              { key: 'in_queue', label: '⏳ In Queue', count: countInQueue, color: 'text-amber-400 font-bold' },
+              { key: 'not_applied_today', label: '⚠️ Not Applied Today', count: countNotAppliedToday, color: 'text-amber-200' },
+              { key: 'payment_required', label: '💳 Payment Required', count: countPaymentRequired, color: 'text-rose-400' },
+              { key: 'disabled', label: '⏸️ Bot Off', count: countDisabled, color: 'text-zinc-400' }
+            ].map(f => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => handleSetExecFilter(f.key)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeExecFilter === f.key
+                    ? 'bg-sky-950/80 text-white border border-sky-500 font-bold shadow-md shadow-sky-500/20'
+                    : 'bg-zinc-950/60 text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800'
+                }`}
+              >
+                {f.pulse && f.count > 0 && <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping mr-0.5" />}
+                <span>{f.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 font-bold ${f.color}`}>
+                  {f.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowStatusGuide(!showStatusGuide)}
+            className="text-xs text-zinc-400 hover:text-amber-300 flex items-center gap-1 transition-colors font-mono cursor-pointer ml-auto"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+            <span>{showStatusGuide ? 'Hide Status Legend' : 'Status & Server Guide'}</span>
+          </button>
+        </div>
+
+        {/* Plan / Subscription Status Filters */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-zinc-900/60">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] font-mono text-zinc-500 uppercase mr-1 flex items-center gap-1">
+              <Filter className="w-3 h-3 text-zinc-400" /> Plan Filter:
+            </span>
+            {[
+              { key: 'all', label: 'All Plans', count: usersList.length, color: 'text-zinc-300' },
               { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400' },
               { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300' },
               { key: 'urgent', label: 'Urgent <24h', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-rose-300' },
@@ -186,15 +296,6 @@ export default function CandidatesTab({
               </button>
             ))}
           </div>
-
-          <button
-            type="button"
-            onClick={() => setShowStatusGuide(!showStatusGuide)}
-            className="text-xs text-zinc-400 hover:text-amber-300 flex items-center gap-1 transition-colors font-mono cursor-pointer ml-auto"
-          >
-            <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-            <span>{showStatusGuide ? 'Hide Status Legend' : 'Status Guide & Legend'}</span>
-          </button>
         </div>
 
         {/* Expandable Status Legend Guide */}
@@ -214,10 +315,40 @@ export default function CandidatesTab({
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+              <div className="p-2.5 rounded-lg bg-zinc-950 border border-sky-900/40 space-y-1">
+                <div className="flex items-center gap-1.5 text-sky-300 font-bold font-mono">
+                  <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                  <span>⚡ Applying Live (Server Identity)</span>
+                </div>
+                <p className="text-[11px] text-zinc-400">
+                  Candidate actively claimed by a server machine (e.g. <span className="text-zinc-200 font-mono">macs-MacBook-Air.local</span>). Protected from duplicate execution across servers via atomic lock.
+                </p>
+              </div>
+
               <div className="p-2.5 rounded-lg bg-zinc-950 border border-emerald-900/40 space-y-1">
                 <div className="flex items-center gap-1.5 text-emerald-300 font-bold font-mono">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Active (Xd left)</span>
+                  <span>✓ Applied Today (Completed)</span>
+                </div>
+                <p className="text-[11px] text-zinc-400">
+                  Daily run successfully executed for today&apos;s IST cycle. Machine identity, PID, and completion timestamp are permanently saved.
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-lg bg-zinc-950 border border-amber-800/40 space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-300 font-bold font-mono">
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <span>⏳ In Queue / Scheduled</span>
+                </div>
+                <p className="text-[11px] text-zinc-400">
+                  Pending in the automated queue, or waiting for scheduled morning run (06:00 AM / 08:00 AM IST).
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-lg bg-zinc-950 border border-emerald-900/40 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-300 font-bold font-mono">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Active Plan (Xd left)</span>
                 </div>
                 <p className="text-[11px] text-zinc-400">
                   Paid plan with &gt; 48 hours remaining. Protected from discount offers to avoid cannibalizing subscription value.
@@ -266,11 +397,11 @@ export default function CandidatesTab({
 
               <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 space-y-1">
                 <div className="flex items-center gap-1.5 text-zinc-400 font-bold font-mono">
-                  <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                  <span>No Active Plan</span>
+                  <Server className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>Multi-Server Distributed Execution</span>
                 </div>
                 <p className="text-[11px] text-zinc-400">
-                  Free tier / unsubscribed account. Prime prospect for first-time conversion offers.
+                  Any server or device running backend workers records its unique machine name, worker ID, and OS platform.
                 </p>
               </div>
             </div>
@@ -350,6 +481,7 @@ export default function CandidatesTab({
                     <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400 transition-colors" />
                   </th>
                   <th className="py-3.5 px-4">Portal Email</th>
+                  <th className="py-3.5 px-4">Bot &amp; Server</th>
                   <th className="py-3.5 px-4">Plan &amp; Access</th>
                   <th className="py-3.5 px-4 text-center">Auto-Apply</th>
                   <th className="py-3.5 px-4">Last Login</th>
@@ -361,14 +493,14 @@ export default function CandidatesTab({
               <tbody className="divide-y divide-slate-800/50">
                 {loadingUsers ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-400">
+                    <td colSpan={9} className="py-12 text-center text-slate-400">
                       <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                       Loading candidate profiles...
                     </td>
                   </tr>
                 ) : filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-500">
+                    <td colSpan={9} className="py-12 text-center text-slate-500">
                       No candidate profiles match your search query.
                     </td>
                   </tr>
@@ -406,6 +538,118 @@ export default function CandidatesTab({
                       </td>
                       <td className="py-4 px-4 text-slate-300 font-mono">
                         {u.email}
+                      </td>
+                      {/* Bot Execution & Server Identity Status */}
+                      <td className="py-4 px-4">
+                        {(() => {
+                          const summary = u.execution_summary || {}
+                          const isApplying = summary.is_applying || u.current_execution?.status === 'applying'
+                          const isAppliedToday = summary.is_applied_today || (u.applied_today && u.applied_today > 0)
+                          const isInQueue = summary.is_in_queue || summary.status === 'in_queue'
+                          const device = summary.device || summary.hostname || u.current_execution?.hostname || u.last_execution?.hostname || u.current_execution?.last_hostname
+                          const workerId = summary.worker_id || u.current_execution?.worker_id || u.last_execution?.worker_id || u.current_execution?.last_worker_id
+                          const platform = summary.platform || u.current_execution?.platform || u.last_execution?.platform
+                          const completedAt = summary.last_completed_at || u.last_automated_run_at || u.last_execution?.completed_at
+
+                          if (isApplying) {
+                            return (
+                              <div className="space-y-1">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_8px_rgba(56,189,248,0.3)] animate-pulse">
+                                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+                                  <Sparkles className="w-3 h-3 text-sky-400" />
+                                  <span>APPLYING NOW</span>
+                                </div>
+                                {device && (
+                                  <div
+                                    className="flex items-center gap-1 text-[10px] font-mono text-sky-200"
+                                    title={`Server Host: ${device}\nWorker ID: ${workerId || 'N/A'}${platform ? `\nPlatform: ${platform}` : ''}`}
+                                  >
+                                    <Server className="w-3 h-3 text-sky-400 shrink-0" />
+                                    <span className="truncate max-w-[130px] font-semibold">{device}</span>
+                                  </div>
+                                )}
+                                {summary.locked_at && (
+                                  <div className="text-[9px] font-mono text-zinc-500">
+                                    Started {formatTimestamp(summary.locked_at)}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          }
+
+                          if (isInQueue) {
+                            return (
+                              <div className="space-y-1">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                  <Clock className="w-3 h-3 text-amber-400 animate-spin" />
+                                  <span>IN QUEUE</span>
+                                </div>
+                                <div className="text-[10px] font-mono text-zinc-400">
+                                  Awaiting worker slot
+                                </div>
+                              </div>
+                            )
+                          }
+
+                          if (isAppliedToday) {
+                            return (
+                              <div className="space-y-1">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                  <span>APPLIED TODAY</span>
+                                </div>
+                                {device && (
+                                  <div
+                                    className="flex items-center gap-1 text-[10px] font-mono text-zinc-300"
+                                    title={`Executed on Server: ${device}\nWorker ID: ${workerId || 'N/A'}${platform ? `\nPlatform: ${platform}` : ''}`}
+                                  >
+                                    <Server className="w-3 h-3 text-emerald-400 shrink-0" />
+                                    <span className="truncate max-w-[130px]">{device}</span>
+                                  </div>
+                                )}
+                                {completedAt && (
+                                  <div className="text-[9px] font-mono text-zinc-500">
+                                    {formatTimestamp(completedAt)}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          }
+
+                          if (u.enabled_for_daily_run === false) {
+                            return (
+                              <div className="space-y-1">
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800">
+                                  <AlertCircle className="w-3 h-3 text-zinc-500" />
+                                  <span>AUTO-APPLY OFF</span>
+                                </div>
+                                <div className="text-[10px] font-mono text-zinc-600">Daily bot disabled</div>
+                              </div>
+                            )
+                          }
+
+                          if (u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan') {
+                            return (
+                              <div className="space-y-1">
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-rose-400 bg-rose-950/30 border border-rose-800/40">
+                                  <AlertCircle className="w-3 h-3 text-rose-400" />
+                                  <span>PLAN REQUIRED</span>
+                                </div>
+                                <div className="text-[10px] font-mono text-zinc-500">Auto-apply paused</div>
+                              </div>
+                            )
+                          }
+
+                          return (
+                            <div className="space-y-1">
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-amber-300 bg-amber-950/20 border border-amber-800/40">
+                                <Clock className="w-3 h-3 text-amber-400" />
+                                <span>NOT APPLIED TODAY</span>
+                              </div>
+                              <div className="text-[10px] font-mono text-zinc-500">Next cycle: 06:00 AM</div>
+                            </div>
+                          )
+                        })()}
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex flex-col items-start gap-1.5">
@@ -642,6 +886,31 @@ export default function CandidatesTab({
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                           </button>
+                          {onTriggerOnDemand && (
+                            <button
+                              type="button"
+                              disabled={Boolean(
+                                u.execution_summary?.is_applying ||
+                                u.current_execution?.status === 'applying' ||
+                                actionProcessingId === u.user_id
+                              )}
+                              onClick={async (e) => {
+                                e.stopPropagation()
+                                if (confirm(`Trigger immediate on-demand application for "${u.name || u.user_id}"?\n(Bypasses daily lock to run on next available server)`)) {
+                                  await onTriggerOnDemand(u.user_id, true)
+                                }
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white font-bold text-xs transition-colors border border-indigo-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                              title="Trigger immediate on-demand bot run for this candidate"
+                            >
+                              {actionProcessingId === u.user_id ? (
+                                <RefreshCw className="w-3.5 h-3.5 text-indigo-300 animate-spin" />
+                              ) : (
+                                <Zap className="w-3.5 h-3.5 text-indigo-400" />
+                              )}
+                              <span>{actionProcessingId === u.user_id ? 'Queuing...' : 'Run Now'}</span>
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => handleInspectCandidate(u)}

@@ -28,6 +28,22 @@ export interface AdminWorkerStatus {
   started_at: string | null
 }
 
+export interface CandidateExecutionInfo {
+  status: 'applying' | 'applied_today' | 'in_queue' | 'not_applied_today' | 'disabled' | 'payment_required'
+  is_applying: boolean
+  is_applied_today: boolean
+  is_in_queue?: boolean
+  device: string | null
+  hostname?: string | null
+  worker_id: string | null
+  platform?: string | null
+  last_run_date?: string | null
+  completed_at?: string | null
+  locked_at?: string | null
+  task_id?: string | null
+  source?: string | null
+}
+
 export interface CandidateUser {
   _id?: string
   user_id: string
@@ -38,20 +54,36 @@ export interface CandidateUser {
   updated_at?: string
   is_vip?: boolean
   role?: string
+  plan?: string
+  plan_name?: string
   plan_tier?: string
+  plan_expires_at?: string | null
+  plan_expiry_status?: string
+  plan_hours_left?: number | null
+  hours_until_expiry?: number | null
   target_role?: string
   target_roles?: string[]
   target_locations?: string[]
   min_experience_years?: number
   max_experience_years?: number
   expected_salary?: string
+  enabled_for_daily_run?: boolean
   last_login_at?: string
   applied_count?: number
   total_applied?: number
+  applied_today?: number
+  applied_this_week?: number
+  applied_this_month?: number
   stats?: any
   bot_schedule?: any
   subscription?: any
   naukri_credentials?: any
+  last_automated_run_date?: string | null
+  last_automated_run_at?: string | null
+  daily_status?: string | null
+  current_execution?: any
+  last_execution?: any
+  execution_summary?: CandidateExecutionInfo
   [key: string]: any
 }
 

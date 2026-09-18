@@ -18,16 +18,53 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const [userDocs, profileDocs, statsList, assignedOffersList, remindersList] = await Promise.all([
+    const [userDocs, profileDocs, statsList, assignedOffersList, remindersList, activeTasks] = await Promise.all([
       db.collection('users').find({}).toArray(),
       db.collection('profiles').find({}).toArray(),
       db.collection('user_stats').find({}).toArray(),
       db.collection('assigned_offers').find({}).toArray(),
-      db.collection('expiry_reminders_sent').find({}).toArray()
+      db.collection('expiry_reminders_sent').find({}).toArray(),
+      db.collection('tasks').find({ status: { $in: ['pending', 'running'] } }).sort({ created_at: -1 }).toArray()
     ])
-    const profiles = userDocs.length > 0 ? userDocs : profileDocs
+
+    // Build unified map of candidate profiles (merging users and profiles collections)
+    const profileMap = new Map<string, any>()
+    profileDocs.forEach(p => {
+      if (p.user_id) profileMap.set(p.user_id, p)
+    })
+    const userMap = new Map<string, any>()
+    userDocs.forEach(u => {
+      if (u.user_id) userMap.set(u.user_id, u)
+    })
+
+    const allUserIds = Array.from(new Set([...Array.from(profileMap.keys()), ...Array.from(userMap.keys())]))
+    const profiles = allUserIds.map(uid => {
+      const uDoc = userMap.get(uid) || {}
+      const pDoc = profileMap.get(uid) || {}
+      return {
+        ...uDoc,
+        ...pDoc,
+        current_execution: pDoc.current_execution || uDoc.current_execution || null,
+        last_execution: pDoc.last_execution || uDoc.last_execution || null,
+        last_automated_run_date: pDoc.last_automated_run_date || uDoc.last_automated_run_date || null,
+        last_automated_run_at: pDoc.last_automated_run_at || uDoc.last_automated_run_at || null,
+        daily_status: pDoc.daily_status || uDoc.daily_status || null,
+        enabled_for_daily_run: pDoc.enabled_for_daily_run !== undefined ? pDoc.enabled_for_daily_run : (uDoc.enabled_for_daily_run !== undefined ? uDoc.enabled_for_daily_run : true)
+      }
+    })
+
+    const activeTasksByUser: Record<string, any> = {}
+    activeTasks.forEach(t => {
+      if (t.user_id && !activeTasksByUser[t.user_id]) {
+        activeTasksByUser[t.user_id] = t
+      }
+    })
 
     const now = new Date()
+    // Current IST date (UTC + 5:30)
+    const istOffsetMs = 5.5 * 60 * 60 * 1000
+    const istNow = new Date(now.getTime() + istOffsetMs)
+    const todayIst = istNow.toISOString().slice(0, 10)
 
     const statsMap: Record<string, any> = {}
     statsList.forEach(s => {
@@ -100,6 +137,83 @@ export async function GET(req: NextRequest) {
       const userOffers = offersByEmail[emailClean] || []
       const userReminders = remindersByEmail[emailClean] || []
 
+      // Multi-Server Execution & Device Identity Resolution
+      const curExec = p.current_execution || {}
+      const lastExec = p.last_execution || {}
+      const activeTask = activeTasksByUser[p.user_id] || null
+
+      let isApplying = false
+      let executionDevice = curExec.hostname || curExec.worker_id || null
+      let executionWorkerId = curExec.worker_id || null
+      let executionPlatform = curExec.platform || null
+      let taskId = curExec.task_id || activeTask?.task_id || null
+
+      if (curExec.status === 'applying') {
+        const hb = curExec.heartbeat_at || curExec.locked_at
+        if (hb) {
+          const hbDate = new Date(hb)
+          const diffMinutes = (now.getTime() - hbDate.getTime()) / 60000
+          if (diffMinutes < 15) {
+            isApplying = true
+          }
+        } else {
+          isApplying = true
+        }
+      }
+
+      if (activeTask && activeTask.status === 'running') {
+        isApplying = true
+        if (!executionDevice && (activeTask.worker_host || activeTask.worker_id)) {
+          executionDevice = activeTask.worker_host || activeTask.worker_id
+          executionWorkerId = activeTask.worker_id
+        }
+      }
+
+      const isAppliedToday = !isApplying && (
+        p.last_automated_run_date === todayIst ||
+        p.daily_status === `completed_${todayIst}` ||
+        (s.today && s.today > 0)
+      )
+
+      if (isAppliedToday && !executionDevice) {
+        executionDevice = lastExec.hostname || curExec.last_hostname || lastExec.worker_id || curExec.last_worker_id || null
+        executionWorkerId = lastExec.worker_id || curExec.last_worker_id || null
+        executionPlatform = lastExec.platform || curExec.last_platform || null
+      }
+
+      const isInQueue = !isApplying && !isAppliedToday && Boolean(activeTask && activeTask.status === 'pending')
+
+      let executionStatus: 'applying' | 'applied_today' | 'in_queue' | 'not_applied_today' | 'disabled' | 'payment_required' = 'not_applied_today'
+      if (isApplying) {
+        executionStatus = 'applying'
+      } else if (isInQueue) {
+        executionStatus = 'in_queue'
+      } else if (isAppliedToday) {
+        executionStatus = 'applied_today'
+      } else if (p.enabled_for_daily_run === false) {
+        executionStatus = 'disabled'
+      } else if (planExpiryStatus === 'expired' || planExpiryStatus === 'no_plan') {
+        executionStatus = 'payment_required'
+      } else {
+        executionStatus = 'not_applied_today'
+      }
+
+      const executionSummary = {
+        status: executionStatus,
+        is_applying: isApplying,
+        is_applied_today: isAppliedToday,
+        is_in_queue: isInQueue,
+        device: executionDevice,
+        hostname: curExec.hostname || lastExec.hostname || curExec.last_hostname || null,
+        worker_id: executionWorkerId,
+        platform: executionPlatform,
+        last_run_date: p.last_automated_run_date || lastExec.date_ist || null,
+        last_completed_at: p.last_automated_run_at || lastExec.completed_at || null,
+        locked_at: curExec.locked_at || null,
+        task_id: taskId,
+        source: curExec.source || lastExec.source || (activeTask ? 'queue' : null)
+      }
+
       return {
         id: p.user_id,
         user_id: p.user_id,
@@ -137,11 +251,27 @@ export async function GET(req: NextRequest) {
         last_scout_run_at: p.last_scout_run_at || null,
         last_automated_run_date: p.last_automated_run_date || null,
         daily_status: p.daily_status || null,
-        current_execution: p.current_execution || null
+        current_execution: p.current_execution || null,
+        last_execution: p.last_execution || null,
+        execution_summary: executionSummary
       }
     })
 
-    return NextResponse.json({ users })
+    const executionCounts = {
+      all: users.length,
+      applying: users.filter(u => u.execution_summary?.status === 'applying').length,
+      applied_today: users.filter(u => u.execution_summary?.status === 'applied_today').length,
+      in_queue: users.filter(u => u.execution_summary?.status === 'in_queue').length,
+      not_applied_today: users.filter(u => u.execution_summary?.status === 'not_applied_today').length,
+      disabled: users.filter(u => u.execution_summary?.status === 'disabled').length,
+      payment_required: users.filter(u => u.execution_summary?.status === 'payment_required').length
+    }
+
+    return NextResponse.json({
+      users,
+      today_ist: todayIst,
+      execution_counts: executionCounts
+    })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message }, { status: 500 })
   }

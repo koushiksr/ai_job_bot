@@ -1648,7 +1648,7 @@ export default function AdminDashboard() {
           <CandidatesTab
             userSearch={userSearch}
             setUserSearch={setUserSearch}
-            usersList={filteredUsers}
+            usersList={usersList}
             loadingUsers={loadingUsers}
             candidateStatusFilter={candidateStatusFilter}
             setCandidateStatusFilter={setCandidateStatusFilter}
@@ -1670,6 +1670,10 @@ export default function AdminDashboard() {
               setDispatchReportTarget(email)
               setIsDispatchReportModalOpen(true)
             }}
+            onTriggerOnDemand={async (userId: string, force: boolean) => {
+              await handleQueueAction('trigger_on_demand', undefined, { user_id: userId, force })
+            }}
+            actionProcessingId={actionProcessingId}
           />
         )}
 
