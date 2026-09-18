@@ -288,15 +288,26 @@ export default function QueueTab({
               </div>
             )}
 
-            <div className="flex items-center gap-2 font-mono text-[11px]">
-              {selectedCandidateActive ? (
+            <div className="flex items-center gap-2 font-mono text-[11px] flex-wrap">
+              {selectedUserObj?.current_execution?.status === 'applying' ? (
+                <span className="px-2 py-0.5 rounded-full bg-sky-500/20 border border-sky-500/40 text-sky-300 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                  Applying on {selectedUserObj.current_execution.hostname || 'Remote Server'}
+                </span>
+              ) : selectedCandidateActive ? (
                 <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  Already in Queue ({selectedCandidateActive.status})
+                  In Queue ({selectedCandidateActive.status})
                 </span>
               ) : (
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" /> Ready to Enqueue
+                </span>
+              )}
+
+              {selectedUserObj?.last_automated_run_date && (
+                <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300">
+                  Done: {selectedUserObj.last_automated_run_date}
                 </span>
               )}
 

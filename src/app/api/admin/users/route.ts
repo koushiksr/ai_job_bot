@@ -134,7 +134,10 @@ export async function GET(req: NextRequest) {
         last_resume_updated_at: p.last_resume_updated_at || null,
         resume_filename: p.resume_filename || null,
         on_demand_run_count: p.on_demand_run_count || 0,
-        last_scout_run_at: p.last_scout_run_at || null
+        last_scout_run_at: p.last_scout_run_at || null,
+        last_automated_run_date: p.last_automated_run_date || null,
+        daily_status: p.daily_status || null,
+        current_execution: p.current_execution || null
       }
     })
 
