@@ -172,10 +172,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        {/* Google tag (gtag.js) */}
+        {/* Google tag (gtag.js) - Google Ads & Google Analytics */}
         <script
           async
           src="https://www.googletagmanager.com/gtag/js?id=AW-825590065"
+        />
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-DDZJVV80DM"
         />
         <script
           dangerouslySetInnerHTML={{
@@ -184,6 +188,7 @@ export default function RootLayout({
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
               gtag('config', 'AW-825590065');
+              gtag('config', 'G-DDZJVV80DM');
             `
           }}
         />
