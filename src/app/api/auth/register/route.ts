@@ -9,13 +9,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const name = (body.name || '').trim()
     const emailClean = (body.email || '').trim().toLowerCase()
-    const pwdClean = (body.password || '').trim()
+    const targetRole = (body.target_role || '').trim()
+    let pwdClean = (body.password || '').trim()
 
-    if (!emailClean || !pwdClean) {
+    if (!emailClean) {
       return NextResponse.json(
-        { detail: 'Email and password are required.' },
+        { detail: 'Email is required to activate free access.' },
         { status: 400 }
       )
+    }
+
+    // Auto-generate secure password if user signed up via 1-click email activator
+    if (!pwdClean) {
+      pwdClean = `JobFlux@${Math.floor(100000 + Math.random() * 900000)}`
     }
 
     const db = await getDb()
@@ -74,6 +80,29 @@ export async function POST(req: NextRequest) {
       lastOrderId = p.order_id || null
     }
 
+    let initialSkills: string[] = []
+    let initialKeywords: string[] = []
+    if (targetRole) {
+      initialKeywords.push(targetRole)
+      const r = targetRole.toLowerCase()
+      if (r.includes('full')) {
+        initialSkills = ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Next.js']
+        initialKeywords = ['Full Stack Engineer', 'Full Stack Developer', 'React', 'Node.js']
+      } else if (r.includes('back') || r.includes('python')) {
+        initialSkills = ['Python', 'Django', 'FastAPI', 'PostgreSQL', 'Microservices']
+        initialKeywords = ['Backend Engineer', 'Python Developer', 'Backend Developer']
+      } else if (r.includes('front') || r.includes('react')) {
+        initialSkills = ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Redux']
+        initialKeywords = ['Frontend Engineer', 'React Developer', 'Frontend Developer']
+      } else if (r.includes('cloud') || r.includes('devops')) {
+        initialSkills = ['AWS', 'Kubernetes', 'Docker', 'Terraform', 'CI/CD']
+        initialKeywords = ['DevOps Engineer', 'Cloud Architect', 'Site Reliability Engineer']
+      } else if (r.includes('ai') || r.includes('data') || r.includes('ml')) {
+        initialSkills = ['Python', 'PyTorch', 'LLMs', 'Machine Learning', 'FastAPI']
+        initialKeywords = ['AI Engineer', 'Machine Learning Engineer', 'Data Scientist']
+      }
+    }
+
     const newProfile = {
       user_id: userId,
       name: name || userId.replace('_', ' '),
@@ -83,10 +112,10 @@ export async function POST(req: NextRequest) {
       current_ctc: 0,
       expected_ctc: 0,
       search_url: 'https://www.naukri.com/mnjuser/recommendedjobs',
-      skills: [],
+      skills: initialSkills,
       job_filters: {
         location: ['Bangalore', 'Remote', 'Hyderabad', 'Mumbai'],
-        keywords: [],
+        keywords: initialKeywords,
         must_have_keywords: [],
         avoid_companies: []
       },
