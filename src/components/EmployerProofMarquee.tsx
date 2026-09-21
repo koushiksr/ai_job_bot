@@ -5,25 +5,25 @@ import { Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react'
 
 interface Employer {
   name: string
-  roles: string
+  targeting: string
   salary: string
   logoBg: string
   accentColor: string
 }
 
 const TOP_EMPLOYERS: Employer[] = [
-  { name: 'Google', roles: 'Software Engineer, Cloud, AI', salary: '₹35L–₹65L', logoBg: 'from-blue-600 to-red-500', accentColor: '#4285F4' },
-  { name: 'Microsoft', roles: 'Full Stack, Azure, SDE-2', salary: '₹32L–₹58L', logoBg: 'from-sky-500 to-emerald-500', accentColor: '#00A4EF' },
-  { name: 'Amazon', roles: 'SDE-1/2, AWS, Distributed Systems', salary: '₹30L–₹55L', logoBg: 'from-amber-500 to-orange-600', accentColor: '#FF9900' },
-  { name: 'Swiggy', roles: 'Backend, Platform, Mobile', salary: '₹26L–₹48L', logoBg: 'from-orange-500 to-amber-600', accentColor: '#FC8019' },
-  { name: 'Razorpay', roles: 'Full Stack, Fintech, DevOps', salary: '₹28L–₹52L', logoBg: 'from-blue-500 to-indigo-600', accentColor: '#0C2340' },
-  { name: 'Zomato', roles: 'Product Eng, Backend, ML', salary: '₹25L–₹45L', logoBg: 'from-red-600 to-rose-700', accentColor: '#CB202D' },
-  { name: 'Flipkart', roles: 'SDE-2, Distributed Infra, Data', salary: '₹28L–₹50L', logoBg: 'from-amber-400 to-blue-600', accentColor: '#2874F0' },
-  { name: 'Zepto', roles: 'Platform, Golang, React Native', salary: '₹30L–₹54L', logoBg: 'from-purple-600 to-pink-600', accentColor: '#7C3AED' },
-  { name: 'Uber', roles: 'Systems, Mobile, Data Engineer', salary: '₹36L–₹68L', logoBg: 'from-zinc-800 to-black', accentColor: '#FFFFFF' },
-  { name: 'Atlassian', roles: 'Fullstack, Cloud, Security', salary: '₹34L–₹60L', logoBg: 'from-blue-600 to-cyan-500', accentColor: '#0052CC' },
-  { name: 'CRED', roles: 'Frontend, Backend Architecture', salary: '₹32L–₹56L', logoBg: 'from-zinc-900 to-neutral-800', accentColor: '#FFFFFF' },
-  { name: 'PhonePe', roles: 'Java, Microservices, SRE', salary: '₹26L–₹48L', logoBg: 'from-purple-600 to-indigo-600', accentColor: '#5F259F' }
+  { name: 'Google', targeting: 'SWE, Cloud & AI openings targeted', salary: '₹35L–₹65L', logoBg: 'from-blue-600 to-red-500', accentColor: '#4285F4' },
+  { name: 'Microsoft', targeting: 'Full Stack, Azure & SDE-2 roles', salary: '₹32L–₹58L', logoBg: 'from-sky-500 to-emerald-500', accentColor: '#00A4EF' },
+  { name: 'Amazon', targeting: 'SDE-1/2, AWS & Systems roles', salary: '₹30L–₹55L', logoBg: 'from-amber-500 to-orange-600', accentColor: '#FF9900' },
+  { name: 'Swiggy', targeting: 'Backend, Platform & Mobile roles', salary: '₹26L–₹48L', logoBg: 'from-orange-500 to-amber-600', accentColor: '#FC8019' },
+  { name: 'Razorpay', targeting: 'FinTech, Full Stack & DevOps roles', salary: '₹28L–₹52L', logoBg: 'from-blue-500 to-indigo-600', accentColor: '#0C2340' },
+  { name: 'Zomato', targeting: 'Product Eng, Backend & ML roles', salary: '₹25L–₹45L', logoBg: 'from-red-600 to-rose-700', accentColor: '#CB202D' },
+  { name: 'Flipkart', targeting: 'SDE-2, Infra & Data roles', salary: '₹28L–₹50L', logoBg: 'from-amber-400 to-blue-600', accentColor: '#2874F0' },
+  { name: 'Zepto', targeting: 'Platform, Golang & React Native roles', salary: '₹30L–₹54L', logoBg: 'from-purple-600 to-pink-600', accentColor: '#7C3AED' },
+  { name: 'Uber', targeting: 'Systems, Mobile & Data roles', salary: '₹36L–₹68L', logoBg: 'from-zinc-800 to-black', accentColor: '#FFFFFF' },
+  { name: 'Atlassian', targeting: 'Fullstack, Cloud & Security roles', salary: '₹34L–₹60L', logoBg: 'from-blue-600 to-cyan-500', accentColor: '#0052CC' },
+  { name: 'CRED', targeting: 'Frontend & Backend Architecture roles', salary: '₹32L–₹56L', logoBg: 'from-zinc-900 to-neutral-800', accentColor: '#FFFFFF' },
+  { name: 'PhonePe', targeting: 'Java, Microservices & SRE roles', salary: '₹26L–₹48L', logoBg: 'from-purple-600 to-indigo-600', accentColor: '#5F259F' }
 ]
 
 export default function EmployerProofMarquee() {
@@ -40,17 +40,17 @@ export default function EmployerProofMarquee() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
             </span>
             <span className="text-[11px] sm:text-xs font-mono uppercase tracking-widest text-zinc-400 font-semibold flex items-center gap-1.5">
-              <span>Where JobFlux Candidates Interview &amp; Get Hired</span>
+              <span>Companies Where JobFlux AI Submits Your Applications</span>
             </span>
           </div>
 
           <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500">
             <span className="text-emerald-400 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span>1,200+ Verified Hiring Teams</span>
+              <span>1,200+ Active Job Openings Targeted</span>
             </span>
             <span className="text-zinc-700 hidden sm:inline">&bull;</span>
-            <span className="text-zinc-400 hidden sm:inline">Harvard ATS Approved</span>
+            <span className="text-zinc-400 hidden sm:inline">Harvard ATS Optimised</span>
           </div>
         </div>
       </div>
@@ -75,8 +75,8 @@ export default function EmployerProofMarquee() {
                     {emp.salary}
                   </span>
                 </div>
-                <div className="text-[10px] text-zinc-400 font-medium truncate max-w-[150px]">
-                  {emp.roles}
+                <div className="text-[10px] text-zinc-400 font-medium truncate max-w-[160px]">
+                  {emp.targeting}
                 </div>
               </div>
             </div>

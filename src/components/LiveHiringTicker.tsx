@@ -12,9 +12,9 @@ const TICKER_ITEMS = [
   },
   {
     icon: '⚡',
-    title: 'Neha G. received interview shortlist from Razorpay (₹28 LPA)',
-    subtitle: 'Naukri Recruiter Outreach · 11m ago',
-    tag: 'Shortlisted'
+    title: "Neha G.'s profile submitted to 12 FinTech openings — Razorpay, PhonePe & more",
+    subtitle: 'Naukri Auto-Apply Sweep · 11m ago',
+    tag: 'Applied'
   },
   {
     icon: '🚀',
@@ -36,9 +36,9 @@ const TICKER_ITEMS = [
   },
   {
     icon: '✨',
-    title: 'Pooja R. secured interview round with Zepto for SDE-2 (₹36 LPA)',
-    subtitle: 'Profile Shortlisted · 25m ago',
-    tag: 'Shortlisted'
+    title: 'Pooja R. applied to 18 rapid-commerce roles — Zepto, Swiggy, Blinkit (₹30L–₹42L range)',
+    subtitle: '8:04 AM Auto-Apply Sweep · 25m ago',
+    tag: 'Applied'
   }
 ]
 

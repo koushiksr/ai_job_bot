@@ -32,9 +32,9 @@ const TOAST_EVENTS: LiveToastItem[] = [
     name: 'Pooja R.',
     city: 'Hyderabad',
     role: 'Full Stack Engineer',
-    action: 'received recruiter interview shortlist (₹32 LPA)',
+    action: 'applied to 22 openings at Zepto, Blinkit & Dunzo (₹26L–₹38L range)',
     timeAgo: '5m ago',
-    companyBadge: 'Zepto'
+    companyBadge: 'Zepto / Blinkit'
   },
   {
     id: 't-3',
@@ -51,9 +51,9 @@ const TOAST_EVENTS: LiveToastItem[] = [
     name: 'Amit S.',
     city: 'Noida / Remote',
     role: 'Staff AI Engineer',
-    action: 'Harvard ATS resume passed 99% Workday filter',
+    action: 'ATS-optimised resume submitted to 8 Google & Amazon openings via Workday',
     timeAgo: '11m ago',
-    companyBadge: 'Google / Amazon'
+    companyBadge: 'Workday ATS'
   }
 ]
 
