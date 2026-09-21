@@ -766,7 +766,12 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                       )}
                     </div>
                     <p className="text-[11px] text-zinc-400">
-                      Applications Today: <strong className="text-emerald-400 font-mono">{foundCandidate?.applied_today || 15}</strong> &bull; Total Applications: <strong className="text-white font-mono">{foundCandidate?.total_applied || 47}</strong> &bull; Top Companies: <span className="text-zinc-300">Probo, Advance Career Solutions, Aezion Technologies</span>
+                      Applications Today: <strong className={`font-mono ${(foundCandidate?.applied_today || 0) > 0 ? 'text-emerald-400' : 'text-amber-400'}`}>{foundCandidate?.applied_today ?? 0}</strong> &bull; Total Applications: <strong className="text-white font-mono">{foundCandidate?.total_applied ?? 0}</strong>
+                      {(foundCandidate?.applied_today || 0) === 0 && (
+                        <span className="ml-2 text-amber-400 font-semibold text-[10px] bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-800/50">
+                          (No jobs today — candidate email is suppressed to prevent stale reporting)
+                        </span>
+                      )}
                     </p>
                   </div>
 

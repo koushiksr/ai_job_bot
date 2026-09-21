@@ -86,6 +86,7 @@ export interface CandidateUser {
   applied_count?: number
   total_applied?: number
   applied_today?: number
+  daily_application_limit?: number
   applied_this_week?: number
   applied_this_month?: number
   stats?: any

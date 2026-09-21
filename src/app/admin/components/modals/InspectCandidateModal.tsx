@@ -14,7 +14,8 @@ import {
   Cpu,
   Laptop,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Zap
 } from 'lucide-react'
 
 interface InspectCandidateModalProps {
@@ -194,6 +195,32 @@ export default function InspectCandidateModal({
                 {candidate.execution_summary?.last_run_date ? `Done: ${candidate.execution_summary.last_run_date}` : 'Cycle: Daily IST'}
               </div>
             </div>
+
+            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
+                <Zap className="w-3 h-3 text-emerald-400" /> Today's Applications
+              </span>
+              <div className="font-mono text-xs font-bold">
+                {(() => {
+                  const limit = candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20))
+                  const todayCount = candidate.applied_today || 0
+                  return (
+                    <span className={todayCount > 0 ? 'text-emerald-300' : 'text-zinc-400'}>
+                      {todayCount} / {limit} applied {todayCount === 0 ? '(Not run today)' : ''}
+                    </span>
+                  )
+                })()}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-sky-400" /> Total Applications
+              </span>
+              <div className="font-mono text-xs font-bold text-white">
+                {candidate.total_applied || 0} lifetime
+              </div>
+            </div>
           </div>
         </div>
 
@@ -203,10 +230,19 @@ export default function InspectCandidateModal({
             <Clock className="w-3.5 h-3.5 text-amber-400" />
             <span>Plan Validity &amp; Expiry Countdown</span>
           </h4>
-          <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
             <div>
               <span className="text-zinc-500">Current Plan:</span>
               <div className="font-bold text-white uppercase">{candidate.plan || 'Free'}</div>
+            </div>
+            <div>
+              <span className="text-zinc-500">Daily Application Quota:</span>
+              <div className="font-mono font-bold text-amber-300">
+                {(() => {
+                  const limit = candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20))
+                  return `${limit}/day ${limit >= 150 ? '⚡ (150 Max)' : ''}`
+                })()}
+              </div>
             </div>
             <div>
               <span className="text-zinc-500">Expiry Status:</span>

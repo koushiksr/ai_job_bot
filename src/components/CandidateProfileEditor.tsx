@@ -114,6 +114,7 @@ export default function CandidateProfileEditor({
 
   // 7. Bot Automation Settings
   const [enabledForDailyRun, setEnabledForDailyRun] = useState<boolean>(true)
+  const [dailyApplicationLimit, setDailyApplicationLimit] = useState<number>(50)
   const [searchUrl, setSearchUrl] = useState<string>('https://www.naukri.com/mnjuser/recommendedjobs')
 
   // Validation state
@@ -353,6 +354,7 @@ export default function CandidateProfileEditor({
 
     // Daily run & search url
     setEnabledForDailyRun(data.enabled_for_daily_run !== false)
+    setDailyApplicationLimit(data.daily_application_limit ? Math.min(150, Math.max(1, Number(data.daily_application_limit))) : (data.plan === 'elite' || data.is_vip ? 150 : 50))
     setSearchUrl(data.search_url || 'https://www.naukri.com/mnjuser/recommendedjobs')
 
     // Raw JSON stringification
@@ -399,6 +401,7 @@ export default function CandidateProfileEditor({
       expected_ctc: ctcExpectedNum,
       search_url: searchUrl,
       enabled_for_daily_run: enabledForDailyRun,
+      daily_application_limit: Number(dailyApplicationLimit) || 50,
       skills: skills,
       job_filters: {
         roles: targetRoles,
@@ -444,6 +447,7 @@ export default function CandidateProfileEditor({
     customQaList,
     employmentHistory,
     enabledForDailyRun,
+    dailyApplicationLimit,
     searchUrl,
     resumeFilename,
     loading
@@ -2569,7 +2573,7 @@ export default function CandidateProfileEditor({
       </div>
 
       {/* 8. BOT AUTOMATION CONTROLS */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3">
+      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider">
@@ -2588,6 +2592,64 @@ export default function CandidateProfileEditor({
             />
             <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
           </label>
+        </div>
+
+        {/* Daily Application Limit (Up to 150 Max Platform Limit) */}
+        <div className="pt-3 border-t border-zinc-900 space-y-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <label className="text-xs font-semibold text-white flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <span>Daily Applications Quota (150 Max / Day)</span>
+              </label>
+              <p className="text-[11px] text-zinc-400 mt-0.5">
+                Controls the maximum job applications the bot will submit per day (Naukri platform hard ceiling: 150/day).
+              </p>
+            </div>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              {dailyApplicationLimit} Max / Day
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            {[
+              { val: 150, label: '⚡ 150 (Max Quota)', desc: 'Elite / VIP Full Capacity' },
+              { val: 50, label: '🎯 50 (Pro)', desc: 'Balanced Daily Quota' },
+              { val: 20, label: '🎯 20 (Trial)', desc: 'Standard Free Tier' },
+              { val: 10, label: '🎯 10 (Light)', desc: 'Minimal Daily Scout' }
+            ].map(preset => (
+              <button
+                key={preset.val}
+                type="button"
+                onClick={() => setDailyApplicationLimit(preset.val)}
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                  dailyApplicationLimit === preset.val
+                    ? 'bg-amber-500/15 border-amber-500/50 text-white shadow-sm'
+                    : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+                }`}
+              >
+                <div className="text-xs font-bold font-mono">{preset.label}</div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">{preset.desc}</div>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 pt-1">
+            <span className="text-[11px] font-mono text-zinc-400">Custom Limit (1 to 150):</span>
+            <input
+              type="number"
+              min="1"
+              max="150"
+              value={dailyApplicationLimit}
+              onChange={e => {
+                const num = parseInt(e.target.value, 10)
+                if (!isNaN(num)) {
+                  setDailyApplicationLimit(Math.min(150, Math.max(1, num)))
+                }
+              }}
+              className="w-24 bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-white font-mono focus:outline-none focus:border-amber-500"
+            />
+          </div>
         </div>
       </div>
 

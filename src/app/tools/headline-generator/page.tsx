@@ -178,7 +178,7 @@ export default function HeadlineGeneratorPage() {
           {PRESETS.map((p, i) => (
             <button
               key={i}
-              onClick={() => applyPreset(p)}
+              onClick={() => handleApplyPreset(p)}
               className="text-xs bg-[#09090b] hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
             >
               {p.label}

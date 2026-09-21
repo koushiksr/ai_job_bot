@@ -17,8 +17,10 @@ export async function GET(req: NextRequest) {
     const statsDoc = await db.collection('user_stats').findOne({ user_id: userId })
     if (statsDoc) {
       const now = new Date()
-      const todayStr = now.toISOString().split('T')[0]
-      const todayCount = statsDoc?.last_date === todayStr ? (statsDoc?.today || 0) : 0
+      const istOffsetMs = 5.5 * 60 * 60 * 1000
+      const istNow = new Date(now.getTime() + istOffsetMs)
+      const todayIstStr = istNow.toISOString().slice(0, 10)
+      const todayCount = statsDoc?.last_date === todayIstStr ? (statsDoc?.today || 0) : 0
 
       return NextResponse.json({
         today: todayCount,

@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
 import { sendEmail, generateJobDispatchReportHtml } from '@/lib/mailService'
 import { sendPushToUser } from '@/lib/webPushService'
+import { APP_CONFIG } from '@/config/appConfig'
 
 export const dynamic = 'force-dynamic'
 
@@ -116,7 +117,15 @@ async function dispatchReportForCandidate(
   candidateInput: { userId?: string; email?: string; taskId?: string },
   channel: 'both' | 'email' | 'push' = 'both',
   offerOverrides: any = {},
-  options: { source?: string; force?: boolean; isOnDemand?: boolean } = {}
+  options: {
+    source?: string
+    force?: boolean
+    isOnDemand?: boolean
+    status?: string
+    error?: string
+    failureReason?: string
+    workerInfo?: any
+  } = {}
 ) {
   const targetEmail = (candidateInput.email || '').toLowerCase().trim()
   const targetUserId = (candidateInput.userId || '').trim()
@@ -148,6 +157,78 @@ async function dispatchReportForCandidate(
     return { success: false, error: `Valid email address required for candidate ${resolvedUserId || 'unknown'}` }
   }
 
+  const now = new Date()
+  const istOffsetMs = 5.5 * 60 * 60 * 1000
+  const istNow = new Date(now.getTime() + istOffsetMs)
+  const todayIstStr = `${istNow.getUTCFullYear()}-${String(istNow.getUTCMonth() + 1).padStart(2, '0')}-${String(istNow.getUTCDate()).padStart(2, '0')}`
+  const startOfTodayUtc = new Date(Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate(), 0, 0, 0) - istOffsetMs)
+
+  // 1.5. Failure / Error Safeguard: Suppress candidate email and alert Admin
+  if (options.status === 'failed' || Boolean(options.error)) {
+    const errorDetail = options.error || options.failureReason || 'Automation run interrupted with error'
+    console.warn(`🚨 [Dispatch] Automation failure reported for ${resolvedEmail}: ${errorDetail}. Suppressing candidate report and notifying admin.`)
+
+    // Notify Admin via Web Push
+    try {
+      const adminSubscriptions = await db.collection('push_subscriptions').find({}).toArray()
+      for (const sub of adminSubscriptions) {
+        if (sub.endpoint && sub.keys) {
+          await sendPushToUser(sub.user_email || 'admin', {
+            title: `🚨 Bot Run Failed: ${candidateName}`,
+            body: `${errorDetail.slice(0, 100)} (Task: ${candidateInput.taskId || 'N/A'})`,
+            url: '/admin'
+          })
+        }
+      }
+    } catch (pushErr) {
+      console.warn('Failed to send admin push alert:', pushErr)
+    }
+
+    // Notify Admin via Email Alert
+    try {
+      await sendEmail({
+        to: APP_CONFIG.supportEmail,
+        subject: `🚨 [JobFlux Admin Alert] Automation Failed for ${candidateName} (${resolvedEmail})`,
+        html: `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; background: #09090b; color: #f8fafc; border-radius: 12px; border: 1px solid #27272a; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #f43f5e; margin: 0 0 16px 0; font-size: 18px;">🚨 Automated Job Application Issue</h2>
+          <p style="font-size: 14px; color: #cbd5e1; margin-bottom: 16px;">
+            The automation bot encountered an issue for candidate <strong>${candidateName}</strong> (${resolvedEmail}). Candidate email was safely suppressed to prevent sending misleading or error emails.
+          </p>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; font-family: monospace;">
+            <tr style="border-bottom: 1px solid #18181b;"><td style="padding: 8px; color: #94a3b8;">Candidate:</td><td style="padding: 8px; color: #fff; font-weight: bold;">${candidateName} (${resolvedEmail})</td></tr>
+            <tr style="border-bottom: 1px solid #18181b;"><td style="padding: 8px; color: #94a3b8;">User ID:</td><td style="padding: 8px; color: #38bdf8;">${resolvedUserId}</td></tr>
+            <tr style="border-bottom: 1px solid #18181b;"><td style="padding: 8px; color: #94a3b8;">Task ID:</td><td style="padding: 8px; color: #cbd5e1;">${candidateInput.taskId || 'N/A'}</td></tr>
+            <tr style="border-bottom: 1px solid #18181b;"><td style="padding: 8px; color: #94a3b8;">Failure Reason:</td><td style="padding: 8px; color: #f43f5e; font-weight: bold;">${errorDetail}</td></tr>
+            <tr><td style="padding: 8px; color: #94a3b8;">Date (IST):</td><td style="padding: 8px; color: #cbd5e1;">${todayIstStr}</td></tr>
+          </table>
+          <a href="https://jobfluxai.vercel.app/admin" style="display: inline-block; padding: 10px 18px; background: #6366f1; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px;">Inspect in Admin Console &rarr;</a>
+        </div>`
+      })
+    } catch (mailErr) {
+      console.warn('Failed to send admin email alert:', mailErr)
+    }
+
+    // Log to admin_push_logs
+    await db.collection('admin_push_logs').insertOne({
+      target_email: resolvedEmail,
+      candidate_name: candidateName,
+      user_id: resolvedUserId,
+      channel: 'admin_alert',
+      type: 'run_failed_alert',
+      error: errorDetail,
+      task_id: candidateInput.taskId || null,
+      dispatched_at: new Date(),
+      status: 'alert_sent'
+    })
+
+    return {
+      success: true,
+      skipped: true,
+      reason: `Run failed: ${errorDetail}. Candidate email suppressed. Admin alerted.`,
+      error: errorDetail
+    }
+  }
+
   // 2. Fetch User Stats
   const stats = await db.collection('user_stats').findOne({
     $or: [
@@ -170,13 +251,6 @@ async function dispatchReportForCandidate(
 
   const notJobUrlCondition = { job_url: { $not: { $regex: /developer-jobs|-jobs-in-|\/search\?/i } } }
 
-  const now = new Date()
-  const istOffsetMs = 5.5 * 60 * 60 * 1000
-  const istNow = new Date(now.getTime() + istOffsetMs)
-  const todayIstStr = `${istNow.getUTCFullYear()}-${String(istNow.getUTCMonth() + 1).padStart(2, '0')}-${String(istNow.getUTCDate()).padStart(2, '0')}`
-  const startOfTodayUtc = new Date(Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate(), 0, 0, 0) - istOffsetMs)
-  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-
   // A. Query jobs from this specific task if provided
   let sweepJobs: any[] = []
   if (candidateInput.taskId) {
@@ -189,7 +263,7 @@ async function dispatchReportForCandidate(
     }).sort({ applied_at: -1, created_at: -1 }).toArray()
   }
 
-  // B. If no specific task jobs found, query today's jobs (IST date or last 24h)
+  // B. If no specific task jobs found, query today's jobs (strictly IST date or start of today UTC)
   if (sweepJobs.length === 0) {
     sweepJobs = await db.collection('applied_jobs').find({
       $and: [
@@ -198,8 +272,7 @@ async function dispatchReportForCandidate(
         {
           $or: [
             { applied_date: todayIstStr },
-            { applied_at: { $gte: startOfTodayUtc } },
-            { applied_at: { $gte: twentyFourHoursAgo } }
+            { applied_at: { $gte: startOfTodayUtc } }
           ]
         }
       ]
@@ -249,20 +322,43 @@ async function dispatchReportForCandidate(
     }
   }
 
-  // 5. Fallback to recent actual applied jobs if today's sweep had 0 dispatches
-  let displayJobs = sweepJobs
-  let isHistorical = false
-  if (displayJobs.length === 0) {
-    displayJobs = await db.collection('applied_jobs').find({
-      $and: [candidateCondition, notJobUrlCondition]
-    })
-      .sort({ applied_at: -1, created_at: -1 })
-      .limit(6)
-      .toArray()
-    isHistorical = displayJobs.length > 0
-  } else if (displayJobs.length > 8) {
-    displayJobs = displayJobs.slice(0, 8)
+  // 5. Zero-Jobs Safeguard: Do NOT email candidate with old or 0 jobs if nothing applied today
+  if (sweepJobs.length === 0) {
+    console.log(`ℹ️ [Dispatch] Candidate ${resolvedEmail} has 0 jobs applied for today (${todayIstStr}). Suppressing email to candidate and notifying admin.`)
+
+    // Alert admin if this was an automated run
+    if (!isOnDemand) {
+      try {
+        await sendEmail({
+          to: APP_CONFIG.supportEmail,
+          subject: `⚠️ [JobFlux Admin Notice] 0 Jobs Applied for ${candidateName} (${todayIstStr})`,
+          html: `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; background: #09090b; color: #f8fafc; border-radius: 12px; border: 1px solid #27272a; max-width: 600px; margin: 0 auto;">
+            <h3 style="color: #fbbf24; margin: 0 0 12px 0; font-size: 16px;">⚠️ Automated Run Yielded 0 Applications</h3>
+            <p style="font-size: 14px; color: #cbd5e1; margin-bottom: 12px;">The scheduled run finished with <strong>0 applications</strong> for candidate <strong>${candidateName}</strong> (${resolvedEmail}).</p>
+            <p style="color: #94a3b8; font-size: 13px;">Candidate email was safely suppressed to prevent sharing zero or outdated jobs.</p>
+            <a href="https://jobfluxai.vercel.app/admin" style="display: inline-block; padding: 8px 16px; background: #38bdf8; color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 12px; margin-top: 8px;">Inspect Candidate in Admin Console &rarr;</a>
+          </div>`
+        })
+      } catch (err) {
+        console.warn('Failed to send 0-job notice to admin:', err)
+      }
+    }
+
+    return {
+      success: true,
+      skipped: true,
+      reason: `Zero jobs applied for today (${todayIstStr}). Candidate email suppressed to prevent sharing 0 or outdated jobs. Admin notified.`,
+      candidate: {
+        name: candidateName,
+        email: resolvedEmail,
+        userId: resolvedUserId,
+        todayApplied: 0,
+        totalApplied: totalAppliedCount
+      }
+    }
   }
+
+  let displayJobs = sweepJobs.slice(0, 8)
 
   // 6. Plan status & package intelligence
   const plan = user?.plan || profile?.plan || 'trial'
@@ -366,7 +462,7 @@ async function dispatchReportForCandidate(
       promoCode,
       discountedPrice,
       originalPrice,
-      sectionTitle: isHistorical ? `Recent Verified Applications (${topCompanies.length})` : undefined
+      sectionTitle: `Today's Verified Applications (${topCompanies.length})`
     })
 
     const subject = todayApplied > 0
@@ -486,7 +582,18 @@ export async function POST(req: NextRequest) {
     const source = (body.source || 'daily_scheduled').toLowerCase()
     const force = Boolean(body.force)
     const isOnDemand = force || ['on_demand', 'web_dashboard_on_demand', 'manual_cli_on_demand', 'admin_on_demand'].includes(source)
-    const dispatchOptions = { source, force, isOnDemand }
+    const status = (body.status || 'completed').toLowerCase()
+    const error = body.error || body.error_message || null
+    const failureReason = body.failureReason || body.failure_reason || null
+    const dispatchOptions = {
+      source,
+      force,
+      isOnDemand,
+      status,
+      error,
+      failureReason,
+      workerInfo: body.worker_info || null
+    }
 
     const offerOverrides = {
       promoCode: body.promoCode,

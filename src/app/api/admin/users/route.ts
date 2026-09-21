@@ -169,11 +169,11 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      const isAppliedToday = !isApplying && (
-        p.last_automated_run_date === todayIst ||
-        p.daily_status === `completed_${todayIst}` ||
-        (s.today && s.today > 0)
-      )
+      // Strict IST Today Data Isolation: Only count applications if the run or stats occurred TODAY in IST
+      const isRunToday = p.last_automated_run_date === todayIst || p.daily_status === `completed_${todayIst}`
+      const isStatsToday = s.last_date === todayIst
+      const realTodayApplied = isStatsToday ? (s.today || 0) : 0
+      const isAppliedToday = !isApplying && (isRunToday || (isStatsToday && realTodayApplied > 0))
 
       if (isAppliedToday && !executionDevice) {
         executionDevice = lastExec.hostname || curExec.last_hostname || lastExec.worker_id || curExec.last_worker_id || null
@@ -223,6 +223,12 @@ export async function GET(req: NextRequest) {
         source: curExec.source || lastExec.source || (activeTask ? 'queue' : null)
       }
 
+      // Default daily limit based on plan or custom override (150 max for Elite/VIP/Enterprise)
+      const defaultLimit = (isVip || ['elite', 'professional', 'enterprise', 'vip'].includes(planClean))
+        ? 150
+        : (planClean === 'pro' ? 50 : 20)
+      const dailyApplicationLimit = p.daily_application_limit ? Math.min(150, Math.max(1, Number(p.daily_application_limit))) : defaultLimit
+
       return {
         id: p.user_id,
         user_id: p.user_id,
@@ -244,7 +250,8 @@ export async function GET(req: NextRequest) {
         reminders_sent: userReminders,
         is_vip: Boolean(p.is_vip || p.vip_access || p.free_privilege),
         total_applied: s.total_applied || 0,
-        applied_today: s.today || 0,
+        applied_today: isAppliedToday ? realTodayApplied : 0,
+        daily_application_limit: dailyApplicationLimit,
         applied_this_week: s.this_week || 0,
         applied_this_month: s.this_month || 0,
         last_active: s.last_applied_at || p.updated_at || null,
@@ -302,7 +309,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { user_id, is_vip, plan, enabled_for_daily_run, extend_days } = body
+    const { user_id, is_vip, plan, enabled_for_daily_run, extend_days, daily_application_limit } = body
 
     if (!user_id) {
       return NextResponse.json({ detail: 'user_id is required' }, { status: 400 })
@@ -310,10 +317,18 @@ export async function PATCH(req: NextRequest) {
 
     const now = new Date()
     const updates: any = { updated_at: now }
+
+    if (daily_application_limit !== undefined && daily_application_limit !== null) {
+      updates.daily_application_limit = Math.min(150, Math.max(1, Number(daily_application_limit)))
+    }
+
     if (typeof is_vip === 'boolean') {
       updates.is_vip = is_vip
       updates.vip_access = is_vip
       updates.free_privilege = is_vip
+      if (is_vip && updates.daily_application_limit === undefined) {
+        updates.daily_application_limit = 150
+      }
     }
     if (typeof enabled_for_daily_run === 'boolean') {
       updates.enabled_for_daily_run = enabled_for_daily_run
@@ -328,14 +343,17 @@ export async function PATCH(req: NextRequest) {
         updates.vip_access = true
         updates.free_privilege = true
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 150
       } else if (plan === 'elite' || plan === 'professional') {
         const days = extend_days || 90
         updates.plan_name = 'JobFlux PROFESSIONAL'
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 150
       } else if (plan === 'pro' || plan === 'starter') {
         const days = extend_days || 30
         updates.plan_name = 'JobFlux PRO'
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 50
       } else if (plan === 'trial') {
         updates.plan_name = 'JobFlux 3-Day Free Access'
         updates.trial_started_at = now
@@ -344,6 +362,7 @@ export async function PATCH(req: NextRequest) {
         updates.is_vip = false
         updates.vip_access = false
         updates.free_privilege = false
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 20
       } else if (plan === 'none' || plan === 'no_plan') {
         updates.plan = 'none'
         updates.plan_name = 'No Active Plan'

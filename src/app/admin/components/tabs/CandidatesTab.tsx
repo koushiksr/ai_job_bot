@@ -492,7 +492,7 @@ export default function CandidatesTab({
                   <th className="py-3.5 px-4 text-center">Auto-Apply</th>
                   <th className="py-3.5 px-4">Last Login</th>
                   <th className="py-3.5 px-4">Profile &amp; Resume</th>
-                  <th className="py-3.5 px-4 text-center">Today / Total</th>
+                  <th className="py-3.5 px-4 text-center" title="Applications Today vs Daily Quota Limit &amp; Lifetime Total">Today (Quota) / Total</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -548,7 +548,7 @@ export default function CandidatesTab({
                       {/* Bot Execution & Server Identity Status */}
                       <td className="py-4 px-4">
                         {(() => {
-                          const summary = u.execution_summary || {}
+                          const summary: any = u.execution_summary || {}
                           const isApplying = summary.is_applying || u.current_execution?.status === 'applying'
                           const isAppliedToday = summary.is_applied_today || (u.applied_today && u.applied_today > 0)
                           const isInQueue = summary.is_in_queue || summary.status === 'in_queue'
@@ -710,6 +710,23 @@ export default function CandidatesTab({
                                 VIP PASS
                               </span>
                             )}
+                            {(() => {
+                              const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
+                              return (
+                                <span 
+                                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${
+                                    limit >= 150
+                                      ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                                      : limit >= 50
+                                      ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'
+                                      : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                  }`}
+                                  title={`Daily Application Limit: ${limit}/day on Naukri platform`}
+                                >
+                                  {limit >= 150 ? '⚡ 150 Max/d' : `🎯 ${limit}/d`}
+                                </span>
+                              )
+                            })()}
                           </div>
 
                           {/* Admin Plan Override Dropdown */}
@@ -907,9 +924,29 @@ export default function CandidatesTab({
                         </div>
                       </td>
                       <td className="py-4 px-4 text-center">
-                        <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-slate-900 text-slate-200 font-mono text-[11px] font-bold border border-slate-800">
-                          {u.applied_today || 0} / {u.total_applied || 0}
-                        </span>
+                        <div className="inline-flex flex-col items-center gap-0.5">
+                          {(() => {
+                            const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
+                            const appliedToday = u.applied_today || 0
+                            return (
+                              <>
+                                <span 
+                                  className={`inline-flex items-center justify-center px-2 py-0.5 rounded font-mono text-[11px] font-bold border ${
+                                    appliedToday > 0 
+                                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' 
+                                      : 'bg-slate-900 text-slate-400 border-slate-800'
+                                  }`}
+                                  title={`Today: ${appliedToday} applied / Daily Limit: ${limit}`}
+                                >
+                                  {appliedToday} / {limit}
+                                </span>
+                                <span className="text-[10px] font-mono text-slate-500" title="Lifetime Total Applications">
+                                  Total: {u.total_applied || 0}
+                                </span>
+                              </>
+                            )
+                          })()}
+                        </div>
                       </td>
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">

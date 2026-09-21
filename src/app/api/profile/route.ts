@@ -102,6 +102,7 @@ export async function GET(req: NextRequest) {
       picture: profile.picture || profile.avatar_url || '',
       has_resume: Boolean(profile.has_resume || profile.last_resume_updated_at || (profile.resume_upload_count && profile.resume_upload_count > 0)),
       enabled_for_daily_run: profile.enabled_for_daily_run !== false,
+      daily_application_limit: profile.daily_application_limit ? Math.min(150, Math.max(1, Number(profile.daily_application_limit))) : (profile.plan === 'elite' || profile.is_vip ? 150 : (profile.plan === 'starter' || profile.plan === 'pro' ? 50 : 20)),
       last_login_at: profile.last_login_at || null,
       last_login_ip: profile.last_login_ip || null,
       login_count: profile.login_count || 0,
@@ -177,6 +178,14 @@ export async function POST(req: NextRequest) {
       updateDoc.enabled_for_daily_run = Boolean(body.enabled_for_daily_run)
     } else if (existing?.enabled_for_daily_run !== undefined) {
       updateDoc.enabled_for_daily_run = existing.enabled_for_daily_run
+    }
+
+    if (body.daily_application_limit !== undefined) {
+      updateDoc.daily_application_limit = Math.min(150, Math.max(1, Number(body.daily_application_limit)))
+    } else if (parsedRaw.daily_application_limit !== undefined) {
+      updateDoc.daily_application_limit = Math.min(150, Math.max(1, Number(parsedRaw.daily_application_limit)))
+    } else if (existing?.daily_application_limit !== undefined) {
+      updateDoc.daily_application_limit = existing.daily_application_limit
     }
 
     // Security: Preserve immutable plan, subscription, and role metadata
