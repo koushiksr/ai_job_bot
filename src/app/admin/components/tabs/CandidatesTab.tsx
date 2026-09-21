@@ -28,7 +28,11 @@ import {
   Server,
   Zap,
   Cpu,
-  Laptop
+  Laptop,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  SlidersHorizontal
 } from 'lucide-react'
 import { CandidateUser } from '../../types'
 
@@ -107,10 +111,117 @@ export default function CandidatesTab({
     } catch {}
   }
 
-  // Pre-calculate real-time execution counts for filters
+  // Sorting state with localStorage persistence
+  type SortField = 'plan' | 'enabled' | 'today' | 'total' | 'execution' | 'name' | 'email' | 'last_login' | 'created_at'
+  type SortOrder = 'asc' | 'desc'
+
+  const [sortField, setSortField] = React.useState<SortField>(() => {
+    try {
+      return (localStorage.getItem('admin_candidate_sort_field') as SortField) || 'plan'
+    } catch {
+      return 'plan'
+    }
+  })
+
+  const [sortOrder, setSortOrder] = React.useState<SortOrder>(() => {
+    try {
+      return (localStorage.getItem('admin_candidate_sort_order') as SortOrder) || 'desc'
+    } catch {
+      return 'desc'
+    }
+  })
+
+  const handleSetSortField = (field: SortField) => {
+    if (field === sortField) {
+      const nextOrder = sortOrder === 'asc' ? 'desc' : 'asc'
+      setSortOrder(nextOrder)
+      try {
+        localStorage.setItem('admin_candidate_sort_order', nextOrder)
+      } catch {}
+    } else {
+      const defaultOrder: SortOrder = ['name', 'email'].includes(field) ? 'asc' : 'desc'
+      setSortField(field)
+      setSortOrder(defaultOrder)
+      try {
+        localStorage.setItem('admin_candidate_sort_field', field)
+        localStorage.setItem('admin_candidate_sort_order', defaultOrder)
+      } catch {}
+    }
+  }
+
+  const handleToggleSortOrder = () => {
+    const nextOrder = sortOrder === 'asc' ? 'desc' : 'asc'
+    setSortOrder(nextOrder)
+    try {
+      localStorage.setItem('admin_candidate_sort_order', nextOrder)
+    } catch {}
+  }
+
+  const handleResetSort = () => {
+    setSortField('plan')
+    setSortOrder('desc')
+    try {
+      localStorage.setItem('admin_candidate_sort_field', 'plan')
+      localStorage.setItem('admin_candidate_sort_order', 'desc')
+    } catch {}
+  }
+
+  const getSortLabel = (field: SortField): string => {
+    switch (field) {
+      case 'plan': return 'Plan Tier (Elite → Pro → Starter → Trial → Free)'
+      case 'enabled': return 'Auto-Apply (Enabled / Active First)'
+      case 'today': return "Today's Applications (Highest First)"
+      case 'total': return 'Lifetime Total Applied (Highest First)'
+      case 'execution': return 'Bot Execution Status'
+      case 'name': return 'Candidate Name (A → Z)'
+      case 'email': return 'Portal Email (A → Z)'
+      case 'last_login': return 'Last Login / Activity (Recent First)'
+      case 'created_at': return 'Signup Date (Newest First)'
+      default: return field
+    }
+  }
+
+  const renderSortIcon = (field: SortField) => {
+    if (sortField === field) {
+      return sortOrder === 'asc' ? (
+        <ArrowUp className="w-3 h-3 text-sky-400 shrink-0" />
+      ) : (
+        <ArrowDown className="w-3 h-3 text-sky-400 shrink-0" />
+      )
+    }
+    return <ArrowUpDown className="w-2.5 h-2.5 text-zinc-600 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
+  }
+
+  // Weight calculators for clean, structured ranking
+  const getPlanWeight = (u: CandidateUser): number => {
+    const isVip = Boolean(u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime')
+    const p = (u.plan || u.plan_name || '').toLowerCase()
+
+    if (p.includes('enterprise')) return 120
+    if (p.includes('elite') || p.includes('professional')) return isVip ? 115 : 100
+    if (isVip) return 95
+    if (p.includes('pro')) return 80
+    if (p.includes('starter')) return 50
+    if (p.includes('trial')) return 20
+    return 0
+  }
+
+  const getExecutionWeight = (u: CandidateUser): number => {
+    const status = u.execution_summary?.status || (u.current_execution?.status === 'applying' ? 'applying' : '')
+    if (status === 'applying' || u.current_execution?.status === 'applying') return 60
+    if (status === 'in_queue' || u.execution_summary?.is_in_queue) return 50
+    if (status === 'applied_today' || (u.applied_today && u.applied_today > 0)) return 40
+    if (status === 'not_applied_today') return 30
+    if (status === 'payment_required') return 20
+    if (u.enabled_for_daily_run === false) return 10
+    return 0
+  }
+
+  // Pre-calculate real-time execution & plan counts for filters
   const countApplying = usersList.filter(u => u.execution_summary?.status === 'applying' || u.current_execution?.status === 'applying').length
   const countAppliedToday = usersList.filter(u => u.execution_summary?.status === 'applied_today' || u.execution_summary?.is_applied_today || (u.applied_today && u.applied_today > 0)).length
   const countInQueue = usersList.filter(u => u.execution_summary?.status === 'in_queue' || u.execution_summary?.is_in_queue).length
+  const countEnabled = usersList.filter(u => u.enabled_for_daily_run !== false).length
   const countDisabled = usersList.filter(u => u.enabled_for_daily_run === false).length
   const countPaymentRequired = usersList.filter(u => u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan').length
   const countNotAppliedToday = usersList.filter(u => {
@@ -118,6 +229,11 @@ export default function CandidatesTab({
     if (st) return st === 'not_applied_today'
     return u.current_execution?.status !== 'applying' && (!u.applied_today || u.applied_today === 0) && u.enabled_for_daily_run !== false && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan'
   }).length
+
+  const countElite = usersList.filter(u => (u.plan || '').toLowerCase().includes('elite') || (u.plan || '').toLowerCase().includes('professional')).length
+  const countPro = usersList.filter(u => (u.plan || '').toLowerCase() === 'pro').length
+  const countStarter = usersList.filter(u => (u.plan || '').toLowerCase() === 'starter').length
+  const countTrial = usersList.filter(u => (u.plan || '').toLowerCase() === 'trial').length
 
   // Filter users by search, execution status, and plan status
   const filteredUsers = usersList.filter(u => {
@@ -150,6 +266,7 @@ export default function CandidatesTab({
       if (activeExecFilter === 'applying' && !isApp) return false
       if (activeExecFilter === 'applied_today' && (!isDone || isApp)) return false
       if (activeExecFilter === 'in_queue' && !isQueued) return false
+      if (activeExecFilter === 'enabled' && u.enabled_for_daily_run === false) return false
       if (activeExecFilter === 'disabled' && u.enabled_for_daily_run !== false) return false
       if (activeExecFilter === 'payment_required' && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan' && summary?.status !== 'payment_required') return false
       if (activeExecFilter === 'not_applied_today') {
@@ -162,6 +279,10 @@ export default function CandidatesTab({
     // 3. Plan & Expiry Status Filter
     if (candidateStatusFilter === 'all') return true
     if (candidateStatusFilter === 'active') return u.plan_expiry_status === 'active'
+    if (candidateStatusFilter === 'elite') return (u.plan || '').toLowerCase().includes('elite') || (u.plan || '').toLowerCase().includes('professional')
+    if (candidateStatusFilter === 'pro') return (u.plan || '').toLowerCase() === 'pro'
+    if (candidateStatusFilter === 'starter') return (u.plan || '').toLowerCase() === 'starter'
+    if (candidateStatusFilter === 'trial') return (u.plan || '').toLowerCase() === 'trial'
     if (candidateStatusFilter === 'expiring') return u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'urgent') return u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'expired') return u.plan_expiry_status === 'expired'
@@ -170,6 +291,76 @@ export default function CandidatesTab({
 
     return true
   })
+
+  // 4. Sort Candidates Multi-Attribute Comparator
+  const sortedUsers = React.useMemo(() => {
+    const list = [...filteredUsers]
+    list.sort((a, b) => {
+      let diff = 0
+      switch (sortField) {
+        case 'plan':
+          diff = getPlanWeight(a) - getPlanWeight(b)
+          break
+        case 'enabled': {
+          const aEn = a.enabled_for_daily_run !== false ? 1 : 0
+          const bEn = b.enabled_for_daily_run !== false ? 1 : 0
+          diff = aEn - bEn
+          break
+        }
+        case 'today': {
+          const aToday = Number(a.applied_today || a.stats?.today || 0)
+          const bToday = Number(b.applied_today || b.stats?.today || 0)
+          diff = aToday - bToday
+          break
+        }
+        case 'total': {
+          const aTotal = Number(a.total_applied || a.applied_count || a.stats?.total_applied || 0)
+          const bTotal = Number(b.total_applied || b.applied_count || b.stats?.total_applied || 0)
+          diff = aTotal - bTotal
+          break
+        }
+        case 'execution':
+          diff = getExecutionWeight(a) - getExecutionWeight(b)
+          break
+        case 'name': {
+          const aName = (a.name || a.user_id || '').toLowerCase()
+          const bName = (b.name || b.user_id || '').toLowerCase()
+          diff = aName.localeCompare(bName)
+          break
+        }
+        case 'email': {
+          const aEmail = (a.email || '').toLowerCase()
+          const bEmail = (b.email || '').toLowerCase()
+          diff = aEmail.localeCompare(bEmail)
+          break
+        }
+        case 'last_login': {
+          const aDate = a.last_login_at ? new Date(a.last_login_at).getTime() : 0
+          const bDate = b.last_login_at ? new Date(b.last_login_at).getTime() : 0
+          diff = aDate - bDate
+          break
+        }
+        case 'created_at': {
+          const aDate = a.created_at ? new Date(a.created_at).getTime() : 0
+          const bDate = b.created_at ? new Date(b.created_at).getTime() : 0
+          diff = aDate - bDate
+          break
+        }
+        default:
+          diff = 0
+      }
+
+      if (diff !== 0) {
+        return sortOrder === 'asc' ? diff : -diff
+      }
+
+      // Tie-breaker: Name A-Z
+      const aName = (a.name || a.user_id || '').toLowerCase()
+      const bName = (b.name || b.user_id || '').toLowerCase()
+      return aName.localeCompare(bName)
+    })
+    return list
+  }, [filteredUsers, sortField, sortOrder])
 
   return (
     <div className="space-y-4">
@@ -232,9 +423,10 @@ export default function CandidatesTab({
               { key: 'applying', label: '⚡ Applying Live', count: countApplying, color: 'text-sky-400 font-bold', pulse: true },
               { key: 'applied_today', label: '✓ Applied Today', count: countAppliedToday, color: 'text-emerald-400 font-bold' },
               { key: 'in_queue', label: '⏳ In Queue', count: countInQueue, color: 'text-amber-400 font-bold' },
+              { key: 'enabled', label: '▶️ Bot Active (ON)', count: countEnabled, color: 'text-emerald-400 font-bold' },
+              { key: 'disabled', label: '⏸️ Bot Off', count: countDisabled, color: 'text-zinc-400' },
               { key: 'not_applied_today', label: '⚠️ Not Applied Today', count: countNotAppliedToday, color: 'text-amber-200' },
-              { key: 'payment_required', label: '💳 Payment Required', count: countPaymentRequired, color: 'text-rose-400' },
-              { key: 'disabled', label: '⏸️ Bot Off', count: countDisabled, color: 'text-zinc-400' }
+              { key: 'payment_required', label: '💳 Payment Required', count: countPaymentRequired, color: 'text-rose-400' }
             ].map(f => (
               <button
                 key={f.key}
@@ -273,6 +465,10 @@ export default function CandidatesTab({
             </span>
             {[
               { key: 'all', label: 'All Plans', count: usersList.length, color: 'text-zinc-300' },
+              { key: 'elite', label: '💎 Elite (90d)', count: countElite, color: 'text-amber-400 font-bold' },
+              { key: 'pro', label: '⚡ Pro', count: countPro, color: 'text-indigo-400 font-bold' },
+              { key: 'starter', label: '🚀 Starter', count: countStarter, color: 'text-sky-400 font-bold' },
+              { key: 'trial', label: '🎁 Trial', count: countTrial, color: 'text-violet-400' },
               { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400' },
               { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300' },
               { key: 'urgent', label: 'Urgent <24h', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-rose-300' },
@@ -301,6 +497,68 @@ export default function CandidatesTab({
                 </span>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Quick Sort Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-zinc-900/80 text-xs">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-mono text-indigo-400 uppercase flex items-center gap-1.5 font-bold">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" /> Sort Candidates:
+            </span>
+
+            <select
+              aria-label="Sort candidates by"
+              value={sortField}
+              onChange={e => handleSetSortField(e.target.value as any)}
+              className="bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-white rounded-lg px-3 py-1 text-xs font-mono focus:outline-none focus:border-indigo-500 cursor-pointer shadow-inner"
+            >
+              <option value="plan">💎 Plan Tier (Elite → Pro → Starter → Trial → Free)</option>
+              <option value="enabled">⚡ Auto-Apply Status (Enabled / Active First)</option>
+              <option value="today">🎯 Applications Today (Highest First)</option>
+              <option value="total">📊 Lifetime Total Applied (Highest First)</option>
+              <option value="execution">🤖 Bot Execution Status (Applying Live First)</option>
+              <option value="name">👤 Candidate Name (A → Z)</option>
+              <option value="email">✉️ Portal Email Address (A → Z)</option>
+              <option value="last_login">🕒 Last Login / Activity (Recent First)</option>
+              <option value="created_at">📅 Date Added (Newest First)</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={handleToggleSortOrder}
+              className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
+              title={`Current order: ${sortOrder === 'asc' ? 'Ascending' : 'Descending'}. Click to toggle.`}
+            >
+              {sortOrder === 'asc' ? (
+                <>
+                  <ArrowUp className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Ascending</span>
+                </>
+              ) : (
+                <>
+                  <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Descending</span>
+                </>
+              )}
+            </button>
+
+            {(sortField !== 'plan' || sortOrder !== 'desc') && (
+              <button
+                type="button"
+                onClick={handleResetSort}
+                className="text-[11px] text-zinc-500 hover:text-zinc-300 font-mono underline ml-1 cursor-pointer transition-colors"
+              >
+                Reset Sort
+              </button>
+            )}
+          </div>
+
+          <div className="text-[11px] font-mono text-zinc-500 ml-auto flex items-center gap-1.5">
+            <span>Sorting:</span>
+            <strong className="text-zinc-300 bg-zinc-900/80 px-2 py-0.5 rounded border border-zinc-800 font-normal">
+              {getSortLabel(sortField)} ({sortOrder.toUpperCase()})
+            </strong>
           </div>
         </div>
 
@@ -476,23 +734,88 @@ export default function CandidatesTab({
         {!candidatesTableCollapsed && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
-              <thead 
-                onClick={toggleCandidatesTable}
-                className="cursor-pointer group select-none"
-                title="Click table head to shrink / expand"
-              >
-                <tr className="bg-slate-950 group-hover:bg-zinc-900/60 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 transition-colors">
-                  <th className="py-3.5 px-4 flex items-center gap-1">
-                    <span>Candidate</span>
-                    <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400 transition-colors" />
+              <thead className="select-none">
+                <tr className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                  <th 
+                    onClick={() => handleSetSortField('name')}
+                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    title="Click to sort by Candidate Name (A → Z)"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Candidate</span>
+                      {renderSortIcon('name')}
+                    </div>
                   </th>
-                  <th className="py-3.5 px-4">Portal Email</th>
-                  <th className="py-3.5 px-4">Bot &amp; Server</th>
-                  <th className="py-3.5 px-4">Plan &amp; Access</th>
-                  <th className="py-3.5 px-4 text-center">Auto-Apply</th>
-                  <th className="py-3.5 px-4">Last Login</th>
-                  <th className="py-3.5 px-4">Profile &amp; Resume</th>
-                  <th className="py-3.5 px-4 text-center" title="Applications Today vs Daily Quota Limit &amp; Lifetime Total">Today (Quota) / Total</th>
+                  <th 
+                    onClick={() => handleSetSortField('email')}
+                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    title="Click to sort by Portal Email Address"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Portal Email</span>
+                      {renderSortIcon('email')}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSetSortField('execution')}
+                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    title="Click to sort by Bot Execution Status (Live Applying First)"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Bot &amp; Server</span>
+                      {renderSortIcon('execution')}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSetSortField('plan')}
+                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    title="Click to sort by Plan Tier (Elite → Pro → Starter → Trial → Free)"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Plan &amp; Access</span>
+                      {renderSortIcon('plan')}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSetSortField('enabled')}
+                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    title="Click to sort by Auto-Apply Status (Enabled / Active First)"
+                  >
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span>Auto-Apply</span>
+                      {renderSortIcon('enabled')}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSetSortField('last_login')}
+                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    title="Click to sort by Last Login Activity (Recent First)"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Last Login</span>
+                      {renderSortIcon('last_login')}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSetSortField('created_at')}
+                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    title="Click to sort by Signup Date (Newest First)"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Profile &amp; Resume</span>
+                      {renderSortIcon('created_at')}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSetSortField('today')}
+                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    title="Click to sort by Applications Today / Lifetime Total"
+                  >
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span>Today (Quota) / Total</span>
+                      {renderSortIcon('today')}
+                    </div>
+                  </th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -504,14 +827,14 @@ export default function CandidatesTab({
                       Loading candidate profiles...
                     </td>
                   </tr>
-                ) : filteredUsers.length === 0 ? (
+                ) : sortedUsers.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="py-12 text-center text-slate-500">
                       No candidate profiles match your search query.
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.map((u, idx) => (
+                  sortedUsers.map((u, idx) => (
                     <tr
                       key={u.user_id || idx}
                       onClick={() => {
