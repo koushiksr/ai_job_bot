@@ -180,23 +180,33 @@ export default function JobFluxHelpModal({
 
   return (
     <>
-      {/* Floating Trigger Button in Bottom-Right Corner */}
+      {/* Floating Trigger: Smallest Circular Icon that smoothly expands on hover/click */}
       {showFloatingTrigger && !isModalOpen && (
         <motion.button
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.94 }}
           onClick={handleOpen}
           type="button"
           aria-label="Help & Support"
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border border-zinc-700/80 hover:border-teal-500/50 text-white shadow-2xl backdrop-blur-md transition-all text-xs font-medium cursor-pointer group pointer-events-auto select-none"
+          title="Help & Support (Click to open)"
+          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center p-2 rounded-full bg-zinc-950/90 hover:bg-zinc-900 border border-zinc-800 hover:border-cyan-500/60 text-zinc-300 hover:text-white shadow-xl shadow-black/60 backdrop-blur-xl transition-all duration-300 cursor-pointer group pointer-events-auto select-none overflow-hidden"
         >
-          <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-300 group-hover:scale-110 transition-transform">
+          {/* Minimalist Question Mark / Help Circle */}
+          <div className="w-6 h-6 rounded-full bg-zinc-900 group-hover:bg-cyan-950/80 border border-zinc-800 group-hover:border-cyan-500/50 flex items-center justify-center text-zinc-300 group-hover:text-cyan-400 transition-colors shrink-0">
             <HelpCircle className="w-3.5 h-3.5" />
           </div>
-          <span className="font-semibold tracking-wide">Help & Support</span>
-          <span className="w-2 h-2 rounded-full bg-zinc-400" />
+
+          {/* Label: Completely hidden in smallest circular resting state, smoothly expands only on hover */}
+          <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 group-hover:max-w-[130px] group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 transition-all duration-300 ease-out text-xs font-semibold text-white tracking-wide">
+            Help &amp; Support
+          </span>
+
+          {/* Micro Status Dot: Only visible when expanded on hover */}
+          <span className="max-w-0 overflow-hidden opacity-0 group-hover:max-w-[8px] group-hover:opacity-100 transition-all duration-300 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 block animate-pulse" />
+          </span>
         </motion.button>
       )}
 
