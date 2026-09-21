@@ -160,7 +160,7 @@ export async function GET(req: NextRequest) {
         jobs_applied: t.jobs_applied || (t.stats?.total_applied) || 0,
         stop_requested: Boolean(t.stop_requested),
         logs_count: Array.isArray(t.logs) ? t.logs.length : 0,
-        logs_preview: Array.isArray(t.logs) ? t.logs.slice(-30) : []
+        logs_preview: Array.isArray(t.logs) ? (searchQuery ? t.logs.slice(-200) : t.logs.slice(-60)) : []
       }
     })
 
