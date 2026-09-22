@@ -39,12 +39,11 @@ export async function GET(req: NextRequest) {
       await db.collection('enterprise_orgs').insertOne(org)
     }
 
-    // Query members in this org
+    // Query members in this org (only real members, NOT super admin)
     const members = await db.collection('profiles').find({
-      $or: [
-        { enterprise_org_id: orgId },
-        { email: 'technohmsit@gmail.com' } // Included by default in Technohm SIT
-      ]
+      enterprise_org_id: orgId,
+      enterprise_role: { $ne: 'super_admin' },  // exclude super admin
+      is_org_admin_only: { $ne: true }           // exclude org admin (koushiksrmedala has no candidate profile)
     }).toArray()
 
     const memberUserIds = members.map(m => m.user_id).filter(Boolean)
@@ -81,7 +80,7 @@ export async function GET(req: NextRequest) {
       status: 'success',
       org: {
         org_id: org.org_id,
-        name: org.name,
+        name: org.name || org.display_name || 'My Organisation',
         admin_email: org.admin_email,
         admin_name: org.admin_name,
         status: org.status || 'active',
@@ -102,5 +101,46 @@ export async function GET(req: NextRequest) {
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Error fetching org' }, { status: 500 })
+  }
+}
+
+// PATCH: Update org name (org admin can rename their org)
+export async function PATCH(req: NextRequest) {
+  try {
+    const db = await getDb()
+    if (!db) {
+      return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
+    }
+
+    const auth = await verifyEnterpriseAdminRequest(req, db)
+    if (!auth.authorized) {
+      return NextResponse.json({ detail: 'Unauthorized. Enterprise Admin privileges required.' }, { status: 403 })
+    }
+
+    const body = await req.json()
+    const newName = (body.name || '').trim()
+
+    if (!newName || newName.length < 2) {
+      return NextResponse.json({ detail: 'Organisation name must be at least 2 characters.' }, { status: 400 })
+    }
+
+    if (newName.length > 80) {
+      return NextResponse.json({ detail: 'Organisation name must be 80 characters or fewer.' }, { status: 400 })
+    }
+
+    const orgId = auth.orgId || 'org_technohmsit'
+
+    await db.collection('enterprise_orgs').updateOne(
+      { org_id: orgId },
+      { $set: { name: newName, display_name: newName, updated_at: new Date() } }
+    )
+
+    return NextResponse.json({
+      status: 'success',
+      message: `Organisation renamed to "${newName}".`,
+      name: newName
+    })
+  } catch (err: any) {
+    return NextResponse.json({ detail: err.message || 'Error updating org name' }, { status: 500 })
   }
 }

@@ -113,15 +113,39 @@ export default function EnterpriseAdminPortal() {
   const [liveLogLoading, setLiveLogLoading] = useState(false)
   const [haltingTask, setHaltingTask] = useState(false)
 
+  // Org Settings State
+  const [editingOrgName, setEditingOrgName] = useState(false)
+  const [orgNameInput, setOrgNameInput] = useState('')
+  const [orgNameSaving, setOrgNameSaving] = useState(false)
+
   // Auth & Initial Load
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Step 1: Ingest Google OAuth params if this is a redirect from Google SSO
+      const p = new URLSearchParams(window.location.search)
+      if (p.get('auth') === 'google' && p.get('user_id')) {
+        const gUid = p.get('user_id')!
+        const gEmail = p.get('email') || ''
+        const gRole = p.get('role') || 'enterprise_admin'
+        const gPlan = p.get('plan') || 'enterprise'
+        const gName = p.get('name') || ''
+        const gPicture = p.get('picture') || ''
+        localStorage.setItem('user_id', gUid)
+        localStorage.setItem('user_email', gEmail)
+        localStorage.setItem('user_role', gRole)
+        localStorage.setItem('user_plan', gPlan)
+        if (gName) localStorage.setItem('user_name', gName)
+        if (gPicture) localStorage.setItem('user_picture', gPicture)
+        window.history.replaceState({}, document.title, '/enterprise-admin')
+      }
+
+      // Step 2: Read from localStorage (now populated if Google redirect)
       const storedUid = localStorage.getItem('user_id')
       const storedEmail = localStorage.getItem('user_email') || ''
       const storedRole = localStorage.getItem('user_role') || 'user'
 
       if (!storedUid) {
-        window.location.replace('/?mode=signin&error=' + encodeURIComponent('Please sign in to access Enterprise Portal.'))
+        window.location.replace('/login?error=' + encodeURIComponent('Please sign in to access Enterprise Portal.'))
         return
       }
 
@@ -407,7 +431,37 @@ export default function EnterpriseAdminPortal() {
 
   const handleSignOut = () => {
     localStorage.clear()
-    window.location.href = '/'
+    window.location.href = '/login'
+  }
+
+  // Save Org Name
+  const handleSaveOrgName = async () => {
+    const trimmedName = orgNameInput.trim()
+    if (!trimmedName || trimmedName.length < 2) {
+      setFeedback({ type: 'error', text: 'Org name must be at least 2 characters.' })
+      return
+    }
+    setOrgNameSaving(true)
+    setFeedback(null)
+    try {
+      const res = await fetch('/api/enterprise-admin/org', {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ name: trimmedName })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setOrg(prev => prev ? { ...prev, name: trimmedName } : prev)
+        setEditingOrgName(false)
+        setFeedback({ type: 'success', text: `✅ Organisation renamed to "${trimmedName}" successfully!` })
+      } else {
+        setFeedback({ type: 'error', text: data.detail || 'Failed to update org name.' })
+      }
+    } catch (e: any) {
+      setFeedback({ type: 'error', text: e.message || 'Network error updating org name.' })
+    } finally {
+      setOrgNameSaving(false)
+    }
   }
 
   // Filter members by search
@@ -573,6 +627,68 @@ export default function EnterpriseAdminPortal() {
             <div className="text-[11px] text-zinc-500 font-mono">
               10 runs / week per member
             </div>
+          </div>
+        </section>
+
+        {/* Organisation Settings Card */}
+        <section className="p-5 sm:p-6 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-indigo-400" />
+                <span>Organisation Settings</span>
+              </h3>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Customise your organisation name visible to all members.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-2.5">
+            {editingOrgName ? (
+              <>
+                <input
+                  type="text"
+                  value={orgNameInput}
+                  onChange={e => setOrgNameInput(e.target.value)}
+                  placeholder="Enter organisation name..."
+                  className="w-full sm:flex-1 px-4 py-2.5 rounded-xl bg-zinc-900/80 border border-indigo-700 focus:border-indigo-500 focus:outline-none text-xs sm:text-sm text-white placeholder-zinc-500"
+                  autoFocus
+                  onKeyDown={e => { if (e.key === 'Enter') handleSaveOrgName(); if (e.key === 'Escape') setEditingOrgName(false) }}
+                />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleSaveOrgName}
+                    disabled={orgNameSaving}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 disabled:opacity-60 transition-all cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {orgNameSaving ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => setEditingOrgName(false)}
+                    className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex-1 px-4 py-2.5 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-white font-medium">
+                  {org?.name || 'Unnamed Organisation'}
+                </div>
+                <button
+                  onClick={() => { setOrgNameInput(org?.name || ''); setEditingOrgName(true) }}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Rename Organisation
+                </button>
+              </>
+            )}
+          </div>
+          <div className="text-[11px] text-zinc-500 font-mono">
+            Org ID: <span className="text-zinc-400">{org?.org_id || 'org_technohmsit'}</span> · Admin: <span className="text-zinc-400">{org?.admin_email || currentUserEmail}</span>
           </div>
         </section>
 

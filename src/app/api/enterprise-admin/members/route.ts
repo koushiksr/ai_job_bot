@@ -21,12 +21,11 @@ export async function GET(req: NextRequest) {
 
     const orgId = auth.orgId || 'org_technohmsit'
 
-    // Fetch org members
+    // Fetch org members (exclude super admin and org admin - only real job seekers)
     const members = await db.collection('profiles').find({
-      $or: [
-        { enterprise_org_id: orgId },
-        { email: 'technohmsit@gmail.com' }
-      ]
+      enterprise_org_id: orgId,
+      is_org_admin_only: { $ne: true },          // exclude org admin (koushiksrmedala manages, doesn't apply)
+      enterprise_role: { $nin: ['admin', 'super_admin'] }  // only actual member role
     }).toArray()
 
     const memberIds = members.map(m => m.user_id).filter(Boolean)
