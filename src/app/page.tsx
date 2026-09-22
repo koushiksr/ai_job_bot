@@ -518,7 +518,7 @@ export default function Home() {
               </h1>
               
               <p className="text-sm sm:text-base text-zinc-300 mt-4 sm:mt-5 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                <strong className="text-white font-semibold">85% of interview shortlists go to the first 10 candidates</strong> who apply within 2 hours. Stop grinding job portals after work. JobFlux AI matches high-paying tech openings and submits verified Harvard ATS applications every morning at 6:00 AM &amp; 8:00 AM IST—putting you at the top of recruiter inboxes while you sleep.
+                <strong className="text-white font-semibold">85% of interview shortlists go to the first 10 candidates</strong> who apply within 2 hours. Stop grinding job portals after work. JobFlux AI matches high-paying tech openings and submits verified Harvard ATS applications every morning at 6:00 AM IST—putting you at the top of recruiter inboxes while you sleep.
               </p>
             </div>
 
@@ -526,7 +526,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-2 sm:gap-2.5 items-center justify-center lg:justify-start text-xs text-zinc-300">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950/80 border border-zinc-800 hover:border-cyan-500/40 transition-colors">
                 <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>Be First In Line (6 &amp; 8 AM Early Sweeps)</span>
+                <span>Be First In Line (6 AM Early Sweep)</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950/80 border border-zinc-800 hover:border-purple-500/40 transition-colors">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
@@ -634,7 +634,7 @@ export default function Home() {
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 hidden sm:inline-block animate-pulse" />
               <span className="text-zinc-400">Scheduled Dispatch:</span>
               <span className="text-zinc-200 font-medium">
-                Dual morning runs at 06:00 AM &amp; 08:00 AM IST directly to hiring managers
+                Morning run at 06:00 AM IST directly to hiring managers
               </span>
             </div>
             <div className="flex items-center gap-3 sm:gap-4 text-[11px] text-zinc-400 font-mono">
@@ -808,7 +808,7 @@ export default function Home() {
                   14-Day Recruiter Interview Guarantee
                 </h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  We are so confident in our dual-run engine and 9 AM profile booster that we offer a 100% money-back guarantee. If you don&apos;t receive at least 3 recruiter profile shortlists or interview calls within 14 days, email us for an immediate, full refund. Zero hassle.
+                  We are so confident in our daily-run engine and 9 AM profile booster that we offer a 100% money-back guarantee. If you don&apos;t receive at least 3 recruiter profile shortlists or interview calls within 14 days, email us for an immediate, full refund. Zero hassle.
                 </p>
               </div>
               <div className="pt-2 text-[11px] font-mono text-zinc-300 flex items-center gap-1.5 font-semibold">

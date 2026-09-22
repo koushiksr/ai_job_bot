@@ -96,11 +96,11 @@ const DEMO_ROLES: RoleOption[] = [
     appliedTime: '08:01 AM IST',
     recruiterMessage: 'Talent Acquisition team accessed verified application portfolio',
     logs: [
-      '08:00:01 🛰️ Morning run initiated: Scanning Azure and enterprise cloud feeds',
-      '08:00:04 🎯 Evaluated match: Microsoft Cloud Architect (97.9% Fit)',
-      '08:00:08 🧠 AI Reasoning: Emphasizing Kubernetes & multi-region deployment track record...',
-      '08:00:11 ⚡ Auto-populating recruiter screening questionnaires',
-      '08:00:14 🚀 Verified application submitted directly to Talent Lead'
+      '06:00:01 🛰️ Morning run initiated: Scanning Azure and enterprise cloud feeds',
+      '06:00:04 🎯 Evaluated match: Microsoft Cloud Architect (97.9% Fit)',
+      '06:00:08 🧠 AI Reasoning: Emphasizing Kubernetes & multi-region deployment track record...',
+      '06:00:11 ⚡ Auto-populating recruiter screening questionnaires',
+      '06:00:14 🚀 Verified application submitted directly to Talent Lead'
     ]
   },
   {
@@ -118,11 +118,11 @@ const DEMO_ROLES: RoleOption[] = [
     appliedTime: '08:03 AM IST',
     recruiterMessage: 'Recruiter requested technical chat and availability slots',
     logs: [
-      '08:00:02 🛰️ Radar sweep: Found 35 fintech backend opportunities',
-      '08:00:05 🎯 Evaluated match: Razorpay Lead Backend Engineer (98.2% Fit)',
-      '08:00:09 🧠 AI Reasoning: Aligning distributed ledger and fault-tolerance highlights...',
-      '08:00:12 ⚡ Answers verified: Immediate availability & matching compensation tier',
-      '08:00:15 🚀 Application verified & logged in candidate personal dashboard'
+      '06:00:02 🛰️ Radar sweep: Found 35 fintech backend opportunities',
+      '06:00:05 🎯 Evaluated match: Razorpay Lead Backend Engineer (98.2% Fit)',
+      '06:00:09 🧠 AI Reasoning: Aligning distributed ledger and fault-tolerance highlights...',
+      '06:00:12 ⚡ Answers verified: Immediate availability & matching compensation tier',
+      '06:00:15 🚀 Application verified & logged in candidate personal dashboard'
     ]
   }
 ]
@@ -184,7 +184,7 @@ export default function AiEngineVisualizer() {
                 Autonomous Engine Live Simulation
               </span>
               <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-400">
-                06:00 &amp; 08:00 AM IST
+                06:00 AM IST
               </span>
             </div>
           </div>
@@ -424,7 +424,7 @@ export default function AiEngineVisualizer() {
       <div className="px-6 py-3 bg-[#050507] border-t border-zinc-800/90 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-          <span className="text-zinc-400 font-medium">Safe Human Pacing Emulation & Dual Daily Windows</span>
+          <span className="text-zinc-400 font-medium">Safe Human Pacing Emulation & Daily Window</span>
         </div>
         <div className="flex items-center gap-3 text-[11px] text-zinc-500">
           <span>Direct ATS Integrations</span>

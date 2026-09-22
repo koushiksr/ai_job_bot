@@ -392,7 +392,7 @@ export default function JobFluxHelpModal({
                               className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs focus:outline-none focus:border-zinc-600 cursor-pointer"
                             >
                               <option value="urgent_query">Urgent Query / Issue</option>
-                              <option value="daily_runs">Daily Runs (6 AM & 8 AM)</option>
+                              <option value="daily_runs">Daily Run (6 AM)</option>
                               <option value="resume_profile">Resume & Profile Criteria</option>
                               <option value="technical">Technical Bug / Problem</option>
                               <option value="feature_request">Feature Request</option>

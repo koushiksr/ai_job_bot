@@ -19,7 +19,7 @@ const TICKER_ITEMS = [
   {
     icon: '🚀',
     title: '428 verified applications submitted automatically this morning',
-    subtitle: 'Dual Morning Sweeps (6 & 8 AM IST)',
+    subtitle: 'Morning Sweep (6 AM IST)',
     tag: 'Live Activity'
   },
   {

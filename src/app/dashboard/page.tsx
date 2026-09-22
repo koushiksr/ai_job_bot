@@ -2149,7 +2149,7 @@ export default function UserDashboard() {
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
-                  Unlock <strong className="text-white">1,800+ applications</strong>, dual morning scans & recruiter fast-path on Professional.
+                  Unlock <strong className="text-white">1,800+ applications</strong>, morning scans & recruiter fast-path on Professional.
                 </p>
               </div>
             </div>
@@ -2191,7 +2191,7 @@ export default function UserDashboard() {
                   <span className="text-zinc-600 hidden sm:inline">•</span>
                   <span className="text-zinc-400 font-medium">Applies Daily</span>
                   <span className="text-zinc-600 hidden sm:inline">•</span>
-                  <span>Radar: <strong className="text-zinc-200 font-mono">06:00 &amp; 08:00 AM IST</strong></span>
+                  <span>Radar: <strong className="text-zinc-200 font-mono">06:00 AM IST</strong></span>
                 </p>
               </div>
             </div>
@@ -2401,7 +2401,7 @@ export default function UserDashboard() {
             </div>
 
             <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">
-              Dual Automated Morning Sync
+              Automated Morning Sync
             </span>
           </div>
         </div>

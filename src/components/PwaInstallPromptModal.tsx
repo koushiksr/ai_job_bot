@@ -313,7 +313,7 @@ export default function PwaInstallPromptModal({
                   )}
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Receive instant desktop & lock-screen notifications when recruiters view your resume, shortlists occur, or the daily 6 AM & 8 AM IST dispatch runs complete.
+                  Receive instant desktop & lock-screen notifications when recruiters view your resume, shortlists occur, or the daily 6 AM IST dispatch run completes.
                 </p>
 
                 {pushStatus === 'granted' && (
@@ -521,7 +521,7 @@ export default function PwaInstallPromptModal({
                 </div>
                 <div className="flex items-start gap-2.5 text-xs text-zinc-300">
                   <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                  <span><strong>Dual Morning Runs:</strong> Automated 6 AM & 8 AM IST application status updates.</span>
+                  <span><strong>Morning Run:</strong> Automated 6 AM IST application status update.</span>
                 </div>
               </div>
 

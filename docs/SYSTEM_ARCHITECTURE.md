@@ -46,7 +46,7 @@ naukri_ai_bot_automatic_job_apply/
 ├── pyproject.toml               # Python package dependencies & build metadata
 ├── run.py                       # Main CLI & Scheduled Daemon Entrypoint
 │                                #   - `uv run run.py` (Interactive Runner)
-│                                #   - `uv run run.py --worker` (Automated 6 AM/8 AM IST Daemon)
+│                                #   - `uv run run.py --worker` (Automated 6 AM IST Daemon)
 ├── src/
 │   ├── ai_engine.py             # LLM Evaluation (Gemini 2.5) & Job Keyword Scoring
 │   ├── core_apply.py            # Playwright Application Automation & Questionnaire Solver
@@ -306,7 +306,7 @@ The profile form is consolidated into **`src/components/CandidateProfileEditor.t
 
 ## 🕒 6. Scheduling & Production Daemon
 
-- **Automated Times**: Runs twice daily at **06:00 AM IST** and **08:00 AM IST**.
+- **Automated Times**: Runs once daily at **06:00 AM IST**.
 - **Daemon Command**:
   ```bash
   uv run run.py --worker

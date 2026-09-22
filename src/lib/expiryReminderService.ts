@@ -119,7 +119,7 @@ function generatePlanExpiryEmailHtml({
                     <table width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
                         <td style="font-size: 12px; color: #71717a;">Status Impact:</td>
-                        <td align="right" style="font-size: 12px; font-weight: 600; color: #f43f5e;">Daily 6 AM & 8 AM IST Sweeps Paused</td>
+                        <td align="right" style="font-size: 12px; font-weight: 600; color: #f43f5e;">Daily 6 AM IST Sweep Paused</td>
                       </tr>
                     </table>
                   </td>

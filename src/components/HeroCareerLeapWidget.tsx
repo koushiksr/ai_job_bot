@@ -165,7 +165,7 @@ export default function HeroCareerLeapWidget({
             <Zap className="w-4 h-4 text-amber-400 shrink-0" />
             <span>150 / day</span>
           </div>
-          <div className="text-[10px] text-zinc-500 font-mono">Dispatched at 6 &amp; 8 AM IST (First 10 Rule)</div>
+          <div className="text-[10px] text-zinc-500 font-mono">Dispatched at 6 AM IST (First 10 Rule)</div>
         </div>
       </div>
 

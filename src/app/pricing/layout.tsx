@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Pricing & Plans | JobFlux AI Autonomous Job Apply Bot',
   description:
-    'Start for free (₹0, no credit card required). Upgrade to 1-Month Essentials (₹99, was ₹1,000) or 3-Month Professional (₹199, was ₹2,500 / 1,800+ applications) for dual daily 6 AM & 8 AM automated recruiter applications.',
+    'Start for free (₹0, no credit card required). Upgrade to 1-Month Essentials (₹99, was ₹1,000) or 3-Month Professional (₹199, was ₹2,500 / 1,800+ applications) for daily 6 AM automated recruiter applications.',
   keywords: [
     'job apply bot pricing',
     'auto apply bot cost',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Pricing & Plans | JobFlux AI Autonomous Job Apply Bot',
     description:
-      'Start for free (₹0, no credit card required). Upgrade to Essentials or Professional for automated daily 6 AM & 8 AM recruiter applications.',
+      'Start for free (₹0, no credit card required). Upgrade to Essentials or Professional for daily 6 AM recruiter applications.',
     url: '/pricing',
     siteName: 'JobFlux AI',
     type: 'website',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Pricing & Plans | JobFlux AI Autonomous Job Apply Bot',
     description:
-      'Start for free (₹0, no credit card required). Upgrade to Essentials or Professional for automated daily 6 AM & 8 AM recruiter applications.',
+      'Start for free (₹0, no credit card required). Upgrade to Essentials or Professional for daily 6 AM recruiter applications.',
     images: ['/icon.svg']
   }
 }

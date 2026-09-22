@@ -1159,7 +1159,7 @@ export default function CandidateProfileEditor({
 
           <div className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-medium flex items-center gap-2 shrink-0">
             <Coffee className="w-4 h-4 text-zinc-400" />
-            <span>Dual Morning Runs: 6 & 8 AM</span>
+            <span>Morning Run: 6 AM</span>
           </div>
         </div>
 
@@ -1266,7 +1266,7 @@ export default function CandidateProfileEditor({
                 </h4>
                 <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
                   {step4Done
-                    ? 'AI applies on your behalf twice daily at 06:00 AM & 08:00 AM IST.'
+                    ? 'AI applies on your behalf every morning at 06:00 AM IST.'
                     : 'Complete Steps 1-3 above to activate autonomous daily runs.'}
                 </p>
               </div>
@@ -2580,7 +2580,7 @@ export default function CandidateProfileEditor({
               Autonomous Cloud Bot Run Schedule
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">
-              The daemon triggers every morning at 06:00 AM &amp; 08:00 AM IST to scout and apply to fresh openings.
+              The daemon triggers every morning at 06:00 AM IST to scout and apply to fresh openings.
             </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">

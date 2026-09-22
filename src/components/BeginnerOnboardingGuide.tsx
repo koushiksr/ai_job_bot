@@ -58,7 +58,7 @@ export default function BeginnerOnboardingGuide({
             </span>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-800">
               <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-              <span>Daily Sweeps (6 &amp; 8 AM IST)</span>
+              <span>Daily Sweep (6 AM IST)</span>
             </span>
           </div>
 
@@ -259,14 +259,14 @@ export default function BeginnerOnboardingGuide({
                     </div>
                     <p className="text-[11px] text-zinc-400 leading-relaxed">
                       {step4Active
-                        ? '100% Autonomous. The cloud bot searches jobs, tailors answers, and applies on your behalf twice daily.'
+                        ? '100% Autonomous. The cloud bot searches jobs, tailors answers, and applies on your behalf every morning.'
                         : 'Finish Steps 1–3 above to activate autonomous daily applications on your behalf.'}
                     </p>
                   </div>
 
                   <div className="w-full py-1.5 px-2.5 rounded-lg border border-zinc-800 bg-zinc-900/70 text-zinc-400 text-xs font-mono flex items-center justify-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Runs: 6 &amp; 8 AM IST</span>
+                    <span>Run: 6 AM IST</span>
                   </div>
                 </div>
               )
@@ -400,7 +400,7 @@ export default function BeginnerOnboardingGuide({
                 <ul className="space-y-1.5 text-[11px] text-zinc-300">
                   <li>• <strong className="text-white">0 minutes wasted</strong> — runs 100% in secure cloud background</li>
                   <li>• <strong className="text-white font-medium">600–1,800 verified applications/month</strong> submitted automatically</li>
-                  <li>• <strong className="text-white">6 AM &amp; 8 AM IST delivery</strong> — your resume lands at the top of recruiter inboxes</li>
+                  <li>• <strong className="text-white">6 AM IST delivery</strong> — your resume lands at the top of recruiter inboxes</li>
                   <li>• AI formulates context-aware answers for notice period &amp; salary Q&amp;As</li>
                   <li>• <strong className="text-white font-medium">Average result:</strong> 6–12 interview calls in first 14 days</li>
                 </ul>

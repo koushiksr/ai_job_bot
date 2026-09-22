@@ -144,7 +144,7 @@ export default function ToolsHubPage() {
               Why apply manually when JobFlux AI can do it 24/7?
             </h2>
             <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-2xl">
-              Our automated Playwright engine runs dual morning batches at 6 AM & 8 AM IST, submits to 50 targeted jobs every day, solves dynamic recruiter questionnaires with AI, and touches your profile daily for top recruiter search ranking.
+              Our automated Playwright engine runs a morning batch at 6 AM IST, submits to 50 targeted jobs every day, solves dynamic recruiter questionnaires with AI, and touches your profile daily for top recruiter search ranking.
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
               <Link

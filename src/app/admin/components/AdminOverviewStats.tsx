@@ -139,7 +139,7 @@ export default function AdminOverviewStats({
           </span>
           <span className="text-zinc-200 font-medium">Cluster Active &amp; Synchronized</span>
           <span className="text-zinc-600 hidden sm:inline">·</span>
-          <span className="text-zinc-400 font-mono text-[11px] hidden sm:inline">Scheduled Runs: Daily 06:00 &amp; 08:00 AM IST</span>
+          <span className="text-zinc-400 font-mono text-[11px] hidden sm:inline">Scheduled Run: Daily 06:00 AM IST</span>
         </div>
         <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-400">
           <span>Primary Admin: <strong className="text-sky-300">{adminEmail || 'technohmsit@gmail.com'}</strong></span>

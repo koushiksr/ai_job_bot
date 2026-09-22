@@ -64,10 +64,10 @@ export const MASTER_PLANS: PlanDefinition[] = [
     amountPaise: 0,
     period: 'free to start',
     durationDays: 3,
-    featuresIntro: 'Dual daily morning sweeps, automated applying, zero card required...',
+    featuresIntro: 'Daily morning sweep, automated applying, zero card required...',
     features: [
       { text: 'Autonomous Daily Auto-Apply' },
-      { text: 'Dual Morning Sweeps (6:00 AM & 8:00 AM IST)' },
+      { text: 'Daily Morning Sweep (6:00 AM IST)' },
       { text: 'Automated screening questions answered' },
       { text: 'Real-time application telemetry dashboard' },
       { text: 'Daily email dispatch reports' },

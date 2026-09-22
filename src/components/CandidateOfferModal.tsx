@@ -134,7 +134,7 @@ export default function CandidateOfferModal({
 
           {/* Subtext description */}
           <p className="mt-2 text-sm text-zinc-300 leading-relaxed">
-            {activeOffer.custom_message || 'Activate dual-run 6 AM & 8 AM IST automated recruiter applications, Harvard single-column ATS resumes, and real-time alerts.'}
+            {activeOffer.custom_message || 'Activate daily 6 AM IST automated recruiter applications, Harvard single-column ATS resumes, and real-time alerts.'}
           </p>
 
           {/* Price Showcase Card */}

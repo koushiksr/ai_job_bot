@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
       filename,
       ats_score: resume.ats_score || 99.4,
       synced_at: now.toISOString(),
-      message: 'Resume successfully synchronized with Auto-Apply Bot! Active for upcoming 06:00 AM & 08:00 AM IST runs.'
+      message: 'Resume successfully synchronized with Auto-Apply Bot! Active for the upcoming 06:00 AM IST run.'
     })
   } catch (err: any) {
     console.error('Resume Bot Sync Error:', err)

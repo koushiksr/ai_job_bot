@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s | JobFlux AI"
   },
   description:
-    "Autonomous AI agent that applies to verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes. Safe, automated, dual morning runs at 6 AM & 8 AM IST.",
+    "Autonomous AI agent that applies to verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes. Safe, automated, daily morning run at 6 AM IST.",
   applicationName: "JobFlux AI",
   keywords: [
     "auto apply bot",
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     siteName: "JobFlux AI",
     title: "JobFlux AI | Autonomous Job Apply Bot & Harvard ATS Resume Studio",
     description:
-      "Autonomous AI agent that applies to verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes. Dual runs at 6 AM & 8 AM IST.",
+      "Autonomous AI agent that applies to verified high-paying tech jobs with custom screening Q&As and single-column Harvard ATS resumes. Daily run at 6 AM IST.",
     images: [
       {
         url: "/icon.svg",

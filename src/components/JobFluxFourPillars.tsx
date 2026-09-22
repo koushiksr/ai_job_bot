@@ -61,7 +61,7 @@ export default function JobFluxFourPillars({
           <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5 text-amber-300 font-mono text-[11px] font-semibold">
               <Zap className="w-3.5 h-3.5" />
-              <span>Applied at 6 &amp; 8 AM IST = #1 on Recruiter Desk</span>
+              <span>Applied at 6 AM IST = #1 on Recruiter Desk</span>
             </div>
           </div>
         </div>

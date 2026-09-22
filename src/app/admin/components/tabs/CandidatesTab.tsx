@@ -400,7 +400,7 @@ export default function CandidatesTab({
 
           <div className="flex items-center gap-4">
             <div className="text-xs text-slate-400 hidden lg:block">
-              Auto-scheduled runs: <span className="text-emerald-400 font-semibold">Daily at 06:00 AM &amp; 08:00 AM IST</span>
+              Auto-scheduled run: <span className="text-emerald-400 font-semibold">Daily at 06:00 AM IST</span>
             </div>
             <button
               type="button"
@@ -605,7 +605,7 @@ export default function CandidatesTab({
                   <span>⏳ In Queue / Scheduled</span>
                 </div>
                 <p className="text-[11px] text-zinc-400">
-                  Pending in the automated queue, or waiting for scheduled morning run (06:00 AM / 08:00 AM IST).
+                  Pending in the automated queue, or waiting for the scheduled morning run (06:00 AM IST).
                 </p>
               </div>
 
