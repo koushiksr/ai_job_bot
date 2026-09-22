@@ -153,14 +153,30 @@ export async function PATCH(req: NextRequest) {
       { $set: updates }
     )
 
+    let resetCount = 0
+    if (updates.daily_sweep_time) {
+      // New sweep time = fresh run for everyone today: clear today's
+      // executed markers so all members queue at the new time.
+      const r1 = await db.collection('profiles').updateMany(
+        { enterprise_org_id: orgId },
+        { $unset: { last_automated_run_date: '', daily_status: '' } }
+      )
+      await db.collection('users').updateMany(
+        { enterprise_org_id: orgId },
+        { $unset: { last_automated_run_date: '', daily_status: '' } }
+      )
+      resetCount = r1.modifiedCount || 0
+    }
+
     const parts: string[] = []
     if (updates.name) parts.push(`renamed to "${updates.name}"`)
-    if (updates.daily_sweep_time) parts.push(`daily sweep set to ${updates.daily_sweep_time} IST (members queue one-by-one from that time)`)
+    if (updates.daily_sweep_time) parts.push(`daily sweep set to ${updates.daily_sweep_time} IST — ${resetCount} member(s) reset to not-run-today and will queue at the new time`)
     return NextResponse.json({
       status: 'success',
       message: `Organisation updated: ${parts.join('; ')}.`,
       name: updates.name,
-      daily_sweep_time: updates.daily_sweep_time
+      daily_sweep_time: updates.daily_sweep_time,
+      members_reset: resetCount
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Error updating org name' }, { status: 500 })
