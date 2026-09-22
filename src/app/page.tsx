@@ -434,13 +434,12 @@ export default function Home() {
                 </div>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => scrollToAuth('signin')}
+                  <Link
+                    href="/login"
                     className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2.5 py-1.5 rounded-lg hover:bg-zinc-900/80 cursor-pointer"
                   >
                     Sign in
-                  </button>
+                  </Link>
                   <button
                     type="button"
                     onClick={() => scrollToAuth('trial')}
@@ -464,13 +463,12 @@ export default function Home() {
                 <span>Stop applying manually. AI applies for you while you sleep • <span className="text-zinc-200 font-medium">Free to start</span></span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => scrollToAuth('signin')}
+                <Link
+                  href="/login"
                   className="text-xs text-zinc-400 hover:text-white transition-colors px-2.5 py-1 rounded-md hover:bg-zinc-900 cursor-pointer"
                 >
                   Sign in
-                </button>
+                </Link>
                 <button
                   type="button"
                   onClick={() => scrollToAuth('trial')}
