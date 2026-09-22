@@ -263,7 +263,22 @@ export async function POST(req: NextRequest) {
     let planName = 'JobFlux 7-Day Free Access'
     let isPlanActive = true
 
-    if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
+    if (rawPlan === 'org_pro') {
+      const orgProExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
+      if (orgProExpires && orgProExpires > now) {
+        verifiedPlan = 'org_pro'
+        planName = 'JobFlux Org Pro'
+        isPlanActive = true
+      } else if (profile.enterprise_role === 'member') {
+        verifiedPlan = 'enterprise'
+        planName = 'JobFlux Enterprise Member'
+        isPlanActive = true
+      } else {
+        verifiedPlan = 'trial'
+        planName = 'JobFlux 7-Day Free Access (Plan Expired)'
+        isPlanActive = false
+      }
+    } else if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
       verifiedPlan = 'enterprise'
       planName = 'JobFlux Enterprise Member'
       isPlanActive = true

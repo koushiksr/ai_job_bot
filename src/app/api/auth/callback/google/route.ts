@@ -225,7 +225,16 @@ export async function GET(req: NextRequest) {
 
     const rawPlan = (profile.plan || 'trial').toLowerCase()
     let verifiedPlan = 'trial'
-    if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
+    if (rawPlan === 'org_pro') {
+      const orgProExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
+      if (orgProExpires && orgProExpires > now) {
+        verifiedPlan = 'org_pro'
+      } else if (profile.enterprise_role === 'member') {
+        verifiedPlan = 'enterprise'
+      } else {
+        verifiedPlan = 'trial'
+      }
+    } else if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
       verifiedPlan = 'enterprise'
     } else if (rawPlan === 'vip') {
       verifiedPlan = 'vip'

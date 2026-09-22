@@ -135,6 +135,7 @@ export async function GET(req: NextRequest) {
         plan === 'elite' ||
         plan === 'professional' ||
         plan === 'enterprise' ||
+        plan === 'org_pro' ||
         role === 'admin'
       ) && isPlanActive
     } catch {

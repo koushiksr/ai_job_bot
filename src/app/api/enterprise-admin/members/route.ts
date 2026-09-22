@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     const memberList = members.map(m => {
       const s = statsMap.get(m.user_id) || {}
       const userTasks = recentTasks.filter(t => t.user_id === m.user_id)
-      const onDemandUsed = userTasks.filter(t => t.source === 'web_dashboard_on_demand').length
+      const onDemandUsed = userTasks.filter(t => t.source === 'web_dashboard_on_demand' || t.source === 'enterprise_admin_on_demand').length
 
       const now = new Date()
       const istOffsetMs = 5.5 * 60 * 60 * 1000
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
         applied_this_month: s.this_month || 0,
         total_applied: s.total_applied || 0,
         on_demand_runs_used: onDemandUsed,
-        on_demand_quota: 10,
+        on_demand_quota: (m.plan || '').toLowerCase() === 'org_pro' ? 15 : 10,
         daily_application_limit: 55,
         last_applied_at: s.last_applied_at || null,
         created_at: m.created_at || null

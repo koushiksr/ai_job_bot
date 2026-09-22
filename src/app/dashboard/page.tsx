@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Script from 'next/script'
 import {
   Briefcase,
   Clock,
@@ -115,6 +116,8 @@ export default function UserDashboard() {
   const [isTriggeringScout, setIsTriggeringScout] = useState<boolean>(false)
   const [activeTask, setActiveTask] = useState<any>(null)
   const [taskFeedback, setTaskFeedback] = useState<{ type: 'success' | 'info' | 'error', text: string } | null>(null)
+  const [orgProLoading, setOrgProLoading] = useState<boolean>(false)
+  const [orgProError, setOrgProError] = useState<string>('')
   const [weeklyQuota, setWeeklyQuota] = useState<{ limit: number, used: number, remaining: number, is_unlimited: boolean } | null>(null)
   const [queueStatus, setQueueStatus] = useState<{ queue_position: number, is_global_sweep_active: boolean, active_user_id: string | null } | null>(null)
   const [showLiveTerminal, setShowLiveTerminal] = useState<boolean>(true)
@@ -128,8 +131,8 @@ export default function UserDashboard() {
   const [proModalFeature, setProModalFeature] = useState<string>('On-Demand Application Sweeps (Up to 5x / week)')
 
   // Candidate account has Professional privileges if on an active Professional tier, Enterprise tier, OR VIP pass.
-  const isEnterpriseMember = enterpriseRole === 'member' || userPlan === 'enterprise'
-  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'vip' || isVip || isEnterpriseMember) && isPlanActive
+  const isEnterpriseMember = enterpriseRole === 'member' || userPlan === 'enterprise' || userPlan === 'org_pro'
+  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'org_pro' || userPlan === 'vip' || isVip || isEnterpriseMember) && isPlanActive
 
   // Plan Expiry & Renewal Computations
   const planExpiryDate = planExpiresAt ? new Date(planExpiresAt) : null
@@ -398,6 +401,73 @@ export default function UserDashboard() {
       alert('Failed to respond to invite: ' + e.message)
     } finally {
       setIsRespondingToInvite(false)
+    }
+  }
+
+  // Org Pro upgrade (members-only plan, ₹99/30 days, 15 on-demand/week)
+  const handleOrgProUpgrade = async () => {
+    setOrgProLoading(true)
+    setOrgProError('')
+    try {
+      const orderRes = await fetch('/api/payment/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_id: 'org_pro', user_id: userId, email: userEmail })
+      })
+      const orderData = await orderRes.json()
+      if (!orderRes.ok) throw new Error(orderData.detail || 'Failed to initiate payment')
+      if (typeof window === 'undefined' || !(window as any).Razorpay) {
+        throw new Error('Payment gateway is still loading. Please refresh and try again.')
+      }
+      const rzp = new (window as any).Razorpay({
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'JobFlux AI',
+        description: 'Org Pro — Member Upgrade (30 Days)',
+        image: '/images/icon.png',
+        order_id: orderData.order_id,
+        prefill: { email: userEmail },
+        theme: { color: '#000000' },
+        handler: async (response: any) => {
+          try {
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                plan_id: 'org_pro',
+                user_id: userId,
+                email: userEmail
+              })
+            })
+            const verifyData = await verifyRes.json()
+            if (verifyRes.ok && verifyData.verified) {
+              localStorage.setItem('user_plan', 'org_pro')
+              setUserPlan('org_pro')
+              setTaskFeedback({ type: 'success', text: '🎉 Org Pro activated! 15 on-demand sweeps/week unlocked. Priority queue enabled.' })
+              refreshAllDashboardData(userId)
+            } else {
+              throw new Error(verifyData.detail || 'Payment verification failed.')
+            }
+          } catch (vErr: any) {
+            setOrgProError(vErr.message || 'Payment verification error')
+          } finally {
+            setOrgProLoading(false)
+          }
+        },
+        modal: { ondismiss: () => setOrgProLoading(false) }
+      })
+      rzp.on('payment.failed', (response: any) => {
+        setOrgProError(`Payment failed: ${response.error?.description || response.error?.reason || 'Unknown error'}`)
+        setOrgProLoading(false)
+      })
+      rzp.open()
+    } catch (e: any) {
+      setOrgProError(e.message || 'Payment error')
+      setOrgProLoading(false)
     }
   }
 
@@ -946,6 +1016,7 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       {/* On-Demand Telemetry Refresh Animation Overlay */}
       {isRefreshing && (
         <AiLoadingScreen
@@ -1425,7 +1496,7 @@ export default function UserDashboard() {
                     {/* Subscription Badge */}
                     {userPlan !== 'vip' && (
                       <span className={`inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold shrink-0 transition-all ${
-                        isPlanActive && (userPlan === 'starter' || userPlan === 'pro' || userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise')
+                        isPlanActive && (userPlan === 'starter' || userPlan === 'pro' || userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'org_pro')
                           ? 'border border-amber-500/30 bg-amber-500/10 text-amber-300 font-medium'
                           : userPlan === 'trial' && isPlanActive
                           ? 'border border-zinc-800 bg-zinc-900 text-zinc-300 font-medium'
@@ -1666,13 +1737,46 @@ export default function UserDashboard() {
               <div>
                 <span className="font-semibold text-white">Enterprise Workspace Active</span>
                 <span className="text-zinc-400 text-[11px] ml-2 font-mono">
-                  • 10 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch
+                  • {userPlan === 'org_pro' ? '15' : '10'} Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch
                 </span>
               </div>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950 border border-indigo-700/70 text-indigo-300 font-semibold uppercase shrink-0">
-              Technohm SIT Org
+              {userPlan === 'org_pro' ? 'Org Pro' : 'Technohm SIT Org'}
             </span>
+          </div>
+        )}
+
+        {/* Org Pro Upgrade Banner — members-only plan (base enterprise members) */}
+        {isEnterpriseMember && userPlan === 'enterprise' && isPlanActive && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/60 via-zinc-950 to-indigo-950/60 border border-amber-500/40 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent pointer-events-none" />
+            <div className="flex items-start gap-3 z-10">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center shrink-0">
+                <Crown className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/40">
+                    Org Member Exclusive
+                  </span>
+                  <span className="text-sm font-bold text-white">Upgrade to Org Pro — ₹99 / 30 days</span>
+                </div>
+                <p className="text-xs text-zinc-300 mt-1">
+                  <strong className="text-amber-300">15 on-demand sweeps/week</strong> (vs 10) • Priority worker queue • Stays linked to your organization.
+                </p>
+                {orgProError && <p className="text-xs text-red-300 mt-1.5">{orgProError}</p>}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleOrgProUpgrade}
+              disabled={orgProLoading}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-60 shrink-0 z-10"
+            >
+              {orgProLoading ? 'Opening Checkout…' : 'Upgrade to Org Pro'}
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         )}
 

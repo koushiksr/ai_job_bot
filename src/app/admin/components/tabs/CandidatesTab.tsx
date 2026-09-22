@@ -197,7 +197,7 @@ export default function CandidatesTab({
     const isVip = Boolean(u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime')
     const p = (u.plan || u.plan_name || '').toLowerCase()
 
-    if (p.includes('enterprise')) return 120
+    if (p.includes('enterprise') || p.includes('org_pro')) return 120
     if (p.includes('elite') || p.includes('professional')) return isVip ? 115 : 100
     if (isVip) return 95
     if (p.includes('pro')) return 80

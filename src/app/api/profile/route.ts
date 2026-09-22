@@ -43,7 +43,22 @@ export async function GET(req: NextRequest) {
     let verifiedPlanName = 'JobFlux 7-Day Free Access'
     let isPlanActive = true
 
-    if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
+    if (rawPlan === 'org_pro') {
+      const orgProExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
+      if (orgProExpires && orgProExpires > now) {
+        verifiedPlan = 'org_pro'
+        verifiedPlanName = 'JobFlux Org Pro'
+        isPlanActive = true
+      } else if (profile.enterprise_role === 'member') {
+        verifiedPlan = 'enterprise'
+        verifiedPlanName = 'JobFlux Enterprise Member'
+        isPlanActive = true
+      } else {
+        verifiedPlan = 'none'
+        verifiedPlanName = 'Plan Expired (No Active Plan)'
+        isPlanActive = false
+      }
+    } else if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
       verifiedPlan = 'enterprise'
       verifiedPlanName = 'JobFlux Enterprise Member'
       isPlanActive = true

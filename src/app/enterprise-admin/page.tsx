@@ -863,7 +863,7 @@ export default function EnterpriseAdminPortal() {
                           <span className="font-mono text-purple-300 font-semibold">
                             {member.on_demand_runs_used}
                           </span>
-                          <span className="text-zinc-600 font-mono"> / 10 week</span>
+                          <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || 10} week</span>
                         </td>
 
                         {/* Automated Run Status (Active or Paused) */}

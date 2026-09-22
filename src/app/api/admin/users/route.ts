@@ -224,7 +224,7 @@ export async function GET(req: NextRequest) {
       }
 
       // Default daily limit based on plan or custom override (150 max for Elite/VIP/Enterprise)
-      const defaultLimit = (isVip || ['elite', 'professional', 'enterprise', 'vip'].includes(planClean))
+      const defaultLimit = (isVip || ['elite', 'professional', 'enterprise', 'org_pro', 'vip'].includes(planClean))
         ? 150
         : (planClean === 'pro' ? 50 : 20)
       const dailyApplicationLimit = p.daily_application_limit ? Math.min(150, Math.max(1, Number(p.daily_application_limit))) : defaultLimit

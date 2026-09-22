@@ -106,7 +106,24 @@ export async function POST(req: NextRequest) {
         let planName = 'JobFlux 7-Day Free Access'
         let isPlanActive = true
 
-        if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
+        if (rawPlan === 'org_pro') {
+          // Paid org-member upgrade: recognized while active; falls back to
+          // free org base on expiry (members never drop to 'none' while in org)
+          const orgProExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
+          if (orgProExpires && orgProExpires > now) {
+            activePlan = 'org_pro'
+            planName = 'JobFlux Org Pro'
+            isPlanActive = true
+          } else if (profile.enterprise_role === 'member') {
+            activePlan = 'enterprise'
+            planName = 'JobFlux Enterprise Member'
+            isPlanActive = true
+          } else {
+            activePlan = 'none'
+            planName = 'Plan Expired (No Active Plan)'
+            isPlanActive = false
+          }
+        } else if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
           activePlan = 'enterprise'
           planName = 'JobFlux Enterprise Member'
           isPlanActive = true

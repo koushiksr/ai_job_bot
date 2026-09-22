@@ -203,7 +203,7 @@ export async function POST(req: NextRequest) {
 
     const role = profile?.role || 'user'
     const plan = (profile?.plan || 'trial').toLowerCase()
-    const isPro = role === 'admin' || user_id === 'admin' || user_id === 'technohmsit' || plan === 'elite' || plan === 'professional' || plan === 'enterprise'
+    const isPro = role === 'admin' || user_id === 'admin' || user_id === 'technohmsit' || plan === 'elite' || plan === 'professional' || plan === 'enterprise' || plan === 'org_pro'
 
     const targetRole = answers.target_role || 'Senior Software Engineer'
     const targetCtc = answers.target_ctc || '₹35 - 50 LPA'

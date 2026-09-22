@@ -259,7 +259,7 @@ export default function ResumeBuilderPage() {
 
   // Professional privilege checked against active plan or VIP pass
   const isProfessional =
-    (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'vip' || isVip) && isPlanActive
+    (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'org_pro' || userPlan === 'vip' || isVip) && isPlanActive
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

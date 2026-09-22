@@ -97,9 +97,11 @@ export async function syncUserPaymentPlan(
     const rawPlanId = payment.plan_id || 'pro'
     const planId = rawPlanId === 'starter' ? 'pro' : rawPlanId
     const planName =
-      planId === 'elite' || planId === 'professional'
-        ? 'JobFlux Professional'
-        : 'JobFlux Essentials'
+      planId === 'org_pro'
+        ? 'JobFlux Org Pro'
+        : planId === 'elite' || planId === 'professional'
+          ? 'JobFlux Professional'
+          : 'JobFlux Essentials'
 
     const activatedAt = payment.verified_at ? new Date(payment.verified_at) : new Date()
 

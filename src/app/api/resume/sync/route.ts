@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       role === 'admin' ||
       user_id === 'admin' ||
       user_id === 'technohmsit' ||
-      ((plan === 'elite' || plan === 'professional' || plan === 'enterprise') && isPlanActive)
+      ((plan === 'elite' || plan === 'professional' || plan === 'enterprise' || plan === 'org_pro') && isPlanActive)
 
     if (!isPro) {
       return NextResponse.json(

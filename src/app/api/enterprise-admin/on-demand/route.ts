@@ -110,18 +110,19 @@ export async function POST(req: NextRequest) {
       }, { status: 429 })
     }
 
-    // ── Rate Limit: Max 10 on-demand runs per week ──────────────────────────
+    // ── Rate Limit: weekly on-demand runs (15 for Org Pro buyers, else 10) ──
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     const weeklyOnDemandCount = await db.collection('tasks').countDocuments({
       user_id: targetUserId,
       source: { $in: ['enterprise_admin_on_demand', 'web_dashboard_on_demand'] },
       created_at: { $gte: sevenDaysAgo }
     })
+    const weeklyLimit = (targetProfile.plan || '').toLowerCase() === 'org_pro' ? 15 : 10
 
-    if (weeklyOnDemandCount >= 10) {
+    if (weeklyOnDemandCount >= weeklyLimit) {
       return NextResponse.json({
-        detail: `Weekly limit reached. On-demand sweeps are capped at 10 per week per member. ${targetProfile.name || targetUserId} has used all 10 this week. Resets on a rolling 7-day basis.`,
-        limit: 10,
+        detail: `Weekly limit reached. On-demand sweeps are capped at ${weeklyLimit} per week for ${weeklyLimit === 15 ? 'Org Pro members' : 'Enterprise members'}. ${targetProfile.name || targetUserId} has used all ${weeklyLimit} this week. Resets on a rolling 7-day basis.${weeklyLimit === 10 ? ' Upgrade to Org Pro (₹99/mo) for 15/week.' : ''}`,
+        limit: weeklyLimit,
         used_this_week: weeklyOnDemandCount,
         remaining_this_week: 0
       }, { status: 429 })

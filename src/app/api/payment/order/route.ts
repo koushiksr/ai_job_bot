@@ -17,6 +17,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Invalid plan selected' }, { status: 400 })
     }
 
+    // Org Pro is exclusive to verified organization members (members-only banner)
+    if (plan_id === 'org_pro') {
+      const db = await getDb()
+      const cleanEmail = ((email || '') as string).toLowerCase().trim()
+      const cleanUid = ((user_id || '') as string).trim()
+      const memberProfile = db ? await db.collection('profiles').findOne({
+        $or: [
+          ...(cleanUid ? [{ user_id: cleanUid }] : []),
+          ...(cleanEmail ? [{ email: { $regex: `^${cleanEmail}$`, $options: 'i' } }] : [])
+        ]
+      }) : null
+      if (!memberProfile?.enterprise_org_id) {
+        return NextResponse.json({ detail: 'Org Pro is available only to organization members. Join an organization first.' }, { status: 403 })
+      }
+    }
+
     const cleanPromo = (promo_code || '').trim().toUpperCase()
     let orderAmount = plan.amount
     let orderPlanName = plan.name

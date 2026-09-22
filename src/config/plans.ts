@@ -286,6 +286,50 @@ export const MASTER_PROMOS: PromoDefinition[] = [
 export const PLANS = MASTER_PLANS
 
 /**
+ * Organization-member exclusive plans (NOT shown on public pricing).
+ * Sold only via the member dashboard upgrade banner to verified org members.
+ */
+export const ORG_PLANS: PlanDefinition[] = [
+  {
+    id: 'org_pro',
+    name: 'Org Pro',
+    subtitle: 'Exclusive upgrade for organization members.',
+    badge: 'ORG MEMBER',
+    price: '₹99',
+    originalPrice: '₹1,000',
+    amountPaise: 9900,
+    period: '/ month',
+    durationDays: 30,
+    featuresIntro: 'Everything in Enterprise, plus member-only extras...',
+    features: [
+      { text: '30 Days of Continuous Daily Auto-Apply' },
+      { text: 'On-Demand Real-Time Sweeps (Up to 15x / week)' },
+      { text: 'Priority Cloud Worker Queue' },
+      { text: 'AI Resume Optimization & Keyword Match' },
+      { text: 'Stays linked to your organization & admin' }
+    ],
+    cta: 'Upgrade to Org Pro (₹99)',
+    highlight: true
+  }
+]
+
+export function getOrgPlan(planId: string): PlanDefinition | undefined {
+  return ORG_PLANS.find(p => p.id === planId)
+}
+
+/** True for organization-linked plans (enterprise base + paid org upgrades). */
+export function isOrgPlanId(planId?: string | null): boolean {
+  return planId === 'enterprise' || planId === 'org_pro'
+}
+
+/** Weekly on-demand run allowance per plan. */
+export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMember = false): number {
+  if (planId === 'org_pro') return 15
+  if (planId === 'enterprise' || isEnterpriseMember) return 10
+  return 5
+}
+
+/**
  * Backend Razorpay Plan Amounts Map
  * Supports both canonical IDs and historical aliases (starter, professional).
  */
@@ -293,7 +337,8 @@ export const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: 
   starter: { amount: 9900, name: 'JobFlux 1-Month Plan (30 Days)', days: 30 },
   pro: { amount: 9900, name: 'JobFlux 1-Month Career Pro (30 Days)', days: 30 },
   elite: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 },
-  professional: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 }
+  professional: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 },
+  org_pro: { amount: 9900, name: 'JobFlux Org Pro — Member Upgrade (30 Days)', days: 30 }
 }
 
 /**
@@ -303,7 +348,8 @@ export const PLAN_DAYS: Record<string, number> = {
   starter: 30,
   pro: 30,
   elite: 90,
-  professional: 90
+  professional: 90,
+  org_pro: 30
 }
 
 /**

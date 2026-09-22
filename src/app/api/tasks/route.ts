@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { getWeeklyOnDemandLimit } from '@/config/plans'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,15 +31,15 @@ async function healStaleUserTasks(db: any, userId: string) {
   }
 }
 
-async function getWeeklyOnDemandQuota(db: any, userId: string, isSuperUser: boolean, isVip: boolean, isEnterpriseMember: boolean = false) {
+async function getWeeklyOnDemandQuota(db: any, userId: string, isSuperUser: boolean, isVip: boolean, isEnterpriseMember: boolean = false, plan?: string) {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
   const usedCount = await db.collection('tasks').countDocuments({
     user_id: userId,
     source: 'web_dashboard_on_demand',
     created_at: { $gte: sevenDaysAgo }
   })
-  // Enterprise members get 10 weekly on-demand runs (vs 5 for pro)
-  const weeklyLimit = isEnterpriseMember ? 10 : 5
+  // Org Pro buyers get 15 weekly on-demand runs (vs 10 enterprise base, 5 pro)
+  const weeklyLimit = getWeeklyOnDemandLimit(plan, isEnterpriseMember)
   return {
     limit: weeklyLimit,
     used: usedCount,
@@ -73,12 +74,12 @@ export async function GET(req: NextRequest) {
     const now = new Date()
     const isSuperUser = role === 'admin' || userId === 'admin' || userId === 'technohmsit'
     const isVip = Boolean(profile?.is_vip || profile?.vip_access || profile?.free_privilege)
-    const isEnterpriseMember = profile?.enterprise_role === 'member' || plan === 'enterprise'
+    const isEnterpriseMember = profile?.enterprise_role === 'member' || plan === 'enterprise' || plan === 'org_pro'
     const isProTier = plan === 'elite' || plan === 'professional' || plan === 'vip'
     const hasActiveExpiration = profile?.plan_expires_at ? new Date(profile.plan_expires_at) > now : false
     const isPro = isSuperUser || isVip || isEnterpriseMember || (isProTier && hasActiveExpiration)
 
-    const quota = await getWeeklyOnDemandQuota(db, userId, isSuperUser, isVip, isEnterpriseMember)
+    const quota = await getWeeklyOnDemandQuota(db, userId, isSuperUser, isVip, isEnterpriseMember, plan)
 
     const latestTask = await db
       .collection('tasks')
@@ -160,7 +161,7 @@ export async function POST(req: NextRequest) {
     const now = new Date()
     const isSuperUser = role === 'admin' || user_id === 'admin' || user_id === 'technohmsit'
     const isVip = Boolean(profile?.is_vip || profile?.vip_access || profile?.free_privilege)
-    const isEnterpriseMember = profile?.enterprise_role === 'member' || plan === 'enterprise'
+    const isEnterpriseMember = profile?.enterprise_role === 'member' || plan === 'enterprise' || plan === 'org_pro'
     const isProTier = plan === 'elite' || plan === 'professional' || plan === 'vip'
     const hasActiveExpiration = profile?.plan_expires_at ? new Date(profile.plan_expires_at) > now : false
     const isPro = isSuperUser || isVip || isEnterpriseMember || (isProTier && hasActiveExpiration)
@@ -173,8 +174,8 @@ export async function POST(req: NextRequest) {
       }, { status: 403 })
     }
 
-    // 2. Weekly Quota Enforcement (10 triggers for enterprise, 5 for pro)
-    const quota = await getWeeklyOnDemandQuota(db, user_id, isSuperUser, isVip, isEnterpriseMember)
+    // 2. Weekly Quota Enforcement (15 org_pro, 10 enterprise, 5 pro)
+    const quota = await getWeeklyOnDemandQuota(db, user_id, isSuperUser, isVip, isEnterpriseMember, plan)
     if (!quota.is_unlimited && quota.used >= quota.limit) {
       return NextResponse.json({
         detail: `Weekly on-demand sweep limit reached (${quota.limit}/${quota.limit}). Daily automated sweeps continue running every day. Quota resets on a rolling 7-day basis.`,

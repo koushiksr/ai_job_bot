@@ -90,9 +90,10 @@ export async function POST(req: NextRequest) {
       query = { email: { $regex: `^${cleanEmail}$`, $options: 'i' } }
     }
 
+    const planDisplayName = plan_id === 'org_pro' ? 'Org Pro' : plan_id.toUpperCase()
     const updateFields: any = {
       plan: plan_id,
-      plan_name: `JobFlux ${plan_id.toUpperCase()}`,
+      plan_name: plan_id === 'org_pro' ? 'JobFlux Org Pro' : `JobFlux ${plan_id.toUpperCase()}`,
       plan_activated_at: now,
       plan_expires_at: expiresAt,
       enabled_for_daily_run: true,
@@ -143,10 +144,10 @@ export async function POST(req: NextRequest) {
       success: true,
       verified: true,
       plan: plan_id,
-      plan_name: `JobFlux ${plan_id.toUpperCase()}`,
+      plan_name: plan_id === 'org_pro' ? 'JobFlux Org Pro' : `JobFlux ${plan_id.toUpperCase()}`,
       plan_activated_at: now,
       plan_expires_at: expiresAt,
-      message: `Payment confirmed! ${plan_id.toUpperCase()} plan activated successfully for ${durationDays} days.`
+      message: `Payment confirmed! ${planDisplayName} plan activated successfully for ${durationDays} days.`
     })
   } catch (err: any) {
     console.error('Payment verification error:', err)
