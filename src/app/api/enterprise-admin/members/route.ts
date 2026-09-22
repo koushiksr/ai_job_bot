@@ -20,6 +20,8 @@ export async function GET(req: NextRequest) {
     }
 
     const orgId = auth.orgId || 'org_technohmsit'
+    const orgDoc = await db.collection('enterprise_orgs').findOne({ org_id: orgId })
+    const orgDisabled = (orgDoc?.status || 'active') === 'disabled'
 
     // Fetch org members (exclude super admin and org admin - only real job seekers)
     const members = await db.collection('profiles').find({
@@ -88,6 +90,29 @@ export async function GET(req: NextRequest) {
         queue_position: activeDoc.status === 'running' ? 0 : (pendingIndex.get(activeDoc.task_id) || null)
       } : null
 
+      // Sweep eligibility: will this member actually be queued at sweep time?
+      // Mirrors backend plan rules: org base + active Org Pro + active paid/trial/VIP.
+      const blockers: string[] = []
+      if (orgDisabled) blockers.push('Org disabled by Super Admin')
+      if (m.enabled_for_daily_run === false) blockers.push('Daily run paused')
+      if ((m.enterprise_status || 'active') === 'disabled') blockers.push('Member disabled')
+      if (!m.password || !String(m.password).trim()) blockers.push('Naukri password missing')
+      const mPlan = (m.plan || 'enterprise').toLowerCase()
+      const nowMs = Date.now()
+      const expOk = (d: any) => {
+        if (!d) return false
+        const t = new Date(d).getTime()
+        return !isNaN(t) && t > nowMs
+      }
+      const planOk =
+        mPlan === 'enterprise' ||
+        mPlan === 'org_pro' || // paid upgrade; expired falls back to org base cover
+        Boolean(m.is_vip || m.vip_access || m.free_privilege) ||
+        (['starter', 'pro', 'elite', 'professional', 'paid'].includes(mPlan) && expOk(m.plan_expires_at)) ||
+        (mPlan === 'trial' && (!m.trial_expires_at || expOk(m.trial_expires_at))) ||
+        mPlan === 'vip'
+      if (!planOk) blockers.push(`No active plan (${mPlan})`)
+
       return {
         user_id: m.user_id,
         email: m.email,
@@ -106,6 +131,8 @@ export async function GET(req: NextRequest) {
         total_applied: s.total_applied || 0,
         on_demand_runs_used: onDemandUsed,
         on_demand_quota: effPlan === 'org_pro' ? 15 : 10,
+        sweep_eligible: blockers.length === 0,
+        sweep_blockers: blockers,
         active_task: activeTask,
         daily_application_limit: 55,
         last_applied_at: s.last_applied_at || null,

@@ -52,6 +52,8 @@ interface Member {
   last_applied_at: string | null
   created_at: string | null
   active_task?: { task_id: string; status: string; queue_position: number | null } | null
+  sweep_eligible?: boolean
+  sweep_blockers?: string[]
 }
 
 interface OrgInfo {
@@ -777,6 +779,17 @@ export default function EnterpriseAdminPortal() {
                   {sweepTimeSaving ? 'Saving...' : 'Set Time'}
                 </button>
                 <span className="text-[10px] text-zinc-600 font-mono hidden sm:inline">members queue one-by-one from this time daily</span>
+                {(() => {
+                  const t = (org?.daily_sweep_time || '06:00')
+                  try {
+                    const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false })
+                    const nowHm = fmt.format(new Date())
+                    const nextDay = t > nowHm ? 'today' : 'tomorrow'
+                    return <span className="text-[10px] font-mono text-cyan-400/90">· Next run {nextDay} {t} IST</span>
+                  } catch {
+                    return null
+                  }
+                })()}
               </div>
             </div>
 
@@ -965,6 +978,15 @@ export default function EnterpriseAdminPortal() {
                           <div className="text-[10px] text-zinc-600 font-mono mt-1">
                             Last active {member.last_applied_at ? new Date(member.last_applied_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
                           </div>
+                          {member.sweep_eligible === false ? (
+                            <div className="text-[10px] font-mono mt-1 text-amber-300" title={(member.sweep_blockers || []).join('; ')}>
+                              ⚠️ Not queued: {(member.sweep_blockers || ['blocked'])[0]}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] font-mono mt-1 text-emerald-400/80">
+                              ✓ In daily sweep
+                            </div>
+                          )}
                         </td>
 
                         {/* Action Buttons: Enable/Disable + Trigger On-Demand */}
