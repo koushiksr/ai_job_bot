@@ -65,7 +65,7 @@ function setCached(key: string, content: string, usage: OpenAIChatResult['usage'
 }
 
 export function getOpenAIModel(): string {
-  return process.env.OPENAI_MODEL || 'gpt-5-nano'
+  return process.env.OPENAI_MODEL || 'gpt-5.4-nano-2026-03-17'
 }
 
 export async function openaiChatCompletion(opts: OpenAIChatOptions): Promise<OpenAIChatResult | null> {
