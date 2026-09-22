@@ -267,7 +267,7 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
 
               {/* Trust line */}
               <div className="flex items-center justify-center gap-3 text-[11px] text-zinc-500 flex-wrap pt-1">
-                <span className="flex items-center gap-1 text-emerald-400"><Check className="w-3 h-3" />7-Day Free Trial</span>
+                <span className="flex items-center gap-1 text-emerald-400"><Check className="w-3 h-3" />3-Day Free Trial</span>
                 <span>·</span>
                 <span>No Credit Card</span>
                 <span>·</span>

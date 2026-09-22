@@ -42,7 +42,7 @@ const TOAST_EVENTS: LiveToastItem[] = [
     name: 'Rohit M.',
     city: 'Pune',
     role: 'DevOps & Kubernetes',
-    action: 'activated 7-Day Free AI Autopilot (100% Free)',
+    action: 'activated 3-Day Free AI Autopilot (100% Free)',
     timeAgo: '7m ago'
   },
   {

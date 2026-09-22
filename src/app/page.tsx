@@ -507,7 +507,7 @@ export default function Home() {
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                 <span className="text-white font-bold tracking-wide">⚡ NEURAL JOB ENGINE v4.2</span>
                 <span className="text-zinc-600">&bull;</span>
-                <span className="text-cyan-300 font-semibold">100% Free 7-Day Access</span>
+                <span className="text-cyan-300 font-semibold">100% Free 3-Day Access</span>
               </div>
               
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
@@ -965,7 +965,7 @@ export default function Home() {
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
-                <span>7-Day Free AI Autopilot</span>
+                <span>3-Day Free AI Autopilot</span>
               </span>
               <span className="text-[10px] text-zinc-400 font-mono truncate">
                 Zero Card Needed &bull; 10s Setup

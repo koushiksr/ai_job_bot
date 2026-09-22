@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
           name: p.name || (p.email ? p.email.split("@")[0] : p.user_id),
           user_id: p.user_id,
           plan: p.plan || "trial",
-          plan_name: p.plan_name || (p.plan === "pro" ? "JobFlux PRO" : "7-Day Free Access"),
+          plan_name: p.plan_name || (p.plan === "pro" ? "JobFlux PRO" : "3-Day Free Access"),
           expires_at: exp,
           hours_left: hoursLeft,
           days_left: hoursLeft <= 24 ? 1 : 2

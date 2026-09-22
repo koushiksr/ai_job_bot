@@ -239,7 +239,7 @@ export async function GET(req: NextRequest) {
         expected_ctc: p.expected_ctc || 0,
         enabled_for_daily_run: p.enabled_for_daily_run !== false,
         plan: p.plan || 'trial',
-        plan_name: p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '7-Day Free Access'),
+        plan_name: p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '3-Day Free Access'),
         plan_expires_at: rawExp,
         trial_expires_at: p.trial_expires_at || null,
         plan_expiry_status: planExpiryStatus,
@@ -355,9 +355,9 @@ export async function PATCH(req: NextRequest) {
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
         if (updates.daily_application_limit === undefined) updates.daily_application_limit = 50
       } else if (plan === 'trial') {
-        updates.plan_name = 'JobFlux 7-Day Free Access'
+        updates.plan_name = 'JobFlux 3-Day Free Access'
         updates.trial_started_at = now
-        updates.trial_expires_at = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+        updates.trial_expires_at = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
         updates.plan_expires_at = null
         updates.is_vip = false
         updates.vip_access = false

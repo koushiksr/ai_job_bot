@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     const rawPlan = (profile.plan || 'trial').toLowerCase()
     const now = new Date()
     let verifiedPlan = 'trial'
-    let verifiedPlanName = 'JobFlux 7-Day Free Access'
+    let verifiedPlanName = 'JobFlux 3-Day Free Access'
     let isPlanActive = true
 
     if (rawPlan === 'org_pro') {
@@ -213,7 +213,7 @@ export async function POST(req: NextRequest) {
     // Security: Preserve immutable plan, subscription, and role metadata
     if (existing) {
       updateDoc.plan = existing.plan || 'trial'
-      updateDoc.plan_name = existing.plan_name || 'JobFlux 7-Day Free Access'
+      updateDoc.plan_name = existing.plan_name || 'JobFlux 3-Day Free Access'
       updateDoc.role = existing.role || 'user'
       if (existing.plan_activated_at) updateDoc.plan_activated_at = existing.plan_activated_at
       if (existing.plan_expires_at) updateDoc.plan_expires_at = existing.plan_expires_at

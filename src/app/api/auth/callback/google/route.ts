@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
           email: 'technohmsit@gmail.com',
           role: 'admin',
           plan: 'trial',
-          plan_name: 'JobFlux 7-Day Free Access',
+          plan_name: 'JobFlux 3-Day Free Access',
           created_at: now,
           updated_at: now
         }
@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
         counter++
       }
 
-      const trialExpires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const trialExpires = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
 
       const newProfile: any = {
         user_id: userId,
@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
         role: 'user',
         is_vip: false,
         plan: 'trial',
-        plan_name: 'JobFlux 7-Day Free Access',
+        plan_name: 'JobFlux 3-Day Free Access',
         trial_started_at: now,
         trial_expires_at: trialExpires,
         created_at: now,
