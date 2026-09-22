@@ -8,13 +8,15 @@
 
 import { APP_CONFIG } from '@/config/appConfig'
 
-// Default fallback VAPID keypair
+// Default fallback VAPID keypair.
+// NOTE: the public key is public by design; the PRIVATE key must NEVER be
+// hardcoded here — it must come from VAPID_PRIVATE_KEY env or the
+// system_config.vapid_config DB record. Push sending fails loudly without it.
 const DEFAULT_VAPID_PUBLIC = 'BNiGxBzDPi4_iFuHn6k1yEpI8GRnblcMfF5mIqH1LK1_D9Keyb_ljg0CienSVGAhtMgJdSdyp7GOi5FCYDLf8xw'
-const DEFAULT_VAPID_PRIVATE = '5KjbKVAQy2QZRL-S2gs9vujwkOouPMZQsKbZGVB3_tQ'
 
 export const VAPID_CONFIG = {
   publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || process.env.VAPID_PUBLIC_KEY || DEFAULT_VAPID_PUBLIC,
-  privateKey: process.env.VAPID_PRIVATE_KEY || DEFAULT_VAPID_PRIVATE,
+  privateKey: process.env.VAPID_PRIVATE_KEY || '',
   subject: process.env.VAPID_SUBJECT || `mailto:${APP_CONFIG.supportEmail}`
 }
 

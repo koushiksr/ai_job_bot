@@ -22,10 +22,17 @@ interface MailResult {
  */
 export function getSmtpCredentials() {
   const user = (process.env.SMTP_USER || process.env.ADMIN_MAIL_TO_SEND_PASSWORD || APP_CONFIG.supportEmail).trim()
-  const pass = (process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || 'tidw wevs gebl qljb')
+  const pass = (process.env.SMTP_PASS || process.env.ADMIN_MAIL_PASSWORD || '')
     .trim()
     .replace(/['"]/g, '')
     .replace(/\s+/g, '')
+
+  if (!pass) {
+    throw new Error(
+      'SMTP credentials missing: set SMTP_PASS (or ADMIN_MAIL_PASSWORD) in environment. ' +
+      'Email dispatch is disabled until configured — no fallback password exists by design.'
+    )
+  }
 
   return { user, pass }
 }
