@@ -54,6 +54,21 @@ export async function GET(req: NextRequest) {
       const todayIstStr = istNow.toISOString().slice(0, 10)
       const todayCount = s.last_date === todayIstStr ? (s.today || 0) : 0
 
+      // Resolve effective current plan: active Org Pro purchase wins,
+      // otherwise the free org-provided Enterprise base (always active for members)
+      const rawPlan = (m.plan || 'enterprise').toLowerCase()
+      let effPlan = 'enterprise'
+      let effPlanName = 'JobFlux Enterprise Member'
+      let effExpiresAt: any = null
+      if (rawPlan === 'org_pro') {
+        const exp = m.plan_expires_at ? new Date(m.plan_expires_at) : null
+        if (exp && exp > now) {
+          effPlan = 'org_pro'
+          effPlanName = 'JobFlux Org Pro'
+          effExpiresAt = m.plan_expires_at
+        }
+      }
+
       return {
         user_id: m.user_id,
         email: m.email,
@@ -62,14 +77,16 @@ export async function GET(req: NextRequest) {
         enterprise_role: m.enterprise_role || (m.email === 'koushiksrmedala@gmail.com' ? 'admin' : 'member'),
         enterprise_status: m.enterprise_status || 'active',
         enabled_for_daily_run: m.enabled_for_daily_run !== false,
-        plan: m.plan || 'enterprise',
-        plan_name: m.plan_name || 'JobFlux Enterprise Member',
+        plan: effPlan,
+        plan_name: effPlanName,
+        plan_active: true,
+        plan_expires_at: effExpiresAt,
         applied_today: todayCount,
         applied_this_week: s.this_week || 0,
         applied_this_month: s.this_month || 0,
         total_applied: s.total_applied || 0,
         on_demand_runs_used: onDemandUsed,
-        on_demand_quota: (m.plan || '').toLowerCase() === 'org_pro' ? 15 : 10,
+        on_demand_quota: effPlan === 'org_pro' ? 15 : 10,
         daily_application_limit: 55,
         last_applied_at: s.last_applied_at || null,
         created_at: m.created_at || null

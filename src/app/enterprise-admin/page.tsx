@@ -40,6 +40,8 @@ interface Member {
   enabled_for_daily_run: boolean
   plan: string
   plan_name: string
+  plan_active?: boolean
+  plan_expires_at?: string | null
   applied_today: number
   applied_this_week: number
   applied_this_month: number
@@ -844,10 +846,25 @@ export default function EnterpriseAdminPortal() {
                             <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-800/50 font-semibold">
                               {member.enterprise_role === 'admin' ? 'Org Admin' : 'Org Member'}
                             </span>
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${
+                              member.plan === 'org_pro'
+                                ? 'bg-amber-950/60 text-amber-300 border-amber-700/60'
+                                : 'bg-zinc-900 text-zinc-300 border-zinc-800'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${(member.plan_active ?? true) ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
                               {member.plan_name}
                             </span>
                           </div>
+                          {member.plan === 'org_pro' && member.plan_expires_at && (
+                            <div className="text-[10px] text-zinc-500 font-mono mt-1">
+                              valid till {new Date(member.plan_expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </div>
+                          )}
+                          {member.plan !== 'org_pro' && (
+                            <div className="text-[10px] text-zinc-600 font-mono mt-1">
+                              Org base plan · free
+                            </div>
+                          )}
                         </td>
 
                         {/* Today's Applications */}
