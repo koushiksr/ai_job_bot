@@ -586,172 +586,146 @@ export default function EnterpriseAdminPortal() {
           </div>
         )}
 
-        {/* Aggregate KPI Grid */}
-        <section className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-1">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-mono">
-              <span>Total Members</span>
-              <Users className="w-4 h-4 text-indigo-400" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold font-mono text-white">
-              {metrics?.total_members || members.length}
-            </div>
-            <div className="text-[11px] text-zinc-500 font-mono">
-              {metrics?.active_scheduled_members || 0} active in daily sweeps
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-1">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-mono">
-              <span>Today's Apps</span>
-              <Activity className="w-4 h-4 text-cyan-400" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold font-mono text-cyan-400">
-              {metrics?.applied_today || 0}
-            </div>
-            <div className="text-[11px] text-zinc-500 font-mono">
-              Max 55 jobs / user / day
+        {/* Compact KPI Strip */}
+        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
+            <Users className="w-4 h-4 text-indigo-400 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-lg font-bold font-mono text-white leading-none">
+                {metrics?.total_members || members.length}
+              </div>
+              <div className="text-[10px] text-zinc-500 font-mono truncate">
+                Members · {metrics?.active_scheduled_members || 0} active
+              </div>
             </div>
           </div>
 
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-1">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-mono">
-              <span>This Week</span>
-              <Layers className="w-4 h-4 text-purple-400" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold font-mono text-purple-300">
-              {metrics?.applied_this_week || 0}
-            </div>
-            <div className="text-[11px] text-zinc-500 font-mono">
-              Rolling 7-day volume
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-1">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-mono">
-              <span>Total Applications</span>
-              <Sparkles className="w-4 h-4 text-emerald-400" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">
-              {metrics?.total_applied || 0}
-            </div>
-            <div className="text-[11px] text-zinc-500 font-mono">
-              All-time org submissions
+          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
+            <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-lg font-bold font-mono text-cyan-400 leading-none">
+                {metrics?.applied_today || 0}
+              </div>
+              <div className="text-[10px] text-zinc-500 font-mono truncate">
+                Today's Apps · 55/user max
+              </div>
             </div>
           </div>
 
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-1 col-span-2 lg:col-span-1">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-mono">
-              <span>On-Demand Runs</span>
-              <Zap className="w-4 h-4 text-amber-400" />
+          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
+            <Layers className="w-4 h-4 text-purple-400 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-lg font-bold font-mono text-purple-300 leading-none">
+                {metrics?.applied_this_week || 0}
+              </div>
+              <div className="text-[10px] text-zinc-500 font-mono truncate">
+                This Week · rolling 7-day
+              </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold font-mono text-amber-300">
-              {metrics?.on_demand_runs_used_this_week || 0}
+          </div>
+
+          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-lg font-bold font-mono text-emerald-400 leading-none">
+                {metrics?.total_applied || 0}
+              </div>
+              <div className="text-[10px] text-zinc-500 font-mono truncate">
+                Total Applications
+              </div>
             </div>
-            <div className="text-[11px] text-zinc-500 font-mono">
-              Max 3/day · 10/week per member
+          </div>
+
+          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5 col-span-2 sm:col-span-1">
+            <Zap className="w-4 h-4 text-amber-400 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-lg font-bold font-mono text-amber-300 leading-none">
+                {metrics?.on_demand_runs_used_this_week || 0}
+              </div>
+              <div className="text-[10px] text-zinc-500 font-mono truncate">
+                On-Demand · 3/day · 10/wk
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Organisation Settings Card */}
-        <section className="p-5 sm:p-6 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-3">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-indigo-400" />
-                <span>Organisation Settings</span>
-              </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Customise your organisation name visible to all members.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-2.5">
-            {editingOrgName ? (
-              <>
-                <input
-                  type="text"
-                  value={orgNameInput}
-                  onChange={e => setOrgNameInput(e.target.value)}
-                  placeholder="Enter organisation name..."
-                  className="w-full sm:flex-1 px-4 py-2.5 rounded-xl bg-zinc-900/80 border border-indigo-700 focus:border-indigo-500 focus:outline-none text-xs sm:text-sm text-white placeholder-zinc-500"
-                  autoFocus
-                  onKeyDown={e => { if (e.key === 'Enter') handleSaveOrgName(); if (e.key === 'Escape') setEditingOrgName(false) }}
-                />
-                <div className="flex items-center gap-2">
+        {/* Organisation Settings + Invite (single compact card) */}
+        <section className="p-4 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {/* Org name */}
+            <div className="flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
+              {editingOrgName ? (
+                <>
+                  <input
+                    type="text"
+                    value={orgNameInput}
+                    onChange={e => setOrgNameInput(e.target.value)}
+                    placeholder="Organisation name..."
+                    className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-indigo-700 focus:border-indigo-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+                    autoFocus
+                    onKeyDown={e => { if (e.key === 'Enter') handleSaveOrgName(); if (e.key === 'Escape') setEditingOrgName(false) }}
+                  />
                   <button
                     onClick={handleSaveOrgName}
                     disabled={orgNameSaving}
-                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 disabled:opacity-60 transition-all cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     {orgNameSaving ? 'Saving...' : 'Save'}
                   </button>
                   <button
                     onClick={() => setEditingOrgName(false)}
-                    className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-medium transition-colors cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs cursor-pointer shrink-0"
                   >
                     Cancel
                   </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex-1 px-4 py-2.5 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-white font-medium">
-                  {org?.name || 'Unnamed Organisation'}
-                </div>
-                <button
-                  onClick={() => { setOrgNameInput(org?.name || ''); setEditingOrgName(true) }}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                  Rename Organisation
-                </button>
-              </>
-            )}
-          </div>
-          <div className="text-[11px] text-zinc-500 font-mono">
-            Org ID: <span className="text-zinc-400">{org?.org_id || 'org_technohmsit'}</span> · Admin: <span className="text-zinc-400">{org?.admin_email || currentUserEmail}</span>
-          </div>
-        </section>
-
-        {/* Invite Member Section */}
-        <section className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-indigo-950/30 via-zinc-950/80 to-purple-950/30 border border-indigo-900/40 space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                <Plus className="w-4 h-4 text-indigo-400" />
-                <span>Invite Candidate to Organization</span>
-              </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Invited candidates automatically receive Enterprise perks (10 weekly on-demand runs and 55 daily job applications).
-              </p>
+                </>
+              ) : (
+                <>
+                  <span className="flex-1 min-w-0 truncate px-3 py-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 text-xs text-white font-medium" title={org?.name || 'Unnamed Organisation'}>
+                    {org?.name || 'Unnamed Organisation'}
+                  </span>
+                  <button
+                    onClick={() => { setOrgNameInput(org?.name || ''); setEditingOrgName(true) }}
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-xs font-medium cursor-pointer shrink-0"
+                  >
+                    Rename
+                  </button>
+                </>
+              )}
             </div>
+
+            {/* Invite */}
+            <form onSubmit={handleSendInvite} className="flex items-center gap-2">
+              <Plus className="w-4 h-4 text-indigo-400 shrink-0" />
+              <input
+                type="email"
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+                placeholder="candidate@email.com — invite to org"
+                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-indigo-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+              />
+              <button
+                type="submit"
+                disabled={inviteSubmitting}
+                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>{inviteSubmitting ? 'Sending...' : 'Invite'}</span>
+              </button>
+            </form>
           </div>
 
-          <form onSubmit={handleSendInvite} className="flex flex-col sm:flex-row items-center gap-2.5">
-            <input
-              type="email"
-              value={inviteEmail}
-              onChange={e => setInviteEmail(e.target.value)}
-              placeholder="candidate@company.com or candidate@gmail.com"
-              className="w-full sm:flex-1 px-4 py-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800 focus:border-indigo-500 focus:outline-none text-xs sm:text-sm text-white placeholder-zinc-500"
-            />
-            <button
-              type="submit"
-              disabled={inviteSubmitting}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 disabled:opacity-60 transition-all cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>{inviteSubmitting ? 'Sending Invite...' : 'Send Enterprise Invite'}</span>
-            </button>
-          </form>
+          <div className="text-[10px] text-zinc-500 font-mono">
+            Org ID: <span className="text-zinc-400">{org?.org_id || 'org_technohmsit'}</span> · Admin: <span className="text-zinc-400">{org?.admin_email || currentUserEmail}</span>
+            <span className="text-zinc-600"> · Members get 10 on-demand/week + 55 daily applications</span>
+          </div>
 
           {/* Pending Invites List */}
           {invites.filter(inv => inv.status === 'pending').length > 0 && (
             <div className="pt-2 border-t border-zinc-900/80">
-              <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+              <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
                 Pending Invitations ({invites.filter(inv => inv.status === 'pending').length})
               </span>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -838,6 +812,10 @@ export default function EnterpriseAdminPortal() {
                           <div className="text-[11px] text-zinc-400 font-mono">
                             {member.email}
                           </div>
+                          <div className="text-[10px] text-zinc-600 font-mono mt-0.5">
+                            Joined {member.created_at ? new Date(member.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                            {' · '}All-time {member.total_applied || 0} applies
+                          </div>
                         </td>
 
                         {/* Role & Plan */}
@@ -873,6 +851,9 @@ export default function EnterpriseAdminPortal() {
                             {member.applied_today}
                           </span>
                           <span className="text-zinc-600 font-mono"> / 55 max</span>
+                          <div className="text-[10px] text-zinc-600 font-mono mt-0.5">
+                            Week {member.applied_this_week || 0} · Month {member.applied_this_month || 0}
+                          </div>
                         </td>
 
                         {/* On-Demand Usage */}
@@ -896,6 +877,9 @@ export default function EnterpriseAdminPortal() {
                               Paused
                             </span>
                           )}
+                          <div className="text-[10px] text-zinc-600 font-mono mt-1">
+                            Last active {member.last_applied_at ? new Date(member.last_applied_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
+                          </div>
                         </td>
 
                         {/* Action Buttons: Enable/Disable + Trigger On-Demand */}
