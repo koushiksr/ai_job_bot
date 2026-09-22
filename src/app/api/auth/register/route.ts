@@ -54,13 +54,13 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date()
-    // 3-Day Free Access expires 72 hours from now
-    const trialExpires = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+    // 7-Day Free Access expires 168 hours (1 week) from now
+    const trialExpires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
 
     // Check if this email has an active purchased plan in the payments collection
     const activePayment = await findActivePaymentForEmail(db, emailClean)
     let initialPlan = 'trial'
-    let initialPlanName = 'JobFlux 3-Day Free Access'
+    let initialPlanName = 'JobFlux 7-Day Free Access'
     let planActivatedAt: Date | null = null
     let planExpiresAt: Date | null = null
     let lastPaymentId: string | null = null
@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
       trial_expires_at: trialExpires.toISOString(),
       message: isPaid
         ? `Your verified purchase (${initialPlanName}) has been automatically linked and activated!`
-        : 'Your 3-Day Free Access (up to 150 applications) has been activated!'
+        : 'Your 7-Day Free Access (1 Week) has been activated! Start applying for jobs today.'
     })
   } catch (err: any) {
     return NextResponse.json(

@@ -334,7 +334,7 @@ export async function checkAndDispatchExpiryReminders(
       continue
     }
 
-    const planName = p.plan_name || (p.plan === "pro" ? "JobFlux PRO" : "1-Day Free Trial")
+    const planName = p.plan_name || (p.plan === "pro" ? "JobFlux PRO" : "7-Day Free Access")
     const renewalUrl = `${siteUrl}/pricing?renew=true&email=${encodeURIComponent(email)}`
     const candidateName = p.name || email.split("@")[0]
 

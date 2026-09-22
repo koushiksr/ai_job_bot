@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         const rawPlan = (profile.plan || 'trial').toLowerCase()
         const now = new Date()
         let activePlan = 'trial'
-        let planName = 'JobFlux 1-Day Free Trial'
+        let planName = 'JobFlux 7-Day Free Access'
         let isPlanActive = true
 
         if (rawPlan === 'none' || rawPlan === 'no_plan') {

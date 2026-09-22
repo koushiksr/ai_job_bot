@@ -61,7 +61,7 @@ export default function UserDashboard() {
   const [userPicture, setUserPicture] = useState<string>('')
   const [userRole, setUserRole] = useState<string>('user')
   const [userPlan, setUserPlan] = useState<string>('trial')
-  const [userPlanName, setUserPlanName] = useState<string>('JobFlux 3-Day Free Access')
+  const [userPlanName, setUserPlanName] = useState<string>('JobFlux 7-Day Free Access')
   const [isPlanActive, setIsPlanActive] = useState<boolean>(true)
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
   const [isVip, setIsVip] = useState<boolean>(false)
@@ -689,7 +689,7 @@ export default function UserDashboard() {
         const vip = Boolean(pData.is_vip || verifiedPlan === 'vip')
         setIsVip(vip)
         setUserPlan(verifiedPlan)
-        setUserPlanName(pData.plan_name || (verifiedPlan === 'trial' ? 'JobFlux 3-Day Free Access' : `JobFlux ${verifiedPlan.toUpperCase()}`))
+        setUserPlanName(pData.plan_name || (verifiedPlan === 'trial' ? 'JobFlux 7-Day Free Access' : `JobFlux ${verifiedPlan.toUpperCase()}`))
         setIsPlanActive(active)
         setPlanExpiresAt(pData.plan_expires_at || pData.trial_expires_at || null)
 
@@ -1826,7 +1826,7 @@ export default function UserDashboard() {
                       ? 'bg-zinc-900 border-zinc-800 text-amber-400'
                       : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                   }`}>
-                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.total_applied >= 150 ? 'EXHAUSTED' : '3-DAY FREE'}
+                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.total_applied >= 150 ? 'EXHAUSTED' : '7-DAY FREE'}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">

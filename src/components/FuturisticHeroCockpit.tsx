@@ -412,7 +412,7 @@ export default function FuturisticHeroCockpit({ onSuccess }: FuturisticHeroCockp
               <div className="flex items-center justify-center gap-3 pt-1 text-[10px] sm:text-[11px] text-zinc-400 flex-wrap">
                 <span className="flex items-center gap-1 text-emerald-400 font-medium">
                   <Check className="w-3 h-3" />
-                  3-Day Free Trial
+                  7-Day Free Trial
                 </span>
                 <span>&bull;</span>
                 <span>Zero Card Details</span>
