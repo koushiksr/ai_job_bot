@@ -116,6 +116,7 @@ export default function UserDashboard() {
   const [isTriggeringScout, setIsTriggeringScout] = useState<boolean>(false)
   const [activeTask, setActiveTask] = useState<any>(null)
   const [taskFeedback, setTaskFeedback] = useState<{ type: 'success' | 'info' | 'error', text: string } | null>(null)
+  const [userAlerts, setUserAlerts] = useState<{ type: string; code: string; title: string; message: string; actionLabel?: string; actionHref?: string }[]>([])
   const [orgProLoading, setOrgProLoading] = useState<boolean>(false)
   const [orgProError, setOrgProError] = useState<string>('')
   const [weeklyQuota, setWeeklyQuota] = useState<{ limit: number, used: number, remaining: number, is_unlimited: boolean } | null>(null)
@@ -361,6 +362,19 @@ export default function UserDashboard() {
     }
   }
 
+  const loadUserAlerts = async (uid: string, email: string) => {
+    if (!uid && !email) return
+    try {
+      const res = await fetch(`/api/user/alerts?user_id=${encodeURIComponent(uid)}&email=${encodeURIComponent(email)}`)
+      if (res.ok) {
+        const data = await res.json()
+        setUserAlerts(data.alerts || [])
+      }
+    } catch {
+      // silent
+    }
+  }
+
   const loadEnterpriseInvites = async (uid: string, email: string) => {
     if (!uid && !email) return
     try {
@@ -559,6 +573,7 @@ export default function UserDashboard() {
     if (storedEmail) {
       loadUserOffers(storedEmail)
       loadEnterpriseInvites(storedUid, storedEmail)
+      loadUserAlerts(storedUid, storedEmail)
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
         subscribeDeviceToPush(storedEmail, storedUid).catch(() => {})
       }
@@ -615,7 +630,8 @@ export default function UserDashboard() {
         loadUserTickets(uid),
         checkActiveTask(uid),
         emailToQuery ? loadUserOffers(emailToQuery) : Promise.resolve(),
-        emailToQuery ? loadEnterpriseInvites(uid, emailToQuery) : Promise.resolve()
+        emailToQuery ? loadEnterpriseInvites(uid, emailToQuery) : Promise.resolve(),
+        emailToQuery ? loadUserAlerts(uid, emailToQuery) : Promise.resolve()
       ])
     } catch (e) {
       console.error('Error refreshing dashboard data:', e)
@@ -1681,6 +1697,34 @@ export default function UserDashboard() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
         
+        {/* Candidate Action Alerts (credentials, quotas, plan) */}
+        {userAlerts.map((a) => (
+          <div
+            key={a.code}
+            className={`p-3.5 sm:p-4 rounded-2xl border flex items-start gap-3 text-xs sm:text-sm shadow-lg ${
+              a.type === 'error'
+                ? 'bg-red-950/40 border-red-800/60 text-red-200'
+                : a.type === 'warning'
+                  ? 'bg-amber-950/40 border-amber-700/60 text-amber-200'
+                  : 'bg-sky-950/40 border-sky-800/60 text-sky-200'
+            }`}
+          >
+            <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${a.type === 'error' ? 'text-red-400' : a.type === 'warning' ? 'text-amber-400' : 'text-sky-400'}`} />
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-white text-xs sm:text-sm">{a.title}</div>
+              <p className="mt-0.5 leading-relaxed opacity-90">{a.message}</p>
+            </div>
+            {a.actionLabel && a.actionHref && (
+              <Link
+                href={a.actionHref}
+                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold shrink-0 transition-colors"
+              >
+                {a.actionLabel}
+              </Link>
+            )}
+          </div>
+        ))}
+
         {/* Enterprise Organization Invitation Banner */}
         {pendingEnterpriseInvites.length > 0 && (
           <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/90 via-purple-950/70 to-zinc-950 border border-indigo-500/50 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl shadow-indigo-950/60 relative overflow-hidden">
