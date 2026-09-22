@@ -61,6 +61,47 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date()
+
+    // ── Rate Limit: Max 3 on-demand runs per day ────────────────────────────
+    const istOffsetMs = 5.5 * 60 * 60 * 1000
+    const istNow = new Date(now.getTime() + istOffsetMs)
+    const todayIstStr = istNow.toISOString().slice(0, 10) // "YYYY-MM-DD"
+    const todayStart = new Date(new Date(todayIstStr + 'T00:00:00+05:30').getTime())
+    const todayEnd   = new Date(new Date(todayIstStr + 'T23:59:59+05:30').getTime())
+
+    const todayOnDemandCount = await db.collection('tasks').countDocuments({
+      user_id: targetUserId,
+      source: { $in: ['enterprise_admin_on_demand', 'web_dashboard_on_demand'] },
+      created_at: { $gte: todayStart, $lte: todayEnd }
+    })
+
+    if (todayOnDemandCount >= 3) {
+      return NextResponse.json({
+        detail: `Daily limit reached. On-demand sweeps are capped at 3 per day per member. ${targetProfile.name || targetUserId} has already used all 3 today. Resets at midnight IST.`,
+        limit: 3,
+        used_today: todayOnDemandCount,
+        remaining_today: 0
+      }, { status: 429 })
+    }
+
+    // ── Rate Limit: Max 10 on-demand runs per week ──────────────────────────
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const weeklyOnDemandCount = await db.collection('tasks').countDocuments({
+      user_id: targetUserId,
+      source: { $in: ['enterprise_admin_on_demand', 'web_dashboard_on_demand'] },
+      created_at: { $gte: sevenDaysAgo }
+    })
+
+    if (weeklyOnDemandCount >= 10) {
+      return NextResponse.json({
+        detail: `Weekly limit reached. On-demand sweeps are capped at 10 per week per member. ${targetProfile.name || targetUserId} has used all 10 this week. Resets on a rolling 7-day basis.`,
+        limit: 10,
+        used_this_week: weeklyOnDemandCount,
+        remaining_this_week: 0
+      }, { status: 429 })
+    }
+    // ───────────────────────────────────────────────────────────────────────
+
     const taskId = `task_${Date.now()}_${Math.floor(Math.random() * 1000)}`
 
     // Count pending tasks ahead in queue

@@ -625,7 +625,7 @@ export default function EnterpriseAdminPortal() {
               {metrics?.on_demand_runs_used_this_week || 0}
             </div>
             <div className="text-[11px] text-zinc-500 font-mono">
-              10 runs / week per member
+              Max 3/day · 10/week per member
             </div>
           </div>
         </section>
