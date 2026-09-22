@@ -51,6 +51,7 @@ interface Member {
   daily_application_limit: number
   last_applied_at: string | null
   created_at: string | null
+  active_task?: { task_id: string; status: string; queue_position: number | null } | null
 }
 
 interface OrgInfo {
@@ -178,8 +179,8 @@ export default function EnterpriseAdminPortal() {
     }
   }
 
-  const loadAllPortalData = async (uid = currentUserId, email = currentUserEmail) => {
-    setLoading(true)
+  const loadAllPortalData = async (uid = currentUserId, email = currentUserEmail, silent = false) => {
+    if (!silent) setLoading(true)
     try {
       const headers = {
         'x-user-id': uid || 'koushiksrmedala',
@@ -271,6 +272,23 @@ export default function EnterpriseAdminPortal() {
       })
 
       const data = await res.json()
+      if (data.status === 'active') {
+        // Member already has a live/queued sweep — show its status, don't duplicate
+        setMembers(prev =>
+          prev.map(m =>
+            m.user_id === member.user_id
+              ? { ...m, active_task: { task_id: data.task_id, status: data.task_status || 'pending', queue_position: data.queue_position ?? null } }
+              : m
+          )
+        )
+        setFeedback({
+          type: 'info',
+          text: data.task_status === 'running'
+            ? `⏳ ${member.name || member.email} is RUNNING live right now. Open Live Log to watch — no new run needed.`
+            : `⏳ ${member.name || member.email} is already queued at position #${data.queue_position ?? '?'}. It will start automatically in order.`
+        })
+        return
+      }
       if (res.ok) {
         const usageNote = (data.applied_today !== undefined && data.daily_limit)
           ? ` (${data.applied_today}/${data.daily_limit} applications used today`
@@ -321,6 +339,18 @@ export default function EnterpriseAdminPortal() {
     const timer = setInterval(pollTaskLogs, 2500)
     return () => clearInterval(timer)
   }, [selectedLiveLog?.task_id, selectedLiveLog?.status])
+
+  // Silent queue-status refresh while any member has an active task
+  const hasActiveQueue = members.some(m => m.active_task)
+  useEffect(() => {
+    if (!hasActiveQueue) return
+    const timer = setInterval(() => {
+      const uid = localStorage.getItem('user_id') || ''
+      const em = localStorage.getItem('user_email') || ''
+      loadAllPortalData(uid, em, true)
+    }, 15000)
+    return () => clearInterval(timer)
+  }, [hasActiveQueue])
 
   // Open Live Log Stream Modal for a Candidate
   const handleOpenLiveLog = async (member: Member) => {
@@ -974,20 +1004,47 @@ export default function EnterpriseAdminPortal() {
                               <span>Live Log</span>
                             </button>
 
-                            {/* Trigger On-Demand Sweep Button — always allowed, tops up to daily cap */}
-                            <button
-                              onClick={() => handleTriggerOnDemand(member)}
-                              disabled={isProcessing || !isEnabled || org?.status === 'disabled'}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 text-indigo-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
-                              title={
-                                org?.status === 'disabled'
-                                  ? 'Org is disabled by Super Admin — all runs are blocked'
-                                  : `Dispatch instant on-demand sweep (${member.applied_today || 0}/55 used today — run tops up the rest from newly posted jobs)`
-                              }
-                            >
-                              <Zap className="w-3 h-3 text-indigo-400" />
-                              <span>On-Demand</span>
-                            </button>
+                            {/* On-Demand Sweep Button — blocked with live status while member has an active task */}
+                            {member.active_task ? (
+                              <button
+                                type="button"
+                                disabled
+                                className={`px-2.5 py-1 rounded-lg border text-xs font-medium flex items-center gap-1 cursor-not-allowed ${
+                                  member.active_task.status === 'running'
+                                    ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-300'
+                                    : 'bg-sky-950/50 border-sky-800/60 text-sky-300'
+                                }`}
+                                title={member.active_task.status === 'running'
+                                  ? 'Sweep is RUNNING live right now — open Live Log to watch. Button unlocks when it finishes.'
+                                  : `Sweep queued at position #${member.active_task.queue_position ?? '?'} — starts automatically in order. Button unlocks when it finishes.`}
+                              >
+                                {member.active_task.status === 'running' ? (
+                                  <>
+                                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                                    <span>Running…</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Clock className="w-3 h-3 text-sky-400" />
+                                    <span>Queued #{member.active_task.queue_position ?? '?'}</span>
+                                  </>
+                                )}
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleTriggerOnDemand(member)}
+                                disabled={isProcessing || !isEnabled || org?.status === 'disabled'}
+                                className="px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 text-indigo-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
+                                title={
+                                  org?.status === 'disabled'
+                                    ? 'Org is disabled by Super Admin — all runs are blocked'
+                                    : `Dispatch instant on-demand sweep (${member.applied_today || 0}/55 used today — run tops up the rest from newly posted jobs)`
+                                }
+                              >
+                                <Zap className="w-3 h-3 text-indigo-400" />
+                                <span>On-Demand</span>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

@@ -43,6 +43,18 @@ export async function GET(req: NextRequest) {
       created_at: { $gte: sevenDaysAgo }
     }).toArray()
 
+    // Active (pending/running) tasks per member + global queue positions.
+    // Queue is strictly FIFO: position = pending tasks created before it + 1.
+    const activeTasks = await db.collection('tasks').find({
+      user_id: { $in: memberIds },
+      status: { $in: ['pending', 'running'] }
+    }).sort({ created_at: 1 }).toArray()
+    const allPending = await db.collection('tasks').find(
+      { status: 'pending' },
+      { projection: { task_id: 1, created_at: 1 } }
+    ).sort({ created_at: 1 }).toArray()
+    const pendingIndex = new Map(allPending.map((t, i) => [t.task_id, i + 1]))
+
     const memberList = members.map(m => {
       const s = statsMap.get(m.user_id) || {}
       const userTasks = recentTasks.filter(t => t.user_id === m.user_id)
@@ -69,6 +81,13 @@ export async function GET(req: NextRequest) {
         }
       }
 
+      const activeDoc = activeTasks.find(t => t.user_id === m.user_id) || null
+      const activeTask = activeDoc ? {
+        task_id: activeDoc.task_id,
+        status: activeDoc.status,
+        queue_position: activeDoc.status === 'running' ? 0 : (pendingIndex.get(activeDoc.task_id) || null)
+      } : null
+
       return {
         user_id: m.user_id,
         email: m.email,
@@ -87,6 +106,7 @@ export async function GET(req: NextRequest) {
         total_applied: s.total_applied || 0,
         on_demand_runs_used: onDemandUsed,
         on_demand_quota: effPlan === 'org_pro' ? 15 : 10,
+        active_task: activeTask,
         daily_application_limit: 55,
         last_applied_at: s.last_applied_at || null,
         created_at: m.created_at || null

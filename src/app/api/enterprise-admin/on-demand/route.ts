@@ -86,9 +86,23 @@ export async function POST(req: NextRequest) {
     })
 
     if (existingTask) {
+      let queuePosition: number | null = null
+      if (existingTask.status === 'pending') {
+        const aheadCount = await db.collection('tasks').countDocuments({
+          status: 'pending',
+          created_at: { $lt: existingTask.created_at }
+        })
+        queuePosition = aheadCount + 1
+      } else {
+        queuePosition = 0 // running now
+      }
       return NextResponse.json({
         status: 'active',
-        message: `A sweep is already queued/running for ${targetProfile.name || targetUserId} (task ${existingTask.task_id}). Wait for it to finish instead of triggering again — check Live Log for progress.`,
+        task_status: existingTask.status,
+        queue_position: queuePosition,
+        message: existingTask.status === 'running'
+          ? `A sweep is already RUNNING live for ${targetProfile.name || targetUserId}. Watch Live Log for real-time progress instead of triggering again.`
+          : `A sweep for ${targetProfile.name || targetUserId} is already queued at position #${queuePosition}. Triggering again would just duplicate it.`,
         task_id: existingTask.task_id
       })
     }
