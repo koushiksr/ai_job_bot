@@ -266,9 +266,14 @@ export default function EnterpriseAdminPortal() {
 
       const data = await res.json()
       if (res.ok) {
+        const usageNote = (data.applied_today !== undefined && data.daily_limit)
+          ? ` (${data.applied_today}/${data.daily_limit} applications used today`
+            + (data.on_demand_used_today !== undefined ? ` · on-demand ${data.on_demand_used_today}/3 today` : '')
+            + `).`
+          : '.'
         setFeedback({
           type: 'success',
-          text: `🚀 Live on-demand sweep dispatched for ${member.name || member.email}! Position #${data.queue_position} in line.`
+          text: `🚀 Live on-demand sweep dispatched for ${member.name || member.email}! Position #${data.queue_position} in line${usageNote} Follow Live Log — its final summary states exactly what happened.`
         })
         loadAllPortalData()
       } else {
@@ -916,9 +921,15 @@ export default function EnterpriseAdminPortal() {
                             {/* Trigger On-Demand Sweep Button */}
                             <button
                               onClick={() => handleTriggerOnDemand(member)}
-                              disabled={isProcessing || !isEnabled || org?.status === 'disabled'}
+                              disabled={isProcessing || !isEnabled || org?.status === 'disabled' || (member.applied_today || 0) >= 55}
                               className="px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 text-indigo-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
-                              title={org?.status === 'disabled' ? 'Org is disabled by Super Admin — all runs are blocked' : 'Dispatch instant on-demand application sweep'}
+                              title={
+                                org?.status === 'disabled'
+                                  ? 'Org is disabled by Super Admin — all runs are blocked'
+                                  : (member.applied_today || 0) >= 55
+                                    ? `Daily cap reached (${member.applied_today}/55 applications). On-demand can't add more until tomorrow 6:00 AM IST — triggering now would waste a run.`
+                                    : `Dispatch instant on-demand sweep (${member.applied_today || 0}/55 used today)`
+                              }
                             >
                               <Zap className="w-3 h-3 text-indigo-400" />
                               <span>Trigger Sweep</span>
