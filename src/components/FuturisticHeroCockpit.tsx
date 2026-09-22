@@ -66,18 +66,8 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
       return
     }
 
-    // Master Admin bypass
-    if (
-      authMode === 'signin' &&
-      (cleanEmail === 'admin' || cleanEmail === 'technohmsit' || cleanEmail === 'technohmsit@gmail.com') &&
-      cleanPwd === 'admin'
-    ) {
-      localStorage.setItem('user_id', 'technohmsit')
-      localStorage.setItem('user_email', 'technohmsit@gmail.com')
-      localStorage.setItem('user_role', 'admin')
-      window.location.href = '/admin'
-      return
-    }
+    // NOTE: no client-side admin shortcut — sign-in always goes through the
+    // server, which issues the httpOnly session cookie on success.
 
     try {
       if (authMode === 'forgot') {

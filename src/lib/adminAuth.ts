@@ -2,53 +2,63 @@ import { NextRequest } from 'next/server'
 import { Db } from 'mongodb'
 
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
+import { readSession } from '@/lib/session'
 
 /**
- * Verify whether the incoming request is from an authenticated Administrator.
- * Master administrator and designated accounts are configured in APP_CONFIG.
- * Checks header 'x-user-id' or query 'auth_user_id' against database records.
+ * Server-side authorization — session cookie ONLY.
+ *
+ * Historical note: these functions previously trusted `x-user-id` headers /
+ * query params, meaning any client could claim to be admin. That trust is
+ * removed. The signed session cookie (see lib/session.ts) is the identity;
+ * when a DB handle is available the claimed role is re-validated live so
+ * revocations (removed admin, removed org member) take effect immediately.
  */
+
 export async function verifyAdminRequest(
   req: NextRequest,
   db: Db | null
 ): Promise<{ authorized: boolean; userId: string; email?: string }> {
-  if (!db) {
+  const sess = readSession(req)
+  if (!sess || sess.role !== 'admin') {
     return { authorized: false, userId: '' }
   }
 
-  const userId = (
-    req.headers.get('x-user-id') ||
-    req.nextUrl.searchParams.get('auth_user_id') ||
-    ''
-  ).trim()
+  const isBreakGlass = isAdminUser(sess.email) || isAdminUser(sess.uid)
 
-  const userEmail = (
-    req.headers.get('x-user-email') ||
-    req.nextUrl.searchParams.get('auth_email') ||
-    ''
-  ).trim().toLowerCase()
-
-  // 1. Direct check: ONLY technohmsit or technohmsit@gmail.com (or system admin bypass)
-  if (
-    userId === 'technohmsit' ||
-    userEmail === 'technohmsit@gmail.com' ||
-    userId === 'admin'
-  ) {
-    return {
-      authorized: true,
-      userId: userId || APP_CONFIG.masterAdminId,
-      email: userEmail || APP_CONFIG.supportEmail
-    }
+  if (!db) {
+    // DB unreachable: only the break-glass super-admin passes
+    return isBreakGlass
+      ? { authorized: true, userId: sess.uid, email: sess.email }
+      : { authorized: false, userId: '' }
   }
 
-  // 2. Reject all other users unconditionally
-  return { authorized: false, userId }
+  // Live re-validation: admin role must still exist in DB
+  try {
+    const rec = await db.collection('profiles').findOne({
+      $or: [{ user_id: sess.uid }, { email: { $regex: `^${sess.email}$`, $options: 'i' } }]
+    }) || await db.collection('users').findOne({
+      $or: [{ user_id: sess.uid }, { email: { $regex: `^${sess.email}$`, $options: 'i' } }]
+    })
+    if (!rec) {
+      // No DB record: only break-glass super-admin passes
+      return isBreakGlass
+        ? { authorized: true, userId: sess.uid, email: sess.email }
+        : { authorized: false, userId: '' }
+    }
+    if (!(rec.role === 'admin' || isAdminUser(rec.email) || rec.user_id === 'technohmsit')) {
+      return { authorized: false, userId: '' }
+    }
+    // Session version must match (bumped on logout → old tokens die)
+    if (Number(rec.session_v || 0) !== sess.v) {
+      return { authorized: false, userId: '' }
+    }
+    return { authorized: true, userId: sess.uid, email: sess.email }
+  } catch {
+    // DB error → deny (fail closed)
+  }
+  return { authorized: false, userId: '' }
 }
 
-/**
- * Verify whether the incoming request is from an authorized Enterprise Administrator or Super Admin.
- * Returns organization context and role information.
- */
 export async function verifyEnterpriseAdminRequest(
   req: NextRequest,
   db: Db | null
@@ -60,90 +70,81 @@ export async function verifyEnterpriseAdminRequest(
   userId: string
   email: string
 }> {
-  if (!db) {
-    return {
-      authorized: false,
-      isSuperAdmin: false,
-      isEnterpriseAdmin: false,
-      orgId: null,
-      userId: '',
-      email: ''
-    }
+  const denied = {
+    authorized: false,
+    isSuperAdmin: false,
+    isEnterpriseAdmin: false,
+    orgId: null as string | null,
+    userId: '',
+    email: ''
   }
 
-  const userId = (
-    req.headers.get('x-user-id') ||
-    req.nextUrl.searchParams.get('auth_user_id') ||
-    ''
-  ).trim()
+  const sess = readSession(req)
+  if (!sess || (sess.role !== 'admin' && sess.role !== 'enterprise_admin')) {
+    return denied
+  }
 
-  const userEmail = (
-    req.headers.get('x-user-email') ||
-    req.nextUrl.searchParams.get('auth_email') ||
-    ''
-  ).trim().toLowerCase()
-
-  // 1. Super Admin has unrestricted access across all organizations
-  if (
-    userId === 'technohmsit' ||
-    userEmail === 'technohmsit@gmail.com' ||
-    userId === 'admin'
-  ) {
-    // If request specifies a target org_id in headers or query, use it
-    const reqOrgId = req.headers.get('x-org-id') || req.nextUrl.searchParams.get('org_id') || null
+  // Super-admin: full access, break-glass without DB
+  if (sess.role === 'admin' && (isAdminUser(sess.email) || isAdminUser(sess.uid))) {
+    const reqOrgId = req.headers.get('x-org-id') || req.nextUrl.searchParams.get('org_id') || sess.orgId || 'org_technohmsit'
     return {
       authorized: true,
       isSuperAdmin: true,
       isEnterpriseAdmin: true,
-      orgId: reqOrgId || 'org_technohmsit',
-      userId: userId || APP_CONFIG.masterAdminId,
-      email: userEmail || APP_CONFIG.supportEmail
+      orgId: reqOrgId,
+      userId: sess.uid,
+      email: sess.email
     }
   }
 
-  // 2. Check if user is a designated Enterprise Admin in APP_CONFIG or enterprise_orgs collection
-  const isDesignated = APP_CONFIG.enterpriseAdminEmails.map(e => e.toLowerCase()).includes(userEmail)
+  if (!db) {
+    return denied
+  }
 
-  // Query database for enterprise org where this user is admin
-  const org = await db.collection('enterprise_orgs').findOne({
-    $or: [
-      { admin_email: { $regex: `^${userEmail}$`, $options: 'i' } },
-      { admin_user_id: userId }
-    ]
-  })
+  // Live re-validation for enterprise admins: org link must still exist
+  try {
+    const userEmail = sess.email
+    const userId = sess.uid
 
-  // Also check if user profile has enterprise_role: 'admin'
-  let profileOrgId: string | null = null
-  if (!org) {
-    const profile = await db.collection('profiles').findOne({
+    const liveProfile = await db.collection('profiles').findOne({
       $or: [
         { email: { $regex: `^${userEmail}$`, $options: 'i' } },
         { user_id: userId }
       ]
     })
-    if (profile && profile.enterprise_role === 'admin' && profile.enterprise_org_id) {
-      profileOrgId = profile.enterprise_org_id
+    // Session version must match (bumped on logout → old tokens die)
+    if (liveProfile && Number(liveProfile.session_v || 0) !== sess.v) {
+      return denied
     }
-  }
 
-  if (org || profileOrgId || isDesignated) {
-    const finalOrgId = org?.org_id || profileOrgId || 'org_technohmsit'
-    return {
-      authorized: true,
-      isSuperAdmin: false,
-      isEnterpriseAdmin: true,
-      orgId: finalOrgId,
-      userId: userId || userEmail.split('@')[0],
-      email: userEmail
+    const org = await db.collection('enterprise_orgs').findOne({
+      $or: [
+        { admin_email: { $regex: `^${userEmail}$`, $options: 'i' } },
+        { admin_user_id: userId }
+      ]
+    })
+
+    let profileOrgId: string | null = null
+    if (!org) {
+      if (liveProfile && liveProfile.enterprise_role === 'admin' && liveProfile.enterprise_org_id) {
+        profileOrgId = liveProfile.enterprise_org_id
+      }
     }
-  }
 
-  return {
-    authorized: false,
-    isSuperAdmin: false,
-    isEnterpriseAdmin: false,
-    orgId: null,
-    userId,
-    email: userEmail
+    const isDesignated = APP_CONFIG.enterpriseAdminEmails.map(e => e.toLowerCase()).includes(userEmail.toLowerCase())
+
+    if (org || profileOrgId || isDesignated) {
+      return {
+        authorized: true,
+        isSuperAdmin: false,
+        isEnterpriseAdmin: true,
+        orgId: org?.org_id || profileOrgId || sess.orgId || 'org_technohmsit',
+        userId,
+        email: userEmail
+      }
+    }
+  } catch {
+    // DB error → deny (fail closed)
   }
+  return denied
 }

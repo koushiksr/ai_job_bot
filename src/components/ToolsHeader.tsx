@@ -31,6 +31,7 @@ export default function ToolsHeader() {
 
   const handleSignOut = () => {
     if (typeof window !== 'undefined') {
+      try { navigator.sendBeacon('/api/auth/logout') } catch {}
       localStorage.clear()
       window.location.href = '/'
     }

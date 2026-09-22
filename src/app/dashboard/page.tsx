@@ -951,6 +951,7 @@ export default function UserDashboard() {
   }
 
   const handleLogout = () => {
+    try { navigator.sendBeacon('/api/auth/logout') } catch {}
     localStorage.clear()
     window.location.href = '/'
   }

@@ -443,6 +443,7 @@ export default function PricingPage() {
                 </Link>
                 <button
                   onClick={() => {
+                    try { navigator.sendBeacon('/api/auth/logout') } catch {}
                     localStorage.clear()
                     window.location.href = '/'
                   }}

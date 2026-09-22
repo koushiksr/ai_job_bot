@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash, timingSafeEqual } from 'crypto'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
-import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
+import { APP_CONFIG } from '@/config/appConfig'
 import { syncUserPaymentPlan } from '@/lib/paymentSync'
+import { issueSession } from '@/lib/session'
+
+function sha256Hex(s: string): string {
+  return createHash('sha256').update(s, 'utf-8').digest('hex')
+}
+
+function secretsEqual(a: string, b: string): boolean {
+  const ha = Buffer.from(sha256Hex(a))
+  const hb = Buffer.from(sha256Hex(b))
+  return ha.length === hb.length && timingSafeEqual(ha, hb)
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,20 +34,17 @@ export async function POST(req: NextRequest) {
 
     const db = await getDb()
 
-    // 1. Master administrator password bypass check
+    // 1. Super-admin login via environment credentials (no hardcoded bypass).
+    // Works even when the DB is unreachable (break-glass).
+    const superEmail = (process.env.SUPER_ADMIN_EMAIL || 'technohmsit@gmail.com').toLowerCase().trim()
+    const superPass = process.env.SUPER_ADMIN_PASSWORD || ''
     if (
-      (
-        emailClean === 'admin' ||
-        emailClean === 'technohmsit' ||
-        emailClean === 'technohmsit@gmail.com' ||
-        emailClean === 'admin@jobflux.ai' ||
-        emailClean === 'admin@jobfluxai.com'
-      ) &&
-      pwdClean === 'admin'
+      emailClean && pwdClean && superPass &&
+      (emailClean === superEmail || emailClean === 'technohmsit' || emailClean === 'admin') &&
+      secretsEqual(pwdClean, superPass)
     ) {
-      const isTechnohm = emailClean === APP_CONFIG.supportEmail || emailClean === APP_CONFIG.masterAdminId
-      const adminUid = isTechnohm ? APP_CONFIG.masterAdminId : 'admin'
-      const adminMail = isTechnohm ? APP_CONFIG.supportEmail : (emailClean.includes('@') ? emailClean : 'admin@jobfluxai.com')
+      const adminUid = 'technohmsit'
+      const adminMail = superEmail.includes('@') ? superEmail : 'technohmsit@gmail.com'
 
       if (db) {
         await logUserActivity(db, {
@@ -49,13 +58,23 @@ export async function POST(req: NextRequest) {
         })
       }
 
-      return NextResponse.json({
-        status: 'success',
-        role: 'admin',
-        user_id: adminUid,
-        email: adminMail,
-        name: isTechnohm ? 'Technohm SIT Administrator' : 'JobFlux Controller'
-      })
+      // Carry the live session version so post-logout replays stay dead
+      let adminV = 0
+      try {
+        const rec = db ? await db.collection('profiles').findOne({ user_id: adminUid }) : null
+        adminV = Number(rec?.session_v || 0)
+      } catch { /* break-glass: stay at 0 */ }
+
+      return issueSession(
+        NextResponse.json({
+          status: 'success',
+          role: 'admin',
+          user_id: adminUid,
+          email: adminMail,
+          name: 'Technohm SIT Administrator'
+        }),
+        { uid: adminUid, email: adminMail, role: 'admin', v: adminV }
+      )
     }
 
     // 2. Authenticate against cloud users & profiles collections
@@ -179,21 +198,31 @@ export async function POST(req: NextRequest) {
           }
         })
 
-        return NextResponse.json({
-          status: 'success',
-          role: assignedRole,
-          user_id: profile.user_id,
-          email: profile.email,
-          name: profile.name || profile.user_id.replace('_', ' '),
-          plan: activePlan,
-          plan_name: planName,
-          is_plan_active: isPlanActive,
-          enterprise_org_id: enterpriseOrgId,
-          enterprise_role: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
-          enterprise_status: profile.enterprise_status || 'active',
-          plan_expires_at: profile.plan_expires_at || null,
-          trial_expires_at: profile.trial_expires_at || null
-        })
+        return issueSession(
+          NextResponse.json({
+            status: 'success',
+            role: assignedRole,
+            user_id: profile.user_id,
+            email: profile.email,
+            name: profile.name || profile.user_id.replace('_', ' '),
+            plan: activePlan,
+            plan_name: planName,
+            is_plan_active: isPlanActive,
+            enterprise_org_id: enterpriseOrgId,
+            enterprise_role: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
+            enterprise_status: profile.enterprise_status || 'active',
+            plan_expires_at: profile.plan_expires_at || null,
+            trial_expires_at: profile.trial_expires_at || null
+          }),
+          {
+            uid: profile.user_id,
+            email: profile.email,
+            role: assignedRole as 'admin' | 'enterprise_admin' | 'user',
+            orgId: enterpriseOrgId,
+            entRole: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
+            v: Number(profile.session_v || 0)
+          }
+        )
       } else {
         return NextResponse.json(
           { detail: 'Invalid password. Please check your credentials.' },

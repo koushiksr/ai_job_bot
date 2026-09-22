@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { issueSession } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
 
@@ -261,7 +262,14 @@ export async function GET(req: NextRequest) {
       targetUrl.searchParams.set('picture', profile.picture || picture)
     }
 
-    return NextResponse.redirect(targetUrl)
+    return issueSession(NextResponse.redirect(targetUrl), {
+      uid: profile.user_id,
+      email: profile.email,
+      role: (role === 'admin' || role === 'enterprise_admin' ? role : 'user') as 'admin' | 'enterprise_admin' | 'user',
+      orgId: profile.enterprise_org_id || null,
+      entRole: profile.enterprise_role || null,
+      v: Number(profile.session_v || 0)
+    })
   } catch (err: any) {
     const msg = encodeURIComponent(err.message || 'Authentication with Google failed.')
     return NextResponse.redirect(new URL(`/?error=${msg}`, req.url))

@@ -59,19 +59,8 @@ export default function LoginPage() {
     const cleanEmail = email.trim().toLowerCase()
     const cleanPwd = password.trim()
 
-    // Master admin shortcut
-    if (
-      (cleanEmail === 'admin' || cleanEmail === 'technohmsit' || cleanEmail === 'technohmsit@gmail.com' || cleanEmail === 'admin@jobflux.ai') &&
-      cleanPwd === 'admin'
-    ) {
-      const masterUid = cleanEmail.includes('@') ? APP_CONFIG.masterAdminId : 'admin'
-      const masterEmail = cleanEmail.includes('@') ? cleanEmail : APP_CONFIG.supportEmail
-      localStorage.setItem('user_id', masterUid)
-      localStorage.setItem('user_email', masterEmail)
-      localStorage.setItem('user_role', 'admin')
-      window.location.href = '/admin'
-      return
-    }
+    // NOTE: no client-side admin shortcut — sign-in always goes through the
+    // server, which issues the httpOnly session cookie on success.
 
     try {
       const res = await fetch('/api/auth/login', {

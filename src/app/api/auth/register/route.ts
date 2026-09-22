@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { findActivePaymentForEmail } from '@/lib/paymentSync'
 import { APP_CONFIG } from '@/config/appConfig'
+import { issueSession } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
 
@@ -193,22 +194,26 @@ export async function POST(req: NextRequest) {
     )
 
     const isPaid = initialPlan !== 'trial'
-    return NextResponse.json({
-      status: 'success',
-      role: newProfile.role,
-      user_id: userId,
-      email: emailClean,
-      name: newProfile.name,
-      plan: initialPlan,
-      plan_name: initialPlanName,
-      enterprise_org_id: enterpriseOrgId,
-      enterprise_role: enterpriseRole,
-      plan_expires_at: planExpiresAt ? planExpiresAt.toISOString() : null,
-      trial_expires_at: trialExpires.toISOString(),
-      message: isPaid
-        ? `Your verified purchase (${initialPlanName}) has been automatically linked and activated!`
-        : 'Your 3-Day Free Access has been activated! Start applying for jobs today.'
-    })
+    const regRole = (newProfile.role === 'admin' || newProfile.role === 'enterprise_admin' ? newProfile.role : 'user') as 'admin' | 'enterprise_admin' | 'user'
+    return issueSession(
+      NextResponse.json({
+        status: 'success',
+        role: newProfile.role,
+        user_id: userId,
+        email: emailClean,
+        name: newProfile.name,
+        plan: initialPlan,
+        plan_name: initialPlanName,
+        enterprise_org_id: enterpriseOrgId,
+        enterprise_role: enterpriseRole,
+        plan_expires_at: planExpiresAt ? planExpiresAt.toISOString() : null,
+        trial_expires_at: trialExpires.toISOString(),
+        message: isPaid
+          ? `Your verified purchase (${initialPlanName}) has been automatically linked and activated!`
+          : 'Your 3-Day Free Access has been activated! Start applying for jobs today.'
+      }),
+      { uid: userId, email: emailClean, role: regRole, orgId: enterpriseOrgId, entRole: enterpriseRole, v: 0 }
+    )
   } catch (err: any) {
     return NextResponse.json(
       { detail: err.message || 'Registration failed.' },

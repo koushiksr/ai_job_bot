@@ -425,13 +425,11 @@ export default function AdminDashboard() {
     }
   }
 
+  // Auth is the httpOnly session cookie (same-origin fetch sends it automatically).
+  // Never send identity headers — the server ignores them.
   const getAdminHeaders = () => {
-    const uid = typeof window !== 'undefined' ? localStorage.getItem('user_id') || '' : ''
-    const uEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : ''
     return {
-      'Content-Type': 'application/json',
-      'x-user-id': uid || 'technohmsit',
-      'x-user-email': uEmail || 'technohmsit@gmail.com'
+      'Content-Type': 'application/json'
     }
   }
 
@@ -1614,6 +1612,7 @@ export default function AdminDashboard() {
   }
 
   const handleLogout = () => {
+    try { navigator.sendBeacon('/api/auth/logout') } catch {}
     localStorage.clear()
     window.location.href = '/'
   }

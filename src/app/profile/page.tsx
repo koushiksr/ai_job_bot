@@ -83,6 +83,7 @@ export default function CandidateProfilePage() {
   }, [])
 
   const handleLogout = () => {
+    try { navigator.sendBeacon('/api/auth/logout') } catch {}
     localStorage.clear()
     window.location.href = '/'
   }

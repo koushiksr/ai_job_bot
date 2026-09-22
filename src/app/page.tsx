@@ -193,6 +193,7 @@ export default function Home() {
   }, [])
 
   const handleSignOut = () => {
+    try { navigator.sendBeacon('/api/auth/logout') } catch {}
     localStorage.clear()
     setExistingUser(null)
     window.location.href = '/'
@@ -206,26 +207,9 @@ export default function Home() {
     const cleanEmail = email.trim().toLowerCase()
     const cleanPwd = password.trim()
 
-    // Direct Master Administrator credentials bypass check
-    if (
-      authMode === 'signin' &&
-      (
-        cleanEmail === 'admin' ||
-        cleanEmail === 'technohmsit' ||
-        cleanEmail === 'technohmsit@gmail.com' ||
-        cleanEmail === 'admin@jobflux.ai' ||
-        cleanEmail === 'admin@jobfluxai.com'
-      ) &&
-      cleanPwd === 'admin'
-    ) {
-      const masterUid = (cleanEmail === 'admin' || cleanEmail.startsWith('admin@')) ? 'admin' : APP_CONFIG.masterAdminId
-      const masterEmail = cleanEmail.includes('@') ? cleanEmail : APP_CONFIG.supportEmail
-      localStorage.setItem('user_id', masterUid)
-      localStorage.setItem('user_email', masterEmail)
-      localStorage.setItem('user_role', 'admin')
-      window.location.href = '/admin'
-      return
-    }
+    // NOTE: admin sign-in always goes through /api/auth/login below, which
+    // issues the httpOnly session cookie. There is intentionally no
+    // client-side credential shortcut here.
 
     try {
       const endpoint = authMode === 'trial' ? '/api/auth/register' : '/api/auth/login'

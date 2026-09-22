@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { findActivePaymentForEmail, syncUserPaymentPlan } from '@/lib/paymentSync'
 import { APP_CONFIG } from '@/config/appConfig'
+import { issueSession } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
 
@@ -302,22 +303,32 @@ export async function POST(req: NextRequest) {
       isPlanActive = trialExpires ? trialExpires > now : true
     }
 
-    return NextResponse.json({
-      status: 'success',
-      role: role,
-      user_id: profile.user_id,
-      email: profile.email,
-      name: profile.name || profile.user_id.replace('_', ' '),
-      picture: profile.picture || picture || '',
-      plan: verifiedPlan,
-      plan_name: planName,
-      is_plan_active: isPlanActive,
-      enterprise_org_id: enterpriseOrgId,
-      enterprise_role: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
-      plan_expires_at: profile.plan_expires_at || null,
-      trial_expires_at: profile.trial_expires_at || null,
-      message: 'Authenticated successfully via Google!'
-    })
+    return issueSession(
+      NextResponse.json({
+        status: 'success',
+        role: role,
+        user_id: profile.user_id,
+        email: profile.email,
+        name: profile.name || profile.user_id.replace('_', ' '),
+        picture: profile.picture || picture || '',
+        plan: verifiedPlan,
+        plan_name: planName,
+        is_plan_active: isPlanActive,
+        enterprise_org_id: enterpriseOrgId,
+        enterprise_role: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
+        plan_expires_at: profile.plan_expires_at || null,
+        trial_expires_at: profile.trial_expires_at || null,
+        message: 'Authenticated successfully via Google!'
+      }),
+      {
+        uid: profile.user_id,
+        email: profile.email,
+        role: (role === 'admin' || role === 'enterprise_admin' ? role : 'user') as 'admin' | 'enterprise_admin' | 'user',
+        orgId: enterpriseOrgId,
+        entRole: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
+        v: Number(profile.session_v || 0)
+      }
+    )
   } catch (err: any) {
     return NextResponse.json(
       { detail: err.message || 'Google authentication failed.' },

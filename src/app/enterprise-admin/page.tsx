@@ -173,11 +173,11 @@ export default function EnterpriseAdminPortal() {
     }
   }, [])
 
+  // Auth is the httpOnly session cookie (same-origin fetch sends it automatically).
+  // Never send identity headers — the server ignores them.
   const getAuthHeaders = () => {
     return {
-      'Content-Type': 'application/json',
-      'x-user-id': currentUserId || 'koushiksrmedala',
-      'x-user-email': currentUserEmail || 'koushiksrmedala@gmail.com'
+      'Content-Type': 'application/json'
     }
   }
 
@@ -473,6 +473,7 @@ export default function EnterpriseAdminPortal() {
   }
 
   const handleSignOut = () => {
+    try { navigator.sendBeacon('/api/auth/logout') } catch {}
     localStorage.clear()
     window.location.href = '/login'
   }
