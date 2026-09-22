@@ -66,9 +66,9 @@ export async function POST(req: NextRequest) {
     const todayStart = new Date(new Date(todayIstStr + 'T00:00:00+05:30').getTime())
     const todayEnd   = new Date(new Date(todayIstStr + 'T23:59:59+05:30').getTime())
 
-    // ── Pre-flight: daily application cap already reached? ─────────────
-    // Block BEFORE enqueue so a doomed run doesn't burn 1 of the 3 daily
-    // on-demand runs. Plain-language counts so admins know exactly why.
+    // ── Daily progress info (on-demand ALWAYS runs, even if swept today) ─
+    // On-demand tops up to the daily cap: e.g. 40/55 used → this run may add
+    // up to 15 more from newly posted jobs. Counts included so admins know.
     const dailyLimit = targetProfile.daily_application_limit || 55
     let appliedToday = 0
     try {
@@ -77,16 +77,7 @@ export async function POST(req: NextRequest) {
         appliedToday = statsDoc.today || 0
       }
     } catch { /* stats missing => treat as 0 */ }
-
-    if (appliedToday >= dailyLimit) {
-      return NextResponse.json({
-        detail: `No point triggering: ${targetProfile.name || targetUserId} already finished today's sweep — ${appliedToday}/${dailyLimit} applications used. On-demand runs can't exceed the daily cap, so this would burn 1 of today's 3 on-demand runs for zero new applications. Next automatic sweep is tomorrow at 6:00 AM IST.`,
-        applied_today: appliedToday,
-        daily_limit: dailyLimit,
-        used_today: 0,
-        remaining_today: 0
-      }, { status: 400 })
-    }
+    const remainingSlots = Math.max(0, dailyLimit - appliedToday)
 
     // Check if task is already running
     const existingTask = await db.collection('tasks').findOne({
@@ -171,14 +162,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       status: 'success',
       message: `On-demand sweep enqueued for ${targetProfile.name || targetUserId} at position #${queuePosition} in line. ` +
-        `Today's progress: ${appliedToday}/${dailyLimit} applications used. ` +
-        `On-demand runs used today: ${todayOnDemandCount + 1} of 3. ` +
+        `Today's progress: ${appliedToday}/${dailyLimit} applications used — this run can add up to ${remainingSlots} more from newly posted jobs. ` +
+        `On-demand runs used today: ${todayOnDemandCount + 1} of 3 (max 3/day, 10/week per member). ` +
         `Watch Live Log for real-time progress — if the run ends with 0 new applications, its summary will state exactly why.`,
       task_id: taskId,
       queue_position: queuePosition,
       candidate_name: targetProfile.name || targetUserId,
       applied_today: appliedToday,
       daily_limit: dailyLimit,
+      remaining_slots: remainingSlots,
       on_demand_used_today: todayOnDemandCount + 1,
       on_demand_limit_per_day: 3
     })

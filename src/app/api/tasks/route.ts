@@ -183,6 +183,26 @@ export async function POST(req: NextRequest) {
       }, { status: 429 })
     }
 
+    // 2b. Daily Quota Enforcement (max 3 on-demand runs per day per user)
+    if (!quota.is_unlimited) {
+      const istNow = new Date(now.getTime() + 5.5 * 60 * 60 * 1000)
+      const todayIstStr = istNow.toISOString().slice(0, 10)
+      const todayStart = new Date(new Date(todayIstStr + 'T00:00:00+05:30').getTime())
+      const todayEnd = new Date(new Date(todayIstStr + 'T23:59:59+05:30').getTime())
+      const usedToday = await db.collection('tasks').countDocuments({
+        user_id: user_id,
+        source: { $in: ['web_dashboard_on_demand', 'enterprise_admin_on_demand'] },
+        created_at: { $gte: todayStart, $lte: todayEnd }
+      })
+      if (usedToday >= 3) {
+        return NextResponse.json({
+          detail: `Daily on-demand limit reached (3/3 used today). Resets at midnight IST — your automated morning sweeps continue every day regardless.`,
+          code: 'DAILY_QUOTA_EXCEEDED',
+          quota: { ...quota, used_today: usedToday, remaining_today: 0 }
+        }, { status: 429 })
+      }
+    }
+
     // 3. Prevent duplicate active tasks for the same user
     const existingTask = await db.collection('tasks').findOne({
       user_id: user_id,

@@ -918,17 +918,15 @@ export default function EnterpriseAdminPortal() {
                               <span>Live Log</span>
                             </button>
 
-                            {/* Trigger On-Demand Sweep Button */}
+                            {/* Trigger On-Demand Sweep Button — always allowed, tops up to daily cap */}
                             <button
                               onClick={() => handleTriggerOnDemand(member)}
-                              disabled={isProcessing || !isEnabled || org?.status === 'disabled' || (member.applied_today || 0) >= 55}
+                              disabled={isProcessing || !isEnabled || org?.status === 'disabled'}
                               className="px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 text-indigo-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
                               title={
                                 org?.status === 'disabled'
                                   ? 'Org is disabled by Super Admin — all runs are blocked'
-                                  : (member.applied_today || 0) >= 55
-                                    ? `Daily cap reached (${member.applied_today}/55 applications). On-demand can't add more until tomorrow 6:00 AM IST — triggering now would waste a run.`
-                                    : `Dispatch instant on-demand sweep (${member.applied_today || 0}/55 used today)`
+                                  : `Dispatch instant on-demand sweep (${member.applied_today || 0}/55 used today — run tops up the rest from newly posted jobs)`
                               }
                             >
                               <Zap className="w-3 h-3 text-indigo-400" />
