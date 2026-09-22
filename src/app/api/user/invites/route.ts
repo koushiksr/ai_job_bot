@@ -51,6 +51,10 @@ export async function GET(req: NextRequest) {
 /**
  * POST: Candidate responds to an enterprise invitation (accept or decline)
  * Body: { invite_id: string, action: 'accept' | 'decline', user_id: string }
+ *
+ * Consent + ownership rule: the invite can only be answered by the account
+ * that owns the invited email. user_id must resolve to a profile whose
+ * email matches invite.invited_email, otherwise 403.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -68,12 +72,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'invite_id is required' }, { status: 400 })
     }
 
+    if (!userId) {
+      return NextResponse.json({ detail: 'user_id is required' }, { status: 400 })
+    }
+
     const invite = await db.collection('enterprise_invites').findOne({
       $or: [{ invite_id: inviteId }]
     })
 
     if (!invite) {
       return NextResponse.json({ detail: 'Invitation not found or has expired.' }, { status: 404 })
+    }
+
+    if (invite.status !== 'pending') {
+      return NextResponse.json({ detail: `This invitation is no longer pending (status: ${invite.status}).` }, { status: 410 })
+    }
+
+    // Ownership check: only the invited email's own account may answer
+    const caller = await db.collection('profiles').findOne({ user_id: userId })
+      || await db.collection('users').findOne({ user_id: userId })
+    const callerEmail = (caller?.email || '').toLowerCase()
+    if (!callerEmail || callerEmail !== (invite.invited_email || '').toLowerCase()) {
+      return NextResponse.json({ detail: 'This invitation belongs to a different account.' }, { status: 403 })
     }
 
     const now = new Date()
@@ -111,6 +131,12 @@ export async function POST(req: NextRequest) {
 
     await db.collection('profiles').updateOne(query, { $set: updateFields })
     await db.collection('users').updateOne(query, { $set: updateFields })
+
+    // Retire any other pending invites for this email so stale banners don't linger
+    await db.collection('enterprise_invites').updateMany(
+      { invited_email: invite.invited_email, status: 'pending', _id: { $ne: invite._id } },
+      { $set: { status: 'superseded', responded_at: now } }
+    )
 
     return NextResponse.json({
       status: 'success',

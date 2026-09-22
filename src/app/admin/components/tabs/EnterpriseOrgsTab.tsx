@@ -244,7 +244,7 @@ export default function EnterpriseOrgsTab({
     finally { setAssigningAdmin(false) }
   }
 
-  // ─── Add member ──────────────────────────────────────────────────────
+  // ─── Invite member (invite-only; joins on candidate Accept) ──────────
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!addMemberOrgId || !addMemberEmail.trim()) return
@@ -263,7 +263,7 @@ export default function EnterpriseOrgsTab({
         await loadOrgMembers(addMemberOrgId)
         await fetchEnterpriseOrgs()
       } else {
-        msg('error', data.detail || 'Failed to add member.')
+        msg('error', data.detail || 'Failed to send invite.')
       }
     } catch (e: any) { msg('error', e.message) }
     finally { setAddingMember(false) }
@@ -557,12 +557,12 @@ export default function EnterpriseOrgsTab({
                           <button type="button" onClick={() => setAddMemberOrgId(addMemberOrgId === org.org_id ? null : org.org_id)}
                             className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold flex items-center gap-1 cursor-pointer">
                             <UserPlus className="w-3 h-3" />
-                            Add Member
+                            Invite Member
                           </button>
                         </div>
                       </div>
 
-                      {/* Add member form */}
+                      {/* Invite member form — invite only; user joins after accepting in their dashboard */}
                       {addMemberOrgId === org.org_id && (
                         <form onSubmit={handleAddMember} className="p-3 border-b border-zinc-800 flex items-center gap-2 bg-zinc-900/50">
                           <Mail className="w-4 h-4 text-zinc-500 shrink-0" />
@@ -570,14 +570,14 @@ export default function EnterpriseOrgsTab({
                             type="email"
                             value={addMemberEmail}
                             onChange={e => setAddMemberEmail(e.target.value)}
-                            placeholder="existing.user@email.com"
+                            placeholder="existing.user@email.com — they must accept the invite"
                             required
                             className="flex-1 bg-black border border-zinc-700 focus:border-emerald-500 rounded-lg px-3 py-1.5 text-xs text-white placeholder-zinc-600 outline-none"
                           />
                           <button type="submit" disabled={addingMember}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-60">
                             {addingMember ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserPlus className="w-3 h-3" />}
-                            Add
+                            Invite
                           </button>
                           <button type="button" onClick={() => { setAddMemberOrgId(null); setAddMemberEmail('') }}
                             className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white cursor-pointer">

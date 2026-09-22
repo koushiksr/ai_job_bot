@@ -7,9 +7,13 @@ export const dynamic = 'force-dynamic'
 /**
  * Super Admin: manage individual members of an enterprise org directly.
  * GET    ?org_id=...                         → list members in org
- * POST   { org_id, email }                   → add existing user to org as member
+ * POST   { org_id, email }                   → INVITE existing user (pending until THEY accept in their dashboard)
  * PATCH  { org_id, user_id, enabled }        → enable / disable member
  * DELETE ?org_id=...&user_id=...             → remove user from org
+ *
+ * Consent rule: nobody is ever pulled into an org silently. POST only creates
+ * a pending enterprise_invites record; membership activates when the candidate
+ * clicks Accept in their own dashboard (POST /api/user/invites).
  */
 
 export async function GET(req: NextRequest) {
@@ -86,33 +90,49 @@ export async function POST(req: NextRequest) {
     const org = await db.collection('enterprise_orgs').findOne({ org_id: orgId })
     if (!org) return NextResponse.json({ detail: 'Organization not found.' }, { status: 404 })
 
-    const now = new Date()
-    const update = {
-      enterprise_org_id: orgId,
-      enterprise_role: 'member',
-      enterprise_status: 'active',
-      plan: 'enterprise',
-      plan_name: 'JobFlux Enterprise Member',
-      daily_application_limit: org.daily_limit_per_user || 55,
-      enabled_for_daily_run: true,
-      updated_at: now
+    // Consent rule: if already an active member, nothing to do
+    if (existingUser.enterprise_org_id === orgId && existingUser.enterprise_role === 'member') {
+      return NextResponse.json({ detail: `${existingUser.name || email} is already an active member of ${org.name}.` }, { status: 400 })
     }
 
-    await db.collection('profiles').updateOne(
-      { email: { $regex: `^${email}$`, $options: 'i' } },
-      { $set: update },
-      { upsert: false }
-    )
-    await db.collection('users').updateOne(
-      { email: { $regex: `^${email}$`, $options: 'i' } },
-      { $set: update },
-      { upsert: false }
-    )
+    const now = new Date()
+
+    // If a pending invite already exists, just refresh it (never duplicate, never force-add)
+    const existingInvite = await db.collection('enterprise_invites').findOne({
+      org_id: orgId,
+      invited_email: email,
+      status: 'pending'
+    })
+    if (existingInvite) {
+      await db.collection('enterprise_invites').updateOne(
+        { _id: existingInvite._id },
+        { $set: { updated_at: now, invited_by: auth.email || auth.userId } }
+      )
+      return NextResponse.json({
+        status: 'success',
+        invite_id: existingInvite.invite_id || existingInvite._id.toString(),
+        email,
+        message: `Invitation refreshed for ${email}. They must accept it in their dashboard before joining ${org.name}.`
+      })
+    }
+
+    // Create a pending invitation — membership activates ONLY on candidate Accept
+    const inviteId = `inv_${Date.now()}_${Math.floor(Math.random() * 1000)}`
+    await db.collection('enterprise_invites').insertOne({
+      invite_id: inviteId,
+      org_id: orgId,
+      org_name: org.name,
+      invited_email: email,
+      invited_by: auth.email || auth.userId,
+      status: 'pending',
+      created_at: now,
+      updated_at: now
+    })
 
     return NextResponse.json({
       status: 'success',
-      message: `${existingUser.name || email} added to ${org.name} as a member.`,
-      user_id: existingUser.user_id,
+      message: `Invitation sent to ${email}. They will join ${org.name} only after accepting it in their dashboard.`,
+      invite_id: inviteId,
       email
     })
   } catch (err: any) {
