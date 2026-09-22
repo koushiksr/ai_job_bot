@@ -61,6 +61,7 @@ interface OrgInfo {
   status: string
   daily_limit_per_user: number
   weekly_on_demand_quota: number
+  daily_sweep_time?: string
 }
 
 interface OrgMetrics {
@@ -119,6 +120,8 @@ export default function EnterpriseAdminPortal() {
   const [editingOrgName, setEditingOrgName] = useState(false)
   const [orgNameInput, setOrgNameInput] = useState('')
   const [orgNameSaving, setOrgNameSaving] = useState(false)
+  const [sweepTimeInput, setSweepTimeInput] = useState('')
+  const [sweepTimeSaving, setSweepTimeSaving] = useState(false)
 
   // Auth & Initial Load
   useEffect(() => {
@@ -193,6 +196,7 @@ export default function EnterpriseAdminPortal() {
         const orgData = await orgRes.json()
         setOrg(orgData.org)
         setMetrics(orgData.metrics)
+        if (orgData.org?.daily_sweep_time) setSweepTimeInput(orgData.org.daily_sweep_time)
       }
 
       if (membersRes.ok) {
@@ -471,6 +475,35 @@ export default function EnterpriseAdminPortal() {
     }
   }
 
+  // Save Daily Sweep Time
+  const handleSaveSweepTime = async () => {
+    const t = sweepTimeInput.trim()
+    if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(t)) {
+      setFeedback({ type: 'error', text: 'Sweep time must be HH:MM in 24-hour IST (e.g. 09:00).' })
+      return
+    }
+    setSweepTimeSaving(true)
+    setFeedback(null)
+    try {
+      const res = await fetch('/api/enterprise-admin/org', {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ daily_sweep_time: t })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setOrg(prev => prev ? { ...prev, daily_sweep_time: t } : prev)
+        setFeedback({ type: 'success', text: `✅ Daily sweep time set to ${t} IST. All members queue one-by-one from that time each day.` })
+      } else {
+        setFeedback({ type: 'error', text: data.detail || 'Failed to update sweep time.' })
+      }
+    } catch (e: any) {
+      setFeedback({ type: 'error', text: e.message || 'Network error updating sweep time.' })
+    } finally {
+      setSweepTimeSaving(false)
+    }
+  }
+
   // Filter members by search
   const filteredMembers = members.filter(m =>
     (m.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -652,48 +685,69 @@ export default function EnterpriseAdminPortal() {
         {/* Organisation Settings + Invite (single compact card) */}
         <section className="p-4 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-3">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {/* Org name */}
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
-              {editingOrgName ? (
-                <>
-                  <input
-                    type="text"
-                    value={orgNameInput}
-                    onChange={e => setOrgNameInput(e.target.value)}
-                    placeholder="Organisation name..."
-                    className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-indigo-700 focus:border-indigo-500 focus:outline-none text-xs text-white placeholder-zinc-500"
-                    autoFocus
-                    onKeyDown={e => { if (e.key === 'Enter') handleSaveOrgName(); if (e.key === 'Escape') setEditingOrgName(false) }}
-                  />
-                  <button
-                    onClick={handleSaveOrgName}
-                    disabled={orgNameSaving}
-                    className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    {orgNameSaving ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    onClick={() => setEditingOrgName(false)}
-                    className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs cursor-pointer shrink-0"
-                  >
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <span className="flex-1 min-w-0 truncate px-3 py-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 text-xs text-white font-medium" title={org?.name || 'Unnamed Organisation'}>
-                    {org?.name || 'Unnamed Organisation'}
-                  </span>
-                  <button
-                    onClick={() => { setOrgNameInput(org?.name || ''); setEditingOrgName(true) }}
-                    className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-xs font-medium cursor-pointer shrink-0"
-                  >
-                    Rename
-                  </button>
-                </>
-              )}
+            {/* Org name + daily sweep time */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                {editingOrgName ? (
+                  <>
+                    <input
+                      type="text"
+                      value={orgNameInput}
+                      onChange={e => setOrgNameInput(e.target.value)}
+                      placeholder="Organisation name..."
+                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-indigo-700 focus:border-indigo-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+                      autoFocus
+                      onKeyDown={e => { if (e.key === 'Enter') handleSaveOrgName(); if (e.key === 'Escape') setEditingOrgName(false) }}
+                    />
+                    <button
+                      onClick={handleSaveOrgName}
+                      disabled={orgNameSaving}
+                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      {orgNameSaving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => setEditingOrgName(false)}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs cursor-pointer shrink-0"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="flex-1 min-w-0 truncate px-3 py-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 text-xs text-white font-medium" title={org?.name || 'Unnamed Organisation'}>
+                      {org?.name || 'Unnamed Organisation'}
+                    </span>
+                    <button
+                      onClick={() => { setOrgNameInput(org?.name || ''); setEditingOrgName(true) }}
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-xs font-medium cursor-pointer shrink-0"
+                    >
+                      Rename
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
+                <span className="text-[11px] text-zinc-400">Daily sweep</span>
+                <input
+                  type="time"
+                  value={sweepTimeInput || org?.daily_sweep_time || '06:00'}
+                  onChange={e => setSweepTimeInput(e.target.value)}
+                  className="px-2 py-1 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-cyan-500 focus:outline-none text-xs text-white font-mono [color-scheme:dark]"
+                />
+                <span className="text-[10px] text-zinc-500 font-mono">IST</span>
+                <button
+                  onClick={handleSaveSweepTime}
+                  disabled={sweepTimeSaving}
+                  className="px-3 py-1 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 text-cyan-300 text-xs font-medium cursor-pointer disabled:opacity-60 shrink-0"
+                >
+                  {sweepTimeSaving ? 'Saving...' : 'Set Time'}
+                </button>
+                <span className="text-[10px] text-zinc-600 font-mono hidden sm:inline">members queue one-by-one from this time daily</span>
+              </div>
             </div>
 
             {/* Invite */}
@@ -720,6 +774,7 @@ export default function EnterpriseAdminPortal() {
           <div className="text-[10px] text-zinc-500 font-mono">
             Org ID: <span className="text-zinc-400">{org?.org_id || 'org_technohmsit'}</span> · Admin: <span className="text-zinc-400">{org?.admin_email || currentUserEmail}</span>
             <span className="text-zinc-600"> · Members get 10 on-demand/week + 55 daily applications</span>
+            <span className="text-cyan-400/80"> · Daily sweep {org?.daily_sweep_time || '06:00'} IST</span>
           </div>
 
           {/* Pending Invites List */}
@@ -931,7 +986,7 @@ export default function EnterpriseAdminPortal() {
                               }
                             >
                               <Zap className="w-3 h-3 text-indigo-400" />
-                              <span>Trigger Sweep</span>
+                              <span>On-Demand</span>
                             </button>
                           </div>
                         </td>

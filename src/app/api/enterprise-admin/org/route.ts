@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
         created_by: 'technohmsit@gmail.com',
         daily_limit_per_user: 55,
         weekly_on_demand_quota: 10,
+        daily_sweep_time: '06:00',
         status: 'active',
         created_at: now,
         updated_at: now
@@ -86,6 +87,7 @@ export async function GET(req: NextRequest) {
         status: org.status || 'active',
         daily_limit_per_user: org.daily_limit_per_user || 55,
         weekly_on_demand_quota: org.weekly_on_demand_quota || 10,
+        daily_sweep_time: org.daily_sweep_time || '06:00',
         created_at: org.created_at
       },
       metrics: {
@@ -104,7 +106,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PATCH: Update org name (org admin can rename their org)
+// PATCH: Update org settings — name and/or daily sweep time (org admin)
 export async function PATCH(req: NextRequest) {
   try {
     const db = await getDb()
@@ -119,26 +121,46 @@ export async function PATCH(req: NextRequest) {
 
     const body = await req.json()
     const newName = (body.name || '').trim()
+    const sweepTime = (body.daily_sweep_time || '').trim()
 
-    if (!newName || newName.length < 2) {
-      return NextResponse.json({ detail: 'Organisation name must be at least 2 characters.' }, { status: 400 })
+    const updates: any = {}
+    if (newName) {
+      if (newName.length < 2) {
+        return NextResponse.json({ detail: 'Organisation name must be at least 2 characters.' }, { status: 400 })
+      }
+      if (newName.length > 80) {
+        return NextResponse.json({ detail: 'Organisation name must be 80 characters or fewer.' }, { status: 400 })
+      }
+      updates.name = newName
+      updates.display_name = newName
+    }
+    if (sweepTime) {
+      if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(sweepTime)) {
+        return NextResponse.json({ detail: 'Daily sweep time must be HH:MM in 24-hour IST (e.g. 09:00).' }, { status: 400 })
+      }
+      updates.daily_sweep_time = sweepTime
     }
 
-    if (newName.length > 80) {
-      return NextResponse.json({ detail: 'Organisation name must be 80 characters or fewer.' }, { status: 400 })
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ detail: 'Nothing to update. Provide name and/or daily_sweep_time.' }, { status: 400 })
     }
 
     const orgId = auth.orgId || 'org_technohmsit'
+    updates.updated_at = new Date()
 
     await db.collection('enterprise_orgs').updateOne(
       { org_id: orgId },
-      { $set: { name: newName, display_name: newName, updated_at: new Date() } }
+      { $set: updates }
     )
 
+    const parts: string[] = []
+    if (updates.name) parts.push(`renamed to "${updates.name}"`)
+    if (updates.daily_sweep_time) parts.push(`daily sweep set to ${updates.daily_sweep_time} IST (members queue one-by-one from that time)`)
     return NextResponse.json({
       status: 'success',
-      message: `Organisation renamed to "${newName}".`,
-      name: newName
+      message: `Organisation updated: ${parts.join('; ')}.`,
+      name: updates.name,
+      daily_sweep_time: updates.daily_sweep_time
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Error updating org name' }, { status: 500 })
