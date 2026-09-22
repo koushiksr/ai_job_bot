@@ -170,14 +170,14 @@ export async function DELETE(req: NextRequest) {
     }
 
     await db.collection('profiles').updateOne(
-      { user_id, enterprise_org_id: orgId },
+      { user_id: userId, enterprise_org_id: orgId },
       {
         $unset: { enterprise_org_id: '', enterprise_role: '', enterprise_status: '' },
         $set: { plan: 'trial', daily_application_limit: 10, updated_at: new Date() }
       }
     )
     await db.collection('users').updateOne(
-      { user_id },
+      { user_id: userId },
       { $unset: { enterprise_org_id: '', enterprise_role: '', enterprise_status: '' }, $set: { updated_at: new Date() } }
     )
 

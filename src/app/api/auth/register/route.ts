@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { findActivePaymentForEmail } from '@/lib/paymentSync'
+import { APP_CONFIG } from '@/config/appConfig'
 
 export const dynamic = 'force-dynamic'
 
