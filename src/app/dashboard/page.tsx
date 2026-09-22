@@ -35,7 +35,9 @@ import {
   AlertTriangle,
   Check,
   Copy,
-  Star
+  Star,
+  Terminal,
+  Radio
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
@@ -115,6 +117,7 @@ export default function UserDashboard() {
   const [taskFeedback, setTaskFeedback] = useState<{ type: 'success' | 'info' | 'error', text: string } | null>(null)
   const [weeklyQuota, setWeeklyQuota] = useState<{ limit: number, used: number, remaining: number, is_unlimited: boolean } | null>(null)
   const [queueStatus, setQueueStatus] = useState<{ queue_position: number, is_global_sweep_active: boolean, active_user_id: string | null } | null>(null)
+  const [showLiveTerminal, setShowLiveTerminal] = useState<boolean>(true)
 
   // AI Application Audit Modal
   const [selectedJobAudit, setSelectedJobAudit] = useState<any | null>(null)
@@ -2099,6 +2102,72 @@ export default function UserDashboard() {
               >
                 ✕
               </button>
+            </div>
+          )}
+
+          {/* Real-time Live Log Stream Terminal */}
+          {activeTask && (activeTask.status === 'running' || activeTask.status === 'pending' || (activeTask.logs && activeTask.logs.length > 0)) && (
+            <div className="border-t border-b border-zinc-800 bg-black overflow-hidden animate-in fade-in duration-200">
+              <div className="px-3.5 py-2 bg-zinc-950 flex items-center justify-between border-b border-zinc-900 text-xs">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-3.5 h-3.5 text-sky-400" />
+                  <span className="font-mono text-zinc-300 font-semibold text-[11px]">
+                    Autonomous Bot Live Terminal {activeTask.task_id ? `(${activeTask.task_id})` : ''}
+                  </span>
+                  {activeTask.status === 'running' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
+                      <Radio className="w-2 h-2 text-emerald-400" />
+                      LIVE
+                    </span>
+                  )}
+                  {activeTask.status === 'pending' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                      QUEUED
+                    </span>
+                  )}
+                  {activeTask.status === 'completed' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      COMPLETED
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowLiveTerminal(prev => !prev)}
+                  className="text-zinc-500 hover:text-white text-[11px] font-mono cursor-pointer"
+                >
+                  {showLiveTerminal ? 'Minimize ▲' : 'Expand Stream ▼'}
+                </button>
+              </div>
+
+              {showLiveTerminal && (
+                <div className="p-3 font-mono text-[11px] max-h-44 overflow-y-auto space-y-1 select-text scroll-smooth">
+                  {activeTask.logs && activeTask.logs.length > 0 ? (
+                    activeTask.logs.map((line: string, i: number) => (
+                      <div
+                        key={i}
+                        className={`leading-relaxed ${
+                          line.includes('❌') || line.includes('Error') || line.includes('Failed')
+                            ? 'text-rose-400 font-medium'
+                            : line.includes('🛑') || line.includes('⚠️')
+                            ? 'text-amber-400'
+                            : line.includes('🎉') || line.includes('APPLIED!') || line.includes('COMPLETED')
+                            ? 'text-emerald-400 font-semibold'
+                            : line.includes('🎬') || line.includes('🚀') || line.includes('Company resolved')
+                            ? 'text-sky-300'
+                            : 'text-zinc-300'
+                        }`}
+                      >
+                        {line}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-zinc-500 italic py-2">
+                      Connecting to background worker... Task queued in dispatch pipeline.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

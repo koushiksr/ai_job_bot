@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
         started_at: t.started_at,
         completed_at: t.completed_at,
         summary: t.summary || null,
-        logs: Array.isArray(t.logs) ? t.logs.slice(-6) : []
+        logs: Array.isArray(t.logs) ? t.logs.slice(-50) : []
       } : null,
       queue_status: {
         queue_position: queuePosition,

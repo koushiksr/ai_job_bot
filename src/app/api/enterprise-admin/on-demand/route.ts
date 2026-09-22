@@ -103,3 +103,108 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ detail: err.message || 'Error triggering on-demand task' }, { status: 500 })
   }
 }
+
+/**
+ * GET: Fetch live execution logs and status for a task within the enterprise org.
+ * Query: ?task_id=... or ?user_id=...
+ */
+export async function GET(req: NextRequest) {
+  try {
+    const db = await getDb()
+    if (!db) {
+      return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
+    }
+
+    const auth = await verifyEnterpriseAdminRequest(req, db)
+    if (!auth.authorized) {
+      return NextResponse.json({ detail: 'Unauthorized' }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const taskId = searchParams.get('task_id')
+    const userId = searchParams.get('user_id')
+
+    const query: any = {}
+    if (taskId) {
+      query.task_id = taskId
+    } else if (userId) {
+      query.user_id = userId
+    } else {
+      return NextResponse.json({ detail: 'task_id or user_id required' }, { status: 400 })
+    }
+
+    const tasks = await db.collection('tasks').find(query).sort({ created_at: -1 }).limit(1).toArray()
+    if (!tasks || tasks.length === 0) {
+      return NextResponse.json({ task: null })
+    }
+
+    const t = tasks[0]
+    return NextResponse.json({
+      task: {
+        task_id: t.task_id,
+        user_id: t.user_id,
+        status: t.status,
+        summary: t.summary || null,
+        created_at: t.created_at,
+        started_at: t.started_at,
+        completed_at: t.completed_at,
+        heartbeat_at: t.heartbeat_at,
+        logs_preview: Array.isArray(t.logs) ? t.logs.slice(-100) : [],
+        logs_count: Array.isArray(t.logs) ? t.logs.length : 0
+      }
+    })
+  } catch (err: any) {
+    return NextResponse.json({ detail: err.message }, { status: 500 })
+  }
+}
+
+/**
+ * DELETE: Stop / Halt a running or pending task for a member.
+ * Query: ?task_id=...
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const db = await getDb()
+    if (!db) {
+      return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
+    }
+
+    const auth = await verifyEnterpriseAdminRequest(req, db)
+    if (!auth.authorized) {
+      return NextResponse.json({ detail: 'Unauthorized' }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const taskId = searchParams.get('task_id')
+    if (!taskId) {
+      return NextResponse.json({ detail: 'task_id required' }, { status: 400 })
+    }
+
+    const res = await db.collection('tasks').updateOne(
+      { task_id: taskId, status: { $in: ['pending', 'running'] } },
+      {
+        $set: {
+          status: 'cancelled',
+          stop_requested: true,
+          completed_at: new Date(),
+          summary: `Halted by Enterprise Administrator (${auth.email})`
+        },
+        $push: {
+          logs: `[${new Date().toLocaleTimeString()}] 🛑 Task halted by Enterprise Administrator (${auth.email}).`
+        } as any
+      }
+    )
+
+    if (res.matchedCount === 0) {
+      return NextResponse.json({ detail: 'Task not found or not in active state' }, { status: 404 })
+    }
+
+    return NextResponse.json({
+      status: 'success',
+      message: `Task ${taskId} halted successfully.`
+    })
+  } catch (err: any) {
+    return NextResponse.json({ detail: err.message }, { status: 500 })
+  }
+}
+

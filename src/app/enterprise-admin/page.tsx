@@ -22,7 +22,11 @@ import {
   Activity,
   RefreshCw,
   Search,
-  ExternalLink
+  ExternalLink,
+  X,
+  Radio,
+  StopCircle,
+  FileText
 } from 'lucide-react'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 
@@ -96,6 +100,18 @@ export default function EnterpriseAdminPortal() {
   const [inviteSubmitting, setInviteSubmitting] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
+
+  // Live Execution Log Stream State
+  const [selectedLiveLog, setSelectedLiveLog] = useState<{
+    task_id: string
+    user_id: string
+    member_name: string
+    status: string
+    summary?: string
+    logs: string[]
+  } | null>(null)
+  const [liveLogLoading, setLiveLogLoading] = useState(false)
+  const [haltingTask, setHaltingTask] = useState(false)
 
   // Auth & Initial Load
   useEffect(() => {
@@ -238,6 +254,101 @@ export default function EnterpriseAdminPortal() {
       setFeedback({ type: 'error', text: e.message || 'Failed to trigger task' })
     } finally {
       setActionLoadingId(null)
+    }
+  }
+
+  // Poll live execution log if modal is open and task is active
+  useEffect(() => {
+    if (!selectedLiveLog?.task_id) return
+    if (selectedLiveLog.status !== 'running' && selectedLiveLog.status !== 'pending') return
+
+    const pollTaskLogs = async () => {
+      try {
+        const res = await fetch(`/api/enterprise-admin/on-demand?task_id=${encodeURIComponent(selectedLiveLog.task_id)}`, {
+          headers: getAuthHeaders()
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.task) {
+            setSelectedLiveLog(prev => prev ? {
+              ...prev,
+              status: data.task.status,
+              summary: data.task.summary,
+              logs: data.task.logs_preview && data.task.logs_preview.length > 0 ? data.task.logs_preview : prev.logs
+            } : null)
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to poll live log:', e)
+      }
+    }
+
+    const timer = setInterval(pollTaskLogs, 2500)
+    return () => clearInterval(timer)
+  }, [selectedLiveLog?.task_id, selectedLiveLog?.status])
+
+  // Open Live Log Stream Modal for a Candidate
+  const handleOpenLiveLog = async (member: Member) => {
+    setLiveLogLoading(true)
+    setSelectedLiveLog({
+      task_id: '',
+      user_id: member.user_id,
+      member_name: member.name || member.user_id,
+      status: 'loading',
+      logs: ['Connecting to cloud execution pipeline...']
+    })
+
+    try {
+      const res = await fetch(`/api/enterprise-admin/on-demand?user_id=${encodeURIComponent(member.user_id)}`, {
+        headers: getAuthHeaders()
+      })
+      const data = await res.json()
+      if (data.task) {
+        setSelectedLiveLog({
+          task_id: data.task.task_id,
+          user_id: member.user_id,
+          member_name: member.name || member.user_id,
+          status: data.task.status,
+          summary: data.task.summary,
+          logs: data.task.logs_preview && data.task.logs_preview.length > 0 ? data.task.logs_preview : ['No logs captured yet.']
+        })
+      } else {
+        setSelectedLiveLog({
+          task_id: '',
+          user_id: member.user_id,
+          member_name: member.name || member.user_id,
+          status: 'idle',
+          logs: ['No active or recent execution runs found for this candidate.']
+        })
+      }
+    } catch (e: any) {
+      setSelectedLiveLog(prev => prev ? { ...prev, logs: ['Error fetching log: ' + e.message] } : null)
+    } finally {
+      setLiveLogLoading(false)
+    }
+  }
+
+  // Halt / Stop a Running Task
+  const handleHaltTask = async (taskId: string) => {
+    if (!taskId) return
+    setHaltingTask(true)
+    try {
+      const res = await fetch(`/api/enterprise-admin/on-demand?task_id=${encodeURIComponent(taskId)}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setSelectedLiveLog(prev => prev ? { ...prev, status: 'cancelled', summary: 'Halted by Administrator' } : null)
+        setFeedback({ type: 'info', text: `Task ${taskId} halted successfully.` })
+        loadAllPortalData()
+      } else {
+        alert(data.detail || 'Failed to halt task')
+      }
+    } catch (e: any) {
+      alert('Error halting task: ' + e.message)
+    } finally {
+      setHaltingTask(false)
     }
   }
 
@@ -659,6 +770,16 @@ export default function EnterpriseAdminPortal() {
                               )}
                             </button>
 
+                            {/* View Live Log Button */}
+                            <button
+                              onClick={() => handleOpenLiveLog(member)}
+                              className="px-2 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-sky-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                              title="View real-time execution stream and bot logs"
+                            >
+                              <Activity className="w-3 h-3 text-sky-400" />
+                              <span>Live Log</span>
+                            </button>
+
                             {/* Trigger On-Demand Sweep Button */}
                             <button
                               onClick={() => handleTriggerOnDemand(member)}
@@ -680,6 +801,114 @@ export default function EnterpriseAdminPortal() {
           </div>
         </section>
       </main>
+
+      {/* Live Execution Stream Modal */}
+      {selectedLiveLog && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedLiveLog(null)
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-3xl bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
+          >
+            {/* Modal Header */}
+            <div className="p-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-sky-400" />
+                  <span>Execution Stream: {selectedLiveLog.member_name} ({selectedLiveLog.user_id})</span>
+                  {selectedLiveLog.status === 'running' && (
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
+                      <Radio className="w-2.5 h-2.5 text-emerald-400" />
+                      LIVE STREAMING
+                    </span>
+                  )}
+                </h4>
+                <p className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                  {selectedLiveLog.task_id ? `Task ID: ${selectedLiveLog.task_id} · ` : ''}Status:{' '}
+                  <span className={`uppercase font-bold ${
+                    selectedLiveLog.status === 'running'
+                      ? 'text-emerald-400'
+                      : selectedLiveLog.status === 'failed' || selectedLiveLog.status === 'cancelled'
+                      ? 'text-rose-400'
+                      : 'text-sky-300'
+                  }`}>
+                    {selectedLiveLog.status}
+                  </span>
+                  {selectedLiveLog.summary && (
+                    <span className="ml-2 text-zinc-400">· {selectedLiveLog.summary}</span>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {liveLogLoading && <RefreshCw className="w-3.5 h-3.5 text-sky-400 animate-spin" />}
+                <button
+                  type="button"
+                  onClick={() => setSelectedLiveLog(null)}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Logs Body */}
+            <div className="p-4 bg-black overflow-y-auto flex-1 font-mono text-xs space-y-1 select-text scroll-smooth max-h-[55vh]">
+              {selectedLiveLog.logs.map((line, i) => (
+                <div
+                  key={i}
+                  className={`leading-relaxed ${
+                    line.includes('❌') || line.includes('Error') || line.includes('Failed')
+                      ? 'text-rose-400 font-medium'
+                      : line.includes('🛑') || line.includes('⚠️')
+                      ? 'text-amber-400'
+                      : line.includes('🎉') || line.includes('APPLIED!') || line.includes('COMPLETED')
+                      ? 'text-emerald-400 font-semibold'
+                      : line.includes('🏢') || line.includes('🚀') || line.includes('Company resolved')
+                      ? 'text-sky-300'
+                      : 'text-zinc-300'
+                  }`}
+                >
+                  {line}
+                </div>
+              ))}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3.5 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between text-xs">
+              <div className="text-zinc-400">
+                Total Captured Lines: <strong className="text-white">{selectedLiveLog.logs.length}</strong>
+                {selectedLiveLog.status === 'running' && (
+                  <span className="ml-2 text-zinc-500 text-[11px]">(Auto-refreshing every 2.5s)</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {(selectedLiveLog.status === 'running' || selectedLiveLog.status === 'pending') && selectedLiveLog.task_id && (
+                  <button
+                    type="button"
+                    disabled={haltingTask}
+                    onClick={() => handleHaltTask(selectedLiveLog.task_id)}
+                    className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-semibold cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <StopCircle className="w-3.5 h-3.5" />
+                    <span>{haltingTask ? 'Stopping...' : 'Stop / Halt Task'}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedLiveLog(null)}
+                  className="px-4 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-semibold cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
