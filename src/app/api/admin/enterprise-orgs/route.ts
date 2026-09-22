@@ -180,7 +180,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const updateDoc: any = { updated_at: new Date() }
-    if (status && ['active', 'paused'].includes(status)) {
+    if (status && ['active', 'paused', 'disabled'].includes(status)) {
       updateDoc.status = status
     }
     if (typeof daily_limit_per_user === 'number') {

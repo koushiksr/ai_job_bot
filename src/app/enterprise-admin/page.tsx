@@ -562,6 +562,23 @@ export default function EnterpriseAdminPortal() {
           </div>
         )}
 
+        {/* ── Org Disabled Warning ───────────────────────────────── */}
+        {org && org.status === 'disabled' && (
+          <div className="p-4 rounded-2xl bg-rose-950/40 border-2 border-rose-500/50 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center shrink-0">
+              <AlertCircle className="w-4 h-4 text-rose-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-rose-300 mb-0.5">⛔ Organisation Temporarily Disabled</p>
+              <p className="text-xs text-rose-400/80 leading-relaxed">
+                Your organisation <strong className="text-rose-300">{org.name}</strong> has been disabled by the Super Admin.
+                All automated daily sweeps and on-demand runs are <strong>completely blocked</strong> for every member until re-enabled.
+                Please contact support if you believe this is an error.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Aggregate KPI Grid */}
         <section className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-1">
@@ -899,9 +916,9 @@ export default function EnterpriseAdminPortal() {
                             {/* Trigger On-Demand Sweep Button */}
                             <button
                               onClick={() => handleTriggerOnDemand(member)}
-                              disabled={isProcessing || !isEnabled}
+                              disabled={isProcessing || !isEnabled || org?.status === 'disabled'}
                               className="px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 text-indigo-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
-                              title="Dispatch instant on-demand application sweep"
+                              title={org?.status === 'disabled' ? 'Org is disabled by Super Admin — all runs are blocked' : 'Dispatch instant on-demand application sweep'}
                             >
                               <Zap className="w-3 h-3 text-indigo-400" />
                               <span>Trigger Sweep</span>

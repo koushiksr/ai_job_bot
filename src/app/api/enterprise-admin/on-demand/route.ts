@@ -46,6 +46,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Cannot run on-demand sweep for a disabled member. Please enable the member first.' }, { status: 400 })
     }
 
+    // Check if the org itself is disabled by Super Admin
+    if (targetProfile.enterprise_org_id) {
+      const orgRecord = await db.collection('enterprise_orgs').findOne({ org_id: targetProfile.enterprise_org_id })
+      if (orgRecord && orgRecord.status === 'disabled') {
+        return NextResponse.json({
+          detail: `Organisation "${orgRecord.name || targetProfile.enterprise_org_id}" has been disabled by Super Admin. All on-demand and daily runs are blocked until re-enabled.`
+        }, { status: 403 })
+      }
+    }
+
+
     // Check if task is already running
     const existingTask = await db.collection('tasks').findOne({
       user_id: targetUserId,
