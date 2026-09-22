@@ -201,8 +201,10 @@ export default function FuturisticHeroCockpit({ onSuccess }: FuturisticHeroCockp
       localStorage.setItem('user_id', data.user_id)
       localStorage.setItem('user_email', data.email)
       localStorage.setItem('user_role', data.role || 'user')
+      if (data.name) localStorage.setItem('user_name', data.name)
       if (data.plan) localStorage.setItem('user_plan', data.plan)
       if (data.picture) localStorage.setItem('user_picture', data.picture)
+      if (data.enterprise_org_id) localStorage.setItem('enterprise_org_id', data.enterprise_org_id)
 
       // Conversion tracking for Meta Pixel and GA4
       if (authMode === 'trial') {
@@ -213,9 +215,11 @@ export default function FuturisticHeroCockpit({ onSuccess }: FuturisticHeroCockp
         })
       }
 
-      // Redirect
-      if (data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com') {
+      // Redirect based on role hierarchy
+      if (data.role === 'admin' || data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com') {
         window.location.href = '/admin'
+      } else if (data.role === 'enterprise_admin' || data.email === 'koushiksrmedala@gmail.com') {
+        window.location.href = '/enterprise-admin'
       } else {
         window.location.href = '/dashboard'
       }

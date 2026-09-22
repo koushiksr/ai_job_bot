@@ -103,43 +103,70 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const newProfile = {
-      user_id: userId,
-      name: name || userId.replace('_', ' '),
-      email: emailClean,
-      password: pwdClean,
-      experience: 1,
-      current_ctc: 0,
-      expected_ctc: 0,
-      search_url: 'https://www.naukri.com/mnjuser/recommendedjobs',
-      skills: initialSkills,
-      job_filters: {
-        location: ['Bangalore', 'Remote', 'Hyderabad', 'Mumbai'],
-        keywords: initialKeywords,
-        must_have_keywords: [],
-        avoid_companies: []
-      },
-      predefined_answers: {
-        'What is your notice period?': 'Immediate / 15 Days',
-        'Are you on a career break?': 'No'
-      },
-      enabled_for_daily_run: true,
-      role: 'user',
-      is_vip: false,
-      plan: initialPlan,
-      plan_name: initialPlanName,
-      trial_started_at: now,
-      trial_expires_at: trialExpires,
-      plan_activated_at: planActivatedAt,
-      plan_expires_at: planExpiresAt,
-      last_payment_id: lastPaymentId,
-      last_order_id: lastOrderId,
-      created_at: now,
-      updated_at: now
-    }
+      // Check if candidate is designated Enterprise Admin or has pending Enterprise Invite
+      const isEntAdmin = emailClean === 'koushiksrmedala@gmail.com' || APP_CONFIG.enterpriseAdminEmails.map(e => e.toLowerCase()).includes(emailClean)
+      const pendingInvite = await db.collection('enterprise_invites').findOne({
+        invited_email: emailClean,
+        status: 'pending'
+      })
 
-    await db.collection('profiles').insertOne({ ...newProfile })
-    await db.collection('users').insertOne({ ...newProfile })
+      let enterpriseOrgId = null
+      let enterpriseRole = null
+      if (isEntAdmin) {
+        enterpriseRole = 'admin'
+        enterpriseOrgId = 'org_technohmsit'
+      } else if (pendingInvite) {
+        enterpriseRole = 'member'
+        enterpriseOrgId = pendingInvite.org_id
+        initialPlan = 'enterprise'
+        initialPlanName = 'JobFlux Enterprise Member'
+        await db.collection('enterprise_invites').updateOne(
+          { _id: pendingInvite._id },
+          { $set: { status: 'accepted', responded_at: now } }
+        )
+      }
+
+      const newProfile = {
+        user_id: userId,
+        name: name || userId.replace('_', ' '),
+        email: emailClean,
+        password: pwdClean,
+        experience: 1,
+        current_ctc: 0,
+        expected_ctc: 0,
+        search_url: 'https://www.naukri.com/mnjuser/recommendedjobs',
+        skills: initialSkills,
+        job_filters: {
+          location: ['Bangalore', 'Remote', 'Hyderabad', 'Mumbai'],
+          keywords: initialKeywords,
+          must_have_keywords: [],
+          avoid_companies: []
+        },
+        predefined_answers: {
+          'What is your notice period?': 'Immediate / 15 Days',
+          'Are you on a career break?': 'No'
+        },
+        enabled_for_daily_run: true,
+        role: isEntAdmin ? 'enterprise_admin' : 'user',
+        enterprise_org_id: enterpriseOrgId,
+        enterprise_role: enterpriseRole,
+        enterprise_status: 'active',
+        daily_application_limit: 55,
+        is_vip: false,
+        plan: initialPlan,
+        plan_name: initialPlanName,
+        trial_started_at: now,
+        trial_expires_at: trialExpires,
+        plan_activated_at: planActivatedAt,
+        plan_expires_at: planExpiresAt,
+        last_payment_id: lastPaymentId,
+        last_order_id: lastOrderId,
+        created_at: now,
+        updated_at: now
+      }
+
+      await db.collection('profiles').insertOne({ ...newProfile })
+      await db.collection('users').insertOne({ ...newProfile })
 
     // Link any existing payments for this email to the new user_id
     await db.collection('payments').updateMany(
@@ -167,12 +194,14 @@ export async function POST(req: NextRequest) {
     const isPaid = initialPlan !== 'trial'
     return NextResponse.json({
       status: 'success',
-      role: 'user',
+      role: newProfile.role,
       user_id: userId,
       email: emailClean,
       name: newProfile.name,
       plan: initialPlan,
       plan_name: initialPlanName,
+      enterprise_org_id: enterpriseOrgId,
+      enterprise_role: enterpriseRole,
       plan_expires_at: planExpiresAt ? planExpiresAt.toISOString() : null,
       trial_expires_at: trialExpires.toISOString(),
       message: isPaid

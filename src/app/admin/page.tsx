@@ -20,6 +20,7 @@ import QueueTab from './components/tabs/QueueTab'
 import PaymentsTab from './components/tabs/PaymentsTab'
 import OffersTab from './components/tabs/OffersTab'
 import EnterpriseLeadsTab from './components/tabs/EnterpriseLeadsTab'
+import EnterpriseOrgsTab from './components/tabs/EnterpriseOrgsTab'
 import LogsTab from './components/tabs/LogsTab'
 import VisitorsTab from './components/tabs/VisitorsTab'
 import ReviewsTab from './components/ReviewsTab'
@@ -275,6 +276,10 @@ export default function AdminDashboard() {
   const [enterpriseLeads, setEnterpriseLeads] = useState<any[]>([])
   const [loadingLeads, setLoadingLeads] = useState<boolean>(false)
 
+  // Enterprise Organizations Management State
+  const [enterpriseOrgs, setEnterpriseOrgs] = useState<any[]>([])
+  const [loadingOrgs, setLoadingOrgs] = useState<boolean>(false)
+
   // Edit Modal State
   const [editingUser, setEditingUser] = useState<any | null>(null)
 
@@ -524,6 +529,23 @@ export default function AdminDashboard() {
       console.error('Failed to fetch enterprise leads:', e)
     } finally {
       setLoadingLeads(false)
+    }
+  }
+
+  const fetchEnterpriseOrgs = async () => {
+    setLoadingOrgs(true)
+    try {
+      const res = await fetch('/api/admin/enterprise-orgs', {
+        headers: getAdminHeaders()
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setEnterpriseOrgs(data.orgs || [])
+      }
+    } catch (e) {
+      console.error('Failed to fetch enterprise orgs:', e)
+    } finally {
+      setLoadingOrgs(false)
     }
   }
 
@@ -1343,6 +1365,10 @@ export default function AdminDashboard() {
       )
 
       if (!isAdmin) {
+        if (storedRole === 'enterprise_admin' || storedEmail === 'koushiksrmedala@gmail.com') {
+          window.location.replace('/enterprise-admin')
+          return
+        }
         window.location.replace('/dashboard?notice=' + encodeURIComponent('Access denied: Administrator console access is restricted to technohmsit@gmail.com.'))
         return
       }
@@ -1353,7 +1379,7 @@ export default function AdminDashboard() {
       // Restore saved admin navigation & filter preferences
       try {
         const savedTab = localStorage.getItem('admin_active_tab')
-        if (savedTab && ['candidates', 'requests', 'queue', 'payments', 'offers', 'enterprise_leads', 'logs'].includes(savedTab)) {
+        if (savedTab && ['candidates', 'requests', 'queue', 'payments', 'offers', 'enterprise_leads', 'enterprise_orgs', 'logs', 'visitors', 'reviews'].includes(savedTab)) {
           setActiveAdminTab(savedTab as any)
         }
         const savedSearch = localStorage.getItem('admin_candidate_search')
@@ -1422,6 +1448,7 @@ export default function AdminDashboard() {
       fetchOverviewAndUsers()
       fetchPayments()
       fetchEnterpriseLeads()
+      fetchEnterpriseOrgs()
       fetchSupportTickets()
     }
   }, [])
@@ -1480,11 +1507,14 @@ export default function AdminDashboard() {
     }
   }, [usersList])
 
-  const handleTabChange = (tab: 'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'logs') => {
+  const handleTabChange = (tab: AdminTabType) => {
     setActiveAdminTab(tab)
     try {
       localStorage.setItem('admin_active_tab', tab)
     } catch {}
+    if (tab === 'enterprise_orgs') {
+      fetchEnterpriseOrgs()
+    }
   }
 
   const handleInspectCandidate = (u: any | null) => {
@@ -1663,13 +1693,14 @@ export default function AdminDashboard() {
         {/* Tab Navigation */}
         <AdminTabsNav
           activeTab={activeAdminTab}
-          onTabChange={setActiveAdminTab}
+          onTabChange={handleTabChange}
           candidatesCount={usersList.length}
           ticketStats={ticketStats}
           queueMetrics={queueMetrics}
           workerStatus={workerStatus}
           paymentsCount={paymentsList.length}
           enterpriseLeadsCount={enterpriseLeads.length}
+          enterpriseOrgsCount={enterpriseOrgs.length}
           pendingReviewsCount={pendingReviewsCount}
         />
 
@@ -1901,6 +1932,16 @@ export default function AdminDashboard() {
             toggleEnterpriseLeadsTable={toggleEnterpriseLeadsTable}
             fetchEnterpriseLeads={fetchEnterpriseLeads}
             handleUpdateLeadStatus={handleUpdateLeadStatus}
+          />
+        )}
+
+        {/* TAB 6.5: ENTERPRISE ORGANIZATIONS */}
+        {activeAdminTab === 'enterprise_orgs' && (
+          <EnterpriseOrgsTab
+            enterpriseOrgs={enterpriseOrgs}
+            loadingOrgs={loadingOrgs}
+            fetchEnterpriseOrgs={fetchEnterpriseOrgs}
+            getAdminHeaders={getAdminHeaders}
           />
         )}
 

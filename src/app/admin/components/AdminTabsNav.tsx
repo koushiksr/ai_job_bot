@@ -23,6 +23,7 @@ interface AdminTabsNavProps {
   workerStatus: AdminWorkerStatus
   paymentsCount: number
   enterpriseLeadsCount: number
+  enterpriseOrgsCount?: number
   pendingReviewsCount?: number
 }
 
@@ -35,6 +36,7 @@ export default function AdminTabsNav({
   workerStatus,
   paymentsCount,
   enterpriseLeadsCount,
+  enterpriseOrgsCount,
   pendingReviewsCount
 }: AdminTabsNavProps) {
   return (
@@ -129,6 +131,24 @@ export default function AdminTabsNav({
         }`}
       >
         <Building2 className="w-3.5 h-3.5" /> Enterprise Leads ({enterpriseLeadsCount})
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onTabChange('enterprise_orgs')}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
+          activeTab === 'enterprise_orgs'
+            ? 'bg-zinc-800 text-white shadow-sm ring-1 ring-indigo-500/40'
+            : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+        }`}
+      >
+        <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+        <span>Enterprise Orgs</span>
+        {typeof enterpriseOrgsCount === 'number' && enterpriseOrgsCount > 0 && (
+          <span className="text-[10px] font-mono text-zinc-500">
+            ({enterpriseOrgsCount})
+          </span>
+        )}
       </button>
 
       <button

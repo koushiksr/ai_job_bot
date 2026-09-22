@@ -22,6 +22,11 @@ export const APP_CONFIG = {
     'technohmsit@gmail.com'
   ] as string[],
 
+  // Designated Enterprise Admins (also dynamically queried from enterprise_orgs)
+  enterpriseAdminEmails: [
+    'koushiksrmedala@gmail.com'
+  ] as string[],
+
   // Default testing and preview recipients
   defaultTestRecipients: [
     'koushiksrmedala@gmail.com',
@@ -39,11 +44,21 @@ export const APP_CONFIG = {
 } as const
 
 /**
- * Check if a given email address or user ID belongs to the administrator.
+ * Check if a given email address or user ID belongs to the Super Administrator.
  * Strictly restricted to technohmsit@gmail.com.
  */
 export function isAdminUser(identifier?: string | null): boolean {
   if (!identifier) return false
   const clean = identifier.toLowerCase().trim()
-  return clean === 'technohmsit' || clean === 'technohmsit@gmail.com'
+  return clean === 'technohmsit' || clean === 'technohmsit@gmail.com' || clean === 'admin'
+}
+
+/**
+ * Check if a given email address or user ID belongs to an Enterprise Administrator or Super Admin.
+ */
+export function isEnterpriseAdminUser(identifier?: string | null): boolean {
+  if (!identifier) return false
+  const clean = identifier.toLowerCase().trim()
+  if (isAdminUser(clean)) return true
+  return APP_CONFIG.enterpriseAdminEmails.map(e => e.toLowerCase()).includes(clean)
 }

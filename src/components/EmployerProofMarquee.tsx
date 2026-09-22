@@ -28,11 +28,15 @@ const TOP_EMPLOYERS: Employer[] = [
 
 export default function EmployerProofMarquee() {
   return (
-    <div className="w-full py-6 sm:py-8 border-y border-zinc-900/80 bg-gradient-to-b from-black via-zinc-950/60 to-black relative overflow-hidden select-none">
+    <div className="w-full max-w-full py-6 sm:py-8 border-y border-zinc-900/80 bg-gradient-to-b from-black via-zinc-950/60 to-black relative overflow-hidden select-none touch-pan-y">
       {/* Background Subtle Gradient Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-950/15 via-transparent to-transparent pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-4 sm:mb-5">
+      {/* Left and Right Smooth Edge Fades to contain cards seamlessly */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-32 bg-gradient-to-r from-black via-black/90 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-32 bg-gradient-to-l from-black via-black/90 to-transparent z-10" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-4 sm:mb-5 relative z-0">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 relative">
@@ -56,12 +60,12 @@ export default function EmployerProofMarquee() {
       </div>
 
       {/* Infinite Scrolling Track (Repeated 2x for seamless loop) */}
-      <div className="relative w-full overflow-hidden mask-gradient">
+      <div className="relative w-full max-w-full overflow-hidden touch-pan-y">
         <div className="animate-marquee-scroll flex gap-4 sm:gap-6 py-1">
           {[...TOP_EMPLOYERS, ...TOP_EMPLOYERS].map((emp, idx) => (
             <div
               key={`${emp.name}-${idx}`}
-              className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-zinc-950/70 hover:bg-zinc-900/80 border border-zinc-800/80 hover:border-cyan-500/40 transition-all duration-300 group shrink-0 cursor-default shadow-md hover:shadow-cyan-500/10"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-zinc-950/70 hover:bg-zinc-900/80 border border-zinc-800/80 hover:border-cyan-500/40 transition-all duration-300 group shrink-0 cursor-default shadow-md hover:shadow-cyan-500/10 pointer-events-auto"
             >
               <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${emp.logoBg} flex items-center justify-center text-white font-extrabold text-xs shadow-inner shrink-0 group-hover:scale-105 transition-transform`}>
                 {emp.name.slice(0, 1)}

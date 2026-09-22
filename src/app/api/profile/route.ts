@@ -43,7 +43,11 @@ export async function GET(req: NextRequest) {
     let verifiedPlanName = 'JobFlux 7-Day Free Access'
     let isPlanActive = true
 
-    if (rawPlan === 'none' || rawPlan === 'no_plan') {
+    if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
+      verifiedPlan = 'enterprise'
+      verifiedPlanName = 'JobFlux Enterprise Member'
+      isPlanActive = true
+    } else if (rawPlan === 'none' || rawPlan === 'no_plan') {
       verifiedPlan = 'none'
       verifiedPlanName = 'No Active Plan'
       isPlanActive = false
@@ -82,6 +86,9 @@ export async function GET(req: NextRequest) {
       plan_name: verifiedPlanName,
       raw_plan: rawPlan,
       is_plan_active: isPlanActive,
+      enterprise_org_id: profile.enterprise_org_id || null,
+      enterprise_role: profile.enterprise_role || null,
+      enterprise_status: profile.enterprise_status || 'active',
       plan_activated_at: profile.plan_activated_at || null,
       plan_expires_at: profile.plan_expires_at || null,
       trial_started_at: profile.trial_started_at || null,
@@ -102,7 +109,7 @@ export async function GET(req: NextRequest) {
       picture: profile.picture || profile.avatar_url || '',
       has_resume: Boolean(profile.has_resume || profile.last_resume_updated_at || (profile.resume_upload_count && profile.resume_upload_count > 0)),
       enabled_for_daily_run: profile.enabled_for_daily_run !== false,
-      daily_application_limit: profile.daily_application_limit ? Math.min(150, Math.max(1, Number(profile.daily_application_limit))) : (profile.plan === 'elite' || profile.is_vip ? 150 : (profile.plan === 'starter' || profile.plan === 'pro' ? 50 : 20)),
+      daily_application_limit: 55,
       last_login_at: profile.last_login_at || null,
       last_login_ip: profile.last_login_ip || null,
       login_count: profile.login_count || 0,

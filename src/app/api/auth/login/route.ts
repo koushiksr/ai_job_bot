@@ -77,10 +77,28 @@ export async function POST(req: NextRequest) {
         // Sync any unlinked or newly purchased plan from payments collection
         await syncUserPaymentPlan(db, profile.user_id, emailClean, profile)
 
-        const assignedRole = (
+        // Check Enterprise Admin designation
+        const isSuperAdmin = (
           (emailClean === 'technohmsit@gmail.com' || profile.user_id === 'technohmsit' || profile.email === 'technohmsit@gmail.com') &&
           profile.role === 'admin'
-        ) ? 'admin' : 'user'
+        )
+
+        // Check if enterprise admin in enterprise_orgs or profile
+        const isEntAdminConfig = APP_CONFIG.enterpriseAdminEmails.map(e => e.toLowerCase()).includes(emailClean)
+        const orgAsAdmin = await db.collection('enterprise_orgs').findOne({
+          $or: [
+            { admin_email: { $regex: `^${emailClean}$`, $options: 'i' } },
+            { admin_user_id: profile.user_id }
+          ]
+        })
+        const isEntAdmin = isEntAdminConfig || Boolean(orgAsAdmin) || profile.enterprise_role === 'admin'
+
+        let assignedRole = 'user'
+        if (isSuperAdmin) {
+          assignedRole = 'admin'
+        } else if (isEntAdmin) {
+          assignedRole = 'enterprise_admin'
+        }
 
         const rawPlan = (profile.plan || 'trial').toLowerCase()
         const now = new Date()
@@ -88,7 +106,11 @@ export async function POST(req: NextRequest) {
         let planName = 'JobFlux 7-Day Free Access'
         let isPlanActive = true
 
-        if (rawPlan === 'none' || rawPlan === 'no_plan') {
+        if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
+          activePlan = 'enterprise'
+          planName = 'JobFlux Enterprise Member'
+          isPlanActive = true
+        } else if (rawPlan === 'none' || rawPlan === 'no_plan') {
           activePlan = 'none'
           planName = 'No Active Plan'
           isPlanActive = false
@@ -117,18 +139,26 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        // Determine org ID
+        const enterpriseOrgId = profile.enterprise_org_id || orgAsAdmin?.org_id || (isEntAdmin ? 'org_technohmsit' : null)
+
         // Log candidate/admin login event
         await logUserActivity(db, {
           userId: profile.user_id,
           email: profile.email,
           eventType: 'login',
-          description: assignedRole === 'admin' ? `Administrator signed in (${profile.user_id})` : `Candidate signed in successfully (Method: Password)`,
+          description: assignedRole === 'admin' 
+            ? `Administrator signed in (${profile.user_id})` 
+            : assignedRole === 'enterprise_admin'
+              ? `Enterprise Administrator signed in (${profile.email})`
+              : `Candidate signed in successfully (Method: Password)`,
           ipAddress: ip,
           userAgent: userAgent,
           metadata: {
             method: 'password',
             role: assignedRole,
-            plan: activePlan
+            plan: activePlan,
+            enterprise_org_id: enterpriseOrgId
           }
         })
 
@@ -141,6 +171,9 @@ export async function POST(req: NextRequest) {
           plan: activePlan,
           plan_name: planName,
           is_plan_active: isPlanActive,
+          enterprise_org_id: enterpriseOrgId,
+          enterprise_role: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
+          enterprise_status: profile.enterprise_status || 'active',
           plan_expires_at: profile.plan_expires_at || null,
           trial_expires_at: profile.trial_expires_at || null
         })

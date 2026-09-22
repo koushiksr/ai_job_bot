@@ -179,11 +179,33 @@ export async function GET(req: NextRequest) {
       profile.picture = picture
     }
 
-    // 4. Redirect to dashboard with authentication params
-    const role = (
+    // 4. Determine user role and redirect path
+    const isSuperAdmin = (
       (emailClean === 'technohmsit@gmail.com' || profile.user_id === 'technohmsit') &&
       profile.role === 'admin'
-    ) ? 'admin' : 'user'
+    )
+
+    const isEntAdmin = (
+      emailClean === 'koushiksrmedala@gmail.com' ||
+      profile.enterprise_role === 'admin' ||
+      (await db.collection('enterprise_orgs').findOne({
+        $or: [
+          { admin_email: { $regex: `^${emailClean}$`, $options: 'i' } },
+          { admin_user_id: profile.user_id }
+        ]
+      }))
+    )
+
+    let role = 'user'
+    let redirectPath = '/dashboard'
+
+    if (isSuperAdmin) {
+      role = 'admin'
+      redirectPath = '/admin'
+    } else if (isEntAdmin) {
+      role = 'enterprise_admin'
+      redirectPath = '/enterprise-admin'
+    }
 
     // Log Google OAuth Redirect login activity
     const { ip, userAgent } = getClientInfo(req)
@@ -191,7 +213,7 @@ export async function GET(req: NextRequest) {
       userId: profile.user_id,
       email: profile.email,
       eventType: 'login',
-      description: `Candidate authenticated via Google OAuth Redirect`,
+      description: `Candidate authenticated via Google OAuth Redirect (${role})`,
       ipAddress: ip,
       userAgent: userAgent,
       metadata: {
@@ -203,7 +225,9 @@ export async function GET(req: NextRequest) {
 
     const rawPlan = (profile.plan || 'trial').toLowerCase()
     let verifiedPlan = 'trial'
-    if (rawPlan === 'vip') {
+    if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
+      verifiedPlan = 'enterprise'
+    } else if (rawPlan === 'vip') {
       verifiedPlan = 'vip'
     } else if (rawPlan !== 'trial') {
       const planExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
@@ -214,16 +238,16 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const targetUrl = new URL(
-      (profile.user_id === 'technohmsit' || profile.email === 'technohmsit@gmail.com') ? '/admin' : '/dashboard',
-      req.url
-    )
+    const targetUrl = new URL(redirectPath, req.url)
     targetUrl.searchParams.set('auth', 'google')
     targetUrl.searchParams.set('user_id', profile.user_id)
     targetUrl.searchParams.set('email', profile.email)
     targetUrl.searchParams.set('name', profile.name || profile.user_id.replace(/_/g, ' '))
     targetUrl.searchParams.set('plan', verifiedPlan)
     targetUrl.searchParams.set('role', role)
+    if (profile.enterprise_org_id) {
+      targetUrl.searchParams.set('org_id', profile.enterprise_org_id)
+    }
     if (profile.picture || picture) {
       targetUrl.searchParams.set('picture', profile.picture || picture)
     }

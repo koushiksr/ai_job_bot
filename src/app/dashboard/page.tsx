@@ -66,6 +66,12 @@ export default function UserDashboard() {
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
   const [isVip, setIsVip] = useState<boolean>(false)
 
+  // Enterprise Org Membership & Invites State
+  const [enterpriseOrgId, setEnterpriseOrgId] = useState<string | null>(null)
+  const [enterpriseRole, setEnterpriseRole] = useState<string | null>(null)
+  const [pendingEnterpriseInvites, setPendingEnterpriseInvites] = useState<any[]>([])
+  const [isRespondingToInvite, setIsRespondingToInvite] = useState<boolean>(false)
+
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'history' | 'profile' | 'queries' | 'resume_builder'>('history')
 
@@ -118,9 +124,9 @@ export default function UserDashboard() {
   const [showProModal, setShowProModal] = useState<boolean>(false)
   const [proModalFeature, setProModalFeature] = useState<string>('On-Demand Application Sweeps (Up to 5x / week)')
 
-  // Candidate account has Professional privileges if on an active Professional tier OR VIP pass.
-  // Admin accounts manage system configurations via the Admin Portal (/admin).
-  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'vip' || isVip) && isPlanActive
+  // Candidate account has Professional privileges if on an active Professional tier, Enterprise tier, OR VIP pass.
+  const isEnterpriseMember = enterpriseRole === 'member' || userPlan === 'enterprise'
+  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'vip' || isVip || isEnterpriseMember) && isPlanActive
 
   // Plan Expiry & Renewal Computations
   const planExpiryDate = planExpiresAt ? new Date(planExpiresAt) : null
@@ -349,6 +355,49 @@ export default function UserDashboard() {
     }
   }
 
+  const loadEnterpriseInvites = async (uid: string, email: string) => {
+    if (!uid && !email) return
+    try {
+      const res = await fetch(`/api/user/invites?user_id=${encodeURIComponent(uid)}&email=${encodeURIComponent(email)}`)
+      if (res.ok) {
+        const data = await res.json()
+        setPendingEnterpriseInvites(data.invites || [])
+      }
+    } catch {
+      // silent
+    }
+  }
+
+  const handleRespondToInvite = async (inviteId: string, action: 'accept' | 'decline') => {
+    setIsRespondingToInvite(true)
+    try {
+      const res = await fetch('/api/user/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invite_id: inviteId,
+          action,
+          user_id: userId
+        })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setPendingEnterpriseInvites(prev => prev.filter(inv => inv.invite_id !== inviteId))
+        if (action === 'accept') {
+          setTaskFeedback({
+            type: 'success',
+            text: `🎉 Welcome to ${data.org_name || 'Enterprise Workspace'}! Enterprise perks activated: 10 weekly on-demand sweeps and 55 daily job applications.`
+          })
+          refreshAllDashboardData(userId)
+        }
+      }
+    } catch (e: any) {
+      alert('Failed to respond to invite: ' + e.message)
+    } finally {
+      setIsRespondingToInvite(false)
+    }
+  }
+
   // Compute Daily Sweep Status
   useEffect(() => {
     const computeCountdown = () => {
@@ -430,6 +479,7 @@ export default function UserDashboard() {
 
     if (storedEmail) {
       loadUserOffers(storedEmail)
+      loadEnterpriseInvites(storedUid, storedEmail)
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
         subscribeDeviceToPush(storedEmail, storedUid).catch(() => {})
       }
@@ -485,7 +535,8 @@ export default function UserDashboard() {
         loadUserHistory(uid, 1, historySearch, historyFilter),
         loadUserTickets(uid),
         checkActiveTask(uid),
-        emailToQuery ? loadUserOffers(emailToQuery) : Promise.resolve()
+        emailToQuery ? loadUserOffers(emailToQuery) : Promise.resolve(),
+        emailToQuery ? loadEnterpriseInvites(uid, emailToQuery) : Promise.resolve()
       ])
     } catch (e) {
       console.error('Error refreshing dashboard data:', e)
@@ -698,6 +749,9 @@ export default function UserDashboard() {
           localStorage.setItem('user_plan', verifiedPlan)
           localStorage.setItem('user_is_vip', vip ? 'true' : 'false')
         }
+
+        if (pData.enterprise_org_id) setEnterpriseOrgId(pData.enterprise_org_id)
+        if (pData.enterprise_role) setEnterpriseRole(pData.enterprise_role)
 
         if (pData.email) {
           setUserEmail(pData.email)
@@ -939,6 +993,10 @@ export default function UserDashboard() {
                       <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-semibold shrink-0">
                         VIP
                       </span>
+                    ) : isEnterpriseMember ? (
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-semibold shrink-0">
+                        ENTERPRISE
+                      </span>
                     ) : isProfessional ? (
                       <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold shrink-0">
                         PRO
@@ -1115,6 +1173,17 @@ export default function UserDashboard() {
                           <span>Admin Console</span>
                         </Link>
                       )}
+
+                      {(userRole === 'enterprise_admin' || userEmail === 'koushiksrmedala@gmail.com' || userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
+                        <Link
+                          href="/enterprise-admin"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3.5 py-2 text-indigo-300 hover:text-white hover:bg-indigo-950/40 transition-colors"
+                        >
+                          <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                          <span>Enterprise Admin Portal</span>
+                        </Link>
+                      )}
                     </div>
 
                     {/* Divider */}
@@ -1280,6 +1349,10 @@ export default function UserDashboard() {
               {(isVip || userPlan === 'vip') ? (
                 <span className="inline-flex items-center text-[9px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1 py-0.2 rounded-md shrink-0">
                   VIP
+                </span>
+              ) : isEnterpriseMember ? (
+                <span className="inline-flex items-center text-[9px] font-mono font-bold text-indigo-300 bg-indigo-500/20 border border-indigo-500/40 px-1 py-0.2 rounded-md shrink-0">
+                  ENTERPRISE
                 </span>
               ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
                 <span className="hidden min-[380px]:inline-flex items-center text-[9px] font-mono font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1 py-0.2 rounded-md shrink-0">
@@ -1499,6 +1572,17 @@ export default function UserDashboard() {
                 </Link>
               )}
 
+              {(userRole === 'enterprise_admin' || userEmail === 'koushiksrmedala@gmail.com' || userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
+                <Link
+                  href="/enterprise-admin"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-indigo-300 hover:text-white hover:bg-indigo-950/40 transition-colors"
+                >
+                  <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <span>Enterprise Admin Portal</span>
+                </Link>
+              )}
+
               <div className="pt-2 border-t border-zinc-800/80">
                 <button
                   type="button"
@@ -1517,6 +1601,84 @@ export default function UserDashboard() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
         
+        {/* Enterprise Organization Invitation Banner */}
+        {pendingEnterpriseInvites.length > 0 && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/90 via-purple-950/70 to-zinc-950 border border-indigo-500/50 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl shadow-indigo-950/60 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent pointer-events-none" />
+            <div className="flex items-start sm:items-center gap-3.5 z-10">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+                <Building2 className="w-5 h-5 text-indigo-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-indigo-900/80 text-indigo-300 border border-indigo-700">
+                    ENTERPRISE INVITATION
+                  </span>
+                  <span className="text-xs font-bold text-white">
+                    {pendingEnterpriseInvites[0].org_name || 'Enterprise Workspace'}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-300 mt-1">
+                  You have been invited by <strong className="text-white">{pendingEnterpriseInvites[0].invited_by}</strong> to join as an Enterprise Member.
+                  Enjoy <strong className="text-indigo-300">10 weekly on-demand sweeps</strong> and <strong className="text-cyan-300">55 daily job applications</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0 self-stretch sm:self-auto justify-end z-10">
+              <button
+                type="button"
+                onClick={() => handleRespondToInvite(pendingEnterpriseInvites[0].invite_id, 'decline')}
+                disabled={isRespondingToInvite}
+                className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-medium transition-colors cursor-pointer"
+              >
+                Decline
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRespondToInvite(pendingEnterpriseInvites[0].invite_id, 'accept')}
+                disabled={isRespondingToInvite}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+              >
+                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                <span>{isRespondingToInvite ? 'Accepting...' : 'Accept Invitation'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Enterprise Member Workspace Active Callout */}
+        {isEnterpriseMember && (
+          <div className="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-indigo-950/40 via-zinc-950 to-purple-950/40 border border-indigo-800/40 text-indigo-200 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-indigo-900/50 border border-indigo-700/50 flex items-center justify-center shrink-0">
+                <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+              </div>
+              <div>
+                <span className="font-semibold text-white">Enterprise Workspace Active</span>
+                <span className="text-zinc-400 text-[11px] ml-2 font-mono">
+                  • 10 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950 border border-indigo-700/70 text-indigo-300 font-semibold uppercase shrink-0">
+              Technohm SIT Org
+            </span>
+          </div>
+        )}
+
+        {/* Daily 55-Job Limit Reached Banner */}
+        {metrics.today >= 55 && (
+          <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex items-center justify-between gap-3 text-xs shadow-lg">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>
+                <strong>Daily Limit Reached (55 max jobs):</strong> You have reached your daily limit of 55 applications for today. Limit is exceeded for today; automated sweeps will resume tomorrow at 06:00 AM IST.
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Browser Push Notifications Assistant Banner */}
         {notificationPermission === 'denied' && (
           <div className="p-3 sm:p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
@@ -1904,7 +2066,7 @@ export default function UserDashboard() {
                         <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold">VIP</span>
                       ) : (
                         <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-200 text-zinc-800 font-bold">
-                          {weeklyQuota ? `${weeklyQuota.remaining}/5` : '5/5'}
+                          {weeklyQuota ? `${weeklyQuota.remaining}/${weeklyQuota.limit || (isEnterpriseMember ? 10 : 5)}` : (isEnterpriseMember ? '10/10' : '5/5')}
                         </span>
                       )
                     ) : (
@@ -1947,8 +2109,17 @@ export default function UserDashboard() {
                 <span className="text-[11px] flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-zinc-500" /> Today</span>
                 <span className="text-[10px] font-mono text-zinc-500">24h</span>
               </div>
-              <div className="text-lg sm:text-2xl font-bold text-white font-mono">{metrics.today}</div>
-              <p className="text-[10px] text-zinc-500">Delivered today</p>
+              <div className="flex items-baseline gap-1">
+                <span className={`text-lg sm:text-2xl font-bold font-mono ${metrics.today >= 55 ? 'text-amber-400' : 'text-white'}`}>{metrics.today}</span>
+                <span className="text-[11px] text-zinc-500 font-mono">/ 55 max</span>
+              </div>
+              <p className="text-[10px] text-zinc-500">
+                {metrics.today >= 55 ? (
+                  <span className="text-amber-400 font-semibold font-mono">Limit exceeded today</span>
+                ) : (
+                  'Delivered today'
+                )}
+              </p>
             </div>
 
             <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">

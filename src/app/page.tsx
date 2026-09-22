@@ -152,8 +152,14 @@ export default function Home() {
 
       if (storedUid) {
         setExistingUser({ id: storedUid, email: storedEmail, role: storedRole })
-        // If already logged in, navigate to candidate dashboard by default
-        window.location.replace('/dashboard')
+        // If already logged in, navigate directly based on role
+        if (storedRole === 'admin' || storedUid === 'technohmsit' || storedEmail === 'technohmsit@gmail.com') {
+          window.location.replace('/admin')
+        } else if (storedRole === 'enterprise_admin' || storedEmail === 'koushiksrmedala@gmail.com') {
+          window.location.replace('/enterprise-admin')
+        } else {
+          window.location.replace('/dashboard')
+        }
         return
       }
 
@@ -249,8 +255,10 @@ export default function Home() {
 
         // If user explicitly signed in with primary master admin credentials, navigate to /admin.
         // For all candidate accounts and users, navigate directly to candidate /dashboard!
-        if (data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com' || data.user_id === 'admin') {
+        if (data.role === 'admin' || data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com' || data.user_id === 'admin') {
           window.location.href = '/admin'
+        } else if (data.role === 'enterprise_admin' || data.email === 'koushiksrmedala@gmail.com') {
+          window.location.href = '/enterprise-admin'
         } else {
           window.location.href = '/dashboard'
         }
