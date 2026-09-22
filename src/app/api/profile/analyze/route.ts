@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import Groq from 'groq-sdk'
 import { logLlmTelemetry } from '@/lib/llmLogger'
+import { openaiChatCompletion, getOpenAIModel } from '@/lib/openaiChat'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -258,13 +259,52 @@ Keyword rules:
     userMessage += `\n\nOutput only valid JSON.`
 
     let resultText = ''
-    let extractionSource = 'groq'
+    let extractionSource = 'openai'
+    const openaiModel = getOpenAIModel()
+
+    // Step 0: Try OpenAI (primary, cached) — Groq/OpenRouter below stay as fallback
+    if (process.env.OPENAI_API_KEY) {
+      const t0 = Date.now()
+      try {
+        const openaiRes = await openaiChatCompletion({
+          system: systemPrompt,
+          user: userMessage,
+          temperature: 0.1,
+          maxTokens: 3000,
+          timeoutMs: 25000,
+        })
+        if (openaiRes?.content) {
+          resultText = openaiRes.content
+          logLlmTelemetry({
+            userId: user_id,
+            userEmail: existingProfile?.email || user_id,
+            provider: 'openai',
+            model: openaiModel,
+            taskType: 'resume_parsing',
+            question: 'Extract structured candidate profile from uploaded resume PDF',
+            prompt: userMessage.slice(0, 1500),
+            answer: resultText,
+            durationMs: Date.now() - t0,
+            status: 'success',
+            promptTokens: openaiRes.usage.prompt_tokens || 0,
+            completionTokens: openaiRes.usage.completion_tokens || 0,
+            totalTokens: openaiRes.usage.total_tokens || 0,
+          }).catch(() => {})
+        }
+      } catch (openaiErr: any) {
+        console.warn(`[ANALYZE] OpenAI primary failed: ${openaiErr.message}. Trying Groq...`)
+      }
+    }
+
+    if (!resultText) {
+      extractionSource = 'groq'
+    }
     const groqKey = process.env.GROQ_API_KEY
     const groqPrimaryModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
     const groqFallbackModel = 'openai/gpt-oss-20b'
 
     // Step 1: Try Primary Groq Model
-    if (groqKey && groqKey !== 'dummy_key') {
+    if (!resultText && groqKey && groqKey !== 'dummy_key') {
       const t0 = Date.now()
       try {
         const completion = await groq.chat.completions.create({

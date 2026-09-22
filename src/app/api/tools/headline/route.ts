@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
+import { openaiChatCompletion } from '@/lib/openaiChat'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,8 +60,8 @@ export async function POST(req: NextRequest) {
       ? skills.split(/[,·|\n]/).map(s => s.trim()).filter(Boolean)
       : ['Python', 'System Design', 'Cloud Architecture', 'APIs']
 
-    // Attempt Groq LLM Generation if Key Available
-    if (process.env.GROQ_API_KEY) {
+    // Attempt OpenAI (primary, cached) then Groq LLM Generation if Keys Available
+    if (process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY) {
       try {
         const prompt = `You are the world's best Indian tech recruiter and candidate profile SEO optimization expert.
 Generate 5 diverse, click-through optimized headlines for a candidate's professional profile.
@@ -86,6 +87,23 @@ Return STRICTLY valid JSON without Markdown blocks:
 }`
 
         const groqModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
+        // OpenAI primary (cached) — uses the same prompt; Groq below stays as fallback
+        try {
+          const openaiRes = await openaiChatCompletion({ user: prompt, temperature: 0.3, maxTokens: 1200 })
+          const rawOpenai = openaiRes?.content
+          if (rawOpenai) {
+            const parsedOpenai = JSON.parse(rawOpenai)
+            if (Array.isArray(parsedOpenai.headlines) && parsedOpenai.summary) {
+              parsedOpenai.headlines = parsedOpenai.headlines.map((h: { type: string; text: string }) => ({
+                type: h.type,
+                text: h.text.length > 98 ? h.text.substring(0, 95) + '...' : h.text
+              }))
+              return NextResponse.json(parsedOpenai)
+            }
+          }
+        } catch (openaiErr) {
+          console.warn('OpenAI headline generation failed, trying Groq:', openaiErr)
+        }
         const completion = await groq.chat.completions.create({
           messages: [{ role: 'user', content: prompt }],
           model: groqModel,

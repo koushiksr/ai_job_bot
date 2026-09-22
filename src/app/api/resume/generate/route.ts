@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import Groq from 'groq-sdk'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { openaiChatCompletion, getOpenAIModel } from '@/lib/openaiChat'
 
 export const dynamic = 'force-dynamic'
 
@@ -241,8 +242,8 @@ export async function POST(req: NextRequest) {
     // 3. User IS Professional: Generate full ATS-Compliant Resume
     let generatedResume: any = null
 
-    // Try generating with Groq if API key is present
-    if (process.env.GROQ_API_KEY) {
+    // Try generating with OpenAI (primary, cached) then Groq if API keys are present
+    if (process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY) {
       try {
         const prompt = `You are a world-class technical executive resume writer specializing in high-paying senior roles (₹30L - ₹80L+ CTC) at top tech companies, unicorns, and FAANG.
 Create an ATS-friendly, single-column, recruiter-approved resume using the Google XYZ formula (Accomplished [X] as measured by [Y] by doing [Z]).
@@ -300,18 +301,37 @@ Return ONLY valid JSON matching this schema:
 }`
 
         const groqModel = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
-        const completion = await groq.chat.completions.create({
-          messages: [
-            { role: 'system', content: 'You are an expert ATS resume writer. Output ONLY raw JSON.' },
-            { role: 'user', content: prompt }
-          ],
-          model: groqModel,
-          temperature: 0.2,
-          response_format: { type: 'json_object' }
-        })
+        // OpenAI primary (cached) — uses the same prompt; Groq below stays as fallback
+        try {
+          const openaiRes = await openaiChatCompletion({
+            system: 'You are an expert ATS resume writer. Output ONLY raw JSON.',
+            user: prompt,
+            temperature: 0.2,
+            maxTokens: 2500,
+          })
+          if (openaiRes?.content) {
+            const parsedOpenai = JSON.parse(openaiRes.content)
+            if (parsedOpenai && parsedOpenai.summary) {
+              generatedResume = parsedOpenai
+            }
+          }
+        } catch (openaiErr) {
+          console.warn('OpenAI resume generation failed, trying Groq:', openaiErr)
+        }
+        if (!generatedResume) {
+          const completion = await groq.chat.completions.create({
+            messages: [
+              { role: 'system', content: 'You are an expert ATS resume writer. Output ONLY raw JSON.' },
+              { role: 'user', content: prompt }
+            ],
+            model: groqModel,
+            temperature: 0.2,
+            response_format: { type: 'json_object' }
+          })
 
-        const raw = completion.choices[0]?.message?.content || '{}'
-        generatedResume = JSON.parse(raw)
+          const raw = completion.choices[0]?.message?.content || '{}'
+          generatedResume = JSON.parse(raw)
+        }
       } catch (llmErr) {
         console.warn('Groq resume generation failed, falling back to neural algorithmic generator:', llmErr)
       }
