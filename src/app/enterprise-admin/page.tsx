@@ -984,12 +984,12 @@ export default function EnterpriseAdminPortal() {
                               {isEnabled ? (
                                 <>
                                   <Pause className="w-3 h-3 text-rose-400" />
-                                  <span>Pause Runs</span>
+                                  <span>Pause Daily Run</span>
                                 </>
                               ) : (
                                 <>
                                   <Play className="w-3 h-3 text-emerald-400" />
-                                  <span>Enable Runs</span>
+                                  <span>Resume Daily Run</span>
                                 </>
                               )}
                             </button>
