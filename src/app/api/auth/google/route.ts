@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { findActivePaymentForEmail, syncUserPaymentPlan } from '@/lib/paymentSync'
+import { APP_CONFIG } from '@/config/appConfig'
 
 export const dynamic = 'force-dynamic'
 
@@ -211,10 +212,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Failed to find or create profile.' }, { status: 500 })
     }
 
-    const role = (
+    const isSuperAdmin = (
       (emailClean === 'technohmsit@gmail.com' || profile.user_id === 'technohmsit') &&
       profile.role === 'admin'
-    ) ? 'admin' : 'user'
+    )
+
+    // Enterprise Admin designation (mirror of password + redirect OAuth flows)
+    const orgAsAdmin = await db.collection('enterprise_orgs').findOne({
+      $or: [
+        { admin_email: { $regex: `^${emailClean}$`, $options: 'i' } },
+        { admin_user_id: profile.user_id }
+      ]
+    })
+    const isEntAdmin =
+      APP_CONFIG.enterpriseAdminEmails.map(e => e.toLowerCase()).includes(emailClean) ||
+      Boolean(orgAsAdmin) ||
+      profile.enterprise_role === 'admin'
+
+    let role = 'user'
+    if (isSuperAdmin) {
+      role = 'admin'
+    } else if (isEntAdmin) {
+      role = 'enterprise_admin'
+    }
+    const enterpriseOrgId = profile.enterprise_org_id || orgAsAdmin?.org_id || (isEntAdmin ? 'org_technohmsit' : null)
 
     // Log Google GIS sign-in activity
     const { ip, userAgent } = getClientInfo(req)
@@ -222,13 +243,18 @@ export async function POST(req: NextRequest) {
       userId: profile.user_id,
       email: profile.email,
       eventType: 'login',
-      description: `Candidate signed in via Google OAuth GIS`,
+      description: role === 'admin'
+        ? `Administrator signed in via Google OAuth GIS`
+        : role === 'enterprise_admin'
+          ? `Enterprise Administrator signed in via Google OAuth GIS (${profile.email})`
+          : `Candidate signed in via Google OAuth GIS`,
       ipAddress: ip,
       userAgent: userAgent,
       metadata: {
         method: 'google_gis',
         role: role,
-        plan: profile.plan || 'trial'
+        plan: profile.plan || 'trial',
+        enterprise_org_id: enterpriseOrgId
       }
     })
 
@@ -237,7 +263,11 @@ export async function POST(req: NextRequest) {
     let planName = 'JobFlux 7-Day Free Access'
     let isPlanActive = true
 
-    if (rawPlan === 'vip') {
+    if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
+      verifiedPlan = 'enterprise'
+      planName = 'JobFlux Enterprise Member'
+      isPlanActive = true
+    } else if (rawPlan === 'vip') {
       verifiedPlan = 'vip'
       planName = 'JobFlux VIP Elite'
       isPlanActive = true
@@ -267,6 +297,8 @@ export async function POST(req: NextRequest) {
       plan: verifiedPlan,
       plan_name: planName,
       is_plan_active: isPlanActive,
+      enterprise_org_id: enterpriseOrgId,
+      enterprise_role: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
       plan_expires_at: profile.plan_expires_at || null,
       trial_expires_at: profile.trial_expires_at || null,
       message: 'Authenticated successfully via Google!'

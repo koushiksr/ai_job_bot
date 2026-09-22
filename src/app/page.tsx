@@ -298,7 +298,14 @@ export default function Home() {
                   localStorage.setItem('user_picture', data.picture)
                 }
                 trackSignUp('google_one_tap', data.plan || 'trial', { email: data.email, user_id: data.user_id })
-                window.location.href = (data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com') ? '/admin' : '/dashboard'
+                if (data.enterprise_org_id) {
+                  localStorage.setItem('enterprise_org_id', data.enterprise_org_id)
+                }
+                if (data.role === 'enterprise_admin' || data.email === 'koushiksrmedala@gmail.com') {
+                  window.location.href = '/enterprise-admin'
+                } else {
+                  window.location.href = (data.role === 'admin' || data.user_id === 'technohmsit' || data.email === 'technohmsit@gmail.com') ? '/admin' : '/dashboard'
+                }
               }
             }
           },

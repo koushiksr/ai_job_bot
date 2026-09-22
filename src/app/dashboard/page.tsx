@@ -473,6 +473,12 @@ export default function UserDashboard() {
       return
     }
 
+    // Enterprise Admins manage their org from the Enterprise Portal, not the candidate dashboard
+    if (storedRole === 'enterprise_admin') {
+      window.location.replace('/enterprise-admin')
+      return
+    }
+
     setUserId(storedUid)
     setUserEmail(storedEmail || '')
     setUserRole(storedRole || 'user')
