@@ -65,7 +65,7 @@ function setCached(key: string, content: string, usage: OpenAIChatResult['usage'
 }
 
 export function getOpenAIModel(): string {
-  return process.env.OPENAI_MODEL || 'gpt-4o-mini'
+  return process.env.OPENAI_MODEL || 'gpt-5-nano'
 }
 
 export async function openaiChatCompletion(opts: OpenAIChatOptions): Promise<OpenAIChatResult | null> {
@@ -87,6 +87,18 @@ export async function openaiChatCompletion(opts: OpenAIChatOptions): Promise<Ope
   if (system) messages.push({ role: 'system', content: system })
   messages.push({ role: 'user', content: user })
 
+  // Reasoning models (gpt-5*, o1/o3*) only support temperature=1 and use
+  // max_completion_tokens instead of max_tokens.
+  const isReasoningModel = /^(gpt-5|o1|o3)/i.test(model)
+  const body: Record<string, unknown> = {
+    model,
+    messages,
+    ...(isReasoningModel
+      ? { max_completion_tokens: maxTokens }
+      : { temperature, max_tokens: maxTokens }),
+    ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
+  }
+
   const key = cacheable
     ? `${model}|${temperature}|${maxTokens}|${jsonMode}|${simpleHash(JSON.stringify(messages))}`
     : null
@@ -105,13 +117,7 @@ export async function openaiChatCompletion(opts: OpenAIChatOptions): Promise<Ope
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature,
-        max_tokens: maxTokens,
-        ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
-      }),
+      body: JSON.stringify(body),
       signal: controller.signal,
     })
     if (!res.ok) {
