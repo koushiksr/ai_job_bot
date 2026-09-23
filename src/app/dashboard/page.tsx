@@ -1091,7 +1091,7 @@ export default function UserDashboard() {
                         VIP
                       </span>
                     ) : isEnterpriseMember ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-semibold shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-semibold shrink-0">
                         ENTERPRISE
                       </span>
                     ) : isProfessional ? (
@@ -1275,9 +1275,9 @@ export default function UserDashboard() {
                         <Link
                           href="/enterprise-admin"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-3.5 py-2 text-indigo-300 hover:text-white hover:bg-indigo-950/40 transition-colors"
+                          className="flex items-center gap-2.5 px-3.5 py-2 text-cyan-300 hover:text-white hover:bg-cyan-950/40 transition-colors"
                         >
-                          <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                          <Building2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                           <span>Enterprise Admin Portal</span>
                         </Link>
                       )}
@@ -1353,10 +1353,10 @@ export default function UserDashboard() {
             {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
               <Link
                 href="/admin"
-                className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 transition-all shrink-0 cursor-pointer shadow-sm"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 transition-all shrink-0 cursor-pointer shadow-sm"
                 title="Open System Administrator Console"
               >
-                <Shield className="w-3.5 h-3.5 text-purple-400" />
+                <Shield className="w-3.5 h-3.5 text-cyan-400" />
                 <span>Admin</span>
               </Link>
             )}
@@ -1448,7 +1448,7 @@ export default function UserDashboard() {
                   VIP
                 </span>
               ) : isEnterpriseMember ? (
-                <span className="inline-flex items-center text-[9px] font-mono font-bold text-indigo-300 bg-indigo-500/20 border border-indigo-500/40 px-1 py-0.2 rounded-md shrink-0">
+                <span className="inline-flex items-center text-[9px] font-mono font-bold text-cyan-300 bg-cyan-500/20 border border-cyan-500/40 px-1 py-0.2 rounded-md shrink-0">
                   ENTERPRISE
                 </span>
               ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
@@ -1673,9 +1673,9 @@ export default function UserDashboard() {
                 <Link
                   href="/enterprise-admin"
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-indigo-300 hover:text-white hover:bg-indigo-950/40 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-cyan-300 hover:text-white hover:bg-cyan-950/40 transition-colors"
                 >
-                  <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <Building2 className="w-4 h-4 text-cyan-400 shrink-0" />
                   <span>Enterprise Admin Portal</span>
                 </Link>
               )}
@@ -1707,10 +1707,10 @@ export default function UserDashboard() {
                 ? 'bg-red-950/40 border-red-800/60 text-red-200'
                 : a.type === 'warning'
                   ? 'bg-amber-950/40 border-amber-700/60 text-amber-200'
-                  : 'bg-sky-950/40 border-sky-800/60 text-sky-200'
+                  : 'bg-cyan-950/40 border-cyan-800/60 text-cyan-200'
             }`}
           >
-            <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${a.type === 'error' ? 'text-red-400' : a.type === 'warning' ? 'text-amber-400' : 'text-sky-400'}`} />
+            <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${a.type === 'error' ? 'text-red-400' : a.type === 'warning' ? 'text-amber-400' : 'text-cyan-400'}`} />
             <div className="flex-1 min-w-0">
               <div className="font-bold text-white text-xs sm:text-sm">{a.title}</div>
               <p className="mt-0.5 leading-relaxed opacity-90">{a.message}</p>
@@ -1728,15 +1728,15 @@ export default function UserDashboard() {
 
         {/* Enterprise Organization Invitation Banner */}
         {pendingEnterpriseInvites.length > 0 && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/90 via-purple-950/70 to-zinc-950 border border-indigo-500/50 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl shadow-indigo-950/60 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent pointer-events-none" />
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-cyan-800/40 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-cyan-950/60 pointer-events-none" />
             <div className="flex items-start sm:items-center gap-3.5 z-10">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
-                <Building2 className="w-5 h-5 text-indigo-400" />
+              <div className="w-10 h-10 rounded-xl bg-cyan-600/30 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+                <Building2 className="w-5 h-5 text-cyan-400" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-indigo-900/80 text-indigo-300 border border-indigo-700">
+                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-cyan-900/80 text-cyan-300 border border-cyan-700">
                     ENTERPRISE INVITATION
                   </span>
                   <span className="text-xs font-bold text-white">
@@ -1745,7 +1745,7 @@ export default function UserDashboard() {
                 </div>
                 <p className="text-xs text-zinc-300 mt-1">
                   You have been invited by <strong className="text-white">{pendingEnterpriseInvites[0].invited_by}</strong> to join as an Enterprise Member.
-                  Enjoy <strong className="text-indigo-300">10 weekly on-demand sweeps</strong> and <strong className="text-cyan-300">55 daily job applications</strong>.
+                  Enjoy <strong className="text-cyan-300">10 weekly on-demand sweeps</strong> and <strong className="text-cyan-300">55 daily job applications</strong>.
                 </p>
               </div>
             </div>
@@ -1763,7 +1763,7 @@ export default function UserDashboard() {
                 type="button"
                 onClick={() => handleRespondToInvite(pendingEnterpriseInvites[0].invite_id, 'accept')}
                 disabled={isRespondingToInvite}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4 text-emerald-300" />
                 <span>{isRespondingToInvite ? 'Accepting...' : 'Accept Invitation'}</span>
@@ -1774,10 +1774,10 @@ export default function UserDashboard() {
 
         {/* Enterprise Member Workspace Active Callout */}
         {isEnterpriseMember && (
-          <div className="p-3 sm:p-3.5 rounded-xl bg-gradient-to-r from-indigo-950/40 via-zinc-950 to-purple-950/40 border border-indigo-800/40 text-indigo-200 flex items-center justify-between gap-3 text-xs">
+          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-950/70 border border-zinc-800/80 text-cyan-200 flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-indigo-900/50 border border-indigo-700/50 flex items-center justify-center shrink-0">
-                <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="w-7 h-7 rounded-lg bg-cyan-900/50 border border-cyan-700/50 flex items-center justify-center shrink-0">
+                <Building2 className="w-3.5 h-3.5 text-cyan-400" />
               </div>
               <div>
                 <span className="font-semibold text-white">Enterprise Workspace Active</span>
@@ -1786,7 +1786,7 @@ export default function UserDashboard() {
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950 border border-indigo-700/70 text-indigo-300 font-semibold uppercase shrink-0">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-700/70 text-cyan-300 font-semibold uppercase shrink-0">
               {userPlan === 'org_pro' ? 'Org Pro' : 'Technohm SIT Org'}
             </span>
           </div>
@@ -1794,7 +1794,7 @@ export default function UserDashboard() {
 
         {/* Org Pro Upgrade Banner — members-only plan (base enterprise members) */}
         {isEnterpriseMember && userPlan === 'enterprise' && isPlanActive && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/60 via-zinc-950 to-indigo-950/60 border border-amber-500/40 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/60 via-zinc-950 to-cyan-950/60 border border-amber-500/40 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent pointer-events-none" />
             <div className="flex items-start gap-3 z-10">
               <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center shrink-0">
@@ -1868,7 +1868,7 @@ export default function UserDashboard() {
         {notificationPermission === 'default' && !notificationBannerDismissed && (
           <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-zinc-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
                 <Bell className="w-4 h-4" />
               </div>
               <div>
@@ -2265,7 +2265,7 @@ export default function UserDashboard() {
             <div className="border-t border-b border-zinc-800 bg-black overflow-hidden animate-in fade-in duration-200">
               <div className="px-3.5 py-2 bg-zinc-950 flex items-center justify-between border-b border-zinc-900 text-xs">
                 <div className="flex items-center gap-2">
-                  <Terminal className="w-3.5 h-3.5 text-sky-400" />
+                  <Terminal className="w-3.5 h-3.5 text-cyan-400" />
                   <span className="font-mono text-zinc-300 font-semibold text-[11px]">
                     Autonomous Bot Live Terminal {activeTask.task_id ? `(${activeTask.task_id})` : ''}
                   </span>
@@ -2309,7 +2309,7 @@ export default function UserDashboard() {
                             : line.includes('🎉') || line.includes('APPLIED!') || line.includes('COMPLETED')
                             ? 'text-emerald-400 font-semibold'
                             : line.includes('🎬') || line.includes('🚀') || line.includes('Company resolved')
-                            ? 'text-sky-300'
+                            ? 'text-cyan-300'
                             : 'text-zinc-300'
                         }`}
                       >
@@ -2635,7 +2635,7 @@ export default function UserDashboard() {
                   <Download className="w-3.5 h-3.5 text-zinc-400" />
                   <span className="hidden sm:inline">Export CSV</span>
                   {!isProfessional && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-950/80 border border-blue-700/50 text-blue-300 font-semibold">
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-700/50 text-cyan-300 font-semibold">
                       PRO
                     </span>
                   )}
@@ -2792,7 +2792,7 @@ export default function UserDashboard() {
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono pt-1">
                         <span>{formatJobDate(job)}</span>
-                        <span className="text-sky-400 flex items-center gap-0.5 font-medium">
+                        <span className="text-cyan-400 flex items-center gap-0.5 font-medium">
                           Audit Receipt &rarr;
                         </span>
                       </div>
@@ -3171,11 +3171,11 @@ export default function UserDashboard() {
                       setProModalFeature('Job Redirect URL Access')
                       setShowProModal(true)
                     }}
-                    className="flex-1 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-blue-500/40 hover:border-blue-500/70 text-blue-300 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    className="flex-1 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-cyan-500/40 hover:border-cyan-500/70 text-cyan-300 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
                     <Lock className="w-3.5 h-3.5" />
                     <span>View Portal Opening</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-700/50 text-blue-300">PRO</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-700/50 text-cyan-300">PRO</span>
                   </button>
                 )}
                 <button
