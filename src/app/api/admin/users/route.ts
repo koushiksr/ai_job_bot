@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
 import { evaluateOfferEligibility } from '@/lib/offerEligibility'
+import { isAdminUser } from '@/config/appConfig'
 
 export async function GET(req: NextRequest) {
   try {
@@ -109,15 +110,18 @@ export async function GET(req: NextRequest) {
     const users = profiles.map(p => {
       const s = statsMap[p.user_id] || {}
       const emailClean = (p.email || '').toLowerCase().trim()
+      const isAdminAccount = isAdminUser(p.email) || isAdminUser(p.user_id) || p.role === 'admin'
       const rawExp = p.plan_expires_at || p.trial_expires_at || null
-      const isVip = Boolean(p.is_vip || p.vip_access || p.free_privilege || p.plan === 'vip')
+      const isVip = Boolean(isAdminAccount || p.is_vip || p.vip_access || p.free_privilege || p.plan === 'vip')
       const planClean = (p.plan || 'trial').toLowerCase()
       const isNoPlan = planClean === 'none' || planClean === 'no_plan'
 
-      let planExpiryStatus: 'active' | 'expiring_soon_2d' | 'expiring_soon_1d' | 'expired' | 'no_expiry' | 'vip_lifetime' | 'no_plan' = 'no_expiry'
+      let planExpiryStatus: 'active' | 'expiring_soon_2d' | 'expiring_soon_1d' | 'expired' | 'no_expiry' | 'vip_lifetime' | 'no_plan' | 'admin' = 'no_expiry'
       let planHoursLeft: number | null = null
 
-      if (isVip) {
+      if (isAdminAccount) {
+        planExpiryStatus = 'admin'
+      } else if (isVip) {
         planExpiryStatus = 'vip_lifetime'
       } else if (isNoPlan) {
         planExpiryStatus = 'no_plan'
@@ -195,7 +199,7 @@ export async function GET(req: NextRequest) {
         executionStatus = 'applied_today'
       } else if (p.enabled_for_daily_run === false) {
         executionStatus = 'disabled'
-      } else if (planExpiryStatus === 'expired' || planExpiryStatus === 'no_plan') {
+      } else if (!isAdminAccount && (planExpiryStatus === 'expired' || planExpiryStatus === 'no_plan')) {
         executionStatus = 'payment_required'
       } else {
         executionStatus = 'not_applied_today'
@@ -237,18 +241,20 @@ export async function GET(req: NextRequest) {
         user_id: p.user_id,
         name: p.name || p.user_id.replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
         email: p.email || '',
+        is_admin: isAdminAccount,
+        role: p.role || (isAdminAccount ? 'admin' : 'user'),
         experience: p.experience || 0,
         current_ctc: p.current_ctc || 0,
         expected_ctc: p.expected_ctc || 0,
         enabled_for_daily_run: p.enabled_for_daily_run !== false,
-        plan: p.plan || 'trial',
-        plan_name: p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '3-Day Free Access'),
-        plan_expires_at: rawExp,
-        trial_expires_at: p.trial_expires_at || null,
+        plan: isAdminAccount ? 'admin' : (p.plan || 'trial'),
+        plan_name: isAdminAccount ? 'Master Administrator (No Plan Required)' : (p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '3-Day Free Access')),
+        plan_expires_at: isAdminAccount ? null : rawExp,
+        trial_expires_at: isAdminAccount ? null : (p.trial_expires_at || null),
         plan_expiry_status: planExpiryStatus,
-        plan_hours_left: planHoursLeft,
-        hours_until_expiry: planHoursLeft,
-        offer_eligibility: evaluateOfferEligibility(p),
+        plan_hours_left: isAdminAccount ? null : planHoursLeft,
+        hours_until_expiry: isAdminAccount ? null : planHoursLeft,
+        offer_eligibility: isAdminAccount ? { is_eligible: false, reason: 'Administrator account' } : evaluateOfferEligibility(p),
         assigned_offers: userOffers,
         reminders_sent: userReminders,
         is_vip: Boolean(p.is_vip || p.vip_access || p.free_privilege),

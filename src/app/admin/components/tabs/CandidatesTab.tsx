@@ -32,7 +32,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Shield
 } from 'lucide-react'
 import { CandidateUser } from '../../types'
 
@@ -194,6 +195,7 @@ export default function CandidatesTab({
 
   // Weight calculators for clean, structured ranking
   const getPlanWeight = (u: CandidateUser): number => {
+    if (u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com') return 999
     const isVip = Boolean(u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime')
     const p = (u.plan || u.plan_name || '').toLowerCase()
 
@@ -223,8 +225,12 @@ export default function CandidatesTab({
   const countInQueue = usersList.filter(u => u.execution_summary?.status === 'in_queue' || u.execution_summary?.is_in_queue).length
   const countEnabled = usersList.filter(u => u.enabled_for_daily_run !== false).length
   const countDisabled = usersList.filter(u => u.enabled_for_daily_run === false).length
-  const countPaymentRequired = usersList.filter(u => u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan').length
+  const countPaymentRequired = usersList.filter(u => {
+    if (u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com') return false
+    return u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan'
+  }).length
   const countNotAppliedToday = usersList.filter(u => {
+    if (u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com') return false
     const st = u.execution_summary?.status
     if (st) return st === 'not_applied_today'
     return u.current_execution?.status !== 'applying' && (!u.applied_today || u.applied_today === 0) && u.enabled_for_daily_run !== false && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan'
@@ -1015,18 +1021,34 @@ export default function CandidatesTab({
                         })()}
                       </td>
                       <td className="py-4 px-4">
-                        <div className="flex flex-col items-start gap-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                              u.plan === 'elite' ? 'bg-amber-500/10 text-amber-400 light:text-amber-600 border border-amber-500/30 light:border-amber-300' :
-                              u.plan === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
-                              u.plan === 'starter' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
-                              u.plan === 'vip' ? 'bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]' :
-                              u.plan === 'none' || u.plan === 'no_plan' ? 'bg-zinc-800/80 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300' :
-                              'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300'
-                            }`}>
-                              {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
-                            </span>
+                        {(() => {
+                          const isAdmin = Boolean(u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com')
+                          if (isAdmin) {
+                            return (
+                              <div className="flex flex-col items-start gap-1 py-1">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 light:text-sky-700 border border-sky-500/40 shadow-sm">
+                                  <Shield className="w-3 h-3 text-sky-400" />
+                                  <span>SUPER ADMIN</span>
+                                </span>
+                                <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600">
+                                  Master Access • No Plan Needed
+                                </span>
+                              </div>
+                            )
+                          }
+                          return (
+                            <div className="flex flex-col items-start gap-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                  u.plan === 'elite' ? 'bg-amber-500/10 text-amber-400 light:text-amber-600 border border-amber-500/30 light:border-amber-300' :
+                                  u.plan === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
+                                  u.plan === 'starter' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
+                                  u.plan === 'vip' ? 'bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]' :
+                                  u.plan === 'none' || u.plan === 'no_plan' ? 'bg-zinc-800/80 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300' :
+                                  'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300'
+                                }`}>
+                                  {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
+                                </span>
                             {u.is_vip && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]">
                                 <Crown className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 fill-amber-400/40" />
@@ -1195,7 +1217,9 @@ export default function CandidatesTab({
                               ))}
                             </div>
                           )}
-                        </div>
+                            </div>
+                          )
+                        })()}
                       </td>
                       <td className="py-4 px-4 text-center">
                         <button

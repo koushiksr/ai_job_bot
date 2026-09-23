@@ -39,6 +39,25 @@ export default function AdminTabsNav({
   enterpriseOrgsCount,
   pendingReviewsCount
 }: AdminTabsNavProps) {
+  const [showEnterpriseTabs, setShowEnterpriseTabs] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem('admin_show_enterprise_tabs')
+      if (saved === 'true' || activeTab === 'enterprise_leads' || activeTab === 'enterprise_orgs') {
+        setShowEnterpriseTabs(true)
+      }
+    } catch {}
+  }, [activeTab])
+
+  const toggleEnterpriseTabs = () => {
+    setShowEnterpriseTabs(prev => {
+      const next = !prev
+      try { localStorage.setItem('admin_show_enterprise_tabs', String(next)) } catch {}
+      return next
+    })
+  }
+
   return (
     <div className="flex items-center gap-2 border-b border-zinc-900 light:border-zinc-200 pb-3 flex-wrap">
       <button
@@ -121,35 +140,58 @@ export default function AdminTabsNav({
         <span>Purchase Offers &amp; Campaigns</span>
       </button>
 
-      <button
-        type="button"
-        onClick={() => onTabChange('enterprise_leads')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
-          activeTab === 'enterprise_leads'
-            ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900'
-            : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-black light:bg-white border border-zinc-800 light:border-zinc-200'
-        }`}
-      >
-        <Building2 className="w-3.5 h-3.5" /> Enterprise Leads ({enterpriseLeadsCount})
-      </button>
+      {showEnterpriseTabs ? (
+        <>
+          <button
+            type="button"
+            onClick={() => onTabChange('enterprise_leads')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
+              activeTab === 'enterprise_leads'
+                ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-black light:bg-white border border-zinc-800 light:border-zinc-200'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5" /> Enterprise Leads ({enterpriseLeadsCount})
+          </button>
 
-      <button
-        type="button"
-        onClick={() => onTabChange('enterprise_orgs')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
-          activeTab === 'enterprise_orgs'
-            ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-sm ring-1 ring-indigo-500/40'
-            : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-black light:bg-white border border-zinc-800 light:border-zinc-200'
-        }`}
-      >
-        <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-        <span>Enterprise Orgs</span>
-        {typeof enterpriseOrgsCount === 'number' && enterpriseOrgsCount > 0 && (
-          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
-            ({enterpriseOrgsCount})
-          </span>
-        )}
-      </button>
+          <button
+            type="button"
+            onClick={() => onTabChange('enterprise_orgs')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs transition-all cursor-pointer ${
+              activeTab === 'enterprise_orgs'
+                ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-sm ring-1 ring-indigo-500/40'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-black light:bg-white border border-zinc-800 light:border-zinc-200'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Enterprise Orgs</span>
+            {typeof enterpriseOrgsCount === 'number' && enterpriseOrgsCount > 0 && (
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
+                ({enterpriseOrgsCount})
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleEnterpriseTabs}
+            className="p-2 rounded-lg text-zinc-500 light:text-zinc-600 hover:text-zinc-300 light:hover:text-zinc-900 transition-colors cursor-pointer text-xs"
+            title="Hide Enterprise Tabs"
+          >
+            ✕
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={toggleEnterpriseTabs}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs text-zinc-500 light:text-zinc-600 hover:text-zinc-300 light:hover:text-zinc-900 bg-zinc-950/60 light:bg-zinc-100/80 border border-zinc-800/80 light:border-zinc-300 transition-all cursor-pointer"
+          title="Click to view Enterprise Leads & Orgs"
+        >
+          <Building2 className="w-3.5 h-3.5 text-zinc-500" />
+          <span>+ Enterprise ({enterpriseLeadsCount + (enterpriseOrgsCount || 0)})</span>
+        </button>
+      )}
 
       <button
         type="button"

@@ -38,7 +38,10 @@ import {
   Copy,
   Star,
   Terminal,
-  Radio
+  Radio,
+  Users,
+  Layers,
+  CreditCard
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
@@ -69,6 +72,7 @@ export default function UserDashboard() {
   const [isPlanActive, setIsPlanActive] = useState<boolean>(true)
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
   const [isVip, setIsVip] = useState<boolean>(false)
+  const [showCandidateTestingMode, setShowCandidateTestingMode] = useState<boolean>(false)
 
   // Enterprise Org Membership & Invites State
   const [enterpriseOrgId, setEnterpriseOrgId] = useState<string | null>(null)
@@ -1143,10 +1147,22 @@ export default function UserDashboard() {
                         <div className="font-semibold text-white light:text-zinc-900 truncate">{userName || 'Candidate'}</div>
                         <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono truncate">{userEmail}</div>
                         <div className="pt-0.5 flex items-center gap-1.5">
-                          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Plan:</span>
-                          <span className="text-[10px] font-mono text-zinc-300 light:text-zinc-700 font-semibold uppercase">
-                            {isVip ? 'VIP Professional Pass' : userPlan || 'Standard'}
-                          </span>
+                          {userRole === 'admin' ? (
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 light:text-sky-700 border border-sky-500/30 font-bold uppercase">
+                              Super Admin
+                            </span>
+                          ) : userRole === 'enterprise_admin' ? (
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 light:text-cyan-700 border border-cyan-500/30 font-bold uppercase">
+                              Enterprise Admin
+                            </span>
+                          ) : (
+                            <>
+                              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Plan:</span>
+                              <span className="text-[10px] font-mono text-zinc-300 light:text-zinc-700 font-semibold uppercase">
+                                {isVip ? 'VIP Professional Pass' : userPlan || 'Standard'}
+                              </span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1220,20 +1236,22 @@ export default function UserDashboard() {
                         </span>
                       </button>
 
-                      <button
-                        onClick={() => {
-                          setIsUserMenuOpen(false)
-                          setIsOfferModalOpen(true)
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors text-left cursor-pointer"
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-amber-300 light:text-amber-700">Promotional Offers</div>
-                          <div className="text-[10px] text-zinc-500 light:text-zinc-600">Exclusive discounts & coupon</div>
-                        </div>
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800">50% OFF</span>
-                      </button>
+                      {userRole !== 'admin' && (
+                        <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false)
+                            setIsOfferModalOpen(true)
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors text-left cursor-pointer"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-amber-300 light:text-amber-700">Promotional Offers</div>
+                            <div className="text-[10px] text-zinc-500 light:text-zinc-600">Exclusive discounts & coupon</div>
+                          </div>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800">50% OFF</span>
+                        </button>
+                      )}
 
                       <button
                         onClick={() => {
@@ -1246,20 +1264,22 @@ export default function UserDashboard() {
                         <span>Help & Support Center</span>
                       </button>
 
-                      <button
-                        onClick={() => {
-                          setIsUserMenuOpen(false)
-                          setIsReviewModalOpen(true)
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors text-left cursor-pointer"
-                      >
-                        <Star className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 shrink-0 fill-amber-400/30" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-amber-300 light:text-amber-700">Rate &amp; Review JobFlux</div>
-                          <div className="text-[10px] text-zinc-500 light:text-zinc-600">Share your satisfaction score</div>
-                        </div>
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800">REVIEW</span>
-                      </button>
+                      {userRole !== 'admin' && (
+                        <button
+                          onClick={() => {
+                            setIsUserMenuOpen(false)
+                            setIsReviewModalOpen(true)
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors text-left cursor-pointer"
+                        >
+                          <Star className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 shrink-0 fill-amber-400/30" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-amber-300 light:text-amber-700">Rate &amp; Review JobFlux</div>
+                            <div className="text-[10px] text-zinc-500 light:text-zinc-600">Share your satisfaction score</div>
+                          </div>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800">REVIEW</span>
+                        </button>
+                      )}
 
                       {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
                         <Link
@@ -1340,16 +1360,18 @@ export default function UserDashboard() {
             </button>
 
             {/* Candidate Offer Button */}
-            <button
-              type="button"
-              onClick={() => setIsOfferModalOpen(true)}
-              className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/40 transition-all shrink-0 cursor-pointer shadow-sm"
-              title="View exclusive candidate offers and discounts"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 animate-pulse shrink-0" />
-              <span className="hidden sm:inline">{activeOfferBanner ? `Deal: ${activeOfferBanner.discount_badge}` : 'Special Offer'}</span>
-              <span className="sm:hidden text-[11px] font-bold">Offer</span>
-            </button>
+            {userRole !== 'admin' && (
+              <button
+                type="button"
+                onClick={() => setIsOfferModalOpen(true)}
+                className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/40 transition-all shrink-0 cursor-pointer shadow-sm"
+                title="View exclusive candidate offers and discounts"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 animate-pulse shrink-0" />
+                <span className="hidden sm:inline">{activeOfferBanner ? `Deal: ${activeOfferBanner.discount_badge}` : 'Special Offer'}</span>
+                <span className="sm:hidden text-[11px] font-bold">Offer</span>
+              </button>
+            )}
 
             {/* Direct Admin Console Link strictly for technohmsit administrator */}
             {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
@@ -1638,27 +1660,31 @@ export default function UserDashboard() {
                 </span>
               </button>
 
-              <button
-                onClick={() => { setIsMobileNavOpen(false); setIsOfferModalOpen(true) }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 light:text-amber-700 hover:text-white light:hover:text-zinc-900 hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
-              >
-                <Sparkles className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0" />
-                <span>Candidate Offers & Discounts</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800 ml-auto font-semibold">
-                  OFFER
-                </span>
-              </button>
+              {userRole !== 'admin' && (
+                <>
+                  <button
+                    onClick={() => { setIsMobileNavOpen(false); setIsOfferModalOpen(true) }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 light:text-amber-700 hover:text-white light:hover:text-zinc-900 hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0" />
+                    <span>Candidate Offers & Discounts</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800 ml-auto font-semibold">
+                      OFFER
+                    </span>
+                  </button>
 
-              <button
-                onClick={() => { setIsMobileNavOpen(false); setIsReviewModalOpen(true) }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 light:text-amber-700 hover:text-white light:hover:text-zinc-900 hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
-              >
-                <Star className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0 fill-amber-400/20" />
-                <span>Rate &amp; Review JobFlux</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800 ml-auto font-semibold">
-                  REVIEW
-                </span>
-              </button>
+                  <button
+                    onClick={() => { setIsMobileNavOpen(false); setIsReviewModalOpen(true) }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 light:text-amber-700 hover:text-white light:hover:text-zinc-900 hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
+                  >
+                    <Star className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0 fill-amber-400/20" />
+                    <span>Rate &amp; Review JobFlux</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800 ml-auto font-semibold">
+                      REVIEW
+                    </span>
+                  </button>
+                </>
+              )}
 
               {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
                 <Link
@@ -1700,8 +1726,134 @@ export default function UserDashboard() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
         
+        {/* Super Administrator Control Card */}
+        {userRole === 'admin' && (
+          <div className="rounded-2xl bg-[#09090b] light:bg-white border border-sky-900/40 light:border-sky-300 p-5 sm:p-6 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600" />
+            
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-5 border-b border-zinc-800/80 light:border-zinc-200">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                  <Shield className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h1 className="text-lg font-bold text-white light:text-zinc-900 tracking-tight">
+                      Super Administrator Console
+                    </h1>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 light:text-sky-700 border border-sky-500/40 uppercase">
+                      Root Admin Access
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
+                    Managing JobFlux platform, candidate queues, multi-server workers, and enterprise workspaces.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap w-full md:w-auto">
+                <Link
+                  href="/admin"
+                  className="flex-1 md:flex-none px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-sky-500/20 transition-all cursor-pointer"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Open System Admin Console ↗</span>
+                </Link>
+                <Link
+                  href="/enterprise-admin"
+                  className="flex-1 md:flex-none px-4 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Building2 className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Enterprise Portal ↗</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick Action Navigation Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-5">
+              <Link
+                href="/admin"
+                className="p-3.5 rounded-xl bg-zinc-950/60 light:bg-zinc-50 border border-zinc-800/80 light:border-zinc-200 hover:border-sky-500/40 transition-all group"
+              >
+                <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+                  <span className="font-semibold text-white light:text-zinc-900 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-sky-400" /> Candidates
+                  </span>
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+                <div className="text-xl font-bold font-mono text-zinc-200 light:text-zinc-800 mt-2">
+                  Candidates &amp; Plans
+                </div>
+                <p className="text-[10px] text-zinc-500 light:text-zinc-600 mt-0.5">Manage user subscriptions &amp; telemetry</p>
+              </Link>
+
+              <Link
+                href="/admin?tab=queue"
+                className="p-3.5 rounded-xl bg-zinc-950/60 light:bg-zinc-50 border border-zinc-800/80 light:border-zinc-200 hover:border-sky-500/40 transition-all group"
+              >
+                <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+                  <span className="font-semibold text-white light:text-zinc-900 flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-sky-400" /> Queue &amp; Workers
+                  </span>
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+                <div className="text-xl font-bold font-mono text-zinc-200 light:text-zinc-800 mt-2">
+                  Execution Queue
+                </div>
+                <p className="text-[10px] text-zinc-500 light:text-zinc-600 mt-0.5">Live daemon activity &amp; background runs</p>
+              </Link>
+
+              <Link
+                href="/admin?tab=payments"
+                className="p-3.5 rounded-xl bg-zinc-950/60 light:bg-zinc-50 border border-zinc-800/80 light:border-zinc-200 hover:border-sky-500/40 transition-all group"
+              >
+                <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+                  <span className="font-semibold text-white light:text-zinc-900 flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5 text-emerald-400" /> Revenue &amp; Plans
+                  </span>
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+                <div className="text-xl font-bold font-mono text-zinc-200 light:text-zinc-800 mt-2">
+                  Razorpay Orders
+                </div>
+                <p className="text-[10px] text-zinc-500 light:text-zinc-600 mt-0.5">Verify user payments &amp; renewals</p>
+              </Link>
+
+              <Link
+                href="/admin?tab=requests"
+                className="p-3.5 rounded-xl bg-zinc-950/60 light:bg-zinc-50 border border-zinc-800/80 light:border-zinc-200 hover:border-sky-500/40 transition-all group"
+              >
+                <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+                  <span className="font-semibold text-white light:text-zinc-900 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-amber-400" /> Support Desk
+                  </span>
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+                <div className="text-xl font-bold font-mono text-zinc-200 light:text-zinc-800 mt-2">
+                  User Inquiries
+                </div>
+                <p className="text-[10px] text-zinc-500 light:text-zinc-600 mt-0.5">Direct candidate tickets &amp; responses</p>
+              </Link>
+            </div>
+
+            {/* Candidate Controls Preview Toggle */}
+            <div className="mt-5 pt-4 border-t border-zinc-800/80 light:border-zinc-200 flex items-center justify-between text-xs flex-wrap gap-2">
+              <span className="text-zinc-400 light:text-zinc-600 text-[11px]">
+                Normal candidate controls &amp; bot parameters are simplified for admin mode.
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowCandidateTestingMode(!showCandidateTestingMode)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 transition-colors cursor-pointer"
+              >
+                {showCandidateTestingMode ? 'Hide Candidate Testing Controls ▲' : 'Preview Candidate Testing Controls ▼'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Candidate Action Alerts (credentials, quotas, plan) */}
-        {userAlerts.map((a) => (
+        {userRole !== 'admin' && userAlerts.map((a) => (
           <div
             key={a.code}
             className={`p-3.5 sm:p-4 rounded-2xl border flex items-start gap-3 text-xs sm:text-sm shadow-lg ${
@@ -1729,7 +1881,7 @@ export default function UserDashboard() {
         ))}
 
         {/* Enterprise Organization Invitation Banner */}
-        {pendingEnterpriseInvites.length > 0 && (
+        {userRole !== 'admin' && pendingEnterpriseInvites.length > 0 && (
           <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 light:bg-white border border-cyan-800/40 text-white light:text-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-cyan-950/60 pointer-events-none" />
             <div className="flex items-start sm:items-center gap-3.5 z-10">
@@ -1775,7 +1927,7 @@ export default function UserDashboard() {
         )}
 
         {/* Enterprise Member Workspace Active Callout */}
-        {isEnterpriseMember && (
+        {userRole !== 'admin' && isEnterpriseMember && (
           <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-cyan-900/50 border border-cyan-700/50 light:border-cyan-300 flex items-center justify-center shrink-0">
@@ -1795,7 +1947,7 @@ export default function UserDashboard() {
         )}
 
         {/* Org Pro Upgrade Banner — members-only plan (base enterprise members) */}
-        {isEnterpriseMember && userPlan === 'enterprise' && isPlanActive && (
+        {userRole !== 'admin' && isEnterpriseMember && userPlan === 'enterprise' && isPlanActive && (
           <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 light:bg-white light:bg-amber-50 border border-zinc-800/80 light:border-zinc-200 light:border-amber-300 text-white light:text-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent pointer-events-none" />
             <div className="flex items-start gap-3 z-10">
@@ -1828,7 +1980,7 @@ export default function UserDashboard() {
         )}
 
         {/* Daily 55-Job Limit Reached Banner */}
-        {metrics.today >= 55 && (
+        {userRole !== 'admin' && metrics.today >= 55 && (
           <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex items-center justify-between gap-3 text-xs shadow-lg">
             <div className="flex items-center gap-2.5">
               <AlertTriangle className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0" />
@@ -2000,7 +2152,7 @@ export default function UserDashboard() {
         )}
 
         {/* Candidate Plan Expiry Warning Banner (1-Day / 2-Day Pre-Expiry Alert) */}
-        {(isPlanExpiringSoon || isPlanExpired) && (
+        {userRole !== 'admin' && (isPlanExpiringSoon || isPlanExpired) && (
           <div className={`p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border shadow-lg ${
             isPlanExpired
               ? 'bg-rose-950/40 border-rose-800/60 text-rose-200 shadow-rose-950/20'
@@ -2056,7 +2208,7 @@ export default function UserDashboard() {
         )}
 
         {/* Administrator Assigned Exclusive Promotional Offer Banner */}
-        {activeOfferBanner ? (
+        {userRole !== 'admin' && activeOfferBanner ? (
           <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
             <div className="flex items-start sm:items-center gap-3.5 z-10">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
@@ -2118,7 +2270,7 @@ export default function UserDashboard() {
               )}
             </div>
           </div>
-        ) : (!isProfessional) ? (
+        ) : (userRole !== 'admin' && !isProfessional) ? (
           <div className="p-3.5 sm:p-4 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center shrink-0 text-zinc-300 light:text-zinc-700">
@@ -2167,6 +2319,7 @@ export default function UserDashboard() {
         ) : null}
 
         {/* Unified Mission Control Card (Cockpit + Live Metrics + Telemetry Strip) */}
+        {(userRole !== 'admin' || showCandidateTestingMode) && (
         <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden card-featured-glow relative">
           {/* Subtle top accent */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
@@ -2408,14 +2561,17 @@ export default function UserDashboard() {
             </span>
           </div>
         </div>
+        )}
 
         {/* Beginner Onboarding & Autonomous Workflow Guide */}
-        <BeginnerOnboardingGuide
-          completeness={profileCompleteness}
-          userPlan={userPlan}
-          isProfessional={isProfessional}
-          totalApplied={metrics.total_applied}
-        />
+        {userRole !== 'admin' && (
+          <BeginnerOnboardingGuide
+            completeness={profileCompleteness}
+            userPlan={userPlan}
+            isProfessional={isProfessional}
+            totalApplied={metrics.total_applied}
+          />
+        )}
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-zinc-950/90 light:bg-white/90 border border-zinc-800/80 light:border-zinc-200 rounded-xl overflow-x-auto scrollbar-none flex-nowrap">
@@ -3234,11 +3390,13 @@ export default function UserDashboard() {
       )}
 
       {/* Professional Tier Perks & Upgrade Modal */}
-      <ProfessionalUpgradeModal
-        isOpen={showProModal}
-        onClose={() => setShowProModal(false)}
-        featureTitle={proModalFeature}
-      />
+      {userRole !== 'admin' && (
+        <ProfessionalUpgradeModal
+          isOpen={showProModal}
+          onClose={() => setShowProModal(false)}
+          featureTitle={proModalFeature}
+        />
+      )}
 
       {/* Universal JobFlux Help & Support Center */}
       <JobFluxHelpModal
@@ -3253,12 +3411,14 @@ export default function UserDashboard() {
       />
 
       {/* Exclusive Candidate Promotional Offer Popup Modal */}
-      <CandidateOfferModal
-        isOpen={isOfferModalOpen}
-        onClose={handleCloseOfferModal}
-        offer={assignedOffers.length > 0 ? assignedOffers[0] : null}
-        userEmail={userEmail}
-      />
+      {userRole !== 'admin' && (
+        <CandidateOfferModal
+          isOpen={isOfferModalOpen}
+          onClose={handleCloseOfferModal}
+          offer={assignedOffers.length > 0 ? assignedOffers[0] : null}
+          userEmail={userEmail}
+        />
+      )}
 
       {/* Official Standalone PWA Installation & Push Notification Activation Modal */}
       <PwaInstallPromptModal

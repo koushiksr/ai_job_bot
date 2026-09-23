@@ -69,8 +69,12 @@ export default function AdminDashboard() {
     const applied_today = usersList.filter(u => u.execution_summary?.status === 'applied_today' || u.execution_summary?.is_applied_today || (u.applied_today && u.applied_today > 0)).length
     const in_queue = usersList.filter(u => u.execution_summary?.status === 'in_queue' || u.execution_summary?.is_in_queue).length
     const disabled = usersList.filter(u => u.enabled_for_daily_run === false).length
-    const payment_required = usersList.filter(u => u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan').length
+    const payment_required = usersList.filter(u => {
+      if (u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com') return false
+      return u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan'
+    }).length
     const not_applied_today = usersList.filter(u => {
+      if (u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com') return false
       const st = u.execution_summary?.status
       if (st) return st === 'not_applied_today'
       return u.current_execution?.status !== 'applying' && (!u.applied_today || u.applied_today === 0) && u.enabled_for_daily_run !== false && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan'
