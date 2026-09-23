@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
       }
     } else {
       query = {
-        email: { $regex: `^${emailClean}$`, $options: 'i' },
+        email: exactMatchCI(emailClean),
         reset_otp: otp,
         reset_token_expires_at: { $gt: now }
       }
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     // Update password and clear reset tokens in both collections
     await db.collection('profiles').updateMany(
-      { $or: [{ user_id: targetUserId }, { email: { $regex: `^${targetEmail}$`, $options: 'i' } }] },
+      { $or: [{ user_id: targetUserId }, { email: exactMatchCI(targetEmail) }] },
       {
         $set: {
           password: newPassword,
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
     )
 
     await db.collection('users').updateMany(
-      { $or: [{ user_id: targetUserId }, { email: { $regex: `^${targetEmail}$`, $options: 'i' } }] },
+      { $or: [{ user_id: targetUserId }, { email: exactMatchCI(targetEmail) }] },
       {
         $set: {
           password: newPassword,

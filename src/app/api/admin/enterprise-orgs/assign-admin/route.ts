@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,9 +31,9 @@ export async function POST(req: NextRequest) {
 
     // Find the user
     const profile = await db.collection('profiles').findOne({
-      email: { $regex: `^${email}$`, $options: 'i' }
+      email: exactMatchCI(email)
     }) || await db.collection('users').findOne({
-      email: { $regex: `^${email}$`, $options: 'i' }
+      email: exactMatchCI(email)
     })
 
     if (!profile) {
@@ -55,11 +56,11 @@ export async function POST(req: NextRequest) {
     }
 
     await db.collection('profiles').updateOne(
-      { email: { $regex: `^${email}$`, $options: 'i' } },
+      { email: exactMatchCI(email) },
       { $set: adminUpdate }
     )
     await db.collection('users').updateOne(
-      { email: { $regex: `^${email}$`, $options: 'i' } },
+      { email: exactMatchCI(email) },
       { $set: adminUpdate }
     )
 

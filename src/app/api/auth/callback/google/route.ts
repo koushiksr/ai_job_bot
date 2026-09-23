@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { issueSession } from '@/lib/session'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,9 +69,9 @@ export async function GET(req: NextRequest) {
     }
 
     let profile: any = await db.collection('users').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     }) || await db.collection('profiles').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     })
 
     const now = new Date()
@@ -191,7 +192,7 @@ export async function GET(req: NextRequest) {
       profile.enterprise_role === 'admin' ||
       (await db.collection('enterprise_orgs').findOne({
         $or: [
-          { admin_email: { $regex: `^${emailClean}$`, $options: 'i' } },
+          { admin_email: exactMatchCI(emailClean) },
           { admin_user_id: profile.user_id }
         ]
       }))

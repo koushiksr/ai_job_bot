@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { getDb } from '@/lib/mongodb'
 import { PLAN_DAYS, PROMO_DISCOUNTS } from '@/config/plans'
+import { exactMatchCI } from '@/lib/query'
 
 export async function POST(req: NextRequest) {
   try {
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
     let resolvedUserId = user_id || null
     if (!resolvedUserId && cleanEmail) {
       const existingProfile = await db.collection('profiles').findOne({
-        email: { $regex: `^${cleanEmail}$`, $options: 'i' }
+        email: exactMatchCI(cleanEmail)
       })
       if (existingProfile) {
         resolvedUserId = existingProfile.user_id
@@ -81,13 +82,13 @@ export async function POST(req: NextRequest) {
       query = {
         $or: [
           { user_id: resolvedUserId },
-          { email: { $regex: `^${cleanEmail}$`, $options: 'i' } }
+          { email: exactMatchCI(cleanEmail) }
         ]
       }
     } else if (resolvedUserId) {
       query = { user_id: resolvedUserId }
     } else if (cleanEmail) {
-      query = { email: { $regex: `^${cleanEmail}$`, $options: 'i' } }
+      query = { email: exactMatchCI(cleanEmail) }
     }
 
     const planDisplayName = plan_id === 'org_pro' ? 'Org Pro' : plan_id.toUpperCase()

@@ -1,4 +1,5 @@
 import { PLAN_DAYS, getPlanDurationDays } from '@/config/plans'
+import { exactMatchCI } from '@/lib/query'
 
 export interface ActivePaymentResult {
   hasPaidPlan: boolean
@@ -29,7 +30,7 @@ export async function findActivePaymentForEmail(
   const payments = await db
     .collection('payments')
     .find({
-      email: { $regex: `^${cleanEmail}$`, $options: 'i' },
+      email: exactMatchCI(cleanEmail),
       status: 'captured'
     })
     .sort({ verified_at: -1, created_at: -1 })
@@ -86,7 +87,7 @@ export async function syncUserPaymentPlan(
   if (userId) {
     await db.collection('payments').updateMany(
       {
-        email: { $regex: `^${cleanEmail}$`, $options: 'i' },
+        email: exactMatchCI(cleanEmail),
         $or: [{ user_id: { $in: [null, '', 'guest'] } }, { user_id: { $exists: false } }]
       },
       { $set: { user_id: userId } }
@@ -117,8 +118,8 @@ export async function syncUserPaymentPlan(
     }
 
     const query = userId
-      ? { $or: [{ user_id: userId }, { email: { $regex: `^${cleanEmail}$`, $options: 'i' } }] }
-      : { email: { $regex: `^${cleanEmail}$`, $options: 'i' } }
+      ? { $or: [{ user_id: userId }, { email: exactMatchCI(cleanEmail) }] }
+      : { email: exactMatchCI(cleanEmail) }
 
     await db.collection('profiles').updateMany(query, { $set: updateFields })
     await db.collection('users').updateMany(query, { $set: updateFields })

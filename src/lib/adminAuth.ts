@@ -3,6 +3,7 @@ import { Db } from 'mongodb'
 
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 import { readSession } from '@/lib/session'
+import { exactMatchCI } from '@/lib/query'
 
 /**
  * Server-side authorization — session cookie ONLY.
@@ -35,9 +36,9 @@ export async function verifyAdminRequest(
   // Live re-validation: admin role must still exist in DB
   try {
     const rec = await db.collection('profiles').findOne({
-      $or: [{ user_id: sess.uid }, { email: { $regex: `^${sess.email}$`, $options: 'i' } }]
+      $or: [{ user_id: sess.uid }, { email: exactMatchCI(sess.email) }]
     }) || await db.collection('users').findOne({
-      $or: [{ user_id: sess.uid }, { email: { $regex: `^${sess.email}$`, $options: 'i' } }]
+      $or: [{ user_id: sess.uid }, { email: exactMatchCI(sess.email) }]
     })
     if (!rec) {
       // No DB record: only break-glass super-admin passes
@@ -108,7 +109,7 @@ export async function verifyEnterpriseAdminRequest(
 
     const liveProfile = await db.collection('profiles').findOne({
       $or: [
-        { email: { $regex: `^${userEmail}$`, $options: 'i' } },
+        { email: exactMatchCI(userEmail) },
         { user_id: userId }
       ]
     })
@@ -119,7 +120,7 @@ export async function verifyEnterpriseAdminRequest(
 
     const org = await db.collection('enterprise_orgs').findOne({
       $or: [
-        { admin_email: { $regex: `^${userEmail}$`, $options: 'i' } },
+        { admin_email: exactMatchCI(userEmail) },
         { admin_user_id: userId }
       ]
     })

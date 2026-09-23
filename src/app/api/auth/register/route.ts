@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb'
 import { findActivePaymentForEmail } from '@/lib/paymentSync'
 import { APP_CONFIG } from '@/config/appConfig'
 import { issueSession } from '@/lib/session'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     // Check if candidate account already exists
     const existing = await db.collection('profiles').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     })
 
     if (existing) {
@@ -172,7 +173,7 @@ export async function POST(req: NextRequest) {
 
     // Link any existing payments for this email to the new user_id
     await db.collection('payments').updateMany(
-      { email: { $regex: `^${emailClean}$`, $options: 'i' } },
+      { email: exactMatchCI(emailClean) },
       { $set: { user_id: userId } }
     )
 

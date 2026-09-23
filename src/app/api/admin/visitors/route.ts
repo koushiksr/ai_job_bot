@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
+import { escapeRegExp } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,7 +67,7 @@ export async function GET(req: NextRequest) {
 
     // Search query across email, IP, path, visitor_id, user_id
     if (search) {
-      const regex = new RegExp(search, 'i')
+      const regex = new RegExp(escapeRegExp(search), 'i')
       query.$or = [
         { email: regex },
         { ip_address: regex },

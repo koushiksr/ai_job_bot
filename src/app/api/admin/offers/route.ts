@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 import { OFFER_PRESETS } from '@/config/plans'
 import { sendPushToUser } from '@/lib/webPushService'
 import { evaluateOfferEligibility } from '@/lib/offerEligibility'
+import { exactMatchCI } from '@/lib/query'
 
 
 
@@ -159,8 +160,8 @@ export async function POST(req: NextRequest) {
       for (const em of cleanList) {
         if (!seen.has(em)) {
           seen.add(em)
-          const user = await db.collection('users').findOne({ email: { $regex: `^${em}$`, $options: 'i' } }) ||
-                       await db.collection('profiles').findOne({ email: { $regex: `^${em}$`, $options: 'i' } })
+          const user = await db.collection('users').findOne({ email: exactMatchCI(em) }) ||
+                       await db.collection('profiles').findOne({ email: exactMatchCI(em) })
           rawTargets.push({
             email: em,
             name: user?.name || em.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ')
@@ -173,8 +174,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ detail: 'Please specify a valid candidate email.' }, { status: 400 })
       }
 
-      const user = await db.collection('users').findOne({ email: { $regex: `^${cleanTarget}$`, $options: 'i' } }) ||
-                   await db.collection('profiles').findOne({ email: { $regex: `^${cleanTarget}$`, $options: 'i' } })
+      const user = await db.collection('users').findOne({ email: exactMatchCI(cleanTarget) }) ||
+                   await db.collection('profiles').findOne({ email: exactMatchCI(cleanTarget) })
 
       // Single candidate sales eligibility check
       const eligibility = evaluateOfferEligibility(user)
@@ -234,8 +235,8 @@ export async function POST(req: NextRequest) {
     const skippedCandidates: Array<{ email: string; name: string; reason: string }> = []
 
     for (const c of rawTargets) {
-      const user = await db.collection('users').findOne({ email: { $regex: `^${c.email}$`, $options: 'i' } }) ||
-                   await db.collection('profiles').findOne({ email: { $regex: `^${c.email}$`, $options: 'i' } })
+      const user = await db.collection('users').findOne({ email: exactMatchCI(c.email) }) ||
+                   await db.collection('profiles').findOne({ email: exactMatchCI(c.email) })
       const el = evaluateOfferEligibility(user)
       if (el.eligible || forceOverride) {
         eligibleCandidates.push(c)

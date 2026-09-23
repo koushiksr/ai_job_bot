@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -114,7 +115,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Assign existing candidate as Enterprise Admin (if profile exists)
     const existingProfile = await db.collection('profiles').findOne({
-      email: { $regex: `^${adminEmail}$`, $options: 'i' }
+      email: exactMatchCI(adminEmail)
     })
 
     if (existingProfile) {
@@ -132,7 +133,7 @@ export async function POST(req: NextRequest) {
         }
       )
       await db.collection('users').updateOne(
-        { email: { $regex: `^${adminEmail}$`, $options: 'i' } },
+        { email: exactMatchCI(adminEmail) },
         {
           $set: {
             enterprise_org_id: orgId,

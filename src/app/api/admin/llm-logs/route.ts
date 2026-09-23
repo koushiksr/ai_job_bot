@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyAdminRequest } from '@/lib/adminAuth'
+import { escapeRegExp } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +72,7 @@ export async function GET(req: NextRequest) {
 
     // Keyword search in question, answer, or prompt
     if (search && search.trim()) {
-      const regex = new RegExp(search.trim(), 'i')
+      const regex = new RegExp(escapeRegExp(search.trim()), 'i')
       query.$or = [
         { question: regex },
         { answer: regex },
@@ -122,7 +123,7 @@ export async function GET(req: NextRequest) {
         legacyQuery.user_id = userId.trim()
       }
       if (search && search.trim()) {
-        const regex = new RegExp(search.trim(), 'i')
+        const regex = new RegExp(escapeRegExp(search.trim()), 'i')
         legacyQuery.$or = [
           { question_text: regex },
           { answer: regex },

@@ -4,6 +4,7 @@ import { verifyAdminRequest } from '@/lib/adminAuth'
 import { sendEmail, generateJobDispatchReportHtml } from '@/lib/mailService'
 import { sendPushToUser } from '@/lib/webPushService'
 import { APP_CONFIG } from '@/config/appConfig'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -140,8 +141,8 @@ async function dispatchReportForCandidate(
   }
 
   if (!profile && !user && targetEmail) {
-    profile = await db.collection('profiles').findOne({ email: { $regex: `^${targetEmail}$`, $options: 'i' } })
-    user = await db.collection('users').findOne({ email: { $regex: `^${targetEmail}$`, $options: 'i' } })
+    profile = await db.collection('profiles').findOne({ email: exactMatchCI(targetEmail) })
+    user = await db.collection('users').findOne({ email: exactMatchCI(targetEmail) })
   }
 
   if (!profile && !user && targetEmail && !targetEmail.includes('@')) {
@@ -233,7 +234,7 @@ async function dispatchReportForCandidate(
   const stats = await db.collection('user_stats').findOne({
     $or: [
       ...(resolvedUserId ? [{ user_id: resolvedUserId }] : []),
-      { email: { $regex: `^${resolvedEmail}$`, $options: 'i' } }
+      { email: exactMatchCI(resolvedEmail) }
     ]
   })
 
@@ -241,8 +242,8 @@ async function dispatchReportForCandidate(
   const orConditions: any[] = []
   if (resolvedUserId) orConditions.push({ user_id: resolvedUserId })
   if (resolvedEmail) {
-    orConditions.push({ user_email: { $regex: `^${resolvedEmail}$`, $options: 'i' } })
-    orConditions.push({ email: { $regex: `^${resolvedEmail}$`, $options: 'i' } })
+    orConditions.push({ user_email: exactMatchCI(resolvedEmail) })
+    orConditions.push({ email: exactMatchCI(resolvedEmail) })
   }
 
   const candidateCondition = orConditions.length > 1
@@ -293,13 +294,13 @@ async function dispatchReportForCandidate(
 
   if (!isOnDemand && (channel === 'both' || channel === 'email')) {
     const emailAlreadySent = await db.collection('emails').findOne({
-      to: { $regex: `^${resolvedEmail}$`, $options: 'i' },
+      to: exactMatchCI(resolvedEmail),
       status: 'sent',
       created_at: { $gte: startOfTodayUtc }
     })
 
     const pushLogAlreadySent = !emailAlreadySent ? await db.collection('admin_push_logs').findOne({
-      target_email: { $regex: `^${resolvedEmail}$`, $options: 'i' },
+      target_email: exactMatchCI(resolvedEmail),
       channel: { $in: ['both', 'email'] },
       status: 'delivered',
       dispatched_at: { $gte: startOfTodayUtc }
@@ -430,7 +431,7 @@ async function dispatchReportForCandidate(
 
   // 6. Resolve Offer Intelligence
   const activeAssignedOffer = await db.collection('assigned_offers').findOne({
-    candidate_email: { $regex: `^${resolvedEmail}$`, $options: 'i' },
+    candidate_email: exactMatchCI(resolvedEmail),
     revoked: { $ne: true },
     is_expired: { $ne: true }
   })

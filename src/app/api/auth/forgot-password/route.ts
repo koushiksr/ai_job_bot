@@ -4,6 +4,7 @@ import { getDb } from '@/lib/mongodb'
 import { sendEmail, generatePasswordResetHtml } from '@/lib/mailService'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,9 +39,9 @@ export async function POST(req: NextRequest) {
 
     // Look for user in profiles or users collection
     const user = await db.collection('users').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     }) || await db.collection('profiles').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     })
 
     if (!user) {
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     // Update in both users and profiles collections
     await db.collection('users').updateMany(
-      { email: { $regex: `^${emailClean}$`, $options: 'i' } },
+      { email: exactMatchCI(emailClean) },
       {
         $set: {
           reset_token: resetToken,
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     )
 
     await db.collection('profiles').updateMany(
-      { email: { $regex: `^${emailClean}$`, $options: 'i' } },
+      { email: exactMatchCI(emailClean) },
       {
         $set: {
           reset_token: resetToken,

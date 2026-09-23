@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyEnterpriseAdminRequest } from '@/lib/adminAuth'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     // Check if the user is already an active member of this org
     const existingProfile = await db.collection('profiles').findOne({
-      email: { $regex: `^${targetEmail}$`, $options: 'i' }
+      email: exactMatchCI(targetEmail)
     })
 
     if (existingProfile && existingProfile.enterprise_org_id === orgId && existingProfile.enterprise_role === 'member') {

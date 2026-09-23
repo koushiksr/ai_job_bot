@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { getWeeklyOnDemandLimit } from '@/config/plans'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
     if (!db) return NextResponse.json({ alerts: [] })
 
     const profile = (userId ? await db.collection('profiles').findOne({ user_id: userId }) : null)
-      || (email ? await db.collection('profiles').findOne({ email: { $regex: `^${email}$`, $options: 'i' } }) : null)
+      || (email ? await db.collection('profiles').findOne({ email: exactMatchCI(email) }) : null)
       || (userId ? await db.collection('users').findOne({ user_id: userId }) : null)
     if (!profile) return NextResponse.json({ alerts: [] })
 

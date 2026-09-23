@@ -5,6 +5,7 @@ import { checkRateLimit } from '@/lib/rateLimit'
 import { APP_CONFIG } from '@/config/appConfig'
 import { syncUserPaymentPlan } from '@/lib/paymentSync'
 import { issueSession } from '@/lib/session'
+import { exactMatchCI } from '@/lib/query'
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,9 +37,9 @@ export async function POST(req: NextRequest) {
     }
 
     const profile = await db.collection('users').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     }) || await db.collection('profiles').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     })
 
     if (profile) {
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
         const isEntAdminConfig = APP_CONFIG.enterpriseAdminEmails.map(e => e.toLowerCase()).includes(emailClean)
         const orgAsAdmin = await db.collection('enterprise_orgs').findOne({
           $or: [
-            { admin_email: { $regex: `^${emailClean}$`, $options: 'i' } },
+            { admin_email: exactMatchCI(emailClean) },
             { admin_user_id: profile.user_id }
           ]
         })

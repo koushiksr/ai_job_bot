@@ -5,6 +5,7 @@ import { getDb } from '@/lib/mongodb'
 export const dynamic = 'force-dynamic'
 
 import { PLAN_AMOUNTS, PROMO_DISCOUNTS } from '@/config/plans'
+import { exactMatchCI } from '@/lib/query'
 export { PROMO_DISCOUNTS }
 
 export async function POST(req: NextRequest) {
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
       const memberProfile = db ? await db.collection('profiles').findOne({
         $or: [
           ...(cleanUid ? [{ user_id: cleanUid }] : []),
-          ...(cleanEmail ? [{ email: { $regex: `^${cleanEmail}$`, $options: 'i' } }] : [])
+          ...(cleanEmail ? [{ email: exactMatchCI(cleanEmail) }] : [])
         ]
       }) : null
       if (!memberProfile?.enterprise_org_id) {

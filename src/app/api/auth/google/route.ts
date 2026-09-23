@@ -4,6 +4,7 @@ import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { findActivePaymentForEmail, syncUserPaymentPlan } from '@/lib/paymentSync'
 import { APP_CONFIG } from '@/config/appConfig'
 import { issueSession } from '@/lib/session'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,9 +79,9 @@ export async function POST(req: NextRequest) {
 
     // 1. Check if user already exists
     let profile: any = await db.collection('users').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     }) || await db.collection('profiles').findOne({
-      email: { $regex: `^${emailClean}$`, $options: 'i' }
+      email: exactMatchCI(emailClean)
     })
 
     const now = new Date()
@@ -187,7 +188,7 @@ export async function POST(req: NextRequest) {
 
       // Link any existing payments to the new Google user_id
       await db.collection('payments').updateMany(
-        { email: { $regex: `^${emailClean}$`, $options: 'i' } },
+        { email: exactMatchCI(emailClean) },
         { $set: { user_id: userId } }
       )
 
@@ -221,7 +222,7 @@ export async function POST(req: NextRequest) {
     // Enterprise Admin designation (mirror of password + redirect OAuth flows)
     const orgAsAdmin = await db.collection('enterprise_orgs').findOne({
       $or: [
-        { admin_email: { $regex: `^${emailClean}$`, $options: 'i' } },
+        { admin_email: exactMatchCI(emailClean) },
         { admin_user_id: profile.user_id }
       ]
     })
