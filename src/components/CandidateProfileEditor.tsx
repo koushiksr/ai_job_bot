@@ -89,6 +89,7 @@ export default function CandidateProfileEditor({
 
   const [mustHaveKeywords, setMustHaveKeywords] = useState<string[]>([])
   const [newMustHaveInput, setNewMustHaveInput] = useState<string>('')
+  const [coreKeyword, setCoreKeyword] = useState<string>('')
 
   // 4. Screening Answers (predefined_answers)
   const [noticePeriod, setNoticePeriod] = useState<string>('Immediate / 15 Days')
@@ -144,22 +145,18 @@ export default function CandidateProfileEditor({
   const [showRawJson, setShowRawJson] = useState<boolean>(false)
   const [activeStep, setActiveStep] = useState<number>(0)
 
-  // Guided setup steps (one section visible at a time — clean & simple)
+  // Guided setup steps (4 clean, logical sections)
   const STEPS = [
-    { title: 'Resume', hint: 'Step 1 of 7 — Upload your resume PDF; AI extracts details and attaches it to applications.' },
-    { title: 'Account', hint: 'Step 2 of 7 — Your identity and Naukri login for automated applying.' },
-    { title: 'Experience & Pay', hint: 'Step 3 of 7 — Tenure, current company and CTC figures recruiters ask for.' },
-    { title: 'Job Preferences', hint: 'Step 4 of 7 — Roles, locations and skills the bot hunts for.' },
-    { title: 'Screening Answers', hint: 'Step 5 of 7 — How the bot answers recruiter screening questions as you.' },
-    { title: 'Work History', hint: 'Step 6 of 7 — Employers plus companies to never apply to.' },
-    { title: 'Review & Launch', hint: 'Step 7 of 7 — Automation controls, then save to go live.' }
+    { title: 'Resume & AI Auto-Fill', hint: 'Step 1 of 4 — Upload your resume PDF. AI automatically extracts details and updates your profile.' },
+    { title: 'Account & Career', hint: 'Step 2 of 4 — Naukri login, experience, current & expected CTC, and employment history.' },
+    { title: 'Job Preferences & Skills', hint: 'Step 3 of 4 — Target roles, core technology keyword (e.g. Python), locations, and skills.' },
+    { title: 'Screening & Bot Launch', hint: 'Step 4 of 4 — Recruiter screening answers, company blacklist, and daily bot automation controls.' }
   ]
   const stepDone = [
     hasResumeUploaded,
-    Boolean(naukriEmail && naukriPassword),
-    Boolean(currentCompany && Number(currentCtcLpa) > 0),
-    targetRoles.length > 0,
-    false, false, false
+    Boolean(naukriEmail && naukriPassword && currentCompany && Number(currentCtcLpa) > 0),
+    Boolean(targetRoles.length > 0 && targetLocations.length > 0),
+    Boolean(noticePeriod && willingToRelocate)
   ]
   const goStep = (i: number) => {
     setActiveStep(Math.max(0, Math.min(STEPS.length - 1, i)))
@@ -168,11 +165,48 @@ export default function CandidateProfileEditor({
     else window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   const stepForErrors = (e: Record<string, string>): number => {
-    if (e.newUserId || e.name || e.email || e.password || e.location) return 1
-    if (e.company || e.experience || e.currentCtc || e.expectedCtc) return 2
-    if (e.targetRoles || e.targetLocations || e.skills) return 3
-    if (e.employment) return 5
-    return 1
+    if (e.newUserId || e.name || e.email || e.password || e.location || e.company || e.experience || e.currentCtc || e.expectedCtc || e.employment) return 1
+    if (e.targetRoles || e.targetLocations || e.skills) return 2
+    return 3
+  }
+
+  // Helper to sanitize noisy split words and canonicalize locations
+  const sanitizeKeywordsAndRoles = () => {
+    const JUNK = new Set([
+      'gen', 'ai', 'genai', 'agent', 'prompt', 'fde', 'development', 'api', 'apis', 'rest',
+      'machine', 'learning', 'artificial', 'intelligence', 'vector', 'databases', 'integration'
+    ])
+    setTargetRoles(prev => prev.filter(r => r.length >= 3 && !JUNK.has(r.toLowerCase())))
+    setSkills(prev => {
+      const seen = new Set<string>()
+      const cleaned: string[] = []
+      for (const s of prev) {
+        const trimmed = s.trim()
+        const lower = trimmed.toLowerCase()
+        if (trimmed.length >= 2 && !seen.has(lower) && !JUNK.has(lower)) {
+          seen.add(lower)
+          cleaned.push(trimmed)
+        }
+      }
+      return cleaned
+    })
+    setTargetLocations(prev => {
+      const seen = new Set<string>()
+      const cleaned: string[] = []
+      for (const l of prev) {
+        const lower = l.toLowerCase().trim()
+        if (lower === 'bangalore' || lower === 'bengaluru') {
+          if (!seen.has('bengaluru')) {
+            seen.add('bengaluru')
+            cleaned.push('Bengaluru')
+          }
+        } else if (!seen.has(lower)) {
+          seen.add(lower)
+          cleaned.push(l.trim())
+        }
+      }
+      return cleaned.length > 0 ? cleaned : ['Bengaluru', 'Remote', 'Hybrid']
+    })
   }
   const [rawJsonStr, setRawJsonStr] = useState<string>('{\n}')
   const [jsonError, setJsonError] = useState<string>('')
@@ -272,29 +306,58 @@ export default function CandidateProfileEditor({
     }
 
     // Job Filters
+    const JUNK_ROLE_WORDS = new Set([
+      'gen', 'ai', 'genai', 'agent', 'prompt', 'fde', 'development', 'api', 'apis', 'rest',
+      'machine', 'learning', 'artificial', 'intelligence'
+    ])
     const filters = data.job_filters || {}
-    const newRoles = Array.isArray(filters.roles) ? filters.roles : []
+    const rawRoles = Array.isArray(filters.roles) ? filters.roles : []
+    const newRoles = rawRoles.map(String).filter(r => r && r.length >= 3 && !JUNK_ROLE_WORDS.has(r.toLowerCase()))
+
     if (isMerge && newRoles.length > 0) {
-      setTargetRoles(prev => Array.from(new Set([...prev, ...newRoles])))
+      setTargetRoles(prev => Array.from(new Set([...prev.filter(r => !JUNK_ROLE_WORDS.has(r.toLowerCase())), ...newRoles])))
     } else if (!isMerge) {
       setTargetRoles(newRoles)
     }
 
-    const newLocs = Array.isArray(filters.location) ? filters.location : (Array.isArray(data.location) ? data.location : [])
+    const canonicalizeLocations = (locs: string[]) => {
+      const seen = new Set<string>()
+      const result: string[] = []
+      for (const l of locs) {
+        const lower = String(l || '').toLowerCase().trim()
+        if (lower === 'bangalore' || lower === 'bengaluru') {
+          if (!seen.has('bengaluru')) {
+            seen.add('bengaluru')
+            result.push('Bengaluru')
+          }
+        } else if (!seen.has(lower) && lower) {
+          seen.add(lower)
+          result.push(l.trim())
+        }
+      }
+      return result
+    }
+
+    const rawLocs = Array.isArray(filters.location) ? filters.location : (Array.isArray(data.location) ? data.location : [])
+    const newLocs = canonicalizeLocations(rawLocs)
     if (isMerge && newLocs.length > 0) {
-      setTargetLocations(prev => Array.from(new Set([...prev, ...newLocs])))
+      setTargetLocations(prev => canonicalizeLocations([...prev, ...newLocs]))
     } else if (!isMerge) {
       setTargetLocations(newLocs)
     }
 
+    const JUNK_SKILL_WORDS = new Set([
+      'development', 'apis', 'rest', 'api', 'integration', 'learning', 'machine', 'intelligence',
+      'artificial', 'vector', 'databases', 'gen', 'ai', 'genai', 'agent', 'prompt'
+    ])
     const incomingSkills = Array.isArray(data.skills) ? data.skills : (Array.isArray(filters.keywords) ? filters.keywords : [])
     if (isMerge && incomingSkills.length > 0) {
       setSkills(prev => {
         const seen = new Set(prev.map(s => s.toLowerCase()))
-        const merged = [...prev]
+        const merged = [...prev.filter(s => !JUNK_SKILL_WORDS.has(s.toLowerCase()))]
         for (const s of incomingSkills) {
           const trimmed = String(s || '').trim()
-          if (trimmed && !seen.has(trimmed.toLowerCase())) {
+          if (trimmed && trimmed.length >= 2 && !seen.has(trimmed.toLowerCase()) && !JUNK_SKILL_WORDS.has(trimmed.toLowerCase())) {
             seen.add(trimmed.toLowerCase())
             merged.push(trimmed)
           }
@@ -302,13 +365,27 @@ export default function CandidateProfileEditor({
         return merged
       })
     } else if (!isMerge) {
-      setSkills(incomingSkills)
+      setSkills(incomingSkills.map(String).filter(s => s && s.length >= 2 && !JUNK_SKILL_WORDS.has(s.toLowerCase())))
     }
 
     if (Array.isArray(filters.must_have_keywords) && filters.must_have_keywords.length > 0) {
       setMustHaveKeywords(prev => isMerge ? Array.from(new Set([...prev, ...filters.must_have_keywords])) : filters.must_have_keywords)
     } else if (!isMerge) {
       setMustHaveKeywords([])
+    }
+
+    // Core Focus Keyword
+    if (filters.core_keyword) {
+      setCoreKeyword(filters.core_keyword)
+    } else if (newRoles.length > 0) {
+      const topRole = newRoles[0].toLowerCase()
+      if (topRole.includes('python')) setCoreKeyword('Python')
+      else if (topRole.includes('java') && !topRole.includes('javascript')) setCoreKeyword('Java')
+      else if (topRole.includes('react')) setCoreKeyword('React')
+      else if (topRole.includes('node')) setCoreKeyword('Node.js')
+      else if (topRole.includes('data')) setCoreKeyword('Data Engineering')
+      else if (topRole.includes('qa') || topRole.includes('test')) setCoreKeyword('Automation')
+      else if (topRole.includes('ai') || topRole.includes('ml')) setCoreKeyword('AI')
     }
     
     // Avoid companies
@@ -441,8 +518,11 @@ export default function CandidateProfileEditor({
         roles: targetRoles,
         location: targetLocations,
         keywords: skills,
-        must_have_keywords: mustHaveKeywords,
-        avoid_companies: avoidCompanies
+        must_have_keywords: coreKeyword && !mustHaveKeywords.some(k => k.toLowerCase() === coreKeyword.toLowerCase())
+          ? [coreKeyword, ...mustHaveKeywords]
+          : mustHaveKeywords,
+        avoid_companies: avoidCompanies,
+        core_keyword: coreKeyword
       },
       predefined_answers: predefinedMap,
       employment_history: employmentHistory,
@@ -469,6 +549,7 @@ export default function CandidateProfileEditor({
     currentCtcLpa,
     expectedCtcLpa,
     targetRoles,
+    coreKeyword,
     targetLocations,
     skills,
     mustHaveKeywords,
@@ -834,10 +915,10 @@ export default function CandidateProfileEditor({
           setResumeFilename(data.filename)
           setResumeVersion(data.timestamp || Date.now())
           setHasResumeUploaded(true)
-          setResumeSuccess(`Resume "${data.filename}" saved to JobFlux Cloud! Tap "Auto-Fill with AI" to extract your details.`)
-          setTimeout(() => setResumeSuccess(''), 6000)
+          setResumeSuccess(`Resume "${data.filename}" saved to JobFlux Cloud! Auto-filling profile with AI...`)
 
-          if (!isNew && userId) loadProfileData(userId)
+          // AUTOMATICALLY TRIGGER AI AUTO-FILL IMMEDIATELY
+          await handleAiAutoFill()
           if (onSaveSuccess) onSaveSuccess()
         } else {
           const err = await res.json().catch(() => ({}))
@@ -1104,34 +1185,20 @@ export default function CandidateProfileEditor({
   }
 
   return (
-    <div id="profile-form-top" className="space-y-6 max-w-5xl mx-auto">
-      {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 light:border-zinc-200 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-white light:text-zinc-900 tracking-wide">
-              Candidate Profile & Automation Settings
-            </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600">
-              Bot Sync Active
-            </span>
-          </div>
-          <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
-            Configure your Naukri credentials, compensation, target roles, and work history. The AI Bot uses these settings to scout and apply.
-          </p>
+    <div id="profile-form-top" className="space-y-4 max-w-5xl mx-auto">
+      {/* COMPACT TOP TOOLBAR */}
+      <div className="flex items-center justify-between gap-3 pb-1">
+        <div className="text-xs font-mono text-zinc-400 light:text-zinc-600">
+          Setup Progress: <span className="text-white light:text-zinc-900 font-semibold">{stepDone.filter(Boolean).length} of {STEPS.length} Completed</span>
         </div>
-
-        {/* Global Save Button in Header */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleSaveProfile}
-            disabled={savingProfile || isAnalyzing}
-            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-all cursor-pointer shadow-sm disabled:opacity-50"
-          >
-            {savingProfile ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            <span>{savingProfile ? 'Saving...' : 'Save Profile & Sync'}</span>
-          </button>
-        </div>
+        <button
+          onClick={handleSaveProfile}
+          disabled={savingProfile || isAnalyzing}
+          className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-all cursor-pointer shadow-sm disabled:opacity-50 shrink-0"
+        >
+          {savingProfile ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+          <span>{savingProfile ? 'Saving...' : 'Save Profile & Sync'}</span>
+        </button>
       </div>
 
       {/* SUCCESS / ERROR ALERTS */}
@@ -1227,7 +1294,7 @@ export default function CandidateProfileEditor({
               </li>
             )}
             {targetRoles.length === 0 && (
-              <li onClick={() => goStep(3)} className="p-2.5 rounded-lg bg-black/50 light:bg-white/85 border border-zinc-800 light:border-zinc-200 hover:border-cyan-500/50 flex items-start gap-2 cursor-pointer transition-colors">
+              <li onClick={() => goStep(2)} className="p-2.5 rounded-lg bg-black/50 light:bg-white/85 border border-zinc-800 light:border-zinc-200 hover:border-cyan-500/50 flex items-start gap-2 cursor-pointer transition-colors">
                 <span className="text-zinc-300 light:text-zinc-700 font-bold shrink-0">3.</span>
                 <span>Add at least 1 <strong className="text-white light:text-zinc-900">Target Role</strong> so the bot targets matching recruiter openings.</span>
               </li>
@@ -1361,6 +1428,13 @@ export default function CandidateProfileEditor({
                 <span>{isAnalyzing ? 'Extracting...' : 'Start Auto-Fill'}</span>
               </button>
             </div>
+          </div>
+        )}
+
+        {isAnalyzing && (
+          <div className="p-3.5 rounded-xl bg-cyan-950/40 light:bg-cyan-50 border border-cyan-500/30 text-cyan-300 light:text-cyan-800 text-xs flex items-center gap-2.5 animate-pulse">
+            <Sparkles className="w-4 h-4 animate-spin text-cyan-400" />
+            <span className="font-medium">AI is analyzing your resume and auto-filling your profile fields...</span>
           </div>
         )}
 
@@ -1593,10 +1667,7 @@ export default function CandidateProfileEditor({
         </div>
       </div>
 
-      </>)}
-
-      {activeStep === 2 && (<>
-      {/* 3. EXPERIENCE & COMPENSATION (CTC) */}
+      {/* CAREER, EXPERIENCE & COMPENSATION (CTC) */}
       <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3">
           <div>
@@ -1607,7 +1678,7 @@ export default function CandidateProfileEditor({
               Recruiters use these values to verify eligibility against their budget and experience brackets.
             </p>
           </div>
-          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Step 3: CTC & Tenure</span>
+          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">CTC & Tenure</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1757,12 +1828,219 @@ export default function CandidateProfileEditor({
         )}
       </div>
 
+      {/* WORK HISTORY & EMPLOYERS (VERIFIED TIMELINE) */}
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
+        <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3 flex-wrap gap-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-zinc-400 light:text-zinc-600" /> Work History & Employers ({employmentHistory.length})
+              </h3>
+              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                currentEmployersCount === 1
+                  ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-emerald-400 light:text-emerald-600'
+                  : currentEmployersCount === 0
+                  ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600'
+                  : 'bg-rose-950/60 light:bg-rose-50 border-rose-800/80 text-rose-300 light:text-rose-600'
+              }`}>
+                {currentEmployersCount === 1
+                  ? '1 Current Employer Active'
+                  : currentEmployersCount === 0
+                  ? '0 Current Selected'
+                  : `${currentEmployersCount} Current Marked (Must be 1)`}
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
+              Verified employment timeline. Only <strong>1 employer</strong> can be marked as current.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowAddEmpForm(!showAddEmpForm)}
+            className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 transition-colors cursor-pointer flex items-center gap-1"
+          >
+            <Plus className="w-3 h-3" /> Add Employer
+          </button>
+        </div>
+
+        {errors.employment && (
+          <div className="p-3 rounded-lg bg-rose-950/40 light:bg-rose-50 border border-rose-800 text-rose-300 light:text-rose-600 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errors.employment}</span>
+          </div>
+        )}
+
+        {/* Add Employer Form */}
+        {showAddEmpForm && (
+          <form onSubmit={handleAddEmployment} className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 animate-in fade-in">
+            <span className="text-xs font-medium text-white light:text-zinc-900 block">Add Employment Record</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] text-zinc-400 light:text-zinc-600 mb-1">Company Name *</label>
+                <input
+                  type="text"
+                  value={newEmpCompany}
+                  onChange={e => setNewEmpCompany(e.target.value)}
+                  placeholder="e.g. Wipro"
+                  required
+                  className="w-full bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] text-zinc-400 light:text-zinc-600 mb-1">Job Title *</label>
+                <input
+                  type="text"
+                  value={newEmpTitle}
+                  onChange={e => setNewEmpTitle(e.target.value)}
+                  placeholder="e.g. Software Test Engineer"
+                  required
+                  className="w-full bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] text-zinc-400 light:text-zinc-600 mb-1">Start Date</label>
+                <input
+                  type="text"
+                  value={newEmpStart}
+                  onChange={e => setNewEmpStart(e.target.value)}
+                  placeholder="e.g. Jan 2023"
+                  className="w-full bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] text-zinc-400 light:text-zinc-600 mb-1">End Date</label>
+                <input
+                  type="text"
+                  value={newEmpEnd}
+                  onChange={e => setNewEmpEnd(e.target.value)}
+                  placeholder="e.g. Present"
+                  disabled={newEmpCurrent}
+                  className="w-full bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900 disabled:opacity-50"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <label className="flex items-center gap-2 text-xs text-zinc-300 light:text-zinc-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newEmpCurrent}
+                  onChange={e => {
+                    setNewEmpCurrent(e.target.checked)
+                    if (e.target.checked) setNewEmpEnd('Present')
+                  }}
+                  className="rounded bg-zinc-900 light:bg-zinc-100 border-zinc-700 light:border-zinc-300"
+                />
+                <span>This is my current employer (will become the single active current company)</span>
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddEmpForm(false)}
+                  className="px-3 py-1 rounded text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-3 py-1 rounded bg-white light:bg-white light:ring-1 light:ring-zinc-300 text-black light:text-zinc-900 text-xs font-semibold cursor-pointer"
+                >
+                  Save Record
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
+
+        {/* Timeline Cards */}
+        {employmentHistory.length === 0 ? (
+          <p className="text-xs text-zinc-500 light:text-zinc-600 italic py-2">
+            No past employment records recorded. Click "Auto-Fill with AI" in Step 1 to extract directly from your resume.
+          </p>
+        ) : (
+          <div className="space-y-2.5">
+            {employmentHistory.map((emp, idx) => (
+              <div
+                key={idx}
+                className={`p-3.5 rounded-xl bg-black light:bg-white border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                  emp.is_current ? 'border-zinc-700 light:border-zinc-300 shadow-sm' : 'border-zinc-800 light:border-zinc-200'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg border shrink-0 ${
+                    emp.is_current ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-700 light:border-zinc-300 text-white light:text-zinc-900' : 'bg-zinc-950 light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-500 light:text-zinc-600'
+                  }`}>
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-semibold text-white light:text-zinc-900">{emp.company}</span>
+                      {emp.is_current ? (
+                        <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 flex items-center gap-1 font-semibold">
+                          <Check className="w-2.5 h-2.5" /> Current Employer (Payroll)
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-zinc-500 light:text-zinc-600">
+                          Former Employer
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-zinc-400 light:text-zinc-600 mt-0.5 flex items-center gap-2 flex-wrap">
+                      <span>{emp.job_title}</span>
+                      {(emp.start_date || emp.end_date) && (
+                        <>
+                          <span className="text-zinc-600">·</span>
+                          <span className="font-mono text-[10px] text-zinc-500 light:text-zinc-600">
+                            {emp.start_date || 'Start'} – {emp.end_date || (emp.is_current ? 'Present' : 'End')}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-end sm:self-center">
+                  {/* Single Current Employer Radio-Toggle Button */}
+                  {emp.is_current ? (
+                    <button
+                      type="button"
+                      onClick={() => handleUnsetCurrentEmployer(idx)}
+                      className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
+                      title="Click to unmark as current employer"
+                    >
+                      Unmark Current
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleSetSingleCurrentEmployer(idx)}
+                      className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-zinc-950 light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
+                      title="Set as the 1 current employer and sync with current_company"
+                    >
+                      Set as Current
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveEmployment(idx)}
+                    className="text-zinc-500 light:text-zinc-600 hover:text-rose-400 p-1.5 rounded transition-colors cursor-pointer"
+                    title="Remove employment record"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       </>)}
 
-      {activeStep === 3 && (<>
-      {/* 4. TARGET JOB FILTERS & PREFERENCES */}
+      {activeStep === 2 && (<>
+      {/* 3. TARGET JOB FILTERS & PREFERENCES */}
       <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-5">
-        <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3">
+        <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3 flex-wrap gap-2">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
               <Sliders className="w-4 h-4 text-zinc-400 light:text-zinc-600" /> Target Job Search Criteria
@@ -1771,7 +2049,51 @@ export default function CandidateProfileEditor({
               Specify what roles, locations, and technologies the bot should target during automated sweeps.
             </p>
           </div>
-          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Step 4: Search Filters</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={sanitizeKeywordsAndRoles}
+              className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 transition-colors cursor-pointer flex items-center gap-1"
+              title="Clean noisy split tokens and deduplicate locations"
+            >
+              <Sparkles className="w-3 h-3 text-cyan-400" /> Clean & Optimize Tags
+            </button>
+            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Step 3 of 4</span>
+          </div>
+        </div>
+
+        {/* CORE TECHNOLOGY KEYWORD (ROOT ANCHOR) */}
+        <div className="p-3.5 rounded-xl bg-zinc-900/60 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 space-y-1.5">
+          <div className="flex items-center justify-between flex-wrap gap-1">
+            <label className="block text-xs font-semibold text-white light:text-zinc-900 flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Core Technology Focus Keyword</span>
+            </label>
+            <span className="text-[10px] font-mono text-cyan-400 light:text-cyan-700 bg-cyan-950/40 light:bg-cyan-50 px-2 py-0.5 rounded border border-cyan-800/40 light:border-cyan-300">
+              Root Keyword Matcher
+            </span>
+          </div>
+          <p className="text-[11px] text-zinc-400 light:text-zinc-600 leading-relaxed">
+            Primary technology term (e.g. <strong className="text-white light:text-zinc-900">Python</strong>). The autonomous bot matches any recruiter title containing this keyword (<em>Python Developer, Python Engineer, Software Engineer - Python</em>).
+          </p>
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="text"
+              value={coreKeyword}
+              onChange={e => setCoreKeyword(e.target.value)}
+              placeholder="e.g. Python, Java, React, Node.js, etc."
+              className="flex-1 bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-cyan-500 font-mono"
+            />
+            {coreKeyword && (
+              <button
+                type="button"
+                onClick={() => setCoreKeyword('')}
+                className="text-zinc-500 hover:text-zinc-300 text-xs px-2"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Target Job Roles */}
@@ -2062,8 +2384,8 @@ export default function CandidateProfileEditor({
 
       </>)}
 
-      {activeStep === 4 && (<>
-      {/* 5. RECRUITER SCREENING QUESTIONS (PREDEFINED ANSWERS) */}
+      {activeStep === 3 && (<>
+      {/* 4. RECRUITER SCREENING QUESTIONS (PREDEFINED ANSWERS) */}
       <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3">
           <div>
@@ -2074,7 +2396,7 @@ export default function CandidateProfileEditor({
               Recruiters ask mandatory one-click questionnaire forms. The AI bot answers using these values.
             </p>
           </div>
-          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Step 5: Screening Q&A</span>
+          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Step 4: Screening & Controls</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2193,216 +2515,6 @@ export default function CandidateProfileEditor({
         </form>
       </div>
 
-      </>)}
-
-      {activeStep === 5 && (<>
-      {/* 6. EMPLOYMENT HISTORY (STRICTLY AT MOST 1 CURRENT EMPLOYER) */}
-      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
-        <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3 flex-wrap gap-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-zinc-400 light:text-zinc-600" /> Work History & Employers ({employmentHistory.length})
-              </h3>
-              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                currentEmployersCount === 1
-                  ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-emerald-400 light:text-emerald-600'
-                  : currentEmployersCount === 0
-                  ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600'
-                  : 'bg-rose-950/60 light:bg-rose-50 border-rose-800/80 text-rose-300 light:text-rose-600'
-              }`}>
-                {currentEmployersCount === 1
-                  ? '1 Current Employer Active'
-                  : currentEmployersCount === 0
-                  ? '0 Current Selected'
-                  : `${currentEmployersCount} Current Marked (Must be 1)`}
-              </span>
-            </div>
-            <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
-              Verified employment timeline. Only <strong>1 employer</strong> can be marked as current.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowAddEmpForm(!showAddEmpForm)}
-            className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 transition-colors cursor-pointer flex items-center gap-1"
-          >
-            <Plus className="w-3 h-3" /> Add Employer
-          </button>
-        </div>
-
-        {errors.employment && (
-          <div className="p-3 rounded-lg bg-rose-950/40 light:bg-rose-50 border border-rose-800 text-rose-300 light:text-rose-600 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{errors.employment}</span>
-          </div>
-        )}
-
-        {/* Add Employer Form */}
-        {showAddEmpForm && (
-          <form onSubmit={handleAddEmployment} className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 animate-in fade-in">
-            <span className="text-xs font-medium text-white light:text-zinc-900 block">Add Employment Record</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] text-zinc-400 light:text-zinc-600 mb-1">Company Name *</label>
-                <input
-                  type="text"
-                  value={newEmpCompany}
-                  onChange={e => setNewEmpCompany(e.target.value)}
-                  placeholder="e.g. Wipro"
-                  required
-                  className="w-full bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] text-zinc-400 light:text-zinc-600 mb-1">Job Title *</label>
-                <input
-                  type="text"
-                  value={newEmpTitle}
-                  onChange={e => setNewEmpTitle(e.target.value)}
-                  placeholder="e.g. Software Test Engineer"
-                  required
-                  className="w-full bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] text-zinc-400 light:text-zinc-600 mb-1">Start Date</label>
-                <input
-                  type="text"
-                  value={newEmpStart}
-                  onChange={e => setNewEmpStart(e.target.value)}
-                  placeholder="e.g. Jan 2023"
-                  className="w-full bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] text-zinc-400 light:text-zinc-600 mb-1">End Date</label>
-                <input
-                  type="text"
-                  value={newEmpEnd}
-                  onChange={e => setNewEmpEnd(e.target.value)}
-                  placeholder="e.g. Present"
-                  disabled={newEmpCurrent}
-                  className="w-full bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-1.5 text-xs text-white light:text-zinc-900 disabled:opacity-50"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 text-xs text-zinc-300 light:text-zinc-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={newEmpCurrent}
-                  onChange={e => {
-                    setNewEmpCurrent(e.target.checked)
-                    if (e.target.checked) setNewEmpEnd('Present')
-                  }}
-                  className="rounded bg-zinc-900 light:bg-zinc-100 border-zinc-700 light:border-zinc-300"
-                />
-                <span>This is my current employer (will become the single active current company)</span>
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddEmpForm(false)}
-                  className="px-3 py-1 rounded text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-3 py-1 rounded bg-white light:bg-white light:ring-1 light:ring-zinc-300 text-black light:text-zinc-900 text-xs font-semibold cursor-pointer"
-                >
-                  Save Record
-                </button>
-              </div>
-            </div>
-          </form>
-        )}
-
-        {/* Timeline Cards */}
-        {employmentHistory.length === 0 ? (
-          <p className="text-xs text-zinc-500 light:text-zinc-600 italic py-2">
-            No past employment records recorded. Click "Auto-Fill with AI" at the top to extract directly from your resume.
-          </p>
-        ) : (
-          <div className="space-y-2.5">
-            {employmentHistory.map((emp, idx) => (
-              <div
-                key={idx}
-                className={`p-3.5 rounded-xl bg-black light:bg-white border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                  emp.is_current ? 'border-zinc-700 light:border-zinc-300 shadow-sm' : 'border-zinc-800 light:border-zinc-200'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg border shrink-0 ${
-                    emp.is_current ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-700 light:border-zinc-300 text-white light:text-zinc-900' : 'bg-zinc-950 light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-500 light:text-zinc-600'
-                  }`}>
-                    <Building2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-semibold text-white light:text-zinc-900">{emp.company}</span>
-                      {emp.is_current ? (
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 flex items-center gap-1 font-semibold">
-                          <Check className="w-2.5 h-2.5" /> Current Employer (Payroll)
-                        </span>
-                      ) : (
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-zinc-500 light:text-zinc-600">
-                          Former Employer
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[11px] text-zinc-400 light:text-zinc-600 mt-0.5 flex items-center gap-2 flex-wrap">
-                      <span>{emp.job_title}</span>
-                      {(emp.start_date || emp.end_date) && (
-                        <>
-                          <span className="text-zinc-600">·</span>
-                          <span className="font-mono text-[10px] text-zinc-500 light:text-zinc-600">
-                            {emp.start_date || 'Start'} – {emp.end_date || (emp.is_current ? 'Present' : 'End')}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 self-end sm:self-center">
-                  {/* Single Current Employer Radio-Toggle Button */}
-                  {emp.is_current ? (
-                    <button
-                      type="button"
-                      onClick={() => handleUnsetCurrentEmployer(idx)}
-                      className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
-                      title="Click to unmark as current employer"
-                    >
-                      Unmark Current
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleSetSingleCurrentEmployer(idx)}
-                      className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-zinc-950 light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
-                      title="Set as the 1 current employer and sync with current_company"
-                    >
-                      Set as Current
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveEmployment(idx)}
-                    className="text-zinc-500 light:text-zinc-600 hover:text-rose-400 p-1.5 rounded transition-colors cursor-pointer"
-                    title="Remove employment record"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* 7. COMPANY EXCLUSION BLACKLIST */}
       <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -2519,9 +2631,6 @@ export default function CandidateProfileEditor({
         </div>
       </div>
 
-      </>)}
-
-      {activeStep === 6 && (<>
       {/* 8. BOT AUTOMATION CONTROLS */}
       <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between">

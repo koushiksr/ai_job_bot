@@ -16,7 +16,6 @@ import {
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
-import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
@@ -185,14 +184,14 @@ export default function CandidateProfilePage() {
           <span className="text-zinc-200 light:text-zinc-800 font-semibold">Candidate Profile & Settings</span>
         </div>
 
-        {/* Page Hero Header */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Merged Sleek Candidate Profile & ATS Readiness Header */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-lg sm:text-xl font-bold text-white light:text-zinc-900 tracking-tight">
-                Candidate Profile
+              <h1 className="text-base sm:text-lg font-bold text-white light:text-zinc-900 tracking-tight">
+                Candidate Profile & Automation Settings
               </h1>
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 light:border-emerald-300 text-emerald-300 light:text-emerald-700">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 light:border-emerald-300 text-emerald-300 light:text-emerald-700 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Bot Synced
               </span>
@@ -200,6 +199,25 @@ export default function CandidateProfilePage() {
             <p className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">
               {userId} · {userEmail} · 06:00 AM IST sweeps
             </p>
+          </div>
+
+          {/* Sleek ATS Diagnostic Indicator */}
+          <div className="flex items-center gap-3 self-start md:self-auto bg-black/60 light:bg-zinc-100/80 px-3.5 py-2 rounded-xl border border-zinc-800/80 light:border-zinc-200 text-xs">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-white light:text-zinc-900 font-mono">94.8% ATS Score</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 font-bold">
+                  Senior Tier
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-zinc-400 light:text-zinc-600">
+                <span>ATS Pass: 98.4%</span>
+                <span>•</span>
+                <span>Keywords: Optimized</span>
+                <span>•</span>
+                <span>Stealth Shield: Active</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -218,17 +236,6 @@ export default function CandidateProfilePage() {
             </Link>
           </div>
         )}
-
-        {/* Neural ATS Recruiter Readiness Diagnostic Widget */}
-        <NeuralAtsDiagnosticCard
-          isProfessional={isProfessional}
-          skillsCount={8}
-          resumeUploaded={true}
-          onUnlockClick={(feat) => {
-            setProModalFeature(feat || 'Professional Suite')
-            setShowProModal(true)
-          }}
-        />
 
         {/* Full Visual Candidate Profile & Credentials Builder */}
         <CandidateProfileEditor
@@ -276,7 +283,7 @@ export default function CandidateProfilePage() {
         isOpen={isHelpOpen}
         onOpen={() => setIsHelpOpen(true)}
         onClose={() => setIsHelpOpen(false)}
-        showFloatingTrigger={true}
+        showFloatingTrigger={false}
         initialEmail={userEmail}
         initialName={userName}
         initialUserId={userId}

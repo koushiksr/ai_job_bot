@@ -246,8 +246,9 @@ Schema:
 }
 
 Keyword rules:
-- skills and keywords must contain individual searchable technology terms.
-- roles should contain realistic job titles matching the candidate's experience.
+- skills and keywords must contain coherent technology terms (e.g. "Python", "FastAPI", "PostgreSQL", "Docker", "Machine Learning", "LangChain"). Do NOT split multi-word skills into isolated single words like "Machine", "Learning", "Development", "APIs", "REST".
+- roles should contain 2 to 4 realistic, complete job titles matching the candidate's core expertise (e.g. "Python Developer", "Backend Engineer", "AI/ML Engineer"). NEVER output single-word fragments like "Gen", "Ai", "Agent", "Prompt", "Fde".
+- must_have_keywords must contain 1-3 core primary technologies/languages (e.g. "Python").
 - avoid_companies must contain every past and present employer name.
 - predefined_answers["Current Company (payroll)?"] must equal current_company.
 - Incorporate custom user instructions where applicable.`
@@ -483,18 +484,38 @@ Keyword rules:
     // ----------------------------------------------------
     // SMART MERGE & AUTO-UPDATE EXISTING CANDIDATE PROFILE
     // ----------------------------------------------------
+    const JUNK_ROLE_WORDS = new Set([
+      'gen', 'ai', 'genai', 'agent', 'prompt', 'fde', 'development', 'api', 'apis', 'rest',
+      'developer', 'engineer', 'lead', 'senior', 'junior', 'learning', 'machine', 'intelligence', 'artificial'
+    ])
+
     const existingRoles = Array.isArray(existingProfile?.job_filters?.roles) ? existingProfile.job_filters.roles : []
     const extractedRoles = Array.isArray(resultJson.job_filters?.roles) ? resultJson.job_filters.roles : []
-    const mergedRoles = Array.from(new Set([...existingRoles, ...extractedRoles].filter(Boolean)))
+    const cleanedExtractedRoles = [...existingRoles, ...extractedRoles]
+      .map((r: any) => String(r || '').trim())
+      .filter((r: string) => r.length >= 3 && !JUNK_ROLE_WORDS.has(r.toLowerCase()))
 
+    const seenRoles = new Set<string>()
+    const mergedRoles: string[] = []
+    for (const r of cleanedExtractedRoles) {
+      if (!seenRoles.has(r.toLowerCase())) {
+        seenRoles.add(r.toLowerCase())
+        mergedRoles.push(r)
+      }
+    }
+
+    const JUNK_SKILL_WORDS = new Set([
+      'development', 'apis', 'rest', 'api', 'integration', 'learning', 'machine', 'intelligence',
+      'artificial', 'vector', 'databases', 'gen', 'ai', 'genai', 'agent', 'prompt'
+    ])
     const existingSkills = Array.isArray(existingProfile?.skills) ? existingProfile.skills : []
     const extractedSkills = Array.isArray(resultJson.skills) ? resultJson.skills : []
-    // Case-insensitive deduplication for skills
+    // Case-insensitive deduplication and sanitization for skills
     const seenSkills = new Set<string>()
     const mergedSkills: string[] = []
     for (const s of [...existingSkills, ...extractedSkills]) {
       const cleaned = String(s || '').trim()
-      if (cleaned && !seenSkills.has(cleaned.toLowerCase())) {
+      if (cleaned && cleaned.length >= 2 && !seenSkills.has(cleaned.toLowerCase()) && !JUNK_SKILL_WORDS.has(cleaned.toLowerCase())) {
         seenSkills.add(cleaned.toLowerCase())
         mergedSkills.push(cleaned)
       }
@@ -505,9 +526,46 @@ Keyword rules:
 
     const existingLocations = Array.isArray(existingProfile?.job_filters?.location) ? existingProfile.job_filters.location : []
     const extractedLocation = resultJson.current_location || ''
-    let mergedLocations = existingLocations
+    const rawLocations = [...existingLocations]
+    if (extractedLocation) rawLocations.push(extractedLocation)
+    if (Array.isArray(resultJson.job_filters?.location)) {
+      rawLocations.push(...resultJson.job_filters.location)
+    }
+
+    const seenLocs = new Set<string>()
+    const mergedLocations: string[] = []
+    for (const loc of rawLocations) {
+      const cl = String(loc || '').trim()
+      if (!cl) continue
+      const lower = cl.toLowerCase()
+      if (lower === 'bangalore' || lower === 'bengaluru') {
+        if (!seenLocs.has('bengaluru')) {
+          seenLocs.add('bengaluru')
+          mergedLocations.push('Bengaluru')
+        }
+      } else if (!seenLocs.has(lower)) {
+        seenLocs.add(lower)
+        mergedLocations.push(cl)
+      }
+    }
     if (mergedLocations.length === 0) {
-      mergedLocations = extractedLocation ? [extractedLocation, 'Remote', 'Hybrid'] : ['Bangalore', 'Remote', 'Hybrid']
+      mergedLocations.push('Bengaluru', 'Remote', 'Hybrid')
+    }
+
+    let mustHaves: string[] = Array.isArray(existingProfile?.job_filters?.must_have_keywords) && existingProfile.job_filters.must_have_keywords.length > 0
+      ? existingProfile.job_filters.must_have_keywords
+      : (Array.isArray(resultJson.job_filters?.must_have_keywords) ? resultJson.job_filters.must_have_keywords : [])
+
+    // If empty, extract core technology from top role (e.g. Python Developer -> Python)
+    if (mustHaves.length === 0 && mergedRoles.length > 0) {
+      const topRole = mergedRoles[0].toLowerCase()
+      if (topRole.includes('python')) mustHaves.push('Python')
+      else if (topRole.includes('java') && !topRole.includes('javascript')) mustHaves.push('Java')
+      else if (topRole.includes('react')) mustHaves.push('React')
+      else if (topRole.includes('node')) mustHaves.push('Node.js')
+      else if (topRole.includes('data')) mustHaves.push('Data Engineering')
+      else if (topRole.includes('qa') || topRole.includes('test')) mustHaves.push('Automation')
+      else if (topRole.includes('ai') || topRole.includes('ml')) mustHaves.push('AI')
     }
 
     const finalCompany = resultJson.current_company || existingProfile?.current_company || (employmentHistory[0]?.company || '')
@@ -534,7 +592,7 @@ Keyword rules:
         roles: mergedRoles.length > 0 ? mergedRoles : ['Python Developer', 'Backend Developer', 'AI Engineer'],
         location: mergedLocations,
         keywords: mergedSkills,
-        must_have_keywords: existingProfile?.job_filters?.must_have_keywords || [],
+        must_have_keywords: mustHaves,
         avoid_companies: mergedAvoidCompanies
       },
       predefined_answers: {
