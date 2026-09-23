@@ -41,6 +41,9 @@ export async function GET(req: NextRequest) {
     const profiles = allUserIds.map(uid => {
       const uDoc = userMap.get(uid) || {}
       const pDoc = profileMap.get(uid) || {}
+      // Never ship credentials to the admin table — support flows use /api/profile (owner/admin gated)
+      delete uDoc.password
+      delete pDoc.password
       return {
         ...uDoc,
         ...pDoc,

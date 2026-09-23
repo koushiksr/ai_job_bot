@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import crypto from 'crypto'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { readSession } from '@/lib/session'
+
+/**
+ * Ownership gate: the caller must be the profile owner (session uid matches)
+ * or a super-admin. Everything in this file returns or mutates sensitive
+ * data (including Naukri credentials), so anonymous access is forbidden.
+ */
+function isSelfOrAdmin(req: NextRequest, userId: string): boolean {
+  const sess = readSession(req)
+  if (!sess) return false
+  if (sess.uid === userId) return true
+  if (sess.role === 'admin') return true
+  return false
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,6 +23,9 @@ export async function GET(req: NextRequest) {
     const userId = searchParams.get('user_id')
     if (!userId) {
       return NextResponse.json({ detail: 'user_id required' }, { status: 400 })
+    }
+    if (!isSelfOrAdmin(req, userId)) {
+      return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }
 
     const ifNoneMatch = req.headers.get('if-none-match')
@@ -154,6 +171,9 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ detail: 'user_id is required' }, { status: 400 })
     }
+    if (!isSelfOrAdmin(req, userId)) {
+      return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
+    }
 
     const db = await getDb()
     if (!db) {
@@ -238,6 +258,12 @@ export async function POST(req: NextRequest) {
       { upsert: true }
     )
 
+    // Password changed → kill all other sessions for this account
+    if (updateDoc.password && updateDoc.password !== existing?.password) {
+      await db.collection('profiles').updateMany({ user_id: userId }, { $inc: { session_v: 1 } })
+      await db.collection('users').updateMany({ user_id: userId }, { $inc: { session_v: 1 } })
+    }
+
     // Log profile update activity
     const { ip, userAgent } = getClientInfo(req)
     await logUserActivity(db, {
@@ -271,6 +297,9 @@ export async function DELETE(req: NextRequest) {
     const userId = searchParams.get('user_id')
     if (!userId) {
       return NextResponse.json({ detail: 'user_id required' }, { status: 400 })
+    }
+    if (!isSelfOrAdmin(req, userId)) {
+      return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }
 
     const db = await getDb()
