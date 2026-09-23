@@ -9,8 +9,8 @@ import { readSession } from '@/lib/session'
  * or a super-admin. Everything in this file returns or mutates sensitive
  * data (including Naukri credentials), so anonymous access is forbidden.
  */
-async function isSelfOrAdmin(req: NextRequest, userId: string): Promise<boolean> {
-  const sess = await readSession(req)
+function isSelfOrAdmin(req: NextRequest, userId: string): boolean {
+  const sess = readSession(req)
   if (!sess) return false
   if (sess.uid === userId) return true
   if (sess.role === 'admin') return true
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ detail: 'user_id required' }, { status: 400 })
     }
-    if (!(await isSelfOrAdmin(req, userId))) {
+    if (!isSelfOrAdmin(req, userId)) {
       return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }
 
@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ detail: 'user_id is required' }, { status: 400 })
     }
-    if (!(await isSelfOrAdmin(req, userId))) {
+    if (!isSelfOrAdmin(req, userId)) {
       return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }
 
@@ -298,7 +298,7 @@ export async function DELETE(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ detail: 'user_id required' }, { status: 400 })
     }
-    if (!(await isSelfOrAdmin(req, userId))) {
+    if (!isSelfOrAdmin(req, userId)) {
       return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }
 

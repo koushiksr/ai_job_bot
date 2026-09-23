@@ -18,7 +18,7 @@ export async function verifyAdminRequest(
   req: NextRequest,
   db: Db | null
 ): Promise<{ authorized: boolean; userId: string; email?: string }> {
-  const sess = await readSession(req)
+  const sess = readSession(req)
   if (!sess || sess.role !== 'admin') {
     return { authorized: false, userId: '' }
   }
@@ -79,7 +79,7 @@ export async function verifyEnterpriseAdminRequest(
     email: ''
   }
 
-  const sess = await readSession(req)
+  const sess = readSession(req)
   if (!sess || (sess.role !== 'admin' && sess.role !== 'enterprise_admin')) {
     return denied
   }

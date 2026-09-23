@@ -262,7 +262,7 @@ export async function GET(req: NextRequest) {
       targetUrl.searchParams.set('picture', profile.picture || picture)
     }
 
-    return await issueSession(NextResponse.redirect(targetUrl), {
+    return issueSession(NextResponse.redirect(targetUrl), {
       uid: profile.user_id,
       email: profile.email,
       role: (role === 'admin' || role === 'enterprise_admin' ? role : 'user') as 'admin' | 'enterprise_admin' | 'user',
