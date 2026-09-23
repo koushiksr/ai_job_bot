@@ -1331,34 +1331,6 @@ export default function UserDashboard() {
           {/* RIGHT: Actions, Telemetry Refresh & Controls */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <ThemeToggle />
-            {/* Install App / Installed Status Button (Desktop & Tablet) */}
-            <button
-              type="button"
-              onClick={() => setIsPwaModalOpen(true)}
-              className={`hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer shadow-sm ${
-                isAppInstalled
-                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/30'
-                  : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 light:text-cyan-700 border border-cyan-500/30'
-              }`}
-              title={
-                isAppInstalled
-                  ? 'JobFlux AI is installed on this device • Click to view status or alerts'
-                  : 'Install JobFlux as a native app and enable push alerts'
-              }
-            >
-              {isAppInstalled ? (
-                <>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
-                  <span>App Installed</span>
-                </>
-              ) : (
-                <>
-                  <Download className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600" />
-                  <span>Install App</span>
-                </>
-              )}
-            </button>
-
             {/* Candidate Offer Button */}
             {userRole !== 'admin' && (
               <button
@@ -1384,17 +1356,6 @@ export default function UserDashboard() {
                 <span>Admin</span>
               </Link>
             )}
-
-            {/* Telemetry Refresh (Desktop) */}
-            <button
-              onClick={() => refreshAllDashboardData(userId)}
-              disabled={isRefreshing}
-              className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer disabled:opacity-50 hidden md:inline-flex"
-              title="Refresh live application telemetry"
-              aria-label="Refresh telemetry"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-white light:text-zinc-900' : ''}`} />
-            </button>
 
             {/* Sales / Upgrade Action Button (Desktop & Tablet) */}
             <div className="hidden sm:flex items-center">
@@ -1437,15 +1398,11 @@ export default function UserDashboard() {
               )}
             </div>
 
-            {/* Desktop Brand Logo & Radar Status (Right on Desktop) */}
-            <div className="hidden md:flex items-center gap-2.5 pl-2 border-l border-zinc-800 light:border-zinc-200 shrink-0">
+            {/* Desktop Brand Logo (Right on Desktop) */}
+            <div className="hidden md:flex items-center pl-2 border-l border-zinc-800 light:border-zinc-200 shrink-0">
               <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
                 <JobFluxLogo size="sm" showText={true} />
               </Link>
-              <div className="hidden lg:flex items-center gap-2 border-l border-zinc-800/80 light:border-zinc-200 pl-2.5">
-                <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600">Autonomous Radar</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-              </div>
             </div>
 
             {/* Mobile Profile Trigger Button (ALWAYS VISIBLE & UNCLIPPED ON MOBILE) */}
@@ -1928,54 +1885,36 @@ export default function UserDashboard() {
 
         {/* Enterprise Member Workspace Active Callout */}
         {userRole !== 'admin' && isEnterpriseMember && (
-          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2.5">
+          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-7 h-7 rounded-lg bg-cyan-900/50 border border-cyan-700/50 light:border-cyan-300 flex items-center justify-center shrink-0">
                 <Building2 className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600" />
               </div>
-              <div>
-                <span className="font-semibold text-white light:text-zinc-900">Enterprise Workspace Active</span>
-                <span className="text-zinc-400 light:text-zinc-600 text-[11px] ml-2 font-mono">
-                  • {userPlan === 'org_pro' ? '15' : '10'} Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold text-white light:text-zinc-900">Enterprise Workspace Active</span>
+                  <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-cyan-950 border border-cyan-700/70 text-cyan-300 light:text-cyan-700 font-semibold uppercase">
+                    {userPlan === 'org_pro' ? 'Org Pro' : 'Enterprise'}
+                  </span>
+                </div>
+                <span className="text-zinc-400 light:text-zinc-600 text-[11px] font-mono block sm:inline">
+                  {userPlan === 'org_pro' ? '15' : '10'} Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-700/70 text-cyan-300 light:text-cyan-700 font-semibold uppercase shrink-0">
-              {userPlan === 'org_pro' ? 'Org Pro' : 'Technohm SIT Org'}
-            </span>
-          </div>
-        )}
-
-        {/* Org Pro Upgrade Banner — members-only plan (base enterprise members) */}
-        {userRole !== 'admin' && isEnterpriseMember && userPlan === 'enterprise' && isPlanActive && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 light:bg-white light:bg-amber-50 border border-zinc-800/80 light:border-zinc-200 light:border-amber-300 text-white light:text-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent pointer-events-none" />
-            <div className="flex items-start gap-3 z-10">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center shrink-0">
-                <Crown className="w-5 h-5 text-amber-400 light:text-amber-600" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/40">
-                    Org Member Exclusive
-                  </span>
-                  <span className="text-sm font-bold text-white light:text-zinc-900">Upgrade to Org Pro — ₹99 / 30 days</span>
-                </div>
-                <p className="text-xs text-zinc-300 light:text-zinc-700 mt-1">
-                  <strong className="text-amber-300 light:text-amber-700">15 on-demand sweeps/week</strong> (vs 10) • Priority worker queue • Stays linked to your organization.
-                </p>
-                {orgProError && <p className="text-xs text-red-300 light:text-red-600 mt-1.5">{orgProError}</p>}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleOrgProUpgrade}
-              disabled={orgProLoading}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-60 shrink-0 z-10"
-            >
-              {orgProLoading ? 'Opening Checkout…' : 'Upgrade to Org Pro'}
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            {userPlan === 'enterprise' && isPlanActive && (
+              <button
+                type="button"
+                onClick={handleOrgProUpgrade}
+                disabled={orgProLoading}
+                className="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 light:text-amber-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 shrink-0 self-end sm:self-auto"
+                title="Upgrade to Org Pro for 15 on-demand sweeps/week"
+              >
+                <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
+                <span>{orgProLoading ? 'Opening…' : 'Upgrade to Org Pro (₹99)'}</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            )}
           </div>
         )}
 
@@ -2345,9 +2284,7 @@ export default function UserDashboard() {
                 <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5 flex items-center gap-1.5 flex-wrap">
                   <span>Schedule: <strong className="text-zinc-300 light:text-zinc-700">Daily Autonomous Sweeps</strong></span>
                   <span className="text-zinc-600 hidden sm:inline">•</span>
-                  <span className="text-zinc-400 light:text-zinc-600 font-medium">Applies Daily</span>
-                  <span className="text-zinc-600 hidden sm:inline">•</span>
-                  <span>Radar: <strong className="text-zinc-200 light:text-zinc-800 font-mono">06:00 AM IST</strong></span>
+                  <span className="text-zinc-400 light:text-zinc-600 font-medium">Applies Daily at 06:00 AM IST</span>
                 </p>
               </div>
             </div>
@@ -2571,8 +2508,8 @@ export default function UserDashboard() {
         </div>
         )}
 
-        {/* Beginner Onboarding & Autonomous Workflow Guide */}
-        {userRole !== 'admin' && (
+        {/* Beginner Onboarding & Autonomous Workflow Guide (Shown only when setup is pending) */}
+        {userRole !== 'admin' && (profileCompleteness.percent < 100 || metrics.total_applied === 0) && (
           <BeginnerOnboardingGuide
             completeness={profileCompleteness}
             userPlan={userPlan}
@@ -2632,117 +2569,6 @@ export default function UserDashboard() {
         {/* TAB 1: JOB APPLYING HISTORY */}
         {activeTab === 'history' && (
           <div className="space-y-4">
-            {/* Daily Autonomous Job Apply Dispatch Report & Engagement Summary */}
-            {metrics.total_applied > 0 && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3.5 relative overflow-hidden">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
-                      <FileCheck className="w-4 h-4 text-zinc-300 light:text-zinc-700" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-sm font-semibold text-white light:text-zinc-900 tracking-tight">
-                          Autonomous Job Dispatch Report
-                        </h3>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 font-semibold">
-                          {metrics.today > 0 ? `${metrics.today} Applied Today` : `${metrics.total_applied} Applications Dispatched`}
-                        </span>
-                      </div>
-                      <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
-                        Verified recruiter delivery via cloud workers with human pacing &amp; tailored ATS screening answers.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const topCompanies = Array.from(new Set(historyJobs.slice(0, 6).map(j => j.company || 'Tech Employer'))).join(', ')
-                        const text = `JobFlux AI Job Dispatch Report:\nDispatched: ${metrics.total_applied} applications (${metrics.today} today)\nTop Companies: ${topCompanies}\nStatus: Verified Recruiter ATS Delivery\nTrack live: https://jobfluxai.vercel.app/dashboard`
-                        navigator.clipboard.writeText(text)
-                        setCopiedReport(true)
-                        setTimeout(() => setCopiedReport(false), 2500)
-                      }}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-750 text-zinc-300 light:text-zinc-700 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
-                    >
-                      {copiedReport ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-zinc-300 light:text-zinc-700" />
-                          <span className="text-zinc-200 light:text-zinc-800">Report Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
-                          <span>Copy Report</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Company Chips from latest run */}
-                {historyJobs.length > 0 && (
-                  <div className="space-y-1.5 pt-1 border-t border-zinc-800/80 light:border-zinc-200">
-                    <span className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono block">
-                      Recently Dispatched Employers:
-                    </span>
-                    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-nowrap pb-1">
-                      {Array.from(new Set(historyJobs.map(j => j.company || 'Tech Partner'))).slice(0, 7).map((comp, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2.5 py-1 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 font-medium shrink-0 flex items-center gap-1.5"
-                        >
-                          <CheckCircle2 className="w-3 h-3 text-zinc-400 light:text-zinc-600" />
-                          <span>{comp}</span>
-                        </span>
-                      ))}
-                      {historyJobs.length > 7 && (
-                        <span className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono self-center px-1">
-                          +{historyJobs.length - 7} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* High-Converting Upgrade Pull for Free/Trial Users */}
-                {!isProfessional ? (
-                  <div className="p-3.5 rounded-xl bg-zinc-900/60 light:bg-zinc-100 border border-zinc-750 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                        <span className="text-xs font-semibold text-white light:text-zinc-900">Free Trial Capacity: {metrics.total_applied} / 50 Dispatched</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/30 font-bold">
-                          {Math.max(0, 50 - metrics.total_applied)} Remaining
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-zinc-400 light:text-zinc-600 leading-relaxed">
-                        Free tier caps at 50 applications. Upgrade to <strong className="text-white light:text-zinc-900">Professional</strong> for 1,800+ continuous applications, daily automated morning sweeps &amp; zero-queue recruiter delivery.
-                      </p>
-                    </div>
-
-                    <Link
-                      href="/pricing?promo=WELCOMEPRO"
-                      className="px-3.5 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-sm"
-                    >
-                      <span>Upgrade for ₹199 (Save 90%)</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="p-2.5 rounded-xl bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 font-mono">
-                    <span className="flex items-center gap-2">
-                      <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                      <span className="text-zinc-300 light:text-zinc-700 font-medium">Professional Plan Active:</span> Unlimited 1,800+ Applications Pool · Fast-Path Priority Queue
-                    </span>
-                    <span className="text-zinc-500 light:text-zinc-600 hidden sm:inline">Active Recruiter Sync</span>
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Search & Filter Header */}
             <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="relative w-full md:w-80">
@@ -2760,19 +2586,11 @@ export default function UserDashboard() {
               </div>
 
               {/* Actions & Export */}
-              <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+              <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end flex-wrap sm:flex-nowrap">
                 {/* Time Pill Filters */}
                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                   {(['all', 'today', 'week', 'month'] as const).map(f => {
-                    const label =
-                      f === 'all'
-                        ? `All (${metrics.total_applied})`
-                        : f === 'today'
-                        ? `Today (${metrics.today})`
-                        : f === 'week'
-                        ? `Week (${metrics.this_week})`
-                        : `Month (${metrics.this_month})`
-                    const active = historyFilter === f
+                    const count = f === 'today' ? metrics.today : f === 'week' ? metrics.this_week : f === 'month' ? metrics.this_month : metrics.total_applied
                     return (
                       <button
                         key={f}
@@ -2780,17 +2598,42 @@ export default function UserDashboard() {
                           setHistoryFilter(f)
                           loadUserHistory(userId, 1, historySearch, f)
                         }}
-                        className={`px-3 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
-                          active
-                            ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900'
-                            : 'bg-black light:bg-white text-zinc-500 light:text-zinc-600 hover:text-zinc-300 border border-zinc-800 light:border-zinc-200'
+                        className={`px-2.5 py-1 text-xs rounded-md transition-colors capitalize whitespace-nowrap ${
+                          historyFilter === f
+                            ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-medium'
+                            : 'text-zinc-400 light:text-zinc-600 hover:text-zinc-200 light:hover:text-zinc-900'
                         }`}
                       >
-                        {label}
+                        {f} <span className="text-[10px] text-zinc-500 light:text-zinc-500 font-mono">({count})</span>
                       </button>
                     )
                   })}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const topCompanies = Array.from(new Set(historyJobs.slice(0, 6).map(j => j.company || 'Tech Employer'))).join(', ')
+                    const text = `JobFlux AI Job Dispatch Report:\nDispatched: ${metrics.total_applied} applications (${metrics.today} today)\nTop Companies: ${topCompanies}\nStatus: Verified Recruiter ATS Delivery\nTrack live: https://jobfluxai.vercel.app/dashboard`
+                    navigator.clipboard.writeText(text)
+                    setCopiedReport(true)
+                    setTimeout(() => setCopiedReport(false), 2500)
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 text-xs font-medium transition-colors cursor-pointer shrink-0"
+                  title="Copy verification dispatch report to clipboard"
+                >
+                  {copiedReport ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="hidden sm:inline text-emerald-400 font-medium">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
+                      <span className="hidden sm:inline">Copy Report</span>
+                    </>
+                  )}
+                </button>
 
                 <button
                   onClick={handleExportHistoryCsv}
@@ -3411,7 +3254,7 @@ export default function UserDashboard() {
         isOpen={isHelpOpen}
         onOpen={() => setIsHelpOpen(true)}
         onClose={() => setIsHelpOpen(false)}
-        showFloatingTrigger={true}
+        showFloatingTrigger={false}
         initialEmail={userEmail}
         initialName={userName}
         initialUserId={userId}
