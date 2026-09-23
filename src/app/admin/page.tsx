@@ -25,6 +25,7 @@ import LogsTab from './components/tabs/LogsTab'
 import VisitorsTab from './components/tabs/VisitorsTab'
 import ReviewsTab from './components/ReviewsTab'
 import { AdminTabType, AdminExecutionCounts } from './types'
+import { usePersistedToggle } from './hooks/usePersistedToggle'
 
 // Modular Modals
 import InspectCandidateModal from './components/modals/InspectCandidateModal'
@@ -153,23 +154,23 @@ export default function AdminDashboard() {
   const [offerNotification, setOfferNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   // Purchase Offers Collapsible & Pagination State with Local State persistence
-  const [offersStatsCollapsed, setOffersStatsCollapsed] = useState<boolean>(false)
-  const [offersCollapsedWatchdog, setOffersCollapsedWatchdog] = useState<boolean>(false)
-  const [offersCollapsedDesigner, setOffersCollapsedDesigner] = useState<boolean>(false)
-  const [offersCollapsedAssigned, setOffersCollapsedAssigned] = useState<boolean>(false)
-  const [offersCollapsedHistory, setOffersCollapsedHistory] = useState<boolean>(false)
-  const [offersCollapsedPreview, setOffersCollapsedPreview] = useState<boolean>(false)
-  const [offersCollapsedMailDiag, setOffersCollapsedMailDiag] = useState<boolean>(false)
-  const [offersCollapsedMailLogs, setOffersCollapsedMailLogs] = useState<boolean>(false)
-  const [offersCollapsedDispatchReport, setOffersCollapsedDispatchReport] = useState<boolean>(false)
-  const [candidatesTableCollapsed, setCandidatesTableCollapsed] = useState<boolean>(false)
-  const [requestsTableCollapsed, setRequestsTableCollapsed] = useState<boolean>(false)
-  const [queueTableCollapsed, setQueueTableCollapsed] = useState<boolean>(false)
-  const [paymentsTableCollapsed, setPaymentsTableCollapsed] = useState<boolean>(false)
-  const [enterpriseLeadsCollapsed, setEnterpriseLeadsCollapsed] = useState<boolean>(false)
-  const [activityTableCollapsed, setActivityTableCollapsed] = useState<boolean>(false)
-  const [jobHistoryTableCollapsed, setJobHistoryTableCollapsed] = useState<boolean>(false)
-  const [llmTableCollapsed, setLlmTableCollapsed] = useState<boolean>(false)
+  const [offersStatsCollapsed, toggleOffersStats] = usePersistedToggle('admin_offers_stats_collapsed')
+  const [offersCollapsedWatchdog, toggleOffersWatchdog] = usePersistedToggle('admin_offers_collapsed_watchdog')
+  const [offersCollapsedDesigner, toggleOffersDesigner] = usePersistedToggle('admin_offers_collapsed_designer')
+  const [offersCollapsedAssigned, toggleOffersAssigned] = usePersistedToggle('admin_offers_collapsed_assigned')
+  const [offersCollapsedHistory, toggleOffersHistory] = usePersistedToggle('admin_offers_collapsed_history')
+  const [offersCollapsedPreview, toggleOffersPreview] = usePersistedToggle('admin_offers_collapsed_preview')
+  const [offersCollapsedMailDiag, toggleOffersMailDiag] = usePersistedToggle('admin_offers_collapsed_maildiag')
+  const [offersCollapsedMailLogs, toggleOffersMailLogs] = usePersistedToggle('admin_offers_collapsed_maillogs')
+  const [offersCollapsedDispatchReport, toggleOffersDispatchReport] = usePersistedToggle('admin_offers_collapsed_dispatch_report')
+  const [candidatesTableCollapsed, toggleCandidatesTable] = usePersistedToggle('admin_candidates_table_collapsed')
+  const [requestsTableCollapsed, toggleRequestsTable] = usePersistedToggle('admin_requests_table_collapsed')
+  const [queueTableCollapsed, toggleQueueTable] = usePersistedToggle('admin_queue_table_collapsed')
+  const [paymentsTableCollapsed, togglePaymentsTable] = usePersistedToggle('admin_payments_table_collapsed')
+  const [enterpriseLeadsCollapsed, toggleEnterpriseLeadsTable] = usePersistedToggle('admin_enterprise_leads_collapsed')
+  const [activityTableCollapsed, toggleActivityTable] = usePersistedToggle('admin_activity_table_collapsed')
+  const [jobHistoryTableCollapsed, toggleJobHistoryTable] = usePersistedToggle('admin_job_history_table_collapsed')
+  const [llmTableCollapsed, toggleLlmTable] = usePersistedToggle('admin_llm_table_collapsed')
   const [isDispatchReportModalOpen, setIsDispatchReportModalOpen] = useState<boolean>(false)
   const [dispatchReportOfferChoice, setDispatchReportOfferChoice] = useState<string>('auto')
   const [assignedOffersPage, setAssignedOffersPage] = useState<number>(1)
@@ -586,142 +587,6 @@ export default function AdminDashboard() {
     } finally {
       setLoadingExpirySweep(false)
     }
-  }
-
-  const toggleOffersStats = () => {
-    setOffersStatsCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_stats_collapsed', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleOffersWatchdog = () => {
-    setOffersCollapsedWatchdog(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_collapsed_watchdog', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleOffersDesigner = () => {
-    setOffersCollapsedDesigner(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_collapsed_designer', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleOffersPreview = () => {
-    setOffersCollapsedPreview(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_collapsed_preview', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleOffersAssigned = () => {
-    setOffersCollapsedAssigned(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_collapsed_assigned', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleOffersHistory = () => {
-    setOffersCollapsedHistory(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_collapsed_history', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleOffersMailDiag = () => {
-    setOffersCollapsedMailDiag(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_collapsed_maildiag', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleOffersMailLogs = () => {
-    setOffersCollapsedMailLogs(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_collapsed_maillogs', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleOffersDispatchReport = () => {
-    setOffersCollapsedDispatchReport(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_offers_collapsed_dispatch_report', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleCandidatesTable = () => {
-    setCandidatesTableCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_candidates_table_collapsed', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleRequestsTable = () => {
-    setRequestsTableCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_requests_table_collapsed', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleQueueTable = () => {
-    setQueueTableCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_queue_table_collapsed', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const togglePaymentsTable = () => {
-    setPaymentsTableCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_payments_table_collapsed', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleEnterpriseLeadsTable = () => {
-    setEnterpriseLeadsCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_enterprise_leads_collapsed', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleActivityTable = () => {
-    setActivityTableCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_activity_table_collapsed', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleJobHistoryTable = () => {
-    setJobHistoryTableCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_job_history_table_collapsed', String(next)) } catch {}
-      return next
-    })
-  }
-
-  const toggleLlmTable = () => {
-    setLlmTableCollapsed(prev => {
-      const next = !prev
-      try { localStorage.setItem('admin_llm_table_collapsed', String(next)) } catch {}
-      return next
-    })
   }
 
   const handleAssignedFilterChange = (filter: 'all' | 'active' | 'claimed' | 'expired') => {
@@ -1390,40 +1255,6 @@ export default function AdminDashboard() {
         if (savedSelectedId) setSelectedCandidateId(savedSelectedId)
 
         // Restore Purchase Offers collapsible states & sub-tab filters
-        const sStats = localStorage.getItem('admin_offers_stats_collapsed')
-        if (sStats !== null) setOffersStatsCollapsed(sStats === 'true')
-        const sWatch = localStorage.getItem('admin_offers_collapsed_watchdog')
-        if (sWatch !== null) setOffersCollapsedWatchdog(sWatch === 'true')
-        const sDes = localStorage.getItem('admin_offers_collapsed_designer')
-        if (sDes !== null) setOffersCollapsedDesigner(sDes === 'true')
-        const sPrev = localStorage.getItem('admin_offers_collapsed_preview')
-        if (sPrev !== null) setOffersCollapsedPreview(sPrev === 'true')
-        const sAssigned = localStorage.getItem('admin_offers_collapsed_assigned')
-        if (sAssigned !== null) setOffersCollapsedAssigned(sAssigned === 'true')
-        const sHist = localStorage.getItem('admin_offers_collapsed_history')
-        if (sHist !== null) setOffersCollapsedHistory(sHist === 'true')
-        const sMailDiag = localStorage.getItem('admin_offers_collapsed_maildiag')
-        if (sMailDiag !== null) setOffersCollapsedMailDiag(sMailDiag === 'true')
-        const sMailLogs = localStorage.getItem('admin_offers_collapsed_maillogs')
-        if (sMailLogs !== null) setOffersCollapsedMailLogs(sMailLogs === 'true')
-        const sDispatch = localStorage.getItem('admin_offers_collapsed_dispatch_report')
-        if (sDispatch !== null) setOffersCollapsedDispatchReport(sDispatch === 'true')
-        const sCand = localStorage.getItem('admin_candidates_table_collapsed')
-        if (sCand !== null) setCandidatesTableCollapsed(sCand === 'true')
-        const sReq = localStorage.getItem('admin_requests_table_collapsed')
-        if (sReq !== null) setRequestsTableCollapsed(sReq === 'true')
-        const sQueue = localStorage.getItem('admin_queue_table_collapsed')
-        if (sQueue !== null) setQueueTableCollapsed(sQueue === 'true')
-        const sPay = localStorage.getItem('admin_payments_table_collapsed')
-        if (sPay !== null) setPaymentsTableCollapsed(sPay === 'true')
-        const sLeads = localStorage.getItem('admin_enterprise_leads_collapsed')
-        if (sLeads !== null) setEnterpriseLeadsCollapsed(sLeads === 'true')
-        const sAct = localStorage.getItem('admin_activity_table_collapsed')
-        if (sAct !== null) setActivityTableCollapsed(sAct === 'true')
-        const sJobH = localStorage.getItem('admin_job_history_table_collapsed')
-        if (sJobH !== null) setJobHistoryTableCollapsed(sJobH === 'true')
-        const sLlm = localStorage.getItem('admin_llm_table_collapsed')
-        if (sLlm !== null) setLlmTableCollapsed(sLlm === 'true')
         const sAssignedFilter = localStorage.getItem('admin_assigned_offer_filter')
         if (sAssignedFilter && ['all', 'active', 'claimed', 'expired'].includes(sAssignedFilter)) setAssignedOfferFilter(sAssignedFilter as any)
         const sLogsSub = localStorage.getItem('admin_logs_sub_tab')
