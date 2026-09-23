@@ -125,7 +125,7 @@ export default function AtsScoreCheckerPage() {
 
         {/* Inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-5 shadow-xl">
+          <div className="bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-5 shadow-xl">
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-zinc-200 light:text-zinc-800 flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-cyan-400 light:text-cyan-600" /> Your Resume Content
@@ -146,7 +146,7 @@ export default function AtsScoreCheckerPage() {
             />
           </div>
 
-          <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-5 shadow-xl">
+          <div className="bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-5 shadow-xl">
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-zinc-200 light:text-zinc-800 flex items-center gap-1.5">
                 <Search className="w-4 h-4 text-amber-400 light:text-amber-600" /> Target Job Description (JD)
@@ -191,7 +191,7 @@ export default function AtsScoreCheckerPage() {
 
         {/* Results Section */}
         {score !== null && (
-          <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-3xl p-6 md:p-8 shadow-2xl mb-12">
+          <div className="bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-3xl p-6 md:p-8 shadow-2xl mb-12">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
               {/* Score Dial (4 cols) */}
               <div className="md:col-span-4 text-center md:border-r md:border-zinc-800 md:pr-6">

@@ -60,7 +60,7 @@ export default function RequestsTab({
     <div className="space-y-6">
       {/* Quick Metrics Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 light:text-zinc-600">Total Queries</div>
             <div className="text-2xl font-extrabold text-white light:text-zinc-900 mt-1">{ticketStats.total}</div>
@@ -69,7 +69,7 @@ export default function RequestsTab({
             <MessageSquare className="w-5 h-5" />
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-rose-400 light:text-rose-600">Open / Pending</div>
             <div className="text-2xl font-extrabold text-rose-400 light:text-rose-600 mt-1">{ticketStats.open}</div>
@@ -78,7 +78,7 @@ export default function RequestsTab({
             <Clock className="w-5 h-5" />
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400 light:text-amber-600">In Progress</div>
             <div className="text-2xl font-extrabold text-amber-400 light:text-amber-600 mt-1">{ticketStats.in_progress}</div>
@@ -87,7 +87,7 @@ export default function RequestsTab({
             <RefreshCw className="w-5 h-5" />
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 light:text-emerald-600">Resolved / Closed</div>
             <div className="text-2xl font-extrabold text-emerald-400 light:text-emerald-600 mt-1">{ticketStats.resolved + ticketStats.closed}</div>
@@ -122,7 +122,7 @@ export default function RequestsTab({
       </div>
 
       {/* Search, Filter & Refresh Bar */}
-      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-96">
           <Search className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3 top-3" />
           <input
@@ -170,7 +170,7 @@ export default function RequestsTab({
       </div>
 
       {/* Inquiries Table */}
-      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div 
           onClick={toggleRequestsTable}
           className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none transition-colors"

@@ -274,7 +274,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
   return (
     <div className="space-y-6">
       {/* Header / Actions */}
-      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
             <Tag className="w-4 h-4 text-amber-400 light:text-amber-600" />
@@ -552,7 +552,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
       </div>
 
       {/* Candidate Daily Job Dispatch Report & Multichannel Hub */}
-      <div id="daily-dispatch-hub" className="rounded-2xl bg-[#09090b] border border-sky-500/30 overflow-hidden shadow-xl space-y-0">
+      <div id="daily-dispatch-hub" className="rounded-2xl bg-[#09090b] light:bg-white border border-sky-500/30 overflow-hidden shadow-xl space-y-0">
         <div 
           onClick={toggleOffersDispatchReport}
           className="px-5 py-4 bg-gradient-to-r from-zinc-950 via-[#0a0f1d] to-zinc-950 hover:bg-zinc-900/80 light:hover:bg-zinc-100 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"

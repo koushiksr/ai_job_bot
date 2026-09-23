@@ -167,7 +167,7 @@ export default function AiEngineVisualizer() {
   }, [selectedIdx, isAutoCycling])
 
   return (
-    <div className="w-full max-w-6xl mx-auto rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 shadow-2xl overflow-hidden relative text-zinc-100 light:text-zinc-900">
+    <div className="w-full max-w-6xl mx-auto rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl overflow-hidden relative text-zinc-100 light:text-zinc-900">
       {/* Autonomous Laser Beam Sweep */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent animate-laser-sweep z-20 pointer-events-none" />
       
@@ -175,7 +175,7 @@ export default function AiEngineVisualizer() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Cockpit Header */}
-      <div className="p-4 sm:px-6 bg-[#050507] border-b border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="p-4 sm:px-6 bg-[#050507] light:bg-white border-b border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
           <div>
@@ -203,7 +203,7 @@ export default function AiEngineVisualizer() {
       </div>
 
       {/* Role Switcher Tabs */}
-      <div className="px-4 sm:px-6 py-3 bg-[#09090b] border-b border-zinc-800/80 light:border-zinc-200 flex items-center justify-between gap-2 overflow-x-auto">
+      <div className="px-4 sm:px-6 py-3 bg-[#09090b] light:bg-white border-b border-zinc-800/80 light:border-zinc-200 flex items-center justify-between gap-2 overflow-x-auto">
         <div className="flex items-center gap-2">
           {DEMO_ROLES.map((role, idx) => (
             <button
@@ -239,7 +239,7 @@ export default function AiEngineVisualizer() {
       </div>
 
       {/* 4-Step Linear Pipeline Stages */}
-      <div className="px-4 sm:px-6 py-2.5 bg-[#070709] border-b border-zinc-800/70 light:border-zinc-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+      <div className="px-4 sm:px-6 py-2.5 bg-[#070709] light:bg-white border-b border-zinc-800/70 light:border-zinc-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
         <div
           className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
             stage === 'scan'
@@ -421,7 +421,7 @@ export default function AiEngineVisualizer() {
       </div>
 
       {/* Bottom Trust & Assurance Footer */}
-      <div className="px-6 py-3 bg-[#050507] border-t border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500 light:text-zinc-600">
+      <div className="px-6 py-3 bg-[#050507] light:bg-white border-t border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500 light:text-zinc-600">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
           <span className="text-zinc-400 light:text-zinc-600 font-medium">Safe Human Pacing Emulation & Daily Window</span>

@@ -1151,7 +1151,7 @@ export default function CandidateProfileEditor({
 
       {/* NEW CANDIDATE ID INPUT (Admin / Creation Mode Only) */}
       {isNew && (
-        <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-2">
+        <div className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2">
           <label className="block text-xs font-semibold text-zinc-300 light:text-zinc-700 uppercase tracking-wider">
             Candidate Unique ID <span className="text-rose-400 light:text-rose-600">*</span>
           </label>
@@ -1238,7 +1238,7 @@ export default function CandidateProfileEditor({
 
       {activeStep === 0 && (<>
       {/* 1. CANDIDATE RESUME PDF & AI AUTO-FILL (TOP HERO SECTION) */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
@@ -1390,7 +1390,7 @@ export default function CandidateProfileEditor({
 
       {activeStep === 1 && (<>
       {/* 2. NAUKRI CREDENTIALS & IDENTITY */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
@@ -1597,7 +1597,7 @@ export default function CandidateProfileEditor({
 
       {activeStep === 2 && (<>
       {/* 3. EXPERIENCE & COMPENSATION (CTC) */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
@@ -1761,7 +1761,7 @@ export default function CandidateProfileEditor({
 
       {activeStep === 3 && (<>
       {/* 4. TARGET JOB FILTERS & PREFERENCES */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-5">
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-5">
         <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
@@ -2064,7 +2064,7 @@ export default function CandidateProfileEditor({
 
       {activeStep === 4 && (<>
       {/* 5. RECRUITER SCREENING QUESTIONS (PREDEFINED ANSWERS) */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
@@ -2197,7 +2197,7 @@ export default function CandidateProfileEditor({
 
       {activeStep === 5 && (<>
       {/* 6. EMPLOYMENT HISTORY (STRICTLY AT MOST 1 CURRENT EMPLOYER) */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 light:border-zinc-200 pb-3 flex-wrap gap-2">
           <div>
             <div className="flex items-center gap-2">
@@ -2404,7 +2404,7 @@ export default function CandidateProfileEditor({
       </div>
 
       {/* 7. COMPANY EXCLUSION BLACKLIST */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider flex items-center gap-2">
@@ -2523,7 +2523,7 @@ export default function CandidateProfileEditor({
 
       {activeStep === 6 && (<>
       {/* 8. BOT AUTOMATION CONTROLS */}
-      <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
+      <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs font-semibold text-zinc-200 light:text-zinc-800 uppercase tracking-wider">
@@ -2554,7 +2554,7 @@ export default function CandidateProfileEditor({
       </div>
 
       {/* 9. PRIMARY ACTION BAR */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 z-20 backdrop-blur-md shadow-2xl">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 z-20 backdrop-blur-md shadow-2xl">
         <div className="text-xs text-zinc-400 light:text-zinc-600 text-center sm:text-left">
           Make sure your Naukri credentials & target roles are accurate before saving.
         </div>

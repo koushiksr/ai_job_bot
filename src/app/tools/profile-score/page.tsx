@@ -88,7 +88,7 @@ export default function ProfileScorePage() {
         </div>
 
         {/* Live Score Display */}
-        <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-3xl p-6 md:p-8 shadow-2xl mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-3xl p-6 md:p-8 shadow-2xl mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <span className="text-xs font-semibold text-zinc-400 light:text-zinc-600 uppercase tracking-wider block mb-1">
               Your Recruiter Inbound Score
@@ -124,7 +124,7 @@ export default function ProfileScorePage() {
         </div>
 
         {/* Questionnaire Form */}
-        <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 space-y-6 mb-12">
+        <div className="bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 space-y-6 mb-12">
           {/* Question 1 */}
           <div>
             <label className="block text-xs font-bold text-zinc-200 light:text-zinc-800 mb-2">
@@ -210,7 +210,7 @@ export default function ProfileScorePage() {
         </div>
 
         {/* Action Conversion */}
-        <div className="rounded-3xl border border-sky-500/30 bg-[#09090b] p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+        <div className="rounded-3xl border border-sky-500/30 bg-[#09090b] light:bg-white p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
           <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10">
             <h3 className="text-lg font-bold text-white light:text-zinc-900 mb-1.5">

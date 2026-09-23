@@ -96,7 +96,7 @@ export default function ToolsHubPage() {
               <Link
                 key={tool.slug}
                 href={tool.slug}
-                className="group relative rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] p-6 sm:p-7 hover:border-zinc-700 light:hover:border-zinc-300 transition-all duration-300 flex flex-col justify-between hover:shadow-2xl hover:shadow-black card-featured-glow"
+                className="group relative rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] light:bg-white p-6 sm:p-7 hover:border-zinc-700 light:hover:border-zinc-300 transition-all duration-300 flex flex-col justify-between hover:shadow-2xl hover:shadow-black card-featured-glow"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
@@ -135,7 +135,7 @@ export default function ToolsHubPage() {
         </div>
 
         {/* Feature Highlight / Upsell to Main Bot */}
-        <div className="rounded-3xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] p-8 md:p-12 relative overflow-hidden space-y-6">
+        <div className="rounded-3xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] light:bg-white p-8 md:p-12 relative overflow-hidden space-y-6">
           <div className="max-w-3xl space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
               <Bot className="w-3.5 h-3.5" /> Next-Level Automation

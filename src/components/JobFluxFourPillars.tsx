@@ -39,7 +39,7 @@ export default function JobFluxFourPillars({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Pillar 1: The Burning Need */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-[#09090b] border border-zinc-800/80 light:border-zinc-200 hover:border-amber-500/30 transition-all space-y-4 relative overflow-hidden group">
+        <div className="p-6 sm:p-8 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800/80 light:border-zinc-200 hover:border-amber-500/30 transition-all space-y-4 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/10 transition-colors" />
           
           <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 light:text-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
@@ -67,7 +67,7 @@ export default function JobFluxFourPillars({
         </div>
 
         {/* Pillar 2: The Career Status */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-[#09090b] border border-zinc-800/80 light:border-zinc-200 hover:border-sky-500/30 transition-all space-y-4 relative overflow-hidden group">
+        <div className="p-6 sm:p-8 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800/80 light:border-zinc-200 hover:border-sky-500/30 transition-all space-y-4 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-40 h-40 bg-sky-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-sky-500/10 transition-colors" />
           
           <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.15)]">
@@ -95,7 +95,7 @@ export default function JobFluxFourPillars({
         </div>
 
         {/* Pillar 3: The Passion */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-[#09090b] border border-zinc-800/80 light:border-zinc-200 hover:border-rose-500/30 transition-all space-y-4 relative overflow-hidden group">
+        <div className="p-6 sm:p-8 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800/80 light:border-zinc-200 hover:border-rose-500/30 transition-all space-y-4 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-rose-500/10 transition-colors" />
           
           <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 light:text-rose-600 shadow-[0_0_15px_rgba(244,63,94,0.15)]">
@@ -123,7 +123,7 @@ export default function JobFluxFourPillars({
         </div>
 
         {/* Pillar 4: The Trusted Brand */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-[#09090b] border border-zinc-800/80 light:border-zinc-200 hover:border-emerald-500/30 transition-all space-y-4 relative overflow-hidden group">
+        <div className="p-6 sm:p-8 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800/80 light:border-zinc-200 hover:border-emerald-500/30 transition-all space-y-4 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/10 transition-colors" />
           
           <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 light:text-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.15)]">

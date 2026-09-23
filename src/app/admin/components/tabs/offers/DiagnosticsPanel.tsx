@@ -110,7 +110,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
   mailLogs,
 }) => {
   return (
-    <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+    <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
       <div 
         onClick={toggleOffersMailDiag}
         className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"

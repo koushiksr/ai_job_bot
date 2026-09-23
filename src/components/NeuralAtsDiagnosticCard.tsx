@@ -28,7 +28,7 @@ export default function NeuralAtsDiagnosticCard({
   onUnlockClick
 }: NeuralAtsDiagnosticCardProps) {
   return (
-    <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4 relative overflow-hidden card-featured-glow text-zinc-100 light:text-zinc-900">
+    <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4 relative overflow-hidden card-featured-glow text-zinc-100 light:text-zinc-900">
       {/* Subtle top accent */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 

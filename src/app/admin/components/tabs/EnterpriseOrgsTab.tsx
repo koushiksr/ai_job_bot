@@ -388,7 +388,7 @@ export default function EnterpriseOrgsTab({
           { label: "Today's Runs", value: todayApplied, sub: '55 max/user/day', icon: <Zap className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />, color: 'text-amber-300 light:text-amber-700' },
           { label: 'Total Applied', value: totalApplied, sub: 'All-time submissions', icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />, color: 'text-emerald-300 light:text-emerald-700' },
         ].map(card => (
-          <div key={card.label} className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col justify-between">
+          <div key={card.label} className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col justify-between">
             <div className="text-zinc-500 light:text-zinc-600 text-[11px] font-medium uppercase tracking-wider flex items-center justify-between">
               <span>{card.label}</span>{card.icon}
             </div>
@@ -399,7 +399,7 @@ export default function EnterpriseOrgsTab({
       </div>
 
       {/* Orgs List */}
-      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div className="p-4 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-indigo-400" />

@@ -63,7 +63,7 @@ export default function InspectCandidateModal({
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl bg-[#0e0e11] border border-zinc-800 light:border-zinc-200 rounded-2xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-2xl bg-[#0e0e11] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto"
       >
         <div className="flex items-start justify-between">
           <div>

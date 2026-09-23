@@ -355,7 +355,7 @@ export default function ReviewsTab({ getAdminHeaders }: ReviewsTabProps) {
                   r.status === 'pending'
                     ? 'bg-amber-950/10 border-amber-500/40 light:border-amber-300 shadow-lg shadow-amber-500/5'
                     : r.status === 'approved'
-                    ? 'bg-[#0a0a0c] border-zinc-800/90 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300'
+                    ? 'bg-[#0a0a0c] light:bg-white border-zinc-800/90 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300'
                     : 'bg-zinc-950/40 light:bg-white border-zinc-900 light:border-zinc-200 opacity-70'
                 }`}
               >

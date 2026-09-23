@@ -29,7 +29,7 @@ export const CampaignHistoryTable: React.FC<CampaignHistoryTableProps> = ({
   setCampaignHistoryPerPage,
 }) => {
   return (
-    <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+    <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
       <div 
         onClick={toggleOffersHistory}
         className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none transition-colors"

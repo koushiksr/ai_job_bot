@@ -130,7 +130,7 @@ export default function AdminOverviewStats({
       )}
 
       {/* Real-time Cluster Radar Telemetry Bar */}
-      <div className="px-4 py-2.5 rounded-xl bg-[#09090b] border border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs relative overflow-hidden card-featured-glow">
+      <div className="px-4 py-2.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs relative overflow-hidden card-featured-glow">
         <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2 w-2">
@@ -236,7 +236,7 @@ export default function AdminOverviewStats({
           <button
             type="button"
             onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('not_applied_today')}
-            className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-left transition-all group cursor-pointer"
+            className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-left transition-all group cursor-pointer"
           >
             <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
               <span className="flex items-center gap-1.5 font-semibold">
@@ -256,7 +256,7 @@ export default function AdminOverviewStats({
           <button
             type="button"
             onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('payment_required')}
-            className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 hover:border-rose-900/50 text-left transition-all group cursor-pointer col-span-2 sm:col-span-1"
+            className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 hover:border-rose-900/50 text-left transition-all group cursor-pointer col-span-2 sm:col-span-1"
           >
             <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 group-hover:text-rose-300 transition-colors">
               <span className="flex items-center gap-1.5 font-semibold">
@@ -276,7 +276,7 @@ export default function AdminOverviewStats({
 
       {/* 5 Clean Overview Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
           <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
             <span className="flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> Candidates
@@ -291,7 +291,7 @@ export default function AdminOverviewStats({
           <p className="text-[11px] text-zinc-500 light:text-zinc-600">Configured profiles</p>
         </div>
 
-        <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
           <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
             <span className="flex items-center gap-1.5">
               <Crown className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> VIP Privilege
@@ -306,7 +306,7 @@ export default function AdminOverviewStats({
           <p className="text-[11px] text-zinc-500 light:text-zinc-600">Admin VIP bypass</p>
         </div>
 
-        <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
           <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
             <span className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> Today Applied
@@ -321,7 +321,7 @@ export default function AdminOverviewStats({
           <p className="text-[11px] text-zinc-500 light:text-zinc-600">Submitted today</p>
         </div>
 
-        <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
           <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> This Week
@@ -336,7 +336,7 @@ export default function AdminOverviewStats({
           <p className="text-[11px] text-zinc-500 light:text-zinc-600">Submitted this week</p>
         </div>
 
-        <div className="p-5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
           <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> Total Applied

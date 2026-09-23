@@ -104,7 +104,7 @@ export default function QueueTab({
   return (
     <div className="space-y-6">
       {/* Header & Controls */}
-      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
             <Layers className="w-4 h-4 text-sky-400" />
@@ -381,7 +381,7 @@ export default function QueueTab({
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             queueStatusFilter === 'all'
               ? 'bg-zinc-800 light:bg-zinc-200 border-zinc-600 ring-1 ring-zinc-500 text-white light:text-zinc-900'
-              : 'bg-[#09090b] border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700'
+              : 'bg-[#09090b] light:bg-white border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700'
           }`}
         >
           <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase tracking-wider block">All Tasks</span>
@@ -394,7 +394,7 @@ export default function QueueTab({
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             queueStatusFilter === 'pending'
               ? 'bg-amber-950/40 light:bg-amber-50 border-amber-500 ring-1 ring-amber-500/50 text-white light:text-zinc-900'
-              : 'bg-[#09090b] border-amber-500/30 light:border-amber-300 bg-amber-500/5 hover:border-amber-500/50 text-amber-200 light:text-amber-800'
+              : 'bg-[#09090b] light:bg-white border-amber-500/30 light:border-amber-300 bg-amber-500/5 hover:border-amber-500/50 text-amber-200 light:text-amber-800'
           }`}
         >
           <span className="text-[10px] font-mono text-amber-400 light:text-amber-600 uppercase tracking-wider block">In Line (Pending)</span>
@@ -407,7 +407,7 @@ export default function QueueTab({
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             queueStatusFilter === 'running'
               ? 'bg-emerald-950/40 light:bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500/50 text-white light:text-zinc-900'
-              : 'bg-[#09090b] border-emerald-500/30 light:border-emerald-300 bg-emerald-500/5 hover:border-emerald-500/50 text-emerald-200 light:text-emerald-800'
+              : 'bg-[#09090b] light:bg-white border-emerald-500/30 light:border-emerald-300 bg-emerald-500/5 hover:border-emerald-500/50 text-emerald-200 light:text-emerald-800'
           }`}
         >
           <span className="text-[10px] font-mono text-emerald-400 light:text-emerald-600 uppercase tracking-wider block">Running Now</span>
@@ -420,7 +420,7 @@ export default function QueueTab({
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             queueStatusFilter === 'completed'
               ? 'bg-zinc-800 light:bg-zinc-200 border-zinc-600 ring-1 ring-zinc-500 text-white light:text-zinc-900'
-              : 'bg-[#09090b] border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700'
+              : 'bg-[#09090b] light:bg-white border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700'
           }`}
         >
           <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase tracking-wider block">Completed</span>
@@ -433,7 +433,7 @@ export default function QueueTab({
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             queueStatusFilter === 'cancelled'
               ? 'bg-zinc-800 light:bg-zinc-200 border-zinc-600 ring-1 ring-zinc-500 text-white light:text-zinc-900'
-              : 'bg-[#09090b] border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700'
+              : 'bg-[#09090b] light:bg-white border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700'
           }`}
         >
           <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 uppercase tracking-wider block">Cancelled / Skipped</span>
@@ -446,7 +446,7 @@ export default function QueueTab({
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             queueStatusFilter === 'failed'
               ? 'bg-rose-950/40 light:bg-rose-50 border-rose-500 ring-1 ring-rose-500/50 text-white light:text-zinc-900'
-              : 'bg-[#09090b] border-zinc-800 light:border-zinc-200 hover:border-rose-900/50 text-zinc-300 light:text-zinc-700'
+              : 'bg-[#09090b] light:bg-white border-zinc-800 light:border-zinc-200 hover:border-rose-900/50 text-zinc-300 light:text-zinc-700'
           }`}
         >
           <span className="text-[10px] font-mono text-rose-400 light:text-rose-600 uppercase tracking-wider block">Failed / Timeouts</span>
@@ -456,7 +456,7 @@ export default function QueueTab({
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
           <span className="text-xs text-zinc-500 light:text-zinc-600 font-medium mr-1">Filter by Status:</span>
           {(['all', 'pending', 'running', 'completed', 'cancelled', 'failed'] as const).map(st => (
@@ -491,7 +491,7 @@ export default function QueueTab({
       </div>
 
       {/* Tasks Table */}
-      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div 
           onClick={toggleQueueTable}
           className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none transition-colors"

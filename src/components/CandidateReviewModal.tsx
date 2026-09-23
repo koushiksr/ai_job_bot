@@ -123,7 +123,7 @@ export default function CandidateReviewModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-black/80 light:bg-white/85 backdrop-blur-sm animate-in fade-in duration-150">
       <div
-        className="w-full max-w-lg bg-[#0a0a0c] border border-zinc-800 light:border-zinc-200 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto relative"
+        className="w-full max-w-lg bg-[#0a0a0c] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto relative"
         onClick={e => e.stopPropagation()}
       >
         {/* Subtle top amber border accent */}

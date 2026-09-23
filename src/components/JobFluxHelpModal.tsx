@@ -223,7 +223,7 @@ export default function JobFluxHelpModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.15 }}
-              className="relative w-full max-w-xl max-h-[94vh] sm:max-h-[92vh] bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-zinc-100 light:text-zinc-900"
+              className="relative w-full max-w-xl max-h-[94vh] sm:max-h-[92vh] bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-zinc-100 light:text-zinc-900"
             >
               {/* Header */}
               <div className="p-4 sm:p-5 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between bg-zinc-950/60 light:bg-white">

@@ -653,7 +653,7 @@ export default function ResumeBuilderPage() {
           }`}
         >
           {/* Preset Selector Card */}
-          <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3">
+          <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 light:text-zinc-600 font-semibold flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
@@ -716,7 +716,7 @@ export default function ResumeBuilderPage() {
 
           {/* TAB 1: BASIC INFORMATION */}
           {activeEditorTab === 'basics' && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3.5">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">Full Legal Name</label>
@@ -797,7 +797,7 @@ export default function ResumeBuilderPage() {
           {activeEditorTab === 'experience' && (
             <div className="space-y-4">
               {(resumeData.experience || []).map((exp: any, expIdx: number) => (
-                <div key={expIdx} className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3">
+                <div key={expIdx} className="p-4 sm:p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                       <label className="block text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase mb-1">Company</label>
@@ -899,7 +899,7 @@ export default function ResumeBuilderPage() {
 
           {/* TAB 3: TECHNICAL COMPETENCIES */}
           {activeEditorTab === 'skills' && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3.5">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3.5">
               <div className="text-xs text-zinc-400 light:text-zinc-600 leading-relaxed">
                 Group your technical competencies clearly. Standard ATS parsers (Workday, Greenhouse, Lever) match keywords against job descriptions using these categories.
               </div>
@@ -924,7 +924,7 @@ export default function ResumeBuilderPage() {
 
           {/* TAB 4: EDUCATION & CREDENTIALS */}
           {activeEditorTab === 'education' && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4">
               <div>
                 <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">Degrees & Institutions</label>
                 <textarea

@@ -681,7 +681,7 @@ export default function VisitorsTab() {
           onClick={() => setInspectEvent(null)}
         >
           <div 
-            className="relative w-full max-w-2xl rounded-3xl bg-[#0d1017] border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 p-6 sm:p-7 shadow-[0_25px_60px_rgba(0,0,0,0.9)] max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-2xl rounded-3xl bg-[#0d1017] light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 p-6 sm:p-7 shadow-[0_25px_60px_rgba(0,0,0,0.9)] max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}

@@ -365,7 +365,7 @@ export default function CandidatesTab({
   return (
     <div className="space-y-4">
       {/* Search & Status Filters Header */}
-      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3 shadow-xl">
+      <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 shadow-xl">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
@@ -674,7 +674,7 @@ export default function CandidatesTab({
       </div>
 
       {/* Candidates Table */}
-      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div 
           onClick={toggleCandidatesTable}
           className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"

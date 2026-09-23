@@ -15,6 +15,16 @@ export function useTheme() {
 function applyTheme(t: ThemeName) {
   if (typeof document !== 'undefined') {
     document.documentElement.classList.toggle('light', t === 'light')
+    // Keep mobile browser chrome in sync with the manual toggle
+    try {
+      let meta = document.querySelector('meta[name="theme-color"]')
+      if (!meta) {
+        meta = document.createElement('meta')
+        meta.setAttribute('name', 'theme-color')
+        document.head.appendChild(meta)
+      }
+      meta.setAttribute('content', t === 'light' ? '#ffffff' : '#000000')
+    } catch {}
   }
 }
 

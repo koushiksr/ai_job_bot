@@ -31,7 +31,7 @@ export default function EnterpriseLeadsTab({
     <div className="space-y-4">
       <div
         onClick={toggleEnterpriseLeadsTable}
-        className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none hover:bg-zinc-900/40 transition-colors group"
+        className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none hover:bg-zinc-900/40 transition-colors group"
       >
         <div>
           <h3 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
@@ -65,7 +65,7 @@ export default function EnterpriseLeadsTab({
         </div>
       </div>
 
-      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         {enterpriseLeadsCollapsed && (
           <div
             onClick={toggleEnterpriseLeadsTable}

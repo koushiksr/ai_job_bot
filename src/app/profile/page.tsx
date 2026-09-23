@@ -186,7 +186,7 @@ export default function CandidateProfilePage() {
         </div>
 
         {/* Page Hero Header */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 relative overflow-hidden">
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-lg sm:text-xl font-bold text-white light:text-zinc-900 tracking-tight">
@@ -241,7 +241,7 @@ export default function CandidateProfilePage() {
         />
 
         {/* Bottom Navigation Helper */}
-        <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="text-zinc-500 light:text-zinc-600">
             Changes apply on the next scheduled run.
           </div>

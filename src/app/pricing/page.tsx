@@ -563,7 +563,7 @@ export default function PricingPage() {
                 key={plan.id}
                 className={`relative rounded-2xl p-6 flex flex-col justify-between border transition-all overflow-hidden ${
                   isFeatured
-                    ? 'bg-[#0c0c0f] border-zinc-700 light:border-zinc-300 shadow-2xl card-featured-glow z-10'
+                    ? 'bg-[#0c0c0f] light:bg-white border-zinc-700 light:border-zinc-300 shadow-2xl card-featured-glow z-10'
                     : 'bg-[#09090b] light:bg-white border-zinc-800/90 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300'
                 }`}
               >

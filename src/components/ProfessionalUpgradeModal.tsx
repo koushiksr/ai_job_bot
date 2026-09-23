@@ -55,7 +55,7 @@ export default function ProfessionalUpgradeModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl card-featured-glow text-zinc-100 light:text-zinc-900"
+          className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl card-featured-glow text-zinc-100 light:text-zinc-900"
         >
           {/* Subtle top accent */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />

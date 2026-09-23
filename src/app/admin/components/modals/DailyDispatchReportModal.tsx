@@ -68,7 +68,7 @@ export default function DailyDispatchReportModal({
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl bg-[#0e0e11] border border-sky-500/40 rounded-3xl p-6 sm:p-7 shadow-2xl shadow-sky-950/40 space-y-5 max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-2xl bg-[#0e0e11] light:bg-white border border-sky-500/40 rounded-3xl p-6 sm:p-7 shadow-2xl shadow-sky-950/40 space-y-5 max-h-[90vh] overflow-y-auto"
       >
         <div className="flex items-start justify-between gap-3 border-b border-zinc-800/80 light:border-zinc-200 pb-4">
           <div className="flex items-center gap-3">

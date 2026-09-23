@@ -100,7 +100,7 @@ export const OfferCampaignDesigner: React.FC<OfferCampaignDesignerProps> = ({
     <div className="space-y-4">
       <div 
         onClick={toggleOffersDesigner}
-        className="p-4 rounded-2xl bg-[#09090b] hover:border-zinc-700 light:hover:border-zinc-300 border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg cursor-pointer select-none transition-all"
+        className="p-4 rounded-2xl bg-[#09090b] light:bg-white hover:border-zinc-700 light:hover:border-zinc-300 border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg cursor-pointer select-none transition-all"
       >
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 light:text-amber-600 shrink-0">
@@ -158,7 +158,7 @@ export const OfferCampaignDesigner: React.FC<OfferCampaignDesignerProps> = ({
       {!offersCollapsedDesigner && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Form Settings */}
-          <div className={`${offersCollapsedPreview ? 'lg:col-span-12' : 'lg:col-span-7'} space-y-5 p-5 rounded-2xl bg-[#09090b] border border-zinc-800`}>
+          <div className={`${offersCollapsedPreview ? 'lg:col-span-12' : 'lg:col-span-7'} space-y-5 p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800`}>
             <div>
               <h4 className="text-xs font-bold text-white light:text-zinc-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
@@ -684,7 +684,7 @@ export const OfferCampaignDesigner: React.FC<OfferCampaignDesignerProps> = ({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] overflow-hidden shadow-2xl">
+              <div className="rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] light:bg-white overflow-hidden shadow-2xl">
                 {/* Email Chrome Header */}
                 <div className="p-3 bg-zinc-950 light:bg-white border-b border-zinc-800/80 light:border-zinc-200 text-[11px] space-y-1">
                   <div className="flex items-center justify-between text-zinc-400 light:text-zinc-600">

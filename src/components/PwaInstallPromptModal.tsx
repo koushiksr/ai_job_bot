@@ -214,7 +214,7 @@ export default function PwaInstallPromptModal({
       aria-modal="true"
     >
       <div 
-        className="relative w-full max-w-lg rounded-3xl bg-[#0d1017] border border-zinc-800/90 light:border-zinc-200 shadow-[0_25px_60px_rgba(0,0,0,0.9)] text-white light:text-zinc-900 p-6 sm:p-7 overflow-hidden"
+        className="relative w-full max-w-lg rounded-3xl bg-[#0d1017] light:bg-white border border-zinc-800/90 light:border-zinc-200 shadow-[0_25px_60px_rgba(0,0,0,0.9)] text-white light:text-zinc-900 p-6 sm:p-7 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle cyan ambient glow at top */}

@@ -179,7 +179,7 @@ export default function HeadlineGeneratorPage() {
             <button
               key={i}
               onClick={() => handleApplyPreset(p)}
-              className="text-xs bg-[#09090b] hover:bg-zinc-900 light:hover:bg-zinc-100 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              className="text-xs bg-[#09090b] light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
             >
               {p.label}
             </button>
@@ -188,7 +188,7 @@ export default function HeadlineGeneratorPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Form (5 cols) */}
-          <div className="lg:col-span-5 bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl space-y-4">
+          <div className="lg:col-span-5 bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl space-y-4">
             <h2 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400 light:text-cyan-600" /> Candidate Profile Inputs
             </h2>
@@ -287,7 +287,7 @@ export default function HeadlineGeneratorPage() {
           {/* Right Output (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
             {/* Generated Headlines List */}
-            <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl">
+            <div className="bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
                   <Star className="w-4 h-4 text-amber-400 light:text-amber-600" />
@@ -345,7 +345,7 @@ export default function HeadlineGeneratorPage() {
             </div>
 
             {/* Generated Profile Summary */}
-            <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl">
+            <div className="bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-zinc-300 light:text-zinc-700" />
@@ -375,7 +375,7 @@ export default function HeadlineGeneratorPage() {
             </div>
 
             {/* Conversion CTA Banner */}
-            <div className="rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] light:bg-white p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <h3 className="text-sm font-bold text-white light:text-zinc-900 mb-1">
                   Ready to auto-apply with your updated profile?

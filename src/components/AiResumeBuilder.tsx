@@ -232,7 +232,7 @@ export default function AiResumeBuilder({
   const activeSample = SAMPLE_RESUMES[selectedSampleIdx]
 
   return (
-    <div className="p-4 sm:p-6 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4 sm:space-y-6 relative overflow-hidden card-featured-glow text-zinc-100 light:text-zinc-900">
+    <div className="p-4 sm:p-6 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-4 sm:space-y-6 relative overflow-hidden card-featured-glow text-zinc-100 light:text-zinc-900">
       {/* Top Accent */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 

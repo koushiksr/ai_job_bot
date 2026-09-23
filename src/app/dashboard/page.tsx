@@ -1124,7 +1124,7 @@ export default function UserDashboard() {
                     className="fixed inset-0 z-40"
                     onClick={() => setIsUserMenuOpen(false)}
                   />
-                  <div className="absolute left-0 mt-2 w-72 rounded-xl bg-[#0c0c0e] border border-zinc-800 light:border-zinc-200 shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute left-0 mt-2 w-72 rounded-xl bg-[#0c0c0e] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150">
                     {/* Header / Identity Info */}
                     <div className="px-3.5 py-2.5 border-b border-zinc-800/80 light:border-zinc-200 flex items-center gap-3">
                       {userPicture ? (
@@ -3014,7 +3014,7 @@ export default function UserDashboard() {
         )}
 
         {/* Mobile Dedicated Candidate Account & Quick Actions Footer Card */}
-        <div className="block md:hidden p-4 rounded-2xl bg-[#0a0a0c] border border-zinc-800/90 light:border-zinc-200 shadow-xl space-y-3.5">
+        <div className="block md:hidden p-4 rounded-2xl bg-[#0a0a0c] light:bg-white border border-zinc-800/90 light:border-zinc-200 shadow-xl space-y-3.5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center font-bold text-white light:text-zinc-900 text-xs shrink-0 relative overflow-hidden">

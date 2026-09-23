@@ -34,7 +34,7 @@ export default function PaymentsTab({
     <div className="space-y-6">
       {/* Quick Metrics Bar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Transactions</div>
             <div className="text-2xl font-extrabold text-white light:text-zinc-900 mt-1">{paymentsList.length}</div>
@@ -43,7 +43,7 @@ export default function PaymentsTab({
             <CreditCard className="w-5 h-5" />
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Paid Subscribers</div>
             <div className="text-2xl font-extrabold text-emerald-400 light:text-emerald-600 mt-1">
@@ -54,7 +54,7 @@ export default function PaymentsTab({
             <Sparkles className="w-5 h-5" />
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">VIP Free Passes</div>
             <div className="text-2xl font-extrabold text-amber-400 light:text-amber-600 mt-1">{vipProfilesCount}</div>
@@ -66,7 +66,7 @@ export default function PaymentsTab({
       </div>
 
       {/* Payments Table */}
-      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div
           onClick={togglePaymentsTable}
           className="px-5 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"

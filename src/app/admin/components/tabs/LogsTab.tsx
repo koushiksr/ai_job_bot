@@ -196,25 +196,25 @@ export const LogsTab: React.FC<LogsTabProps> = ({
         <div className="space-y-4">
           {/* 4 Stat Badges */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
               <span className="text-[10px] uppercase font-mono text-zinc-500 light:text-zinc-600">Total Logins</span>
               <div className="text-xl font-semibold font-mono text-emerald-400 light:text-emerald-600">
                 {activityStats.total_logins || 0}
               </div>
             </div>
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
               <span className="text-[10px] uppercase font-mono text-zinc-500 light:text-zinc-600">Profile Updates</span>
               <div className="text-xl font-semibold font-mono text-sky-400">
                 {activityStats.total_profile_updates || 0}
               </div>
             </div>
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
               <span className="text-[10px] uppercase font-mono text-zinc-500 light:text-zinc-600">Resume Uploads</span>
               <div className="text-xl font-semibold font-mono text-cyan-400 light:text-cyan-600">
                 {activityStats.total_resume_uploads || 0}
               </div>
             </div>
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
               <span className="text-[10px] uppercase font-mono text-zinc-500 light:text-zinc-600">Scout Tasks</span>
               <div className="text-xl font-semibold font-mono text-amber-400 light:text-amber-600">
                 {activityStats.total_task_runs || 0}
@@ -223,7 +223,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
           </div>
 
           {/* Activity Feed Table */}
-          <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+          <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
             <div
               onClick={toggleActivityTable}
               className="px-5 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"
@@ -346,7 +346,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
           {/* 5 KPI Metric Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Card 1: Inferences */}
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase font-mono text-zinc-400 light:text-zinc-600">Total Inferences</span>
                 <Brain className="w-4 h-4 text-purple-400" />
@@ -360,7 +360,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             </div>
 
             {/* Card 2: Average Latency (Speed) */}
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase font-mono text-zinc-400 light:text-zinc-600">Avg Speed / Latency</span>
                 <Zap className="w-4 h-4 text-amber-400 light:text-amber-600" />
@@ -376,7 +376,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             </div>
 
             {/* Card 3: Success Rate */}
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase font-mono text-zinc-400 light:text-zinc-600">Success Rate</span>
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600" />
@@ -390,7 +390,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             </div>
 
             {/* Card 4: Tokens Consumed */}
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase font-mono text-zinc-400 light:text-zinc-600">Total Tokens</span>
                 <Database className="w-4 h-4 text-sky-400" />
@@ -404,7 +404,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             </div>
 
             {/* Card 5: Providers Split */}
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm col-span-2 lg:col-span-1">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1.5 shadow-sm col-span-2 lg:col-span-1">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase font-mono text-zinc-400 light:text-zinc-600">Provider Split</span>
                 <Cpu className="w-4 h-4 text-indigo-400" />
@@ -430,7 +430,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
           </div>
 
           {/* Filter Controls Bar */}
-          <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3">
+          <div className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-3">
               {/* Search Query */}
               <div className="relative flex-1 min-w-[240px]">
@@ -544,7 +544,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
           </div>
 
           {/* Main Telemetry Table */}
-          <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+          <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
             <div
               onClick={toggleLlmTable}
               className="px-5 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"
@@ -712,7 +712,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
           {/* Inspect Context Modal */}
           {selectedLlmLog && (
             <div className="fixed inset-0 bg-black/80 light:bg-white/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div className="bg-[#0c0c0e] border border-zinc-800 light:border-zinc-200 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-[#0c0c0e] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between pb-3 border-b border-zinc-800 light:border-zinc-200">
                   <div className="flex items-center gap-2">
                     <Brain className="w-5 h-5 text-indigo-400" />
@@ -839,7 +839,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
       {/* VIEW 2: JOB APPLICATION RECORDS */}
       {logsSubTab === 'job_history' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 p-4 space-y-2 h-[600px] overflow-y-auto">
+          <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 p-4 space-y-2 h-[600px] overflow-y-auto">
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
               Select Candidate
             </h3>
@@ -859,7 +859,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             ))}
           </div>
 
-          <div className="md:col-span-2 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden flex flex-col h-[600px]">
+          <div className="md:col-span-2 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden flex flex-col h-[600px]">
             <div className="bg-black light:bg-white px-4 py-3 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between">
               <span className="text-xs font-mono text-white light:text-zinc-900">
                 {selectedSystemLog ? `Application Log for ${selectedSystemLog}` : 'Select a candidate on the left'}
@@ -894,7 +894,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
 
       {/* VIEW 3: INBOUND SUPPORT TICKETS */}
       {logsSubTab === 'tickets' && (
-        <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+        <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
           <div className="p-4 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between bg-black light:bg-white">
             <div>
               <h3 className="text-xs font-semibold text-white light:text-zinc-900">
