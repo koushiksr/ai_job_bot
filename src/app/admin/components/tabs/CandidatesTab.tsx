@@ -34,6 +34,8 @@ import {
   ArrowDown,
   SlidersHorizontal,
   Shield,
+  ShieldAlert,
+  Building2,
   MoreHorizontal,
   MoreVertical,
   RotateCcw,
@@ -116,6 +118,22 @@ export default function CandidatesTab({
     } catch {}
   }
 
+  // Account Type Visibility filter: 'all' | 'candidates' | 'admins'
+  const [accountTypeFilter, setAccountTypeFilter] = React.useState<'all' | 'candidates' | 'admins'>(() => {
+    try {
+      return (localStorage.getItem('admin_account_type_filter') as any) || 'all'
+    } catch {
+      return 'all'
+    }
+  })
+
+  const handleSetAccountTypeFilter = (val: 'all' | 'candidates' | 'admins') => {
+    setAccountTypeFilter(val)
+    try {
+      localStorage.setItem('admin_account_type_filter', val)
+    } catch {}
+  }
+
   // Sorting state with localStorage persistence
   type SortField = 'plan' | 'enabled' | 'today' | 'total' | 'execution' | 'name' | 'email' | 'last_login' | 'created_at'
   type SortOrder = 'asc' | 'desc'
@@ -192,14 +210,16 @@ export default function CandidatesTab({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const isFiltered = activeExecFilter !== 'all' || candidateStatusFilter !== 'all' || userSearch.trim().length > 0 || sortField !== 'plan' || sortOrder !== 'desc'
-  const activeFilterCount = (activeExecFilter !== 'all' ? 1 : 0) + (candidateStatusFilter !== 'all' ? 1 : 0) + (sortField !== 'plan' || sortOrder !== 'desc' ? 1 : 0)
+  const isFiltered = activeExecFilter !== 'all' || candidateStatusFilter !== 'all' || accountTypeFilter !== 'all' || userSearch.trim().length > 0 || sortField !== 'plan' || sortOrder !== 'desc'
+  const activeFilterCount = (activeExecFilter !== 'all' ? 1 : 0) + (candidateStatusFilter !== 'all' ? 1 : 0) + (accountTypeFilter !== 'all' ? 1 : 0) + (sortField !== 'plan' || sortOrder !== 'desc' ? 1 : 0)
 
   const handleClearAllFilters = () => {
     handleSetExecFilter('all')
     setCandidateStatusFilter('all')
+    handleSetAccountTypeFilter('all')
     try {
       localStorage.setItem('admin_candidate_status_filter', 'all')
+      localStorage.setItem('admin_account_type_filter', 'all')
     } catch {}
     handleResetSort()
     setUserSearch('')
@@ -234,9 +254,31 @@ export default function CandidatesTab({
     return <ArrowUpDown className="w-2.5 h-2.5 text-zinc-600 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
   }
 
+  // Super Admin & Org Admin Identification
+  const isSuperAdminUser = (u: CandidateUser) => Boolean(
+    u.is_admin ||
+    u.role === 'admin' ||
+    u.user_id === 'technohmsit' ||
+    u.email?.toLowerCase() === 'technohmsit@gmail.com'
+  )
+
+  const isOrgAdminUser = (u: CandidateUser) => Boolean(
+    !isSuperAdminUser(u) && (
+      u.is_org_admin ||
+      u.role === 'enterprise_admin' ||
+      u.enterprise_role === 'admin' ||
+      u.is_org_admin_only ||
+      u.email?.toLowerCase() === 'ranganathat32@gmail.com' ||
+      u.email?.toLowerCase() === 'koushiksrmedala@gmail.com'
+    )
+  )
+
+  const isAdministrativeUser = (u: CandidateUser) => isSuperAdminUser(u) || isOrgAdminUser(u)
+
   // Weight calculators for clean, structured ranking
   const getPlanWeight = (u: CandidateUser): number => {
-    if (u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com') return 999
+    if (isSuperAdminUser(u)) return 999
+    if (isOrgAdminUser(u)) return 950
     const isVip = Boolean(u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime')
     const p = (u.plan || u.plan_name || '').toLowerCase()
 
@@ -250,6 +292,7 @@ export default function CandidatesTab({
   }
 
   const getExecutionWeight = (u: CandidateUser): number => {
+    if (isAdministrativeUser(u)) return 0
     const status = u.execution_summary?.status || (u.current_execution?.status === 'applying' ? 'applying' : '')
     if (status === 'applying' || u.current_execution?.status === 'applying') return 60
     if (status === 'in_queue' || u.execution_summary?.is_in_queue) return 50
@@ -264,18 +307,21 @@ export default function CandidatesTab({
   const countApplying = usersList.filter(u => u.execution_summary?.status === 'applying' || u.current_execution?.status === 'applying').length
   const countAppliedToday = usersList.filter(u => u.execution_summary?.status === 'applied_today' || u.execution_summary?.is_applied_today || (u.applied_today && u.applied_today > 0)).length
   const countInQueue = usersList.filter(u => u.execution_summary?.status === 'in_queue' || u.execution_summary?.is_in_queue).length
-  const countEnabled = usersList.filter(u => u.enabled_for_daily_run !== false).length
-  const countDisabled = usersList.filter(u => u.enabled_for_daily_run === false).length
+  const countEnabled = usersList.filter(u => !isAdministrativeUser(u) && u.enabled_for_daily_run !== false).length
+  const countDisabled = usersList.filter(u => !isAdministrativeUser(u) && u.enabled_for_daily_run === false).length
   const countPaymentRequired = usersList.filter(u => {
-    if (u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com') return false
+    if (isAdministrativeUser(u)) return false
     return u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan'
   }).length
   const countNotAppliedToday = usersList.filter(u => {
-    if (u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com') return false
+    if (isAdministrativeUser(u)) return false
     const st = u.execution_summary?.status
     if (st) return st === 'not_applied_today'
     return u.current_execution?.status !== 'applying' && (!u.applied_today || u.applied_today === 0) && u.enabled_for_daily_run !== false && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan'
   }).length
+
+  const countCandidatesOnly = usersList.filter(u => !isAdministrativeUser(u)).length
+  const countAdminsOnly = usersList.filter(u => isAdministrativeUser(u)).length
 
   const countElite = usersList.filter(u => (u.plan || '').toLowerCase().includes('elite') || (u.plan || '').toLowerCase().includes('professional')).length
   const countPro = usersList.filter(u => (u.plan || '').toLowerCase() === 'pro').length
@@ -284,12 +330,17 @@ export default function CandidatesTab({
 
   // Filter users by search, execution status, and plan status
   const filteredUsers = usersList.filter(u => {
+    // 0. Account Type Filter (All / Candidates Only / Admins Only)
+    if (accountTypeFilter === 'candidates' && isAdministrativeUser(u)) return false
+    if (accountTypeFilter === 'admins' && !isAdministrativeUser(u)) return false
+
     // 1. Search Query Match
     const q = userSearch.toLowerCase().trim()
     const matchesSearch = !q || (
       (u.name && u.name.toLowerCase().includes(q)) ||
       (u.email && u.email.toLowerCase().includes(q)) ||
       (u.user_id && u.user_id.toLowerCase().includes(q)) ||
+      (u.org_name && u.org_name.toLowerCase().includes(q)) ||
       (u.phone && u.phone.includes(q)) ||
       (u.execution_summary?.device && u.execution_summary.device.toLowerCase().includes(q)) ||
       (u.execution_summary?.hostname && u.execution_summary.hostname.toLowerCase().includes(q)) ||
@@ -305,6 +356,7 @@ export default function CandidatesTab({
 
     // 2. Execution Status Filter
     if (activeExecFilter !== 'all') {
+      if (isAdministrativeUser(u)) return false
       const summary = u.execution_summary
       const isApp = summary?.is_applying || u.current_execution?.status === 'applying'
       const isDone = summary?.is_applied_today || (u.applied_today && u.applied_today > 0)
@@ -452,17 +504,78 @@ export default function CandidatesTab({
             {/* Quick 1-Click Status Tabs */}
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5">
               {[
-                { key: 'all', label: 'All', count: usersList.length },
-                { key: 'applying', label: 'Live', count: countApplying, color: 'text-sky-400 font-medium', pulse: true },
-                { key: 'applied_today', label: 'Done Today', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-700 font-medium' },
-                { key: 'not_applied_today', label: 'Needs Attention', count: countPaymentRequired + countNotAppliedToday, color: 'text-amber-400 light:text-amber-700 font-medium' }
+                {
+                  id: 'tab_candidates',
+                  label: 'Candidates',
+                  count: countCandidatesOnly,
+                  isActive: accountTypeFilter === 'candidates' && activeExecFilter === 'all',
+                  onClick: () => {
+                    handleSetAccountTypeFilter('candidates')
+                    handleSetExecFilter('all')
+                  }
+                },
+                {
+                  id: 'tab_live',
+                  label: 'Live',
+                  count: countApplying,
+                  color: 'text-sky-400 font-medium',
+                  pulse: true,
+                  isActive: activeExecFilter === 'applying',
+                  onClick: () => {
+                    handleSetExecFilter('applying')
+                    if (accountTypeFilter === 'admins') handleSetAccountTypeFilter('all')
+                  }
+                },
+                {
+                  id: 'tab_done',
+                  label: 'Done Today',
+                  count: countAppliedToday,
+                  color: 'text-emerald-400 light:text-emerald-700 font-medium',
+                  isActive: activeExecFilter === 'applied_today',
+                  onClick: () => {
+                    handleSetExecFilter('applied_today')
+                    if (accountTypeFilter === 'admins') handleSetAccountTypeFilter('all')
+                  }
+                },
+                {
+                  id: 'tab_needs_attention',
+                  label: 'Needs Attention',
+                  count: countPaymentRequired + countNotAppliedToday,
+                  color: 'text-amber-400 light:text-amber-700 font-medium',
+                  isActive: activeExecFilter === 'not_applied_today',
+                  onClick: () => {
+                    handleSetExecFilter('not_applied_today')
+                    if (accountTypeFilter === 'admins') handleSetAccountTypeFilter('all')
+                  }
+                },
+                {
+                  id: 'tab_admins',
+                  label: 'Admins & Orgs',
+                  count: countAdminsOnly,
+                  color: 'text-indigo-400 light:text-indigo-600 font-medium',
+                  isActive: accountTypeFilter === 'admins',
+                  onClick: () => {
+                    handleSetAccountTypeFilter('admins')
+                    handleSetExecFilter('all')
+                  }
+                },
+                {
+                  id: 'tab_all',
+                  label: 'All',
+                  count: usersList.length,
+                  isActive: accountTypeFilter === 'all' && activeExecFilter === 'all',
+                  onClick: () => {
+                    handleSetAccountTypeFilter('all')
+                    handleSetExecFilter('all')
+                  }
+                }
               ].map(tab => (
                 <button
-                  key={tab.key}
+                  key={tab.id}
                   type="button"
-                  onClick={() => handleSetExecFilter(tab.key)}
+                  onClick={tab.onClick}
                   className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
-                    activeExecFilter === tab.key
+                    tab.isActive
                       ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 border border-zinc-700 light:border-zinc-300 font-semibold shadow-sm'
                       : 'bg-zinc-950/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200'
                   }`}
@@ -540,6 +653,12 @@ export default function CandidatesTab({
         {isFiltered && (
           <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-zinc-900 light:border-zinc-200 text-[11px] font-mono">
             <span className="text-zinc-500 light:text-zinc-600">Active filters:</span>
+            {accountTypeFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
+                <span>Account: {accountTypeFilter === 'candidates' ? 'Candidates Only' : 'Admins & Orgs Only'}</span>
+                <button type="button" onClick={() => handleSetAccountTypeFilter('all')} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            )}
             {activeExecFilter !== 'all' && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
                 <span>Bot: {activeExecFilter.replace(/_/g, ' ')}</span>
@@ -596,8 +715,43 @@ export default function CandidatesTab({
               </button>
             </div>
 
-            {/* Section 1: Bot Execution Filter */}
+            {/* Section 0: Account Type Visibility */}
             <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 font-semibold uppercase flex items-center gap-1">
+                  <User className="w-3.5 h-3.5 text-zinc-400" /> Account Visibility:
+                </span>
+                {accountTypeFilter !== 'all' && (
+                  <button type="button" onClick={() => handleSetAccountTypeFilter('all')} className="text-[10px] text-zinc-500 hover:text-zinc-300 font-mono cursor-pointer">
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { key: 'candidates', label: 'Candidates Only', count: countCandidatesOnly, color: 'text-sky-400' },
+                  { key: 'admins', label: 'Admins & Orgs', count: countAdminsOnly, color: 'text-indigo-400 light:text-indigo-600' },
+                  { key: 'all', label: 'All Accounts', count: usersList.length, color: 'text-zinc-400' }
+                ].map(f => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => handleSetAccountTypeFilter(f.key as any)}
+                    className={`p-1.5 rounded-lg text-[11px] font-mono transition-all text-left flex items-center justify-between cursor-pointer ${
+                      accountTypeFilter === f.key
+                        ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 border border-zinc-700 light:border-zinc-300 font-semibold shadow-sm'
+                        : 'bg-zinc-950 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200'
+                    }`}
+                  >
+                    <span className="truncate">{f.label}</span>
+                    <span className={`text-[10px] font-bold shrink-0 ml-1 ${f.color || 'text-zinc-500'}`}>{f.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Section 1: Bot Execution Filter */}
+            <div className="space-y-1.5 pt-2 border-t border-zinc-900 light:border-zinc-200">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 font-semibold uppercase flex items-center gap-1">
                   <Cpu className="w-3.5 h-3.5 text-zinc-400" /> Bot Execution Status:
@@ -1038,8 +1192,31 @@ export default function CandidatesTab({
                             </div>
                           </div>
 
-                          {/* Symbolic Application Progress Meter */}
-                          {(() => {
+                          {/* Symbolic Application Progress Meter or Administrative Badge */}
+                          {isAdministrativeUser(u) ? (
+                            <div className="pt-1.5 border-t border-zinc-800/60 light:border-zinc-200/80 flex items-center justify-between text-[11px] font-mono">
+                              <div className="flex items-center gap-1.5 text-zinc-400 light:text-zinc-600">
+                                {isOrgAdminUser(u) ? (
+                                  <>
+                                    <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                                    <span className="text-indigo-300 light:text-indigo-700 font-medium truncate max-w-[170px]" title={u.org_name || u.org_id || 'Enterprise Org'}>
+                                      {u.org_name || 'Enterprise Org'}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ShieldAlert className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                                    <span className="text-purple-300 light:text-purple-700 font-medium">
+                                      Super Admin
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800/80 light:bg-zinc-200 text-zinc-300 light:text-zinc-700 font-semibold border border-zinc-700/60 light:border-zinc-300 font-mono">
+                                {isOrgAdminUser(u) ? 'ORG ADMIN' : 'SUPER ADMIN'}
+                              </span>
+                            </div>
+                          ) : (() => {
                             const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
                             const appliedToday = u.applied_today || 0
                             const totalApplied = u.total_applied || u.applied_count || 0
@@ -1112,6 +1289,25 @@ export default function CandidatesTab({
                           const hardwareModel = summary.hardware_model || summary.device_brand || u.last_execution?.hardware_model || u.current_execution?.hardware_model || deviceBrand
                           const macAddress = summary.mac_address || u.last_execution?.mac_address || u.current_execution?.mac_address
                           const pidVal = summary.pid || u.last_execution?.pid || u.current_execution?.pid
+
+                          if (isAdministrativeUser(u)) {
+                            const isSuper = isSuperAdminUser(u)
+                            return (
+                              <div className="space-y-1">
+                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
+                                  isSuper
+                                    ? 'bg-purple-500/15 text-purple-300 light:text-purple-700 border border-purple-500/30 light:border-purple-300'
+                                    : 'bg-indigo-500/15 text-indigo-300 light:text-indigo-700 border border-indigo-500/30 light:border-indigo-300'
+                                }`}>
+                                  {isSuper ? <ShieldAlert className="w-3 h-3 text-purple-400" /> : <Building2 className="w-3 h-3 text-indigo-400" />}
+                                  <span>{isSuper ? 'SUPER ADMIN' : 'ORG ADMIN'}</span>
+                                </div>
+                                <div className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
+                                  Exempt from bot sweeps
+                                </div>
+                              </div>
+                            )
+                          }
 
                           if (isApplying) {
                             return (
@@ -1228,16 +1424,28 @@ export default function CandidatesTab({
                       </td>
                       <td className="py-3 px-3">
                         {(() => {
-                          const isAdmin = Boolean(u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com')
-                          if (isAdmin) {
+                          if (isSuperAdminUser(u)) {
                             return (
                               <div className="flex flex-col items-start gap-1 py-1">
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 light:text-sky-700 border border-sky-500/40 shadow-sm">
-                                  <Shield className="w-3 h-3 text-sky-400" />
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 light:text-purple-700 border border-purple-500/40 shadow-sm">
+                                  <ShieldAlert className="w-3 h-3 text-purple-400" />
                                   <span>SUPER ADMIN</span>
                                 </span>
                                 <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600">
-                                  Master Access • No Plan Needed
+                                  Master Access • Exempt from Plans
+                                </span>
+                              </div>
+                            )
+                          }
+                          if (isOrgAdminUser(u)) {
+                            return (
+                              <div className="flex flex-col items-start gap-1 py-1">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 light:text-indigo-700 border border-indigo-500/40 shadow-sm">
+                                  <Building2 className="w-3 h-3 text-indigo-400" />
+                                  <span>ORG ADMIN</span>
+                                </span>
+                                <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 truncate max-w-[170px]" title={u.org_name || 'Enterprise Org'}>
+                                  {u.org_name || 'Enterprise Org'} • Exempt
                                 </span>
                               </div>
                             )
@@ -1419,22 +1627,31 @@ export default function CandidatesTab({
                         })()}
                       </td>
                       <td className="py-3 px-3 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleDaily(u.user_id, u.enabled_for_daily_run !== false)}
-                          className="text-xs transition-colors cursor-pointer"
-                          title="Toggle automated daily apply"
-                        >
-                          {u.enabled_for_daily_run !== false ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 light:text-emerald-600 border border-emerald-500/30 light:border-emerald-300">
-                              <ToggleRight className="w-4 h-4 text-emerald-400 light:text-emerald-600" /> ENABLED
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300">
-                              <ToggleLeft className="w-4 h-4 text-zinc-500 light:text-zinc-600" /> DISABLED
-                            </span>
-                          )}
-                        </button>
+                        {isAdministrativeUser(u) ? (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold bg-zinc-800/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border border-zinc-700/60 light:border-zinc-300"
+                            title="Administrative accounts do not run automated bot sweeps"
+                          >
+                            Exempt (Admin)
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleDaily(u.user_id, u.enabled_for_daily_run !== false)}
+                            className="text-xs transition-colors cursor-pointer"
+                            title="Toggle automated daily apply"
+                          >
+                            {u.enabled_for_daily_run !== false ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 light:text-emerald-600 border border-emerald-500/30 light:border-emerald-300">
+                                <ToggleRight className="w-4 h-4 text-emerald-400 light:text-emerald-600" /> ENABLED
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300">
+                                <ToggleLeft className="w-4 h-4 text-zinc-500 light:text-zinc-600" /> DISABLED
+                              </span>
+                            )}
+                          </button>
+                        )}
                       </td>
                       <td className="py-3 px-3">
                         <div className="space-y-1">
@@ -1446,7 +1663,7 @@ export default function CandidatesTab({
                           <div className="flex items-center gap-1 text-[11px] text-zinc-700 light:text-zinc-700">
                             <FileText className="w-3 h-3 text-zinc-500 light:text-zinc-500 shrink-0" />
                             <span className="truncate max-w-[130px]" title={u.resume_filename || 'No resume file recorded'}>
-                              {u.resume_filename || 'No PDF'}
+                              {u.resume_filename || (isAdministrativeUser(u) ? 'Admin Account' : 'No PDF')}
                             </span>
                             <span className="text-[9px] text-zinc-500 light:text-zinc-500">
                               · {u.last_resume_updated_at ? formatTimestamp(u.last_resume_updated_at) : (u.last_profile_updated_at ? formatTimestamp(u.last_profile_updated_at) : 'synced')}
@@ -1456,8 +1673,8 @@ export default function CandidatesTab({
                       </td>
                       <td className="py-3 px-3.5 text-right relative">
                         <div className="flex items-center justify-end gap-1.5" ref={openRowActionMenuId === u.user_id ? rowActionMenuRef : undefined}>
-                          {/* Primary Quick Action: Zap Sweep */}
-                          {onTriggerOnDemand && (
+                          {/* Primary Quick Action: Zap Sweep (Candidates Only) */}
+                          {!isAdministrativeUser(u) && onTriggerOnDemand && (
                             <button
                               type="button"
                               disabled={Boolean(
@@ -1519,7 +1736,7 @@ export default function CandidatesTab({
                                 onClick={(e) => e.stopPropagation()}
                                 className="absolute right-0 top-full mt-1 w-52 p-1.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 text-left space-y-0.5 animate-fadeIn"
                               >
-                                {onTriggerOnDemand && (
+                                {!isAdministrativeUser(u) && onTriggerOnDemand && (
                                   <button
                                     type="button"
                                     disabled={Boolean(
@@ -1552,18 +1769,20 @@ export default function CandidatesTab({
                                   <span>Inspect Telemetry &amp; Plan</span>
                                 </button>
 
-                                <button
-                                  type="button"
-                                  disabled={dispatchReportLoading}
-                                  onClick={() => {
-                                    setOpenRowActionMenuId(null)
-                                    onOpenDispatchReportForUser(u.email)
-                                  }}
-                                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50"
-                                >
-                                  <Send className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                                  <span>Send Dispatch Report</span>
-                                </button>
+                                {!isAdministrativeUser(u) && (
+                                  <button
+                                    type="button"
+                                    disabled={dispatchReportLoading}
+                                    onClick={() => {
+                                      setOpenRowActionMenuId(null)
+                                      onOpenDispatchReportForUser(u.email)
+                                    }}
+                                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50"
+                                  >
+                                    <Send className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                                    <span>Send Dispatch Report</span>
+                                  </button>
+                                )}
 
                                 <button
                                   type="button"
@@ -1571,13 +1790,28 @@ export default function CandidatesTab({
                                     setOpenRowActionMenuId(null)
                                     localStorage.setItem('user_id', u.user_id)
                                     localStorage.setItem('user_email', u.email)
-                                    localStorage.setItem('user_role', 'admin')
-                                    window.open('/dashboard', '_blank')
+                                    localStorage.setItem('user_role', isSuperAdminUser(u) ? 'admin' : (isOrgAdminUser(u) ? 'enterprise_admin' : 'candidate'))
+                                    const targetUrl = isOrgAdminUser(u) ? '/enterprise' : (isSuperAdminUser(u) ? '/admin' : '/dashboard')
+                                    window.open(targetUrl, '_blank')
                                   }}
                                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer"
                                 >
-                                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                                  <span>Candidate Dashboard</span>
+                                  {isOrgAdminUser(u) ? (
+                                    <>
+                                      <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                                      <span>Org Enterprise Portal</span>
+                                    </>
+                                  ) : isSuperAdminUser(u) ? (
+                                    <>
+                                      <Shield className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                                      <span>Super Admin Portal</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                                      <span>Candidate Dashboard</span>
+                                    </>
+                                  )}
                                 </button>
 
                                 <button
@@ -1594,17 +1828,23 @@ export default function CandidatesTab({
 
                                 <div className="border-t border-zinc-900 light:border-zinc-200 my-1" />
 
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setOpenRowActionMenuId(null)
-                                    handleDeleteUser(u.user_id)
-                                  }}
-                                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-rose-400 hover:bg-rose-950/40 light:hover:bg-rose-50 transition-colors cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                                  <span>Delete Candidate</span>
-                                </button>
+                                {isSuperAdminUser(u) ? (
+                                  <div className="px-2.5 py-1 text-[11px] text-zinc-500 font-mono italic">
+                                    Primary Admin (Protected)
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenRowActionMenuId(null)
+                                      handleDeleteUser(u.user_id)
+                                    }}
+                                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-rose-400 hover:bg-rose-950/40 light:hover:bg-rose-50 transition-colors cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{isOrgAdminUser(u) ? 'Delete Org Admin' : 'Delete Candidate'}</span>
+                                  </button>
+                                )}
                               </div>
                             )}
                           </div>

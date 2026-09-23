@@ -68,6 +68,11 @@ export interface CandidateUser {
   updated_at?: string
   is_vip?: boolean
   is_admin?: boolean
+  is_org_admin?: boolean
+  is_org_admin_only?: boolean
+  org_id?: string | null
+  org_name?: string | null
+  enterprise_role?: string | null
   role?: string
   plan?: string
   plan_name?: string

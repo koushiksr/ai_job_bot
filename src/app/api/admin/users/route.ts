@@ -19,14 +19,22 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const [userDocs, profileDocs, statsList, assignedOffersList, remindersList, activeTasks] = await Promise.all([
+    const [userDocs, profileDocs, statsList, assignedOffersList, remindersList, activeTasks, orgDocs] = await Promise.all([
       db.collection('users').find({}).toArray(),
       db.collection('profiles').find({}).toArray(),
       db.collection('user_stats').find({}).toArray(),
       db.collection('assigned_offers').find({}).toArray(),
       db.collection('expiry_reminders_sent').find({}).toArray(),
-      db.collection('tasks').find({ status: { $in: ['pending', 'running'] } }).sort({ created_at: -1 }).toArray()
+      db.collection('tasks').find({ status: { $in: ['pending', 'running'] } }).sort({ created_at: -1 }).toArray(),
+      db.collection('enterprise_orgs').find({}).toArray()
     ])
+
+    const orgMapById = new Map<string, any>()
+    const orgMapByAdminEmail = new Map<string, any>()
+    orgDocs.forEach((o: any) => {
+      if (o.org_id) orgMapById.set(o.org_id, o)
+      if (o.admin_email) orgMapByAdminEmail.set(o.admin_email.toLowerCase().trim(), o)
+    })
 
     // Build unified map of candidate profiles (merging users and profiles collections)
     const profileMap = new Map<string, any>()
@@ -110,17 +118,30 @@ export async function GET(req: NextRequest) {
     const users = profiles.map(p => {
       const s = statsMap[p.user_id] || {}
       const emailClean = (p.email || '').toLowerCase().trim()
-      const isAdminAccount = isAdminUser(p.email) || isAdminUser(p.user_id) || p.role === 'admin'
+      const isAdminAccount = isAdminUser(p.email) || isAdminUser(p.user_id) || p.role === 'admin' || emailClean === 'technohmsit@gmail.com' || p.user_id === 'technohmsit'
+      const assignedOrg = orgMapByAdminEmail.get(emailClean) || (p.enterprise_org_id ? orgMapById.get(p.enterprise_org_id) : null)
+      const isOrgAdmin = Boolean(
+        !isAdminAccount && (
+          p.role === 'enterprise_admin' ||
+          p.enterprise_role === 'admin' ||
+          p.is_org_admin_only ||
+          assignedOrg?.admin_email?.toLowerCase() === emailClean ||
+          emailClean === 'ranganathat32@gmail.com' ||
+          emailClean === 'koushiksrmedala@gmail.com'
+        )
+      )
       const rawExp = p.plan_expires_at || p.trial_expires_at || null
       const isVip = Boolean(isAdminAccount || p.is_vip || p.vip_access || p.free_privilege || p.plan === 'vip')
       const planClean = (p.plan || 'trial').toLowerCase()
       const isNoPlan = planClean === 'none' || planClean === 'no_plan'
 
-      let planExpiryStatus: 'active' | 'expiring_soon_2d' | 'expiring_soon_1d' | 'expired' | 'no_expiry' | 'vip_lifetime' | 'no_plan' | 'admin' = 'no_expiry'
+      let planExpiryStatus: 'active' | 'expiring_soon_2d' | 'expiring_soon_1d' | 'expired' | 'no_expiry' | 'vip_lifetime' | 'no_plan' | 'admin' | 'org_admin' = 'no_expiry'
       let planHoursLeft: number | null = null
 
       if (isAdminAccount) {
         planExpiryStatus = 'admin'
+      } else if (isOrgAdmin) {
+        planExpiryStatus = 'org_admin'
       } else if (isVip) {
         planExpiryStatus = 'vip_lifetime'
       } else if (isNoPlan) {
@@ -190,8 +211,12 @@ export async function GET(req: NextRequest) {
 
       const isInQueue = !isApplying && !isAppliedToday && Boolean(activeTask && activeTask.status === 'pending')
 
-      let executionStatus: 'applying' | 'applied_today' | 'in_queue' | 'not_applied_today' | 'disabled' | 'payment_required' = 'not_applied_today'
-      if (isApplying) {
+      let executionStatus: 'applying' | 'applied_today' | 'in_queue' | 'not_applied_today' | 'disabled' | 'payment_required' | 'admin' | 'org_admin' = 'not_applied_today'
+      if (isAdminAccount) {
+        executionStatus = 'admin'
+      } else if (isOrgAdmin) {
+        executionStatus = 'org_admin'
+      } else if (isApplying) {
         executionStatus = 'applying'
       } else if (isInQueue) {
         executionStatus = 'in_queue'
@@ -199,7 +224,7 @@ export async function GET(req: NextRequest) {
         executionStatus = 'applied_today'
       } else if (p.enabled_for_daily_run === false) {
         executionStatus = 'disabled'
-      } else if (!isAdminAccount && (planExpiryStatus === 'expired' || planExpiryStatus === 'no_plan')) {
+      } else if (planExpiryStatus === 'expired' || planExpiryStatus === 'no_plan') {
         executionStatus = 'payment_required'
       } else {
         executionStatus = 'not_applied_today'
@@ -234,7 +259,7 @@ export async function GET(req: NextRequest) {
       const defaultLimit = (isVip || ['elite', 'professional', 'enterprise', 'org_pro', 'vip'].includes(planClean))
         ? 150
         : (planClean === 'pro' ? 50 : 20)
-      const dailyApplicationLimit = p.daily_application_limit ? Math.min(150, Math.max(1, Number(p.daily_application_limit))) : defaultLimit
+      const dailyApplicationLimit = (isAdminAccount || isOrgAdmin) ? 0 : (p.daily_application_limit ? Math.min(150, Math.max(1, Number(p.daily_application_limit))) : defaultLimit)
 
       return {
         id: p.user_id,
@@ -242,21 +267,33 @@ export async function GET(req: NextRequest) {
         name: p.name || p.user_id.replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
         email: p.email || '',
         is_admin: isAdminAccount,
-        role: p.role || (isAdminAccount ? 'admin' : 'user'),
+        is_org_admin: isOrgAdmin,
+        is_org_admin_only: Boolean(p.is_org_admin_only || isOrgAdmin),
+        org_id: assignedOrg?.org_id || p.enterprise_org_id || null,
+        org_name: assignedOrg?.name || (isOrgAdmin ? 'Enterprise Org' : null),
+        role: isAdminAccount ? 'admin' : (isOrgAdmin ? 'enterprise_admin' : (p.role || 'user')),
+        enterprise_role: isOrgAdmin ? 'admin' : (p.enterprise_role || null),
+        enterprise_org_id: assignedOrg?.org_id || p.enterprise_org_id || null,
         experience: p.experience || 0,
         current_ctc: p.current_ctc || 0,
         expected_ctc: p.expected_ctc || 0,
-        enabled_for_daily_run: p.enabled_for_daily_run !== false,
-        plan: isAdminAccount ? 'admin' : (p.plan || 'trial'),
-        plan_name: isAdminAccount ? 'Master Administrator (No Plan Required)' : (p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '3-Day Free Access')),
-        plan_expires_at: isAdminAccount ? null : rawExp,
-        trial_expires_at: isAdminAccount ? null : (p.trial_expires_at || null),
+        enabled_for_daily_run: (isAdminAccount || isOrgAdmin) ? false : (p.enabled_for_daily_run !== false),
+        plan: isAdminAccount ? 'admin' : (isOrgAdmin ? 'org_admin' : (p.plan || 'trial')),
+        plan_name: isAdminAccount
+          ? 'Master Administrator (No Plan Required)'
+          : isOrgAdmin
+          ? `Org Admin • ${assignedOrg?.name || 'Enterprise Org'}`
+          : (p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '3-Day Free Access')),
+        plan_expires_at: (isAdminAccount || isOrgAdmin) ? null : rawExp,
+        trial_expires_at: (isAdminAccount || isOrgAdmin) ? null : (p.trial_expires_at || null),
         plan_expiry_status: planExpiryStatus,
-        plan_hours_left: isAdminAccount ? null : planHoursLeft,
-        hours_until_expiry: isAdminAccount ? null : planHoursLeft,
-        offer_eligibility: isAdminAccount ? { is_eligible: false, reason: 'Administrator account' } : evaluateOfferEligibility(p),
-        assigned_offers: userOffers,
-        reminders_sent: userReminders,
+        plan_hours_left: (isAdminAccount || isOrgAdmin) ? null : planHoursLeft,
+        hours_until_expiry: (isAdminAccount || isOrgAdmin) ? null : planHoursLeft,
+        offer_eligibility: (isAdminAccount || isOrgAdmin)
+          ? { is_eligible: false, reason: isOrgAdmin ? 'Organization Administrator account' : 'Administrator account' }
+          : evaluateOfferEligibility(p),
+        assigned_offers: (isAdminAccount || isOrgAdmin) ? [] : userOffers,
+        reminders_sent: (isAdminAccount || isOrgAdmin) ? [] : userReminders,
         is_vip: Boolean(p.is_vip || p.vip_access || p.free_privilege),
         total_applied: s.total_applied || 0,
         applied_today: isAppliedToday ? realTodayApplied : 0,
@@ -287,9 +324,9 @@ export async function GET(req: NextRequest) {
       applying: users.filter(u => u.execution_summary?.status === 'applying').length,
       applied_today: users.filter(u => u.execution_summary?.status === 'applied_today').length,
       in_queue: users.filter(u => u.execution_summary?.status === 'in_queue').length,
-      not_applied_today: users.filter(u => u.execution_summary?.status === 'not_applied_today').length,
-      disabled: users.filter(u => u.execution_summary?.status === 'disabled').length,
-      payment_required: users.filter(u => u.execution_summary?.status === 'payment_required').length
+      not_applied_today: users.filter(u => !u.is_admin && !u.is_org_admin && u.execution_summary?.status === 'not_applied_today').length,
+      disabled: users.filter(u => !u.is_admin && !u.is_org_admin && u.execution_summary?.status === 'disabled').length,
+      payment_required: users.filter(u => !u.is_admin && !u.is_org_admin && u.execution_summary?.status === 'payment_required').length
     }
 
     return NextResponse.json({
