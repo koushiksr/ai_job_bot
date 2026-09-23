@@ -19,8 +19,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ detail: 'Unauthorized. Enterprise Admin privileges required.' }, { status: 403 })
     }
 
-    const orgId = auth.orgId || 'org_technohmsit'
-    const orgDoc = await db.collection('enterprise_orgs').findOne({ org_id: orgId })
+    let orgId = req.headers.get('x-org-id') || req.nextUrl.searchParams.get('org_id') || auth.orgId || 'org_technohmsit'
+    let orgDoc = await db.collection('enterprise_orgs').findOne({ org_id: orgId })
+    if (!orgDoc) {
+      const adminEmailParam = req.headers.get('x-admin-email') || req.nextUrl.searchParams.get('admin_email')
+      if (adminEmailParam) {
+        orgDoc = await db.collection('enterprise_orgs').findOne({ admin_email: exactMatchCI(adminEmailParam) })
+        if (orgDoc?.org_id) orgId = orgDoc.org_id
+      }
+    }
     const orgDisabled = (orgDoc?.status || 'active') === 'disabled'
 
     // Fetch org members (exclude super admin and org admin - only real job seekers)

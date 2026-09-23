@@ -97,6 +97,8 @@ export default function EnterpriseAdminPortal() {
   
   // Org data
   const [org, setOrg] = useState<OrgInfo | null>(null)
+  const [currentOrgId, setCurrentOrgId] = useState<string>('')
+  const [currentAdminEmail, setCurrentAdminEmail] = useState<string>('')
   const [metrics, setMetrics] = useState<OrgMetrics | null>(null)
   const [members, setMembers] = useState<Member[]>([])
   const [invites, setInvites] = useState<InviteItem[]>([])
@@ -130,8 +132,13 @@ export default function EnterpriseAdminPortal() {
   // Auth & Initial Load
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Step 1: Ingest Google OAuth params if this is a redirect from Google SSO
       const p = new URLSearchParams(window.location.search)
+      const urlOrgId = p.get('org_id') || ''
+      const urlAdminEmail = p.get('admin_email') || ''
+      if (urlOrgId) setCurrentOrgId(urlOrgId)
+      if (urlAdminEmail) setCurrentAdminEmail(urlAdminEmail)
+
+      // Step 1: Ingest Google OAuth params if this is a redirect from Google SSO
       if (p.get('auth') === 'google' && p.get('user_id')) {
         const gUid = p.get('user_id')!
         const gEmail = p.get('email') || ''
@@ -170,35 +177,58 @@ export default function EnterpriseAdminPortal() {
         return
       }
 
-      loadAllPortalData(storedUid, storedEmail)
+      loadAllPortalData(storedUid, storedEmail, false, urlOrgId, urlAdminEmail)
     }
   }, [])
 
-  // Auth is the httpOnly session cookie (same-origin fetch sends it automatically).
-  // Never send identity headers — the server ignores them.
+  // Auth headers including specific org target when navigating from super admin
   const getAuthHeaders = () => {
-    return {
+    const h: Record<string, string> = {
       'Content-Type': 'application/json'
     }
+    const oId = org?.org_id || currentOrgId
+    if (oId) h['x-org-id'] = oId
+    const aEmail = org?.admin_email || currentAdminEmail
+    if (aEmail) h['x-admin-email'] = aEmail
+    return h
   }
 
-  const loadAllPortalData = async (uid = currentUserId, email = currentUserEmail, silent = false) => {
+  const loadAllPortalData = async (
+    uid = currentUserId,
+    email = currentUserEmail,
+    silent = false,
+    targetOrgId?: string,
+    targetAdminEmail?: string
+  ) => {
     if (!silent) setLoading(true)
     try {
-      const headers = {
-        'x-user-id': uid || 'koushiksrmedala',
-        'x-user-email': email || 'koushiksrmedala@gmail.com'
+      const activeOrgId = targetOrgId !== undefined ? targetOrgId : (currentOrgId || '')
+      const activeAdminEmail = targetAdminEmail !== undefined ? targetAdminEmail : (currentAdminEmail || '')
+
+      const queryParams = new URLSearchParams()
+      if (activeOrgId) queryParams.set('org_id', activeOrgId)
+      if (activeAdminEmail) queryParams.set('admin_email', activeAdminEmail)
+      const qStr = queryParams.toString() ? `?${queryParams.toString()}` : ''
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'x-user-id': uid || 'technohmsit',
+        'x-user-email': email || 'technohmsit@gmail.com'
       }
+      if (activeOrgId) headers['x-org-id'] = activeOrgId
+      if (activeAdminEmail) headers['x-admin-email'] = activeAdminEmail
 
       const [orgRes, membersRes, invitesRes] = await Promise.all([
-        fetch('/api/enterprise-admin/org', { headers }),
-        fetch('/api/enterprise-admin/members', { headers }),
-        fetch('/api/enterprise-admin/invite', { headers })
+        fetch(`/api/enterprise-admin/org${qStr}`, { headers }),
+        fetch(`/api/enterprise-admin/members${qStr}`, { headers }),
+        fetch(`/api/enterprise-admin/invite${qStr}`, { headers })
       ])
 
       if (orgRes.ok) {
         const orgData = await orgRes.json()
         setOrg(orgData.org)
+        if (orgData.org?.org_id) setCurrentOrgId(orgData.org.org_id)
+        if (orgData.org?.admin_email) setCurrentAdminEmail(orgData.org.admin_email)
         setMetrics(orgData.metrics)
         if (orgData.org?.daily_sweep_time) setSweepTimeInput(orgData.org.daily_sweep_time)
       }

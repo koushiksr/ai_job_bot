@@ -87,12 +87,21 @@ export async function verifyEnterpriseAdminRequest(
 
   // Super-admin: full access, break-glass without DB
   if (sess.role === 'admin' && (isAdminUser(sess.email) || isAdminUser(sess.uid))) {
-    const reqOrgId = req.headers.get('x-org-id') || req.nextUrl.searchParams.get('org_id') || sess.orgId || 'org_technohmsit'
+    let reqOrgId = req.headers.get('x-org-id') || req.nextUrl.searchParams.get('org_id') || sess.orgId
+    const targetAdminEmail = req.headers.get('x-admin-email') || req.nextUrl.searchParams.get('admin_email') || req.headers.get('x-user-email')
+
+    if (!reqOrgId && targetAdminEmail && db && targetAdminEmail !== 'technohmsit@gmail.com') {
+      try {
+        const found = await db.collection('enterprise_orgs').findOne({ admin_email: exactMatchCI(targetAdminEmail) })
+        if (found?.org_id) reqOrgId = found.org_id
+      } catch {}
+    }
+
     return {
       authorized: true,
       isSuperAdmin: true,
       isEnterpriseAdmin: true,
-      orgId: reqOrgId,
+      orgId: reqOrgId || 'org_technohmsit',
       userId: sess.uid,
       email: sess.email
     }

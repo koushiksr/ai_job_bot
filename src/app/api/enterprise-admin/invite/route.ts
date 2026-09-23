@@ -20,7 +20,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ detail: 'Unauthorized' }, { status: 403 })
     }
 
-    const orgId = auth.orgId || 'org_technohmsit'
+    let orgId = req.headers.get('x-org-id') || req.nextUrl.searchParams.get('org_id') || auth.orgId || 'org_technohmsit'
+    if (orgId === 'org_technohmsit') {
+      const adminEmailParam = req.headers.get('x-admin-email') || req.nextUrl.searchParams.get('admin_email')
+      if (adminEmailParam && adminEmailParam !== 'technohmsit@gmail.com') {
+        const found = await db.collection('enterprise_orgs').findOne({ admin_email: exactMatchCI(adminEmailParam) })
+        if (found?.org_id) orgId = found.org_id
+      }
+    }
 
     const invites = await db.collection('enterprise_invites')
       .find({ org_id: orgId })
@@ -67,9 +74,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'A valid email address is required to send an invitation.' }, { status: 400 })
     }
 
-    const orgId = auth.orgId || 'org_technohmsit'
-    const org = await db.collection('enterprise_orgs').findOne({ org_id: orgId })
-    const orgName = org?.name || 'Technohm SIT Org'
+    let orgId = (auth.isSuperAdmin && body.org_id) || req.headers.get('x-org-id') || req.nextUrl.searchParams.get('org_id') || auth.orgId || 'org_technohmsit'
+    let org = await db.collection('enterprise_orgs').findOne({ org_id: orgId })
+    if (!org) {
+      const adminEmailParam = req.headers.get('x-admin-email') || req.nextUrl.searchParams.get('admin_email')
+      if (adminEmailParam) {
+        org = await db.collection('enterprise_orgs').findOne({ admin_email: exactMatchCI(adminEmailParam) })
+        if (org?.org_id) orgId = org.org_id
+      }
+    }
+    const orgName = org?.name || 'Enterprise Org'
 
     // Check if the user is already an active member of this org
     const existingProfile = await db.collection('profiles').findOne({

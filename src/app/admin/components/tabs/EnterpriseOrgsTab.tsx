@@ -495,7 +495,7 @@ export default function EnterpriseOrgsTab({
                       </button>
 
                       {/* Open Portal */}
-                      <Link href={`/enterprise-admin?org_id=${encodeURIComponent(org.org_id)}`} target="_blank"
+                      <Link href={`/enterprise-admin?org_id=${encodeURIComponent(org.org_id)}&admin_email=${encodeURIComponent(org.admin_email || '')}`} target="_blank"
                         className="px-2.5 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer">
                         <ExternalLink className="w-3 h-3" />
                         <span className="hidden sm:inline">Portal</span>

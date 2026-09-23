@@ -16,10 +16,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ detail: 'Unauthorized. Enterprise Admin privileges required.' }, { status: 403 })
     }
 
-    const orgId = auth.orgId || 'org_technohmsit'
+    let orgId = req.headers.get('x-org-id') || req.nextUrl.searchParams.get('org_id') || auth.orgId || 'org_technohmsit'
 
     // Fetch org record or build fallback
     let org = await db.collection('enterprise_orgs').findOne({ org_id: orgId })
+    if (!org) {
+      const adminEmailParam = req.headers.get('x-admin-email') || req.nextUrl.searchParams.get('admin_email')
+      if (adminEmailParam) {
+        org = await db.collection('enterprise_orgs').findOne({ admin_email: exactMatchCI(adminEmailParam) })
+        if (org?.org_id) orgId = org.org_id
+      }
+    }
     if (!org) {
       // Auto-create default record if not yet inserted
       const now = new Date()
@@ -145,7 +152,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ detail: 'Nothing to update. Provide name and/or daily_sweep_time.' }, { status: 400 })
     }
 
-    const orgId = auth.orgId || 'org_technohmsit'
+    const orgId = body.org_id || req.headers.get('x-org-id') || auth.orgId || 'org_technohmsit'
     updates.updated_at = new Date()
 
     await db.collection('enterprise_orgs').updateOne(
