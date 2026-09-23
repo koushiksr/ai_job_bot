@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { ThemeToggle } from '@/components/ThemeProvider'
 import {
   Building2,
   Users,
@@ -545,7 +546,7 @@ export default function EnterpriseAdminPortal() {
   )
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="min-h-screen bg-black light:bg-white text-white light:text-zinc-900 selection:bg-cyan-500/30 selection:text-cyan-200">
       {/* Ambient Cyber Aurora Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 left-1/3 w-[600px] h-[500px] bg-cyan-600/10 rounded-full blur-[140px]" />
@@ -553,28 +554,29 @@ export default function EnterpriseAdminPortal() {
       </div>
 
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-30 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-zinc-900 light:border-zinc-200 bg-zinc-950/80 light:bg-white/85 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-cyan-300" />
+              <Building2 className="w-5 h-5 text-cyan-300 light:text-cyan-700" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-sm sm:text-base text-white tracking-tight">
+                <span className="font-bold text-sm sm:text-base text-white light:text-zinc-900 tracking-tight">
                   {org?.name || 'Technohm SIT Org'}
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60 text-cyan-300 font-semibold uppercase">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 light:bg-cyan-50 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 font-semibold uppercase">
                   Enterprise Portal
                 </span>
               </div>
-              <p className="text-[11px] text-zinc-400 font-mono">
+              <p className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono">
                 Admin: {org?.admin_email || currentUserEmail}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5">
+            <ThemeToggle />
             {isSuperAdmin && (
               <Link
                 href="/admin"
@@ -588,7 +590,7 @@ export default function EnterpriseAdminPortal() {
             <button
               onClick={() => loadAllPortalData()}
               disabled={loading}
-              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+              className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 transition-colors"
               title="Refresh Data"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -596,7 +598,7 @@ export default function EnterpriseAdminPortal() {
 
             <button
               onClick={handleSignOut}
-              className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1.5 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Sign Out</span>
@@ -612,23 +614,23 @@ export default function EnterpriseAdminPortal() {
           <div
             className={`p-4 rounded-xl border flex items-center justify-between gap-3 text-xs sm:text-sm animate-fade-in ${
               feedback.type === 'success'
-                ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
+                ? 'bg-emerald-950/40 border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700'
                 : feedback.type === 'error'
-                  ? 'bg-rose-950/40 border-rose-800/60 text-rose-300'
-                  : 'bg-cyan-950/40 border-cyan-800/60 text-cyan-300'
+                  ? 'bg-rose-950/40 light:bg-rose-50 border-rose-800/60 text-rose-300 light:text-rose-600'
+                  : 'bg-cyan-950/40 border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700'
             }`}
           >
             <div className="flex items-center gap-2">
               {feedback.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 light:text-emerald-600" />
               ) : (
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 light:text-rose-600" />
               )}
               <span>{feedback.text}</span>
             </div>
             <button
               onClick={() => setFeedback(null)}
-              className="text-zinc-400 hover:text-white text-xs underline cursor-pointer"
+              className="text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 text-xs underline cursor-pointer"
             >
               Dismiss
             </button>
@@ -637,14 +639,14 @@ export default function EnterpriseAdminPortal() {
 
         {/* ── Org Disabled Warning ───────────────────────────────── */}
         {org && org.status === 'disabled' && (
-          <div className="p-4 rounded-2xl bg-rose-950/40 border-2 border-rose-500/50 flex items-start gap-3">
+          <div className="p-4 rounded-2xl bg-rose-950/40 light:bg-rose-50 border-2 border-rose-500/50 light:border-rose-300 flex items-start gap-3">
             <div className="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center shrink-0">
-              <AlertCircle className="w-4 h-4 text-rose-400" />
+              <AlertCircle className="w-4 h-4 text-rose-400 light:text-rose-600" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-rose-300 mb-0.5">⛔ Organisation Temporarily Disabled</p>
+              <p className="text-sm font-bold text-rose-300 light:text-rose-600 mb-0.5">⛔ Organisation Temporarily Disabled</p>
               <p className="text-xs text-rose-400/80 leading-relaxed">
-                Your organisation <strong className="text-rose-300">{org.name}</strong> has been disabled by the Super Admin.
+                Your organisation <strong className="text-rose-300 light:text-rose-600">{org.name}</strong> has been disabled by the Super Admin.
                 All automated daily sweeps and on-demand runs are <strong>completely blocked</strong> for every member until re-enabled.
                 Please contact support if you believe this is an error.
               </p>
@@ -654,61 +656,61 @@ export default function EnterpriseAdminPortal() {
 
         {/* Compact KPI Strip */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
-            <Users className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5">
+            <Users className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
             <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-white leading-none">
+              <div className="text-lg font-bold font-mono text-white light:text-zinc-900 leading-none">
                 {metrics?.total_members || members.length}
               </div>
-              <div className="text-[10px] text-zinc-500 font-mono truncate">
+              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
                 Members · {metrics?.active_scheduled_members || 0} active
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
-            <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5">
+            <Activity className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
             <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-cyan-400 leading-none">
+              <div className="text-lg font-bold font-mono text-cyan-400 light:text-cyan-600 leading-none">
                 {metrics?.applied_today || 0}
               </div>
-              <div className="text-[10px] text-zinc-500 font-mono truncate">
+              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
                 Today's Apps · 55/user max
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
-            <Layers className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5">
+            <Layers className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
             <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-cyan-300 leading-none">
+              <div className="text-lg font-bold font-mono text-cyan-300 light:text-cyan-700 leading-none">
                 {metrics?.applied_this_week || 0}
               </div>
-              <div className="text-[10px] text-zinc-500 font-mono truncate">
+              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
                 This Week · rolling 7-day
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
-            <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-emerald-400 light:text-emerald-600 shrink-0" />
             <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-emerald-400 leading-none">
+              <div className="text-lg font-bold font-mono text-emerald-400 light:text-emerald-600 leading-none">
                 {metrics?.total_applied || 0}
               </div>
-              <div className="text-[10px] text-zinc-500 font-mono truncate">
+              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
                 Total Applications
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5 col-span-2 sm:col-span-1">
-            <Zap className="w-4 h-4 text-amber-400 shrink-0" />
+          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5 col-span-2 sm:col-span-1">
+            <Zap className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0" />
             <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-amber-300 leading-none">
+              <div className="text-lg font-bold font-mono text-amber-300 light:text-amber-700 leading-none">
                 {metrics?.on_demand_runs_used_this_week || 0}
               </div>
-              <div className="text-[10px] text-zinc-500 font-mono truncate">
+              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
                 On-Demand · 3/day · 10/wk
               </div>
             </div>
@@ -716,12 +718,12 @@ export default function EnterpriseAdminPortal() {
         </section>
 
         {/* Organisation Settings + Invite (single compact card) */}
-        <section className="p-4 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 backdrop-blur-md space-y-3">
+        <section className="p-4 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 backdrop-blur-md space-y-3">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {/* Org name + daily sweep time */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-cyan-400 shrink-0" />
+                <Building2 className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
                 {editingOrgName ? (
                   <>
                     <input
@@ -729,33 +731,33 @@ export default function EnterpriseAdminPortal() {
                       value={orgNameInput}
                       onChange={e => setOrgNameInput(e.target.value)}
                       placeholder="Organisation name..."
-                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-cyan-700 focus:border-cyan-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 light:bg-zinc-100 border border-cyan-700 focus:border-cyan-500 focus:outline-none text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400"
                       autoFocus
                       onKeyDown={e => { if (e.key === 'Enter') handleSaveOrgName(); if (e.key === 'Escape') setEditingOrgName(false) }}
                     />
                     <button
                       onClick={handleSaveOrgName}
                       disabled={orgNameSaving}
-                      className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
+                      className="px-3 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       {orgNameSaving ? 'Saving...' : 'Save'}
                     </button>
                     <button
                       onClick={() => setEditingOrgName(false)}
-                      className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs cursor-pointer shrink-0"
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs cursor-pointer shrink-0"
                     >
                       Cancel
                     </button>
                   </>
                 ) : (
                   <>
-                    <span className="flex-1 min-w-0 truncate px-3 py-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 text-xs text-white font-medium" title={org?.name || 'Unnamed Organisation'}>
+                    <span className="flex-1 min-w-0 truncate px-3 py-1.5 rounded-lg bg-zinc-900/50 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs text-white light:text-zinc-900 font-medium" title={org?.name || 'Unnamed Organisation'}>
                       {org?.name || 'Unnamed Organisation'}
                     </span>
                     <button
                       onClick={() => { setOrgNameInput(org?.name || ''); setEditingOrgName(true) }}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-xs font-medium cursor-pointer shrink-0"
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium cursor-pointer shrink-0"
                     >
                       Rename
                     </button>
@@ -763,19 +765,19 @@ export default function EnterpriseAdminPortal() {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span className="text-[11px] text-zinc-400">Daily sweep</span>
+                <Clock className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
+                <span className="text-[11px] text-zinc-400 light:text-zinc-600">Daily sweep</span>
                 <input
                   type="time"
                   value={sweepTimeInput || org?.daily_sweep_time || '06:00'}
                   onChange={e => setSweepTimeInput(e.target.value)}
-                  className="px-2 py-1 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-cyan-500 focus:outline-none text-xs text-white font-mono [color-scheme:dark]"
+                  className="px-2 py-1 rounded-lg bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:outline-none text-xs text-white light:text-zinc-900 font-mono [color-scheme:dark]"
                 />
-                <span className="text-[10px] text-zinc-500 font-mono">IST</span>
+                <span className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono">IST</span>
                 <button
                   onClick={handleSaveSweepTime}
                   disabled={sweepTimeSaving}
-                  className="px-3 py-1 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 text-cyan-300 text-xs font-medium cursor-pointer disabled:opacity-60 shrink-0"
+                  className="px-3 py-1 rounded-lg bg-cyan-950/60 light:bg-cyan-50 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 text-xs font-medium cursor-pointer disabled:opacity-60 shrink-0"
                 >
                   {sweepTimeSaving ? 'Saving...' : 'Set Time'}
                 </button>
@@ -796,18 +798,18 @@ export default function EnterpriseAdminPortal() {
 
             {/* Invite */}
             <form onSubmit={handleSendInvite} className="flex items-center gap-2">
-              <Plus className="w-4 h-4 text-cyan-400 shrink-0" />
+              <Plus className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
               <input
                 type="email"
                 value={inviteEmail}
                 onChange={e => setInviteEmail(e.target.value)}
                 placeholder="candidate@email.com — invite to org"
-                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-cyan-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:outline-none text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400"
               />
               <button
                 type="submit"
                 disabled={inviteSubmitting}
-                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{inviteSubmitting ? 'Sending...' : 'Invite'}</span>
@@ -815,16 +817,16 @@ export default function EnterpriseAdminPortal() {
             </form>
           </div>
 
-          <div className="text-[10px] text-zinc-500 font-mono">
-            Org ID: <span className="text-zinc-400">{org?.org_id || 'org_technohmsit'}</span> · Admin: <span className="text-zinc-400">{org?.admin_email || currentUserEmail}</span>
+          <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono">
+            Org ID: <span className="text-zinc-400 light:text-zinc-600">{org?.org_id || 'org_technohmsit'}</span> · Admin: <span className="text-zinc-400 light:text-zinc-600">{org?.admin_email || currentUserEmail}</span>
             <span className="text-zinc-600"> · Members get 10 on-demand/week + 55 daily applications</span>
             <span className="text-cyan-400/80"> · Daily sweep {org?.daily_sweep_time || '06:00'} IST</span>
           </div>
 
           {/* Pending Invites List */}
           {invites.filter(inv => inv.status === 'pending').length > 0 && (
-            <div className="pt-2 border-t border-zinc-900/80">
-              <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">
+            <div className="pt-2 border-t border-zinc-900/80 light:border-zinc-200">
+              <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 uppercase tracking-wider">
                 Pending Invitations ({invites.filter(inv => inv.status === 'pending').length})
               </span>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -833,13 +835,13 @@ export default function EnterpriseAdminPortal() {
                   .map(inv => (
                     <div
                       key={inv.invite_id}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs font-mono"
                     >
-                      <Clock className="w-3 h-3 text-amber-400" />
-                      <span className="text-zinc-200">{inv.invited_email}</span>
+                      <Clock className="w-3 h-3 text-amber-400 light:text-amber-600" />
+                      <span className="text-zinc-200 light:text-zinc-800">{inv.invited_email}</span>
                       <button
                         onClick={() => handleRevokeInvite(inv.invite_id, inv.invited_email)}
-                        className="text-zinc-500 hover:text-rose-400 transition-colors ml-1"
+                        className="text-zinc-500 light:text-zinc-600 hover:text-rose-400 transition-colors ml-1"
                         title="Revoke Invite"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -852,34 +854,34 @@ export default function EnterpriseAdminPortal() {
         </section>
 
         {/* Org Member Management Table */}
-        <section className="p-5 sm:p-6 rounded-2xl bg-zinc-950/70 border border-zinc-900 space-y-4">
+        <section className="p-5 sm:p-6 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-900 light:border-zinc-200 space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Users className="w-4 h-4 text-cyan-400" />
+              <h3 className="text-base font-bold text-white light:text-zinc-900 flex items-center gap-2">
+                <Users className="w-4 h-4 text-cyan-400 light:text-cyan-600" />
                 <span>Organization Candidates &amp; Automation Controls</span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
                 Manage candidate accounts, toggle automated sweep eligibility, or trigger live on-demand sweeps.
               </p>
             </div>
 
             <div className="w-full sm:w-64 relative">
-              <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search member or email..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 focus:border-cyan-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:outline-none text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400"
               />
             </div>
           </div>
 
           {/* Members Table */}
-          <div className="overflow-x-auto rounded-xl border border-zinc-900">
+          <div className="overflow-x-auto rounded-xl border border-zinc-900 light:border-zinc-200">
             <table className="w-full text-left text-xs">
-              <thead className="bg-zinc-900/60 text-zinc-400 font-mono uppercase text-[10px] tracking-wider border-b border-zinc-900">
+              <thead className="bg-zinc-900/60 text-zinc-400 light:text-zinc-600 font-mono uppercase text-[10px] tracking-wider border-b border-zinc-900 light:border-zinc-200">
                 <tr>
                   <th className="py-3 px-4">Candidate</th>
                   <th className="py-3 px-4">Role &amp; Plan</th>
@@ -892,7 +894,7 @@ export default function EnterpriseAdminPortal() {
               <tbody className="divide-y divide-zinc-900">
                 {filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-zinc-500">
+                    <td colSpan={6} className="py-8 text-center text-zinc-500 light:text-zinc-600">
                       No organization members found matching "{searchQuery}"
                     </td>
                   </tr>
@@ -905,10 +907,10 @@ export default function EnterpriseAdminPortal() {
                       <tr key={member.user_id} className="hover:bg-zinc-900/30 transition-colors">
                         {/* Candidate Identity */}
                         <td className="py-3.5 px-4">
-                          <div className="font-semibold text-white">
+                          <div className="font-semibold text-white light:text-zinc-900">
                             {member.name || member.user_id}
                           </div>
-                          <div className="text-[11px] text-zinc-400 font-mono">
+                          <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono">
                             {member.email}
                           </div>
                           <div className="text-[10px] text-zinc-600 font-mono mt-0.5">
@@ -920,20 +922,20 @@ export default function EnterpriseAdminPortal() {
                         {/* Role & Plan */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/50 font-semibold">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border border-cyan-800/50 light:border-cyan-300 font-semibold">
                               {member.enterprise_role === 'admin' ? 'Org Admin' : 'Org Member'}
                             </span>
                             <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${
                               member.plan === 'org_pro'
-                                ? 'bg-amber-950/60 text-amber-300 border-amber-700/60'
-                                : 'bg-zinc-900 text-zinc-300 border-zinc-800'
+                                ? 'bg-amber-950/60 light:bg-amber-50 text-amber-300 light:text-amber-700 border-amber-700/60 light:border-amber-300'
+                                : 'bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border-zinc-800 light:border-zinc-200'
                             }`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${(member.plan_active ?? true) ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
                               {member.plan_name}
                             </span>
                           </div>
                           {member.plan === 'org_pro' && member.plan_expires_at && (
-                            <div className="text-[10px] text-zinc-500 font-mono mt-1">
+                            <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono mt-1">
                               valid till {new Date(member.plan_expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </div>
                           )}
@@ -946,7 +948,7 @@ export default function EnterpriseAdminPortal() {
 
                         {/* Today's Applications */}
                         <td className="py-3.5 px-4 text-center">
-                          <span className={`font-mono font-bold ${member.applied_today >= 55 ? 'text-amber-400' : 'text-cyan-300'}`}>
+                          <span className={`font-mono font-bold ${member.applied_today >= 55 ? 'text-amber-400 light:text-amber-600' : 'text-cyan-300 light:text-cyan-700'}`}>
                             {member.applied_today}
                           </span>
                           <span className="text-zinc-600 font-mono"> / 55 max</span>
@@ -957,7 +959,7 @@ export default function EnterpriseAdminPortal() {
 
                         {/* On-Demand Usage */}
                         <td className="py-3.5 px-4 text-center">
-                          <span className="font-mono text-cyan-300 font-semibold">
+                          <span className="font-mono text-cyan-300 light:text-cyan-700 font-semibold">
                             {member.on_demand_runs_used}
                           </span>
                           <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || 10} week</span>
@@ -966,13 +968,13 @@ export default function EnterpriseAdminPortal() {
                         {/* Automated Run Status (Active or Paused) */}
                         <td className="py-3.5 px-4 text-center">
                           {isEnabled ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 text-[10px] font-mono">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/60 light:bg-emerald-50 border border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700 text-[10px] font-mono">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                               Active Runs
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-950/60 border border-rose-800/60 text-rose-300 text-[10px] font-mono">
-                              <Pause className="w-2.5 h-2.5 text-rose-400" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-950/60 light:bg-rose-50 border border-rose-800/60 text-rose-300 light:text-rose-600 text-[10px] font-mono">
+                              <Pause className="w-2.5 h-2.5 text-rose-400 light:text-rose-600" />
                               Paused
                             </span>
                           )}
@@ -980,7 +982,7 @@ export default function EnterpriseAdminPortal() {
                             Last active {member.last_applied_at ? new Date(member.last_applied_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
                           </div>
                           {member.sweep_eligible === false ? (
-                            <div className="text-[10px] font-mono mt-1 text-amber-300" title={(member.sweep_blockers || []).join('; ')}>
+                            <div className="text-[10px] font-mono mt-1 text-amber-300 light:text-amber-700" title={(member.sweep_blockers || []).join('; ')}>
                               ⚠️ Not queued: {(member.sweep_blockers || ['blocked'])[0]}
                             </div>
                           ) : (
@@ -999,19 +1001,19 @@ export default function EnterpriseAdminPortal() {
                               disabled={isProcessing}
                               className={`px-2.5 py-1 rounded-lg border text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
                                 isEnabled
-                                  ? 'bg-zinc-900 hover:bg-rose-950/50 border-zinc-800 hover:border-rose-700/60 text-zinc-300 hover:text-rose-300'
-                                  : 'bg-emerald-950/40 hover:bg-emerald-900/50 border-emerald-800/60 text-emerald-300'
+                                  ? 'bg-zinc-900 light:bg-zinc-100 hover:bg-rose-950/50 border-zinc-800 light:border-zinc-200 hover:border-rose-700/60 text-zinc-300 light:text-zinc-700 hover:text-rose-300'
+                                  : 'bg-emerald-950/40 hover:bg-emerald-900/50 border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700'
                               }`}
                               title={isEnabled ? 'Pause candidate from automated daily runs' : 'Enable candidate for automated daily runs'}
                             >
                               {isEnabled ? (
                                 <>
-                                  <Pause className="w-3 h-3 text-rose-400" />
+                                  <Pause className="w-3 h-3 text-rose-400 light:text-rose-600" />
                                   <span>Pause Daily Run</span>
                                 </>
                               ) : (
                                 <>
-                                  <Play className="w-3 h-3 text-emerald-400" />
+                                  <Play className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
                                   <span>Resume Daily Run</span>
                                 </>
                               )}
@@ -1020,7 +1022,7 @@ export default function EnterpriseAdminPortal() {
                             {/* View Live Log Button */}
                             <button
                               onClick={() => handleOpenLiveLog(member)}
-                              className="px-2 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-sky-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                              className="px-2 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-sky-300 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
                               title="View real-time execution stream and bot logs"
                             >
                               <Activity className="w-3 h-3 text-sky-400" />
@@ -1034,7 +1036,7 @@ export default function EnterpriseAdminPortal() {
                                 disabled
                                 className={`px-2.5 py-1 rounded-lg border text-xs font-medium flex items-center gap-1 cursor-not-allowed ${
                                   member.active_task.status === 'running'
-                                    ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-300'
+                                    ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-300 light:text-emerald-700'
                                     : 'bg-sky-950/50 border-sky-800/60 text-sky-300'
                                 }`}
                                 title={member.active_task.status === 'running'
@@ -1057,14 +1059,14 @@ export default function EnterpriseAdminPortal() {
                               <button
                                 onClick={() => handleTriggerOnDemand(member)}
                                 disabled={isProcessing || !isEnabled || org?.status === 'disabled'}
-                                className="px-2.5 py-1 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 text-cyan-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
+                                className="px-2.5 py-1 rounded-lg bg-cyan-950/60 light:bg-cyan-50 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
                                 title={
                                   org?.status === 'disabled'
                                     ? 'Org is disabled by Super Admin — all runs are blocked'
                                     : `Dispatch instant on-demand sweep (${member.applied_today || 0}/55 used today — run tops up the rest from newly posted jobs)`
                                 }
                               >
-                                <Zap className="w-3 h-3 text-cyan-400" />
+                                <Zap className="w-3 h-3 text-cyan-400 light:text-cyan-600" />
                                 <span>On-Demand</span>
                               </button>
                             )}
@@ -1083,41 +1085,41 @@ export default function EnterpriseAdminPortal() {
       {/* Live Execution Stream Modal */}
       {selectedLiveLog && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/80 light:bg-white/85 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) setSelectedLiveLog(null)
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-3xl bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
+            className="w-full max-w-3xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
           >
             {/* Modal Header */}
-            <div className="p-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between">
+            <div className="p-4 bg-zinc-900 light:bg-zinc-100 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-sky-400" />
                   <span>Execution Stream: {selectedLiveLog.member_name} ({selectedLiveLog.user_id})</span>
                   {selectedLiveLog.status === 'running' && (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
-                      <Radio className="w-2.5 h-2.5 text-emerald-400" />
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/40 animate-pulse">
+                      <Radio className="w-2.5 h-2.5 text-emerald-400 light:text-emerald-600" />
                       LIVE STREAMING
                     </span>
                   )}
                 </h4>
-                <p className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono mt-0.5">
                   {selectedLiveLog.task_id ? `Task ID: ${selectedLiveLog.task_id} · ` : ''}Status:{' '}
                   <span className={`uppercase font-bold ${
                     selectedLiveLog.status === 'running'
-                      ? 'text-emerald-400'
+                      ? 'text-emerald-400 light:text-emerald-600'
                       : selectedLiveLog.status === 'failed' || selectedLiveLog.status === 'cancelled'
-                      ? 'text-rose-400'
+                      ? 'text-rose-400 light:text-rose-600'
                       : 'text-sky-300'
                   }`}>
                     {selectedLiveLog.status}
                   </span>
                   {selectedLiveLog.summary && (
-                    <span className="ml-2 text-zinc-400">· {selectedLiveLog.summary}</span>
+                    <span className="ml-2 text-zinc-400 light:text-zinc-600">· {selectedLiveLog.summary}</span>
                   )}
                 </p>
               </div>
@@ -1126,7 +1128,7 @@ export default function EnterpriseAdminPortal() {
                 <button
                   type="button"
                   onClick={() => setSelectedLiveLog(null)}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1134,20 +1136,20 @@ export default function EnterpriseAdminPortal() {
             </div>
 
             {/* Logs Body */}
-            <div className="p-4 bg-black overflow-y-auto flex-1 font-mono text-xs space-y-1 select-text scroll-smooth max-h-[55vh]">
+            <div className="p-4 bg-black light:bg-white overflow-y-auto flex-1 font-mono text-xs space-y-1 select-text scroll-smooth max-h-[55vh]">
               {selectedLiveLog.logs.map((line, i) => (
                 <div
                   key={i}
                   className={`leading-relaxed ${
                     line.includes('❌') || line.includes('Error') || line.includes('Failed')
-                      ? 'text-rose-400 font-medium'
+                      ? 'text-rose-400 light:text-rose-600 font-medium'
                       : line.includes('🛑') || line.includes('⚠️')
-                      ? 'text-amber-400'
+                      ? 'text-amber-400 light:text-amber-600'
                       : line.includes('🎉') || line.includes('APPLIED!') || line.includes('COMPLETED')
-                      ? 'text-emerald-400 font-semibold'
+                      ? 'text-emerald-400 light:text-emerald-600 font-semibold'
                       : line.includes('🏢') || line.includes('🚀') || line.includes('Company resolved')
                       ? 'text-sky-300'
-                      : 'text-zinc-300'
+                      : 'text-zinc-300 light:text-zinc-700'
                   }`}
                 >
                   {line}
@@ -1156,11 +1158,11 @@ export default function EnterpriseAdminPortal() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3.5 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between text-xs">
-              <div className="text-zinc-400">
-                Total Captured Lines: <strong className="text-white">{selectedLiveLog.logs.length}</strong>
+            <div className="p-3.5 bg-zinc-900 light:bg-zinc-100 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs">
+              <div className="text-zinc-400 light:text-zinc-600">
+                Total Captured Lines: <strong className="text-white light:text-zinc-900">{selectedLiveLog.logs.length}</strong>
                 {selectedLiveLog.status === 'running' && (
-                  <span className="ml-2 text-zinc-500 text-[11px]">(Auto-refreshing every 2.5s)</span>
+                  <span className="ml-2 text-zinc-500 light:text-zinc-600 text-[11px]">(Auto-refreshing every 2.5s)</span>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -1169,7 +1171,7 @@ export default function EnterpriseAdminPortal() {
                     type="button"
                     disabled={haltingTask}
                     onClick={() => handleHaltTask(selectedLiveLog.task_id)}
-                    className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-semibold cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                    className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 light:border-rose-300 text-rose-300 light:text-rose-600 font-semibold cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                   >
                     <StopCircle className="w-3.5 h-3.5" />
                     <span>{haltingTask ? 'Stopping...' : 'Stop / Halt Task'}</span>
@@ -1178,7 +1180,7 @@ export default function EnterpriseAdminPortal() {
                 <button
                   type="button"
                   onClick={() => setSelectedLiveLog(null)}
-                  className="px-4 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-semibold cursor-pointer"
+                  className="px-4 py-1.5 rounded-lg bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700 text-white light:text-zinc-900 font-semibold cursor-pointer"
                 >
                   Close
                 </button>

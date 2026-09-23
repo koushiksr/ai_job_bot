@@ -422,7 +422,7 @@ export default function PricingPage() {
               onClick={() => setIsHelpOpen(true)}
               className="text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors font-medium cursor-pointer flex items-center gap-1 shrink-0"
             >
-              <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+              <Mail className="w-3.5 h-3.5 text-teal-400 light:text-teal-600 shrink-0" />
               <span className="hidden sm:inline">Help & Support</span>
             </button>
 
@@ -493,7 +493,7 @@ export default function PricingPage() {
         </div>
 
         {/* Auth0 Controls Bar: Use Case Segmented Pill + Volume Slider */}
-        <div className="max-w-4xl mx-auto p-5 rounded-2xl bg-[#09090b] border border-zinc-800/90 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="max-w-4xl mx-auto p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800/90 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-6">
           
           {/* Left: What is your use case? */}
           <div className="space-y-2 w-full md:w-auto">
@@ -564,7 +564,7 @@ export default function PricingPage() {
                 className={`relative rounded-2xl p-6 flex flex-col justify-between border transition-all overflow-hidden ${
                   isFeatured
                     ? 'bg-[#0c0c0f] border-zinc-700 light:border-zinc-300 shadow-2xl card-featured-glow z-10'
-                    : 'bg-[#09090b] border-zinc-800/90 hover:border-zinc-700 light:hover:border-zinc-300'
+                    : 'bg-[#09090b] light:bg-white border-zinc-800/90 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300'
                 }`}
               >
                 {/* Laser beam sweep accent for featured plan */}
@@ -666,7 +666,7 @@ export default function PricingPage() {
 
         {/* Risk Reversal & Interview Assurance Banner */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-start gap-4 shadow-xl">
+          <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-start gap-4 shadow-xl">
             <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
@@ -678,7 +678,7 @@ export default function PricingPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#09090b] border border-sky-500/30 flex items-start gap-4 shadow-xl">
+          <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-sky-500/30 flex items-start gap-4 shadow-xl">
             <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 light:text-cyan-600 shrink-0">
               <Zap className="w-5 h-5" />
             </div>
@@ -690,7 +690,7 @@ export default function PricingPage() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#09090b] border border-cyan-500/30 flex items-start gap-4 shadow-xl">
+          <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-cyan-500/30 flex items-start gap-4 shadow-xl">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 light:text-cyan-600 shrink-0">
               <Lock className="w-5 h-5" />
             </div>
@@ -704,7 +704,7 @@ export default function PricingPage() {
         </div>
 
         {/* Staffing Agencies & Placement Cells Banner */}
-        <section className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 p-8 space-y-6">
+        <section className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 p-8 space-y-6">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
               <span className="text-[11px] font-mono uppercase text-zinc-400 light:text-zinc-600 tracking-wider">
@@ -797,7 +797,7 @@ export default function PricingPage() {
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
-              className="w-full max-w-md bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5"
+              className="w-full max-w-md bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5"
             >
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800 light:border-zinc-200">
                 <div>
@@ -978,7 +978,7 @@ export default function PricingPage() {
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
-              className="w-full max-w-lg bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5"
+              className="w-full max-w-lg bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between pb-3 border-b border-zinc-800 light:border-zinc-200">

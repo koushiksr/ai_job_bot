@@ -1156,7 +1156,7 @@ export default function UserDashboard() {
                       <Link
                         href="/profile"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700/80 text-zinc-200 light:text-zinc-800 hover:text-white light:hover:text-zinc-900 font-medium transition-all text-xs"
+                        className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700/80 light:border-zinc-300 text-zinc-200 light:text-zinc-800 hover:text-white light:hover:text-zinc-900 font-medium transition-all text-xs"
                       >
                         <User className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                         <span>Edit Profile, Photo & Credentials ↗</span>
@@ -1470,12 +1470,12 @@ export default function UserDashboard() {
         <div className="md:hidden">
           {/* Dark Translucent Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-in fade-in duration-150"
+            className="fixed inset-0 bg-black/60 light:bg-white/85 backdrop-blur-sm z-40 transition-opacity animate-in fade-in duration-150"
             onClick={() => setIsMobileNavOpen(false)}
           />
 
           {/* Floating Action Sheet */}
-          <div className="fixed top-14 right-3 left-3 max-w-sm ml-auto z-50 p-4 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 rounded-2xl shadow-2xl shadow-black/80 space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="fixed top-14 right-3 left-3 max-w-sm ml-auto z-50 p-4 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 light:border-zinc-200 rounded-2xl shadow-2xl shadow-black/80 space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
             {/* Candidate Identity Card (Clickable to open profile) */}
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80 light:border-zinc-200">
               <Link
@@ -1796,7 +1796,7 @@ export default function UserDashboard() {
 
         {/* Org Pro Upgrade Banner — members-only plan (base enterprise members) */}
         {isEnterpriseMember && userPlan === 'enterprise' && isPlanActive && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 light:bg-amber-50 border border-zinc-800/80 light:border-amber-300 text-white light:text-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 light:bg-white light:bg-amber-50 border border-zinc-800/80 light:border-zinc-200 light:border-amber-300 text-white light:text-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent pointer-events-none" />
             <div className="flex items-start gap-3 z-10">
               <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center shrink-0">
@@ -1939,7 +1939,7 @@ export default function UserDashboard() {
                 </button>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 space-y-1">
+              <div className="p-3.5 rounded-xl bg-black/60 light:bg-white/85 border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 space-y-1">
                 <p className="font-semibold text-amber-300 light:text-amber-700">Why are notifications blocked?</p>
                 <p className="text-zinc-400 light:text-zinc-600 text-[11px] leading-relaxed">
                   When notifications are blocked in browser settings, web standards prevent websites from triggering prompts automatically. You can re-enable them in 10 seconds:
@@ -2167,12 +2167,12 @@ export default function UserDashboard() {
         ) : null}
 
         {/* Unified Mission Control Card (Cockpit + Live Metrics + Telemetry Strip) */}
-        <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden card-featured-glow relative">
+        <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden card-featured-glow relative">
           {/* Subtle top accent */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 
           {/* Section 1: Cockpit Header */}
-          <div className="p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3.5 bg-zinc-950/50">
+          <div className="p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3.5 bg-zinc-950/50 light:bg-white">
             <div className="flex items-center gap-3.5 min-w-0">
               <div className="relative shrink-0">
                 <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700">
@@ -2329,8 +2329,8 @@ export default function UserDashboard() {
           )}
 
           {/* Section 2: Integrated 4 Metrics Bar - Clean Responsive Card Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 p-3 sm:p-4 border-t border-zinc-800/80 light:border-zinc-200 bg-black/40">
-            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 space-y-1">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 p-3 sm:p-4 border-t border-zinc-800/80 light:border-zinc-200 bg-black/40 light:bg-white/85">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 light:border-zinc-200 space-y-1">
               <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
                 <span className="text-[11px] flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600" /> Today</span>
                 <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">24h</span>
@@ -2348,7 +2348,7 @@ export default function UserDashboard() {
               </p>
             </div>
 
-            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 space-y-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 light:border-zinc-200 space-y-1">
               <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
                 <span className="text-[11px] flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600" /> This Week</span>
                 <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">7d</span>
@@ -2357,7 +2357,7 @@ export default function UserDashboard() {
               <p className="text-[10px] text-zinc-500 light:text-zinc-600">7-day outreach</p>
             </div>
 
-            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 space-y-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 light:border-zinc-200 space-y-1">
               <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
                 <span className="text-[11px] flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600" /> This Month</span>
                 <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">30d</span>
@@ -2366,7 +2366,7 @@ export default function UserDashboard() {
               <p className="text-[10px] text-zinc-500 light:text-zinc-600">Monthly volume</p>
             </div>
 
-            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 space-y-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 light:border-zinc-200 space-y-1">
               <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
                 <span className="text-[11px] flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600" /> Total Verified</span>
                 <span className="text-[9px] font-mono text-zinc-300 light:text-zinc-700 bg-zinc-800 light:bg-zinc-200 px-1.5 py-0.2 rounded border border-zinc-700 light:border-zinc-300 font-medium">100%</span>
@@ -2470,7 +2470,7 @@ export default function UserDashboard() {
           <div className="space-y-4">
             {/* Daily Autonomous Job Apply Dispatch Report & Engagement Summary */}
             {metrics.total_applied > 0 && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3.5 relative overflow-hidden">
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3.5 relative overflow-hidden">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
@@ -2545,7 +2545,7 @@ export default function UserDashboard() {
 
                 {/* High-Converting Upgrade Pull for Free/Trial Users */}
                 {!isProfessional ? (
-                  <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-750 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="p-3.5 rounded-xl bg-zinc-900/60 light:bg-zinc-100 border border-zinc-750 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
                         <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
@@ -2580,7 +2580,7 @@ export default function UserDashboard() {
             )}
 
             {/* Search & Filter Header */}
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="relative w-full md:w-80">
                 <Search className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600 absolute left-3 top-2.5" />
                 <input
@@ -2646,7 +2646,7 @@ export default function UserDashboard() {
             </div>
 
             {/* Applications Table (Desktop) & Cards (Mobile) */}
-            <div className="rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden">
+            <div className="rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden">
               {/* Desktop Table View */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs text-zinc-300 light:text-zinc-700">
@@ -2835,7 +2835,7 @@ export default function UserDashboard() {
 
         {/* TAB 2 (FALLBACK): CANDIDATE PROFILE & CREDENTIALS */}
         {activeTab === 'profile' && (
-          <div className="p-8 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 text-center space-y-4">
+          <div className="p-8 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 text-center space-y-4">
             <div className="w-12 h-12 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center mx-auto text-zinc-300 light:text-zinc-700">
               <User className="w-6 h-6" />
             </div>
@@ -2873,7 +2873,7 @@ export default function UserDashboard() {
         {activeTab === 'queries' && (
           <div className="space-y-4">
             {/* Header / Summary Card */}
-            <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-teal-400 light:text-cyan-600 shrink-0">
                   <MessageSquare className="w-4 h-4" />
@@ -2907,12 +2907,12 @@ export default function UserDashboard() {
 
             {/* Queries List */}
             {loadingUserTickets ? (
-              <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 text-center text-zinc-400 light:text-zinc-600">
+              <div className="p-12 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 text-center text-zinc-400 light:text-zinc-600">
                 <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-teal-400 light:text-cyan-600" />
                 <span>Loading your inquiries...</span>
               </div>
             ) : userTickets.length === 0 ? (
-              <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 text-center space-y-3">
+              <div className="p-12 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 text-center space-y-3">
                 <div className="w-12 h-12 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 mx-auto flex items-center justify-center text-zinc-500 light:text-zinc-600">
                   <MessageSquare className="w-6 h-6" />
                 </div>
@@ -2934,7 +2934,7 @@ export default function UserDashboard() {
                 {userTickets.map((t) => (
                   <div
                     key={t.ticket_id || t.id}
-                    className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3 transition-colors hover:border-zinc-700 light:hover:border-zinc-300"
+                    className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 transition-colors hover:border-zinc-700 light:hover:border-zinc-300"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-zinc-800/80 light:border-zinc-200">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -2977,7 +2977,7 @@ export default function UserDashboard() {
 
                     <div>
                       <h4 className="text-xs font-semibold text-white light:text-zinc-900 mb-1">{t.subject}</h4>
-                      <p className="text-xs text-zinc-300 light:text-zinc-700 leading-relaxed bg-black/60 p-3 rounded-lg border border-zinc-800/80 light:border-zinc-200">
+                      <p className="text-xs text-zinc-300 light:text-zinc-700 leading-relaxed bg-black/60 light:bg-white/85 p-3 rounded-lg border border-zinc-800/80 light:border-zinc-200">
                         {t.message}
                       </p>
                     </div>
@@ -3014,7 +3014,7 @@ export default function UserDashboard() {
         )}
 
         {/* Mobile Dedicated Candidate Account & Quick Actions Footer Card */}
-        <div className="block md:hidden p-4 rounded-2xl bg-[#0a0a0c] border border-zinc-800/90 shadow-xl space-y-3.5">
+        <div className="block md:hidden p-4 rounded-2xl bg-[#0a0a0c] border border-zinc-800/90 light:border-zinc-200 shadow-xl space-y-3.5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center font-bold text-white light:text-zinc-900 text-xs shrink-0 relative overflow-hidden">
@@ -3041,7 +3041,7 @@ export default function UserDashboard() {
             </div>
           </div>
 
-          <div className="pt-1 border-t border-zinc-800/60 space-y-2">
+          <div className="pt-1 border-t border-zinc-800/60 light:border-zinc-200 space-y-2">
             <button
               type="button"
               onClick={() => setIsReviewModalOpen(true)}
@@ -3078,7 +3078,7 @@ export default function UserDashboard() {
             onClick={() => setSelectedJobAudit(null)}
           >
             <div
-              className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5"
+              className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}

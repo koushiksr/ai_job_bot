@@ -353,7 +353,7 @@ export default function Home() {
                 aria-label="Help & Support"
                 className="hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
               >
-                <Mail className="w-4 h-4 text-teal-400 shrink-0" />
+                <Mail className="w-4 h-4 text-teal-400 light:text-teal-600 shrink-0" />
               </button>
             </nav>
 
@@ -532,7 +532,7 @@ export default function Home() {
             className="w-full lg:w-[460px] xl:w-[490px] shrink-0 scroll-mt-24"
           >
             {existingUser ? (
-              <div className="p-7 w-full border border-zinc-800 light:border-zinc-200 bg-[#09090b] rounded-2xl shadow-xl space-y-5 text-center relative overflow-hidden card-featured-glow">
+              <div className="p-7 w-full border border-zinc-800 light:border-zinc-200 bg-[#09090b] light:bg-white rounded-2xl shadow-xl space-y-5 text-center relative overflow-hidden card-featured-glow">
                 {/* Subtle top border accent */}
                 <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
                 <div className="w-12 h-12 rounded-full bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 flex items-center justify-center mx-auto">
@@ -633,7 +633,7 @@ export default function Home() {
         <section id="features" className="w-full max-w-7xl mx-auto px-6 pb-16 z-10 space-y-6">
 
           {/* Clean Monochrome Metrics */}
-          <div className="p-6 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div className="p-6 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
               <div className="text-2xl sm:text-3xl font-semibold text-white light:text-zinc-900 font-mono">600+</div>
               <div className="text-[11px] text-zinc-500 light:text-zinc-600 mt-1 uppercase tracking-wider font-mono">Monthly Applications</div>
@@ -688,7 +688,7 @@ export default function Home() {
           </div>
 
           {/* Comparison Table */}
-          <div className="overflow-x-auto rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] shadow-2xl">
+          <div className="overflow-x-auto rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] light:bg-white shadow-2xl">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 light:border-zinc-200 bg-zinc-950/90 light:bg-white/90 text-zinc-400 light:text-zinc-600">
@@ -739,7 +739,7 @@ export default function Home() {
                   <td className="p-4 sm:p-5 font-medium text-white light:text-zinc-900">Monthly Investment</td>
                   <td className="p-4 sm:p-5 text-zinc-400 light:text-zinc-600">₹45,000+ (in lost dev time)</td>
                   <td className="p-4 sm:p-5 text-zinc-400 light:text-zinc-600">₹1,500 - ₹3,000/mo ($20-$40)</td>
-                  <td className="p-4 sm:p-5 font-bold text-white light:text-zinc-900 bg-zinc-900/60">Just ₹99 / Month (was ₹1,000 · ₹3.3 / day)</td>
+                  <td className="p-4 sm:p-5 font-bold text-white light:text-zinc-900 bg-zinc-900/60 light:bg-zinc-100">Just ₹99 / Month (was ₹1,000 · ₹3.3 / day)</td>
                 </tr>
               </tbody>
             </table>
@@ -835,7 +835,7 @@ export default function Home() {
         </section>
 
         {/* Section 5: Semantic Tech Roles & Indian Tech Hubs Matrix (SEO Indexing Mesh) */}
-        <section className="w-full max-w-7xl mx-auto px-6 py-12 border-t border-zinc-900/60 z-10 space-y-6">
+        <section className="w-full max-w-7xl mx-auto px-6 py-12 border-t border-zinc-900/60 light:border-zinc-200 z-10 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
             <div className="space-y-2">
               <h4 className="text-[11px] font-mono uppercase text-zinc-300 light:text-zinc-700 font-semibold tracking-wider">
