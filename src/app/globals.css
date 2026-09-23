@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Light theme variant: activated by `.light` on <html> (see ThemeProvider).
+   Dark is the default (no class). Usage: `bg-zinc-950 light:bg-white`. */
+@custom-variant light (&:where(.light, .light *));
+
 @theme {
   --color-background: #000000;
   --color-foreground: #f4f4f5;
@@ -26,6 +30,11 @@ html, body {
   max-width: 100vw;
   width: 100%;
   position: relative;
+}
+
+html.light, html.light body {
+  background-color: #ffffff;
+  color: #09090b;
 }
 
 /* Subtle Auth0/Gladia ambient radial spotlight */
@@ -190,6 +199,12 @@ input[type="range"] {
     linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 
+.light .cyber-grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
+
 /* Futuristic Glass Card with Neon Gradient Sheen */
 .glass-card-futuristic {
   position: relative;
@@ -214,6 +229,14 @@ input[type="range"] {
   pointer-events: none;
 }
 
+.light .glass-card-futuristic {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(244, 244, 245, 0.95) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 20px 50px -20px rgba(0, 0, 0, 0.18),
+    0 0 40px -18px rgba(6, 182, 212, 0.25);
+}
+
 /* Glowing Border Beam Sweep */
 @keyframes borderBeamMove {
   0% { offset-distance: 0%; }
@@ -223,6 +246,10 @@ input[type="range"] {
 /* Glowing Cyber Gradient Text */
 .text-cyber-glow {
   text-shadow: 0 0 20px rgba(56, 189, 248, 0.4), 0 0 40px rgba(168, 85, 247, 0.2);
+}
+
+.light .text-cyber-glow {
+  text-shadow: none;
 }
 
 /* Shimmer Button Effect */

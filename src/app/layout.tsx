@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import VisitorTracker from "@/components/VisitorTracker";
 import TrackingScripts from "@/components/TrackingScripts";
 import { Analytics } from "@vercel/analytics/next";
@@ -172,6 +173,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
+        {/* Apply stored theme before paint (no dark-flash for light users) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('jf-theme')==='light'){document.documentElement.classList.add('light')}}catch(e){}`
+          }}
+        />
         {/* Google tag (gtag.js) - Google Ads & Google Analytics */}
         <script
           async
@@ -198,11 +205,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <ServiceWorkerRegistrar />
-        <VisitorTracker />
-        <TrackingScripts />
-        <Analytics />
-        {children}
+        <ThemeProvider>
+          <ServiceWorkerRegistrar />
+          <VisitorTracker />
+          <TrackingScripts />
+          <Analytics />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
