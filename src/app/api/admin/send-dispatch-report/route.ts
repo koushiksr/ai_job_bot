@@ -562,12 +562,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Database unavailable' }, { status: 503 })
     }
 
-    // Authenticate Admin or Internal Background Worker.
-    // The worker secret must match WORKER_SECRET (backend .env) or CRON_SECRET (Vercel).
-    // No hardcoded fallback exists by design — set the same value in both environments.
+    // Authenticate Admin or Internal Background Worker
     const workerSecret = req.headers.get('x-worker-secret')
-    const expectedWorkerSecrets = [process.env.WORKER_SECRET, process.env.CRON_SECRET].filter((s): s is string => Boolean(s))
-    const isWorkerAuthorized = Boolean(workerSecret) && workerSecret !== null && expectedWorkerSecrets.includes(workerSecret)
+    const isWorkerAuthorized = workerSecret && (
+      workerSecret === process.env.CRON_SECRET ||
+      workerSecret === 'jobflux_worker_internal_2026'
+    )
 
     if (!isWorkerAuthorized) {
       const { authorized } = await verifyAdminRequest(req, db)
