@@ -204,7 +204,7 @@ export default function PwaInstallPromptModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 light:bg-white/85 backdrop-blur-md animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleDismiss()
@@ -214,7 +214,7 @@ export default function PwaInstallPromptModal({
       aria-modal="true"
     >
       <div 
-        className="relative w-full max-w-lg rounded-3xl bg-[#0d1017] border border-zinc-800/90 shadow-[0_25px_60px_rgba(0,0,0,0.9)] text-white p-6 sm:p-7 overflow-hidden"
+        className="relative w-full max-w-lg rounded-3xl bg-[#0d1017] border border-zinc-800/90 light:border-zinc-200 shadow-[0_25px_60px_rgba(0,0,0,0.9)] text-white light:text-zinc-900 p-6 sm:p-7 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle cyan ambient glow at top */}
@@ -227,7 +227,7 @@ export default function PwaInstallPromptModal({
             handleDismiss()
           }}
           type="button"
-          className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition-colors border border-zinc-700/60 cursor-pointer shadow-sm"
+          className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-zinc-800/80 light:bg-zinc-200 hover:bg-zinc-700 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 flex items-center justify-center transition-colors border border-zinc-700/60 light:border-zinc-300 cursor-pointer shadow-sm"
           aria-label="Close dialog"
         >
           <X className="w-4 h-4" />
@@ -236,7 +236,7 @@ export default function PwaInstallPromptModal({
         {/* Header: App Emblem + Title + Platform Tag */}
         <div className="relative z-10">
           <div className="flex items-center gap-3.5 mb-5 pr-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 light:border-cyan-300 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
               <img 
                 src="/icon.svg" 
                 alt="JobFlux" 
@@ -245,20 +245,20 @@ export default function PwaInstallPromptModal({
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-bold text-white tracking-tight">
+                <h3 className="text-base font-bold text-white light:text-zinc-900 tracking-tight">
                   {isInstalled || isStandalone ? 'JobFlux AI App' : 'Install JobFlux AI'}
                 </h3>
-                <span className="text-[10px] font-semibold font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 flex items-center gap-1">
+                <span className="text-[10px] font-semibold font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 light:text-cyan-700 border border-cyan-800 flex items-center gap-1">
                   {deviceEnv.isDesktop ? <Laptop className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
                   {deviceEnv.osName}
                 </span>
                 {isInstalled && (
-                  <span className="text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800 flex items-center gap-1">
+                  <span className="text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 light:bg-emerald-50 text-emerald-300 light:text-emerald-700 border border-emerald-800 flex items-center gap-1">
                     <Check className="w-2.5 h-2.5" /> INSTALLED
                   </span>
                 )}
               </div>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
                 {isInstalled 
                   ? 'Application is verified & installed on this device' 
                   : deviceEnv.isDesktop 
@@ -274,31 +274,31 @@ export default function PwaInstallPromptModal({
           {isInstalled || isStandalone ? (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 light:text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/30 light:border-emerald-300">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-bold text-emerald-300">Application Verified on this Device</h4>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-900/60 text-emerald-200">
+                    <h4 className="text-xs font-bold text-emerald-300 light:text-emerald-700">Application Verified on this Device</h4>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-900/60 text-emerald-200 light:text-emerald-800">
                       {isStandalone ? 'Active Window' : 'Dock / App Library'}
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-300 mt-1 leading-relaxed">
+                  <p className="text-xs text-zinc-300 light:text-zinc-700 mt-1 leading-relaxed">
                     JobFlux AI is installed. You can launch it directly from your {deviceEnv.os === 'mac' ? 'Mac Dock, Spotlight, or Launchpad' : deviceEnv.os === 'windows' ? 'Windows Taskbar or Start Menu' : 'desktop or home screen'} without opening browser tabs.
                   </p>
                 </div>
               </div>
 
               {/* Push Alerts & Notification Center Option */}
-              <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-3">
+              <div className="p-4 rounded-2xl bg-zinc-900/90 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-semibold text-zinc-200 light:text-zinc-800 flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-cyan-400 light:text-cyan-600" />
                     Real-Time Push Alerts & Recruiter Updates
                   </span>
                   {pushStatus === 'granted' ? (
-                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                    <span className="text-xs font-bold text-emerald-400 light:text-emerald-600 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Enabled
                     </span>
                   ) : (
@@ -306,24 +306,24 @@ export default function PwaInstallPromptModal({
                       type="button"
                       onClick={handleEnablePush}
                       disabled={pushStatus === 'loading'}
-                      className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black light:text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                     >
                       {pushStatus === 'loading' ? 'Enabling...' : 'Enable Alerts'}
                     </button>
                   )}
                 </div>
-                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600 leading-relaxed">
                   Receive instant desktop & lock-screen notifications when recruiters view your resume, shortlists occur, or the daily 6 AM IST dispatch run completes.
                 </p>
 
                 {pushStatus === 'granted' && (
-                  <div className="pt-1 flex items-center justify-between border-t border-zinc-800/80">
-                    <span className="text-[11px] text-zinc-400">Verify push delivery:</span>
+                  <div className="pt-1 flex items-center justify-between border-t border-zinc-800/80 light:border-zinc-200">
+                    <span className="text-[11px] text-zinc-400 light:text-zinc-600">Verify push delivery:</span>
                     <button
                       type="button"
                       onClick={handleSendTestAlert}
                       disabled={testAlertSent}
-                      className="text-xs text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer transition-colors"
+                      className="text-xs text-cyan-400 light:text-cyan-600 hover:text-cyan-300 font-medium cursor-pointer transition-colors"
                     >
                       {testAlertSent ? '✓ Sent to Desktop!' : 'Send Test Notification'}
                     </button>
@@ -336,7 +336,7 @@ export default function PwaInstallPromptModal({
                 <button
                   type="button"
                   onClick={handleDismiss}
-                  className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors cursor-pointer text-center shadow-md"
+                  className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black light:text-white font-bold text-xs transition-colors cursor-pointer text-center shadow-md"
                 >
                   Done
                 </button>
@@ -352,7 +352,7 @@ export default function PwaInstallPromptModal({
                     setIsStandalone(false)
                     setActiveStep('prompt')
                   }}
-                  className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer inline-flex items-center gap-1"
+                  className="text-[11px] text-zinc-500 light:text-zinc-600 hover:text-zinc-300 transition-colors cursor-pointer inline-flex items-center gap-1"
                 >
                   <RotateCcw className="w-3 h-3" />
                   Not installed or uninstalled? Reset install state
@@ -364,8 +364,8 @@ export default function PwaInstallPromptModal({
             /* VIEW 2: LAPTOP / DESKTOP STEP-BY-STEP INSTALLATION GUIDE                  */
             /* ========================================================================= */
             <div className="space-y-4">
-              <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-800/60 text-xs text-cyan-200 flex items-center gap-2.5">
-                <Laptop className="w-4 h-4 text-cyan-400 shrink-0" />
+              <div className="p-3 rounded-xl bg-cyan-950/40 light:bg-cyan-50 border border-cyan-800/60 light:border-cyan-300 text-xs text-cyan-200 light:text-cyan-800 flex items-center gap-2.5">
+                <Laptop className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
                 <span>
                   Installing on <strong>{deviceEnv.osName}</strong> via <strong>{deviceEnv.browserName}</strong>
                 </span>
@@ -373,61 +373,61 @@ export default function PwaInstallPromptModal({
 
               {deviceEnv.isMacSafari ? (
                 /* macOS Safari "Add to Dock" instructions (macOS Sonoma 14+) */
-                <div className="space-y-2.5 text-xs text-zinc-300">
-                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                <div className="space-y-2.5 text-xs text-zinc-300 light:text-zinc-700">
+                  <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                       1
                     </div>
                     <div>
-                      In the top Mac menu bar, click <strong className="text-white">File</strong> (or click the <strong className="text-white">Share</strong> <Share2 className="w-3.5 h-3.5 inline text-cyan-400 mx-0.5" /> button in Safari).
+                      In the top Mac menu bar, click <strong className="text-white light:text-zinc-900">File</strong> (or click the <strong className="text-white light:text-zinc-900">Share</strong> <Share2 className="w-3.5 h-3.5 inline text-cyan-400 light:text-cyan-600 mx-0.5" /> button in Safari).
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                       2
                     </div>
                     <div>
-                      Click <strong className="text-white">&quot;Add to Dock...&quot;</strong> from the dropdown menu.
+                      Click <strong className="text-white light:text-zinc-900">&quot;Add to Dock...&quot;</strong> from the dropdown menu.
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                       3
                     </div>
                     <div>
-                      Click <strong className="text-white">&quot;Add&quot;</strong> in the dialog. JobFlux AI will now launch directly from your Mac Dock as a standalone native app!
+                      Click <strong className="text-white light:text-zinc-900">&quot;Add&quot;</strong> in the dialog. JobFlux AI will now launch directly from your Mac Dock as a standalone native app!
                     </div>
                   </div>
                 </div>
               ) : (
                 /* Chrome, Edge, Brave on Mac/Windows/Linux */
-                <div className="space-y-2.5 text-xs text-zinc-300">
-                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                <div className="space-y-2.5 text-xs text-zinc-300 light:text-zinc-700">
+                  <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                       1
                     </div>
                     <div>
-                      Look at the right side of your browser <strong>Address bar (URL bar)</strong>. Click the <strong className="text-white">Install JobFlux AI</strong> icon (<Download className="w-3 h-3 inline text-cyan-400 mx-0.5" /> computer/monitor with down arrow).
+                      Look at the right side of your browser <strong>Address bar (URL bar)</strong>. Click the <strong className="text-white light:text-zinc-900">Install JobFlux AI</strong> icon (<Download className="w-3 h-3 inline text-cyan-400 light:text-cyan-600 mx-0.5" /> computer/monitor with down arrow).
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                       2
                     </div>
                     <div>
-                      <em>Alternatively:</em> Click the browser menu (<strong className="text-white">⋮</strong> or <strong className="text-white">⋯</strong> in top right) &rarr; select <strong className="text-white">&quot;Save and share&quot;</strong> or <strong className="text-white">&quot;Apps&quot;</strong> &rarr; <strong className="text-white">&quot;Install JobFlux AI...&quot;</strong>
+                      <em>Alternatively:</em> Click the browser menu (<strong className="text-white light:text-zinc-900">⋮</strong> or <strong className="text-white light:text-zinc-900">⋯</strong> in top right) &rarr; select <strong className="text-white light:text-zinc-900">&quot;Save and share&quot;</strong> or <strong className="text-white light:text-zinc-900">&quot;Apps&quot;</strong> &rarr; <strong className="text-white light:text-zinc-900">&quot;Install JobFlux AI...&quot;</strong>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                       3
                     </div>
                     <div>
-                      Click <strong className="text-white">&quot;Install&quot;</strong> in the popup. JobFlux AI will open in its own clean window, free from browser tabs!
+                      Click <strong className="text-white light:text-zinc-900">&quot;Install&quot;</strong> in the popup. JobFlux AI will open in its own clean window, free from browser tabs!
                     </div>
                   </div>
                 </div>
@@ -438,14 +438,14 @@ export default function PwaInstallPromptModal({
                 <button
                   type="button"
                   onClick={() => setActiveStep('prompt')}
-                  className="w-1/3 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer text-center"
+                  className="w-1/3 py-2.5 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 text-xs font-medium transition-colors cursor-pointer text-center"
                 >
                   Back
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmInstalled}
-                  className="w-2/3 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5 shadow-md"
+                  className="w-2/3 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black light:text-white font-extrabold text-xs transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5 shadow-md"
                 >
                   <Check className="w-3.5 h-3.5" />
                   <span>I&apos;ve Installed It ✓</span>
@@ -457,31 +457,31 @@ export default function PwaInstallPromptModal({
             /* VIEW 3: iOS SAFARI STEP-BY-STEP GUIDE                                     */
             /* ========================================================================= */
             <div className="space-y-4">
-              <div className="space-y-2.5 text-xs text-zinc-300">
-                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0">
+              <div className="space-y-2.5 text-xs text-zinc-300 light:text-zinc-700">
+                <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0">
                     1
                   </div>
                   <div>
-                    Tap <strong className="text-white">Share</strong> <Share2 className="w-3 h-3 inline text-cyan-400 mx-0.5" /> at the bottom of Safari
+                    Tap <strong className="text-white light:text-zinc-900">Share</strong> <Share2 className="w-3 h-3 inline text-cyan-400 light:text-cyan-600 mx-0.5" /> at the bottom of Safari
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0">
                     2
                   </div>
                   <div>
-                    Select <strong className="text-white">&quot;Add to Home Screen&quot;</strong> <PlusSquare className="w-3 h-3 inline text-cyan-400 mx-0.5" />
+                    Select <strong className="text-white light:text-zinc-900">&quot;Add to Home Screen&quot;</strong> <PlusSquare className="w-3 h-3 inline text-cyan-400 light:text-cyan-600 mx-0.5" />
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 light:text-cyan-600 flex items-center justify-center font-bold text-xs shrink-0">
                     3
                   </div>
                   <div>
-                    Tap <strong className="text-white">&quot;Add&quot;</strong> in the top right to install
+                    Tap <strong className="text-white light:text-zinc-900">&quot;Add&quot;</strong> in the top right to install
                   </div>
                 </div>
               </div>
@@ -490,14 +490,14 @@ export default function PwaInstallPromptModal({
                 <button
                   type="button"
                   onClick={() => setActiveStep('prompt')}
-                  className="w-1/3 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer text-center"
+                  className="w-1/3 py-2.5 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 text-xs font-medium transition-colors cursor-pointer text-center"
                 >
                   Back
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmInstalled}
-                  className="w-2/3 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors cursor-pointer text-center"
+                  className="w-2/3 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black light:text-white font-bold text-xs transition-colors cursor-pointer text-center"
                 >
                   I&apos;ve Installed It ✓
                 </button>
@@ -509,18 +509,18 @@ export default function PwaInstallPromptModal({
             /* ========================================================================= */
             <div className="space-y-4">
               <div className="space-y-2.5 py-1">
-                <div className="flex items-start gap-2.5 text-xs text-zinc-300">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2.5 text-xs text-zinc-300 light:text-zinc-700">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0 mt-0.5" />
                   <span><strong>Instant Recruiter Alerts:</strong> Real-time lock-screen & desktop push notifications for profile views.</span>
                 </div>
-                <div className="flex items-start gap-2.5 text-xs text-zinc-300">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2.5 text-xs text-zinc-300 light:text-zinc-700">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0 mt-0.5" />
                   <span>
                     <strong>{deviceEnv.isDesktop ? 'Standalone Desktop App:' : 'Home Screen App:'}</strong> Launch in 1 click from your {deviceEnv.os === 'mac' ? 'Mac Dock' : deviceEnv.os === 'windows' ? 'Windows Taskbar' : 'home screen'} with dedicated window.
                   </span>
                 </div>
-                <div className="flex items-start gap-2.5 text-xs text-zinc-300">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2.5 text-xs text-zinc-300 light:text-zinc-700">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0 mt-0.5" />
                   <span><strong>Morning Run:</strong> Automated 6 AM IST application status update.</span>
                 </div>
               </div>
@@ -531,7 +531,7 @@ export default function PwaInstallPromptModal({
                   <button
                     type="button"
                     onClick={() => setActiveStep('ios_instructions')}
-                    className="w-full py-3 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
+                    className="w-full py-3 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black light:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
                   >
                     <Smartphone className="w-4 h-4" />
                     <span>How to Install on iPhone / iPad</span>
@@ -541,7 +541,7 @@ export default function PwaInstallPromptModal({
                   <button
                     type="button"
                     onClick={handleInstallClick}
-                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black light:text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
                   >
                     <Download className="w-4 h-4" />
                     <span>Install JobFlux App Now</span>
@@ -551,7 +551,7 @@ export default function PwaInstallPromptModal({
                     <button
                       type="button"
                       onClick={() => setActiveStep('desktop_instructions')}
-                      className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
+                      className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black light:text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
                     >
                       <Laptop className="w-4 h-4" />
                       <span>How to Install on {deviceEnv.osName} ({deviceEnv.browserName})</span>
@@ -561,9 +561,9 @@ export default function PwaInstallPromptModal({
                     <button
                       type="button"
                       onClick={handleConfirmInstalled}
-                      className="w-full py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-[11px] font-medium transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-zinc-800/80"
+                      className="w-full py-2 px-3 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-zinc-200 text-[11px] font-medium transition-colors cursor-pointer text-center flex items-center justify-center gap-1 border border-zinc-800/80 light:border-zinc-200"
                     >
-                      <Check className="w-3 h-3 text-emerald-400" />
+                      <Check className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
                       <span>Already installed on this laptop? Click here</span>
                     </button>
                   </div>
@@ -571,7 +571,7 @@ export default function PwaInstallPromptModal({
                   <button
                     type="button"
                     onClick={handleInstallClick}
-                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black light:text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.01]"
                   >
                     <Download className="w-4 h-4" />
                     <span>Install JobFlux App</span>
@@ -581,7 +581,7 @@ export default function PwaInstallPromptModal({
                 <button
                   type="button"
                   onClick={handleDismiss}
-                  className="w-full py-2 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer text-center"
+                  className="w-full py-2 text-xs text-zinc-400 light:text-zinc-600 hover:text-zinc-200 transition-colors cursor-pointer text-center"
                 >
                   Maybe Later
                 </button>

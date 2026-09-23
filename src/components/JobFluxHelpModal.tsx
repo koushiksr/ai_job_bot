@@ -191,15 +191,15 @@ export default function JobFluxHelpModal({
           type="button"
           aria-label="Help & Support"
           title="Help & Support (Click to open)"
-          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center p-2 rounded-full bg-zinc-950/90 hover:bg-zinc-900 border border-zinc-800 hover:border-cyan-500/60 text-zinc-300 hover:text-white shadow-xl shadow-black/60 backdrop-blur-xl transition-all duration-300 cursor-pointer group pointer-events-auto select-none overflow-hidden"
+          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center p-2 rounded-full bg-zinc-950/90 light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 border border-zinc-800 light:border-zinc-200 hover:border-cyan-500/60 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 shadow-xl shadow-black/60 backdrop-blur-xl transition-all duration-300 cursor-pointer group pointer-events-auto select-none overflow-hidden"
         >
           {/* Minimalist Question Mark / Help Circle */}
-          <div className="w-6 h-6 rounded-full bg-zinc-900 group-hover:bg-cyan-950/80 border border-zinc-800 group-hover:border-cyan-500/50 flex items-center justify-center text-zinc-300 group-hover:text-cyan-400 transition-colors shrink-0">
+          <div className="w-6 h-6 rounded-full bg-zinc-900 light:bg-zinc-100 group-hover:bg-cyan-950/80 border border-zinc-800 light:border-zinc-200 group-hover:border-cyan-500/50 flex items-center justify-center text-zinc-300 light:text-zinc-700 group-hover:text-cyan-400 transition-colors shrink-0">
             <HelpCircle className="w-3.5 h-3.5" />
           </div>
 
           {/* Label: Completely hidden in smallest circular resting state, smoothly expands only on hover */}
-          <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 group-hover:max-w-[130px] group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 transition-all duration-300 ease-out text-xs font-semibold text-white tracking-wide">
+          <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 group-hover:max-w-[130px] group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1 transition-all duration-300 ease-out text-xs font-semibold text-white light:text-zinc-900 tracking-wide">
             Help &amp; Support
           </span>
 
@@ -215,7 +215,7 @@ export default function JobFluxHelpModal({
         {isModalOpen && (
           <div 
             onClick={(e) => { if (e.target === e.currentTarget) handleClose() }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 light:bg-white/85 backdrop-blur-md"
           >
             <motion.div
               onClick={(e) => e.stopPropagation()}
@@ -223,19 +223,19 @@ export default function JobFluxHelpModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.15 }}
-              className="relative w-full max-w-xl max-h-[94vh] sm:max-h-[92vh] bg-[#09090b] border border-zinc-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-zinc-100"
+              className="relative w-full max-w-xl max-h-[94vh] sm:max-h-[92vh] bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-zinc-100 light:text-zinc-900"
             >
               {/* Header */}
-              <div className="p-4 sm:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/60">
+              <div className="p-4 sm:p-5 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between bg-zinc-950/60 light:bg-white">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+                  <div className="w-9 h-9 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700">
                     <MessageSquare className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-white light:text-zinc-900 flex items-center gap-2">
                       JobFlux Help & Support Center
                     </h3>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-zinc-400 light:text-zinc-600">
                       Direct access to the JobFlux technical support team
                     </p>
                   </div>
@@ -247,25 +247,25 @@ export default function JobFluxHelpModal({
                     handleClose()
                   }}
                   aria-label="Close help modal"
-                  className="w-8 h-8 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer z-50 shadow-sm"
+                  className="w-8 h-8 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer z-50 shadow-sm"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Priority Email Hero Banner */}
-              <div className="p-5 bg-gradient-to-b from-zinc-900/50 to-transparent border-b border-zinc-800/80">
-                <div className="p-4 rounded-xl bg-black border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="p-5 bg-gradient-to-b from-zinc-900/50 to-transparent border-b border-zinc-800/80 light:border-zinc-200">
+                <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
+                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700">
                         Primary Preference
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-mono flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-zinc-400" /> 2-4h response
+                      <span className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-zinc-400 light:text-zinc-600" /> 2-4h response
                       </span>
                     </div>
-                    <div className="text-sm font-mono font-semibold text-white tracking-wide">
+                    <div className="text-sm font-mono font-semibold text-white light:text-zinc-900 tracking-wide">
                       {supportEmail}
                     </div>
                   </div>
@@ -273,19 +273,19 @@ export default function JobFluxHelpModal({
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     <a
                       href={`mailto:${supportEmail}?subject=JobFlux%20AI%20Support%20Request`}
-                      className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors"
+                      className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors"
                     >
                       <Mail className="w-3.5 h-3.5" />
                       <span>Send Mail</span>
                     </a>
                     <button
                       onClick={handleCopyEmail}
-                      className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition-colors cursor-pointer"
+                      className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 transition-colors cursor-pointer"
                     >
                       {copied ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-zinc-200" />
-                          <span className="text-zinc-200">Copied</span>
+                          <Check className="w-3.5 h-3.5 text-zinc-200 light:text-zinc-800" />
+                          <span className="text-zinc-200 light:text-zinc-800">Copied</span>
                         </>
                       ) : (
                         <>
@@ -304,8 +304,8 @@ export default function JobFluxHelpModal({
                   onClick={() => setActiveTab('ticket')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'ticket'
-                      ? 'bg-zinc-800 text-white'
-                      : 'text-zinc-400 hover:text-white bg-transparent'
+                      ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900'
+                      : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-transparent'
                   }`}
                 >
                   Submit Inquiry Ticket
@@ -314,8 +314,8 @@ export default function JobFluxHelpModal({
                   onClick={() => setActiveTab('faq')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     activeTab === 'faq'
-                      ? 'bg-zinc-800 text-white'
-                      : 'text-zinc-400 hover:text-white bg-transparent'
+                      ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900'
+                      : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-transparent'
                   }`}
                 >
                   Knowledge Base & FAQ
@@ -327,24 +327,24 @@ export default function JobFluxHelpModal({
                 {activeTab === 'ticket' && (
                   <div>
                     {submittedTicket ? (
-                      <div className="p-6 rounded-xl bg-zinc-950 border border-zinc-800 text-center space-y-4">
-                        <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 flex items-center justify-center mx-auto">
+                      <div className="p-6 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-center space-y-4">
+                        <div className="w-12 h-12 rounded-full bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-200 light:text-zinc-800 flex items-center justify-center mx-auto">
                           <Check className="w-6 h-6" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-semibold text-white">
+                          <h4 className="text-sm font-semibold text-white light:text-zinc-900">
                             Inquiry Received Successfully
                           </h4>
-                          <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
-                            Ticket reference <strong className="text-zinc-200 font-mono">#{submittedTicket}</strong> has been forwarded to our support queue at <span className="text-teal-300 font-mono">{supportEmail}</span>.
+                          <p className="text-xs text-zinc-400 light:text-zinc-600 mt-1 max-w-sm mx-auto">
+                            Ticket reference <strong className="text-zinc-200 light:text-zinc-800 font-mono">#{submittedTicket}</strong> has been forwarded to our support queue at <span className="text-teal-300 light:text-cyan-700 font-mono">{supportEmail}</span>.
                           </p>
                         </div>
-                        <p className="text-[11px] text-zinc-500">
-                          We will respond directly to your email at <span className="text-zinc-300">{email}</span>.
+                        <p className="text-[11px] text-zinc-500 light:text-zinc-600">
+                          We will respond directly to your email at <span className="text-zinc-300 light:text-zinc-700">{email}</span>.
                         </p>
                         <button
                           onClick={() => setSubmittedTicket(null)}
-                          className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-zinc-300 transition-colors cursor-pointer"
+                          className="px-4 py-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-xs font-medium text-zinc-300 light:text-zinc-700 transition-colors cursor-pointer"
                         >
                           Submit Another Inquiry
                         </button>
@@ -352,25 +352,25 @@ export default function JobFluxHelpModal({
                     ) : (
                       <form onSubmit={handleSubmitTicket} className="space-y-3.5">
                         {formError && (
-                          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400">
+                          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400 light:text-rose-600">
                             {formError}
                           </div>
                         )}
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[11px] text-zinc-400 font-medium">Your Name</label>
+                            <label className="text-[11px] text-zinc-400 light:text-zinc-600 font-medium">Your Name</label>
                             <input
                               type="text"
                               value={name}
                               onChange={(e) => setName(e.target.value)}
                               placeholder="Alex Mercer"
-                              className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[11px] text-zinc-400 font-medium">
-                              Email Address <span className="text-teal-400">*</span>
+                            <label className="text-[11px] text-zinc-400 light:text-zinc-600 font-medium">
+                              Email Address <span className="text-teal-400 light:text-cyan-600">*</span>
                             </label>
                             <input
                               type="email"
@@ -378,18 +378,18 @@ export default function JobFluxHelpModal({
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
                               placeholder="alex@domain.com"
-                              className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[11px] text-zinc-400 font-medium">Request Type</label>
+                            <label className="text-[11px] text-zinc-400 light:text-zinc-600 font-medium">Request Type</label>
                             <select
                               value={category}
                               onChange={(e) => setCategory(e.target.value)}
-                              className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs focus:outline-none focus:border-zinc-600 cursor-pointer"
+                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs focus:outline-none focus:border-zinc-600 cursor-pointer"
                             >
                               <option value="urgent_query">Urgent Query / Issue</option>
                               <option value="daily_runs">Daily Run (6 AM)</option>
@@ -402,11 +402,11 @@ export default function JobFluxHelpModal({
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[11px] text-zinc-400 font-medium">Priority</label>
+                            <label className="text-[11px] text-zinc-400 light:text-zinc-600 font-medium">Priority</label>
                             <select
                               value={priority}
                               onChange={(e) => setPriority(e.target.value)}
-                              className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs focus:outline-none focus:border-zinc-600 cursor-pointer"
+                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs focus:outline-none focus:border-zinc-600 cursor-pointer"
                             >
                               <option value="normal">Normal Priority</option>
                               <option value="high">High Priority</option>
@@ -415,20 +415,20 @@ export default function JobFluxHelpModal({
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[11px] text-zinc-400 font-medium">Subject</label>
+                            <label className="text-[11px] text-zinc-400 light:text-zinc-600 font-medium">Subject</label>
                             <input
                               type="text"
                               value={subject}
                               onChange={(e) => setSubject(e.target.value)}
                               placeholder="Brief summary of your query"
-                              className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                             />
                           </div>
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[11px] text-zinc-400 font-medium">
-                            Message Details <span className="text-teal-400">*</span>
+                          <label className="text-[11px] text-zinc-400 light:text-zinc-600 font-medium">
+                            Message Details <span className="text-teal-400 light:text-cyan-600">*</span>
                           </label>
                           <textarea
                             required
@@ -436,18 +436,18 @@ export default function JobFluxHelpModal({
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Describe how we can help you..."
-                            className="w-full px-3 py-2 rounded-lg bg-black border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 resize-none"
+                            className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 resize-none"
                           />
                         </div>
 
                         <div className="pt-2 flex items-center justify-between">
-                          <span className="text-[11px] text-zinc-500 font-mono">
+                          <span className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">
                             Dispatches to {supportEmail}
                           </span>
                           <button
                             type="submit"
                             disabled={submitting}
-                            className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                            className="px-4 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>{submitting ? 'Submitting...' : 'Send Inquiry'}</span>
@@ -463,21 +463,21 @@ export default function JobFluxHelpModal({
                     {faqs.map((faq, idx) => (
                       <div
                         key={idx}
-                        className="rounded-xl bg-black border border-zinc-800/80 overflow-hidden transition-colors"
+                        className="rounded-xl bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 overflow-hidden transition-colors"
                       >
                         <button
                           onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
-                          className="w-full p-3.5 text-left flex items-center justify-between gap-3 text-xs font-medium text-white hover:bg-zinc-900/40 cursor-pointer"
+                          className="w-full p-3.5 text-left flex items-center justify-between gap-3 text-xs font-medium text-white light:text-zinc-900 hover:bg-zinc-900/40 cursor-pointer"
                         >
                           <span>{faq.q}</span>
                           {openFaqIndex === idx ? (
-                            <ChevronUp className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                            <ChevronUp className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 shrink-0" />
                           ) : (
-                            <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                            <ChevronDown className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 shrink-0" />
                           )}
                         </button>
                         {openFaqIndex === idx && (
-                          <div className="px-3.5 pb-3.5 text-xs text-zinc-400 leading-relaxed border-t border-zinc-900/60 pt-2.5">
+                          <div className="px-3.5 pb-3.5 text-xs text-zinc-400 light:text-zinc-600 leading-relaxed border-t border-zinc-900/60 light:border-zinc-200 pt-2.5">
                             {faq.a}
                           </div>
                         )}
@@ -488,13 +488,13 @@ export default function JobFluxHelpModal({
               </div>
 
               {/* Footer */}
-              <div className="p-3.5 border-t border-zinc-800 bg-zinc-950 text-center text-[11px] text-zinc-500 flex items-center justify-between px-5">
+              <div className="p-3.5 border-t border-zinc-800 light:border-zinc-200 bg-zinc-950 light:bg-white text-center text-[11px] text-zinc-500 light:text-zinc-600 flex items-center justify-between px-5">
                 <span className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" /> 256-Bit SSL Encrypted Support
+                  <ShieldCheck className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> 256-Bit SSL Encrypted Support
                 </span>
                 <a
                   href={`mailto:${supportEmail}`}
-                  className="text-zinc-400 hover:text-white transition-colors"
+                  className="text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors"
                 >
                   {supportEmail}
                 </a>
