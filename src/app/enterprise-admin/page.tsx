@@ -881,7 +881,7 @@ export default function EnterpriseAdminPortal() {
           {/* Members Table */}
           <div className="overflow-x-auto rounded-xl border border-zinc-900 light:border-zinc-200">
             <table className="w-full text-left text-xs">
-              <thead className="bg-zinc-900/60 text-zinc-400 light:text-zinc-600 font-mono uppercase text-[10px] tracking-wider border-b border-zinc-900 light:border-zinc-200">
+              <thead className="bg-zinc-900/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 font-mono uppercase text-[10px] tracking-wider border-b border-zinc-900 light:border-zinc-200">
                 <tr>
                   <th className="py-3 px-4">Candidate</th>
                   <th className="py-3 px-4">Role &amp; Plan</th>
@@ -904,7 +904,7 @@ export default function EnterpriseAdminPortal() {
                     const isEnabled = member.enabled_for_daily_run
 
                     return (
-                      <tr key={member.user_id} className="hover:bg-zinc-900/30 transition-colors">
+                      <tr key={member.user_id} className="hover:bg-zinc-900/30 light:hover:bg-zinc-50 transition-colors">
                         {/* Candidate Identity */}
                         <td className="py-3.5 px-4">
                           <div className="font-semibold text-white light:text-zinc-900">

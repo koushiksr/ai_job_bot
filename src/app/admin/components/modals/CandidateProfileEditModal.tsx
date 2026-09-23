@@ -42,9 +42,9 @@ export default function CandidateProfileEditModal({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
+          className="bg-slate-900 light:bg-white border border-slate-800 light:border-zinc-200 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
         >
-          <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+          <div className="px-6 py-4 border-b border-slate-800 light:border-zinc-200 flex items-center justify-between bg-slate-950 light:bg-zinc-50">
             <div className="flex items-center gap-2">
               <Edit className="w-4 h-4 text-indigo-400" />
               <h3 className="font-bold text-sm text-white light:text-zinc-900">
@@ -58,7 +58,7 @@ export default function CandidateProfileEditModal({
                 onClose()
               }}
               aria-label="Close profile editor"
-              className="text-slate-400 hover:text-white light:hover:text-zinc-900 p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer z-50"
+              className="text-slate-400 light:text-zinc-500 hover:text-white light:hover:text-zinc-900 p-1 rounded-lg hover:bg-slate-800 light:hover:bg-zinc-200 transition-colors cursor-pointer z-50"
             >
               <X className="w-5 h-5" />
             </button>

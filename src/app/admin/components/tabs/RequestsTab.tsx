@@ -173,7 +173,7 @@ export default function RequestsTab({
       <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div 
           onClick={toggleRequestsTable}
-          className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none transition-colors"
+          className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 light:hover:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none transition-colors"
         >
           <div>
             <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
@@ -214,7 +214,7 @@ export default function RequestsTab({
         {requestsTableCollapsed && (
           <div 
             onClick={toggleRequestsTable}
-            className="px-5 py-3 bg-zinc-900/30 light:bg-zinc-100 hover:bg-zinc-900/60 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 cursor-pointer transition-colors"
+            className="px-5 py-3 bg-zinc-900/30 light:bg-zinc-100 hover:bg-zinc-900/60 light:hover:bg-zinc-200 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
@@ -235,7 +235,7 @@ export default function RequestsTab({
                 className="cursor-pointer group select-none"
                 title="Click table head to shrink / expand"
               >
-                <tr className="bg-black light:bg-white group-hover:bg-zinc-900/60 text-zinc-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-zinc-800 light:border-zinc-200 transition-colors">
+                <tr className="bg-black light:bg-white group-hover:bg-zinc-900/60 light:group-hover:bg-zinc-100 text-zinc-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-zinc-800 light:border-zinc-200 transition-colors">
                   <th className="py-3.5 px-4 flex items-center gap-1">
                     <span>Ticket &amp; Priority</span>
                     <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-teal-400 transition-colors" />
@@ -267,7 +267,7 @@ export default function RequestsTab({
                     const noteValue = ticketNotes[t.ticket_id] !== undefined ? ticketNotes[t.ticket_id] : (t.admin_response || '')
                     const isSaving = savingTicketId === t.ticket_id
                     return (
-                      <tr key={t.ticket_id || t._id} className="hover:bg-zinc-900/30 transition-colors align-top">
+                      <tr key={t.ticket_id || t._id} className="hover:bg-zinc-900/30 light:hover:bg-zinc-50 transition-colors align-top">
                         {/* Ticket & Priority */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <div className="font-mono font-semibold text-white light:text-zinc-900 text-xs">{t.ticket_id}</div>

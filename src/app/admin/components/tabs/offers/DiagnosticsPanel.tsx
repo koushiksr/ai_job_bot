@@ -113,7 +113,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
     <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
       <div 
         onClick={toggleOffersMailDiag}
-        className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+        className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 light:hover:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
       >
         <div>
           <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
@@ -673,7 +673,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
               <div className="rounded-xl border border-zinc-800 light:border-zinc-200 overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead onClick={toggleOffersMailLogs} className="cursor-pointer group select-none" title="Click table head to shrink / expand">
-                    <tr className="border-b border-zinc-800 light:border-zinc-200 bg-zinc-950/80 light:bg-white text-[11px] font-mono text-zinc-400 light:text-zinc-600 uppercase tracking-wider hover:bg-zinc-900/60 transition-colors">
+                    <tr className="border-b border-zinc-800 light:border-zinc-200 bg-zinc-950/80 light:bg-white text-[11px] font-mono text-zinc-400 light:text-zinc-600 uppercase tracking-wider hover:bg-zinc-900/60 light:hover:bg-zinc-100 transition-colors">
                       <th className="py-2.5 px-3 flex items-center gap-1">
                         <span>Date &amp; Time</span>
                         <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400" />
@@ -693,7 +693,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
                       </tr>
                     ) : (
                       mailLogs.map((log) => (
-                        <tr key={log.id} className="hover:bg-zinc-900/40 transition-colors">
+                        <tr key={log.id} className="hover:bg-zinc-900/40 light:hover:bg-zinc-50 transition-colors">
                           <td className="py-2.5 px-3 font-mono text-[11px] text-zinc-400 light:text-zinc-600 whitespace-nowrap">
                             {new Date(log.created_at).toLocaleTimeString('en-IN', {
                               hour: '2-digit',

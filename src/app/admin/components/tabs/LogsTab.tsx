@@ -226,7 +226,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
           <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
             <div
               onClick={toggleActivityTable}
-              className="px-5 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"
+              className="px-5 py-3.5 bg-slate-950 light:bg-white border-b border-slate-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 light:hover:bg-zinc-50 transition-colors group"
             >
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-sky-400" />
@@ -247,7 +247,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             {activityTableCollapsed && (
               <div
                 onClick={toggleActivityTable}
-                className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+                className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 light:hover:text-zinc-900 hover:bg-zinc-900/30 light:hover:bg-zinc-100 transition-all select-none"
               >
                 <Activity className="w-3.5 h-3.5 text-sky-400" />
                 <span>Table shrunk ({activityLogs.length} events hidden) · Click header to expand</span>
@@ -257,13 +257,13 @@ export const LogsTab: React.FC<LogsTabProps> = ({
 
             {!activityTableCollapsed && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
+              <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
                 <thead
                   onClick={toggleActivityTable}
-                  className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 cursor-pointer group select-none"
+                  className="bg-slate-950 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200 cursor-pointer group select-none"
                   title="Click table head to shrink / expand"
                 >
-                  <tr className="hover:bg-zinc-900/60 transition-colors">
+                  <tr className="hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors">
                     <th className="py-3 px-4 flex items-center gap-1">
                       <span>Timestamp</span>
                       <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400" />
@@ -274,23 +274,23 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                     <th className="py-3 px-4">IP &amp; Device (Click Head to Shrink ▲)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
                   {loadingActivity ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-400">
+                      <td colSpan={5} className="py-12 text-center text-slate-400 light:text-zinc-500">
                         <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                         Streaming live activity records...
                       </td>
                     </tr>
                   ) : activityLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-500">
+                      <td colSpan={5} className="py-12 text-center text-slate-500 light:text-zinc-500">
                         No activity logs found for this filter.
                       </td>
                     </tr>
                   ) : (
                     activityLogs.map((log, idx) => (
-                      <tr key={log.id || idx} className="hover:bg-slate-800/30 transition-colors">
+                      <tr key={log.id || idx} className="hover:bg-slate-800/30 light:hover:bg-zinc-50 transition-colors">
                         <td className="py-3 px-4 font-mono text-[11px] text-zinc-400 light:text-zinc-600 whitespace-nowrap">
                           {formatTimestamp(log.created_at)}
                         </td>
@@ -547,7 +547,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
           <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
             <div
               onClick={toggleLlmTable}
-              className="px-5 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"
+              className="px-5 py-3.5 bg-slate-950 light:bg-white border-b border-slate-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 light:hover:bg-zinc-50 transition-colors group"
             >
               <div className="flex items-center gap-2">
                 <Brain className="w-4 h-4 text-purple-400" />
@@ -568,7 +568,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             {llmTableCollapsed && (
               <div
                 onClick={toggleLlmTable}
-                className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+                className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 light:hover:text-zinc-900 hover:bg-zinc-900/30 light:hover:bg-zinc-100 transition-all select-none"
               >
                 <Brain className="w-3.5 h-3.5 text-purple-400" />
                 <span>Table shrunk ({llmLogs.length} inferences hidden) · Click header to expand</span>
@@ -578,13 +578,13 @@ export const LogsTab: React.FC<LogsTabProps> = ({
 
             {!llmTableCollapsed && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
+              <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
                 <thead
                   onClick={toggleLlmTable}
-                  className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 cursor-pointer group select-none"
+                  className="bg-slate-950 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200 cursor-pointer group select-none"
                   title="Click table head to shrink / expand"
                 >
-                  <tr className="hover:bg-zinc-900/60 transition-colors">
+                  <tr className="hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors">
                     <th className="py-3 px-4 flex items-center gap-1">
                       <span>Time &amp; Candidate</span>
                       <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-purple-400" />
@@ -597,27 +597,27 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                     <th className="py-3 px-4 text-right">Details (Click Head to Shrink ▲)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
                   {loadingLlmLogs ? (
                     <tr>
-                      <td colSpan={7} className="py-14 text-center text-slate-400">
+                      <td colSpan={7} className="py-14 text-center text-slate-400 light:text-zinc-500">
                         <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                         Querying AI inference telemetry &amp; Q&amp;A records...
                       </td>
                     </tr>
                   ) : llmLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-14 text-center text-slate-500">
+                      <td colSpan={7} className="py-14 text-center text-slate-500 light:text-zinc-500">
                         <Brain className="w-8 h-8 mx-auto text-zinc-600 mb-2" />
                         No LLM inference logs found matching your filters.
-                        <div className="text-[11px] text-zinc-600 mt-1">
+                        <div className="text-[11px] text-zinc-600 light:text-zinc-500 mt-1">
                           Questions answered by the bot will automatically appear here in real-time.
                         </div>
                       </td>
                     </tr>
                   ) : (
                     llmLogs.map((log, idx) => (
-                      <tr key={log.id || idx} className="hover:bg-slate-800/30 transition-colors">
+                      <tr key={log.id || idx} className="hover:bg-slate-800/30 light:hover:bg-zinc-50 transition-colors">
                         {/* Time & Candidate */}
                         <td className="py-3 px-4 whitespace-nowrap">
                           <div className="font-mono text-[11px] text-zinc-300 light:text-zinc-700 font-semibold">
@@ -840,7 +840,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
       {logsSubTab === 'job_history' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 p-4 space-y-2 h-[600px] overflow-y-auto">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 light:text-zinc-600 mb-3">
               Select Candidate
             </h3>
             {usersList.map((u: any) => (
@@ -850,7 +850,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 className={`w-full text-left p-3 rounded-xl text-xs font-mono transition-all flex items-center justify-between cursor-pointer ${
                   selectedSystemLog === u.user_id
                     ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-md border border-zinc-700 light:border-zinc-300'
-                    : 'bg-black light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 text-slate-300 border border-zinc-800 light:border-zinc-200'
+                    : 'bg-black light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 text-slate-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-200'
                 }`}
               >
                 <span className="truncate">{u.name || u.user_id}</span>
@@ -867,17 +867,17 @@ export const LogsTab: React.FC<LogsTabProps> = ({
               {selectedSystemLog && (
                 <button
                   onClick={() => loadSystemLogContent(selectedSystemLog)}
-                  className="text-xs text-slate-400 hover:text-white light:hover:text-zinc-900 cursor-pointer"
+                  className="text-xs text-slate-400 light:text-zinc-500 hover:text-white light:hover:text-zinc-900 cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
-            <div className="p-4 flex-1 overflow-y-auto font-mono text-xs text-slate-300 space-y-1">
+            <div className="p-4 flex-1 overflow-y-auto font-mono text-xs text-slate-300 light:text-zinc-700 space-y-1">
               {loadingLogContent ? (
-                <div className="h-full flex items-center justify-center text-slate-500">Loading activity...</div>
+                <div className="h-full flex items-center justify-center text-slate-500 light:text-zinc-500">Loading activity...</div>
               ) : selectedLogContent.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-slate-500">
+                <div className="h-full flex items-center justify-center text-slate-500 light:text-zinc-500">
                   Click a candidate on the left to view their applied job activity.
                 </div>
               ) : (
@@ -912,8 +912,8 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             </button>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
+              <thead className="bg-slate-950 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200">
                 <tr>
                   <th className="py-3 px-4">Ticket ID</th>
                   <th className="py-3 px-4">Candidate</th>
@@ -923,23 +923,23 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                   <th className="py-3 px-4 text-right">Target Email</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
                 {loadingTickets ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
+                    <td colSpan={6} className="py-12 text-center text-slate-400 light:text-zinc-500">
                       <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                       Loading support tickets...
                     </td>
                   </tr>
                 ) : supportTickets.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-500">
+                    <td colSpan={6} className="py-12 text-center text-slate-500 light:text-zinc-500">
                       No support inquiries received yet. Inquiries from the Help Modal will appear here.
                     </td>
                   </tr>
                 ) : (
                   supportTickets.map((t, idx) => (
-                    <tr key={t._id || t.ticket_id || idx} className="hover:bg-slate-800/30 transition-colors">
+                    <tr key={t._id || t.ticket_id || idx} className="hover:bg-slate-800/30 light:hover:bg-zinc-50 transition-colors">
                       <td className="py-3 px-4 font-mono font-semibold text-white light:text-zinc-900">
                         {t.ticket_id}
                       </td>

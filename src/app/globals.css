@@ -71,12 +71,21 @@ html.light, html.light body {
   border-radius: 1rem;
 }
 
+.light .glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
 /* Custom Auth0-Style Slider */
 input[type="range"] {
   accent-color: #ffffff;
 }
 
-/* Minimalist dark scrollbar */
+html.light input[type="range"] {
+  accent-color: #09090b;
+}
+
+/* Minimalist scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -84,12 +93,21 @@ input[type="range"] {
 ::-webkit-scrollbar-track {
   background: #050505;
 }
+html.light ::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
 ::-webkit-scrollbar-thumb {
   background: #27272a;
   border-radius: 3px;
 }
+html.light ::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
 }
 
 /* Sleek Autonomous Laser Beam Sweep (Matches JobFlux Engine Status) */

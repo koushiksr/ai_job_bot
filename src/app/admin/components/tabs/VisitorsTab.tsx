@@ -466,7 +466,7 @@ export default function VisitorsTab() {
                   return (
                     <tr
                       key={evt.id}
-                      className={`hover:bg-zinc-900/40 transition-colors ${
+                      className={`hover:bg-zinc-900/40 light:hover:bg-zinc-50 transition-colors ${
                         isPayment ? 'bg-amber-500/5' : ''
                       }`}
                     >

@@ -365,7 +365,7 @@ export default function JobFluxHelpModal({
                               value={name}
                               onChange={(e) => setName(e.target.value)}
                               placeholder="Alex Mercer"
-                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 light:placeholder:text-zinc-400 focus:outline-none focus:border-zinc-600"
                             />
                           </div>
                           <div className="space-y-1">
@@ -378,7 +378,7 @@ export default function JobFluxHelpModal({
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
                               placeholder="alex@domain.com"
-                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 light:placeholder:text-zinc-400 focus:outline-none focus:border-zinc-600"
                             />
                           </div>
                         </div>
@@ -421,7 +421,7 @@ export default function JobFluxHelpModal({
                               value={subject}
                               onChange={(e) => setSubject(e.target.value)}
                               placeholder="Brief summary of your query"
-                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                              className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 light:placeholder:text-zinc-400 focus:outline-none focus:border-zinc-600"
                             />
                           </div>
                         </div>
@@ -436,7 +436,7 @@ export default function JobFluxHelpModal({
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Describe how we can help you..."
-                            className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 resize-none"
+                            className="w-full px-3 py-2 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 text-xs placeholder:text-zinc-600 light:placeholder:text-zinc-400 focus:outline-none focus:border-zinc-600 resize-none"
                           />
                         </div>
 
@@ -467,7 +467,7 @@ export default function JobFluxHelpModal({
                       >
                         <button
                           onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
-                          className="w-full p-3.5 text-left flex items-center justify-between gap-3 text-xs font-medium text-white light:text-zinc-900 hover:bg-zinc-900/40 cursor-pointer"
+                          className="w-full p-3.5 text-left flex items-center justify-between gap-3 text-xs font-medium text-white light:text-zinc-900 hover:bg-zinc-900/40 light:hover:bg-zinc-100 cursor-pointer"
                         >
                           <span>{faq.q}</span>
                           {openFaqIndex === idx ? (

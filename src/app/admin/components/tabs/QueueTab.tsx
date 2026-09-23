@@ -494,7 +494,7 @@ export default function QueueTab({
       <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div 
           onClick={toggleQueueTable}
-          className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none transition-colors"
+          className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 light:hover:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none transition-colors"
         >
           <div>
             <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
@@ -535,7 +535,7 @@ export default function QueueTab({
         {queueTableCollapsed && (
           <div 
             onClick={toggleQueueTable}
-            className="px-5 py-3 bg-zinc-900/30 light:bg-zinc-100 hover:bg-zinc-900/60 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 cursor-pointer transition-colors"
+            className="px-5 py-3 bg-zinc-900/30 light:bg-zinc-100 hover:bg-zinc-900/60 light:hover:bg-zinc-200 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
@@ -556,7 +556,7 @@ export default function QueueTab({
                 className="cursor-pointer group select-none"
                 title="Click table head to shrink / expand"
               >
-                <tr className="border-b border-zinc-800 light:border-zinc-200 bg-black/40 light:bg-white/85 group-hover:bg-zinc-900/60 text-zinc-400 light:text-zinc-600 font-mono uppercase text-[10px] transition-colors">
+                <tr className="border-b border-zinc-800 light:border-zinc-200 bg-black/40 light:bg-white/85 group-hover:bg-zinc-900/60 light:group-hover:bg-zinc-100 text-zinc-400 light:text-zinc-600 font-mono uppercase text-[10px] transition-colors">
                   <th className="py-3 px-4 flex items-center gap-1">
                     <span>Queue / State</span>
                     <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-sky-400 transition-colors" />
@@ -584,7 +584,7 @@ export default function QueueTab({
                     const isCompleted = t.status === 'completed'
 
                     return (
-                      <tr key={t.id || t._id} className="hover:bg-zinc-900/40 transition-colors">
+                      <tr key={t.id || t._id} className="hover:bg-zinc-900/40 light:hover:bg-zinc-50 transition-colors">
                         {/* Queue / Status Column */}
                         <td className="py-3.5 px-4">
                           {isPending ? (

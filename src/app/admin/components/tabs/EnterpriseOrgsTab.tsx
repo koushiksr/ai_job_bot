@@ -435,7 +435,7 @@ export default function EnterpriseOrgsTab({
               return (
                 <div key={org.org_id} className={isDisabled ? 'bg-rose-950/10' : ''}>
                   {/* Org Row */}
-                  <div className="flex flex-wrap items-center gap-3 py-4 px-4 hover:bg-zinc-900/30 transition-colors">
+                  <div className="flex flex-wrap items-center gap-3 py-4 px-4 hover:bg-zinc-900/30 light:hover:bg-zinc-50 transition-colors">
                     {/* Name & ID */}
                     <div className="flex items-center gap-2.5 min-w-[180px] flex-1">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${isDisabled ? 'bg-rose-500/10 border-rose-500/20 text-rose-400 light:text-rose-600' : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'}`}>
@@ -601,7 +601,7 @@ export default function EnterpriseOrgsTab({
                             const isRemoving = actionLoadingId === member.user_id + '_remove'
                             const isToggling = actionLoadingId === member.user_id
                             return (
-                              <div key={member.user_id} className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-900/30 transition-colors">
+                              <div key={member.user_id} className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-900/30 light:hover:bg-zinc-100 transition-colors">
                                 {/* Avatar */}
                                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                                   member.enterprise_role === 'admin' ? 'bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300' : 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/20'

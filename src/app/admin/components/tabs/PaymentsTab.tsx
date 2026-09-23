@@ -69,7 +69,7 @@ export default function PaymentsTab({
       <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div
           onClick={togglePaymentsTable}
-          className="px-5 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 transition-colors group"
+          className="px-5 py-4 bg-slate-950 light:bg-white border-b border-slate-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none hover:bg-slate-900/60 light:hover:bg-zinc-50 transition-colors group"
         >
           <div>
             <h3 className="font-bold text-sm text-white light:text-zinc-900 flex items-center gap-2">
@@ -79,7 +79,7 @@ export default function PaymentsTab({
                 {paymentsList.length} records
               </span>
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-400 light:text-zinc-600 mt-0.5">
               Real-time payment verification records and active plan subscriptions.
             </p>
           </div>
@@ -88,7 +88,7 @@ export default function PaymentsTab({
               type="button"
               onClick={(e) => { e.stopPropagation(); fetchPayments() }}
               disabled={loadingPayments}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 light:bg-zinc-100 hover:bg-slate-800 light:hover:bg-zinc-200 text-slate-300 light:text-zinc-700 border border-slate-800 light:border-zinc-300 text-xs font-semibold transition-all cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingPayments ? 'animate-spin' : ''}`} />
               Refresh
@@ -107,7 +107,7 @@ export default function PaymentsTab({
         {paymentsTableCollapsed && (
           <div
             onClick={togglePaymentsTable}
-            className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+            className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 light:hover:text-zinc-900 hover:bg-zinc-900/30 light:hover:bg-zinc-100 transition-all select-none"
           >
             <CreditCard className="w-3.5 h-3.5 text-indigo-400" />
             <span>Table shrunk ({paymentsList.length} transactions hidden) · Click anywhere on head to expand</span>
@@ -117,13 +117,13 @@ export default function PaymentsTab({
 
         {!paymentsTableCollapsed && (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
+            <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
               <thead
                 onClick={togglePaymentsTable}
-                className="bg-slate-950/70 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 cursor-pointer group select-none"
+                className="bg-slate-950/70 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200 cursor-pointer group select-none"
                 title="Click table head to shrink / expand"
               >
-                <tr className="hover:bg-zinc-900/60 transition-colors">
+                <tr className="hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors">
                   <th className="py-3.5 px-4 flex items-center gap-1">
                     <span>Candidate / User</span>
                     <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-indigo-400" />
@@ -136,17 +136,17 @@ export default function PaymentsTab({
                   <th className="py-3.5 px-4 text-center">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
                 {loadingPayments ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={7} className="py-12 text-center text-slate-400 light:text-zinc-500">
                       <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                       Loading Razorpay transactions...
                     </td>
                   </tr>
                 ) : paymentsList.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
+                    <td colSpan={7} className="py-12 text-center text-slate-500 light:text-zinc-500">
                       <CreditCard className="w-8 h-8 mx-auto text-slate-600 mb-2" />
                       No Razorpay payments recorded in the database yet.
                       <div className="text-[11px] text-slate-600 mt-1">
@@ -156,10 +156,10 @@ export default function PaymentsTab({
                   </tr>
                 ) : (
                   paymentsList.map((p, idx) => (
-                    <tr key={p.id || p._id || idx} className="hover:bg-slate-800/30 transition-colors">
+                    <tr key={p.id || p._id || idx} className="hover:bg-slate-800/30 light:hover:bg-zinc-50 transition-colors">
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-white light:text-zinc-900">{p.email || p.user_id}</div>
-                        <div className="text-[11px] text-slate-500 font-mono">{p.user_id}</div>
+                        <div className="text-[11px] text-slate-500 light:text-zinc-500 font-mono">{p.user_id}</div>
                       </td>
                       <td className="py-3.5 px-4">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
@@ -176,10 +176,10 @@ export default function PaymentsTab({
                       <td className="py-3.5 px-4 font-mono text-[11px] text-cyan-400 light:text-cyan-600">
                         {p.payment_id}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400 light:text-zinc-600">
                         {p.order_id}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-400 text-[11px]">
+                      <td className="py-3.5 px-4 text-slate-400 light:text-zinc-600 text-[11px]">
                         {p.verified_at ? new Date(p.verified_at).toLocaleString() : 'N/A'}
                       </td>
                       <td className="py-3.5 px-4 text-center">

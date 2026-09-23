@@ -129,7 +129,7 @@ export default function HomeInteractiveToolsCard({
                 value={targetRole}
                 onChange={(e) => setTargetRole(e.target.value)}
                 placeholder="e.g. Python Backend Engineer"
-                className="w-full bg-slate-950 border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 text-xs font-mono"
+                className="w-full bg-slate-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 text-xs font-mono"
               />
             </div>
             <div>
@@ -139,7 +139,7 @@ export default function HomeInteractiveToolsCard({
                 value={userSkills}
                 onChange={(e) => setUserSkills(e.target.value)}
                 placeholder="e.g. Python, FastAPI, Docker, AWS"
-                className="w-full bg-slate-950 border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 text-xs font-mono"
+                className="w-full bg-slate-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 text-xs font-mono"
               />
             </div>
           </div>
@@ -366,7 +366,7 @@ export default function HomeInteractiveToolsCard({
                 value={targetCompany}
                 onChange={(e) => setTargetCompany(e.target.value)}
                 placeholder="e.g. PhonePe, Razorpay, Swiggy"
-                className="w-full bg-slate-950 border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 text-xs font-mono"
+                className="w-full bg-slate-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 text-xs font-mono"
               />
             </div>
             <div className="self-end w-full sm:w-auto pt-1">

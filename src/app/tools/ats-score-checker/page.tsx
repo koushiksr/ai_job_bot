@@ -194,7 +194,7 @@ export default function AtsScoreCheckerPage() {
           <div className="bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 rounded-3xl p-6 md:p-8 shadow-2xl mb-12">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
               {/* Score Dial (4 cols) */}
-              <div className="md:col-span-4 text-center md:border-r md:border-zinc-800 md:pr-6">
+              <div className="md:col-span-4 text-center md:border-r border-zinc-800 light:border-zinc-200 md:pr-6">
                 <span className="text-xs font-semibold text-zinc-400 light:text-zinc-600 uppercase tracking-wider block mb-2">
                   Estimated ATS Match
                 </span>

@@ -31,7 +31,7 @@ export default function EnterpriseLeadsTab({
     <div className="space-y-4">
       <div
         onClick={toggleEnterpriseLeadsTable}
-        className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none hover:bg-zinc-900/40 transition-colors group"
+        className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none hover:bg-zinc-900/40 light:hover:bg-zinc-50 transition-colors group"
       >
         <div>
           <h3 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
@@ -41,7 +41,7 @@ export default function EnterpriseLeadsTab({
               {enterpriseLeads.length} leads
             </span>
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-400 light:text-zinc-600 mt-0.5">
             Direct inbound leads from staffing agencies, college placement cells, and enterprise cohorts.
           </p>
         </div>
@@ -49,7 +49,7 @@ export default function EnterpriseLeadsTab({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); fetchEnterpriseLeads() }}
-            className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-slate-900 light:bg-zinc-100 hover:bg-slate-800 light:hover:bg-zinc-200 border border-slate-800 light:border-zinc-300 text-slate-300 light:text-zinc-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loadingLeads ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
@@ -69,7 +69,7 @@ export default function EnterpriseLeadsTab({
         {enterpriseLeadsCollapsed && (
           <div
             onClick={toggleEnterpriseLeadsTable}
-            className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+            className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 light:hover:text-zinc-900 hover:bg-zinc-900/30 light:hover:bg-zinc-100 transition-all select-none"
           >
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
             <span>Table shrunk ({enterpriseLeads.length} leads hidden) · Click header card to expand</span>
@@ -79,13 +79,13 @@ export default function EnterpriseLeadsTab({
 
         {!enterpriseLeadsCollapsed && (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
+            <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
               <thead
                 onClick={toggleEnterpriseLeadsTable}
-                className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 cursor-pointer group select-none"
+                className="bg-slate-950 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200 cursor-pointer group select-none"
                 title="Click table head to shrink / expand"
               >
-                <tr className="hover:bg-zinc-900/60 transition-colors">
+                <tr className="hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors">
                   <th className="py-3.5 px-4 flex items-center gap-1">
                     <span>Organization / Company</span>
                     <ChevronUp className="w-3 h-3 text-zinc-600 group-hover:text-indigo-400" />
@@ -98,23 +98,23 @@ export default function EnterpriseLeadsTab({
                   <th className="py-3.5 px-4 text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
                 {loadingLeads ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={7} className="py-12 text-center text-slate-400 light:text-zinc-500">
                       <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                       Loading enterprise inquiries...
                     </td>
                   </tr>
                 ) : enterpriseLeads.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
+                    <td colSpan={7} className="py-12 text-center text-slate-500 light:text-zinc-500">
                       No enterprise inquiries received yet. Inbound requests from /pricing will appear here.
                     </td>
                   </tr>
                 ) : (
                   enterpriseLeads.map((lead, idx) => (
-                    <tr key={lead.id || lead.inquiry_id || idx} className="hover:bg-slate-800/30 transition-colors">
+                    <tr key={lead.id || lead.inquiry_id || idx} className="hover:bg-slate-800/30 light:hover:bg-zinc-50 transition-colors">
                       <td className="py-4 px-4 font-bold text-white light:text-zinc-900">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold shrink-0">
@@ -137,30 +137,30 @@ export default function EnterpriseLeadsTab({
                           {lead.seats || lead.seat_count}
                         </span>
                       </td>
-                      <td className="py-4 px-4 font-mono text-slate-200">
+                      <td className="py-4 px-4 font-mono text-slate-200 light:text-zinc-800">
                         {lead.phone ? (
                           <a
                             href={`tel:${lead.phone}`}
                             className="hover:text-cyan-400 flex items-center gap-1"
                           >
-                            <Phone className="w-3 h-3 text-slate-500" />
+                            <Phone className="w-3 h-3 text-slate-500 light:text-zinc-500" />
                             {lead.phone}
                           </a>
                         ) : (
-                          <span className="text-slate-500">N/A</span>
+                          <span className="text-slate-500 light:text-zinc-500">N/A</span>
                         )}
                       </td>
-                      <td className="py-4 px-4 text-slate-400 max-w-xs truncate text-[11px]">
+                      <td className="py-4 px-4 text-slate-400 light:text-zinc-600 max-w-xs truncate text-[11px]">
                         {lead.notes || 'No custom notes provided.'}
                       </td>
-                      <td className="py-4 px-4 text-slate-400 text-[11px] font-mono">
+                      <td className="py-4 px-4 text-slate-400 light:text-zinc-600 text-[11px] font-mono">
                         {new Date(lead.created_at).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-4 text-right">
                         <select
                           value={lead.status || 'new'}
                           onChange={(e) => handleUpdateLeadStatus(lead.inquiry_id || lead._id, e.target.value)}
-                          className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-lg border bg-slate-950 cursor-pointer focus:outline-none ${
+                          className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-lg border bg-slate-950 light:bg-white cursor-pointer focus:outline-none ${
                             lead.status === 'contacted'
                               ? 'border-blue-500/40 text-blue-400'
                               : lead.status === 'closed'

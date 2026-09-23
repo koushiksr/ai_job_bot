@@ -106,7 +106,7 @@ export default function CandidateOfferModal({
             onClose()
           }}
           type="button"
-          className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-zinc-900/80 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 flex items-center justify-center transition-colors border border-zinc-700/50 cursor-pointer shadow-sm"
+          className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-zinc-900/80 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 flex items-center justify-center transition-colors border border-zinc-700/50 light:border-zinc-300 cursor-pointer shadow-sm"
           aria-label="Close offer popup"
         >
           <X className="w-4 h-4" />

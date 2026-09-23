@@ -380,7 +380,7 @@ export default function CandidatesTab({
                   localStorage.setItem('admin_candidate_search', val)
                 } catch {}
               }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white light:text-zinc-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-950 light:bg-zinc-50 border border-slate-800 light:border-zinc-300 rounded-xl pl-9 pr-4 py-2 text-xs text-white light:text-zinc-900 placeholder-slate-500 light:placeholder-zinc-400 focus:outline-none focus:border-indigo-500 light:focus:border-indigo-600"
             />
             {userSearch && (
               <button
@@ -677,7 +677,7 @@ export default function CandidatesTab({
       <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div 
           onClick={toggleCandidatesTable}
-          className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+          className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 light:hover:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
         >
           <div>
             <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
@@ -718,7 +718,7 @@ export default function CandidatesTab({
         {candidatesTableCollapsed && (
           <div 
             onClick={toggleCandidatesTable}
-            className="px-5 py-3 bg-zinc-900/30 light:bg-zinc-100 hover:bg-zinc-900/60 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 cursor-pointer transition-colors"
+            className="px-5 py-3 bg-zinc-900/30 light:bg-zinc-100 hover:bg-zinc-900/60 light:hover:bg-zinc-200 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
@@ -733,12 +733,12 @@ export default function CandidatesTab({
 
         {!candidatesTableCollapsed && (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
+            <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
               <thead className="select-none">
-                <tr className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <tr className="bg-slate-950 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200">
                   <th 
                     onClick={() => handleSetSortField('name')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
                     title="Click to sort by Candidate Name (A → Z)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -748,7 +748,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('email')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
                     title="Click to sort by Portal Email Address"
                   >
                     <div className="flex items-center gap-1.5">
@@ -758,7 +758,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('execution')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
                     title="Click to sort by Bot Execution Status (Live Applying First)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -768,7 +768,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('plan')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
                     title="Click to sort by Plan Tier (Elite → Pro → Starter → Trial → Free)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -778,7 +778,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('enabled')}
-                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
                     title="Click to sort by Auto-Apply Status (Enabled / Active First)"
                   >
                     <div className="flex items-center justify-center gap-1.5">
@@ -788,7 +788,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('last_login')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
                     title="Click to sort by Last Login Activity (Recent First)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -798,7 +798,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('created_at')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
                     title="Click to sort by Signup Date (Newest First)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -808,7 +808,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('today')}
-                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
                     title="Click to sort by Applications Today / Lifetime Total"
                   >
                     <div className="flex items-center justify-center gap-1.5">
@@ -819,17 +819,17 @@ export default function CandidatesTab({
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
                 {loadingUsers ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400">
+                    <td colSpan={9} className="py-12 text-center text-slate-400 light:text-zinc-500">
                       <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                       Loading candidate profiles...
                     </td>
                   </tr>
                 ) : sortedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-500">
+                    <td colSpan={9} className="py-12 text-center text-slate-500 light:text-zinc-500">
                       No candidate profiles match your search query.
                     </td>
                   </tr>
@@ -845,8 +845,8 @@ export default function CandidatesTab({
                       }}
                       className={`transition-colors cursor-pointer ${
                         selectedCandidateId === u.user_id
-                          ? 'bg-indigo-950/40 border-l-2 border-l-indigo-500 ring-1 ring-indigo-500/30'
-                          : 'hover:bg-slate-800/30'
+                          ? 'bg-indigo-950/40 light:bg-indigo-50/80 border-l-2 border-l-indigo-500 ring-1 ring-indigo-500/30'
+                          : 'hover:bg-slate-800/30 light:hover:bg-zinc-50'
                       }`}
                     >
                       <td className="py-4 px-4 font-bold text-white light:text-zinc-900 flex items-center gap-3">
@@ -1056,11 +1056,11 @@ export default function CandidatesTab({
                           <select
                             value={u.plan || 'trial'}
                             onChange={(e) => handleChangePlan(u.user_id, e.target.value)}
-                            className="bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-[10px] text-slate-200 rounded-md px-1.5 py-1 focus:outline-none focus:border-indigo-500 cursor-pointer font-mono font-medium transition-colors"
+                            className="bg-slate-900 light:bg-white hover:bg-slate-800 light:hover:bg-zinc-100 border border-slate-700/80 light:border-zinc-300 text-[10px] text-slate-200 light:text-zinc-800 rounded-md px-1.5 py-1 focus:outline-none focus:border-indigo-500 light:focus:border-indigo-600 cursor-pointer font-mono font-medium transition-colors"
                             title="Admin Quick Action: Change this candidate's plan tier"
                           >
                             <option value="none">No Plan (Inactive)</option>
-                            <option value="trial">Free Trial (24h)</option>
+                            <option value="trial">Free Trial (7 Days)</option>
                             <option value="starter">Starter (30d)</option>
                             <option value="pro">Pro (30d)</option>
                             <option value="elite">Professional (90d)</option>
@@ -1073,7 +1073,7 @@ export default function CandidatesTab({
                             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                               u.is_vip
                                 ? 'bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
-                                : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
+                                : 'bg-slate-900 light:bg-zinc-100 text-slate-400 light:text-zinc-600 border border-slate-800 light:border-zinc-300 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
                             }`}
                             title={u.is_vip ? "Click to Revoke VIP Pass" : "Click to Grant 3-Month VIP Pass"}
                           >
@@ -1209,8 +1209,8 @@ export default function CandidatesTab({
                               <ToggleRight className="w-4 h-4 text-emerald-400 light:text-emerald-600" /> ENABLED
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
-                              <ToggleLeft className="w-4 h-4 text-slate-500" /> DISABLED
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 light:bg-zinc-200 text-slate-400 light:text-zinc-600 border border-slate-700 light:border-zinc-300">
+                              <ToggleLeft className="w-4 h-4 text-slate-500 light:text-zinc-600" /> DISABLED
                             </span>
                           )}
                         </button>
@@ -1235,13 +1235,13 @@ export default function CandidatesTab({
                       </td>
                       <td className="py-4 px-4">
                         <div className="space-y-1 text-xs">
-                          <div className="flex items-center gap-1 text-slate-300">
-                            <FileText className="w-3 h-3 text-slate-500 shrink-0" />
+                          <div className="flex items-center gap-1 text-slate-300 light:text-zinc-700">
+                            <FileText className="w-3 h-3 text-slate-500 light:text-zinc-500 shrink-0" />
                             <span className="truncate max-w-[120px]" title={u.resume_filename || 'No resume file recorded'}>
                               {u.resume_filename || 'No PDF'}
                             </span>
                           </div>
-                          <div className="text-[10px] text-slate-500">
+                          <div className="text-[10px] text-slate-500 light:text-zinc-500">
                             {u.last_resume_updated_at ? `PDF: ${formatTimestamp(u.last_resume_updated_at)}` : (u.last_profile_updated_at ? `Profile: ${formatTimestamp(u.last_profile_updated_at)}` : 'Synced')}
                           </div>
                         </div>
@@ -1257,13 +1257,13 @@ export default function CandidatesTab({
                                   className={`inline-flex items-center justify-center px-2 py-0.5 rounded font-mono text-[11px] font-bold border ${
                                     appliedToday > 0 
                                       ? 'bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border-emerald-500/30 light:border-emerald-300' 
-                                      : 'bg-slate-900 text-slate-400 border-slate-800'
+                                      : 'bg-slate-900 light:bg-zinc-100 text-slate-400 light:text-zinc-700 border-slate-800 light:border-zinc-300'
                                   }`}
                                   title={`Today: ${appliedToday} applied / Daily Limit: ${limit}`}
                                 >
                                   {appliedToday} / {limit}
                                 </span>
-                                <span className="text-[10px] font-mono text-slate-500" title="Lifetime Total Applications">
+                                <span className="text-[10px] font-mono text-slate-500 light:text-zinc-500" title="Lifetime Total Applications">
                                   Total: {u.total_applied || 0}
                                 </span>
                               </>
@@ -1281,7 +1281,7 @@ export default function CandidatesTab({
                               localStorage.setItem('user_role', 'admin')
                               window.open('/dashboard', '_blank')
                             }}
-                            className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg bg-slate-900 light:bg-zinc-100 hover:bg-slate-800 light:hover:bg-zinc-200 text-slate-300 light:text-zinc-700 border border-slate-800 light:border-zinc-300 transition-colors cursor-pointer"
                             title="Open Candidate Dashboard"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />

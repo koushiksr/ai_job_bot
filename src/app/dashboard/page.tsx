@@ -1434,7 +1434,7 @@ export default function UserDashboard() {
               aria-label="Toggle profile menu"
               title="Candidate Profile & Settings"
             >
-              <div className="w-7 h-7 rounded-lg bg-zinc-800 light:bg-zinc-200 border border-zinc-700/70 flex items-center justify-center font-bold text-[10px] text-white light:text-zinc-900 shrink-0 relative overflow-hidden">
+              <div className="w-7 h-7 rounded-lg bg-zinc-800 light:bg-zinc-200 border border-zinc-700/70 light:border-zinc-300 flex items-center justify-center font-bold text-[10px] text-white light:text-zinc-900 shrink-0 relative overflow-hidden">
                 {userPicture ? (
                   <img src={userPicture} alt={userName || 'Candidate'} className="w-full h-full object-cover" onError={() => setUserPicture('')} />
                 ) : (
@@ -1475,7 +1475,7 @@ export default function UserDashboard() {
           />
 
           {/* Floating Action Sheet */}
-          <div className="fixed top-14 right-3 left-3 max-w-sm ml-auto z-50 p-4 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 light:border-zinc-200 rounded-2xl shadow-2xl shadow-black/80 space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="fixed top-14 right-3 left-3 max-w-sm ml-auto z-50 p-4 bg-zinc-950/95 light:bg-white/95 backdrop-blur-2xl border border-zinc-800/90 light:border-zinc-200 rounded-2xl shadow-2xl shadow-black/80 light:shadow-zinc-300/60 space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
             {/* Candidate Identity Card (Clickable to open profile) */}
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80 light:border-zinc-200">
               <Link
@@ -1868,7 +1868,7 @@ export default function UserDashboard() {
         )}
 
         {notificationPermission === 'default' && !notificationBannerDismissed && (
-          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/90 light:bg-zinc-100/90 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 light:text-cyan-600 shrink-0">
                 <Bell className="w-4 h-4" />
@@ -2424,7 +2424,7 @@ export default function UserDashboard() {
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'history'
                 ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold shadow-sm'
-                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50 light:hover:bg-zinc-100'
             }`}
           >
             <Briefcase className="w-3.5 h-3.5 shrink-0" />
@@ -2438,7 +2438,7 @@ export default function UserDashboard() {
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'queries'
                 ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold shadow-sm'
-                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50 light:hover:bg-zinc-100'
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5 shrink-0" />
@@ -2454,7 +2454,7 @@ export default function UserDashboard() {
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               activeTab === 'resume_builder'
                 ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold shadow-sm'
-                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50 light:hover:bg-zinc-100'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
@@ -2691,7 +2691,7 @@ export default function UserDashboard() {
                         <tr
                           key={job.id || idx}
                           onClick={() => setSelectedJobAudit(job)}
-                          className="hover:bg-zinc-900/50 transition-colors cursor-pointer"
+                          className="hover:bg-zinc-900/50 light:hover:bg-zinc-100/80 transition-colors cursor-pointer"
                         >
                           <td className="py-3 px-4 font-medium text-white light:text-zinc-900 flex items-center gap-2">
                             <div className="w-6 h-6 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-[10px] text-zinc-400 light:text-zinc-600 font-bold shrink-0">
@@ -2772,7 +2772,7 @@ export default function UserDashboard() {
                     <div
                       key={job.id || idx}
                       onClick={() => setSelectedJobAudit(job)}
-                      className="p-3.5 hover:bg-zinc-900/40 active:bg-zinc-900/70 transition-colors cursor-pointer space-y-2"
+                      className="p-3.5 hover:bg-zinc-900/40 light:hover:bg-zinc-100 active:bg-zinc-900/70 light:active:bg-zinc-200 transition-colors cursor-pointer space-y-2"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
