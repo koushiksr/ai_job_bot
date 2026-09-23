@@ -1791,7 +1791,9 @@ export default function CandidatesTab({
                                     localStorage.setItem('user_id', u.user_id)
                                     localStorage.setItem('user_email', u.email)
                                     localStorage.setItem('user_role', isSuperAdminUser(u) ? 'admin' : (isOrgAdminUser(u) ? 'enterprise_admin' : 'candidate'))
-                                    const targetUrl = isOrgAdminUser(u) ? '/enterprise' : (isSuperAdminUser(u) ? '/admin' : '/dashboard')
+                                    const targetUrl = isOrgAdminUser(u)
+                                      ? (u.org_id ? `/enterprise-admin?org_id=${encodeURIComponent(u.org_id)}` : '/enterprise-admin')
+                                      : (isSuperAdminUser(u) ? '/admin' : '/dashboard')
                                     window.open(targetUrl, '_blank')
                                   }}
                                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer"
