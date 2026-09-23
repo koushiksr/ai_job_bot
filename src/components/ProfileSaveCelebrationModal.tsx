@@ -28,25 +28,6 @@ export default function ProfileSaveCelebrationModal({
   userEmail = '',
   isProfessional = false
 }: ProfileSaveCelebrationModalProps) {
-  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
-    hours: 23,
-    minutes: 59,
-    seconds: 45
-  })
-
-  // Simulated 24-hour welcome offer countdown
-  useEffect(() => {
-    if (!isOpen) return
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 }
-        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 }
-        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 }
-        return prev
-      })
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [isOpen])
 
   // Close on Escape key
   useEffect(() => {
@@ -146,12 +127,6 @@ export default function ProfileSaveCelebrationModal({
                   <Crown className="w-4 h-4 text-amber-400" />
                   <span className="text-xs font-semibold uppercase tracking-wider text-zinc-200 font-mono">
                     Exclusive Welcome Pass
-                  </span>
-                </div>
-                <div className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 flex items-center gap-1">
-                  <span>Expires in:</span>
-                  <span className="font-bold text-white">
-                    {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
                   </span>
                 </div>
               </div>

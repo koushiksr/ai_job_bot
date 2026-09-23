@@ -32,13 +32,11 @@ import HomeInteractiveToolsCard from '@/components/HomeInteractiveToolsCard'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import HeroReviewCarousel from '@/components/HeroReviewCarousel'
 import CandidateReviewModal from '@/components/CandidateReviewModal'
-import LiveHiringTicker from '@/components/LiveHiringTicker'
 import HeroCareerLeapWidget from '@/components/HeroCareerLeapWidget'
 import JobFluxFourPillars from '@/components/JobFluxFourPillars'
 import FuturisticHeroCockpit from '@/components/FuturisticHeroCockpit'
 import EmployerProofMarquee from '@/components/EmployerProofMarquee'
 import TrustBadgesBar from '@/components/TrustBadgesBar'
-import LiveConversionToast from '@/components/LiveConversionToast'
 import Footer from '@/components/Footer'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 import { trackSignUp } from '@/lib/tracker'
@@ -475,7 +473,6 @@ export default function Home() {
         )}
         
         {/* Real-Time Live Hiring Activity Ticker */}
-        <LiveHiringTicker />
 
         {/* Main Hero Section */}
         <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 md:py-16 flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 z-10">
@@ -941,32 +938,6 @@ export default function Home() {
           onClose={() => setIsHelpOpen(false)}
           showFloatingTrigger={true}
         />
-
-        {/* Real-time Simulated Candidate Applications & Shortlist Toast */}
-        <LiveConversionToast onActivateFree={() => scrollToAuth('trial')} />
-
-        {/* Sticky Mobile Conversion Bar (for 88%+ Ad Mobile Visitors) */}
-        {!existingUser && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 p-2.5 sm:hidden bg-zinc-950/95 backdrop-blur-xl border-t border-cyan-500/30 flex items-center justify-between gap-2.5 shadow-2xl">
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold text-white light:text-zinc-900 flex items-center gap-1.5 truncate">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
-                <span>3-Day Free AI Autopilot</span>
-              </span>
-              <span className="text-[10px] text-zinc-400 light:text-zinc-600 font-mono truncate">
-                Zero Card Needed &bull; 10s Setup
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => scrollToAuth('trial')}
-              className="px-3.5 py-2 rounded-xl text-xs font-extrabold text-white light:text-zinc-900 shimmer-button-glow shadow-md shadow-cyan-500/30 shrink-0 cursor-pointer flex items-center gap-1"
-            >
-              <span>Start Free</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Google Identity Services SDK Script */}
