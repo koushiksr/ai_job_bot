@@ -434,7 +434,8 @@ export default function CandidateProfileEditor({
       expected_ctc: ctcExpectedNum,
       search_url: searchUrl,
       enabled_for_daily_run: enabledForDailyRun,
-      daily_application_limit: Number(dailyApplicationLimit) || 50,
+      // NOTE: daily_application_limit is intentionally NOT sent — it is fixed
+      // by plan (55/day) and only admins may change it (server enforces this).
       skills: skills,
       job_filters: {
         roles: targetRoles,
@@ -2535,62 +2536,12 @@ export default function CandidateProfileEditor({
           </label>
         </div>
 
-        {/* Daily Application Limit (Up to 150 Max Platform Limit) */}
-        <div className="pt-3 border-t border-zinc-900 space-y-2">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <label className="text-xs font-semibold text-white flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>Daily Applications Quota (150 Max / Day)</span>
-              </label>
-              <p className="text-[11px] text-zinc-400 mt-0.5">
-                Controls the maximum job applications the bot will submit per day (Naukri platform hard ceiling: 150/day).
-              </p>
-            </div>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-              {dailyApplicationLimit} Max / Day
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-            {[
-              { val: 150, label: '⚡ 150 (Max Quota)', desc: 'Elite / VIP Full Capacity' },
-              { val: 50, label: '🎯 50 (Pro)', desc: 'Balanced Daily Quota' },
-              { val: 20, label: '🎯 20 (Trial)', desc: 'Standard Free Tier' },
-              { val: 10, label: '🎯 10 (Light)', desc: 'Minimal Daily Scout' }
-            ].map(preset => (
-              <button
-                key={preset.val}
-                type="button"
-                onClick={() => setDailyApplicationLimit(preset.val)}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                  dailyApplicationLimit === preset.val
-                    ? 'bg-amber-500/15 border-amber-500/50 text-white shadow-sm'
-                    : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
-                }`}
-              >
-                <div className="text-xs font-bold font-mono">{preset.label}</div>
-                <div className="text-[10px] text-zinc-500 mt-0.5">{preset.desc}</div>
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3 pt-1">
-            <span className="text-[11px] font-mono text-zinc-400">Custom Limit (1 to 150):</span>
-            <input
-              type="number"
-              min="1"
-              max="150"
-              value={dailyApplicationLimit}
-              onChange={e => {
-                const num = parseInt(e.target.value, 10)
-                if (!isNaN(num)) {
-                  setDailyApplicationLimit(Math.min(150, Math.max(1, num)))
-                }
-              }}
-              className="w-24 bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-white font-mono focus:outline-none focus:border-amber-500"
-            />
-          </div>
+        {/* Daily limit — fixed by plan, admin-managed. Candidates see it, only admins change it. */}
+        <div className="pt-3 border-t border-zinc-900 flex items-center justify-between gap-2">
+          <p className="text-[11px] text-zinc-500">
+            Daily limit: <span className="text-zinc-200 font-mono font-semibold">55 / day</span>
+            <span className="text-zinc-600"> · set by your plan</span>
+          </p>
         </div>
       </div>
 

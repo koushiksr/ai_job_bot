@@ -10,7 +10,6 @@ import {
   Sparkles,
   LogOut,
   Crown,
-  Briefcase,
   ChevronRight,
   ExternalLink
 } from 'lucide-react'
@@ -185,50 +184,20 @@ export default function CandidateProfilePage() {
         </div>
 
         {/* Page Hero Header */}
-        <div className="p-6 sm:p-7 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4 relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1 max-w-2xl">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  Candidate Profile & Naukri Credentials
-                </h1>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold">
-                  ONE-TIME SETUP
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                  Bot Synchronized
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1">
-                Configure your Naukri login credentials, upload your resume PDF, set your single current employer, and target roles. The autonomous worker uses these exact parameters during daily morning application sweeps.
-              </p>
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#09090b] border border-zinc-800 relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                Candidate Profile
+              </h1>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Bot Synced
+              </span>
             </div>
-
-            <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
-              <Link
-                href="/dashboard"
-                className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-200 hover:text-white transition-colors flex items-center gap-1.5"
-              >
-                <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
-                <span>View Dispatched Jobs</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Quick Context Chips */}
-          <div className="pt-3 border-t border-zinc-800/80 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div className="p-3 rounded-lg bg-black/60 border border-zinc-800/60 flex items-center justify-between">
-              <span className="text-zinc-500 font-mono">Account ID:</span>
-              <span className="font-mono text-white font-medium truncate max-w-[150px]">{userId}</span>
-            </div>
-            <div className="p-3 rounded-lg bg-black/60 border border-zinc-800/60 flex items-center justify-between">
-              <span className="text-zinc-500 font-mono">Primary Email:</span>
-              <span className="font-mono text-white font-medium truncate max-w-[150px]">{userEmail}</span>
-            </div>
-            <div className="p-3 rounded-lg bg-black/60 border border-zinc-800/60 flex items-center justify-between">
-              <span className="text-zinc-500 font-mono">Schedule:</span>
-              <span className="font-mono text-zinc-200 font-medium">06:00 AM IST Sweeps</span>
-            </div>
+            <p className="text-[11px] text-zinc-500 font-mono">
+              {userId} · {userEmail} · 06:00 AM IST sweeps
+            </p>
           </div>
         </div>
 
@@ -271,8 +240,8 @@ export default function CandidateProfilePage() {
 
         {/* Bottom Navigation Helper */}
         <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div className="text-zinc-400">
-            Finished calibrating your profile? All changes take effect on the next scheduled application run.
+          <div className="text-zinc-500">
+            Changes apply on the next scheduled run.
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Link

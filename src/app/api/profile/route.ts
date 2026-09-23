@@ -222,9 +222,13 @@ export async function POST(req: NextRequest) {
       updateDoc.enabled_for_daily_run = existing.enabled_for_daily_run
     }
 
-    if (body.daily_application_limit !== undefined) {
+    // Daily limit is admin-managed: only admin sessions may set it.
+    // Candidate saves (visual form + raw JSON) can never raise it.
+    const sess = await readSession(req)
+    const isAdminCaller = sess?.role === 'admin'
+    if (isAdminCaller && body.daily_application_limit !== undefined) {
       updateDoc.daily_application_limit = Math.min(150, Math.max(1, Number(body.daily_application_limit)))
-    } else if (parsedRaw.daily_application_limit !== undefined) {
+    } else if (isAdminCaller && parsedRaw.daily_application_limit !== undefined) {
       updateDoc.daily_application_limit = Math.min(150, Math.max(1, Number(parsedRaw.daily_application_limit)))
     } else if (existing?.daily_application_limit !== undefined) {
       updateDoc.daily_application_limit = existing.daily_application_limit
