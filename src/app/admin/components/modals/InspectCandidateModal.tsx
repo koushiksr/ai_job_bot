@@ -54,7 +54,7 @@ export default function InspectCandidateModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 light:bg-white/85 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -63,15 +63,15 @@ export default function InspectCandidateModal({
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl bg-[#0e0e11] border border-zinc-800 rounded-2xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-2xl bg-[#0e0e11] border border-zinc-800 light:border-zinc-200 rounded-2xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto"
       >
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-white light:text-zinc-900 flex items-center gap-2">
               <User className="w-4 h-4 text-sky-400" />
               <span>Candidate Telemetry: {candidate.name || candidate.user_id}</span>
             </h3>
-            <p className="text-xs text-zinc-400 font-mono mt-0.5">{candidate.email}</p>
+            <p className="text-xs text-zinc-400 light:text-zinc-600 font-mono mt-0.5">{candidate.email}</p>
           </div>
           <button
             type="button"
@@ -80,7 +80,7 @@ export default function InspectCandidateModal({
               onClose()
             }}
             aria-label="Close candidate telemetry modal"
-            className="p-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white cursor-pointer z-50"
+            className="p-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 cursor-pointer z-50"
           >
             <X className="w-5 h-5" />
           </button>
@@ -109,23 +109,23 @@ export default function InspectCandidateModal({
               }
               if (isInQueue) {
                 return (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                    <Clock className="w-3 h-3 text-amber-400 animate-spin" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300">
+                    <Clock className="w-3 h-3 text-amber-400 light:text-amber-600 animate-spin" />
                     ⏳ IN QUEUE
                   </span>
                 )
               }
               if (isDone) {
                 return (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 light:border-emerald-300">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
                     ✓ APPLIED TODAY
                   </span>
                 )
               }
               return (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800">
-                  <Clock className="w-3 h-3 text-zinc-500" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border border-zinc-800 light:border-zinc-200">
+                  <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600" />
                   NOT APPLIED TODAY
                 </span>
               )
@@ -133,11 +133,11 @@ export default function InspectCandidateModal({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs pt-1">
-            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
+            <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase flex items-center gap-1">
                 <Laptop className="w-3 h-3 text-sky-400" /> Device Brand &amp; Model
               </span>
-              <div className="font-bold text-white text-xs truncate">
+              <div className="font-bold text-white light:text-zinc-900 text-xs truncate">
                 {candidate.execution_summary?.hardware_model ||
                  candidate.execution_summary?.device_brand ||
                  candidate.current_execution?.hardware_model ||
@@ -148,9 +148,9 @@ export default function InspectCandidateModal({
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
-                <Server className="w-3 h-3 text-emerald-400" /> Server Hostname
+            <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase flex items-center gap-1">
+                <Server className="w-3 h-3 text-emerald-400 light:text-emerald-600" /> Server Hostname
               </span>
               <div className="font-mono text-sky-300 font-bold text-xs truncate" title={candidate.execution_summary?.hostname || candidate.current_execution?.hostname || candidate.last_execution?.hostname || 'N/A'}>
                 {candidate.execution_summary?.hostname ||
@@ -160,11 +160,11 @@ export default function InspectCandidateModal({
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
-                <Cpu className="w-3 h-3 text-amber-400" /> Hardware MAC ID
+            <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase flex items-center gap-1">
+                <Cpu className="w-3 h-3 text-amber-400 light:text-amber-600" /> Hardware MAC ID
               </span>
-              <div className="font-mono text-amber-300 font-bold text-xs">
+              <div className="font-mono text-amber-300 light:text-amber-700 font-bold text-xs">
                 {candidate.execution_summary?.mac_address ||
                  candidate.current_execution?.mac_address ||
                  candidate.last_execution?.mac_address ||
@@ -172,9 +172,9 @@ export default function InspectCandidateModal({
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase">OS &amp; Architecture</span>
-              <div className="font-mono text-zinc-300 text-[11px] truncate">
+            <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase">OS &amp; Architecture</span>
+              <div className="font-mono text-zinc-300 light:text-zinc-700 text-[11px] truncate">
                 {candidate.execution_summary?.platform ||
                  candidate.current_execution?.platform ||
                  candidate.last_execution?.platform ||
@@ -182,30 +182,30 @@ export default function InspectCandidateModal({
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase">Worker Process &amp; PID</span>
-              <div className="font-mono text-zinc-300 text-[11px] truncate" title={candidate.execution_summary?.worker_id || candidate.current_execution?.worker_id || candidate.last_execution?.worker_id || 'N/A'}>
+            <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase">Worker Process &amp; PID</span>
+              <div className="font-mono text-zinc-300 light:text-zinc-700 text-[11px] truncate" title={candidate.execution_summary?.worker_id || candidate.current_execution?.worker_id || candidate.last_execution?.worker_id || 'N/A'}>
                 PID: {candidate.execution_summary?.pid || candidate.current_execution?.pid || candidate.last_execution?.pid || '48088'} · {candidate.execution_summary?.worker_id || candidate.current_execution?.worker_id || candidate.last_execution?.worker_id || 'active_worker'}
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase">Execution Cycle</span>
-              <div className="font-mono text-zinc-300 text-[11px]">
+            <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase">Execution Cycle</span>
+              <div className="font-mono text-zinc-300 light:text-zinc-700 text-[11px]">
                 {candidate.execution_summary?.last_run_date ? `Done: ${candidate.execution_summary.last_run_date}` : 'Cycle: Daily IST'}
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
-                <Zap className="w-3 h-3 text-emerald-400" /> Today's Applications
+            <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase flex items-center gap-1">
+                <Zap className="w-3 h-3 text-emerald-400 light:text-emerald-600" /> Today's Applications
               </span>
               <div className="font-mono text-xs font-bold">
                 {(() => {
                   const limit = candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20))
                   const todayCount = candidate.applied_today || 0
                   return (
-                    <span className={todayCount > 0 ? 'text-emerald-300' : 'text-zinc-400'}>
+                    <span className={todayCount > 0 ? 'text-emerald-300 light:text-emerald-700' : 'text-zinc-400 light:text-zinc-600'}>
                       {todayCount} / {limit} applied {todayCount === 0 ? '(Not run today)' : ''}
                     </span>
                   )
@@ -213,11 +213,11 @@ export default function InspectCandidateModal({
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase flex items-center gap-1">
+            <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3 text-sky-400" /> Total Applications
               </span>
-              <div className="font-mono text-xs font-bold text-white">
+              <div className="font-mono text-xs font-bold text-white light:text-zinc-900">
                 {candidate.total_applied || 0} lifetime
               </div>
             </div>
@@ -225,19 +225,19 @@ export default function InspectCandidateModal({
         </div>
 
         {/* Plan Validity Section */}
-        <div className="p-4 rounded-xl bg-black border border-zinc-800 space-y-2">
-          <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
+        <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2">
+          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
             <span>Plan Validity &amp; Expiry Countdown</span>
           </h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
             <div>
-              <span className="text-zinc-500">Current Plan:</span>
-              <div className="font-bold text-white uppercase">{candidate.plan || 'Free'}</div>
+              <span className="text-zinc-500 light:text-zinc-600">Current Plan:</span>
+              <div className="font-bold text-white light:text-zinc-900 uppercase">{candidate.plan || 'Free'}</div>
             </div>
             <div>
-              <span className="text-zinc-500">Daily Application Quota:</span>
-              <div className="font-mono font-bold text-amber-300">
+              <span className="text-zinc-500 light:text-zinc-600">Daily Application Quota:</span>
+              <div className="font-mono font-bold text-amber-300 light:text-amber-700">
                 {(() => {
                   const limit = candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20))
                   return `${limit}/day ${limit >= 150 ? '⚡ (150 Max)' : ''}`
@@ -245,14 +245,14 @@ export default function InspectCandidateModal({
               </div>
             </div>
             <div>
-              <span className="text-zinc-500">Expiry Status:</span>
+              <span className="text-zinc-500 light:text-zinc-600">Expiry Status:</span>
               <div className={`font-bold ${
-                candidate.plan_expiry_status === 'expired' ? 'text-rose-400' :
-                candidate.plan_expiry_status === 'expiring_soon_1d' ? 'text-rose-400 animate-pulse' :
-                candidate.plan_expiry_status === 'expiring_soon_2d' ? 'text-amber-400' :
-                candidate.plan_expiry_status === 'vip_lifetime' ? 'text-amber-300' :
-                candidate.plan_expiry_status === 'no_plan' ? 'text-zinc-400' :
-                'text-emerald-400'
+                candidate.plan_expiry_status === 'expired' ? 'text-rose-400 light:text-rose-600' :
+                candidate.plan_expiry_status === 'expiring_soon_1d' ? 'text-rose-400 light:text-rose-600 animate-pulse' :
+                candidate.plan_expiry_status === 'expiring_soon_2d' ? 'text-amber-400 light:text-amber-600' :
+                candidate.plan_expiry_status === 'vip_lifetime' ? 'text-amber-300 light:text-amber-700' :
+                candidate.plan_expiry_status === 'no_plan' ? 'text-zinc-400 light:text-zinc-600' :
+                'text-emerald-400 light:text-emerald-600'
               }`}>
                 {candidate.plan_expiry_status === 'vip_lifetime' ? 'VIP Pass (90d Active)' :
                  candidate.plan_expiry_status === 'expiring_soon_1d' ? 'Expiring Soon (<24h Left)' :
@@ -263,14 +263,14 @@ export default function InspectCandidateModal({
               </div>
             </div>
             <div>
-              <span className="text-zinc-500">Plan Expires At:</span>
-              <div className="font-mono text-zinc-300">
+              <span className="text-zinc-500 light:text-zinc-600">Plan Expires At:</span>
+              <div className="font-mono text-zinc-300 light:text-zinc-700">
                 {candidate.plan_expires_at ? formatTimestamp(candidate.plan_expires_at) : (candidate.is_vip ? 'Active VIP Access (90d)' : 'No fixed expiration')}
               </div>
             </div>
             <div>
-              <span className="text-zinc-500">Hours Remaining:</span>
-              <div className="font-mono text-zinc-300">
+              <span className="text-zinc-500 light:text-zinc-600">Hours Remaining:</span>
+              <div className="font-mono text-zinc-300 light:text-zinc-700">
                 {(() => {
                   const h = candidate.plan_hours_left ?? candidate.hours_until_expiry
                   if (h !== null && h !== undefined) {
@@ -284,29 +284,29 @@ export default function InspectCandidateModal({
         </div>
 
         {/* Assigned Offers Section */}
-        <div className="p-4 rounded-xl bg-black border border-zinc-800 space-y-2">
-          <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+        <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2">
+          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
             <Tag className="w-3.5 h-3.5 text-sky-400" />
             <span>Assigned Promotional Offers ({candidate.assigned_offers?.length || 0})</span>
           </h4>
           {(!candidate.assigned_offers || candidate.assigned_offers.length === 0) ? (
-            <p className="text-xs text-zinc-500">No promotional offers currently assigned to this candidate.</p>
+            <p className="text-xs text-zinc-500 light:text-zinc-600">No promotional offers currently assigned to this candidate.</p>
           ) : (
             <div className="space-y-2">
               {candidate.assigned_offers.map((off: any, idx: number) => (
-                <div key={idx} className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between gap-3">
+                <div key={idx} className="p-3 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-xs flex items-center justify-between gap-3">
                   <div>
-                    <div className="font-bold text-white">{off.offer_title}</div>
-                    <div className="text-[11px] text-zinc-400">
-                      Code: <span className="text-sky-300 font-mono font-bold">{off.promo_code}</span> · Price: <span className="text-emerald-400 font-mono font-bold">{off.discounted_price}</span>
+                    <div className="font-bold text-white light:text-zinc-900">{off.offer_title}</div>
+                    <div className="text-[11px] text-zinc-400 light:text-zinc-600">
+                      Code: <span className="text-sky-300 font-mono font-bold">{off.promo_code}</span> · Price: <span className="text-emerald-400 light:text-emerald-600 font-mono font-bold">{off.discounted_price}</span>
                     </div>
-                    <div className="text-[10px] text-zinc-500 font-mono mt-0.5">
+                    <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono mt-0.5">
                       Assigned: {formatTimestamp(off.assigned_at)} · Expires: {formatTimestamp(off.expires_at)}
                     </div>
                   </div>
                   <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
-                      off.is_expired ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                      off.is_expired ? 'bg-rose-950 text-rose-300 light:text-rose-600 border border-rose-800' : 'bg-emerald-950 text-emerald-300 light:text-emerald-700 border border-emerald-800'
                     }`}>
                       {off.is_expired ? 'Expired' : `${off.hours_left}h left`}
                     </span>
@@ -314,7 +314,7 @@ export default function InspectCandidateModal({
                       type="button"
                       disabled={revokingOfferId === (off.id || off.promo_code)}
                       onClick={() => onRevokeOffer(off.id, candidate.email, off.promo_code)}
-                      className="px-2 py-1 rounded bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors disabled:opacity-50"
+                      className="px-2 py-1 rounded bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 light:text-rose-600 border border-rose-500/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors disabled:opacity-50"
                       title="Revoke and delete this offer from candidate account"
                     >
                       <Trash2 className="w-2.5 h-2.5" />
@@ -328,29 +328,29 @@ export default function InspectCandidateModal({
         </div>
 
         {/* Automated Expiry Reminders Sent History */}
-        <div className="p-4 rounded-xl bg-black border border-zinc-800 space-y-2">
-          <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <BellRing className="w-3.5 h-3.5 text-amber-400" />
+        <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2">
+          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
+            <BellRing className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
             <span>Automated Reminder Dispatch Logs ({candidate.reminders_sent?.length || 0})</span>
           </h4>
           {(!candidate.reminders_sent || candidate.reminders_sent.length === 0) ? (
-            <p className="text-xs text-zinc-500">No automated expiry reminders dispatched yet for this candidate.</p>
+            <p className="text-xs text-zinc-500 light:text-zinc-600">No automated expiry reminders dispatched yet for this candidate.</p>
           ) : (
             <div className="space-y-1.5 max-h-48 overflow-y-auto">
               {candidate.reminders_sent.map((rem: any, rIdx: number) => (
-                <div key={rIdx} className="p-2 rounded bg-zinc-950 border border-zinc-800 text-xs flex items-center justify-between">
+                <div key={rIdx} className="p-2 rounded bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-xs flex items-center justify-between">
                   <div>
-                    <span className="font-semibold text-white uppercase text-[10px] tracking-wider mr-2">
+                    <span className="font-semibold text-white light:text-zinc-900 uppercase text-[10px] tracking-wider mr-2">
                       {rem.type === 'plan_expiry' ? 'Plan Expiry Warning' : 'Offer Expiry Warning'}
                     </span>
-                    <span className="text-[11px] text-zinc-400">
+                    <span className="text-[11px] text-zinc-400 light:text-zinc-600">
                       {rem.warning_tier || 'Alert'} ({rem.details?.hours_left !== undefined ? `${rem.details.hours_left}h left` : ''})
                     </span>
-                    <div className="text-[10px] text-zinc-500 font-mono">
+                    <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono">
                       Email: {rem.channels?.email ? '✅ Sent' : '❌ Skipped'} · Push: {rem.channels?.push ? '✅ Sent' : '❌ Skipped'}
                     </div>
                   </div>
-                  <div className="text-[10px] font-mono text-zinc-400">
+                  <div className="text-[10px] font-mono text-zinc-400 light:text-zinc-600">
                     {formatTimestamp(rem.sent_at)}
                   </div>
                 </div>
@@ -361,14 +361,14 @@ export default function InspectCandidateModal({
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-2">
-          <div className="text-[11px] text-zinc-500">
+          <div className="text-[11px] text-zinc-500 light:text-zinc-600">
             Anti-flooding safeguards enforce an 18-hour quiet window unless manually triggered.
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700 text-zinc-300 light:text-zinc-700 text-xs cursor-pointer"
             >
               Close
             </button>
@@ -378,7 +378,7 @@ export default function InspectCandidateModal({
               onClick={async () => {
                 await onDispatchCareerReport(candidate.email, 'both')
               }}
-              className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black light:text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               title="Dispatches live daily report with real DB stats and applied companies via email and web push"
             >
               {dispatchReportLoading ? (

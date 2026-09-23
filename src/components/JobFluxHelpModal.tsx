@@ -273,7 +273,7 @@ export default function JobFluxHelpModal({
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     <a
                       href={`mailto:${supportEmail}?subject=JobFlux%20AI%20Support%20Request`}
-                      className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-colors"
+                      className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 light:hover:bg-zinc-100 text-black light:text-zinc-900 light:text-zinc-900 transition-colors"
                     >
                       <Mail className="w-3.5 h-3.5" />
                       <span>Send Mail</span>
@@ -447,7 +447,7 @@ export default function JobFluxHelpModal({
                           <button
                             type="submit"
                             disabled={submitting}
-                            className="px-4 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                            className="px-4 py-2 rounded-lg bg-white light:bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 light:hover:bg-zinc-100 text-black light:text-zinc-900 light:text-zinc-900 font-semibold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>{submitting ? 'Submitting...' : 'Send Inquiry'}</span>

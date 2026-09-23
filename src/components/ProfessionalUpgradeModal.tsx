@@ -45,7 +45,7 @@ export default function ProfessionalUpgradeModal({
     <AnimatePresence>
       <div 
         onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 light:bg-white/85 backdrop-blur-xl animate-in fade-in duration-200"
         role="dialog"
         aria-modal="true"
       >
@@ -170,7 +170,7 @@ export default function ProfessionalUpgradeModal({
                 })
                 onClose()
               }}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white light:bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 light:hover:bg-zinc-100 text-black light:text-zinc-900 light:text-zinc-900 font-semibold text-xs transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
             >
               <span>{featureTitle.toLowerCase().includes('download') ? 'Buy Subscription to Download' : 'Upgrade to Professional'}</span>
               <ArrowRight className="w-4 h-4" />

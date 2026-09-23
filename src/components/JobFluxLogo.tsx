@@ -88,7 +88,7 @@ export default function JobFluxLogo({
           <span className={`font-bold tracking-tight text-white light:text-zinc-900 ${iconSizes.text}`}>
             JobFlux
           </span>
-          <span className={`font-mono font-medium uppercase rounded-md bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 text-zinc-400 light:text-zinc-600 ${iconSizes.badge}`}>
+          <span className={`font-mono font-medium uppercase rounded-md bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 light:border-zinc-300 text-zinc-400 light:text-zinc-600 ${iconSizes.badge}`}>
             AI
           </span>
         </div>

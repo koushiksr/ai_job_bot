@@ -22,7 +22,7 @@ export default function AiLoadingScreen({
         fullscreen
           ? 'fixed inset-0 z-50 w-screen w-full h-screen h-[100dvh] min-h-screen'
           : 'min-h-[420px] h-full w-full'
-      } bg-[#000000] flex flex-col items-center justify-center text-zinc-400 font-mono text-xs overflow-hidden select-none animate-in fade-in duration-200`}
+      } bg-[#000000] light:bg-white flex flex-col items-center justify-center text-zinc-400 light:text-zinc-600 font-mono text-xs overflow-hidden select-none animate-in fade-in duration-200`}
       style={fullscreen ? { minHeight: '100vh', height: '100dvh' } : undefined}
     >
       {/* Ambient electric sky radial beam - centered directly behind the logo */}
@@ -38,19 +38,19 @@ export default function AiLoadingScreen({
 
         {/* Laser sweep scanner + typography */}
         <div className="flex flex-col items-center gap-2">
-          <span className="text-zinc-200 font-medium tracking-tight text-sm sm:text-base">
+          <span className="text-zinc-200 light:text-zinc-800 font-medium tracking-tight text-sm sm:text-base">
             {title}
           </span>
-          <div className="w-44 h-[2.5px] bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden relative my-0.5">
+          <div className="w-44 h-[2.5px] bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 rounded-full overflow-hidden relative my-0.5">
             <div className="w-24 h-full bg-gradient-to-r from-transparent via-sky-400 to-transparent animate-laser-sweep" />
           </div>
           {subtitle && (
-            <span className="text-[11px] text-zinc-400 font-sans max-w-sm leading-relaxed">
+            <span className="text-[11px] text-zinc-400 light:text-zinc-600 font-sans max-w-sm leading-relaxed">
               {subtitle}
             </span>
           )}
           {accountInfo && (
-            <span className="text-[10px] text-zinc-500 font-mono mt-0.5">
+            <span className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono mt-0.5">
               {accountInfo}
             </span>
           )}

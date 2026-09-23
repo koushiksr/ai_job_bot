@@ -57,7 +57,7 @@ export default function ProfileScorePage() {
   else score += 0
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+    <div className="min-h-screen bg-[#000000] light:bg-white text-zinc-100 light:text-zinc-900 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
       {/* Subtle Auth0 ambient radial light */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-spotlight pointer-events-none" />
 
@@ -65,69 +65,69 @@ export default function ProfileScorePage() {
       <ToolsHeader />
 
       {/* Breadcrumb Navigation */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-5 w-full flex items-center gap-1.5 text-xs text-zinc-400">
-        <Link href="/tools" className="hover:text-white transition-colors">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-5 w-full flex items-center gap-1.5 text-xs text-zinc-400 light:text-zinc-600">
+        <Link href="/tools" className="hover:text-white light:hover:text-zinc-900 transition-colors">
           Free Tools
         </Link>
         <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-        <span className="text-zinc-200 font-medium">Recruiter Search Visibility Calculator</span>
+        <span className="text-zinc-200 light:text-zinc-800 font-medium">Recruiter Search Visibility Calculator</span>
       </div>
 
       {/* Main Container */}
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-8 relative z-10 w-full">
         <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-zinc-950 border border-zinc-800 text-zinc-300">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700">
             <TrendingUp className="w-3.5 h-3.5 text-sky-400" /> Recruiter Algorithm Diagnostics
           </div>
-          <h1 className="text-3xl md:text-4xl font-semibold text-white tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-semibold text-white light:text-zinc-900 tracking-tight">
             Recruiter Search Visibility Calculator
           </h1>
-          <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
+          <p className="text-zinc-400 light:text-zinc-600 text-sm md:text-base leading-relaxed">
             Understand where your profile appears when recruiters search candidates for your target tech roles.
           </p>
         </div>
 
         {/* Live Score Display */}
-        <div className="bg-[#09090b] border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-2xl mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-3xl p-6 md:p-8 shadow-2xl mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+            <span className="text-xs font-semibold text-zinc-400 light:text-zinc-600 uppercase tracking-wider block mb-1">
               Your Recruiter Inbound Score
             </span>
-            <div className="text-5xl font-black text-white">
-              {score} <span className="text-2xl text-zinc-500 font-normal">/ 100</span>
+            <div className="text-5xl font-black text-white light:text-zinc-900">
+              {score} <span className="text-2xl text-zinc-500 light:text-zinc-600 font-normal">/ 100</span>
             </div>
-            <p className="text-xs text-zinc-300 mt-2">
+            <p className="text-xs text-zinc-300 light:text-zinc-700 mt-2">
               {score >= 80 ? (
-                <span className="text-white font-semibold flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-amber-400" /> Top 5% (Page 1 in Recruiter Search Results)
+                <span className="text-white light:text-zinc-900 font-semibold flex items-center gap-1.5">
+                  <Flame className="w-4 h-4 text-amber-400 light:text-amber-600" /> Top 5% (Page 1 in Recruiter Search Results)
                 </span>
               ) : score >= 60 ? (
-                <span className="text-amber-400 font-semibold flex items-center gap-1.5">
+                <span className="text-amber-400 light:text-amber-600 font-semibold flex items-center gap-1.5">
                   <AlertCircle className="w-4 h-4" /> Average (Page 3–4 in Search Results)
                 </span>
               ) : (
-                <span className="text-rose-400 font-semibold flex items-center gap-1.5">
+                <span className="text-rose-400 light:text-rose-600 font-semibold flex items-center gap-1.5">
                   <ShieldAlert className="w-4 h-4" /> Buried (Page 6+ · Less than 1 call/week)
                 </span>
               )}
             </p>
           </div>
 
-          <div className="bg-black border border-zinc-800/80 rounded-2xl p-4 text-xs max-w-sm">
+          <div className="bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 rounded-2xl p-4 text-xs max-w-sm">
             <div className="flex items-center gap-1.5 text-sky-400 font-bold mb-1">
               <Sparkles className="w-3.5 h-3.5" /> Recruiter Search Fact
             </div>
-            <p className="text-zinc-400 leading-relaxed text-[11px]">
-              Over <strong className="text-zinc-200">78% of recruiter profile clicks</strong> go to candidates who updated their profile within the last 48 hours. Daily profile touches guarantee Page 1 placement.
+            <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
+              Over <strong className="text-zinc-200 light:text-zinc-800">78% of recruiter profile clicks</strong> go to candidates who updated their profile within the last 48 hours. Daily profile touches guarantee Page 1 placement.
             </p>
           </div>
         </div>
 
         {/* Questionnaire Form */}
-        <div className="bg-[#09090b] border border-zinc-800 rounded-2xl p-6 space-y-6 mb-12">
+        <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 space-y-6 mb-12">
           {/* Question 1 */}
           <div>
-            <label className="block text-xs font-bold text-zinc-200 mb-2">
+            <label className="block text-xs font-bold text-zinc-200 light:text-zinc-800 mb-2">
               1. When was the last time you edited or touched your job profile?
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
@@ -142,12 +142,12 @@ export default function ProfileScorePage() {
                   onClick={() => setLastUpdate(opt.id as any)}
                   className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                     lastUpdate === opt.id
-                      ? 'bg-sky-500/10 border-sky-500/50 text-white'
-                      : 'bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                      ? 'bg-sky-500/10 border-sky-500/50 text-white light:text-zinc-900'
+                      : 'bg-black light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:border-zinc-700 light:hover:border-zinc-300 hover:text-zinc-200'
                   }`}
                 >
                   <div className="font-semibold">{opt.label}</div>
-                  <div className="text-[10px] text-zinc-500">{opt.desc}</div>
+                  <div className="text-[10px] text-zinc-500 light:text-zinc-600">{opt.desc}</div>
                 </button>
               ))}
             </div>
@@ -155,7 +155,7 @@ export default function ProfileScorePage() {
 
           {/* Question 2 */}
           <div>
-            <label className="block text-xs font-bold text-zinc-200 mb-2">
+            <label className="block text-xs font-bold text-zinc-200 light:text-zinc-800 mb-2">
               2. What is your stated Notice Period?
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
@@ -170,12 +170,12 @@ export default function ProfileScorePage() {
                   onClick={() => setNoticePeriod(opt.id as any)}
                   className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                     noticePeriod === opt.id
-                      ? 'bg-sky-500/10 border-sky-500/50 text-white'
-                      : 'bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                      ? 'bg-sky-500/10 border-sky-500/50 text-white light:text-zinc-900'
+                      : 'bg-black light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:border-zinc-700 light:hover:border-zinc-300 hover:text-zinc-200'
                   }`}
                 >
                   <div className="font-semibold">{opt.label}</div>
-                  <div className="text-[10px] text-zinc-500">{opt.desc}</div>
+                  <div className="text-[10px] text-zinc-500 light:text-zinc-600">{opt.desc}</div>
                 </button>
               ))}
             </div>
@@ -183,7 +183,7 @@ export default function ProfileScorePage() {
 
           {/* Question 3 */}
           <div>
-            <label className="block text-xs font-bold text-zinc-200 mb-2">
+            <label className="block text-xs font-bold text-zinc-200 light:text-zinc-800 mb-2">
               3. How is your Profile Headline formatted?
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
@@ -197,12 +197,12 @@ export default function ProfileScorePage() {
                   onClick={() => setHeadlineType(opt.id as any)}
                   className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                     headlineType === opt.id
-                      ? 'bg-sky-500/10 border-sky-500/50 text-white'
-                      : 'bg-black border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                      ? 'bg-sky-500/10 border-sky-500/50 text-white light:text-zinc-900'
+                      : 'bg-black light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:border-zinc-700 light:hover:border-zinc-300 hover:text-zinc-200'
                   }`}
                 >
                   <div className="font-semibold">{opt.label}</div>
-                  <div className="text-[10px] text-zinc-500">{opt.desc}</div>
+                  <div className="text-[10px] text-zinc-500 light:text-zinc-600">{opt.desc}</div>
                 </button>
               ))}
             </div>
@@ -213,10 +213,10 @@ export default function ProfileScorePage() {
         <div className="rounded-3xl border border-sky-500/30 bg-[#09090b] p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
           <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10">
-            <h3 className="text-lg font-bold text-white mb-1.5">
+            <h3 className="text-lg font-bold text-white light:text-zinc-900 mb-1.5">
               Want a guaranteed 95+ score every single day?
             </h3>
-            <p className="text-xs text-zinc-400 max-w-lg leading-relaxed">
+            <p className="text-xs text-zinc-400 light:text-zinc-600 max-w-lg leading-relaxed">
               JobFlux AI runs automated daily 9 AM profile touch algorithms and submits up to 50 targeted applications each morning while you sleep.
             </p>
           </div>

@@ -365,7 +365,7 @@ export default function CandidatesTab({
   return (
     <div className="space-y-4">
       {/* Search & Status Filters Header */}
-      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3 shadow-xl">
+      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3 shadow-xl">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
@@ -380,7 +380,7 @@ export default function CandidatesTab({
                   localStorage.setItem('admin_candidate_search', val)
                 } catch {}
               }}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white light:text-zinc-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
             />
             {userSearch && (
               <button
@@ -391,7 +391,7 @@ export default function CandidatesTab({
                     localStorage.removeItem('admin_candidate_search')
                   } catch {}
                 }}
-                className="absolute right-3 top-2.5 text-zinc-500 hover:text-white"
+                className="absolute right-3 top-2.5 text-zinc-500 light:text-zinc-600 hover:text-white light:hover:text-zinc-900"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -400,12 +400,12 @@ export default function CandidatesTab({
 
           <div className="flex items-center gap-4">
             <div className="text-xs text-slate-400 hidden lg:block">
-              Auto-scheduled run: <span className="text-emerald-400 font-semibold">Daily at 06:00 AM IST</span>
+              Auto-scheduled run: <span className="text-emerald-400 light:text-emerald-600 font-semibold">Daily at 06:00 AM IST</span>
             </div>
             <button
               type="button"
               onClick={() => setEditingUser({ isNew: true, user_id: '' })}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-500/25 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white light:text-zinc-900 font-bold text-xs transition-all shadow-lg shadow-indigo-500/25 cursor-pointer"
             >
               <User className="w-4 h-4" /> Create Candidate
             </button>
@@ -413,20 +413,20 @@ export default function CandidatesTab({
         </div>
 
         {/* Bot Execution & Multi-Server Status Filters */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-zinc-900">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-zinc-900 light:border-zinc-200">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] font-mono text-sky-400 uppercase mr-1 flex items-center gap-1 font-bold">
               <Cpu className="w-3 h-3 text-sky-400" /> Bot Execution:
             </span>
             {[
-              { key: 'all', label: 'All Candidates', count: usersList.length, color: 'text-zinc-300' },
+              { key: 'all', label: 'All Candidates', count: usersList.length, color: 'text-zinc-300 light:text-zinc-700' },
               { key: 'applying', label: '⚡ Applying Live', count: countApplying, color: 'text-sky-400 font-bold', pulse: true },
-              { key: 'applied_today', label: '✓ Applied Today', count: countAppliedToday, color: 'text-emerald-400 font-bold' },
-              { key: 'in_queue', label: '⏳ In Queue', count: countInQueue, color: 'text-amber-400 font-bold' },
-              { key: 'enabled', label: '▶️ Bot Active (ON)', count: countEnabled, color: 'text-emerald-400 font-bold' },
-              { key: 'disabled', label: '⏸️ Bot Off', count: countDisabled, color: 'text-zinc-400' },
-              { key: 'not_applied_today', label: '⚠️ Not Applied Today', count: countNotAppliedToday, color: 'text-amber-200' },
-              { key: 'payment_required', label: '💳 Payment Required', count: countPaymentRequired, color: 'text-rose-400' }
+              { key: 'applied_today', label: '✓ Applied Today', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
+              { key: 'in_queue', label: '⏳ In Queue', count: countInQueue, color: 'text-amber-400 light:text-amber-600 font-bold' },
+              { key: 'enabled', label: '▶️ Bot Active (ON)', count: countEnabled, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
+              { key: 'disabled', label: '⏸️ Bot Off', count: countDisabled, color: 'text-zinc-400 light:text-zinc-600' },
+              { key: 'not_applied_today', label: '⚠️ Not Applied Today', count: countNotAppliedToday, color: 'text-amber-200 light:text-amber-800' },
+              { key: 'payment_required', label: '💳 Payment Required', count: countPaymentRequired, color: 'text-rose-400 light:text-rose-600' }
             ].map(f => (
               <button
                 key={f.key}
@@ -434,13 +434,13 @@ export default function CandidatesTab({
                 onClick={() => handleSetExecFilter(f.key)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeExecFilter === f.key
-                    ? 'bg-sky-950/80 text-white border border-sky-500 font-bold shadow-md shadow-sky-500/20'
-                    : 'bg-zinc-950/60 text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800'
+                    ? 'bg-sky-950/80 text-white light:text-zinc-900 border border-sky-500 font-bold shadow-md shadow-sky-500/20'
+                    : 'bg-zinc-950/60 light:bg-white text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200 hover:border-zinc-800 light:hover:border-zinc-200'
                 }`}
               >
                 {f.pulse && f.count > 0 && <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping mr-0.5" />}
                 <span>{f.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 font-bold ${f.color}`}>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 light:bg-white/85 font-bold ${f.color}`}>
                   {f.count}
                 </span>
               </button>
@@ -450,31 +450,31 @@ export default function CandidatesTab({
           <button
             type="button"
             onClick={() => setShowStatusGuide(!showStatusGuide)}
-            className="text-xs text-zinc-400 hover:text-amber-300 flex items-center gap-1 transition-colors font-mono cursor-pointer ml-auto"
+            className="text-xs text-zinc-400 light:text-zinc-600 hover:text-amber-300 flex items-center gap-1 transition-colors font-mono cursor-pointer ml-auto"
           >
-            <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+            <HelpCircle className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
             <span>{showStatusGuide ? 'Hide Status Legend' : 'Status & Server Guide'}</span>
           </button>
         </div>
 
         {/* Plan / Subscription Status Filters */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-zinc-900/60">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-zinc-900/60 light:border-zinc-200">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-mono text-zinc-500 uppercase mr-1 flex items-center gap-1">
-              <Filter className="w-3 h-3 text-zinc-400" /> Plan Filter:
+            <span className="text-[11px] font-mono text-zinc-500 light:text-zinc-600 uppercase mr-1 flex items-center gap-1">
+              <Filter className="w-3 h-3 text-zinc-400 light:text-zinc-600" /> Plan Filter:
             </span>
             {[
-              { key: 'all', label: 'All Plans', count: usersList.length, color: 'text-zinc-300' },
-              { key: 'elite', label: '💎 Elite (90d)', count: countElite, color: 'text-amber-400 font-bold' },
+              { key: 'all', label: 'All Plans', count: usersList.length, color: 'text-zinc-300 light:text-zinc-700' },
+              { key: 'elite', label: '💎 Elite (90d)', count: countElite, color: 'text-amber-400 light:text-amber-600 font-bold' },
               { key: 'pro', label: '⚡ Pro', count: countPro, color: 'text-indigo-400 font-bold' },
               { key: 'starter', label: '🚀 Starter', count: countStarter, color: 'text-sky-400 font-bold' },
               { key: 'trial', label: '🎁 Trial', count: countTrial, color: 'text-violet-400' },
-              { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400' },
-              { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300' },
-              { key: 'urgent', label: 'Urgent <24h', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-rose-300' },
-              { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400' },
-              { key: 'vip', label: 'VIP Pass (90d)', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length, color: 'text-amber-400' },
-              { key: 'no_plan', label: 'No Plan', count: usersList.filter(u => u.plan_expiry_status === 'no_plan' || u.plan === 'none' || u.plan === 'no_plan').length, color: 'text-zinc-400' }
+              { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400 light:text-emerald-600' },
+              { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300 light:text-amber-700' },
+              { key: 'urgent', label: 'Urgent <24h', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-rose-300 light:text-rose-600' },
+              { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400 light:text-rose-600' },
+              { key: 'vip', label: 'VIP Pass (90d)', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length, color: 'text-amber-400 light:text-amber-600' },
+              { key: 'no_plan', label: 'No Plan', count: usersList.filter(u => u.plan_expiry_status === 'no_plan' || u.plan === 'none' || u.plan === 'no_plan').length, color: 'text-zinc-400 light:text-zinc-600' }
             ].map(f => (
               <button
                 key={f.key}
@@ -487,12 +487,12 @@ export default function CandidatesTab({
                 }}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
                   candidateStatusFilter === f.key
-                    ? 'bg-zinc-800 text-white border border-zinc-700 font-bold shadow-sm'
-                    : 'bg-zinc-950/60 text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-800'
+                    ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 border border-zinc-700 light:border-zinc-300 font-bold shadow-sm'
+                    : 'bg-zinc-950/60 light:bg-white text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200 hover:border-zinc-800 light:hover:border-zinc-200'
                 }`}
               >
                 <span>{f.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 font-bold ${f.color}`}>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 light:bg-white/85 font-bold ${f.color}`}>
                   {f.count}
                 </span>
               </button>
@@ -501,7 +501,7 @@ export default function CandidatesTab({
         </div>
 
         {/* Quick Sort Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-zinc-900/80 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-zinc-900/80 light:border-zinc-200 text-xs">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] font-mono text-indigo-400 uppercase flex items-center gap-1.5 font-bold">
               <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" /> Sort Candidates:
@@ -511,7 +511,7 @@ export default function CandidatesTab({
               aria-label="Sort candidates by"
               value={sortField}
               onChange={e => handleSetSortField(e.target.value as any)}
-              className="bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-white rounded-lg px-3 py-1 text-xs font-mono focus:outline-none focus:border-indigo-500 cursor-pointer shadow-inner"
+              className="bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-white light:text-zinc-900 rounded-lg px-3 py-1 text-xs font-mono focus:outline-none focus:border-indigo-500 cursor-pointer shadow-inner"
             >
               <option value="plan">💎 Plan Tier (Elite → Pro → Starter → Trial → Free)</option>
               <option value="enabled">⚡ Auto-Apply Status (Enabled / Active First)</option>
@@ -527,7 +527,7 @@ export default function CandidatesTab({
             <button
               type="button"
               onClick={handleToggleSortOrder}
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
               title={`Current order: ${sortOrder === 'asc' ? 'Ascending' : 'Descending'}. Click to toggle.`}
             >
               {sortOrder === 'asc' ? (
@@ -547,16 +547,16 @@ export default function CandidatesTab({
               <button
                 type="button"
                 onClick={handleResetSort}
-                className="text-[11px] text-zinc-500 hover:text-zinc-300 font-mono underline ml-1 cursor-pointer transition-colors"
+                className="text-[11px] text-zinc-500 light:text-zinc-600 hover:text-zinc-300 font-mono underline ml-1 cursor-pointer transition-colors"
               >
                 Reset Sort
               </button>
             )}
           </div>
 
-          <div className="text-[11px] font-mono text-zinc-500 ml-auto flex items-center gap-1.5">
+          <div className="text-[11px] font-mono text-zinc-500 light:text-zinc-600 ml-auto flex items-center gap-1.5">
             <span>Sorting:</span>
-            <strong className="text-zinc-300 bg-zinc-900/80 px-2 py-0.5 rounded border border-zinc-800 font-normal">
+            <strong className="text-zinc-300 light:text-zinc-700 bg-zinc-900/80 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200 font-normal">
               {getSortLabel(sortField)} ({sortOrder.toUpperCase()})
             </strong>
           </div>
@@ -564,107 +564,107 @@ export default function CandidatesTab({
 
         {/* Expandable Status Legend Guide */}
         {showStatusGuide && (
-          <div className="p-4 rounded-xl bg-black/80 border border-amber-500/30 text-xs space-y-2.5 animate-fadeIn">
+          <div className="p-4 rounded-xl bg-black/80 light:bg-white/85 border border-amber-500/30 light:border-amber-300 text-xs space-y-2.5 animate-fadeIn">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+              <span className="font-bold text-white light:text-zinc-900 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-400 light:text-amber-600" />
                 <span>Candidate Plan Expiry Status &amp; Visual Indicator Guide</span>
               </span>
               <button
                 type="button"
                 onClick={() => setShowStatusGuide(false)}
-                className="text-zinc-400 hover:text-white cursor-pointer"
+                className="text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-sky-900/40 space-y-1">
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-sky-900/40 space-y-1">
                 <div className="flex items-center gap-1.5 text-sky-300 font-bold font-mono">
                   <Sparkles className="w-3.5 h-3.5 text-sky-400" />
                   <span>⚡ Applying Live (Server Identity)</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
-                  Candidate actively claimed by a server machine (e.g. <span className="text-zinc-200 font-mono">macs-MacBook-Air.local</span>). Protected from duplicate execution across servers via atomic lock.
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
+                  Candidate actively claimed by a server machine (e.g. <span className="text-zinc-200 light:text-zinc-800 font-mono">macs-MacBook-Air.local</span>). Protected from duplicate execution across servers via atomic lock.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-emerald-900/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-300 font-bold font-mono">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-emerald-900/40 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-300 light:text-emerald-700 font-bold font-mono">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
                   <span>✓ Applied Today (Completed)</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Daily run successfully executed for today&apos;s IST cycle. Machine identity, PID, and completion timestamp are permanently saved.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-amber-800/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-300 font-bold font-mono">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-amber-800/40 space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-300 light:text-amber-700 font-bold font-mono">
+                  <Clock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
                   <span>⏳ In Queue / Scheduled</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Pending in the automated queue, or waiting for the scheduled morning run (06:00 AM IST).
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-emerald-900/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-300 font-bold font-mono">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-emerald-900/40 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-300 light:text-emerald-700 font-bold font-mono">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
                   <span>Active Plan (Xd left)</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Paid plan with &gt; 48 hours remaining. Protected from discount offers to avoid cannibalizing subscription value.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-amber-800/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-300 font-bold font-mono">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-amber-800/40 space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-300 light:text-amber-700 font-bold font-mono">
+                  <Clock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
                   <span>Expiring: 1-2d (36h left)</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Plan expiring within 24–48 hours. Prime window to send retention renewal offers and automated reminders.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-rose-800/50 space-y-1">
-                <div className="flex items-center gap-1.5 text-rose-300 font-bold font-mono">
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-rose-800/50 space-y-1">
+                <div className="flex items-center gap-1.5 text-rose-300 light:text-rose-600 font-bold font-mono">
                   <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
                   <span>Expiring: &lt;24h left (Red Pulse)</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Urgent final 24-hour expiration countdown. Critical retention period before candidate&apos;s daily apply halts.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-rose-900/60 space-y-1">
-                <div className="flex items-center gap-1.5 text-rose-400 font-bold font-mono">
-                  <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-rose-900/60 space-y-1">
+                <div className="flex items-center gap-1.5 text-rose-400 light:text-rose-600 font-bold font-mono">
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-400 light:text-rose-600" />
                   <span>Plan Expired</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Validity ended. Candidate is paused and eligible for win-back discount offers and immediate reactivation.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-amber-500/30 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-300 font-bold font-mono">
-                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-amber-500/30 light:border-amber-300 space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-300 light:text-amber-700 font-bold font-mono">
+                  <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
                   <span>VIP Pass (3 Months / 90d)</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Candidate holds an active VIP access pass (90 days). Renewable upon completion.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 space-y-1">
-                <div className="flex items-center gap-1.5 text-zinc-400 font-bold font-mono">
-                  <Server className="w-3.5 h-3.5 text-zinc-400" />
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
+                <div className="flex items-center gap-1.5 text-zinc-400 light:text-zinc-600 font-bold font-mono">
+                  <Server className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                   <span>Multi-Server Distributed Execution</span>
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Any server or device running backend workers records its unique machine name, worker ID, and OS platform.
                 </p>
               </div>
@@ -674,20 +674,20 @@ export default function CandidatesTab({
       </div>
 
       {/* Candidates Table */}
-      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div 
           onClick={toggleCandidatesTable}
-          className="px-5 py-4 bg-zinc-950 hover:bg-zinc-900/60 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+          className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
         >
           <div>
-            <h4 className="text-sm font-bold text-white flex items-center gap-2">
+            <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
               <Users className="w-4 h-4 text-sky-400" />
               <span>Candidate Profiles Directory</span>
-              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+              <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
                 {filteredUsers.length} profiles
               </span>
             </h4>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
               Live candidate profiles, automated apply status, ATS resumes, and daily job report actions.
             </p>
           </div>
@@ -698,7 +698,7 @@ export default function CandidatesTab({
                 e.stopPropagation()
                 toggleCandidatesTable()
               }}
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
             >
               {candidatesTableCollapsed ? (
                 <>
@@ -718,7 +718,7 @@ export default function CandidatesTab({
         {candidatesTableCollapsed && (
           <div 
             onClick={toggleCandidatesTable}
-            className="px-5 py-3 bg-zinc-900/30 hover:bg-zinc-900/60 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400 cursor-pointer transition-colors"
+            className="px-5 py-3 bg-zinc-900/30 light:bg-zinc-100 hover:bg-zinc-900/60 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
@@ -738,7 +738,7 @@ export default function CandidatesTab({
                 <tr className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
                   <th 
                     onClick={() => handleSetSortField('name')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
                     title="Click to sort by Candidate Name (A → Z)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -748,7 +748,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('email')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
                     title="Click to sort by Portal Email Address"
                   >
                     <div className="flex items-center gap-1.5">
@@ -758,7 +758,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('execution')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
                     title="Click to sort by Bot Execution Status (Live Applying First)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -768,7 +768,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('plan')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
                     title="Click to sort by Plan Tier (Elite → Pro → Starter → Trial → Free)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -778,7 +778,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('enabled')}
-                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
                     title="Click to sort by Auto-Apply Status (Enabled / Active First)"
                   >
                     <div className="flex items-center justify-center gap-1.5">
@@ -788,7 +788,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('last_login')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
                     title="Click to sort by Last Login Activity (Recent First)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -798,7 +798,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('created_at')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
                     title="Click to sort by Signup Date (Newest First)"
                   >
                     <div className="flex items-center gap-1.5">
@@ -808,7 +808,7 @@ export default function CandidatesTab({
                   </th>
                   <th 
                     onClick={() => handleSetSortField('today')}
-                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white hover:bg-zinc-900/60 transition-colors group"
+                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 transition-colors group"
                     title="Click to sort by Applications Today / Lifetime Total"
                   >
                     <div className="flex items-center justify-center gap-1.5">
@@ -849,12 +849,12 @@ export default function CandidatesTab({
                           : 'hover:bg-slate-800/30'
                       }`}
                     >
-                      <td className="py-4 px-4 font-bold text-white flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                      <td className="py-4 px-4 font-bold text-white light:text-zinc-900 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-600 flex items-center justify-center text-xs font-bold text-white light:text-zinc-900 shrink-0">
                           {u.name ? u.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'C'}
                         </div>
                         <div>
-                          <div className="font-bold text-white flex items-center gap-1.5">
+                          <div className="font-bold text-white light:text-zinc-900 flex items-center gap-1.5">
                             <span>{u.name || u.user_id}</span>
                             {selectedCandidateId === u.user_id && (
                               <span className="px-1.5 py-0.2 rounded text-[9px] bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 font-mono font-bold">
@@ -894,7 +894,7 @@ export default function CandidatesTab({
                                   <span>APPLYING NOW</span>
                                 </div>
                                 <div className="space-y-0.5">
-                                  <div className="flex items-center gap-1 text-[11px] font-bold text-white group-hover:text-sky-300 transition-colors">
+                                  <div className="flex items-center gap-1 text-[11px] font-bold text-white light:text-zinc-900 group-hover:text-sky-300 transition-colors">
                                     <Laptop className="w-3 h-3 text-sky-400 shrink-0" />
                                     <span className="truncate max-w-[145px]">{hardwareModel || 'Apple Mac'}</span>
                                   </div>
@@ -909,13 +909,13 @@ export default function CandidatesTab({
                                   )}
                                   {macAddress && (
                                     <div className="flex items-center gap-1 text-[9px] font-mono text-amber-300/90">
-                                      <Cpu className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                                      <Cpu className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 shrink-0" />
                                       <span>MAC: {macAddress}</span>
                                     </div>
                                   )}
                                 </div>
                                 {summary.locked_at && (
-                                  <div className="text-[9px] font-mono text-zinc-500">
+                                  <div className="text-[9px] font-mono text-zinc-500 light:text-zinc-600">
                                     Started {formatTimestamp(summary.locked_at)}
                                   </div>
                                 )}
@@ -926,11 +926,11 @@ export default function CandidatesTab({
                           if (isInQueue) {
                             return (
                               <div className="space-y-1">
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                                  <Clock className="w-3 h-3 text-amber-400 animate-spin" />
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300">
+                                  <Clock className="w-3 h-3 text-amber-400 light:text-amber-600 animate-spin" />
                                   <span>IN QUEUE</span>
                                 </div>
-                                <div className="text-[10px] font-mono text-zinc-400">
+                                <div className="text-[10px] font-mono text-zinc-400 light:text-zinc-600">
                                   Awaiting worker slot
                                 </div>
                               </div>
@@ -940,33 +940,33 @@ export default function CandidatesTab({
                           if (isAppliedToday) {
                             return (
                               <div className="space-y-1.5 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to inspect execution device details">
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 light:border-emerald-300">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
                                   <span>APPLIED TODAY</span>
                                 </div>
                                 <div className="space-y-0.5">
-                                  <div className="flex items-center gap-1 text-[11px] font-bold text-white group-hover:text-emerald-300 transition-colors">
-                                    <Laptop className="w-3 h-3 text-emerald-400 shrink-0" />
+                                  <div className="flex items-center gap-1 text-[11px] font-bold text-white light:text-zinc-900 group-hover:text-emerald-300 transition-colors">
+                                    <Laptop className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
                                     <span className="truncate max-w-[145px]">{hardwareModel || 'Apple Mac'}</span>
                                   </div>
                                   {device && (
                                     <div
-                                      className="flex items-center gap-1 text-[10px] font-mono text-zinc-300"
+                                      className="flex items-center gap-1 text-[10px] font-mono text-zinc-300 light:text-zinc-700"
                                       title={`Server: ${device}\nWorker: ${workerId || 'N/A'}${platform ? `\nPlatform: ${platform}` : ''}`}
                                     >
-                                      <Server className="w-2.5 h-2.5 text-zinc-400 shrink-0" />
+                                      <Server className="w-2.5 h-2.5 text-zinc-400 light:text-zinc-600 shrink-0" />
                                       <span className="truncate max-w-[145px]">{device}</span>
                                     </div>
                                   )}
                                   {macAddress && (
                                     <div className="flex items-center gap-1 text-[9px] font-mono text-amber-300/80">
-                                      <Cpu className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                                      <Cpu className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 shrink-0" />
                                       <span>MAC: {macAddress}</span>
                                     </div>
                                   )}
                                 </div>
                                 {completedAt && (
-                                  <div className="text-[9px] font-mono text-zinc-500">
+                                  <div className="text-[9px] font-mono text-zinc-500 light:text-zinc-600">
                                     {formatTimestamp(completedAt)}
                                   </div>
                                 )}
@@ -977,8 +977,8 @@ export default function CandidatesTab({
                           if (u.enabled_for_daily_run === false) {
                             return (
                               <div className="space-y-1">
-                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800">
-                                  <AlertCircle className="w-3 h-3 text-zinc-500" />
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-500 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200">
+                                  <AlertCircle className="w-3 h-3 text-zinc-500 light:text-zinc-600" />
                                   <span>AUTO-APPLY OFF</span>
                                 </div>
                                 <div className="text-[10px] font-mono text-zinc-600">Daily bot disabled</div>
@@ -989,24 +989,24 @@ export default function CandidatesTab({
                           if (u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan') {
                             return (
                               <div className="space-y-1">
-                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-rose-400 bg-rose-950/30 border border-rose-800/40">
-                                  <AlertCircle className="w-3 h-3 text-rose-400" />
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-rose-400 light:text-rose-600 bg-rose-950/30 border border-rose-800/40">
+                                  <AlertCircle className="w-3 h-3 text-rose-400 light:text-rose-600" />
                                   <span>PLAN REQUIRED</span>
                                 </div>
-                                <div className="text-[10px] font-mono text-zinc-500">Auto-apply paused</div>
+                                <div className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Auto-apply paused</div>
                               </div>
                             )
                           }
 
                           return (
                             <div className="space-y-1 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to view candidate details">
-                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-amber-300 bg-amber-950/20 border border-amber-800/40">
-                                <Clock className="w-3 h-3 text-amber-400" />
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-amber-300 light:text-amber-700 bg-amber-950/20 border border-amber-800/40">
+                                <Clock className="w-3 h-3 text-amber-400 light:text-amber-600" />
                                 <span>NOT APPLIED TODAY</span>
                               </div>
-                              <div className="text-[10px] font-mono text-zinc-500">Next cycle: 06:00 AM</div>
+                              <div className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Next cycle: 06:00 AM</div>
                               {(hardwareModel || device) && (
-                                <div className="text-[9px] font-mono text-zinc-500 truncate max-w-[140px]">
+                                <div className="text-[9px] font-mono text-zinc-500 light:text-zinc-600 truncate max-w-[140px]">
                                   Last: {hardwareModel || device}
                                 </div>
                               )}
@@ -1018,18 +1018,18 @@ export default function CandidatesTab({
                         <div className="flex flex-col items-start gap-1.5">
                           <div className="flex items-center gap-1.5">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                              u.plan === 'elite' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' :
+                              u.plan === 'elite' ? 'bg-amber-500/10 text-amber-400 light:text-amber-600 border border-amber-500/30 light:border-amber-300' :
                               u.plan === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
                               u.plan === 'starter' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
-                              u.plan === 'vip' ? 'bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]' :
-                              u.plan === 'none' || u.plan === 'no_plan' ? 'bg-zinc-800/80 text-zinc-400 border border-zinc-700' :
-                              'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
+                              u.plan === 'vip' ? 'bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]' :
+                              u.plan === 'none' || u.plan === 'no_plan' ? 'bg-zinc-800/80 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300' :
+                              'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300'
                             }`}>
                               {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
                             </span>
                             {u.is_vip && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]">
-                                <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40" />
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]">
+                                <Crown className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 fill-amber-400/40" />
                                 VIP PASS
                               </span>
                             )}
@@ -1039,10 +1039,10 @@ export default function CandidatesTab({
                                 <span 
                                   className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${
                                     limit >= 150
-                                      ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                                      ? 'bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300'
                                       : limit >= 50
                                       ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'
-                                      : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                      : 'bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300'
                                   }`}
                                   title={`Daily Application Limit: ${limit}/day on Naukri platform`}
                                 >
@@ -1072,12 +1072,12 @@ export default function CandidatesTab({
                             onClick={() => handleToggleVip(u.user_id, !u.is_vip)}
                             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                               u.is_vip
-                                ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
+                                ? 'bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
                                 : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
                             }`}
                             title={u.is_vip ? "Click to Revoke VIP Pass" : "Click to Grant 3-Month VIP Pass"}
                           >
-                            <Crown className="w-3 h-3 text-amber-400" />
+                            <Crown className="w-3 h-3 text-amber-400 light:text-amber-600" />
                             {u.is_vip ? 'Revoke VIP' : 'Grant VIP Pass'}
                           </button>
 
@@ -1086,10 +1086,10 @@ export default function CandidatesTab({
                             if (u.is_vip || u.plan === 'vip') {
                               return (
                                 <div
-                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 text-amber-300 bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-500/30"
+                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 text-amber-300 light:text-amber-700 bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-500/30 light:border-amber-300"
                                   title="Candidate has active VIP access (90d)."
                                 >
-                                  <Crown className="w-3 h-3 text-amber-400 shrink-0" />
+                                  <Crown className="w-3 h-3 text-amber-400 light:text-amber-600 shrink-0" />
                                   <span className="font-semibold">VIP Pass (90d Active)</span>
                                 </div>
                               )
@@ -1098,10 +1098,10 @@ export default function CandidatesTab({
                             if (u.plan === 'none' || u.plan === 'no_plan' || u.plan_expiry_status === 'no_plan') {
                               return (
                                 <div
-                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800"
+                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-800 light:border-zinc-200"
                                   title="Candidate has no active plan. Prime prospect for conversion offer."
                                 >
-                                  <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                                  <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600 shrink-0" />
                                   <span>No Active Plan</span>
                                 </div>
                               )
@@ -1112,10 +1112,10 @@ export default function CandidatesTab({
                             if (u.plan_expiry_status === 'expired' || (hoursLeft !== null && hoursLeft !== undefined && hoursLeft <= 0)) {
                               return (
                                 <div
-                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/40 text-rose-300 border border-rose-800/60"
+                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/40 light:bg-rose-50 text-rose-300 light:text-rose-600 border border-rose-800/60 light:border-rose-300"
                                   title={`Plan expired on ${u.plan_expires_at ? formatTimestamp(u.plan_expires_at) : 'recently'}. Eligible for renewal retention offer.`}
                                 >
-                                  <AlertCircle className="w-3 h-3 text-rose-400 shrink-0" />
+                                  <AlertCircle className="w-3 h-3 text-rose-400 light:text-rose-600 shrink-0" />
                                   <span className="font-bold">Plan Expired</span>
                                 </div>
                               )
@@ -1124,7 +1124,7 @@ export default function CandidatesTab({
                             if (u.plan_expiry_status === 'expiring_soon_1d' || (hoursLeft !== null && hoursLeft !== undefined && hoursLeft <= 24)) {
                               return (
                                 <div
-                                  className="text-[10px] font-mono mt-1 flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-950/50 text-rose-300 border border-rose-800"
+                                  className="text-[10px] font-mono mt-1 flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-950/50 text-rose-300 light:text-rose-600 border border-rose-800"
                                   title={`Expires in ${hoursLeft} hours (${u.plan_expires_at ? formatTimestamp(u.plan_expires_at) : ''}). Urgent renewal retention window.`}
                                 >
                                   <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping shrink-0" />
@@ -1137,11 +1137,11 @@ export default function CandidatesTab({
                               const days = Math.ceil((hoursLeft || 1) / 24)
                               return (
                                 <div
-                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/40 text-amber-300 border border-amber-800/60"
+                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/40 light:bg-amber-50 text-amber-300 light:text-amber-700 border border-amber-800/60 light:border-amber-300"
                                   title={`Expires in ${hoursLeft} hours (${days}d). Within 1-2 days renewal retention window.`}
                                 >
-                                  <Clock className="w-3 h-3 text-amber-400 shrink-0" />
-                                  <span className="font-bold text-amber-300">Expiring: {days}d ({hoursLeft}h left)</span>
+                                  <Clock className="w-3 h-3 text-amber-400 light:text-amber-600 shrink-0" />
+                                  <span className="font-bold text-amber-300 light:text-amber-700">Expiring: {days}d ({hoursLeft}h left)</span>
                                 </div>
                               )
                             }
@@ -1150,27 +1150,27 @@ export default function CandidatesTab({
                               const days = Math.ceil(hoursLeft / 24)
                               return (
                                 <div
-                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950/30 text-emerald-300 border border-emerald-800/40"
+                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950/30 text-emerald-300 light:text-emerald-700 border border-emerald-800/40"
                                   title={`Active plan until ${u.plan_expires_at ? formatTimestamp(u.plan_expires_at) : ''} (${days} days left). Protected from discount offers.`}
                                 >
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                                  <span className="font-medium text-emerald-300">Active ({days}d left)</span>
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
+                                  <span className="font-medium text-emerald-300 light:text-emerald-700">Active ({days}d left)</span>
                                 </div>
                               )
                             }
 
                             if (u.plan_expires_at) {
                               return (
-                                <div className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
-                                  <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                                <div className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
+                                  <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600 shrink-0" />
                                   <span>Expires: {formatTimestamp(u.plan_expires_at)}</span>
                                 </div>
                               )
                             }
 
                             return (
-                              <div className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
-                                <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                              <div className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
+                                <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600 shrink-0" />
                                 <span>Trial (Standard)</span>
                               </div>
                             )
@@ -1184,8 +1184,8 @@ export default function CandidatesTab({
                                   key={oIdx}
                                   className={`px-1.5 py-0.2 rounded text-[9px] font-mono flex items-center gap-1 ${
                                     off.is_expired
-                                      ? 'bg-zinc-900 text-zinc-500 line-through border border-zinc-800'
-                                      : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                                      ? 'bg-zinc-900 light:bg-zinc-100 text-zinc-500 light:text-zinc-600 line-through border border-zinc-800 light:border-zinc-200'
+                                      : 'bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300'
                                   }`}
                                   title={`Offer: ${off.offer_title} (${off.discounted_price}) - Code: ${off.promo_code}`}
                                 >
@@ -1205,8 +1205,8 @@ export default function CandidatesTab({
                           title="Toggle automated daily apply"
                         >
                           {u.enabled_for_daily_run !== false ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                              <ToggleRight className="w-4 h-4 text-emerald-400" /> ENABLED
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 light:text-emerald-600 border border-emerald-500/30 light:border-emerald-300">
+                              <ToggleRight className="w-4 h-4 text-emerald-400 light:text-emerald-600" /> ENABLED
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
@@ -1217,16 +1217,16 @@ export default function CandidatesTab({
                       </td>
                       <td className="py-4 px-4">
                         <div className="space-y-1">
-                          <div className="text-white font-mono text-[11px] flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-zinc-500 shrink-0" />
+                          <div className="text-white light:text-zinc-900 font-mono text-[11px] flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600 shrink-0" />
                             <span>{formatTimestamp(u.last_login_at)}</span>
                           </div>
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-300">
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700">
                               {u.login_count || 0} logins
                             </span>
                             {u.last_login_ip && (
-                              <span className="text-[9px] font-mono text-zinc-500 truncate max-w-[80px]" title={u.last_login_ip}>
+                              <span className="text-[9px] font-mono text-zinc-500 light:text-zinc-600 truncate max-w-[80px]" title={u.last_login_ip}>
                                 {u.last_login_ip}
                               </span>
                             )}
@@ -1256,7 +1256,7 @@ export default function CandidatesTab({
                                 <span 
                                   className={`inline-flex items-center justify-center px-2 py-0.5 rounded font-mono text-[11px] font-bold border ${
                                     appliedToday > 0 
-                                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' 
+                                      ? 'bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border-emerald-500/30 light:border-emerald-300' 
                                       : 'bg-slate-900 text-slate-400 border-slate-800'
                                   }`}
                                   title={`Today: ${appliedToday} applied / Daily Limit: ${limit}`}
@@ -1300,7 +1300,7 @@ export default function CandidatesTab({
                                   await onTriggerOnDemand(u.user_id, true)
                                 }
                               }}
-                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white font-bold text-xs transition-colors border border-indigo-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white light:hover:text-zinc-900 font-bold text-xs transition-colors border border-indigo-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                               title="Trigger immediate on-demand bot run for this candidate"
                             >
                               {actionProcessingId === u.user_id ? (
@@ -1314,10 +1314,10 @@ export default function CandidatesTab({
                           <button
                             type="button"
                             onClick={() => handleInspectCandidate(u)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-amber-300 font-bold text-xs transition-colors border border-amber-500/30 shadow-sm cursor-pointer"
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-amber-300 light:text-amber-700 font-bold text-xs transition-colors border border-amber-500/30 light:border-amber-300 shadow-sm cursor-pointer"
                             title="Inspect candidate plan validity, assigned offers & reminder telemetry"
                           >
-                            <Eye className="w-3.5 h-3.5 text-amber-400" />
+                            <Eye className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
                             <span>Inspect</span>
                           </button>
                           <button
@@ -1336,14 +1336,14 @@ export default function CandidatesTab({
                           <button
                             type="button"
                             onClick={() => setEditingUser(u)}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-md cursor-pointer"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white light:text-zinc-900 font-bold transition-all shadow-md cursor-pointer"
                           >
                             <Edit className="w-3.5 h-3.5" /> Edit Profile
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteUser(u.user_id)}
-                            className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 light:text-rose-600 border border-rose-500/20 transition-colors cursor-pointer"
                             title="Delete Candidate"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

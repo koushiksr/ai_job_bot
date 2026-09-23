@@ -14,6 +14,7 @@ import {
   ExternalLink
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
+import { ThemeToggle } from '@/components/ThemeProvider'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
 import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
@@ -100,26 +101,26 @@ export default function CandidateProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+    <div className="min-h-screen bg-[#000000] light:bg-white text-zinc-100 light:text-zinc-900 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-8 py-3">
+      <header className="sticky top-0 z-40 bg-black/90 light:bg-white/85 backdrop-blur-xl border-b border-zinc-900 light:border-zinc-200 px-4 sm:px-8 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           {/* Left: Back to Dashboard & Candidate Identity with Photo */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 transition-colors cursor-pointer"
               title="Return to applications dashboard"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Dashboard</span>
             </Link>
 
-            <div className="h-4 w-px bg-zinc-800" />
+            <div className="h-4 w-px bg-zinc-800 light:bg-zinc-200" />
 
             {/* Candidate Identity with Photo & Status */}
             <div className="flex items-center gap-2.5 text-xs">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-[11px] shrink-0 relative overflow-hidden">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center font-bold text-white light:text-zinc-900 text-[11px] shrink-0 relative overflow-hidden">
                 {userPicture ? (
                   <img
                     src={userPicture}
@@ -134,38 +135,39 @@ export default function CandidateProfilePage() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-white truncate max-w-[120px] sm:max-w-[160px]">
+                  <span className="font-semibold text-white light:text-zinc-900 truncate max-w-[120px] sm:max-w-[160px]">
                     {userName || 'Candidate'}
                   </span>
                   {isVip ? (
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold">
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 light:text-amber-700 font-bold">
                       VIP
                     </span>
                   ) : isProfessional ? (
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold">
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/80 text-amber-300 light:text-amber-700 font-bold">
                       PRO
                     </span>
                   ) : null}
                 </div>
-                <div className="text-[10px] text-zinc-400 font-mono">Profile Settings</div>
+                <div className="text-[10px] text-zinc-400 light:text-zinc-600 font-mono">Profile Settings</div>
               </div>
             </div>
           </div>
 
           {/* Right: Brand Logo & Sign Out */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <ThemeToggle />
             <Link href="/dashboard" className="hidden sm:flex items-center hover:opacity-90 transition-opacity">
               <JobFluxLogo size="sm" showText={true} />
             </Link>
 
-            <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
+            <div className="h-4 w-px bg-zinc-800 light:bg-zinc-200 hidden sm:block" />
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 hover:text-red-200 transition-colors cursor-pointer shrink-0 shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 light:text-red-600 hover:text-red-200 transition-colors cursor-pointer shrink-0 shadow-sm"
               title="Sign out of JobFlux"
             >
-              <LogOut className="w-3.5 h-3.5 text-red-400" />
+              <LogOut className="w-3.5 h-3.5 text-red-400 light:text-red-600" />
               <span>Sign Out</span>
             </button>
           </div>
@@ -175,27 +177,27 @@ export default function CandidateProfilePage() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-8 py-8 space-y-8">
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 light:text-zinc-600">
           <Link href="/dashboard" className="hover:text-zinc-200 transition-colors">
             Dashboard
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-          <span className="text-zinc-200 font-semibold">Candidate Profile & Settings</span>
+          <span className="text-zinc-200 light:text-zinc-800 font-semibold">Candidate Profile & Settings</span>
         </div>
 
         {/* Page Hero Header */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-[#09090b] border border-zinc-800 relative overflow-hidden">
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+              <h1 className="text-lg sm:text-xl font-bold text-white light:text-zinc-900 tracking-tight">
                 Candidate Profile
               </h1>
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 light:border-emerald-300 text-emerald-300 light:text-emerald-700">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Bot Synced
               </span>
             </div>
-            <p className="text-[11px] text-zinc-500 font-mono">
+            <p className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">
               {userId} · {userEmail} · 06:00 AM IST sweeps
             </p>
           </div>
@@ -203,14 +205,14 @@ export default function CandidateProfilePage() {
 
         {/* Save Confirmation Banner */}
         {showSaveBanner && (
-          <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs flex items-center justify-between gap-3 font-medium animate-in fade-in">
+          <div className="p-4 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 text-xs flex items-center justify-between gap-3 font-medium animate-in fade-in">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-zinc-300 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-zinc-300 light:text-zinc-700 shrink-0" />
               <span>Candidate profile and Naukri credentials successfully synchronized with the autonomous bot!</span>
             </div>
             <Link
               href="/dashboard"
-              className="px-3 py-1 rounded bg-white hover:bg-zinc-200 text-black text-xs font-semibold transition-colors shrink-0"
+              className="px-3 py-1 rounded bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 text-xs font-semibold transition-colors shrink-0"
             >
               Go to Dashboard →
             </Link>
@@ -239,21 +241,21 @@ export default function CandidateProfilePage() {
         />
 
         {/* Bottom Navigation Helper */}
-        <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div className="text-zinc-500">
+        <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="text-zinc-500 light:text-zinc-600">
             Changes apply on the next scheduled run.
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Link
               href="/dashboard"
-              className="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0"
+              className="flex-1 sm:flex-none text-center px-4 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors shrink-0"
             >
               Back to Application Cockpit
             </Link>
             <button
               type="button"
               onClick={handleLogout}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-semibold text-xs transition-colors cursor-pointer shrink-0"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 light:text-red-600 font-semibold text-xs transition-colors cursor-pointer shrink-0"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>

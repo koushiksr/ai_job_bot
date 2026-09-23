@@ -31,13 +31,13 @@ export default function EnterpriseLeadsTab({
     <div className="space-y-4">
       <div
         onClick={toggleEnterpriseLeadsTable}
-        className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-center justify-between cursor-pointer select-none hover:bg-zinc-900/40 transition-colors group"
+        className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-center justify-between cursor-pointer select-none hover:bg-zinc-900/40 transition-colors group"
       >
         <div>
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+          <h3 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
             <Building2 className="w-4 h-4 text-indigo-400" />
             <span>Enterprise &amp; Bulk Candidate Licensing Inquiries</span>
-            <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 px-2 py-0.5 rounded-full">
               {enterpriseLeads.length} leads
             </span>
           </h3>
@@ -57,7 +57,7 @@ export default function EnterpriseLeadsTab({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); toggleEnterpriseLeadsTable() }}
-            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
             title={enterpriseLeadsCollapsed ? 'Expand table' : 'Collapse table'}
           >
             {enterpriseLeadsCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
@@ -65,11 +65,11 @@ export default function EnterpriseLeadsTab({
         </div>
       </div>
 
-      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden shadow-xl">
+      <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         {enterpriseLeadsCollapsed && (
           <div
             onClick={toggleEnterpriseLeadsTable}
-            className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
+            className="flex items-center justify-center gap-2 py-4 text-xs text-zinc-500 light:text-zinc-600 cursor-pointer hover:text-zinc-300 hover:bg-zinc-900/30 transition-all select-none"
           >
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
             <span>Table shrunk ({enterpriseLeads.length} leads hidden) · Click header card to expand</span>
@@ -115,7 +115,7 @@ export default function EnterpriseLeadsTab({
                 ) : (
                   enterpriseLeads.map((lead, idx) => (
                     <tr key={lead.id || lead.inquiry_id || idx} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="py-4 px-4 font-bold text-white">
+                      <td className="py-4 px-4 font-bold text-white light:text-zinc-900">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold shrink-0">
                             <Building2 className="w-3.5 h-3.5" />
@@ -124,7 +124,7 @@ export default function EnterpriseLeadsTab({
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="font-semibold text-white">{lead.name}</div>
+                        <div className="font-semibold text-white light:text-zinc-900">{lead.name}</div>
                         <a
                           href={`mailto:${lead.email}`}
                           className="text-[11px] text-indigo-400 hover:underline flex items-center gap-1 mt-0.5"
@@ -164,8 +164,8 @@ export default function EnterpriseLeadsTab({
                             lead.status === 'contacted'
                               ? 'border-blue-500/40 text-blue-400'
                               : lead.status === 'closed'
-                              ? 'border-emerald-500/40 text-emerald-400'
-                              : 'border-amber-500/40 text-amber-400'
+                              ? 'border-emerald-500/40 light:border-emerald-300 text-emerald-400 light:text-emerald-600'
+                              : 'border-amber-500/40 light:border-amber-300 text-amber-400 light:text-amber-600'
                           }`}
                         >
                           <option value="new">NEW LEAD</option>

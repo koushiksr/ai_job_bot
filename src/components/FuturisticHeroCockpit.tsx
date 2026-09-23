@@ -149,7 +149,7 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
       type="button"
       onClick={handleGoogleAuth}
       disabled={loading}
-      className="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-200 flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-60"
+      className="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-zinc-950 light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-200 light:text-zinc-800 flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-60"
     >
       <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -163,17 +163,17 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
 
   return (
     <div className="w-full relative">
-      <div className="relative rounded-2xl bg-zinc-950 border border-zinc-800 p-6 shadow-2xl">
+      <div className="relative rounded-2xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 p-6 shadow-2xl">
 
         {/* Tab Switcher */}
-        <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-zinc-800 gap-1 mb-5">
+        <div className="flex items-center bg-zinc-900 light:bg-zinc-100 p-1 rounded-xl border border-zinc-800 light:border-zinc-200 gap-1 mb-5">
           <button
             type="button"
             onClick={() => { setAuthMode('trial'); setError('') }}
             className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               authMode === 'trial'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white light:text-zinc-900 shadow-md'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-zinc-200'
             }`}
           >
             <Sparkles className="w-3 h-3" />
@@ -184,8 +184,8 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
             onClick={() => { setAuthMode('signin'); setError('') }}
             className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               authMode === 'signin'
-                ? 'bg-white text-black shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-white light:bg-white light:ring-1 light:ring-zinc-300 text-black light:text-zinc-900 shadow-sm'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-zinc-200'
             }`}
           >
             <User className="w-3 h-3" />
@@ -200,27 +200,27 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
             <GoogleButton label="Sign up free with Google" />
 
             <div className="flex items-center gap-3 text-zinc-700 text-[11px]">
-              <div className="flex-1 h-px bg-zinc-800" />
+              <div className="flex-1 h-px bg-zinc-800 light:bg-zinc-200" />
               <span>or with email</span>
-              <div className="flex-1 h-px bg-zinc-800" />
+              <div className="flex-1 h-px bg-zinc-800 light:bg-zinc-200" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Name */}
               <div className="relative">
-                <User className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+                <User className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
                 <input
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="Your name (optional)"
-                  className="w-full bg-black border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
                 />
               </div>
 
               {/* Email */}
               <div className="relative">
-                <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+                <Mail className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
                 <input
                   type="email"
                   value={email}
@@ -228,12 +228,12 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
                   placeholder="name@example.com"
                   required
                   autoComplete="email"
-                  className="w-full bg-black border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
                 />
               </div>
 
               {error && (
-                <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/50 text-red-300 rounded-xl text-xs">
+                <div className="flex items-start gap-2 p-3 bg-red-950/40 light:bg-red-50 border border-red-800/50 light:border-red-300 text-red-300 light:text-red-600 rounded-xl text-xs">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -242,7 +242,7 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full py-3 rounded-xl text-sm font-bold text-white light:text-zinc-900 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -256,8 +256,8 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
               </button>
 
               {/* Trust line */}
-              <div className="flex items-center justify-center gap-3 text-[11px] text-zinc-500 flex-wrap pt-1">
-                <span className="flex items-center gap-1 text-emerald-400"><Check className="w-3 h-3" />3-Day Free Trial</span>
+              <div className="flex items-center justify-center gap-3 text-[11px] text-zinc-500 light:text-zinc-600 flex-wrap pt-1">
+                <span className="flex items-center gap-1 text-emerald-400 light:text-emerald-600"><Check className="w-3 h-3" />3-Day Free Trial</span>
                 <span>·</span>
                 <span>No Credit Card</span>
                 <span>·</span>
@@ -266,14 +266,14 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
             </form>
 
             {isInAppBrowser && (
-              <p className="text-[10px] text-amber-300 bg-amber-950/30 border border-amber-800/40 rounded-lg p-2 text-center">
+              <p className="text-[10px] text-amber-300 light:text-amber-700 bg-amber-950/30 border border-amber-800/40 rounded-lg p-2 text-center">
                 💡 On Instagram/Facebook? Use the email form above — Google blocks in-app browsers.
               </p>
             )}
 
-            <p className="text-center text-xs text-zinc-500">
+            <p className="text-center text-xs text-zinc-500 light:text-zinc-600">
               Already have an account?{' '}
-              <button type="button" onClick={() => { setAuthMode('signin'); setError('') }} className="text-cyan-400 hover:underline cursor-pointer font-medium">
+              <button type="button" onClick={() => { setAuthMode('signin'); setError('') }} className="text-cyan-400 light:text-cyan-600 hover:underline cursor-pointer font-medium">
                 Sign in
               </button>
             </p>
@@ -287,15 +287,15 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
             <GoogleButton label="Continue with Google" />
 
             <div className="flex items-center gap-3 text-zinc-700 text-[11px]">
-              <div className="flex-1 h-px bg-zinc-800" />
+              <div className="flex-1 h-px bg-zinc-800 light:bg-zinc-200" />
               <span>or email &amp; password</span>
-              <div className="flex-1 h-px bg-zinc-800" />
+              <div className="flex-1 h-px bg-zinc-800 light:bg-zinc-200" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Email */}
               <div className="relative">
-                <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+                <Mail className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
                 <input
                   type="email"
                   value={email}
@@ -304,24 +304,24 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
                   required
                   autoComplete="email"
                   autoFocus
-                  className="w-full bg-black border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
                 />
               </div>
 
               {/* Password */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-medium text-zinc-300">Password</span>
+                  <span className="text-xs font-medium text-zinc-300 light:text-zinc-700">Password</span>
                   <button
                     type="button"
                     onClick={() => { setAuthMode('forgot'); setError('') }}
-                    className="text-[11px] text-cyan-400 hover:text-cyan-300 hover:underline cursor-pointer"
+                    className="text-[11px] text-cyan-400 light:text-cyan-600 hover:text-cyan-300 hover:underline cursor-pointer"
                   >
                     Forgot password?
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+                  <Lock className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -329,12 +329,12 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
                     placeholder="Your password"
                     required
                     autoComplete="current-password"
-                    className="w-full bg-black border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                    className="absolute right-3 top-3 text-zinc-500 light:text-zinc-600 hover:text-zinc-300 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
@@ -342,7 +342,7 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
               </div>
 
               {error && (
-                <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/50 text-red-300 rounded-xl text-xs">
+                <div className="flex items-start gap-2 p-3 bg-red-950/40 light:bg-red-50 border border-red-800/50 light:border-red-300 text-red-300 light:text-red-600 rounded-xl text-xs">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -351,7 +351,7 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-white hover:bg-zinc-200 text-black font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                className="w-full py-3 bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><span>Sign In</span><ArrowRight className="w-4 h-4" /></>}
               </button>
@@ -363,9 +363,9 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
               <span>Enterprise Admin? Sign in with your email &amp; password, or Google if you registered via Google.</span>
             </div>
 
-            <p className="text-center text-xs text-zinc-500">
+            <p className="text-center text-xs text-zinc-500 light:text-zinc-600">
               New here?{' '}
-              <button type="button" onClick={() => { setAuthMode('trial'); setError('') }} className="text-cyan-400 hover:underline cursor-pointer font-medium">
+              <button type="button" onClick={() => { setAuthMode('trial'); setError('') }} className="text-cyan-400 light:text-cyan-600 hover:underline cursor-pointer font-medium">
                 Start free — no card needed
               </button>
             </p>
@@ -376,18 +376,18 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
         {authMode === 'forgot' && (
           <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-white mb-1">Reset Password</h3>
-              <p className="text-xs text-zinc-400">Enter your email to receive a reset link.</p>
+              <h3 className="text-sm font-bold text-white light:text-zinc-900 mb-1">Reset Password</h3>
+              <p className="text-xs text-zinc-400 light:text-zinc-600">Enter your email to receive a reset link.</p>
             </div>
 
             {forgotSent ? (
-              <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-300 space-y-2">
-                <p className="font-semibold text-white">✅ Check Your Inbox</p>
-                <p className="text-zinc-400">Reset link sent to <strong>{email}</strong>.</p>
+              <div className="p-4 bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 rounded-xl text-xs text-zinc-300 light:text-zinc-700 space-y-2">
+                <p className="font-semibold text-white light:text-zinc-900">✅ Check Your Inbox</p>
+                <p className="text-zinc-400 light:text-zinc-600">Reset link sent to <strong>{email}</strong>.</p>
                 <button
                   type="button"
                   onClick={() => { setAuthMode('signin'); setForgotSent(false) }}
-                  className="text-cyan-400 hover:underline text-xs"
+                  className="text-cyan-400 light:text-cyan-600 hover:underline text-xs"
                 >
                   ← Back to Sign In
                 </button>
@@ -395,7 +395,7 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
             ) : (
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+                  <Mail className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
                   <input
                     type="email"
                     value={email}
@@ -403,12 +403,12 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
                     placeholder="name@example.com"
                     required
                     autoFocus
-                    className="w-full bg-black border border-zinc-800 focus:border-cyan-500 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
                   />
                 </div>
 
                 {error && (
-                  <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/50 text-red-300 rounded-xl text-xs">
+                  <div className="flex items-start gap-2 p-3 bg-red-950/40 light:bg-red-50 border border-red-800/50 light:border-red-300 text-red-300 light:text-red-600 rounded-xl text-xs">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                     <span>{error}</span>
                   </div>
@@ -417,14 +417,14 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 bg-white hover:bg-zinc-200 text-black font-semibold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50"
+                  className="w-full py-2.5 bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Send Reset Link'}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setAuthMode('signin'); setError('') }}
-                  className="w-full text-center text-xs text-zinc-400 hover:text-white cursor-pointer py-1"
+                  className="w-full text-center text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 cursor-pointer py-1"
                 >
                   Cancel
                 </button>

@@ -442,7 +442,7 @@ export default function ResumeBuilderPage() {
   }
 
   return (
-    <div className={`min-h-screen bg-[#000000] text-zinc-100 flex flex-col selection:bg-zinc-800 selection:text-white ${!isProfessional && userRole !== 'admin' ? 'free-ats-hide' : 'pro-ats-show'}`}>
+    <div className={`min-h-screen bg-[#000000] light:bg-white text-zinc-100 light:text-zinc-900 flex flex-col selection:bg-zinc-800 selection:text-white ${!isProfessional && userRole !== 'admin' ? 'free-ats-hide' : 'pro-ats-show'}`}>
       {/* Print stylesheet to enforce Harvard single-column ATS format on print for PRO, and block free export */}
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -502,26 +502,26 @@ export default function ResumeBuilderPage() {
       </div>
 
       {/* Top Navigation Bar */}
-      <header className="no-print border-b border-zinc-900 bg-black/80 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <header className="no-print border-b border-zinc-900 light:border-zinc-200 bg-black/80 light:bg-white/85 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-zinc-900"
+            className="flex items-center gap-1.5 text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors p-1.5 rounded-lg hover:bg-zinc-900 light:hover:bg-zinc-100"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline font-medium">Dashboard</span>
           </Link>
 
-          <div className="h-4 w-[1px] bg-zinc-800" />
+          <div className="h-4 w-[1px] bg-zinc-800 light:bg-zinc-200" />
 
           <div className="flex items-center gap-2">
             <JobFluxLogo size="sm" showText={false} />
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm font-bold text-white tracking-tight">
+                <span className="text-xs sm:text-sm font-bold text-white light:text-zinc-900 tracking-tight">
                   Harvard / FAANG ATS Resume Studio
                 </span>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-700/60 text-amber-300 font-semibold uppercase">
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-950/80 light:bg-amber-50 border border-amber-700/60 light:border-amber-300 text-amber-300 light:text-amber-700 font-semibold uppercase">
                   Single Column Ivy
                 </span>
               </div>
@@ -533,10 +533,10 @@ export default function ResumeBuilderPage() {
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Minimal PII Shield Badge */}
           <div
-            className="hidden md:flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 bg-zinc-950 px-2.5 py-1 rounded-md border border-zinc-800"
+            className="hidden md:flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 light:text-zinc-600 bg-zinc-950 light:bg-white px-2.5 py-1 rounded-md border border-zinc-800 light:border-zinc-200"
             title="Zero Data-Leak Guarantee: Automatically scrubs and anonymizes sensitive PII (Home address, Aadhaar/PAN, internal IDs, personal phone) before cloud processing"
           >
-            <Shield className="w-3 text-zinc-400 shrink-0" />
+            <Shield className="w-3 text-zinc-400 light:text-zinc-600 shrink-0" />
             <span>Auto PII Sanitized</span>
           </div>
 
@@ -544,21 +544,21 @@ export default function ResumeBuilderPage() {
           <div className="flex items-center gap-1.5">
             {(isVip || userPlan === 'vip') && (
               <span
-                className="inline-flex items-center gap-1 text-[9px] font-mono px-2.5 py-0.5 rounded-full border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.25)] shrink-0"
+                className="inline-flex items-center gap-1 text-[9px] font-mono px-2.5 py-0.5 rounded-full border border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.25)] shrink-0"
                 title="VIP Professional Pass Active (90d)"
               >
-                <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
+                <Crown className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 fill-amber-400/40 shrink-0" />
                 <span>VIP</span>
               </span>
             )}
             <span
               className={`inline-flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full border uppercase font-semibold ${
                 isProfessional
-                  ? 'border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 font-bold tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.2)]'
-                  : 'bg-zinc-900 border-zinc-800 text-zinc-400'
+                  ? 'border-amber-400/80 bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 font-bold tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                  : 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600'
               }`}
             >
-              {isProfessional && <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />}
+              {isProfessional && <Sparkles className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 shrink-0" />}
               <span>{isProfessional ? (userPlan === 'vip' ? 'VIP PASS' : userPlan === 'elite' ? 'PROFESSIONAL' : userPlan.toUpperCase()) : 'FREE PREVIEW'}</span>
             </span>
           </div>
@@ -585,20 +585,20 @@ export default function ResumeBuilderPage() {
             onClick={handleDownloadPdf}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm ${
               isProfessional
-                ? 'bg-white hover:bg-zinc-200 text-black'
-                : 'bg-zinc-900 hover:bg-zinc-850 text-zinc-200 border border-zinc-750'
+                ? 'bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900'
+                : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-850 text-zinc-200 light:text-zinc-800 border border-zinc-750'
             }`}
             title={isProfessional ? "Download or Print ATS PDF" : "Upgrade to Professional to export PDF"}
           >
             {isProfessional ? (
               <Printer className="w-3.5 h-3.5" />
             ) : (
-              <Lock className="w-3.5 h-3.5 text-amber-400" />
+              <Lock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
             )}
             <span className="hidden sm:inline">Download ATS PDF</span>
             <span className="sm:hidden">PDF</span>
             {!isProfessional && (
-              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 ml-0.5 font-bold">
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/40 light:border-amber-300 ml-0.5 font-bold">
                 PRO
               </span>
             )}
@@ -608,24 +608,24 @@ export default function ResumeBuilderPage() {
 
       {/* Sync Status Banner */}
       {syncSuccess && (
-        <div className="no-print bg-zinc-900 border-b border-zinc-800 px-4 py-2 text-xs text-zinc-200 flex items-center justify-center gap-2 font-medium">
-          <CheckCircle2 className="w-4 h-4 text-zinc-300 shrink-0" />
+        <div className="no-print bg-zinc-900 light:bg-zinc-100 border-b border-zinc-800 light:border-zinc-200 px-4 py-2 text-xs text-zinc-200 light:text-zinc-800 flex items-center justify-center gap-2 font-medium">
+          <CheckCircle2 className="w-4 h-4 text-zinc-300 light:text-zinc-700 shrink-0" />
           <span>{syncSuccess}</span>
         </div>
       )}
       {syncError && (
-        <div className="no-print bg-red-950/70 border-b border-red-800/60 px-4 py-2 text-xs text-red-200 flex items-center justify-center gap-2 font-medium">
+        <div className="no-print bg-red-950/70 border-b border-red-800/60 light:border-red-300 px-4 py-2 text-xs text-red-200 flex items-center justify-center gap-2 font-medium">
           <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
           <span>{syncError}</span>
         </div>
       )}
 
       {/* Mobile Tab Switcher: Editor vs ATS Live Sheet */}
-      <div className="no-print lg:hidden flex items-center border-b border-zinc-800 bg-zinc-950 p-1">
+      <div className="no-print lg:hidden flex items-center border-b border-zinc-800 light:border-zinc-200 bg-zinc-950 light:bg-white p-1">
         <button
           onClick={() => setMobileView('editor')}
           className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
-            mobileView === 'editor' ? 'bg-zinc-800 text-white' : 'text-zinc-400'
+            mobileView === 'editor' ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900' : 'text-zinc-400 light:text-zinc-600'
           }`}
         >
           <Sliders className="w-3.5 h-3.5" />
@@ -634,7 +634,7 @@ export default function ResumeBuilderPage() {
         <button
           onClick={() => setMobileView('preview')}
           className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
-            mobileView === 'preview' ? 'bg-zinc-800 text-white' : 'text-zinc-400'
+            mobileView === 'preview' ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900' : 'text-zinc-400 light:text-zinc-600'
           }`}
         >
           <Eye className="w-3.5 h-3.5" />
@@ -653,13 +653,13 @@ export default function ResumeBuilderPage() {
           }`}
         >
           {/* Preset Selector Card */}
-          <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3">
+          <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 light:text-zinc-600 font-semibold flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
                 Select Harvard/FAANG Standard Template
               </span>
-              <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400">
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-emerald-400 light:text-emerald-600">
                 100% Free to Prepare
               </span>
             </div>
@@ -673,13 +673,13 @@ export default function ResumeBuilderPage() {
                     onClick={() => handleSelectPreset(p.id)}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       active
-                        ? 'bg-amber-950/40 border-amber-600/70 text-white shadow-sm ring-1 ring-amber-500/40'
-                        : 'bg-black border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+                        ? 'bg-amber-950/40 light:bg-amber-50 border-amber-600/70 text-white light:text-zinc-900 shadow-sm ring-1 ring-amber-500/40'
+                        : 'bg-black light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300'
                     }`}
                   >
-                    <div className="text-xs font-semibold truncate text-white">{p.name.split('(')[0]}</div>
-                    <div className="text-[10px] text-zinc-400 font-mono mt-0.5">{p.bracket}</div>
-                    <div className="text-[9px] text-emerald-400 font-mono mt-1 flex items-center gap-1">
+                    <div className="text-xs font-semibold truncate text-white light:text-zinc-900">{p.name.split('(')[0]}</div>
+                    <div className="text-[10px] text-zinc-400 light:text-zinc-600 font-mono mt-0.5">{p.bracket}</div>
+                    <div className="text-[9px] text-emerald-400 light:text-emerald-600 font-mono mt-1 flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-emerald-400" />
                       {p.ats_score}% ATS Match
                     </div>
@@ -690,7 +690,7 @@ export default function ResumeBuilderPage() {
           </div>
 
           {/* Section Navigation Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-zinc-950 border border-zinc-800 rounded-xl overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1 p-1 bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-xl overflow-x-auto scrollbar-none">
             {[
               { id: 'basics', label: 'Basics & Role', icon: User },
               { id: 'experience', label: 'Work Experience', icon: Briefcase },
@@ -704,7 +704,7 @@ export default function ResumeBuilderPage() {
                   key={tab.id}
                   onClick={() => setActiveEditorTab(tab.id as any)}
                   className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
-                    active ? 'bg-zinc-800 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-white'
+                    active ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold shadow-sm' : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -716,78 +716,78 @@ export default function ResumeBuilderPage() {
 
           {/* TAB 1: BASIC INFORMATION */}
           {activeEditorTab === 'basics' && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3.5">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Full Legal Name</label>
+                  <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">Full Legal Name</label>
                   <input
                     type="text"
                     value={resumeData.name || ''}
                     onChange={(e) => setResumeData({ ...resumeData, name: e.target.value })}
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Target Senior Title</label>
+                  <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">Target Senior Title</label>
                   <input
                     type="text"
                     value={resumeData.role || ''}
                     onChange={(e) => setResumeData({ ...resumeData, role: e.target.value })}
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Email</label>
+                  <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">Email</label>
                   <input
                     type="email"
                     value={resumeData.email || ''}
                     onChange={(e) => setResumeData({ ...resumeData, email: e.target.value })}
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500 font-mono"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Phone</label>
+                  <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">Phone</label>
                   <input
                     type="text"
                     value={resumeData.phone || ''}
                     onChange={(e) => setResumeData({ ...resumeData, phone: e.target.value })}
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500 font-mono"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">Location</label>
+                  <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">Location</label>
                   <input
                     type="text"
                     value={resumeData.location || ''}
                     onChange={(e) => setResumeData({ ...resumeData, location: e.target.value })}
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-zinc-400 mb-1">LinkedIn / Portfolio</label>
+                <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">LinkedIn / Portfolio</label>
                 <input
                   type="text"
                   value={resumeData.linkedin || ''}
                   onChange={(e) => setResumeData({ ...resumeData, linkedin: e.target.value })}
                   placeholder="linkedin.com/in/username"
-                  className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500 font-mono"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500 font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-zinc-400 mb-1">
+                <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">
                   Executive Professional Summary (3-4 Sentences)
                 </label>
                 <textarea
                   rows={4}
                   value={resumeData.summary || ''}
                   onChange={(e) => setResumeData({ ...resumeData, summary: e.target.value })}
-                  className="w-full bg-black border border-zinc-800 rounded-lg p-3 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 leading-relaxed resize-none"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg p-3 text-xs text-zinc-200 light:text-zinc-800 focus:outline-none focus:border-zinc-500 leading-relaxed resize-none"
                 />
               </div>
             </div>
@@ -797,10 +797,10 @@ export default function ResumeBuilderPage() {
           {activeEditorTab === 'experience' && (
             <div className="space-y-4">
               {(resumeData.experience || []).map((exp: any, expIdx: number) => (
-                <div key={expIdx} className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3">
+                <div key={expIdx} className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-[10px] font-mono text-zinc-500 uppercase mb-1">Company</label>
+                      <label className="block text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase mb-1">Company</label>
                       <input
                         type="text"
                         value={exp.company || ''}
@@ -809,11 +809,11 @@ export default function ResumeBuilderPage() {
                           list[expIdx].company = e.target.value
                           setResumeData({ ...resumeData, experience: list })
                         }}
-                        className="w-full bg-black border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-semibold"
+                        className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs text-white light:text-zinc-900 font-semibold"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-mono text-zinc-500 uppercase mb-1">Role Title</label>
+                      <label className="block text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase mb-1">Role Title</label>
                       <input
                         type="text"
                         value={exp.title || ''}
@@ -822,14 +822,14 @@ export default function ResumeBuilderPage() {
                           list[expIdx].title = e.target.value
                           setResumeData({ ...resumeData, experience: list })
                         }}
-                        className="w-full bg-black border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                        className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs text-white light:text-zinc-900"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-[10px] font-mono text-zinc-500 uppercase mb-1">Period</label>
+                      <label className="block text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase mb-1">Period</label>
                       <input
                         type="text"
                         value={exp.period || ''}
@@ -838,11 +838,11 @@ export default function ResumeBuilderPage() {
                           list[expIdx].period = e.target.value
                           setResumeData({ ...resumeData, experience: list })
                         }}
-                        className="w-full bg-black border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
+                        className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs text-white light:text-zinc-900 font-mono"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-mono text-zinc-500 uppercase mb-1">Location</label>
+                      <label className="block text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase mb-1">Location</label>
                       <input
                         type="text"
                         value={exp.location || ''}
@@ -851,20 +851,20 @@ export default function ResumeBuilderPage() {
                           list[expIdx].location = e.target.value
                           setResumeData({ ...resumeData, experience: list })
                         }}
-                        className="w-full bg-black border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                        className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs text-white light:text-zinc-900"
                       />
                     </div>
                   </div>
 
                   {/* Quantified XYZ Bullets */}
-                  <div className="space-y-2 pt-2 border-t border-zinc-900">
+                  <div className="space-y-2 pt-2 border-t border-zinc-900 light:border-zinc-200">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono uppercase text-zinc-400 font-semibold">
+                      <span className="text-[10px] font-mono uppercase text-zinc-400 light:text-zinc-600 font-semibold">
                         Google XYZ Formula Bullets (Accomplished [X] as measured by [Y] by doing [Z])
                       </span>
                       <button
                         onClick={() => handleAddMetric(expIdx)}
-                        className="text-[10px] font-medium text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
+                        className="text-[10px] font-medium text-amber-400 light:text-amber-600 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
                       >
                         <Plus className="w-3 h-3" />
                         <span>Add Bullet</span>
@@ -879,7 +879,7 @@ export default function ResumeBuilderPage() {
                             rows={2}
                             value={m}
                             onChange={(e) => handleUpdateMetric(expIdx, mIdx, e.target.value)}
-                            className="flex-1 bg-black border border-zinc-800 rounded-lg p-2 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 resize-none leading-relaxed"
+                            className="flex-1 bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg p-2 text-xs text-zinc-200 light:text-zinc-800 focus:outline-none focus:border-zinc-500 resize-none leading-relaxed"
                           />
                           <button
                             onClick={() => handleDeleteMetric(expIdx, mIdx)}
@@ -899,14 +899,14 @@ export default function ResumeBuilderPage() {
 
           {/* TAB 3: TECHNICAL COMPETENCIES */}
           {activeEditorTab === 'skills' && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3.5">
-              <div className="text-xs text-zinc-400 leading-relaxed">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3.5">
+              <div className="text-xs text-zinc-400 light:text-zinc-600 leading-relaxed">
                 Group your technical competencies clearly. Standard ATS parsers (Workday, Greenhouse, Lever) match keywords against job descriptions using these categories.
               </div>
 
               {Object.entries(resumeData.skills || {}).map(([cat, sks]: any, idx) => (
                 <div key={idx} className="space-y-1">
-                  <label className="block text-[11px] font-medium text-zinc-300 font-mono">{cat}</label>
+                  <label className="block text-[11px] font-medium text-zinc-300 light:text-zinc-700 font-mono">{cat}</label>
                   <input
                     type="text"
                     value={Array.isArray(sks) ? sks.join(', ') : sks}
@@ -915,7 +915,7 @@ export default function ResumeBuilderPage() {
                       updated[cat] = e.target.value.split(',').map((s: string) => s.trim())
                       setResumeData({ ...resumeData, skills: updated })
                     }}
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500 font-mono"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500 font-mono"
                   />
                 </div>
               ))}
@@ -924,20 +924,20 @@ export default function ResumeBuilderPage() {
 
           {/* TAB 4: EDUCATION & CREDENTIALS */}
           {activeEditorTab === 'education' && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-4">
               <div>
-                <label className="block text-[11px] font-medium text-zinc-400 mb-1">Degrees & Institutions</label>
+                <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">Degrees & Institutions</label>
                 <textarea
                   rows={2}
                   value={resumeData.education || ''}
                   onChange={(e) => setResumeData({ ...resumeData, education: e.target.value })}
                   placeholder="e.g. B.Tech in Computer Science & Engineering · IIT Madras"
-                  className="w-full bg-black border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg p-3 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-zinc-400 mb-1">
+                <label className="block text-[11px] font-medium text-zinc-400 light:text-zinc-600 mb-1">
                   Certifications & Honors (Comma-separated)
                 </label>
                 <textarea
@@ -950,7 +950,7 @@ export default function ResumeBuilderPage() {
                     })
                   }
                   placeholder="One certification per line"
-                  className="w-full bg-black border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-zinc-500 font-mono"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg p-3 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500 font-mono"
                 />
               </div>
             </div>
@@ -966,11 +966,11 @@ export default function ResumeBuilderPage() {
           }`}
         >
           {/* Header Bar above Preview */}
-          <div className="no-print flex items-center justify-between px-2 text-xs text-zinc-400">
+          <div className="no-print flex items-center justify-between px-2 text-xs text-zinc-400 light:text-zinc-600">
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-              <span className="font-semibold text-white">Live Harvard/FAANG Standard Layout</span>
-              <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">
+              <span className="font-semibold text-white light:text-zinc-900">Live Harvard/FAANG Standard Layout</span>
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 hidden sm:inline">
                 · A4 Single-Column (Workday, Greenhouse & Lever 100% Compliant)
               </span>
             </div>
@@ -978,19 +978,19 @@ export default function ResumeBuilderPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleDownloadPdf}
-                className="text-xs text-zinc-300 hover:text-white flex items-center gap-1.5 cursor-pointer font-medium px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
+                className="text-xs text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 flex items-center gap-1.5 cursor-pointer font-medium px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 transition-colors"
                 title={isProfessional ? "Export Harvard ATS Resume as PDF" : "Upgrade to Professional to export print-ready PDF"}
               >
                 {isProfessional ? (
                   <>
-                    <Printer className="w-3.5 h-3.5 text-zinc-400" />
+                    <Printer className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                     <span>Print / Save PDF</span>
                   </>
                 ) : (
                   <>
-                    <Lock className="w-3 h-3 text-amber-400" />
+                    <Lock className="w-3 h-3 text-amber-400 light:text-amber-600" />
                     <span>Export ATS PDF</span>
-                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold ml-0.5">
+                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/40 light:border-amber-300 font-bold ml-0.5">
                       PRO
                     </span>
                   </>
@@ -1005,8 +1005,8 @@ export default function ResumeBuilderPage() {
               <div className="flex items-center gap-2">
                 <Crown className="w-4 h-4 text-blue-400 shrink-0" />
                 <div>
-                  <span className="font-semibold text-white">Free Candidate Preparation Mode</span>
-                  <p className="text-[11px] text-zinc-400">
+                  <span className="font-semibold text-white light:text-zinc-900">Free Candidate Preparation Mode</span>
+                  <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                     Customize your resume freely. Upgrade to Professional to unlock high-res unwatermarked ATS PDF download and 1-Click Bot Sync.
                   </p>
                 </div>
@@ -1016,7 +1016,7 @@ export default function ResumeBuilderPage() {
                   setUpgradeFeature('Official Harvard ATS PDF & Bot Sync')
                   setShowUpgradeModal(true)
                 }}
-                className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold text-xs shrink-0 cursor-pointer shadow-sm"
+                className="px-3 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-bold text-xs shrink-0 cursor-pointer shadow-sm"
               >
                 Unlock Pro
               </button>
@@ -1027,7 +1027,7 @@ export default function ResumeBuilderPage() {
           <div
             id="ats-resume-sheet"
             ref={resumeSheetRef}
-            className="relative bg-[#ffffff] text-[#000000] p-6 sm:p-10 rounded-2xl shadow-2xl border border-zinc-700 min-h-[900px] font-serif transition-all"
+            className="relative bg-[#ffffff] text-[#000000] p-6 sm:p-10 rounded-2xl shadow-2xl border border-zinc-700 light:border-zinc-300 min-h-[900px] font-serif transition-all"
             style={{ fontFamily: "'Times New Roman', Times, Georgia, serif" }}
           >
             {/* Watermark for Free / Trial accounts */}
@@ -1086,7 +1086,7 @@ export default function ResumeBuilderPage() {
                 <div className="text-xs space-y-1 text-neutral-800">
                   {Object.entries(resumeData.skills).map(([cat, sks]: any, idx) => (
                     <div key={idx} className="leading-snug">
-                      <strong className="text-black">{cat}:</strong>{' '}
+                      <strong className="text-black light:text-white">{cat}:</strong>{' '}
                       <span>{Array.isArray(sks) ? sks.join(', ') : sks}</span>
                     </div>
                   ))}
@@ -1103,7 +1103,7 @@ export default function ResumeBuilderPage() {
                 <div className="space-y-3.5">
                   {resumeData.experience.map((exp: any, idx: number) => (
                     <div key={idx} className="text-xs">
-                      <div className="flex justify-between items-baseline font-bold text-black">
+                      <div className="flex justify-between items-baseline font-bold text-black light:text-white">
                         <span>{exp.company}</span>
                         <span className="font-normal italic text-neutral-700">{exp.location}</span>
                       </div>

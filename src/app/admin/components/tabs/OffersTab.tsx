@@ -274,19 +274,19 @@ export const OffersTab: React.FC<OffersTabProps> = ({
   return (
     <div className="space-y-6">
       {/* Header / Actions */}
-      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Tag className="w-4 h-4 text-amber-400" />
+          <h3 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
+            <Tag className="w-4 h-4 text-amber-400 light:text-amber-600" />
             <span>Purchase Offers, Flash Discounts &amp; Promotional Campaigns</span>
           </h3>
-          <p className="text-xs text-zinc-400 mt-0.5">
+          <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
             Design luxury promotional upgrade offers, configure custom coupon codes, and dispatch bulk or single-candidate email campaigns.
           </p>
         </div>
         <button
           onClick={fetchOffersData}
-          className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+          className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loadingOffers ? 'animate-spin' : ''}`} />
           <span>Refresh Hub</span>
@@ -298,21 +298,21 @@ export const OffersTab: React.FC<OffersTabProps> = ({
         <div
           className={`p-4 rounded-xl text-xs flex items-start justify-between gap-3 border ${
             offerNotification.type === 'success'
-              ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
-              : 'bg-rose-950/40 border-rose-800/50 text-rose-300'
+              ? 'bg-emerald-950/40 light:bg-emerald-50 border-emerald-800/50 text-emerald-300 light:text-emerald-700'
+              : 'bg-rose-950/40 light:bg-rose-50 border-rose-800/50 text-rose-300 light:text-rose-600'
           }`}
         >
           <div className="flex items-center gap-2">
             {offerNotification.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600 shrink-0" />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-rose-400 light:text-rose-600 shrink-0" />
             )}
             <span>{offerNotification.message}</span>
           </div>
           <button
             onClick={() => setOfferNotification(null)}
-            className="text-zinc-400 hover:text-white cursor-pointer"
+            className="text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -320,18 +320,18 @@ export const OffersTab: React.FC<OffersTabProps> = ({
       )}
 
       {/* Sticky Metrics Overview Bar */}
-      <div className="sticky top-2 z-20 backdrop-blur-xl bg-[#09090b]/90 p-3 rounded-2xl border border-zinc-800 shadow-2xl transition-all space-y-2">
+      <div className="sticky top-2 z-20 backdrop-blur-xl bg-[#09090b]/90 p-3 rounded-2xl border border-zinc-800 light:border-zinc-200 shadow-2xl transition-all space-y-2">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">Live Conversion &amp; Campaign Stats</span>
+            <span className="text-[11px] font-bold text-zinc-300 light:text-zinc-700 uppercase tracking-wider">Live Conversion &amp; Campaign Stats</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">Pinned on Scroll</span>
+            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 hidden sm:inline">Pinned on Scroll</span>
             <button
               type="button"
               onClick={toggleOffersStats}
-              className="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-mono font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="px-2 py-0.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-[10px] font-mono font-semibold flex items-center gap-1 cursor-pointer transition-colors"
             >
               {offersStatsCollapsed ? (
                 <>
@@ -351,35 +351,35 @@ export const OffersTab: React.FC<OffersTabProps> = ({
         {offersStatsCollapsed ? (
           <div
             onClick={toggleOffersStats}
-            className="flex items-center justify-between gap-3 overflow-x-auto scrollbar-none py-1.5 px-3 text-[11px] font-mono whitespace-nowrap bg-black/40 rounded-xl border border-zinc-800/80 cursor-pointer hover:border-zinc-700 transition-colors"
+            className="flex items-center justify-between gap-3 overflow-x-auto scrollbar-none py-1.5 px-3 text-[11px] font-mono whitespace-nowrap bg-black/40 light:bg-white/85 rounded-xl border border-zinc-800/80 light:border-zinc-200 cursor-pointer hover:border-zinc-700 light:hover:border-zinc-300 transition-colors"
           >
-            <span className="text-zinc-400">Total: <strong className="text-white">{offersData.metrics.total_candidates}</strong></span>
+            <span className="text-zinc-400 light:text-zinc-600">Total: <strong className="text-white light:text-zinc-900">{offersData.metrics.total_candidates}</strong></span>
             <span className="text-zinc-700">|</span>
-            <span className="text-amber-400">Targets: <strong className="text-amber-300">{offersData.metrics.unsubscribed_count}</strong></span>
+            <span className="text-amber-400 light:text-amber-600">Targets: <strong className="text-amber-300 light:text-amber-700">{offersData.metrics.unsubscribed_count}</strong></span>
             <span className="text-zinc-700">|</span>
-            <span className="text-emerald-400">Subscribed: <strong className="text-emerald-300">{offersData.metrics.subscribed_count}</strong></span>
+            <span className="text-emerald-400 light:text-emerald-600">Subscribed: <strong className="text-emerald-300 light:text-emerald-700">{offersData.metrics.subscribed_count}</strong></span>
             <span className="text-zinc-700">|</span>
             <span className="text-sky-400">Active Offers: <strong className="text-sky-300">{offersData.metrics.active_assigned_offers ?? (offersData.assigned_offers || []).filter((o: any) => !o.claimed && !o.is_expired && !o.revoked).length}</strong></span>
-            <span className="text-zinc-500 text-[10px] ml-auto">▾ Tap to expand</span>
+            <span className="text-zinc-500 light:text-zinc-600 text-[10px] ml-auto">▾ Tap to expand</span>
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">Total Candidate Base</span>
-              <div className="text-xl font-bold text-white mt-0.5">{offersData.metrics.total_candidates}</div>
-              <p className="text-[10px] text-zinc-500">Registered accounts</p>
+            <div className="p-3 rounded-xl bg-zinc-950/80 light:bg-white border border-zinc-800 light:border-zinc-200">
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase tracking-wider block">Total Candidate Base</span>
+              <div className="text-xl font-bold text-white light:text-zinc-900 mt-0.5">{offersData.metrics.total_candidates}</div>
+              <p className="text-[10px] text-zinc-500 light:text-zinc-600">Registered accounts</p>
             </div>
 
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
-              <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block font-semibold">Prime Target Audience</span>
-              <div className="text-xl font-bold text-amber-300 mt-0.5">{offersData.metrics.unsubscribed_count}</div>
+              <span className="text-[10px] font-mono text-amber-400 light:text-amber-600 uppercase tracking-wider block font-semibold">Prime Target Audience</span>
+              <div className="text-xl font-bold text-amber-300 light:text-amber-700 mt-0.5">{offersData.metrics.unsubscribed_count}</div>
               <p className="text-[10px] text-amber-400/80">Unsubscribed &amp; expired</p>
             </div>
 
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
-              <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block font-semibold">Subscribed Pro/VIP</span>
-              <div className="text-xl font-bold text-emerald-400 mt-0.5">{offersData.metrics.subscribed_count}</div>
-              <p className="text-[10px] text-zinc-400">Active paid candidates</p>
+              <span className="text-[10px] font-mono text-emerald-400 light:text-emerald-600 uppercase tracking-wider block font-semibold">Subscribed Pro/VIP</span>
+              <div className="text-xl font-bold text-emerald-400 light:text-emerald-600 mt-0.5">{offersData.metrics.subscribed_count}</div>
+              <p className="text-[10px] text-zinc-400 light:text-zinc-600">Active paid candidates</p>
             </div>
 
             <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/25">
@@ -396,7 +396,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
       </div>
 
       {/* Automated Expiry & Renewal Watchdog Card */}
-      <div className="p-5 rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0d121c] to-zinc-950 border border-amber-500/30 shadow-xl space-y-4">
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0d121c] to-zinc-950 border border-amber-500/30 light:border-amber-300 shadow-xl space-y-4">
         <div
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none"
           onClick={(e) => {
@@ -405,17 +405,17 @@ export const OffersTab: React.FC<OffersTabProps> = ({
           }}
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 light:text-amber-700 shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+              <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
                 <span>Automated Expiry &amp; Renewal Watchdog</span>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/60">
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-950 text-emerald-300 light:text-emerald-700 border border-emerald-800/60 light:border-emerald-300">
                   18h Anti-Flooding Active
                 </span>
               </h4>
-              <p className="text-[11px] text-zinc-400">
+              <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                 Monitors candidate plan renewals and promotional offer expiries (1-day &amp; 2-day dual alerts via Google SMTP + OS Web Push).
               </p>
             </div>
@@ -426,7 +426,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
               type="button"
               disabled={loadingExpirySweep}
               onClick={() => handleRunExpirySweep()}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all shrink-0"
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black light:text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 transition-all shrink-0"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingExpirySweep ? 'animate-spin' : ''}`} />
               <span>{loadingExpirySweep ? 'Running Sweep...' : 'Run Automated Expiry Sweep Now'}</span>
@@ -437,7 +437,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                 e.stopPropagation()
                 toggleOffersWatchdog()
               }}
-              className="px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+              className="px-2.5 py-1.5 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
               title={offersCollapsedWatchdog ? 'Expand section' : 'Collapse section'}
             >
               {offersCollapsedWatchdog ? (
@@ -456,29 +456,29 @@ export const OffersTab: React.FC<OffersTabProps> = ({
         </div>
 
         {offersCollapsedWatchdog ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-black/50 border border-zinc-800/80 text-xs font-mono">
-            <div className="flex flex-wrap items-center gap-3 text-zinc-300">
-              <span>1D Expiry: <strong className="text-rose-400 font-bold">{expiryStats?.summary?.expiring_in_24h ?? 0}</strong></span>
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-black/50 light:bg-white/85 border border-zinc-800/80 light:border-zinc-200 text-xs font-mono">
+            <div className="flex flex-wrap items-center gap-3 text-zinc-300 light:text-zinc-700">
+              <span>1D Expiry: <strong className="text-rose-400 light:text-rose-600 font-bold">{expiryStats?.summary?.expiring_in_24h ?? 0}</strong></span>
               <span className="text-zinc-600">•</span>
-              <span>2D Expiry: <strong className="text-amber-400 font-bold">{expiryStats?.summary?.expiring_in_48h ?? 0}</strong></span>
+              <span>2D Expiry: <strong className="text-amber-400 light:text-amber-600 font-bold">{expiryStats?.summary?.expiring_in_48h ?? 0}</strong></span>
               <span className="text-zinc-600">•</span>
-              <span>Expired Plans: <strong className="text-zinc-200 font-bold">{expiryStats?.summary?.expired_count ?? 0}</strong></span>
+              <span>Expired Plans: <strong className="text-zinc-200 light:text-zinc-800 font-bold">{expiryStats?.summary?.expired_count ?? 0}</strong></span>
               <span className="text-zinc-600">•</span>
               <span>Expiring Offers: <strong className="text-sky-300 font-bold">{expiryStats?.summary?.offers_expiring_soon ?? 0}</strong></span>
             </div>
-            <span className="text-[10px] text-zinc-500">18h Anti-Flooding Active</span>
+            <span className="text-[10px] text-zinc-500 light:text-zinc-600">18h Anti-Flooding Active</span>
           </div>
         ) : (
           <>
             {sweepResult && (
               <div className={`p-3 rounded-xl text-xs flex items-center justify-between border ${
-                sweepResult.success ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300' : 'bg-rose-950/40 border-rose-800/50 text-rose-300'
+                sweepResult.success ? 'bg-emerald-950/40 light:bg-emerald-50 border-emerald-800/50 text-emerald-300 light:text-emerald-700' : 'bg-rose-950/40 light:bg-rose-50 border-rose-800/50 text-rose-300 light:text-rose-600'
               }`}>
                 <div className="flex items-center gap-2">
-                  {sweepResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertTriangle className="w-4 h-4 text-rose-400" />}
+                  {sweepResult.success ? <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600" /> : <AlertTriangle className="w-4 h-4 text-rose-400 light:text-rose-600" />}
                   <span>{sweepResult.message || (sweepResult.success ? `Sweep complete: ${sweepResult.summary?.plan_reminders_sent || 0} plan alerts & ${sweepResult.summary?.offer_reminders_sent || 0} offer alerts dispatched!` : sweepResult.error)}</span>
                 </div>
-                <button onClick={() => setSweepResult(null)} className="text-zinc-400 hover:text-white cursor-pointer">
+                <button onClick={() => setSweepResult(null)} className="text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -486,50 +486,50 @@ export const OffersTab: React.FC<OffersTabProps> = ({
 
             {/* Expiry Quick Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-              <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
-                <span className="text-[10px] uppercase font-mono text-rose-400 font-bold block">1-Day Plan Expiry</span>
-                <div className="text-lg font-bold text-white mt-0.5">
+              <div className="p-3 rounded-xl bg-black/60 light:bg-white/85 border border-zinc-800 light:border-zinc-200">
+                <span className="text-[10px] uppercase font-mono text-rose-400 light:text-rose-600 font-bold block">1-Day Plan Expiry</span>
+                <div className="text-lg font-bold text-white light:text-zinc-900 mt-0.5">
                   {expiryStats?.summary?.expiring_in_24h ?? 0}
                 </div>
-                <span className="text-[10px] text-zinc-500">&le; 24h Remaining</span>
+                <span className="text-[10px] text-zinc-500 light:text-zinc-600">&le; 24h Remaining</span>
               </div>
-              <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
-                <span className="text-[10px] uppercase font-mono text-amber-400 font-bold block">2-Day Plan Expiry</span>
-                <div className="text-lg font-bold text-white mt-0.5">
+              <div className="p-3 rounded-xl bg-black/60 light:bg-white/85 border border-zinc-800 light:border-zinc-200">
+                <span className="text-[10px] uppercase font-mono text-amber-400 light:text-amber-600 font-bold block">2-Day Plan Expiry</span>
+                <div className="text-lg font-bold text-white light:text-zinc-900 mt-0.5">
                   {expiryStats?.summary?.expiring_in_48h ?? 0}
                 </div>
-                <span className="text-[10px] text-zinc-500">24h - 48h Remaining</span>
+                <span className="text-[10px] text-zinc-500 light:text-zinc-600">24h - 48h Remaining</span>
               </div>
-              <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
-                <span className="text-[10px] uppercase font-mono text-zinc-400 font-bold block">Expired Plans</span>
-                <div className="text-lg font-bold text-zinc-300 mt-0.5">
+              <div className="p-3 rounded-xl bg-black/60 light:bg-white/85 border border-zinc-800 light:border-zinc-200">
+                <span className="text-[10px] uppercase font-mono text-zinc-400 light:text-zinc-600 font-bold block">Expired Plans</span>
+                <div className="text-lg font-bold text-zinc-300 light:text-zinc-700 mt-0.5">
                   {expiryStats?.summary?.expired_count ?? 0}
                 </div>
-                <span className="text-[10px] text-zinc-500">Ready for Special Offer</span>
+                <span className="text-[10px] text-zinc-500 light:text-zinc-600">Ready for Special Offer</span>
               </div>
-              <div className="p-3 rounded-xl bg-black/60 border border-zinc-800">
+              <div className="p-3 rounded-xl bg-black/60 light:bg-white/85 border border-zinc-800 light:border-zinc-200">
                 <span className="text-[10px] uppercase font-mono text-sky-400 font-bold block">Expiring Offers</span>
                 <div className="text-lg font-bold text-sky-300 mt-0.5">
                   {expiryStats?.summary?.offers_expiring_soon ?? 0}
                 </div>
-                <span className="text-[10px] text-zinc-500">&le; 48h Offer Validity</span>
+                <span className="text-[10px] text-zinc-500 light:text-zinc-600">&le; 48h Offer Validity</span>
               </div>
             </div>
 
             {/* List of candidates expiring within 48h */}
             {expiryStats?.candidates_expiring_48h && expiryStats.candidates_expiring_48h.length > 0 && (
-              <div className="mt-3 p-3 rounded-xl bg-black/40 border border-zinc-800/80">
-                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block mb-2">
+              <div className="mt-3 p-3 rounded-xl bg-black/40 light:bg-white/85 border border-zinc-800/80 light:border-zinc-200">
+                <span className="text-[11px] font-bold text-zinc-300 light:text-zinc-700 uppercase tracking-wider block mb-2">
                   Priority Candidates Expiring Within 48 Hours:
                 </span>
                 <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
                   {expiryStats.candidates_expiring_48h.map((c: any) => (
-                    <div key={c.email || c.user_id} className="flex items-center justify-between p-2 rounded-lg bg-zinc-900/70 border border-zinc-800 text-xs">
+                    <div key={c.email || c.user_id} className="flex items-center justify-between p-2 rounded-lg bg-zinc-900/70 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white">{c.name || c.user_id}</span>
-                        <span className="text-[11px] font-mono text-zinc-400">{c.email}</span>
+                        <span className="font-semibold text-white light:text-zinc-900">{c.name || c.user_id}</span>
+                        <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600">{c.email}</span>
                         <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase ${
-                          c.hours_left <= 24 ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300'
+                          c.hours_left <= 24 ? 'bg-rose-500/20 text-rose-300 light:text-rose-600' : 'bg-amber-500/20 text-amber-300 light:text-amber-700'
                         }`}>
                           {c.hours_left <= 24 ? '1-Day Warning' : '2-Day Warning'} ({c.hours_left}h left)
                         </span>
@@ -538,7 +538,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                         type="button"
                         onClick={() => handleRunExpirySweep(c.email)}
                         disabled={loadingExpirySweep}
-                        className="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-medium cursor-pointer disabled:opacity-50"
+                        className="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 light:text-amber-700 border border-amber-500/40 light:border-amber-300 text-[10px] font-medium cursor-pointer disabled:opacity-50"
                       >
                         Trigger Alert Now
                       </button>
@@ -555,23 +555,23 @@ export const OffersTab: React.FC<OffersTabProps> = ({
       <div id="daily-dispatch-hub" className="rounded-2xl bg-[#09090b] border border-sky-500/30 overflow-hidden shadow-xl space-y-0">
         <div 
           onClick={toggleOffersDispatchReport}
-          className="px-5 py-4 bg-gradient-to-r from-zinc-950 via-[#0a0f1d] to-zinc-950 hover:bg-zinc-900/80 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+          className="px-5 py-4 bg-gradient-to-r from-zinc-950 via-[#0a0f1d] to-zinc-950 hover:bg-zinc-900/80 light:hover:bg-zinc-100 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0 shadow-inner">
               <Send className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
+              <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2 flex-wrap">
                 <span>Candidate Daily Job Dispatch Report &amp; Multichannel Hub</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30">
                   Email (SMTP) + Web Push
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-950/60 light:bg-emerald-50 text-emerald-400 light:text-emerald-600 border border-emerald-800/40">
                   Live DB Applications
                 </span>
               </h4>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
                 Dispatches live candidate job application telemetry (today&apos;s applied, verified companies, recruiter views) and intelligent upgrade offers simultaneously.
               </p>
             </div>
@@ -584,7 +584,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                 e.stopPropagation()
                 toggleOffersDispatchReport()
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
             >
               {offersCollapsedDispatchReport ? (
                 <>
@@ -620,11 +620,11 @@ export const OffersTab: React.FC<OffersTabProps> = ({
         {!offersCollapsedDispatchReport && (
           <div className="p-5 space-y-5">
             {/* Quick 1-Click Action Bar */}
-            <div className="p-3 rounded-xl bg-black/50 border border-zinc-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-zinc-400">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span className="font-semibold text-zinc-300">Instant Test Dispatch:</span>
-                <span className="text-zinc-500 hidden sm:inline">Send verified real-time report for Koushik with 1 click:</span>
+            <div className="p-3 rounded-xl bg-black/50 light:bg-white/85 border border-zinc-800 light:border-zinc-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-zinc-400 light:text-zinc-600">
+                <Sparkles className="w-4 h-4 text-amber-400 light:text-amber-600" />
+                <span className="font-semibold text-zinc-300 light:text-zinc-700">Instant Test Dispatch:</span>
+                <span className="text-zinc-500 light:text-zinc-600 hidden sm:inline">Send verified real-time report for Koushik with 1 click:</span>
               </div>
               <button
                 type="button"
@@ -644,13 +644,13 @@ export const OffersTab: React.FC<OffersTabProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* 1. Candidate Selection */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                <label className="text-[11px] font-bold text-zinc-300 light:text-zinc-700 uppercase tracking-wider block">
                   1. Target Candidate
                 </label>
                 <select
                   value={dispatchReportTarget}
                   onChange={(e) => setDispatchReportTarget(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 text-xs font-mono focus:outline-none focus:border-sky-500 transition-colors"
                 >
                   <option value="koushiksr1999@gmail.com">koushiksr1999@gmail.com (Koushik · Pro Active)</option>
                   <option value="koushiksrmedala@gmail.com">koushiksrmedala@gmail.com</option>
@@ -669,24 +669,24 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                     value={customPushRecipient}
                     onChange={(e) => setCustomPushRecipient(e.target.value)}
                     placeholder="candidate@gmail.com"
-                    className="w-full px-3 py-1.5 rounded-lg bg-black border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-sky-500 mt-1.5"
+                    className="w-full px-3 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 text-xs font-mono focus:outline-none focus:border-sky-500 mt-1.5"
                   />
                 )}
               </div>
 
               {/* 2. Channel Selection */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                <label className="text-[11px] font-bold text-zinc-300 light:text-zinc-700 uppercase tracking-wider block">
                   2. Multichannel Delivery
                 </label>
-                <div className="grid grid-cols-3 gap-1.5 bg-black/60 p-1 rounded-xl border border-zinc-800">
+                <div className="grid grid-cols-3 gap-1.5 bg-black/60 light:bg-white/85 p-1 rounded-xl border border-zinc-800 light:border-zinc-200">
                   <button
                     type="button"
                     onClick={() => setDispatchReportChannel('both')}
                     className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
                       dispatchReportChannel === 'both'
-                        ? 'bg-sky-500 text-black font-bold shadow'
-                        : 'text-zinc-400 hover:text-white'
+                        ? 'bg-sky-500 text-black light:text-white font-bold shadow'
+                        : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900'
                     }`}
                   >
                     Email + Push
@@ -696,8 +696,8 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                     onClick={() => setDispatchReportChannel('email')}
                     className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
                       dispatchReportChannel === 'email'
-                        ? 'bg-sky-500 text-black font-bold shadow'
-                        : 'text-zinc-400 hover:text-white'
+                        ? 'bg-sky-500 text-black light:text-white font-bold shadow'
+                        : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900'
                     }`}
                   >
                     Email Only
@@ -708,13 +708,13 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                     className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
                       dispatchReportChannel === 'push'
                         ? 'bg-amber-400 text-black font-bold shadow'
-                        : 'text-zinc-400 hover:text-white'
+                        : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900'
                     }`}
                   >
                     Push Only
                   </button>
                 </div>
-                <p className="text-[10px] text-zinc-500">
+                <p className="text-[10px] text-zinc-500 light:text-zinc-600">
                   {dispatchReportChannel === 'both' && 'Delivers luxury HTML via Google SMTP and OS Web Push notification.'}
                   {dispatchReportChannel === 'email' && 'Dispatches only executive HTML report to the recipient inbox.'}
                   {dispatchReportChannel === 'push' && 'Triggers instant browser Web Push notification with dashboard link.'}
@@ -723,13 +723,13 @@ export const OffersTab: React.FC<OffersTabProps> = ({
 
               {/* 3. Offer Package Attachment */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider block">
+                <label className="text-[11px] font-bold text-zinc-300 light:text-zinc-700 uppercase tracking-wider block">
                   3. Attached Upgrade Offer
                 </label>
                 <select
                   value={dispatchReportOfferChoice}
                   onChange={(e) => setDispatchReportOfferChoice(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
                 >
                   <option value="auto">Auto-Detect Active or Best Tier Offer</option>
                   <option value="vip299">3-Month VIP Professional Extension (₹299 / 90d)</option>
@@ -737,7 +737,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                   <option value="choc29">1-Month Starter Deal (₹29 / 30d)</option>
                   <option value="none">No Offer (Stats &amp; Companies Only)</option>
                 </select>
-                <p className="text-[10px] text-zinc-500">
+                <p className="text-[10px] text-zinc-500 light:text-zinc-600">
                   {dispatchReportOfferChoice === 'auto' && 'Picks assigned promo code from DB or smart tier (VIP299 for paid, WELCOMEPRO for trial).'}
                   {dispatchReportOfferChoice === 'vip299' && 'Forces 3-Month VIP Extension at ₹299 (90 days continuous access).'}
                   {dispatchReportOfferChoice === 'welcomepro' && 'Forces 1-Month Essentials Unlimited at ₹149.'}
@@ -752,23 +752,23 @@ export const OffersTab: React.FC<OffersTabProps> = ({
               const targetEmailClean = dispatchReportTarget === 'custom' ? customPushRecipient : dispatchReportTarget
               const foundCandidate = usersList.find(u => u.email === targetEmailClean)
               return (
-                <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900/60 to-zinc-950 border border-zinc-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-950 via-zinc-900/60 to-zinc-950 border border-zinc-800/80 light:border-zinc-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <strong className="text-white text-xs">{foundCandidate?.name || targetEmailClean}</strong>
-                      <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{targetEmailClean}</span>
+                      <strong className="text-white light:text-zinc-900 text-xs">{foundCandidate?.name || targetEmailClean}</strong>
+                      <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200">{targetEmailClean}</span>
                       {foundCandidate?.is_vip ? (
-                        <span className="text-[10px] font-bold text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-500/30">VIP Pass (90d)</span>
+                        <span className="text-[10px] font-bold text-amber-300 light:text-amber-700 bg-amber-950/40 light:bg-amber-50 px-2 py-0.5 rounded border border-amber-500/30 light:border-amber-300">VIP Pass (90d)</span>
                       ) : foundCandidate?.plan && foundCandidate?.plan !== 'none' ? (
-                        <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30 capitalize">{foundCandidate.plan} Active</span>
+                        <span className="text-[10px] font-bold text-emerald-300 light:text-emerald-700 bg-emerald-950/40 light:bg-emerald-50 px-2 py-0.5 rounded border border-emerald-500/30 light:border-emerald-300 capitalize">{foundCandidate.plan} Active</span>
                       ) : (
-                        <span className="text-[10px] font-bold text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">Free / Trial</span>
+                        <span className="text-[10px] font-bold text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200">Free / Trial</span>
                       )}
                     </div>
-                    <p className="text-[11px] text-zinc-400">
-                      Applications Today: <strong className={`font-mono ${(foundCandidate?.applied_today || 0) > 0 ? 'text-emerald-400' : 'text-amber-400'}`}>{foundCandidate?.applied_today ?? 0}</strong> &bull; Total Applications: <strong className="text-white font-mono">{foundCandidate?.total_applied ?? 0}</strong>
+                    <p className="text-[11px] text-zinc-400 light:text-zinc-600">
+                      Applications Today: <strong className={`font-mono ${(foundCandidate?.applied_today || 0) > 0 ? 'text-emerald-400 light:text-emerald-600' : 'text-amber-400 light:text-amber-600'}`}>{foundCandidate?.applied_today ?? 0}</strong> &bull; Total Applications: <strong className="text-white light:text-zinc-900 font-mono">{foundCandidate?.total_applied ?? 0}</strong>
                       {(foundCandidate?.applied_today || 0) === 0 && (
-                        <span className="ml-2 text-amber-400 font-semibold text-[10px] bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-800/50">
+                        <span className="ml-2 text-amber-400 light:text-amber-600 font-semibold text-[10px] bg-amber-950/40 light:bg-amber-50 px-1.5 py-0.5 rounded border border-amber-800/50">
                           (No jobs today — candidate email is suppressed to prevent stale reporting)
                         </span>
                       )}
@@ -779,7 +779,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                     type="button"
                     disabled={dispatchReportLoading}
                     onClick={() => handleDispatchCareerReport()}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 via-sky-500 to-indigo-500 hover:from-sky-300 hover:to-indigo-400 text-black font-bold text-xs transition-all shadow-lg shadow-sky-500/20 cursor-pointer flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 via-sky-500 to-indigo-500 hover:from-sky-300 hover:to-indigo-400 text-black light:text-white font-bold text-xs transition-all shadow-lg shadow-sky-500/20 cursor-pointer flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
                   >
                     {dispatchReportLoading ? (
                       <>
@@ -807,15 +807,15 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {dispatchReportResult.success ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600" />
                     ) : (
-                      <AlertTriangle className="w-4 h-4 text-rose-400" />
+                      <AlertTriangle className="w-4 h-4 text-rose-400 light:text-rose-600" />
                     )}
-                    <strong className="font-bold text-white">
+                    <strong className="font-bold text-white light:text-zinc-900">
                       {dispatchReportResult.success ? 'Dispatch Succeeded & Recorded in Audit Logs' : 'Dispatch Failed'}
                     </strong>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-zinc-300 border border-zinc-700 uppercase">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 light:bg-white/85 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300 uppercase">
                     Channel: {dispatchReportResult.channel || dispatchReportChannel}
                   </span>
                 </div>
@@ -823,26 +823,26 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                 {dispatchReportResult.success && dispatchReportResult.candidate && (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-sky-500/20 text-[11px] font-mono">
                     <div>
-                      <span className="text-zinc-400 block text-[10px]">Candidate:</span>
-                      <span className="text-white font-bold">{dispatchReportResult.candidate.email}</span>
+                      <span className="text-zinc-400 light:text-zinc-600 block text-[10px]">Candidate:</span>
+                      <span className="text-white light:text-zinc-900 font-bold">{dispatchReportResult.candidate.email}</span>
                     </div>
                     <div>
-                      <span className="text-zinc-400 block text-[10px]">Jobs Reported:</span>
-                      <span className="text-emerald-300 font-bold">{dispatchReportResult.candidate.todayApplied} today ({dispatchReportResult.candidate.totalApplied} total)</span>
+                      <span className="text-zinc-400 light:text-zinc-600 block text-[10px]">Jobs Reported:</span>
+                      <span className="text-emerald-300 light:text-emerald-700 font-bold">{dispatchReportResult.candidate.todayApplied} today ({dispatchReportResult.candidate.totalApplied} total)</span>
                     </div>
                     <div>
-                      <span className="text-zinc-400 block text-[10px]">Offer Attached:</span>
-                      <span className="text-amber-300 font-bold">{dispatchReportResult.offer?.promoCode || 'None'} ({dispatchReportResult.offer?.discountedPrice || 'N/A'})</span>
+                      <span className="text-zinc-400 light:text-zinc-600 block text-[10px]">Offer Attached:</span>
+                      <span className="text-amber-300 light:text-amber-700 font-bold">{dispatchReportResult.offer?.promoCode || 'None'} ({dispatchReportResult.offer?.discountedPrice || 'N/A'})</span>
                     </div>
                     <div>
-                      <span className="text-zinc-400 block text-[10px]">Email Provider:</span>
+                      <span className="text-zinc-400 light:text-zinc-600 block text-[10px]">Email Provider:</span>
                       <span className="text-sky-300 font-bold">{dispatchReportResult.emailResult?.provider || 'Google SMTP (250 OK)'}</span>
                     </div>
                   </div>
                 )}
 
                 {dispatchReportResult.error && (
-                  <p className="text-rose-300 font-mono text-[11px] mt-1">
+                  <p className="text-rose-300 light:text-rose-600 font-mono text-[11px] mt-1">
                     Error: {dispatchReportResult.error}
                   </p>
                 )}

@@ -48,7 +48,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black overflow-hidden cursor-pointer select-none"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black light:bg-white overflow-hidden cursor-pointer select-none"
         >
           {/* Subtle Ambient Radial Glow */}
           <motion.div
@@ -220,17 +220,17 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
               className="mt-6 flex flex-col items-center text-center"
             >
               <div className="flex items-center gap-2">
-                <span className="text-3xl md:text-4xl font-extrabold tracking-tight text-white font-sans">
+                <span className="text-3xl md:text-4xl font-extrabold tracking-tight text-white light:text-zinc-900 font-sans">
                   JobFlux
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-md font-mono font-medium uppercase bg-zinc-900 border border-zinc-800 text-zinc-400 shadow-sm">
+                <span className="text-xs px-2 py-0.5 rounded-md font-mono font-medium uppercase bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 shadow-sm">
                   AI
                 </span>
               </div>
 
               {/* Status Laser Beam */}
               <div className="mt-4 flex flex-col items-center gap-2">
-                <div className="w-36 h-[2px] bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden relative">
+                <div className="w-36 h-[2px] bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 rounded-full overflow-hidden relative">
                   <motion.div
                     initial={{ x: '-100%' }}
                     animate={{ x: '100%' }}
@@ -242,7 +242,7 @@ export default function JobFluxSplash({ onComplete }: JobFluxSplashProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 0.7 }}
                   transition={{ duration: 0.4, delay: 0.6 }}
-                  className="text-[10px] font-mono tracking-widest uppercase text-zinc-500"
+                  className="text-[10px] font-mono tracking-widest uppercase text-zinc-500 light:text-zinc-600"
                 >
                   Autonomous Engine Initialized
                 </motion.span>

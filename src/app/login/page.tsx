@@ -14,6 +14,7 @@ import {
   Building2
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
+import { ThemeToggle } from '@/components/ThemeProvider'
 import { validatedIdentity } from '@/lib/sessionClient'
 
 export default function LoginPage() {
@@ -98,7 +99,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-black light:bg-white flex flex-col items-center justify-center p-4">
+      <div className="fixed top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
       {/* Background gradient */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-cyan-950/20 blur-[120px] rounded-full" />
@@ -112,18 +116,18 @@ export default function LoginPage() {
               <JobFluxLogo size="md" showText />
             </Link>
           </div>
-          <h1 className="text-xl font-bold text-white">Welcome back</h1>
-          <p className="text-xs text-zinc-400">Sign in to your JobFlux AI account</p>
+          <h1 className="text-xl font-bold text-white light:text-zinc-900">Welcome back</h1>
+          <p className="text-xs text-zinc-400 light:text-zinc-600">Sign in to your JobFlux AI account</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div className="bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl space-y-4">
 
           {/* Google Login — shown first for frictionless access */}
           <button
             type="button"
             onClick={handleGoogleAuth}
-            className="w-full py-3 rounded-xl text-sm font-semibold bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-600 text-zinc-200 flex items-center justify-center gap-2.5 transition-all cursor-pointer"
+            className="w-full py-3 rounded-xl text-sm font-semibold bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 hover:border-zinc-600 text-zinc-200 light:text-zinc-800 flex items-center justify-center gap-2.5 transition-all cursor-pointer"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -136,17 +140,17 @@ export default function LoginPage() {
 
           {/* Divider */}
           <div className="flex items-center gap-3 text-zinc-700 text-[11px] font-mono">
-            <div className="flex-1 h-px bg-zinc-800" />
+            <div className="flex-1 h-px bg-zinc-800 light:bg-zinc-200" />
             <span>or sign in with email</span>
-            <div className="flex-1 h-px bg-zinc-800" />
+            <div className="flex-1 h-px bg-zinc-800 light:bg-zinc-200" />
           </div>
 
           {/* Email / Password Form */}
           <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1.5">Email Address</label>
+              <label className="block text-xs font-medium text-zinc-300 light:text-zinc-700 mb-1.5">Email Address</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+                <Mail className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
                 <input
                   type="email"
                   value={email}
@@ -155,23 +159,23 @@ export default function LoginPage() {
                   required
                   autoComplete="email"
                   autoFocus
-                  className="w-full bg-black border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-medium text-zinc-300">Password</label>
+                <label className="text-xs font-medium text-zinc-300 light:text-zinc-700">Password</label>
                 <Link
                   href="/?mode=forgot"
-                  className="text-[11px] text-cyan-400 hover:text-cyan-300 hover:underline"
+                  className="text-[11px] text-cyan-400 light:text-cyan-600 hover:text-cyan-300 hover:underline"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+                <Lock className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -179,12 +183,12 @@ export default function LoginPage() {
                   placeholder="Your password"
                   required
                   autoComplete="current-password"
-                  className="w-full bg-black border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-all"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                  className="absolute right-3 top-3 text-zinc-500 light:text-zinc-600 hover:text-zinc-300 cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
@@ -192,7 +196,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/50 text-red-300 rounded-xl text-xs">
+              <div className="flex items-start gap-2 p-3 bg-red-950/40 light:bg-red-50 border border-red-800/50 light:border-red-300 text-red-300 light:text-red-600 rounded-xl text-xs">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
@@ -201,7 +205,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-white hover:bg-zinc-200 text-black font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-3 bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -225,9 +229,9 @@ export default function LoginPage() {
         </div>
 
         {/* Sign Up CTA */}
-        <p className="text-center text-xs text-zinc-500">
+        <p className="text-center text-xs text-zinc-500 light:text-zinc-600">
           Don&apos;t have an account?{' '}
-          <Link href="/" className="text-cyan-400 hover:underline font-medium">
+          <Link href="/" className="text-cyan-400 light:text-cyan-600 hover:underline font-medium">
             Start free — no card needed
           </Link>
         </p>

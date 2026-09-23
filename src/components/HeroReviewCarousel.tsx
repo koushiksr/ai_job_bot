@@ -80,15 +80,15 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
       {/* Top Telemetry & Overall Rating Header */}
       <div className="flex items-center justify-between gap-3 mb-2.5 px-1">
         <div className="flex items-center gap-2">
-          <div className="flex items-center text-amber-400">
+          <div className="flex items-center text-amber-400 light:text-amber-600">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400 light:text-amber-600" />
             ))}
           </div>
-          <span className="text-xs font-bold text-white font-mono">{avgRating.toFixed(1)}/5.0</span>
+          <span className="text-xs font-bold text-white light:text-zinc-900 font-mono">{avgRating.toFixed(1)}/5.0</span>
           <span className="text-zinc-600 hidden sm:inline">·</span>
-          <span className="text-[11px] text-zinc-400 hidden sm:inline flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3 text-emerald-400" /> Verified Candidate Satisfaction
+          <span className="text-[11px] text-zinc-400 light:text-zinc-600 hidden sm:inline flex items-center gap-1">
+            <ShieldCheck className="w-3 h-3 text-emerald-400 light:text-emerald-600" /> Verified Candidate Satisfaction
           </span>
         </div>
 
@@ -96,16 +96,16 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
           <button
             type="button"
             onClick={onOpenReviewModal}
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
           >
-            <MessageSquarePlus className="w-3 h-3 text-zinc-400" />
+            <MessageSquarePlus className="w-3 h-3 text-zinc-400 light:text-zinc-600" />
             <span>Rate Experience</span>
           </button>
         )}
       </div>
 
       {/* Main Glassmorphic Animated Review Card */}
-      <div className="relative rounded-2xl bg-zinc-950/90 border border-zinc-800/90 p-4 sm:p-5 shadow-2xl backdrop-blur-md overflow-hidden card-featured-glow">
+      <div className="relative rounded-2xl bg-zinc-950/90 light:bg-white border border-zinc-800/90 light:border-zinc-200 p-4 sm:p-5 shadow-2xl backdrop-blur-md overflow-hidden card-featured-glow">
         {/* Subtle top glow highlight */}
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/25 to-transparent pointer-events-none" />
 
@@ -127,14 +127,14 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
                     <img
                       src={current.user_avatar}
                       alt={current.user_name}
-                      className="w-10 h-10 rounded-full object-cover border border-zinc-700 shadow-sm"
+                      className="w-10 h-10 rounded-full object-cover border border-zinc-700 light:border-zinc-300 shadow-sm"
                       onError={e => {
                         // Fallback on load error
                         ;(e.target as HTMLElement).style.display = 'none'
                       }}
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center font-bold text-xs text-white shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 light:border-zinc-300 flex items-center justify-center font-bold text-xs text-white light:text-zinc-900 shadow-sm">
                       {current.user_name
                         ? current.user_name
                             .split(' ')
@@ -151,34 +151,34 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
                 {/* Name, Role & Verification */}
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-sm font-semibold text-white truncate">{current.user_name}</span>
-                    <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full font-medium">
+                    <span className="text-sm font-semibold text-white light:text-zinc-900 truncate">{current.user_name}</span>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400 light:text-emerald-600 font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full font-medium">
                       <CheckCircle2 className="w-2.5 h-2.5" /> Verified Candidate
                     </span>
                   </div>
-                  <p className="text-[11px] text-zinc-400 truncate mt-0.5">
+                  <p className="text-[11px] text-zinc-400 light:text-zinc-600 truncate mt-0.5">
                     {current.role_title} {current.company ? `• ${current.company}` : ''}
                   </p>
                 </div>
               </div>
 
               {/* Star Rating */}
-              <div className="flex items-center gap-0.5 text-amber-400 shrink-0 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
+              <div className="flex items-center gap-0.5 text-amber-400 light:text-amber-600 shrink-0 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
                 <Star className="w-3 h-3 fill-amber-400" />
-                <span className="text-[11px] font-bold font-mono text-amber-300 ml-0.5">{Number(current.rating).toFixed(1)}</span>
+                <span className="text-[11px] font-bold font-mono text-amber-300 light:text-amber-700 ml-0.5">{Number(current.rating).toFixed(1)}</span>
               </div>
             </div>
 
             {/* Satisfaction Highlight Tag */}
             {current.satisfaction_level && (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-300">
-                <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-300 light:text-amber-700">
+                <Sparkles className="w-2.5 h-2.5 text-amber-400 light:text-amber-600" />
                 <span>{current.satisfaction_level}</span>
               </div>
             )}
 
             {/* Quote Body */}
-            <div className="relative pl-3 border-l-2 border-zinc-800 text-xs sm:text-[13px] text-zinc-300 leading-relaxed font-normal italic">
+            <div className="relative pl-3 border-l-2 border-zinc-800 light:border-zinc-200 text-xs sm:text-[13px] text-zinc-300 light:text-zinc-700 leading-relaxed font-normal italic">
               <Quote className="w-3.5 h-3.5 text-zinc-700 absolute -top-1 -left-2 fill-zinc-800 opacity-60" />
               <span>&ldquo;{current.review_text}&rdquo;</span>
             </div>
@@ -186,7 +186,7 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
         </AnimatePresence>
 
         {/* Footer Navigation Dots & Prev/Next Arrows */}
-        <div className="flex items-center justify-between pt-3.5 border-t border-zinc-900 mt-3 text-xs">
+        <div className="flex items-center justify-between pt-3.5 border-t border-zinc-900 light:border-zinc-200 mt-3 text-xs">
           {/* Pagination Indicators */}
           <div className="flex items-center gap-1.5">
             {reviews.map((r, i) => (
@@ -195,7 +195,7 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
                 type="button"
                 onClick={() => setCurrentIndex(i)}
                 className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                  i === currentIndex ? 'w-5 bg-amber-400' : 'w-1.5 bg-zinc-800 hover:bg-zinc-700'
+                  i === currentIndex ? 'w-5 bg-amber-400' : 'w-1.5 bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700'
                 }`}
                 aria-label={`Go to candidate review ${i + 1}`}
               />
@@ -204,13 +204,13 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
 
           {/* Controls */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-mono text-zinc-500 mr-1.5">
+            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 mr-1.5">
               {currentIndex + 1} of {reviews.length}
             </span>
             <button
               type="button"
               onClick={handlePrev}
-              className="p-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 transition-colors cursor-pointer"
+              className="p-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 transition-colors cursor-pointer"
               aria-label="Previous review"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
@@ -218,7 +218,7 @@ export default function HeroReviewCarousel({ onOpenReviewModal }: HeroReviewCaro
             <button
               type="button"
               onClick={handleNext}
-              className="p-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 transition-colors cursor-pointer"
+              className="p-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 transition-colors cursor-pointer"
               aria-label="Next review"
             >
               <ChevronRight className="w-3.5 h-3.5" />

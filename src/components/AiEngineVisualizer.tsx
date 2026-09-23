@@ -167,7 +167,7 @@ export default function AiEngineVisualizer() {
   }, [selectedIdx, isAutoCycling])
 
   return (
-    <div className="w-full max-w-6xl mx-auto rounded-2xl bg-[#09090b] border border-zinc-800 shadow-2xl overflow-hidden relative text-zinc-100">
+    <div className="w-full max-w-6xl mx-auto rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 shadow-2xl overflow-hidden relative text-zinc-100 light:text-zinc-900">
       {/* Autonomous Laser Beam Sweep */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent animate-laser-sweep z-20 pointer-events-none" />
       
@@ -175,15 +175,15 @@ export default function AiEngineVisualizer() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Cockpit Header */}
-      <div className="p-4 sm:px-6 bg-[#050507] border-b border-zinc-800/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="p-4 sm:px-6 bg-[#050507] border-b border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-semibold text-white tracking-tight">
+              <span className="text-xs sm:text-sm font-semibold text-white light:text-zinc-900 tracking-tight">
                 Autonomous Engine Live Simulation
               </span>
-              <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-400">
+              <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600">
                 06:00 AM IST
               </span>
             </div>
@@ -192,10 +192,10 @@ export default function AiEngineVisualizer() {
 
         {/* Live Counters */}
         <div className="flex items-center gap-4 text-xs font-mono self-end sm:self-auto">
-          <div className="text-zinc-400 text-[11px]">
-            Scanned: <span className="text-white font-medium">{scanPulse.toLocaleString()}</span>
+          <div className="text-zinc-400 light:text-zinc-600 text-[11px]">
+            Scanned: <span className="text-white light:text-zinc-900 font-medium">{scanPulse.toLocaleString()}</span>
           </div>
-          <div className="text-zinc-200 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800 flex items-center gap-1.5 text-[11px]">
+          <div className="text-zinc-200 light:text-zinc-800 bg-zinc-900 light:bg-zinc-100 px-2.5 py-1 rounded-md border border-zinc-800 light:border-zinc-200 flex items-center gap-1.5 text-[11px]">
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
             <span>Applications: {applicationsCount}</span>
           </div>
@@ -203,7 +203,7 @@ export default function AiEngineVisualizer() {
       </div>
 
       {/* Role Switcher Tabs */}
-      <div className="px-4 sm:px-6 py-3 bg-[#09090b] border-b border-zinc-800/80 flex items-center justify-between gap-2 overflow-x-auto">
+      <div className="px-4 sm:px-6 py-3 bg-[#09090b] border-b border-zinc-800/80 light:border-zinc-200 flex items-center justify-between gap-2 overflow-x-auto">
         <div className="flex items-center gap-2">
           {DEMO_ROLES.map((role, idx) => (
             <button
@@ -214,12 +214,12 @@ export default function AiEngineVisualizer() {
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 selectedIdx === idx
-                  ? 'bg-white text-black shadow-sm'
-                  : 'bg-zinc-900/60 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                  ? 'bg-white light:bg-white light:ring-1 light:ring-zinc-300 text-black light:text-zinc-900 shadow-sm'
+                  : 'bg-zinc-900/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300'
               }`}
             >
               <span>{role.label}</span>
-              <span className={`text-[10px] ${selectedIdx === idx ? 'text-zinc-600' : 'text-zinc-500'}`}>
+              <span className={`text-[10px] ${selectedIdx === idx ? 'text-zinc-600' : 'text-zinc-500 light:text-zinc-600'}`}>
                 {role.company}
               </span>
             </button>
@@ -230,8 +230,8 @@ export default function AiEngineVisualizer() {
           onClick={() => setIsAutoCycling(!isAutoCycling)}
           className={`text-[10px] px-2.5 py-1 rounded border font-mono transition-colors shrink-0 hidden sm:flex items-center gap-1 cursor-pointer ${
             isAutoCycling
-              ? 'bg-zinc-900 text-zinc-300 border-zinc-800'
-              : 'bg-zinc-950 text-zinc-500 border-zinc-900'
+              ? 'bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border-zinc-800 light:border-zinc-200'
+              : 'bg-zinc-950 light:bg-white text-zinc-500 light:text-zinc-600 border-zinc-900 light:border-zinc-200'
           }`}
         >
           {isAutoCycling ? 'Cycle: Auto' : 'Cycle: Paused'}
@@ -239,54 +239,54 @@ export default function AiEngineVisualizer() {
       </div>
 
       {/* 4-Step Linear Pipeline Stages */}
-      <div className="px-4 sm:px-6 py-2.5 bg-[#070709] border-b border-zinc-800/70 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+      <div className="px-4 sm:px-6 py-2.5 bg-[#070709] border-b border-zinc-800/70 light:border-zinc-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
         <div
           className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
             stage === 'scan'
-              ? 'bg-zinc-900 text-white border-zinc-700 font-medium'
-              : 'bg-black/40 text-zinc-500 border-zinc-900'
+              ? 'bg-zinc-900 light:bg-zinc-100 text-white light:text-zinc-900 border-zinc-700 light:border-zinc-300 font-medium'
+              : 'bg-black/40 light:bg-white/85 text-zinc-500 light:text-zinc-600 border-zinc-900 light:border-zinc-200'
           }`}
         >
-          <Search className="w-3.5 h-3.5 text-zinc-400" />
+          <Search className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
           <span className="truncate">1. Opportunity Scan</span>
         </div>
 
         <div
           className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
             stage === 'score'
-              ? 'bg-zinc-900 text-white border-zinc-700 font-medium'
-              : 'bg-black/40 text-zinc-500 border-zinc-900'
+              ? 'bg-zinc-900 light:bg-zinc-100 text-white light:text-zinc-900 border-zinc-700 light:border-zinc-300 font-medium'
+              : 'bg-black/40 light:bg-white/85 text-zinc-500 light:text-zinc-600 border-zinc-900 light:border-zinc-200'
           }`}
         >
-          <Target className="w-3.5 h-3.5 text-zinc-400" />
+          <Target className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
           <span className="truncate">2. Skill Fit Match</span>
         </div>
 
         <div
           className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
             stage === 'answer'
-              ? 'bg-zinc-900 text-white border-zinc-700 font-medium'
-              : 'bg-black/40 text-zinc-500 border-zinc-900'
+              ? 'bg-zinc-900 light:bg-zinc-100 text-white light:text-zinc-900 border-zinc-700 light:border-zinc-300 font-medium'
+              : 'bg-black/40 light:bg-white/85 text-zinc-500 light:text-zinc-600 border-zinc-900 light:border-zinc-200'
           }`}
         >
-          <Cpu className="w-3.5 h-3.5 text-zinc-400" />
+          <Cpu className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
           <span className="truncate">3. Screening Q&A</span>
         </div>
 
         <div
           className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
             stage === 'applied'
-              ? 'bg-zinc-900 text-white border-zinc-700 font-medium'
-              : 'bg-black/40 text-zinc-500 border-zinc-900'
+              ? 'bg-zinc-900 light:bg-zinc-100 text-white light:text-zinc-900 border-zinc-700 light:border-zinc-300 font-medium'
+              : 'bg-black/40 light:bg-white/85 text-zinc-500 light:text-zinc-600 border-zinc-900 light:border-zinc-200'
           }`}
         >
-          <CheckCircle2 className="w-3.5 h-3.5 text-zinc-300" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-zinc-300 light:text-zinc-700" />
           <span className="truncate">4. Verified Delivery</span>
         </div>
       </div>
 
       {/* Autonomous Liquid Data Stream Channel */}
-      <div className="relative h-1.5 w-full bg-zinc-950 overflow-hidden border-b border-zinc-900">
+      <div className="relative h-1.5 w-full bg-zinc-950 light:bg-white overflow-hidden border-b border-zinc-900 light:border-zinc-200">
         <div 
           className="h-full liquid-gradient-stream transition-all duration-700 ease-out"
           style={{
@@ -305,24 +305,24 @@ export default function AiEngineVisualizer() {
       <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         
         {/* Left Sub-Panel: Live Agent Terminal Output (5 Cols) */}
-        <div className="lg:col-span-5 rounded-xl bg-black border border-zinc-800 p-4 flex flex-col justify-between space-y-4 font-mono text-xs">
+        <div className="lg:col-span-5 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 p-4 flex flex-col justify-between space-y-4 font-mono text-xs">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 text-[11px] text-zinc-400">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 light:border-zinc-200 text-[11px] text-zinc-400 light:text-zinc-600">
               <div className="flex items-center gap-2">
-                <Terminal className="w-3.5 h-3.5 text-zinc-400" />
-                <span className="text-zinc-200 font-sans font-medium">Engine Execution Telemetry</span>
+                <Terminal className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
+                <span className="text-zinc-200 light:text-zinc-800 font-sans font-medium">Engine Execution Telemetry</span>
               </div>
-              <span className="text-[10px] text-zinc-300 bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-700">
+              <span className="text-[10px] text-zinc-300 light:text-zinc-700 bg-zinc-800 light:bg-zinc-200 px-1.5 py-0.5 rounded border border-zinc-700 light:border-zinc-300">
                 ACTIVE
               </span>
             </div>
 
             {/* Terminal Lines */}
-            <div className="space-y-2 mt-3 text-[11px] text-zinc-400 min-h-[190px]">
+            <div className="space-y-2 mt-3 text-[11px] text-zinc-400 light:text-zinc-600 min-h-[190px]">
               {activeRole.logs.map((log, i) => (
                 <div key={i} className="flex items-start gap-2 leading-relaxed">
                   <span className="text-zinc-600 shrink-0 select-none">›</span>
-                  <span className={i === activeRole.logs.length - 1 ? 'text-zinc-200 font-medium' : 'text-zinc-400'}>
+                  <span className={i === activeRole.logs.length - 1 ? 'text-zinc-200 light:text-zinc-800 font-medium' : 'text-zinc-400 light:text-zinc-600'}>
                     {log}
                   </span>
                 </div>
@@ -331,7 +331,7 @@ export default function AiEngineVisualizer() {
           </div>
 
           {/* Recruiter Response Toast Alert */}
-          <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-[11px] flex items-center gap-2.5 text-zinc-300 font-sans min-h-[46px]">
+          <div className="p-3 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-[11px] flex items-center gap-2.5 text-zinc-300 light:text-zinc-700 font-sans min-h-[46px]">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
             <span className="line-clamp-2">{activeRole.recruiterMessage}</span>
           </div>
@@ -341,26 +341,26 @@ export default function AiEngineVisualizer() {
         <div className="lg:col-span-7 space-y-3.5 flex flex-col justify-between">
           
           {/* Target Opportunity Header Card */}
-          <div className="p-4 sm:p-5 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between gap-4 min-h-[82px]">
+          <div className="p-4 sm:p-5 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between gap-4 min-h-[82px]">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-base shrink-0">
+              <div className="w-11 h-11 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center font-bold text-white light:text-zinc-900 text-base shrink-0">
                 {activeRole.logoText}
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm sm:text-base font-semibold text-white">{activeRole.role}</h3>
-                  <span className="text-xs text-zinc-400">@{activeRole.company}</span>
+                  <h3 className="text-sm sm:text-base font-semibold text-white light:text-zinc-900">{activeRole.role}</h3>
+                  <span className="text-xs text-zinc-400 light:text-zinc-600">@{activeRole.company}</span>
                 </div>
-                <div className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2 flex-wrap">
+                <div className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5 flex items-center gap-2 flex-wrap">
                   <span>{activeRole.location}</span>
                   <span>•</span>
-                  <span className="text-zinc-200 font-medium font-mono">{activeRole.salary}</span>
+                  <span className="text-zinc-200 light:text-zinc-800 font-medium font-mono">{activeRole.salary}</span>
                 </div>
               </div>
             </div>
 
             {/* Neural Fit Gauge */}
-            <div className="px-3 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 font-medium text-xs font-mono shrink-0">
+            <div className="px-3 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-200 light:text-zinc-800 font-medium text-xs font-mono shrink-0">
               {activeRole.matchScore}% Match
             </div>
           </div>
@@ -368,15 +368,15 @@ export default function AiEngineVisualizer() {
           {/* AI Decision Actions Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             {/* Matched Skill Matrix */}
-            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-2 min-h-[105px]">
-              <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono flex items-center gap-1.5">
-                <Layers className="w-3 h-3 text-zinc-400" /> Matched Skills
+            <div className="p-3.5 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800/90 light:border-zinc-200 space-y-2 min-h-[105px]">
+              <span className="text-[10px] uppercase tracking-wider text-zinc-400 light:text-zinc-600 font-mono flex items-center gap-1.5">
+                <Layers className="w-3 h-3 text-zinc-400 light:text-zinc-600" /> Matched Skills
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {activeRole.skills.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono"
+                    className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 font-mono"
                   >
                     {skill}
                   </span>
@@ -385,13 +385,13 @@ export default function AiEngineVisualizer() {
             </div>
 
             {/* Contextual Screening Q&A */}
-            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/90 space-y-1 min-h-[105px]">
-              <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono flex items-center gap-1.5">
-                <Cpu className="w-3 h-3 text-zinc-400" /> Tailored Screening Response
+            <div className="p-3.5 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800/90 light:border-zinc-200 space-y-1 min-h-[105px]">
+              <span className="text-[10px] uppercase tracking-wider text-zinc-400 light:text-zinc-600 font-mono flex items-center gap-1.5">
+                <Cpu className="w-3 h-3 text-zinc-400 light:text-zinc-600" /> Tailored Screening Response
               </span>
               <div className="text-[11px] leading-relaxed">
-                <span className="text-zinc-500 block text-[10px]">Q: {activeRole.screeningQuestion}</span>
-                <span className="text-zinc-200 font-medium block mt-0.5 line-clamp-3">
+                <span className="text-zinc-500 light:text-zinc-600 block text-[10px]">Q: {activeRole.screeningQuestion}</span>
+                <span className="text-zinc-200 light:text-zinc-800 font-medium block mt-0.5 line-clamp-3">
                   A: {activeRole.aiAnswer}
                 </span>
               </div>
@@ -399,20 +399,20 @@ export default function AiEngineVisualizer() {
           </div>
 
           {/* Dispatch Confirmation Card */}
-          <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between text-xs">
+          <div className="p-3.5 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-white font-medium block text-xs">Application Submitted</span>
-                <span className="text-zinc-500 text-[11px]">
-                  Dispatched at <span className="font-mono text-zinc-300">{activeRole.appliedTime}</span>
+                <span className="text-white light:text-zinc-900 font-medium block text-xs">Application Submitted</span>
+                <span className="text-zinc-500 light:text-zinc-600 text-[11px]">
+                  Dispatched at <span className="font-mono text-zinc-300 light:text-zinc-700">{activeRole.appliedTime}</span>
                 </span>
               </div>
             </div>
-            <div className="text-[11px] text-zinc-500 font-mono hidden sm:flex items-center gap-1.5">
-              <Eye className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono hidden sm:flex items-center gap-1.5">
+              <Eye className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
               <span>Visible in Recruiter Portal</span>
             </div>
           </div>
@@ -421,12 +421,12 @@ export default function AiEngineVisualizer() {
       </div>
 
       {/* Bottom Trust & Assurance Footer */}
-      <div className="px-6 py-3 bg-[#050507] border-t border-zinc-800/90 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500">
+      <div className="px-6 py-3 bg-[#050507] border-t border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500 light:text-zinc-600">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-          <span className="text-zinc-400 font-medium">Safe Human Pacing Emulation & Daily Window</span>
+          <ShieldCheck className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
+          <span className="text-zinc-400 light:text-zinc-600 font-medium">Safe Human Pacing Emulation & Daily Window</span>
         </div>
-        <div className="flex items-center gap-3 text-[11px] text-zinc-500">
+        <div className="flex items-center gap-3 text-[11px] text-zinc-500 light:text-zinc-600">
           <span>Direct ATS Integrations</span>
           <span>•</span>
           <span>Zero Spam Policy</span>

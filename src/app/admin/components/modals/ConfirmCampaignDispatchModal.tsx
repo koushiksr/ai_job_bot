@@ -53,7 +53,7 @@ export default function ConfirmCampaignDispatchModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/80 light:bg-white/85 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -62,26 +62,26 @@ export default function ConfirmCampaignDispatchModal({
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black space-y-4"
+        className="w-full max-w-md bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-2xl shadow-black space-y-4"
       >
-        <div className="flex items-center gap-3 text-amber-400">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3 text-amber-400 light:text-amber-600">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 light:border-amber-300 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">Confirm Campaign Dispatch</h3>
-            <p className="text-[11px] text-zinc-400">Mandatory administrative authorization</p>
+            <h3 className="text-sm font-bold text-white light:text-zinc-900">Confirm Campaign Dispatch</h3>
+            <p className="text-[11px] text-zinc-400 light:text-zinc-600">Mandatory administrative authorization</p>
           </div>
         </div>
 
-        <div className="p-3.5 bg-black/70 border border-zinc-800 rounded-xl text-xs space-y-2">
+        <div className="p-3.5 bg-black/70 light:bg-white/85 border border-zinc-800 light:border-zinc-200 rounded-xl text-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-zinc-500">Campaign:</span>
-            <span className="font-semibold text-white">{offerTitle}</span>
+            <span className="text-zinc-500 light:text-zinc-600">Campaign:</span>
+            <span className="font-semibold text-white light:text-zinc-900">{offerTitle}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-zinc-500">Target Audience:</span>
-            <span className="font-mono text-amber-300 capitalize">
+            <span className="text-zinc-500 light:text-zinc-600">Target Audience:</span>
+            <span className="font-mono text-amber-300 light:text-amber-700 capitalize">
               {targetType === 'single'
                 ? targetEmail
                 : targetType === 'multiple'
@@ -92,30 +92,30 @@ export default function ConfirmCampaignDispatchModal({
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-zinc-500">Delivery Channels:</span>
+            <span className="text-zinc-500 light:text-zinc-600">Delivery Channels:</span>
             <span className="font-mono text-sky-400">Email + Native Background Web Push</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-zinc-500">Pricing / Code:</span>
-            <span className="font-mono text-emerald-400">{discountedPrice} · {promoCode}</span>
+            <span className="text-zinc-500 light:text-zinc-600">Pricing / Code:</span>
+            <span className="font-mono text-emerald-400 light:text-emerald-600">{discountedPrice} · {promoCode}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-zinc-500">Validity Window:</span>
-            <span className="font-mono text-amber-400 font-bold">{validityHours} Hours ({Math.round(validityHours / 24 * 10) / 10} days)</span>
+            <span className="text-zinc-500 light:text-zinc-600">Validity Window:</span>
+            <span className="font-mono text-amber-400 light:text-amber-600 font-bold">{validityHours} Hours ({Math.round(validityHours / 24 * 10) / 10} days)</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-zinc-500">Sales Policy Rule:</span>
+            <span className="text-zinc-500 light:text-zinc-600">Sales Policy Rule:</span>
             <span className={`font-mono font-bold text-[11px] ${
-              forceOverride ? 'text-amber-400' : 'text-emerald-400'
+              forceOverride ? 'text-amber-400 light:text-amber-600' : 'text-emerald-400 light:text-emerald-600'
             }`}>
               {forceOverride ? 'Override Active (Forced VIP Upsell)' : 'Enforced (1-2 Days Before Expiry Only)'}
             </span>
           </div>
         </div>
 
-        <div className="p-3 bg-zinc-950/90 rounded-xl border border-zinc-800 text-[11px] text-zinc-400 space-y-1.5">
-          <div className="text-white font-medium flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+        <div className="p-3 bg-zinc-950/90 light:bg-white rounded-xl border border-zinc-800 light:border-zinc-200 text-[11px] text-zinc-400 light:text-zinc-600 space-y-1.5">
+          <div className="text-white light:text-zinc-900 font-medium flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
             <span>Dual-Channel Delivery &amp; Anti-Spam Safeguard:</span>
           </div>
           <p className="leading-relaxed">
@@ -130,7 +130,7 @@ export default function ConfirmCampaignDispatchModal({
             type="button"
             disabled={sendingOffer}
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold cursor-pointer"
+            className="px-4 py-2 rounded-lg bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700 text-zinc-300 light:text-zinc-700 text-xs font-semibold cursor-pointer"
           >
             Cancel
           </button>

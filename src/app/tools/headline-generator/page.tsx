@@ -135,7 +135,7 @@ export default function HeadlineGeneratorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+    <div className="min-h-screen bg-[#000000] light:bg-white text-zinc-100 light:text-zinc-900 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
       {/* Subtle ambient radial light */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-spotlight pointer-events-none" />
 
@@ -143,43 +143,43 @@ export default function HeadlineGeneratorPage() {
       <ToolsHeader />
 
       {/* Breadcrumbs */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-2 w-full flex items-center gap-2 text-xs text-zinc-500">
-        <Link href="/" className="hover:text-white transition-colors">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-2 w-full flex items-center gap-2 text-xs text-zinc-500 light:text-zinc-600">
+        <Link href="/" className="hover:text-white light:hover:text-zinc-900 transition-colors">
           Home
         </Link>
         <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-        <Link href="/tools" className="hover:text-white transition-colors">
+        <Link href="/tools" className="hover:text-white light:hover:text-zinc-900 transition-colors">
           Free Tools
         </Link>
         <ChevronRight className="w-3.5 h-3.5 text-zinc-600" />
-        <span className="text-zinc-200 font-medium">Recruiter Headline & Summary Generator</span>
+        <span className="text-zinc-200 light:text-zinc-800 font-medium">Recruiter Headline & Summary Generator</span>
       </div>
 
       {/* Main Container */}
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-8 relative z-10 w-full">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-zinc-950 border border-zinc-800 text-zinc-300">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> Recruiter Search Optimizer
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600" /> Recruiter Search Optimizer
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white light:text-zinc-900 tracking-tight">
             Recruiter Profile Headline & Summary Generator
           </h1>
-          <p className="text-zinc-400 text-xs sm:text-sm">
+          <p className="text-zinc-400 light:text-zinc-600 text-xs sm:text-sm">
             Generate click-through optimized headlines strictly under 100 characters that trigger recruiter search algorithms.
           </p>
         </div>
 
         {/* Quick Presets */}
         <div className="mb-8 flex flex-wrap items-center justify-center gap-2">
-          <span className="text-xs text-zinc-500 mr-1 flex items-center gap-1">
-            <Zap className="w-3.5 h-3.5 text-amber-400" /> Quick Presets:
+          <span className="text-xs text-zinc-500 light:text-zinc-600 mr-1 flex items-center gap-1">
+            <Zap className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" /> Quick Presets:
           </span>
           {PRESETS.map((p, i) => (
             <button
               key={i}
               onClick={() => handleApplyPreset(p)}
-              className="text-xs bg-[#09090b] hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              className="text-xs bg-[#09090b] hover:bg-zinc-900 light:hover:bg-zinc-100 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
             >
               {p.label}
             </button>
@@ -188,51 +188,51 @@ export default function HeadlineGeneratorPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Form (5 cols) */}
-          <div className="lg:col-span-5 bg-[#09090b] border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cyan-400" /> Candidate Profile Inputs
+          <div className="lg:col-span-5 bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl space-y-4">
+            <h2 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-cyan-400 light:text-cyan-600" /> Candidate Profile Inputs
             </h2>
 
             <form onSubmit={handleGenerate} className="space-y-4 text-xs">
               <div>
-                <label className="block text-zinc-300 font-semibold mb-1.5">
-                  Target Job Role <span className="text-rose-400">*</span>
+                <label className="block text-zinc-300 light:text-zinc-700 font-semibold mb-1.5">
+                  Target Job Role <span className="text-rose-400 light:text-rose-600">*</span>
                 </label>
                 <input
                   type="text"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                   placeholder="e.g. Python Developer, React Lead"
-                  className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-700 transition-colors"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-zinc-300 font-semibold mb-1.5">Total Experience</label>
+                  <label className="block text-zinc-300 light:text-zinc-700 font-semibold mb-1.5">Total Experience</label>
                   <input
                     type="text"
                     value={experience}
                     onChange={(e) => setExperience(e.target.value)}
                     placeholder="e.g. 3.5 Years"
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-700 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-zinc-300 font-semibold mb-1.5">Notice Period</label>
+                  <label className="block text-zinc-300 light:text-zinc-700 font-semibold mb-1.5">Notice Period</label>
                   <input
                     type="text"
                     value={noticePeriod}
                     onChange={(e) => setNoticePeriod(e.target.value)}
                     placeholder="e.g. Immediate, 15 Days"
-                    className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+                    className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-700 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-zinc-300 font-semibold mb-1.5">
+                <label className="block text-zinc-300 light:text-zinc-700 font-semibold mb-1.5">
                   Primary Skills (Comma separated)
                 </label>
                 <textarea
@@ -240,25 +240,25 @@ export default function HeadlineGeneratorPage() {
                   value={skills}
                   onChange={(e) => setSkills(e.target.value)}
                   placeholder="e.g. React, Node.js, TypeScript, AWS, Docker"
-                  className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-700 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-zinc-300 font-semibold mb-1.5">Domain / Specialization (Optional)</label>
+                <label className="block text-zinc-300 light:text-zinc-700 font-semibold mb-1.5">Domain / Specialization (Optional)</label>
                 <input
                   type="text"
                   value={domain}
                   onChange={(e) => setDomain(e.target.value)}
                   placeholder="e.g. FinTech, Microservices, E-commerce"
-                  className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-700 transition-colors"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading || !role.trim()}
-                className="w-full mt-2 bg-white hover:bg-zinc-200 disabled:opacity-50 text-black font-bold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                className="w-full mt-2 bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 disabled:opacity-50 text-black light:text-zinc-900 font-bold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 {loading ? (
                   <>
@@ -274,11 +274,11 @@ export default function HeadlineGeneratorPage() {
               </button>
             </form>
 
-            <div className="mt-6 pt-5 border-t border-zinc-800/80 text-[11px] text-zinc-400 space-y-2">
-              <div className="flex items-center gap-1.5 text-zinc-300 font-medium">
-                <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> Why does the headline matter so much?
+            <div className="mt-6 pt-5 border-t border-zinc-800/80 light:border-zinc-200 text-[11px] text-zinc-400 light:text-zinc-600 space-y-2">
+              <div className="flex items-center gap-1.5 text-zinc-300 light:text-zinc-700 font-medium">
+                <Info className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600 shrink-0" /> Why does the headline matter so much?
               </div>
-              <p className="leading-relaxed text-zinc-500">
+              <p className="leading-relaxed text-zinc-500 light:text-zinc-600">
                 Recruiters use targeted keyword boolean search queries. If your exact role and top skills are not in your headline, your profile is hidden behind 500+ candidates.
               </p>
             </div>
@@ -287,13 +287,13 @@ export default function HeadlineGeneratorPage() {
           {/* Right Output (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
             {/* Generated Headlines List */}
-            <div className="bg-[#09090b] border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Star className="w-4 h-4 text-amber-400" />
+                <h2 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
+                  <Star className="w-4 h-4 text-amber-400 light:text-amber-600" />
                   Generated Profile Headlines
                 </h2>
-                <span className="text-[11px] text-zinc-500 font-mono">Strictly &lt; 100 characters</span>
+                <span className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">Strictly &lt; 100 characters</span>
               </div>
 
               <div className="space-y-3">
@@ -303,39 +303,39 @@ export default function HeadlineGeneratorPage() {
                   return (
                     <div
                       key={idx}
-                      className="border border-zinc-800/90 hover:border-zinc-700 rounded-xl p-3.5 bg-black transition-all"
+                      className="border border-zinc-800/90 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 rounded-xl p-3.5 bg-black light:bg-white transition-all"
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[11px] font-semibold text-zinc-300">{item.type}</span>
+                        <span className="text-[11px] font-semibold text-zinc-300 light:text-zinc-700">{item.type}</span>
                         <div className="flex items-center gap-2">
                           <span
                             className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
                               len <= 95
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                ? 'bg-emerald-500/10 text-emerald-400 light:text-emerald-600 border border-emerald-500/20'
+                                : 'bg-amber-500/10 text-amber-400 light:text-amber-600 border border-amber-500/20'
                             }`}
                           >
                             {len} / 100 chars
                           </span>
                           <button
                             onClick={() => handleCopyHeadline(item.text, idx)}
-                            className="inline-flex items-center gap-1 text-[11px] bg-zinc-900 hover:bg-zinc-800 text-zinc-200 px-2 py-1 rounded transition-colors cursor-pointer border border-zinc-800"
+                            className="inline-flex items-center gap-1 text-[11px] bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-200 light:text-zinc-800 px-2 py-1 rounded transition-colors cursor-pointer border border-zinc-800 light:border-zinc-200"
                           >
                             {isCopied ? (
                               <>
-                                <Check className="w-3 h-3 text-emerald-400" />
-                                <span className="text-emerald-400">Copied!</span>
+                                <Check className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
+                                <span className="text-emerald-400 light:text-emerald-600">Copied!</span>
                               </>
                             ) : (
                               <>
-                                <Copy className="w-3 h-3 text-zinc-400" />
+                                <Copy className="w-3 h-3 text-zinc-400 light:text-zinc-600" />
                                 <span>Copy</span>
                               </>
                             )}
                           </button>
                         </div>
                       </div>
-                      <p className="text-xs text-white font-medium leading-relaxed select-all">
+                      <p className="text-xs text-white light:text-zinc-900 font-medium leading-relaxed select-all">
                         {item.text}
                       </p>
                     </div>
@@ -345,48 +345,48 @@ export default function HeadlineGeneratorPage() {
             </div>
 
             {/* Generated Profile Summary */}
-            <div className="bg-[#09090b] border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <div className="bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-xl">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-zinc-300" />
+                <h2 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-zinc-300 light:text-zinc-700" />
                   Generated Profile Summary
                 </h2>
                 <button
                   onClick={handleCopySummary}
-                  className="inline-flex items-center gap-1 text-xs bg-zinc-900 hover:bg-zinc-800 text-zinc-200 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-zinc-800"
+                  className="inline-flex items-center gap-1 text-xs bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-200 light:text-zinc-800 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-zinc-800 light:border-zinc-200"
                 >
                   {copiedSummary ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400 font-semibold">Copied Summary!</span>
+                      <Check className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
+                      <span className="text-emerald-400 light:text-emerald-600 font-semibold">Copied Summary!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                      <Copy className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                       <span>Copy Summary</span>
                     </>
                   )}
                 </button>
               </div>
 
-              <div className="bg-black border border-zinc-800/80 rounded-xl p-4 text-xs text-zinc-300 leading-relaxed font-normal select-all">
+              <div className="bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 rounded-xl p-4 text-xs text-zinc-300 light:text-zinc-700 leading-relaxed font-normal select-all">
                 {summary}
               </div>
             </div>
 
             {/* Conversion CTA Banner */}
-            <div className="rounded-2xl border border-zinc-800 bg-[#09090b] p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b] p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm font-bold text-white mb-1">
+                <h3 className="text-sm font-bold text-white light:text-zinc-900 mb-1">
                   Ready to auto-apply with your updated profile?
                 </h3>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-zinc-400 light:text-zinc-600">
                   JobFlux AI submits 50 applications daily and solves recruiter screening questions automatically.
                 </p>
               </div>
               <Link
                 href="/?mode=trial"
-                className="whitespace-nowrap inline-flex items-center gap-1.5 bg-white hover:bg-zinc-200 text-black font-bold text-xs px-4 py-2.5 rounded-lg shadow-sm transition-all"
+                className="whitespace-nowrap inline-flex items-center gap-1.5 bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-bold text-xs px-4 py-2.5 rounded-lg shadow-sm transition-all"
               >
                 Launch Bot Free <ArrowRight className="w-3.5 h-3.5" />
               </Link>

@@ -30,7 +30,7 @@ export default function CandidateProfileEditModal({
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 bg-black/80 light:bg-white/85 backdrop-blur-sm flex items-center justify-center p-4"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose()
         }}
@@ -47,7 +47,7 @@ export default function CandidateProfileEditModal({
           <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
             <div className="flex items-center gap-2">
               <Edit className="w-4 h-4 text-indigo-400" />
-              <h3 className="font-bold text-sm text-white">
+              <h3 className="font-bold text-sm text-white light:text-zinc-900">
                 {editingUser.isNew ? 'Create New Candidate Profile' : `Edit Candidate Profile — ${editingUser.name || editingUser.user_id}`}
               </h3>
             </div>
@@ -58,7 +58,7 @@ export default function CandidateProfileEditModal({
                 onClose()
               }}
               aria-label="Close profile editor"
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer z-50"
+              className="text-slate-400 hover:text-white light:hover:text-zinc-900 p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer z-50"
             >
               <X className="w-5 h-5" />
             </button>
