@@ -7,17 +7,14 @@ import {
   BellRing,
   CheckCircle2,
   Settings,
-  X,
   Users,
-  Crown,
   Clock,
   Calendar,
   Sparkles,
   Zap,
   AlertCircle,
   Cpu,
-  Laptop,
-  Server
+  Layers
 } from 'lucide-react'
 import { AdminOverviewMetrics, AdminExecutionCounts } from '../types'
 
@@ -25,6 +22,7 @@ interface AdminOverviewStatsProps {
   overviewMetrics: AdminOverviewMetrics
   executionCounts?: AdminExecutionCounts
   onFilterByExecutionStatus?: (status: string) => void
+  currentExecutionStatusFilter?: string
   notificationPermission: string
   notificationBannerDismissed: boolean
   onDismissBanner: () => void
@@ -39,6 +37,7 @@ export default function AdminOverviewStats({
   overviewMetrics,
   executionCounts,
   onFilterByExecutionStatus,
+  currentExecutionStatusFilter = 'all',
   notificationPermission,
   notificationBannerDismissed,
   onDismissBanner,
@@ -48,309 +47,290 @@ export default function AdminOverviewStats({
   onOpenUnblockGuide,
   adminEmail
 }: AdminOverviewStatsProps) {
+  const activeFilter = currentExecutionStatusFilter || 'all'
+
   return (
-    <div className="space-y-6">
-      {/* Browser Push Notifications Assistant Banner for Admin */}
-      {notificationPermission === 'denied' && (
-        <div className="p-3 sm:p-3.5 rounded-xl bg-amber-950/40 light:bg-amber-50 border border-amber-500/40 light:border-amber-300 text-amber-200 light:text-amber-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 light:border-amber-300 flex items-center justify-center text-amber-400 light:text-amber-600 shrink-0">
-              <BellOff className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-white light:text-zinc-900 flex items-center gap-2">
-                <span>Browser Push Notifications Blocked</span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 light:text-amber-700 font-mono">Action Required</span>
-              </div>
-              <p className="text-[11px] text-amber-300/80 mt-0.5">
-                Your browser is currently blocking notifications for JobFlux AI. Enable them to receive real-time admin dispatch confirmations &amp; queue updates.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onOpenUnblockGuide}
-            className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5 shrink-0 self-end sm:self-auto"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            <span>How to Unblock (1-Click Guide)</span>
-          </button>
-        </div>
-      )}
-
-      {notificationPermission === 'default' && !notificationBannerDismissed && (
-        <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/90 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
-              <Bell className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-white light:text-zinc-900">Enable Real-Time Admin Push Notifications</div>
-              <p className="text-[11px] text-zinc-400 light:text-zinc-600 mt-0.5">
-                Receive immediate alerts when background worker sweeps complete, tickets are filed, or purchase offers are dispatched.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-            <button
-              type="button"
-              onClick={onDismissBanner}
-              className="p-1.5 rounded-lg text-zinc-500 light:text-zinc-600 hover:text-zinc-300 transition-colors cursor-pointer"
-              title="Dismiss"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={onRequestNotification}
-              className="px-3 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5"
-            >
-              <BellRing className="w-3.5 h-3.5" />
-              <span>Allow Notifications</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {notificationPermission === 'granted' && (
-        <div className="p-2.5 rounded-xl bg-emerald-950/20 border border-emerald-800/30 text-emerald-300 light:text-emerald-700 flex items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600 shrink-0" />
-            <span>Real-time push notifications active for admin alerts, worker sweeps, and queue dispatches.</span>
-          </div>
-          <button
-            type="button"
-            onClick={onSendTestNotification}
-            className="px-2.5 py-1 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 light:border-emerald-300 text-emerald-300 light:text-emerald-700 text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-          >
-            <Bell className="w-3 h-3" />
-            <span>{testNotificationSent ? 'Alert Sent' : 'Send Test Alert'}</span>
-          </button>
-        </div>
-      )}
-
-      {/* Real-time Cluster Radar Telemetry Bar */}
-      <div className="px-4 py-2.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800/90 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs relative overflow-hidden card-featured-glow">
+    <div className="space-y-4">
+      {/* 1. Unified Telemetry & Notification Control Bar */}
+      <div className="px-4 py-2.5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800/90 light:border-zinc-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs relative overflow-hidden shadow-sm">
         <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-400/80 to-transparent animate-laser-sweep pointer-events-none" />
-        <div className="flex items-center gap-2.5">
+        
+        {/* Left: Cluster Telemetry Status */}
+        <div className="flex items-center gap-2.5 flex-wrap">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
-          <span className="text-zinc-200 light:text-zinc-800 font-medium">Cluster Active &amp; Synchronized</span>
+          <span className="text-zinc-200 light:text-zinc-900 font-semibold tracking-wide">
+            Cluster Active &amp; Synchronized
+          </span>
           <span className="text-zinc-600 hidden sm:inline">·</span>
-          <span className="text-zinc-400 light:text-zinc-600 font-mono text-[11px] hidden sm:inline">Scheduled Run: Daily 06:00 AM IST</span>
+          <span className="text-zinc-400 light:text-zinc-600 font-mono text-[11px] hidden sm:inline">
+            Daily Auto-Run: 06:00 AM IST
+          </span>
         </div>
-        <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-400 light:text-zinc-600">
-          <span>Primary Admin: <strong className="text-sky-300">{adminEmail || 'technohmsit@gmail.com'}</strong></span>
-          <span className="text-zinc-700">|</span>
-          <span className="text-emerald-400 light:text-emerald-600 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Live
+
+        {/* Right: Quick Notification Pill & Admin Tag */}
+        <div className="flex items-center gap-2.5 flex-wrap self-end md:self-auto text-[11px]">
+          {notificationPermission === 'denied' && (
+            <button
+              type="button"
+              onClick={onOpenUnblockGuide}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 light:text-amber-700 hover:bg-amber-500/25 transition-colors cursor-pointer font-medium"
+              title="Browser notifications are blocked. Tap to view unblock guide."
+            >
+              <BellOff className="w-3 h-3 text-amber-400" />
+              <span>Notifications Blocked</span>
+              <Settings className="w-2.5 h-2.5 opacity-70" />
+            </button>
+          )}
+
+          {notificationPermission === 'default' && !notificationBannerDismissed && (
+            <button
+              type="button"
+              onClick={onRequestNotification}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-300 light:text-sky-700 hover:bg-sky-500/25 transition-colors cursor-pointer font-medium"
+              title="Enable push alerts for automated run completions"
+            >
+              <BellRing className="w-3 h-3 text-sky-400" />
+              <span>Enable Push Alerts</span>
+            </button>
+          )}
+
+          {notificationPermission === 'granted' && (
+            <button
+              type="button"
+              onClick={onSendTestNotification}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 light:text-emerald-700 hover:bg-emerald-500/20 transition-colors cursor-pointer font-medium"
+              title="Click to dispatch a test notification"
+            >
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>{testNotificationSent ? 'Alert Dispatched' : 'Push Active (Test)'}</span>
+            </button>
+          )}
+
+          <div className="h-3.5 w-px bg-zinc-800 light:bg-zinc-200 hidden sm:block" />
+
+          <span className="text-zinc-400 light:text-zinc-600 font-mono">
+            Admin: <strong className="text-zinc-200 light:text-zinc-800">{adminEmail || 'technohmsit@gmail.com'}</strong>
           </span>
         </div>
       </div>
 
-      {/* Today's Multi-Server Automated Execution Pipeline */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-sky-400" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300 light:text-zinc-700">
-              Today&apos;s Multi-Server Execution Pipeline
-            </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30">
-              IST Daily Cycle
-            </span>
+      {/* 2. Unified Command Deck: Core KPIs + Integrated Pipeline Filters */}
+      <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800/90 light:border-zinc-200 p-4 sm:p-5 space-y-4 shadow-sm">
+        {/* Top: 4 Core Platform Metrics in One Clean Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {/* Metric 1: Total Candidates */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/70 light:bg-zinc-50 border border-zinc-800/60 light:border-zinc-200 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Users className="w-3.5 h-3.5 text-sky-400" /> Candidates
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 light:bg-zinc-200 text-zinc-300 light:text-zinc-700">
+                {overviewMetrics.scheduled_profiles_active} Active
+              </span>
+            </div>
+            <div className="text-2xl font-bold font-mono text-white light:text-zinc-900 tracking-tight">
+              {overviewMetrics.total_profiles}
+            </div>
+            <p className="text-[11px] text-zinc-500 light:text-zinc-500 flex items-center gap-1.5">
+              <span>{overviewMetrics.vip_profiles_count} VIP pass</span>
+              <span className="text-zinc-700">·</span>
+              <span>Configured</span>
+            </p>
           </div>
-          <span className="text-[11px] text-zinc-500 light:text-zinc-600 hidden sm:inline">
-            Click any status card to filter candidates table below
-          </span>
+
+          {/* Metric 2: Today Applied */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/70 light:bg-zinc-50 border border-zinc-800/60 light:border-zinc-200 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Clock className="w-3.5 h-3.5 text-emerald-400" /> Today Applied
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 light:text-emerald-700">
+                24h IST
+              </span>
+            </div>
+            <div className="text-2xl font-bold font-mono text-emerald-400 light:text-emerald-600 tracking-tight">
+              {overviewMetrics.applied_today}
+            </div>
+            <p className="text-[11px] text-zinc-500 light:text-zinc-500">
+              Submitted in current cycle
+            </p>
+          </div>
+
+          {/* Metric 3: This Week */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/70 light:bg-zinc-50 border border-zinc-800/60 light:border-zinc-200 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Calendar className="w-3.5 h-3.5 text-amber-400" /> This Week
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-400 light:text-amber-700">
+                7d
+              </span>
+            </div>
+            <div className="text-2xl font-bold font-mono text-white light:text-zinc-900 tracking-tight">
+              {overviewMetrics.applied_this_week}
+            </div>
+            <p className="text-[11px] text-zinc-500 light:text-zinc-500">
+              Submitted past 7 days
+            </p>
+          </div>
+
+          {/* Metric 4: All-Time Verified */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/70 light:bg-zinc-50 border border-zinc-800/60 light:border-zinc-200 space-y-1">
+            <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Total Verified
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/15 text-indigo-400 light:text-indigo-700">
+                All-Time
+              </span>
+            </div>
+            <div className="text-2xl font-bold font-mono text-white light:text-zinc-900 tracking-tight">
+              {overviewMetrics.total_applied}
+            </div>
+            <p className="text-[11px] text-zinc-500 light:text-zinc-500">
+              Verified job applications
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {/* 1. Progressing Now */}
-          <button
-            type="button"
-            onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('applying')}
-            className="p-3.5 rounded-xl bg-gradient-to-b from-sky-950/40 to-[#09090b] border border-sky-500/40 hover:border-sky-400 text-left transition-all group shadow-lg shadow-sky-950/20 cursor-pointer"
-          >
-            <div className="flex items-center justify-between text-xs text-sky-300">
-              <span className="flex items-center gap-1.5 font-semibold">
-                <span className="relative flex h-2 w-2">
+        {/* Bottom: Integrated Real-Time Execution Pipeline Filters */}
+        <div className="pt-3 border-t border-zinc-800/80 light:border-zinc-200 space-y-2.5">
+          <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <Cpu className="w-3.5 h-3.5 text-sky-400" />
+              <span className="font-semibold text-zinc-300 light:text-zinc-700 uppercase tracking-wider text-[11px]">
+                Today&apos;s Execution Pipeline Filter
+              </span>
+            </div>
+            <span className="text-[11px] text-zinc-500 light:text-zinc-500">
+              Click any status below to filter candidates table
+            </span>
+          </div>
+
+          {/* Interactive Filter Pills */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            {/* All */}
+            <button
+              type="button"
+              onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('all')}
+              className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                activeFilter === 'all'
+                  ? 'bg-zinc-800 light:bg-zinc-200 border-zinc-600 light:border-zinc-400 shadow-sm text-white light:text-zinc-900'
+                  : 'bg-zinc-950/60 light:bg-zinc-50/80 hover:bg-zinc-900 light:hover:bg-zinc-100 border-zinc-800/70 light:border-zinc-200 text-zinc-400 light:text-zinc-600'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Layers className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="text-xs font-medium truncate">All Profiles</span>
+              </div>
+              <span className="font-mono text-xs font-bold shrink-0">
+                {executionCounts?.all ?? overviewMetrics.total_profiles}
+              </span>
+            </button>
+
+            {/* Progressing Now */}
+            <button
+              type="button"
+              onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('applying')}
+              className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                activeFilter === 'applying'
+                  ? 'bg-sky-950/60 light:bg-sky-100 border-sky-500 text-sky-200 light:text-sky-900 shadow-sm ring-1 ring-sky-500/40'
+                  : 'bg-zinc-950/60 light:bg-zinc-50/80 hover:bg-sky-950/30 light:hover:bg-sky-50 border-zinc-800/70 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-sky-300'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="relative flex h-2 w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
                 </span>
-                Progressing Now
+                <span className="text-xs font-medium truncate">Applying Now</span>
+              </div>
+              <span className="font-mono text-xs font-bold text-sky-400 light:text-sky-600 shrink-0">
+                {executionCounts?.applying ?? 0}
               </span>
-              <Zap className="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform" />
-            </div>
-            <div className="text-2xl font-bold font-mono text-white light:text-zinc-900 mt-1.5">
-              {executionCounts?.applying ?? 0}
-            </div>
-            <p className="text-[10px] text-sky-300/70 font-mono mt-0.5">
-              Active bot runners
-            </p>
-          </button>
+            </button>
 
-          {/* 2. Done Today */}
-          <button
-            type="button"
-            onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('applied_today')}
-            className="p-3.5 rounded-xl bg-gradient-to-b from-emerald-950/40 to-[#09090b] border border-emerald-500/40 light:border-emerald-300 hover:border-emerald-400 text-left transition-all group shadow-lg shadow-emerald-950/20 cursor-pointer"
-          >
-            <div className="flex items-center justify-between text-xs text-emerald-300 light:text-emerald-700">
-              <span className="flex items-center gap-1.5 font-semibold">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" /> Done Today
+            {/* Done Today */}
+            <button
+              type="button"
+              onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('applied_today')}
+              className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                activeFilter === 'applied_today'
+                  ? 'bg-emerald-950/60 light:bg-emerald-100 border-emerald-500 text-emerald-200 light:text-emerald-900 shadow-sm ring-1 ring-emerald-500/40'
+                  : 'bg-zinc-950/60 light:bg-zinc-50/80 hover:bg-emerald-950/30 light:hover:bg-emerald-50 border-zinc-800/70 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-emerald-300'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="text-xs font-medium truncate">Done Today</span>
+              </div>
+              <span className="font-mono text-xs font-bold text-emerald-400 light:text-emerald-600 shrink-0">
+                {executionCounts?.applied_today ?? 0}
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 light:text-emerald-700">IST</span>
-            </div>
-            <div className="text-2xl font-bold font-mono text-emerald-400 light:text-emerald-600 mt-1.5">
-              {executionCounts?.applied_today ?? 0}
-            </div>
-            <p className="text-[10px] text-emerald-400/70 font-mono mt-0.5">
-              Completed today
-            </p>
-          </button>
+            </button>
 
-          {/* 3. In Queue */}
-          <button
-            type="button"
-            onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('in_queue')}
-            className="p-3.5 rounded-xl bg-gradient-to-b from-amber-950/40 to-[#09090b] border border-amber-500/40 light:border-amber-300 hover:border-amber-400 text-left transition-all group shadow-lg shadow-amber-950/20 cursor-pointer"
-          >
-            <div className="flex items-center justify-between text-xs text-amber-300 light:text-amber-700">
-              <span className="flex items-center gap-1.5 font-semibold">
-                <Clock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" /> In Queue
+            {/* In Queue */}
+            <button
+              type="button"
+              onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('in_queue')}
+              className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                activeFilter === 'in_queue'
+                  ? 'bg-amber-950/60 light:bg-amber-100 border-amber-500 text-amber-200 light:text-amber-900 shadow-sm ring-1 ring-amber-500/40'
+                  : 'bg-zinc-950/60 light:bg-zinc-50/80 hover:bg-amber-950/30 light:hover:bg-amber-50 border-zinc-800/70 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-amber-300'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="text-xs font-medium truncate">In Queue</span>
+              </div>
+              <span className="font-mono text-xs font-bold text-amber-400 light:text-amber-600 shrink-0">
+                {executionCounts?.in_queue ?? 0}
               </span>
-              <span className="text-[10px] font-mono text-amber-400 light:text-amber-600">Next</span>
-            </div>
-            <div className="text-2xl font-bold font-mono text-amber-300 light:text-amber-700 mt-1.5">
-              {executionCounts?.in_queue ?? 0}
-            </div>
-            <p className="text-[10px] text-amber-300/70 font-mono mt-0.5">
-              Awaiting worker claim
-            </p>
-          </button>
+            </button>
 
-          {/* 4. Need to be Done Today */}
-          <button
-            type="button"
-            onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('not_applied_today')}
-            className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-left transition-all group cursor-pointer"
-          >
-            <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
-              <span className="flex items-center gap-1.5 font-semibold">
-                <Clock className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> Need to be Done
+            {/* Need to be Done / Scheduled */}
+            <button
+              type="button"
+              onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('not_applied_today')}
+              className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                activeFilter === 'not_applied_today'
+                  ? 'bg-zinc-800 light:bg-zinc-200 border-zinc-600 text-white light:text-zinc-900 shadow-sm ring-1 ring-zinc-500/40'
+                  : 'bg-zinc-950/60 light:bg-zinc-50/80 hover:bg-zinc-900 light:hover:bg-zinc-100 border-zinc-800/70 light:border-zinc-200 text-zinc-400 light:text-zinc-600'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                <span className="text-xs font-medium truncate">Scheduled</span>
+              </div>
+              <span className="font-mono text-xs font-bold text-zinc-200 light:text-zinc-800 shrink-0">
+                {executionCounts?.not_applied_today ?? 0}
               </span>
-              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Scheduled</span>
-            </div>
-            <div className="text-2xl font-bold font-mono text-zinc-200 light:text-zinc-800 mt-1.5">
-              {executionCounts?.not_applied_today ?? 0}
-            </div>
-            <p className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono mt-0.5">
-              Pending scheduled run
-            </p>
-          </button>
+            </button>
 
-          {/* 5. Payment Required / Paused */}
-          <button
-            type="button"
-            onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('payment_required')}
-            className="p-3.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 hover:border-rose-900/50 text-left transition-all group cursor-pointer col-span-2 sm:col-span-1"
-          >
-            <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 group-hover:text-rose-300 transition-colors">
-              <span className="flex items-center gap-1.5 font-semibold">
-                <AlertCircle className="w-3.5 h-3.5 text-rose-400 light:text-rose-600" /> Plan Required
+            {/* Plan Required */}
+            <button
+              type="button"
+              onClick={() => onFilterByExecutionStatus && onFilterByExecutionStatus('payment_required')}
+              className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                activeFilter === 'payment_required'
+                  ? 'bg-rose-950/60 light:bg-rose-100 border-rose-500 text-rose-200 light:text-rose-900 shadow-sm ring-1 ring-rose-500/40'
+                  : 'bg-zinc-950/60 light:bg-zinc-50/80 hover:bg-rose-950/30 light:hover:bg-rose-50 border-zinc-800/70 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-rose-300'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <span className="text-xs font-medium truncate">Plan Paused</span>
+              </div>
+              <span className="font-mono text-xs font-bold text-rose-400 light:text-rose-600 shrink-0">
+                {executionCounts?.payment_required ?? 0}
               </span>
-              <span className="text-[10px] font-mono text-rose-400/80">Paused</span>
-            </div>
-            <div className="text-2xl font-bold font-mono text-rose-400/90 mt-1.5">
-              {executionCounts?.payment_required ?? 0}
-            </div>
-            <p className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono mt-0.5">
-              Plan expired / inactive
-            </p>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* 5 Clean Overview Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
-          <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
-            <span className="flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> Candidates
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
-              {overviewMetrics.scheduled_profiles_active} Active
-            </span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-semibold text-white light:text-zinc-900 font-mono">
-            {overviewMetrics.total_profiles}
-          </div>
-          <p className="text-[11px] text-zinc-500 light:text-zinc-600">Configured profiles</p>
-        </div>
-
-        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
-          <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
-            <span className="flex items-center gap-1.5">
-              <Crown className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> VIP Privilege
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
-              Free Pass
-            </span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-semibold text-white light:text-zinc-900 font-mono">
-            {overviewMetrics.vip_profiles_count}
-          </div>
-          <p className="text-[11px] text-zinc-500 light:text-zinc-600">Admin VIP bypass</p>
-        </div>
-
-        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
-          <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> Today Applied
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
-              24h
-            </span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-semibold text-white light:text-zinc-900 font-mono">
-            {overviewMetrics.applied_today}
-          </div>
-          <p className="text-[11px] text-zinc-500 light:text-zinc-600">Submitted today</p>
-        </div>
-
-        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
-          <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> This Week
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
-              7d
-            </span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-semibold text-white light:text-zinc-900 font-mono">
-            {overviewMetrics.applied_this_week}
-          </div>
-          <p className="text-[11px] text-zinc-500 light:text-zinc-600">Submitted this week</p>
-        </div>
-
-        <div className="p-5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
-          <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> Total Applied
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
-              All-Time
-            </span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-semibold text-white light:text-zinc-900 font-mono">
-            {overviewMetrics.total_applied}
-          </div>
-          <p className="text-[11px] text-zinc-500 light:text-zinc-600">All-time verified</p>
-        </div>
-      </section>
     </div>
   )
 }

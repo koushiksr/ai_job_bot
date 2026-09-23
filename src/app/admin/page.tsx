@@ -13,28 +13,51 @@ import AdminHeader from './components/AdminHeader'
 import AdminOverviewStats from './components/AdminOverviewStats'
 import AdminTabsNav from './components/AdminTabsNav'
 
-// Modular Tab Views
-import CandidatesTab from './components/tabs/CandidatesTab'
-import RequestsTab from './components/tabs/RequestsTab'
-import QueueTab from './components/tabs/QueueTab'
-import PaymentsTab from './components/tabs/PaymentsTab'
-import OffersTab from './components/tabs/OffersTab'
-import EnterpriseLeadsTab from './components/tabs/EnterpriseLeadsTab'
-import EnterpriseOrgsTab from './components/tabs/EnterpriseOrgsTab'
-import LogsTab from './components/tabs/LogsTab'
-import VisitorsTab from './components/tabs/VisitorsTab'
-import ReviewsTab from './components/ReviewsTab'
+import dynamic from 'next/dynamic'
+import TabLoadingSkeleton from './components/TabLoadingSkeleton'
 import { AdminTabType, AdminExecutionCounts } from './types'
 import { usePersistedToggle } from './hooks/usePersistedToggle'
 
-// Modular Modals
-import InspectCandidateModal from './components/modals/InspectCandidateModal'
-import CandidateProfileEditModal from './components/modals/CandidateProfileEditModal'
-import LiveExecutionLogModal from './components/modals/LiveExecutionLogModal'
-import ConfirmCancelAllModal from './components/modals/ConfirmCancelAllModal'
-import DailyDispatchReportModal from './components/modals/DailyDispatchReportModal'
-import ConfirmCampaignDispatchModal from './components/modals/ConfirmCampaignDispatchModal'
-import AdminUnblockGuideModal from './components/modals/AdminUnblockGuideModal'
+// Lazy-Loaded Tab Views with Skeleton Fallback
+const CandidatesTab = dynamic(() => import('./components/tabs/CandidatesTab'), {
+  loading: () => <TabLoadingSkeleton title="Candidates" />
+})
+const RequestsTab = dynamic(() => import('./components/tabs/RequestsTab'), {
+  loading: () => <TabLoadingSkeleton title="Support Requests" />
+})
+const QueueTab = dynamic(() => import('./components/tabs/QueueTab'), {
+  loading: () => <TabLoadingSkeleton title="Execution Queue" />
+})
+const PaymentsTab = dynamic(() => import('./components/tabs/PaymentsTab'), {
+  loading: () => <TabLoadingSkeleton title="Payments" />
+})
+const OffersTab = dynamic(() => import('./components/tabs/OffersTab'), {
+  loading: () => <TabLoadingSkeleton title="Offers & Campaigns" />
+})
+const EnterpriseLeadsTab = dynamic(() => import('./components/tabs/EnterpriseLeadsTab'), {
+  loading: () => <TabLoadingSkeleton title="Enterprise Leads" />
+})
+const EnterpriseOrgsTab = dynamic(() => import('./components/tabs/EnterpriseOrgsTab'), {
+  loading: () => <TabLoadingSkeleton title="Enterprise Organizations" />
+})
+const LogsTab = dynamic(() => import('./components/tabs/LogsTab'), {
+  loading: () => <TabLoadingSkeleton title="System Logs" />
+})
+const VisitorsTab = dynamic(() => import('./components/tabs/VisitorsTab'), {
+  loading: () => <TabLoadingSkeleton title="Live Visitors & Telemetry" />
+})
+const ReviewsTab = dynamic(() => import('./components/ReviewsTab'), {
+  loading: () => <TabLoadingSkeleton title="Reviews & Feedback" />
+})
+
+// Lazy-Loaded Heavy Modals
+const InspectCandidateModal = dynamic(() => import('./components/modals/InspectCandidateModal'))
+const CandidateProfileEditModal = dynamic(() => import('./components/modals/CandidateProfileEditModal'))
+const LiveExecutionLogModal = dynamic(() => import('./components/modals/LiveExecutionLogModal'))
+const ConfirmCancelAllModal = dynamic(() => import('./components/modals/ConfirmCancelAllModal'))
+const DailyDispatchReportModal = dynamic(() => import('./components/modals/DailyDispatchReportModal'))
+const ConfirmCampaignDispatchModal = dynamic(() => import('./components/modals/ConfirmCampaignDispatchModal'))
+const AdminUnblockGuideModal = dynamic(() => import('./components/modals/AdminUnblockGuideModal'))
 
 export default function AdminDashboard() {
   const [adminEmail, setAdminEmail] = useState<string>(APP_CONFIG.supportEmail)
@@ -1510,6 +1533,7 @@ export default function AdminDashboard() {
         <AdminOverviewStats
           overviewMetrics={overviewMetrics}
           executionCounts={executionCounts}
+          currentExecutionStatusFilter={executionStatusFilter}
           onFilterByExecutionStatus={(status: string) => {
             setActiveAdminTab('candidates')
             setExecutionStatusFilter(status)
