@@ -329,31 +329,11 @@ export default function Home() {
             {/* In-page Anchor & Navigation Links (Desktop) */}
             <nav className="hidden md:flex items-center gap-6 text-xs text-zinc-400 light:text-zinc-600 font-medium">
               <a
-                href="#ai-engine-showcase"
-                className="hover:text-white light:hover:text-zinc-900 transition-colors"
-              >
-                Engine
-              </a>
-              <a
                 href="#features"
                 className="hover:text-white light:hover:text-zinc-900 transition-colors"
               >
                 Features
               </a>
-              <Link
-                href="/resume-builder"
-                className="hover:text-white light:hover:text-zinc-900 transition-colors flex items-center gap-1"
-              >
-                <span>Resume Studio</span>
-                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-950/80 light:bg-amber-50 border border-amber-700/50 light:border-amber-300 text-amber-300 light:text-amber-700">ATS</span>
-              </Link>
-              <Link
-                href="/tools"
-                className="hover:text-cyan-400 transition-colors flex items-center gap-1 text-cyan-400/90 font-semibold"
-              >
-                <span>Free Tools</span>
-                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-cyan-950/80 light:bg-cyan-50 border border-cyan-700/50 light:border-cyan-300 text-cyan-300 light:text-cyan-700">NEW</span>
-              </Link>
               <Link
                 href="/pricing"
                 className="hover:text-white light:hover:text-zinc-900 transition-colors"
@@ -369,31 +349,16 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setIsHelpOpen(true)}
-                className="hover:text-white light:hover:text-zinc-900 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Help & Support"
+                aria-label="Help & Support"
+                className="hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
               >
-                <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                <span>Help & Support</span>
+                <Mail className="w-4 h-4 text-teal-400 shrink-0" />
               </button>
             </nav>
 
             <div className="flex items-center gap-2 sm:gap-3">
               <ThemeToggle />
-              {/* Mobile Help Trigger */}
-              <button
-                type="button"
-                onClick={() => setIsHelpOpen(true)}
-                className="text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors font-medium cursor-pointer flex md:hidden items-center gap-1 shrink-0 px-2 py-1"
-              >
-                <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                <span className="hidden sm:inline">Help</span>
-              </button>
-
-              <Link
-                href="/tools"
-                className="text-xs text-cyan-400 light:text-cyan-600 hover:text-cyan-300 transition-colors font-medium md:hidden hidden sm:inline-block px-2 py-1"
-              >
-                Tools
-              </Link>
               <Link
                 href="/pricing"
                 className="text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors font-medium md:hidden hidden sm:inline-block px-2 py-1"
