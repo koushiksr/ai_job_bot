@@ -25,6 +25,7 @@ import {
   Lock
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
+import { ThemeToggle } from '@/components/ThemeProvider'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import Footer from '@/components/Footer'
 import { PLANS, PROMO_DEFINITIONS, PlanDefinition as Plan } from '@/config/plans'
@@ -402,23 +403,24 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+    <div className="min-h-screen bg-[#000000] light:bg-white text-zinc-100 light:text-zinc-900 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
       
       {/* Clean static radial gradient — calm, enterprise aesthetic */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] pointer-events-none" style={{background:'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%)'}} />
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-700/40 to-transparent pointer-events-none" />
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-zinc-900 px-4 sm:px-6 py-3 sm:py-4">
+      <header className="sticky top-0 z-40 bg-black/80 light:bg-white/85 backdrop-blur-xl border-b border-zinc-900 light:border-zinc-200 px-4 sm:px-6 py-3 sm:py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <JobFluxLogo size="sm" />
           </Link>
 
           <div className="flex items-center gap-2.5 sm:gap-4">
+            <ThemeToggle />
             <button
               onClick={() => setIsHelpOpen(true)}
-              className="text-xs text-zinc-400 hover:text-white transition-colors font-medium cursor-pointer flex items-center gap-1 shrink-0"
+              className="text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors font-medium cursor-pointer flex items-center gap-1 shrink-0"
             >
               <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
               <span className="hidden sm:inline">Help & Support</span>
@@ -426,17 +428,17 @@ export default function PricingPage() {
 
             {isLoggedIn ? (
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
-                  <div className="w-4 h-4 rounded-full bg-zinc-800 text-zinc-300 font-medium flex items-center justify-center text-[10px]">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-xs">
+                  <div className="w-4 h-4 rounded-full bg-zinc-800 light:bg-zinc-200 text-zinc-300 light:text-zinc-700 font-medium flex items-center justify-center text-[10px]">
                     {(currentUserEmail || currentUserId || 'U')[0].toUpperCase()}
                   </div>
-                  <span className="text-zinc-400 font-mono text-[11px] max-w-[160px] truncate">
+                  <span className="text-zinc-400 light:text-zinc-600 font-mono text-[11px] max-w-[160px] truncate">
                     {currentUserEmail || currentUserId}
                   </span>
                 </div>
                 <Link
                   href="/dashboard"
-                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors flex items-center gap-1.5 shrink-0"
+                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors flex items-center gap-1.5 shrink-0"
                 >
                   <span>Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -447,7 +449,7 @@ export default function PricingPage() {
                     localStorage.clear()
                     window.location.href = '/'
                   }}
-                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1 cursor-pointer flex items-center gap-1 shrink-0"
+                  className="text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors font-medium px-2 py-1 cursor-pointer flex items-center gap-1 shrink-0"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Sign Out</span>
@@ -457,13 +459,13 @@ export default function PricingPage() {
               <>
                 <Link
                   href="/?mode=signin"
-                  className="text-xs text-zinc-400 hover:text-white transition-colors font-medium px-2 py-1"
+                  className="text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors font-medium px-2 py-1"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/?mode=free"
-                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
+                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0 shadow-sm"
                 >
                   <span className="hidden sm:inline">Start for Free</span>
                   <span className="sm:hidden">Start Free</span>
@@ -479,13 +481,13 @@ export default function PricingPage() {
         
         {/* Title */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <h1 className="text-3xl sm:text-5xl font-semibold text-white tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-semibold text-white light:text-zinc-900 tracking-tight">
             Flexible pricing for{' '}
-            <span className="text-zinc-400">
+            <span className="text-zinc-400 light:text-zinc-600">
               candidates & companies
             </span>
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto">
+          <p className="text-xs sm:text-sm text-zinc-400 light:text-zinc-600 max-w-xl mx-auto">
             Choose the right autonomous tier for your career goals or agency talent pool.
           </p>
         </div>
@@ -495,16 +497,16 @@ export default function PricingPage() {
           
           {/* Left: What is your use case? */}
           <div className="space-y-2 w-full md:w-auto">
-            <label className="text-xs font-medium text-zinc-400 block">
+            <label className="text-xs font-medium text-zinc-400 light:text-zinc-600 block">
               What is your use case?
             </label>
-            <div className="inline-flex p-1 rounded-lg bg-black border border-zinc-800 text-xs">
+            <div className="inline-flex p-1 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs">
               <button
                 onClick={() => setUseCase('b2c')}
                 className={`px-4 py-1.5 rounded-md font-medium transition-all ${
                   useCase === 'b2c'
-                    ? 'bg-zinc-800 text-white shadow-sm'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-sm'
+                    : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900'
                 }`}
               >
                 Candidates (B2C)
@@ -517,8 +519,8 @@ export default function PricingPage() {
                 }}
                 className={`px-4 py-1.5 rounded-md font-medium transition-all ${
                   useCase === 'b2b'
-                    ? 'bg-zinc-800 text-white shadow-sm'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-sm'
+                    : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900'
                 }`}
               >
                 Staffing & Teams (B2B)
@@ -529,8 +531,8 @@ export default function PricingPage() {
           {/* Right: Application / Candidate Volume Slider */}
           <div className="space-y-2 w-full md:w-80">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-400">Estimated monthly applications</span>
-              <span className="font-mono text-zinc-200 font-medium">{monthlyVolume}+ jobs</span>
+              <span className="text-zinc-400 light:text-zinc-600">Estimated monthly applications</span>
+              <span className="font-mono text-zinc-200 light:text-zinc-800 font-medium">{monthlyVolume}+ jobs</span>
             </div>
             
             <input
@@ -540,10 +542,10 @@ export default function PricingPage() {
               step="100"
               value={monthlyVolume}
               onChange={(e) => setMonthlyVolume(parseInt(e.target.value))}
-              className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+              className="w-full h-1.5 bg-zinc-800 light:bg-zinc-200 rounded-lg appearance-none cursor-pointer"
             />
 
-            <div className="flex justify-between text-[10px] text-zinc-500 font-mono">
+            <div className="flex justify-between text-[10px] text-zinc-500 light:text-zinc-600 font-mono">
               <span>Free to Start</span>
               <span>600 (1-Month)</span>
               <span>1,800+ (Elite)</span>
@@ -561,53 +563,53 @@ export default function PricingPage() {
                 key={plan.id}
                 className={`relative rounded-2xl p-6 flex flex-col justify-between border transition-all overflow-hidden ${
                   isFeatured
-                    ? 'bg-[#0c0c0f] border-zinc-700 shadow-2xl card-featured-glow z-10'
-                    : 'bg-[#09090b] border-zinc-800/90 hover:border-zinc-700'
+                    ? 'bg-[#0c0c0f] border-zinc-700 light:border-zinc-300 shadow-2xl card-featured-glow z-10'
+                    : 'bg-[#09090b] border-zinc-800/90 hover:border-zinc-700 light:hover:border-zinc-300'
                 }`}
               >
                 {/* Laser beam sweep accent for featured plan */}
                 {isFeatured && (
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-laser-sweep pointer-events-none" />
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400 light:via-cyan-500 to-transparent animate-laser-sweep pointer-events-none" />
                 )}
 
                 {/* Header Info */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-white">{plan.name}</h3>
+                    <h3 className="text-base font-semibold text-white light:text-zinc-900">{plan.name}</h3>
                     {plan.badge && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-mono uppercase">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 light:bg-zinc-200 text-zinc-300 light:text-zinc-700 font-mono uppercase">
                         {plan.badge}
                       </span>
                     )}
                   </div>
 
-                  <p className="text-xs text-zinc-400 leading-relaxed min-h-[36px]">
+                  <p className="text-xs text-zinc-400 light:text-zinc-600 leading-relaxed min-h-[36px]">
                     {plan.subtitle}
                   </p>
 
                   <div className="pt-2">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-3xl font-bold text-white tracking-tight">
+                      <span className="text-3xl font-bold text-white light:text-zinc-900 tracking-tight">
                         {plan.price}
                       </span>
                       {plan.originalPrice && (
                         <>
-                          <span className="text-xs text-zinc-500 line-through">
+                          <span className="text-xs text-zinc-500 light:text-zinc-600 line-through">
                             {plan.originalPrice}
                           </span>
                           {plan.id === 'pro' && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/30">
                               90% OFF
                             </span>
                           )}
                           {plan.id === 'elite' && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 light:bg-zinc-200 text-zinc-200 light:text-zinc-800 border border-zinc-700 light:border-zinc-300">
                               92% OFF
                             </span>
                           )}
                         </>
                       )}
-                      <span className="text-xs text-zinc-400 font-normal">
+                      <span className="text-xs text-zinc-400 light:text-zinc-600 font-normal">
                         {plan.period}
                       </span>
                     </div>
@@ -619,8 +621,8 @@ export default function PricingPage() {
                       onClick={() => handleOpenPlanModal(plan)}
                       className={`w-full py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         isFeatured
-                          ? 'bg-white hover:bg-zinc-200 text-black shadow-sm'
-                          : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800'
+                          ? 'bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white shadow-sm'
+                          : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-200 light:text-zinc-800 border border-zinc-800 light:border-zinc-200'
                       }`}
                     >
                       <span>
@@ -629,23 +631,23 @@ export default function PricingPage() {
                     </button>
                   </div>
 
-                  <div className="h-px bg-zinc-800/80 my-4" />
+                  <div className="h-px bg-zinc-800/80 light:bg-zinc-200 my-4" />
 
                   {/* Features List */}
                   <div className="space-y-3">
-                    <span className="text-[11px] text-zinc-400 font-medium block">
+                    <span className="text-[11px] text-zinc-400 light:text-zinc-600 font-medium block">
                       {plan.featuresIntro}
                     </span>
 
-                    <ul className="space-y-2.5 text-xs text-zinc-300">
+                    <ul className="space-y-2.5 text-xs text-zinc-300 light:text-zinc-700">
                       {plan.features.map((feat, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <Check className="w-3.5 h-3.5 text-zinc-400 shrink-0 mt-0.5" />
-                          <span className="leading-tight text-zinc-300">
+                          <Check className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 shrink-0 mt-0.5" />
+                          <span className="leading-tight text-zinc-300 light:text-zinc-700">
                             {feat.text}
                           </span>
                           {feat.isAddon && (
-                            <span className="ml-auto text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono">
+                            <span className="ml-auto text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 font-mono">
                               ADD-ON
                             </span>
                           )}
@@ -664,37 +666,37 @@ export default function PricingPage() {
 
         {/* Risk Reversal & Interview Assurance Banner */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 flex items-start gap-4 shadow-xl">
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+          <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="space-y-1 text-xs">
-              <h3 className="font-bold text-white text-sm">14-Day Interview Guarantee</h3>
-              <p className="text-zinc-400 leading-relaxed text-[11px]">
+              <h3 className="font-bold text-white light:text-zinc-900 text-sm">14-Day Interview Guarantee</h3>
+              <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
                 If you don&apos;t receive at least 3 recruiter profile shortlists or calls in 14 days, get a 100% full refund immediately.
               </p>
             </div>
           </div>
 
           <div className="p-5 rounded-2xl bg-[#09090b] border border-sky-500/30 flex items-start gap-4 shadow-xl">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 light:text-cyan-600 shrink-0">
               <Zap className="w-5 h-5" />
             </div>
             <div className="space-y-1 text-xs">
-              <h3 className="font-bold text-white text-sm">9 AM Resdex Freshness Bump</h3>
-              <p className="text-zinc-400 leading-relaxed text-[11px]">
+              <h3 className="font-bold text-white light:text-zinc-900 text-sm">9 AM Resdex Freshness Bump</h3>
+              <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
                 Silently touches your profile daily, placing you on Page 1 of recruiter searches (worth ₹15,000 in placement consulting).
               </p>
             </div>
           </div>
 
           <div className="p-5 rounded-2xl bg-[#09090b] border border-cyan-500/30 flex items-start gap-4 shadow-xl">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 light:text-cyan-600 shrink-0">
               <Lock className="w-5 h-5" />
             </div>
             <div className="space-y-1 text-xs">
-              <h3 className="font-bold text-white text-sm">100% Local Stealth & 0 Bans</h3>
-              <p className="text-zinc-400 leading-relaxed text-[11px]">
+              <h3 className="font-bold text-white light:text-zinc-900 text-sm">100% Local Stealth & 0 Bans</h3>
+              <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
                 Runs using your real home IP address and human-like delays. Completely undetectable by Cloudflare or bot protection firewalls.
               </p>
             </div>
@@ -702,16 +704,16 @@ export default function PricingPage() {
         </div>
 
         {/* Staffing Agencies & Placement Cells Banner */}
-        <section className="rounded-2xl bg-[#09090b] border border-zinc-800 p-8 space-y-6">
+        <section className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 p-8 space-y-6">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
-              <span className="text-[11px] font-mono uppercase text-zinc-400 tracking-wider">
+              <span className="text-[11px] font-mono uppercase text-zinc-400 light:text-zinc-600 tracking-wider">
                 Institutional Cohorts
               </span>
-              <h2 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-semibold text-white light:text-zinc-900 tracking-tight">
                 Bulk candidate licensing with grouped telemetry access.
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              <p className="text-xs sm:text-sm text-zinc-400 light:text-zinc-600 leading-relaxed">
                 Organize candidates into batches (e.g. CS 2026, Full Stack Cohort), track aggregated delivery receipts, and supercharge candidate placement rates across your organization.
               </p>
             </div>
@@ -721,50 +723,50 @@ export default function PricingPage() {
                 setShowEnterpriseModal(true)
                 setEnterpriseSuccess(false)
               }}
-              className="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-800 text-xs font-semibold transition-all shrink-0 flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-200 light:text-zinc-800 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 text-xs font-semibold transition-all shrink-0 flex items-center gap-2 cursor-pointer"
             >
-              <Building2 className="w-4 h-4 text-zinc-400" />
+              <Building2 className="w-4 h-4 text-zinc-400 light:text-zinc-600" />
               <span>Request Institutional Quote</span>
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs pt-2">
-            <div className="p-4 rounded-xl bg-black border border-zinc-800/80 space-y-1">
-              <div className="text-zinc-200 font-medium flex items-center gap-2">
-                <FolderKanban className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <div className="text-zinc-200 light:text-zinc-800 font-medium flex items-center gap-2">
+                <FolderKanban className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                 <span>Cohort Grouping</span>
               </div>
-              <p className="text-zinc-500 text-[11px] leading-relaxed">
+              <p className="text-zinc-500 light:text-zinc-600 text-[11px] leading-relaxed">
                 Filter and manage candidates by batch or client specialization.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-black border border-zinc-800/80 space-y-1">
-              <div className="text-zinc-200 font-medium flex items-center gap-2">
-                <Users className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <div className="text-zinc-200 light:text-zinc-800 font-medium flex items-center gap-2">
+                <Users className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                 <span>Aggregated Telemetry</span>
               </div>
-              <p className="text-zinc-500 text-[11px] leading-relaxed">
+              <p className="text-zinc-500 light:text-zinc-600 text-[11px] leading-relaxed">
                 Supervise total match velocity, delivery receipts, and interviews.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-black border border-zinc-800/80 space-y-1">
-              <div className="text-zinc-200 font-medium flex items-center gap-2">
-                <Zap className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <div className="text-zinc-200 light:text-zinc-800 font-medium flex items-center gap-2">
+                <Zap className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                 <span>Dedicated Workers</span>
               </div>
-              <p className="text-zinc-500 text-[11px] leading-relaxed">
+              <p className="text-zinc-500 light:text-zinc-600 text-[11px] leading-relaxed">
                 Isolated cloud worker threads for reliable morning dispatch.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-black border border-zinc-800/80 space-y-1">
-              <div className="text-zinc-200 font-medium flex items-center gap-2">
-                <Headset className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 space-y-1">
+              <div className="text-zinc-200 light:text-zinc-800 font-medium flex items-center gap-2">
+                <Headset className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                 <span>Dedicated SLA</span>
               </div>
-              <p className="text-zinc-500 text-[11px] leading-relaxed">
+              <p className="text-zinc-500 light:text-zinc-600 text-[11px] leading-relaxed">
                 Priority direct Slack and WhatsApp channel with rapid response.
               </p>
             </div>
@@ -786,7 +788,7 @@ export default function PricingPage() {
                 setPromoError('')
               }
             }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 light:bg-white/85 backdrop-blur-sm"
             role="dialog"
             aria-modal="true"
           >
@@ -795,16 +797,16 @@ export default function PricingPage() {
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
-              className="w-full max-w-md bg-[#09090b] border border-zinc-800 rounded-2xl p-6 shadow-2xl space-y-5"
+              className="w-full max-w-md bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800 light:border-zinc-200">
                 <div>
-                  <h3 className="text-base font-semibold text-white">Activate {selectedPlan.name}</h3>
-                  <div className="flex items-baseline gap-1.5 text-xs text-zinc-400">
+                  <h3 className="text-base font-semibold text-white light:text-zinc-900">Activate {selectedPlan.name}</h3>
+                  <div className="flex items-baseline gap-1.5 text-xs text-zinc-400 light:text-zinc-600">
                     {promoDiscount ? (
                       <>
-                        <span className="line-through text-zinc-500 font-mono">{selectedPlan.price}</span>
-                        <span className="font-extrabold text-amber-400 font-mono text-sm">{promoDiscount.displayPrice}</span>
+                        <span className="line-through text-zinc-500 light:text-zinc-600 font-mono">{selectedPlan.price}</span>
+                        <span className="font-extrabold text-amber-400 light:text-amber-600 font-mono text-sm">{promoDiscount.displayPrice}</span>
                         <span>{selectedPlan.period}</span>
                       </>
                     ) : (
@@ -820,7 +822,7 @@ export default function PricingPage() {
                     setPromoError('')
                   }}
                   aria-label="Close modal"
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer z-50"
+                  className="p-1.5 rounded-lg text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-800 light:hover:bg-zinc-200 transition-colors cursor-pointer z-50"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -829,7 +831,7 @@ export default function PricingPage() {
               {paymentStep === 'details' ? (
                 <form onSubmit={handleActivatePlan} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-zinc-300 mb-1">
+                    <label className="block text-xs font-medium text-zinc-300 light:text-zinc-700 mb-1">
                       Candidate Account Email
                     </label>
                     <input
@@ -847,18 +849,18 @@ export default function PricingPage() {
                       }}
                       placeholder="Your login email"
                       required
-                      className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                      className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 transition-colors"
                     />
-                    <p className="text-[11px] text-zinc-500 mt-1">
+                    <p className="text-[11px] text-zinc-500 light:text-zinc-600 mt-1">
                       The plan will be linked to this account for automated applications.
                     </p>
                   </div>
 
                   {/* Promo Code / Purchase Offer Section */}
                   <div>
-                    <label className="block text-xs font-medium text-zinc-300 mb-1 flex items-center justify-between">
+                    <label className="block text-xs font-medium text-zinc-300 light:text-zinc-700 mb-1 flex items-center justify-between">
                       <span>Promo Code / Purchase Offer</span>
-                      <span className="text-[10px] text-amber-400 font-mono">Candidate-Locked Deals</span>
+                      <span className="text-[10px] text-amber-400 light:text-amber-600 font-mono">Candidate-Locked Deals</span>
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -870,13 +872,13 @@ export default function PricingPage() {
                           setPromoSuccessMsg('')
                         }}
                         placeholder="e.g. FLASH49, PRO129, VIP299"
-                        className="flex-1 bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono uppercase text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 transition-colors"
+                        className="flex-1 bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs font-mono uppercase text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-amber-500 transition-colors"
                       />
                       <button
                         type="button"
                         disabled={validatingPromo || !inputPromoCode.trim()}
                         onClick={() => applyPromoToPlan(inputPromoCode, selectedPlan, candidateEmail)}
-                        className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5"
+                        className="px-3 py-2 bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700 disabled:opacity-50 text-white light:text-zinc-900 rounded-lg text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5"
                       >
                         {validatingPromo ? (
                           <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
@@ -886,7 +888,7 @@ export default function PricingPage() {
                     </div>
                     {appliedPromoCode && promoDiscount && (
                       <div className="mt-2 space-y-1">
-                        <div className="flex items-center justify-between text-[11px] bg-zinc-900 border border-zinc-750 rounded-md px-2.5 py-1.5 text-zinc-200">
+                        <div className="flex items-center justify-between text-[11px] bg-zinc-900 light:bg-zinc-100 border border-zinc-750 rounded-md px-2.5 py-1.5 text-zinc-200 light:text-zinc-800">
                           <span className="font-medium">✓ {appliedPromoCode}: {promoDiscount.label}</span>
                           <button
                             type="button"
@@ -897,13 +899,13 @@ export default function PricingPage() {
                               setPromoError('')
                               setPromoSuccessMsg('')
                             }}
-                            className="text-zinc-400 hover:text-white ml-2 underline cursor-pointer text-[10px]"
+                            className="text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 ml-2 underline cursor-pointer text-[10px]"
                           >
                             Remove
                           </button>
                         </div>
                         {promoSuccessMsg && (
-                          <p className="text-[11px] text-zinc-300 font-medium px-1">{promoSuccessMsg}</p>
+                          <p className="text-[11px] text-zinc-300 light:text-zinc-700 font-medium px-1">{promoSuccessMsg}</p>
                         )}
                       </div>
                     )}
@@ -915,20 +917,20 @@ export default function PricingPage() {
                     )}
                   </div>
 
-                  <div className="p-3 rounded-lg bg-black border border-zinc-800 space-y-2">
-                    <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-mono block">
+                  <div className="p-3 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2">
+                    <span className="text-[10px] uppercase tracking-wider text-zinc-400 light:text-zinc-600 font-mono block">
                       Payment Gateway
                     </span>
-                    <div className="flex items-center justify-between text-xs text-zinc-300">
+                    <div className="flex items-center justify-between text-xs text-zinc-300 light:text-zinc-700">
                       <span>UPI, Cards, NetBanking (Razorpay)</span>
-                      <span className="text-zinc-400 font-mono text-[10px]">256-BIT SSL</span>
+                      <span className="text-zinc-400 light:text-zinc-600 font-mono text-[10px]">256-BIT SSL</span>
                     </div>
                   </div>
 
                   <button
                     type="submit"
                     disabled={activating}
-                    className="w-full py-2.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-full py-2.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {activating ? (
                       <span>Connecting to gateway...</span>
@@ -942,18 +944,18 @@ export default function PricingPage() {
                 </form>
               ) : (
                 <div className="text-center py-6 space-y-4">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 flex items-center justify-center mx-auto">
+                  <div className="w-10 h-10 rounded-full bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-200 light:text-zinc-800 flex items-center justify-center mx-auto">
                     <Check className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-base font-semibold text-white">Payment Confirmed · Plan Activated</h4>
-                    <p className="text-xs text-zinc-400 mt-1">
+                    <h4 className="text-base font-semibold text-white light:text-zinc-900">Payment Confirmed · Plan Activated</h4>
+                    <p className="text-xs text-zinc-400 light:text-zinc-600 mt-1">
                       {selectedPlan.name} is now cryptographically verified and active for {candidateEmail}.
                     </p>
                   </div>
                   <Link
                     href="/dashboard"
-                    className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-semibold bg-white text-black hover:bg-zinc-200 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 text-black light:text-white hover:bg-zinc-200 light:hover:bg-zinc-800 transition-colors"
                   >
                     <span>Go to Dashboard</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -969,24 +971,24 @@ export default function PricingPage() {
       <AnimatePresence>
         {showEnterpriseModal && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 light:bg-white/85 backdrop-blur-sm"
             onClick={() => setShowEnterpriseModal(false)}
           >
             <motion.div
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
-              className="w-full max-w-lg bg-[#09090b] border border-zinc-800 rounded-2xl p-6 shadow-2xl space-y-5"
+              className="w-full max-w-lg bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-start justify-between pb-3 border-b border-zinc-800">
+              <div className="flex items-start justify-between pb-3 border-b border-zinc-800 light:border-zinc-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
                     <Building2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-white">Enterprise & Bulk Inquiries</h3>
-                    <p className="text-xs text-zinc-400">Custom volume rates for staffing & placement cells</p>
+                    <h3 className="text-base font-semibold text-white light:text-zinc-900">Enterprise & Bulk Inquiries</h3>
+                    <p className="text-xs text-zinc-400 light:text-zinc-600">Custom volume rates for staffing & placement cells</p>
                   </div>
                 </div>
                 <button
@@ -996,29 +998,29 @@ export default function PricingPage() {
                     setShowEnterpriseModal(false)
                   }}
                   aria-label="Close enterprise inquiry"
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer z-50"
+                  className="p-1.5 rounded-lg text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-800 light:hover:bg-zinc-200 transition-colors cursor-pointer z-50"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {enterpriseSuccess ? (
-                <div className="p-6 rounded-xl bg-zinc-950 border border-zinc-800 text-center space-y-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 text-zinc-200 flex items-center justify-center mx-auto">
+                <div className="p-6 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-center space-y-3">
+                  <div className="w-10 h-10 rounded-full bg-zinc-900 light:bg-zinc-100 text-zinc-200 light:text-zinc-800 flex items-center justify-center mx-auto">
                     <CheckCheck className="w-5 h-5" />
                   </div>
-                  <h4 className="text-sm font-semibold text-white">Inquiry Received</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed max-w-sm mx-auto">
+                  <h4 className="text-sm font-semibold text-white light:text-zinc-900">Inquiry Received</h4>
+                  <p className="text-xs text-zinc-400 light:text-zinc-600 leading-relaxed max-w-sm mx-auto">
                     Our enterprise team will review your cohort volume and respond within <strong>4 business hours</strong> with custom seat pricing.
                   </p>
-                  <div className="pt-2 text-xs text-zinc-500 flex items-center justify-center gap-1.5 font-mono">
-                    <Mail className="w-3.5 h-3.5 text-zinc-400" />
+                  <div className="pt-2 text-xs text-zinc-500 light:text-zinc-600 flex items-center justify-center gap-1.5 font-mono">
+                    <Mail className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                     <span>enterprise@jobfluxai.com</span>
                   </div>
                   <div className="pt-3">
                     <button
                       onClick={() => setShowEnterpriseModal(false)}
-                      className="px-5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors cursor-pointer"
+                      className="px-5 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors cursor-pointer"
                     >
                       Close Window
                     </button>
@@ -1027,54 +1029,54 @@ export default function PricingPage() {
               ) : (
                 <form onSubmit={handleEnterpriseSubmit} className="space-y-3.5">
                   {enterpriseError && (
-                    <div className="p-3 rounded-lg bg-red-950/30 border border-red-900/50 text-xs text-red-300">
+                    <div className="p-3 rounded-lg bg-red-950/30 border border-red-900/50 text-xs text-red-300 light:text-red-600">
                       {enterpriseError}
                     </div>
                   )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-zinc-300 block mb-1">Contact Name *</label>
+                      <label className="text-xs font-medium text-zinc-300 light:text-zinc-700 block mb-1">Contact Name *</label>
                       <input
                         type="text"
                         required
                         value={enterpriseForm.name}
                         onChange={(e) => setEnterpriseForm({ ...enterpriseForm, name: e.target.value })}
                         placeholder="Ramesh Kumar"
-                        className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                        className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-zinc-300 block mb-1">Work Email *</label>
+                      <label className="text-xs font-medium text-zinc-300 light:text-zinc-700 block mb-1">Work Email *</label>
                       <input
                         type="email"
                         required
                         value={enterpriseForm.email}
                         onChange={(e) => setEnterpriseForm({ ...enterpriseForm, email: e.target.value })}
                         placeholder="name@company.com"
-                        className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                        className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 transition-colors"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-zinc-300 block mb-1">Company / College *</label>
+                      <label className="text-xs font-medium text-zinc-300 light:text-zinc-700 block mb-1">Company / College *</label>
                       <input
                         type="text"
                         required
                         value={enterpriseForm.company}
                         onChange={(e) => setEnterpriseForm({ ...enterpriseForm, company: e.target.value })}
                         placeholder="Apex Staffing Solutions"
-                        className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                        className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-zinc-300 block mb-1">Candidate Seats *</label>
+                      <label className="text-xs font-medium text-zinc-300 light:text-zinc-700 block mb-1">Candidate Seats *</label>
                       <select
                         value={enterpriseForm.seats}
                         onChange={(e) => setEnterpriseForm({ ...enterpriseForm, seats: e.target.value })}
-                        className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-500 transition-colors"
+                        className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 focus:outline-none focus:border-zinc-500 transition-colors"
                       >
                         <option value="10-25 Candidates">10 – 25 Candidates (Starter Team)</option>
                         <option value="25-50 Candidates">25 – 50 Candidates (Growth Agency)</option>
@@ -1086,25 +1088,25 @@ export default function PricingPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium text-zinc-300 block mb-1">Phone / WhatsApp *</label>
+                    <label className="text-xs font-medium text-zinc-300 light:text-zinc-700 block mb-1">Phone / WhatsApp *</label>
                     <input
                       type="tel"
                       required
                       value={enterpriseForm.phone}
                       onChange={(e) => setEnterpriseForm({ ...enterpriseForm, phone: e.target.value })}
                       placeholder="+91 98765 43210"
-                      className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                      className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium text-zinc-300 block mb-1">Requirements / Notes</label>
+                    <label className="text-xs font-medium text-zinc-300 light:text-zinc-700 block mb-1">Requirements / Notes</label>
                     <textarea
                       rows={3}
                       value={enterpriseForm.notes}
                       onChange={(e) => setEnterpriseForm({ ...enterpriseForm, notes: e.target.value })}
                       placeholder="Candidate batch details, target role domains..."
-                      className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 resize-none transition-colors"
+                      className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 resize-none transition-colors"
                     />
                   </div>
 
@@ -1112,11 +1114,11 @@ export default function PricingPage() {
                     <button
                       type="submit"
                       disabled={enterpriseSubmitting}
-                      className="w-full py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                      className="w-full py-2.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                     >
                       {enterpriseSubmitting ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin text-black" />
+                          <Loader2 className="w-4 h-4 animate-spin text-black light:text-white" />
                           <span>Sending Inquiry...</span>
                         </>
                       ) : (

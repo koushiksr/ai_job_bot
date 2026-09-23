@@ -44,6 +44,7 @@ import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
+import { ThemeToggle } from '@/components/ThemeProvider'
 import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
 import CandidateReviewModal from '@/components/CandidateReviewModal'
 import NeuralAtsDiagnosticCard from '@/components/NeuralAtsDiagnosticCard'
@@ -1032,7 +1033,7 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
+    <div className="min-h-screen bg-[#000000] light:bg-white text-zinc-100 light:text-zinc-900 flex flex-col font-sans selection:bg-zinc-800 selection:text-white relative">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       {/* On-Demand Telemetry Refresh Animation Overlay */}
       {isRefreshing && (
@@ -1045,7 +1046,7 @@ export default function UserDashboard() {
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900 px-3.5 sm:px-6 py-2 sm:py-2.5">
+      <header className="sticky top-0 z-40 bg-black/90 light:bg-white/90 backdrop-blur-xl border-b border-zinc-900 light:border-zinc-200 px-3.5 sm:px-6 py-2 sm:py-2.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
           
           {/* LEFT: Candidate Profile Section (Swapped to Left for Instant Trust & Easy Profile Access) */}
@@ -1057,8 +1058,8 @@ export default function UserDashboard() {
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className={`group flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-xl border transition-all cursor-pointer text-left ${
                   isUserMenuOpen
-                    ? 'bg-zinc-800 border-zinc-700 text-white shadow-sm'
-                    : 'bg-zinc-900 hover:bg-zinc-850 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white'
+                    ? 'bg-zinc-800 light:bg-zinc-200 border-zinc-700 light:border-zinc-300 text-white light:text-zinc-900 shadow-sm'
+                    : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-850 border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900'
                 }`}
                 title="Candidate Profile & Settings - Click to update profile & credentials"
                 aria-label="Candidate account menu"
@@ -1069,11 +1070,11 @@ export default function UserDashboard() {
                     <img
                       src={userPicture}
                       alt={userName || 'Candidate'}
-                      className="w-8 h-8 rounded-lg object-cover border border-zinc-700 group-hover:border-zinc-600 transition-colors shadow-sm"
+                      className="w-8 h-8 rounded-lg object-cover border border-zinc-700 light:border-zinc-300 group-hover:border-zinc-600 transition-colors shadow-sm"
                       onError={() => setUserPicture('')}
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 group-hover:border-zinc-600 flex items-center justify-center font-bold text-white text-xs shrink-0 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 group-hover:border-zinc-600 flex items-center justify-center font-bold text-white light:text-zinc-900 text-xs shrink-0 transition-colors">
                       {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
                     </div>
                   )}
@@ -1083,37 +1084,37 @@ export default function UserDashboard() {
                 {/* Candidate Name, Plan Badge, and 'Click to Edit Profile' Callout */}
                 <div className="flex flex-col min-w-0 pr-0.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold text-white truncate max-w-[130px] lg:max-w-[160px]">
+                    <span className="text-xs font-semibold text-white light:text-zinc-900 truncate max-w-[130px] lg:max-w-[160px]">
                       {userName ? userName.split(' ')[0] : 'Candidate'}
                     </span>
                     {(isVip || userPlan === 'vip') ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-semibold shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 light:text-amber-700 font-semibold shrink-0">
                         VIP
                       </span>
                     ) : isEnterpriseMember ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-semibold shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-cyan-500/20 border border-cyan-500/40 light:border-cyan-300 text-cyan-300 light:text-cyan-700 font-semibold shrink-0">
                         ENTERPRISE
                       </span>
                     ) : isProfessional ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 font-semibold shrink-0">
                         PRO
                       </span>
                     ) : (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 shrink-0">
                         FREE
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] text-zinc-400 group-hover:text-zinc-300 transition-colors">
-                    <span className="text-zinc-400">● Active</span>
+                  <div className="flex items-center gap-1 text-[10px] text-zinc-400 light:text-zinc-600 group-hover:text-zinc-300 transition-colors">
+                    <span className="text-zinc-400 light:text-zinc-600">● Active</span>
                     <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-400 group-hover:text-white transition-colors">
+                    <span className="text-zinc-400 light:text-zinc-600 group-hover:text-white transition-colors">
                       Edit Profile ↗
                     </span>
                   </div>
                 </div>
 
-                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 group-hover:text-white ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 transition-transform duration-200 group-hover:text-white ${isUserMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Luxury Left-Aligned Dropdown Menu */}
@@ -1123,27 +1124,27 @@ export default function UserDashboard() {
                     className="fixed inset-0 z-40"
                     onClick={() => setIsUserMenuOpen(false)}
                   />
-                  <div className="absolute left-0 mt-2 w-72 rounded-xl bg-[#0c0c0e] border border-zinc-800 shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute left-0 mt-2 w-72 rounded-xl bg-[#0c0c0e] border border-zinc-800 light:border-zinc-200 shadow-2xl py-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-150">
                     {/* Header / Identity Info */}
-                    <div className="px-3.5 py-2.5 border-b border-zinc-800/80 flex items-center gap-3">
+                    <div className="px-3.5 py-2.5 border-b border-zinc-800/80 light:border-zinc-200 flex items-center gap-3">
                       {userPicture ? (
                         <img
                           src={userPicture}
                           alt={userName || 'Candidate'}
-                          className="w-10 h-10 rounded-full object-cover border border-zinc-700 shrink-0 shadow-sm"
+                          className="w-10 h-10 rounded-full object-cover border border-zinc-700 light:border-zinc-300 shrink-0 shadow-sm"
                           onError={() => setUserPicture('')}
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-white text-sm shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 flex items-center justify-center font-bold text-white light:text-zinc-900 text-sm shrink-0">
                           {userName ? userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AI'}
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-white truncate">{userName || 'Candidate'}</div>
-                        <div className="text-[11px] text-zinc-400 font-mono truncate">{userEmail}</div>
+                        <div className="font-semibold text-white light:text-zinc-900 truncate">{userName || 'Candidate'}</div>
+                        <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono truncate">{userEmail}</div>
                         <div className="pt-0.5 flex items-center gap-1.5">
-                          <span className="text-[10px] font-mono text-zinc-500">Plan:</span>
-                          <span className="text-[10px] font-mono text-zinc-300 font-semibold uppercase">
+                          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Plan:</span>
+                          <span className="text-[10px] font-mono text-zinc-300 light:text-zinc-700 font-semibold uppercase">
                             {isVip ? 'VIP Professional Pass' : userPlan || 'Standard'}
                           </span>
                         </div>
@@ -1151,13 +1152,13 @@ export default function UserDashboard() {
                     </div>
 
                     {/* Prominent Quick-Action Callout */}
-                    <div className="p-2 border-b border-zinc-800/80">
+                    <div className="p-2 border-b border-zinc-800/80 light:border-zinc-200">
                       <Link
                         href="/profile"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white font-medium transition-all text-xs"
+                        className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700/80 text-zinc-200 light:text-zinc-800 hover:text-white light:hover:text-zinc-900 font-medium transition-all text-xs"
                       >
-                        <User className="w-3.5 h-3.5 text-zinc-400" />
+                        <User className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                         <span>Edit Profile, Photo & Credentials ↗</span>
                       </Link>
                     </div>
@@ -1167,27 +1168,27 @@ export default function UserDashboard() {
                       <Link
                         href="/profile"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
                       >
-                        <User className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <User className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="font-medium">Naukri Login & Credentials</div>
-                          <div className="text-[10px] text-zinc-500">Resume, password & targeting filters</div>
+                          <div className="text-[10px] text-zinc-500 light:text-zinc-600">Resume, password & targeting filters</div>
                         </div>
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">1-Time</span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 light:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300">1-Time</span>
                       </Link>
 
                       <Link
                         href="/resume-builder"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <Sparkles className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="font-medium">AI ATS Resume Studio</div>
-                          <div className="text-[10px] text-zinc-500">FAANG Harvard ATS generator</div>
+                          <div className="text-[10px] text-zinc-500 light:text-zinc-600">FAANG Harvard ATS generator</div>
                         </div>
-                        <span className="text-[9px] font-mono px-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 font-medium">PRO</span>
+                        <span className="text-[9px] font-mono px-1 rounded bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 font-medium">PRO</span>
                       </Link>
 
                       <button
@@ -1195,25 +1196,25 @@ export default function UserDashboard() {
                           setIsUserMenuOpen(false)
                           setIsPwaModalOpen(true)
                         }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors text-left cursor-pointer"
                       >
                         {isAppInstalled ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600 shrink-0" />
                         ) : (
-                          <Download className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Download className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600 shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className={`font-medium ${isAppInstalled ? 'text-emerald-300' : 'text-cyan-300'}`}>
+                          <div className={`font-medium ${isAppInstalled ? 'text-emerald-300 light:text-emerald-700' : 'text-cyan-300 light:text-cyan-700'}`}>
                             {isAppInstalled ? 'JobFlux App Installed' : 'Install JobFlux App'}
                           </div>
-                          <div className="text-[10px] text-zinc-500">
+                          <div className="text-[10px] text-zinc-500 light:text-zinc-600">
                             {isAppInstalled ? 'Verified on device • Push alerts' : 'Standalone App & push alerts'}
                           </div>
                         </div>
                         <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
                           isAppInstalled 
-                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' 
-                            : 'bg-cyan-950 text-cyan-300 border border-cyan-800'
+                            ? 'bg-emerald-950 text-emerald-300 light:text-emerald-700 border border-emerald-800' 
+                            : 'bg-cyan-950 text-cyan-300 light:text-cyan-700 border border-cyan-800'
                         }`}>
                           {isAppInstalled ? 'ACTIVE' : 'PWA'}
                         </span>
@@ -1224,14 +1225,14 @@ export default function UserDashboard() {
                           setIsUserMenuOpen(false)
                           setIsOfferModalOpen(true)
                         }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors text-left cursor-pointer"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-amber-300">Promotional Offers</div>
-                          <div className="text-[10px] text-zinc-500">Exclusive discounts & coupon</div>
+                          <div className="font-medium text-amber-300 light:text-amber-700">Promotional Offers</div>
+                          <div className="text-[10px] text-zinc-500 light:text-zinc-600">Exclusive discounts & coupon</div>
                         </div>
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">50% OFF</span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800">50% OFF</span>
                       </button>
 
                       <button
@@ -1239,9 +1240,9 @@ export default function UserDashboard() {
                           setIsUserMenuOpen(false)
                           setIsHelpOpen(true)
                         }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors text-left cursor-pointer"
                       >
-                        <Mail className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <Mail className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 shrink-0" />
                         <span>Help & Support Center</span>
                       </button>
 
@@ -1250,23 +1251,23 @@ export default function UserDashboard() {
                           setIsUserMenuOpen(false)
                           setIsReviewModalOpen(true)
                         }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors text-left cursor-pointer"
                       >
-                        <Star className="w-3.5 h-3.5 text-amber-400 shrink-0 fill-amber-400/30" />
+                        <Star className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 shrink-0 fill-amber-400/30" />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-amber-300">Rate &amp; Review JobFlux</div>
-                          <div className="text-[10px] text-zinc-500">Share your satisfaction score</div>
+                          <div className="font-medium text-amber-300 light:text-amber-700">Rate &amp; Review JobFlux</div>
+                          <div className="text-[10px] text-zinc-500 light:text-zinc-600">Share your satisfaction score</div>
                         </div>
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">REVIEW</span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800">REVIEW</span>
                       </button>
 
                       {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
                         <Link
                           href="/admin"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                          className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
                         >
-                          <Shield className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                          <Shield className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 shrink-0" />
                           <span>Admin Console</span>
                         </Link>
                       )}
@@ -1275,16 +1276,16 @@ export default function UserDashboard() {
                         <Link
                           href="/enterprise-admin"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-3.5 py-2 text-cyan-300 hover:text-white hover:bg-cyan-950/40 transition-colors"
+                          className="flex items-center gap-2.5 px-3.5 py-2 text-cyan-300 light:text-cyan-700 hover:text-white light:hover:text-zinc-900 hover:bg-cyan-950/40 transition-colors"
                         >
-                          <Building2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <Building2 className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600 shrink-0" />
                           <span>Enterprise Admin Portal</span>
                         </Link>
                       )}
                     </div>
 
                     {/* Divider */}
-                    <div className="border-t border-zinc-800/80 my-1" />
+                    <div className="border-t border-zinc-800/80 light:border-zinc-200 my-1" />
 
                     {/* Sign Out */}
                     <div className="px-1">
@@ -1309,14 +1310,15 @@ export default function UserDashboard() {
 
           {/* RIGHT: Actions, Telemetry Refresh & Controls */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <ThemeToggle />
             {/* Install App / Installed Status Button (Desktop & Tablet) */}
             <button
               type="button"
               onClick={() => setIsPwaModalOpen(true)}
               className={`hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer shadow-sm ${
                 isAppInstalled
-                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                  : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/30'
+                  : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 light:text-cyan-700 border border-cyan-500/30'
               }`}
               title={
                 isAppInstalled
@@ -1326,12 +1328,12 @@ export default function UserDashboard() {
             >
               {isAppInstalled ? (
                 <>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
                   <span>App Installed</span>
                 </>
               ) : (
                 <>
-                  <Download className="w-3.5 h-3.5 text-cyan-400" />
+                  <Download className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600" />
                   <span>Install App</span>
                 </>
               )}
@@ -1341,10 +1343,10 @@ export default function UserDashboard() {
             <button
               type="button"
               onClick={() => setIsOfferModalOpen(true)}
-              className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-400/40 transition-all shrink-0 cursor-pointer shadow-sm"
+              className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/40 transition-all shrink-0 cursor-pointer shadow-sm"
               title="View exclusive candidate offers and discounts"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600 animate-pulse shrink-0" />
               <span className="hidden sm:inline">{activeOfferBanner ? `Deal: ${activeOfferBanner.discount_badge}` : 'Special Offer'}</span>
               <span className="sm:hidden text-[11px] font-bold">Offer</span>
             </button>
@@ -1353,10 +1355,10 @@ export default function UserDashboard() {
             {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
               <Link
                 href="/admin"
-                className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 transition-all shrink-0 cursor-pointer shadow-sm"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 light:text-cyan-700 border border-cyan-500/40 light:border-cyan-300 transition-all shrink-0 cursor-pointer shadow-sm"
                 title="Open System Administrator Console"
               >
-                <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                <Shield className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600" />
                 <span>Admin</span>
               </Link>
             )}
@@ -1365,11 +1367,11 @@ export default function UserDashboard() {
             <button
               onClick={() => refreshAllDashboardData(userId)}
               disabled={isRefreshing}
-              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer disabled:opacity-50 hidden md:inline-flex"
+              className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer disabled:opacity-50 hidden md:inline-flex"
               title="Refresh live application telemetry"
               aria-label="Refresh telemetry"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-white' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-white light:text-zinc-900' : ''}`} />
             </button>
 
             {/* Sales / Upgrade Action Button (Desktop & Tablet) */}
@@ -1386,7 +1388,7 @@ export default function UserDashboard() {
               ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
                 <Link
                   href="/pricing"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-zinc-200 text-black transition-colors shrink-0 shadow-sm"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0 shadow-sm"
                   title="Upgrade to unlock automated applications"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-zinc-800" />
@@ -1395,31 +1397,31 @@ export default function UserDashboard() {
               ) : userPlan === 'pro' ? (
                 <Link
                   href="/pricing?plan=elite"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 text-white transition-colors shrink-0"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-750 border border-zinc-700 light:border-zinc-300 text-white light:text-zinc-900 transition-colors shrink-0"
                   title="Upgrade to Professional"
                 >
-                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
                   <span>Upgrade to Professional (₹199)</span>
                 </Link>
               ) : (
                 <Link
                   href="/pricing"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors shrink-0"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 transition-colors shrink-0"
                   title="View membership plans"
                 >
-                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
                   <span>Plans & Upgrades</span>
                 </Link>
               )}
             </div>
 
             {/* Desktop Brand Logo & Radar Status (Right on Desktop) */}
-            <div className="hidden md:flex items-center gap-2.5 pl-2 border-l border-zinc-800 shrink-0">
+            <div className="hidden md:flex items-center gap-2.5 pl-2 border-l border-zinc-800 light:border-zinc-200 shrink-0">
               <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity">
                 <JobFluxLogo size="sm" showText={true} />
               </Link>
-              <div className="hidden lg:flex items-center gap-2 border-l border-zinc-800/80 pl-2.5">
-                <span className="text-[11px] font-mono text-zinc-400">Autonomous Radar</span>
+              <div className="hidden lg:flex items-center gap-2 border-l border-zinc-800/80 light:border-zinc-200 pl-2.5">
+                <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600">Autonomous Radar</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
               </div>
             </div>
@@ -1428,11 +1430,11 @@ export default function UserDashboard() {
             <button
               type="button"
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="flex md:hidden items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 active:scale-95 transition-all text-white cursor-pointer shrink-0 shadow-sm"
+              className="flex md:hidden items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-850 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 active:scale-95 transition-all text-white light:text-zinc-900 cursor-pointer shrink-0 shadow-sm"
               aria-label="Toggle profile menu"
               title="Candidate Profile & Settings"
             >
-              <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700/70 flex items-center justify-center font-bold text-[10px] text-white shrink-0 relative overflow-hidden">
+              <div className="w-7 h-7 rounded-lg bg-zinc-800 light:bg-zinc-200 border border-zinc-700/70 flex items-center justify-center font-bold text-[10px] text-white light:text-zinc-900 shrink-0 relative overflow-hidden">
                 {userPicture ? (
                   <img src={userPicture} alt={userName || 'Candidate'} className="w-full h-full object-cover" onError={() => setUserPicture('')} />
                 ) : (
@@ -1440,23 +1442,23 @@ export default function UserDashboard() {
                 )}
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 border border-black" />
               </div>
-              <span className="text-xs font-semibold text-zinc-200 max-w-[65px] truncate">
+              <span className="text-xs font-semibold text-zinc-200 light:text-zinc-800 max-w-[65px] truncate">
                 {userName ? userName.split(' ')[0] : 'Profile'}
               </span>
               {(isVip || userPlan === 'vip') ? (
-                <span className="inline-flex items-center text-[9px] font-mono font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-1 py-0.2 rounded-md shrink-0">
+                <span className="inline-flex items-center text-[9px] font-mono font-bold text-amber-300 light:text-amber-700 bg-amber-500/10 border border-amber-500/30 px-1 py-0.2 rounded-md shrink-0">
                   VIP
                 </span>
               ) : isEnterpriseMember ? (
-                <span className="inline-flex items-center text-[9px] font-mono font-bold text-cyan-300 bg-cyan-500/20 border border-cyan-500/40 px-1 py-0.2 rounded-md shrink-0">
+                <span className="inline-flex items-center text-[9px] font-mono font-bold text-cyan-300 light:text-cyan-700 bg-cyan-500/20 border border-cyan-500/40 light:border-cyan-300 px-1 py-0.2 rounded-md shrink-0">
                   ENTERPRISE
                 </span>
               ) : isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' ? (
-                <span className="hidden min-[380px]:inline-flex items-center text-[9px] font-mono font-bold text-zinc-300 bg-zinc-800 border border-zinc-700 px-1 py-0.2 rounded-md shrink-0">
+                <span className="hidden min-[380px]:inline-flex items-center text-[9px] font-mono font-bold text-zinc-300 light:text-zinc-700 bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 px-1 py-0.2 rounded-md shrink-0">
                   {userPlan === 'elite' ? 'PRO' : userPlan === 'trial' ? 'TRIAL' : userPlan.toUpperCase()}
                 </span>
               ) : null}
-              <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3 h-3 text-zinc-400 light:text-zinc-600 transition-transform duration-200 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
             </button>
           </div>
 
@@ -1475,14 +1477,14 @@ export default function UserDashboard() {
           {/* Floating Action Sheet */}
           <div className="fixed top-14 right-3 left-3 max-w-sm ml-auto z-50 p-4 bg-zinc-950/95 backdrop-blur-2xl border border-zinc-800/90 rounded-2xl shadow-2xl shadow-black/80 space-y-3.5 animate-in fade-in zoom-in-95 duration-150">
             {/* Candidate Identity Card (Clickable to open profile) */}
-            <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80 light:border-zinc-200">
               <Link
                 href="/profile"
                 onClick={() => setIsMobileNavOpen(false)}
                 className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity cursor-pointer"
                 title="Click to manage Candidate Profile & Resume"
               >
-                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0 relative overflow-hidden">
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center font-bold text-white light:text-zinc-900 text-xs shrink-0 relative overflow-hidden">
                   {userPicture ? (
                     <img
                       src={userPicture}
@@ -1497,15 +1499,15 @@ export default function UserDashboard() {
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-semibold text-white truncate max-w-[140px]">{userName || 'Candidate'}</span>
+                    <span className="text-xs font-semibold text-white light:text-zinc-900 truncate max-w-[140px]">{userName || 'Candidate'}</span>
 
                     {/* VIP Badge in Standard Muted Amber */}
                     {(isVip || userPlan === 'vip') && (
                       <span
-                        className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 font-mono font-semibold uppercase tracking-wider shrink-0"
+                        className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 light:text-amber-700 font-mono font-semibold uppercase tracking-wider shrink-0"
                         title="VIP Access Pass Active (90d)"
                       >
-                        <Crown className="w-2.5 h-2.5 text-amber-400 fill-amber-400/40 shrink-0" />
+                        <Crown className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 fill-amber-400/40 shrink-0" />
                         <span>VIP</span>
                       </span>
                     )}
@@ -1514,17 +1516,17 @@ export default function UserDashboard() {
                     {userPlan !== 'vip' && (
                       <span className={`inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold shrink-0 transition-all ${
                         isPlanActive && (userPlan === 'starter' || userPlan === 'pro' || userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'org_pro')
-                          ? 'border border-amber-500/30 bg-amber-500/10 text-amber-300 font-medium'
+                          ? 'border border-amber-500/30 bg-amber-500/10 text-amber-300 light:text-amber-700 font-medium'
                           : userPlan === 'trial' && isPlanActive
-                          ? 'border border-zinc-800 bg-zinc-900 text-zinc-300 font-medium'
+                          ? 'border border-zinc-800 light:border-zinc-200 bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 font-medium'
                           : userPlan === 'none' || userPlan === 'no_plan'
-                          ? 'bg-zinc-900 border border-zinc-800 text-zinc-500'
+                          ? 'bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-500 light:text-zinc-600'
                           : !isPlanActive
-                          ? 'bg-red-950/80 border-red-800 text-red-300'
-                          : 'bg-zinc-900 border-zinc-800 text-zinc-300'
+                          ? 'bg-red-950/80 border-red-800 text-red-300 light:text-red-600'
+                          : 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700'
                       }`}>
                         {isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan' && (
-                          <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                          <Sparkles className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 shrink-0" />
                         )}
                         <span>
                           {userPlan === 'none' || userPlan === 'no_plan'
@@ -1540,12 +1542,12 @@ export default function UserDashboard() {
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-zinc-500 font-mono truncate mt-0.5">{userEmail}</p>
+                  <p className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono truncate mt-0.5">{userEmail}</p>
                 </div>
               </Link>
               <button
                 onClick={() => setIsMobileNavOpen(false)}
-                className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                className="w-7 h-7 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -1555,9 +1557,9 @@ export default function UserDashboard() {
             <Link
               href="/profile"
               onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-semibold transition-all text-xs"
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 font-semibold transition-all text-xs"
             >
-              <User className="w-3.5 h-3.5 text-zinc-400" />
+              <User className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
               <span>Edit Profile &amp; Credentials ↗</span>
             </Link>
 
@@ -1566,11 +1568,11 @@ export default function UserDashboard() {
               <Link
                 href="/profile"
                 onClick={() => setIsMobileNavOpen(false)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
               >
-                <User className="w-4 h-4 text-zinc-400 shrink-0" />
+                <User className="w-4 h-4 text-zinc-400 light:text-zinc-600 shrink-0" />
                 <span>Candidate Profile &amp; Credentials</span>
-                <span className="text-[10px] text-zinc-400 font-mono ml-auto">1-Time</span>
+                <span className="text-[10px] text-zinc-400 light:text-zinc-600 font-mono ml-auto">1-Time</span>
               </Link>
 
               <button
@@ -1578,38 +1580,38 @@ export default function UserDashboard() {
                   setIsMobileNavOpen(false)
                   refreshAllDashboardData(userId)
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer text-left"
               >
-                <RefreshCw className="w-4 h-4 text-zinc-400 shrink-0" />
+                <RefreshCw className="w-4 h-4 text-zinc-400 light:text-zinc-600 shrink-0" />
                 <span>Refresh Live Telemetry</span>
               </button>
 
               <Link
                 href="/resume-builder"
                 onClick={() => setIsMobileNavOpen(false)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
               >
-                <FileText className="w-4 h-4 text-zinc-400 shrink-0" />
+                <FileText className="w-4 h-4 text-zinc-400 light:text-zinc-600 shrink-0" />
                 <span>AI ATS Resume Studio</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 ml-auto font-semibold">
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 ml-auto font-semibold">
                   HARVARD
                 </span>
               </Link>
 
               <button
                 onClick={() => { setIsHelpOpen(true); setIsMobileNavOpen(false) }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer text-left"
               >
-                <Mail className="w-4 h-4 text-zinc-400 shrink-0" />
+                <Mail className="w-4 h-4 text-zinc-400 light:text-zinc-600 shrink-0" />
                 <span>Help & Support Center</span>
               </button>
 
               <Link
                 href="/pricing"
                 onClick={() => setIsMobileNavOpen(false)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
               >
-                <Sparkles className="w-4 h-4 text-zinc-400 shrink-0" />
+                <Sparkles className="w-4 h-4 text-zinc-400 light:text-zinc-600 shrink-0" />
                 <span>Compare Pricing & Plans</span>
               </Link>
 
@@ -1617,20 +1619,20 @@ export default function UserDashboard() {
                 onClick={() => { setIsMobileNavOpen(false); setIsPwaModalOpen(true) }}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors cursor-pointer text-left ${
                   isAppInstalled
-                    ? 'text-emerald-300 hover:text-white hover:bg-emerald-950/30'
-                    : 'text-cyan-300 hover:text-white hover:bg-cyan-950/30'
+                    ? 'text-emerald-300 light:text-emerald-700 hover:text-white light:hover:text-zinc-900 hover:bg-emerald-950/30'
+                    : 'text-cyan-300 light:text-cyan-700 hover:text-white light:hover:text-zinc-900 hover:bg-cyan-950/30'
                 }`}
               >
                 {isAppInstalled ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 light:text-emerald-600 shrink-0" />
                 ) : (
-                  <Download className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <Download className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
                 )}
                 <span>{isAppInstalled ? 'JobFlux App (Installed)' : 'Install JobFlux App (PWA)'}</span>
                 <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ml-auto font-semibold ${
                   isAppInstalled
-                    ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                    : 'bg-cyan-950 text-cyan-300 border border-cyan-800'
+                    ? 'bg-emerald-950 text-emerald-300 light:text-emerald-700 border border-emerald-800'
+                    : 'bg-cyan-950 text-cyan-300 light:text-cyan-700 border border-cyan-800'
                 }`}>
                   {isAppInstalled ? 'INSTALLED' : 'APP'}
                 </span>
@@ -1638,22 +1640,22 @@ export default function UserDashboard() {
 
               <button
                 onClick={() => { setIsMobileNavOpen(false); setIsOfferModalOpen(true) }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 hover:text-white hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 light:text-amber-700 hover:text-white light:hover:text-zinc-900 hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
               >
-                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <Sparkles className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0" />
                 <span>Candidate Offers & Discounts</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 ml-auto font-semibold">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800 ml-auto font-semibold">
                   OFFER
                 </span>
               </button>
 
               <button
                 onClick={() => { setIsMobileNavOpen(false); setIsReviewModalOpen(true) }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 hover:text-white hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-300 light:text-amber-700 hover:text-white light:hover:text-zinc-900 hover:bg-amber-950/30 transition-colors cursor-pointer text-left"
               >
-                <Star className="w-4 h-4 text-amber-400 shrink-0 fill-amber-400/20" />
+                <Star className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0 fill-amber-400/20" />
                 <span>Rate &amp; Review JobFlux</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 ml-auto font-semibold">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 light:text-amber-700 border border-amber-800 ml-auto font-semibold">
                   REVIEW
                 </span>
               </button>
@@ -1662,9 +1664,9 @@ export default function UserDashboard() {
                 <Link
                   href="/admin"
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
                 >
-                  <Shield className="w-4 h-4 text-zinc-400 shrink-0" />
+                  <Shield className="w-4 h-4 text-zinc-400 light:text-zinc-600 shrink-0" />
                   <span>Admin Control Center</span>
                 </Link>
               )}
@@ -1673,18 +1675,18 @@ export default function UserDashboard() {
                 <Link
                   href="/enterprise-admin"
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-cyan-300 hover:text-white hover:bg-cyan-950/40 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-cyan-300 light:text-cyan-700 hover:text-white light:hover:text-zinc-900 hover:bg-cyan-950/40 transition-colors"
                 >
-                  <Building2 className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <Building2 className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
                   <span>Enterprise Admin Portal</span>
                 </Link>
               )}
 
-              <div className="pt-2 border-t border-zinc-800/80">
+              <div className="pt-2 border-t border-zinc-800/80 light:border-zinc-200">
                 <button
                   type="button"
                   onClick={() => { setIsMobileNavOpen(false); handleLogout() }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 hover:text-white font-semibold text-xs transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-300 light:text-red-600 hover:text-white light:hover:text-zinc-900 font-semibold text-xs transition-all cursor-pointer shadow-sm active:scale-[0.98]"
                 >
                   <LogOut className="w-3.5 h-3.5 text-red-400" />
                   <span>Sign Out of JobFlux</span>
@@ -1704,21 +1706,21 @@ export default function UserDashboard() {
             key={a.code}
             className={`p-3.5 sm:p-4 rounded-2xl border flex items-start gap-3 text-xs sm:text-sm shadow-lg ${
               a.type === 'error'
-                ? 'bg-red-950/40 border-red-800/60 text-red-200'
+                ? 'bg-red-950/40 light:bg-red-50 border-red-800/60 text-red-200'
                 : a.type === 'warning'
                   ? 'bg-amber-950/40 border-amber-700/60 text-amber-200'
                   : 'bg-cyan-950/40 border-cyan-800/60 text-cyan-200'
             }`}
           >
-            <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${a.type === 'error' ? 'text-red-400' : a.type === 'warning' ? 'text-amber-400' : 'text-cyan-400'}`} />
+            <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${a.type === 'error' ? 'text-red-400' : a.type === 'warning' ? 'text-amber-400 light:text-amber-600' : 'text-cyan-400 light:text-cyan-600'}`} />
             <div className="flex-1 min-w-0">
-              <div className="font-bold text-white text-xs sm:text-sm">{a.title}</div>
+              <div className="font-bold text-white light:text-zinc-900 text-xs sm:text-sm">{a.title}</div>
               <p className="mt-0.5 leading-relaxed opacity-90">{a.message}</p>
             </div>
             {a.actionLabel && a.actionHref && (
               <Link
                 href={a.actionHref}
-                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold shrink-0 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-white/10 light:bg-zinc-900/5 hover:bg-white/20 border border-white/20 light:border-zinc-300 text-white light:text-zinc-900 text-xs font-semibold shrink-0 transition-colors"
               >
                 {a.actionLabel}
               </Link>
@@ -1728,24 +1730,24 @@ export default function UserDashboard() {
 
         {/* Enterprise Organization Invitation Banner */}
         {pendingEnterpriseInvites.length > 0 && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 border border-cyan-800/40 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 light:bg-white border border-cyan-800/40 text-white light:text-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-cyan-950/60 pointer-events-none" />
             <div className="flex items-start sm:items-center gap-3.5 z-10">
-              <div className="w-10 h-10 rounded-xl bg-cyan-600/30 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
-                <Building2 className="w-5 h-5 text-cyan-400" />
+              <div className="w-10 h-10 rounded-xl bg-cyan-600/30 border border-cyan-400/40 flex items-center justify-center text-cyan-300 light:text-cyan-700 shrink-0">
+                <Building2 className="w-5 h-5 text-cyan-400 light:text-cyan-600" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-cyan-900/80 text-cyan-300 border border-cyan-700">
+                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-cyan-900/80 text-cyan-300 light:text-cyan-700 border border-cyan-700">
                     ENTERPRISE INVITATION
                   </span>
-                  <span className="text-xs font-bold text-white">
+                  <span className="text-xs font-bold text-white light:text-zinc-900">
                     {pendingEnterpriseInvites[0].org_name || 'Enterprise Workspace'}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-300 mt-1">
-                  You have been invited by <strong className="text-white">{pendingEnterpriseInvites[0].invited_by}</strong> to join as an Enterprise Member.
-                  Enjoy <strong className="text-cyan-300">10 weekly on-demand sweeps</strong> and <strong className="text-cyan-300">55 daily job applications</strong>.
+                <p className="text-xs text-zinc-300 light:text-zinc-700 mt-1">
+                  You have been invited by <strong className="text-white light:text-zinc-900">{pendingEnterpriseInvites[0].invited_by}</strong> to join as an Enterprise Member.
+                  Enjoy <strong className="text-cyan-300 light:text-cyan-700">10 weekly on-demand sweeps</strong> and <strong className="text-cyan-300 light:text-cyan-700">55 daily job applications</strong>.
                 </p>
               </div>
             </div>
@@ -1755,7 +1757,7 @@ export default function UserDashboard() {
                 type="button"
                 onClick={() => handleRespondToInvite(pendingEnterpriseInvites[0].invite_id, 'decline')}
                 disabled={isRespondingToInvite}
-                className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-medium transition-colors cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 text-xs font-medium transition-colors cursor-pointer"
               >
                 Decline
               </button>
@@ -1763,9 +1765,9 @@ export default function UserDashboard() {
                 type="button"
                 onClick={() => handleRespondToInvite(pendingEnterpriseInvites[0].invite_id, 'accept')}
                 disabled={isRespondingToInvite}
-                className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
               >
-                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-300 light:text-emerald-700" />
                 <span>{isRespondingToInvite ? 'Accepting...' : 'Accept Invitation'}</span>
               </button>
             </div>
@@ -1774,19 +1776,19 @@ export default function UserDashboard() {
 
         {/* Enterprise Member Workspace Active Callout */}
         {isEnterpriseMember && (
-          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-950/70 border border-zinc-800/80 text-cyan-200 flex items-center justify-between gap-3 text-xs">
+          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-cyan-900/50 border border-cyan-700/50 flex items-center justify-center shrink-0">
-                <Building2 className="w-3.5 h-3.5 text-cyan-400" />
+              <div className="w-7 h-7 rounded-lg bg-cyan-900/50 border border-cyan-700/50 light:border-cyan-300 flex items-center justify-center shrink-0">
+                <Building2 className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600" />
               </div>
               <div>
-                <span className="font-semibold text-white">Enterprise Workspace Active</span>
-                <span className="text-zinc-400 text-[11px] ml-2 font-mono">
+                <span className="font-semibold text-white light:text-zinc-900">Enterprise Workspace Active</span>
+                <span className="text-zinc-400 light:text-zinc-600 text-[11px] ml-2 font-mono">
                   • {userPlan === 'org_pro' ? '15' : '10'} Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-700/70 text-cyan-300 font-semibold uppercase shrink-0">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-700/70 text-cyan-300 light:text-cyan-700 font-semibold uppercase shrink-0">
               {userPlan === 'org_pro' ? 'Org Pro' : 'Technohm SIT Org'}
             </span>
           </div>
@@ -1794,23 +1796,23 @@ export default function UserDashboard() {
 
         {/* Org Pro Upgrade Banner — members-only plan (base enterprise members) */}
         {isEnterpriseMember && userPlan === 'enterprise' && isPlanActive && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-950/60 via-zinc-950 to-cyan-950/60 border border-amber-500/40 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950/70 light:bg-amber-50 border border-zinc-800/80 light:border-amber-300 text-white light:text-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent pointer-events-none" />
             <div className="flex items-start gap-3 z-10">
               <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center shrink-0">
-                <Crown className="w-5 h-5 text-amber-400" />
+                <Crown className="w-5 h-5 text-amber-400 light:text-amber-600" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/40">
+                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/40">
                     Org Member Exclusive
                   </span>
-                  <span className="text-sm font-bold text-white">Upgrade to Org Pro — ₹99 / 30 days</span>
+                  <span className="text-sm font-bold text-white light:text-zinc-900">Upgrade to Org Pro — ₹99 / 30 days</span>
                 </div>
-                <p className="text-xs text-zinc-300 mt-1">
-                  <strong className="text-amber-300">15 on-demand sweeps/week</strong> (vs 10) • Priority worker queue • Stays linked to your organization.
+                <p className="text-xs text-zinc-300 light:text-zinc-700 mt-1">
+                  <strong className="text-amber-300 light:text-amber-700">15 on-demand sweeps/week</strong> (vs 10) • Priority worker queue • Stays linked to your organization.
                 </p>
-                {orgProError && <p className="text-xs text-red-300 mt-1.5">{orgProError}</p>}
+                {orgProError && <p className="text-xs text-red-300 light:text-red-600 mt-1.5">{orgProError}</p>}
               </div>
             </div>
             <button
@@ -1829,7 +1831,7 @@ export default function UserDashboard() {
         {metrics.today >= 55 && (
           <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex items-center justify-between gap-3 text-xs shadow-lg">
             <div className="flex items-center gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0" />
               <span>
                 <strong>Daily Limit Reached (55 max jobs):</strong> You have reached your daily limit of 55 applications for today. Limit is exceeded for today; automated sweeps will resume tomorrow at 06:00 AM IST.
               </span>
@@ -1841,13 +1843,13 @@ export default function UserDashboard() {
         {notificationPermission === 'denied' && (
           <div className="p-3 sm:p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 light:text-amber-600 shrink-0">
                 <BellOff className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-white flex items-center gap-2">
+                <div className="text-xs font-semibold text-white light:text-zinc-900 flex items-center gap-2">
                   <span>Browser Push Notifications Blocked</span>
-                  <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-500/20 text-amber-300 font-mono">Action Required</span>
+                  <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-500/20 text-amber-300 light:text-amber-700 font-mono">Action Required</span>
                 </div>
                 <p className="text-[11px] text-amber-300/80 mt-0.5">
                   Your browser is currently blocking notifications for JobFlux AI. Enable them to receive real-time job application receipts & daily sweeps.
@@ -1866,14 +1868,14 @@ export default function UserDashboard() {
         )}
 
         {notificationPermission === 'default' && !notificationBannerDismissed && (
-          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-zinc-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 light:text-cyan-600 shrink-0">
                 <Bell className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-white">Enable Real-Time Dispatch Notifications</div>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
+                <div className="text-xs font-semibold text-white light:text-zinc-900">Enable Real-Time Dispatch Notifications</div>
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600 mt-0.5">
                   Get instant receipts when the autonomous engine submits applications and when exclusive flash offers drop.
                 </p>
               </div>
@@ -1882,7 +1884,7 @@ export default function UserDashboard() {
               <button
                 type="button"
                 onClick={() => setNotificationBannerDismissed(true)}
-                className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-zinc-500 light:text-zinc-600 hover:text-zinc-300 transition-colors cursor-pointer"
                 title="Dismiss"
               >
                 <X className="w-3.5 h-3.5" />
@@ -1890,7 +1892,7 @@ export default function UserDashboard() {
               <button
                 type="button"
                 onClick={handleRequestNotification}
-                className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5"
               >
                 <BellRing className="w-3.5 h-3.5" />
                 <span>Allow Notifications</span>
@@ -1906,22 +1908,22 @@ export default function UserDashboard() {
             onClick={(e) => {
               if (e.target === e.currentTarget) setShowUnblockGuide(false)
             }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/80 light:bg-white/85 backdrop-blur-sm flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
           >
             <div 
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black space-y-5"
+              className="w-full max-w-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 rounded-2xl p-6 shadow-2xl shadow-black space-y-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 light:text-amber-600 shrink-0">
                     <BellRing className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">How to Unblock Notifications in Your Browser</h3>
-                    <p className="text-[11px] text-zinc-400">Quick 3-step guide for Chrome / macOS</p>
+                    <h3 className="text-sm font-bold text-white light:text-zinc-900">How to Unblock Notifications in Your Browser</h3>
+                    <p className="text-[11px] text-zinc-400 light:text-zinc-600">Quick 3-step guide for Chrome / macOS</p>
                   </div>
                 </div>
                 <button
@@ -1931,56 +1933,56 @@ export default function UserDashboard() {
                     setShowUnblockGuide(false)
                   }}
                   aria-label="Close unblock guide"
-                  className="text-zinc-500 hover:text-white p-1 cursor-pointer z-50"
+                  className="text-zinc-500 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 p-1 cursor-pointer z-50"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800 text-xs text-zinc-300 space-y-1">
-                <p className="font-semibold text-amber-300">Why are notifications blocked?</p>
-                <p className="text-zinc-400 text-[11px] leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 space-y-1">
+                <p className="font-semibold text-amber-300 light:text-amber-700">Why are notifications blocked?</p>
+                <p className="text-zinc-400 light:text-zinc-600 text-[11px] leading-relaxed">
                   When notifications are blocked in browser settings, web standards prevent websites from triggering prompts automatically. You can re-enable them in 10 seconds:
                 </p>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
-                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center shrink-0 text-xs">1</span>
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 light:bg-white/85 border border-zinc-800/80 light:border-zinc-200">
+                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 light:text-amber-700 font-bold flex items-center justify-center shrink-0 text-xs">1</span>
                   <div>
-                    <div className="font-semibold text-white">Click the Site Settings / Padlock Icon in Address Bar</div>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                    <div className="font-semibold text-white light:text-zinc-900">Click the Site Settings / Padlock Icon in Address Bar</div>
+                    <p className="text-[11px] text-zinc-400 light:text-zinc-600 mt-0.5">
                       Look at the left of the URL in your browser address bar. Click the 🔒 or ⚙️ (tune/padlock) icon.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
-                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center shrink-0 text-xs">2</span>
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 light:bg-white/85 border border-zinc-800/80 light:border-zinc-200">
+                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 light:text-amber-700 font-bold flex items-center justify-center shrink-0 text-xs">2</span>
                   <div>
-                    <div className="font-semibold text-white">Switch &ldquo;Notifications&rdquo; from Block to Allow</div>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                    <div className="font-semibold text-white light:text-zinc-900">Switch &ldquo;Notifications&rdquo; from Block to Allow</div>
+                    <p className="text-[11px] text-zinc-400 light:text-zinc-600 mt-0.5">
                       In the site permissions menu, find <strong>Notifications</strong> and change the dropdown setting to <strong>Allow</strong>.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
-                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center shrink-0 text-xs">3</span>
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/80 light:bg-white/85 border border-zinc-800/80 light:border-zinc-200">
+                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 light:text-amber-700 font-bold flex items-center justify-center shrink-0 text-xs">3</span>
                   <div>
-                    <div className="font-semibold text-white">Verify Connection</div>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                    <div className="font-semibold text-white light:text-zinc-900">Verify Connection</div>
+                    <p className="text-[11px] text-zinc-400 light:text-zinc-600 mt-0.5">
                       Click the button below to confirm the permission change and receive an immediate verification alert!
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-800">
+              <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-800 light:border-zinc-200">
                 <button
                   type="button"
                   onClick={() => setShowUnblockGuide(false)}
-                  className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700 text-zinc-300 light:text-zinc-700 text-xs font-semibold cursor-pointer"
                 >
                   Close
                 </button>
@@ -2010,7 +2012,7 @@ export default function UserDashboard() {
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
                 isPlanExpired
                   ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
-                  : 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                  : 'bg-amber-500/20 border-amber-500/40 text-amber-300 light:text-amber-700'
               }`}>
                 <Clock className="w-4 h-4" />
               </div>
@@ -2018,18 +2020,18 @@ export default function UserDashboard() {
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
                     isPlanExpired
-                      ? 'bg-rose-500 text-white'
+                      ? 'bg-rose-500 text-white light:text-zinc-900'
                       : hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 24
-                      ? 'bg-red-500 text-white'
+                      ? 'bg-red-500 text-white light:text-zinc-900'
                       : 'bg-amber-500 text-black'
                   }`}>
                     {isPlanExpired ? 'PLAN EXPIRED' : hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 24 ? '1-DAY EXPIRY ALERT' : '2-DAY EXPIRY ALERT'}
                   </span>
-                  <span className="text-xs font-bold text-white">
+                  <span className="text-xs font-bold text-white light:text-zinc-900">
                     {userPlanName}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-300 mt-0.5">
+                <p className="text-xs text-zinc-300 light:text-zinc-700 mt-0.5">
                   {isPlanExpired
                     ? 'Your subscription plan has expired. Automated application submissions are paused. Renew now to resume daily job applications.'
                     : `Your current plan expires in ${hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 24 ? `${hoursUntilPlanExpiry} hours` : `${Math.ceil((hoursUntilPlanExpiry || 48) / 24)} days`}. Renew today to prevent application pauses.`}
@@ -2042,7 +2044,7 @@ export default function UserDashboard() {
                 href="/pricing"
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md ${
                   isPlanExpired
-                    ? 'bg-rose-600 hover:bg-rose-500 text-white'
+                    ? 'bg-rose-600 hover:bg-rose-500 text-white light:text-zinc-900'
                     : 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20'
                 }`}
               >
@@ -2055,29 +2057,29 @@ export default function UserDashboard() {
 
         {/* Administrator Assigned Exclusive Promotional Offer Banner */}
         {activeOfferBanner ? (
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950 border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
             <div className="flex items-start sm:items-center gap-3.5 z-10">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
-                <Sparkles className="w-5 h-5 text-zinc-300" />
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
+                <Sparkles className="w-5 h-5 text-zinc-300 light:text-zinc-700" />
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[10px] font-mono font-semibold uppercase px-2.5 py-0.5 rounded-md bg-zinc-900 text-zinc-300 border border-zinc-800 tracking-wide">
+                  <span className="text-[10px] font-mono font-semibold uppercase px-2.5 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-200 tracking-wide">
                     {activeOfferBanner.discount_badge || 'SPECIAL OFFER'}
                   </span>
-                  <span className="text-xs font-mono font-medium text-zinc-400">
+                  <span className="text-xs font-mono font-medium text-zinc-400 light:text-zinc-600">
                     Locked to Your Email ({userEmail || 'Account'})
                   </span>
-                  <span className="text-[11px] font-mono text-zinc-300 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-                    Code: <strong className="text-white font-semibold">{activeOfferBanner.promo_code}</strong>
+                  <span className="text-[11px] font-mono text-zinc-300 light:text-zinc-700 bg-zinc-900 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
+                    Code: <strong className="text-white light:text-zinc-900 font-semibold">{activeOfferBanner.promo_code}</strong>
                   </span>
                   {activeOfferBanner.expires_at && (
                     <span className={`text-[10px] font-mono px-2 py-0.5 rounded border flex items-center gap-1 ${
                       activeOfferBanner.is_expired
-                        ? 'bg-zinc-900 border-zinc-800 text-zinc-500 font-medium'
+                        ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-500 light:text-zinc-600 font-medium'
                         : activeOfferBanner.hours_left !== undefined && activeOfferBanner.hours_left <= 24
-                        ? 'bg-zinc-900 border-zinc-800 text-amber-400 font-medium'
-                        : 'bg-zinc-900 border-zinc-800 text-zinc-400'
+                        ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-amber-400 light:text-amber-600 font-medium'
+                        : 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600'
                     }`}>
                       <Clock className="w-2.5 h-2.5" />
                       {activeOfferBanner.is_expired
@@ -2086,12 +2088,12 @@ export default function UserDashboard() {
                     </span>
                   )}
                 </div>
-                <h4 className="text-sm sm:text-base font-bold text-white mt-1.5 flex items-center gap-2.5">
+                <h4 className="text-sm sm:text-base font-bold text-white light:text-zinc-900 mt-1.5 flex items-center gap-2.5">
                   <span>{activeOfferBanner.offer_title}</span>
-                  <span className="text-zinc-500 line-through text-xs sm:text-sm font-mono">{activeOfferBanner.original_price}</span>
-                  <span className="text-white font-extrabold text-sm sm:text-base font-mono">{activeOfferBanner.discounted_price}</span>
+                  <span className="text-zinc-500 light:text-zinc-600 line-through text-xs sm:text-sm font-mono">{activeOfferBanner.original_price}</span>
+                  <span className="text-white light:text-zinc-900 font-extrabold text-sm sm:text-base font-mono">{activeOfferBanner.discounted_price}</span>
                 </h4>
-                <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
                   {activeOfferBanner.custom_message || 'Administrator assigned deal locked to your email address. 1-click instant unlock.'}
                 </p>
               </div>
@@ -2100,7 +2102,7 @@ export default function UserDashboard() {
               {activeOfferBanner.is_expired ? (
                 <Link
                   href="/pricing"
-                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-400 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-850 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>Offer Expired · View Pricing</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -2108,7 +2110,7 @@ export default function UserDashboard() {
               ) : (
                 <Link
                   href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
                 >
                   <span>Claim & Upgrade ({activeOfferBanner.discounted_price})</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -2117,14 +2119,14 @@ export default function UserDashboard() {
             </div>
           </div>
         ) : (!isProfessional) ? (
-          <div className="p-3.5 sm:p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-zinc-300">
-                <Sparkles className="w-4 h-4 text-zinc-400" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center shrink-0 text-zinc-300 light:text-zinc-700">
+                <Sparkles className="w-4 h-4 text-zinc-400 light:text-zinc-600" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-white">
+                  <span className="text-xs font-semibold text-white light:text-zinc-900">
                     {userPlan === 'none' || userPlan === 'no_plan'
                       ? 'No Active Subscription · Choose a Plan to Start Auto-Apply'
                       : !isPlanActive
@@ -2137,26 +2139,26 @@ export default function UserDashboard() {
                   </span>
                   <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${
                     userPlan === 'none' || userPlan === 'no_plan'
-                      ? 'bg-zinc-900 text-zinc-400 border-zinc-800'
+                      ? 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-800 light:border-zinc-200'
                       : !isPlanActive
-                      ? 'bg-red-950/80 border-red-800 text-red-300'
+                      ? 'bg-red-950/80 border-red-800 text-red-300 light:text-red-600'
                       : userPlan === 'pro'
-                      ? 'bg-zinc-900 border-zinc-800 text-zinc-300'
+                      ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700'
                       : metrics.total_applied >= 150
-                      ? 'bg-zinc-900 border-zinc-800 text-amber-400'
-                      : 'bg-zinc-900 border-zinc-800 text-zinc-400'
+                      ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-amber-400 light:text-amber-600'
+                      : 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600'
                   }`}>
                     {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.total_applied >= 150 ? 'EXHAUSTED' : '3-DAY FREE'}
                   </span>
                 </div>
-                <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">
-                  Unlock <strong className="text-white">1,800+ applications</strong>, morning scans & recruiter fast-path on Professional.
+                <p className="text-[11px] sm:text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
+                  Unlock <strong className="text-white light:text-zinc-900">1,800+ applications</strong>, morning scans & recruiter fast-path on Professional.
                 </p>
               </div>
             </div>
             <Link
               href="/pricing?plan=elite"
-              className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
+              className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
             >
               <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : userPlan === 'pro' ? 'Upgrade to Pro (₹199)' : 'Upgrade Plan'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -2165,7 +2167,7 @@ export default function UserDashboard() {
         ) : null}
 
         {/* Unified Mission Control Card (Cockpit + Live Metrics + Telemetry Strip) */}
-        <div className="rounded-2xl bg-[#09090b] border border-zinc-800 overflow-hidden card-featured-glow relative">
+        <div className="rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden card-featured-glow relative">
           {/* Subtle top accent */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 
@@ -2173,26 +2175,26 @@ export default function UserDashboard() {
           <div className="p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3.5 bg-zinc-950/50">
             <div className="flex items-center gap-3.5 min-w-0">
               <div className="relative shrink-0">
-                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
-                  <Cpu className="w-5 h-5 text-zinc-300" />
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700">
+                  <Cpu className="w-5 h-5 text-zinc-300 light:text-zinc-700" />
                 </div>
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-sm font-semibold text-white tracking-tight">
+                  <h2 className="text-sm font-semibold text-white light:text-zinc-900 tracking-tight">
                     Autonomous Engine Cockpit
                   </h2>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono flex items-center gap-1.5 shrink-0">
+                  <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 font-mono flex items-center gap-1.5 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                     Daemon Active
                   </span>
                 </div>
-                <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
-                  <span>Schedule: <strong className="text-zinc-300">Daily Autonomous Sweeps</strong></span>
+                <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                  <span>Schedule: <strong className="text-zinc-300 light:text-zinc-700">Daily Autonomous Sweeps</strong></span>
                   <span className="text-zinc-600 hidden sm:inline">•</span>
-                  <span className="text-zinc-400 font-medium">Applies Daily</span>
+                  <span className="text-zinc-400 light:text-zinc-600 font-medium">Applies Daily</span>
                   <span className="text-zinc-600 hidden sm:inline">•</span>
-                  <span>Radar: <strong className="text-zinc-200 font-mono">06:00 AM IST</strong></span>
+                  <span>Radar: <strong className="text-zinc-200 light:text-zinc-800 font-mono">06:00 AM IST</strong></span>
                 </p>
               </div>
             </div>
@@ -2202,12 +2204,12 @@ export default function UserDashboard() {
                 type="button"
                 onClick={handleTriggerOnDemandScout}
                 disabled={isTriggeringScout || (activeTask && (activeTask.status === 'pending' || activeTask.status === 'running')) || (isProfessional && weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0)}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white hover:bg-zinc-200 text-black disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
                 title={!isProfessional ? "Upgrade to Professional to run on-demand sweeps" : (weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0) ? "Weekly on-demand sweep quota reached (5/5). Resets in rolling 7 days." : "Trigger instant real-time job application sweep"}
               >
                 {activeTask?.status === 'running' ? (
                   <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-black" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-black light:text-white" />
                     <span>Running Sweep...</span>
                   </>
                 ) : activeTask?.status === 'pending' ? (
@@ -2228,7 +2230,7 @@ export default function UserDashboard() {
                         </span>
                       )
                     ) : (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 font-semibold">
                         PRO
                       </span>
                     )}
@@ -2242,18 +2244,18 @@ export default function UserDashboard() {
           {taskFeedback && isProfessional && (
             <div className={`p-3 text-xs flex items-center justify-between border-t border-b ${
               taskFeedback.type === 'success'
-                ? 'bg-zinc-950 border-zinc-700 text-zinc-200'
+                ? 'bg-zinc-950 light:bg-white border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800'
                 : taskFeedback.type === 'error'
-                ? 'bg-zinc-950 border-red-500/30 text-red-300'
-                : 'bg-zinc-950 border-zinc-800 text-zinc-300'
+                ? 'bg-zinc-950 light:bg-white border-red-500/30 text-red-300 light:text-red-600'
+                : 'bg-zinc-950 light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700'
             }`}>
               <span className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+                <Sparkles className="w-3.5 h-3.5 shrink-0 text-zinc-400 light:text-zinc-600" />
                 {taskFeedback.text}
               </span>
               <button
                 onClick={() => setTaskFeedback(null)}
-                className="text-zinc-500 hover:text-white text-xs px-2 py-0.5 cursor-pointer"
+                className="text-zinc-500 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 text-xs px-2 py-0.5 cursor-pointer"
               >
                 ✕
               </button>
@@ -2262,26 +2264,26 @@ export default function UserDashboard() {
 
           {/* Real-time Live Log Stream Terminal */}
           {activeTask && (activeTask.status === 'running' || activeTask.status === 'pending' || (activeTask.logs && activeTask.logs.length > 0)) && (
-            <div className="border-t border-b border-zinc-800 bg-black overflow-hidden animate-in fade-in duration-200">
-              <div className="px-3.5 py-2 bg-zinc-950 flex items-center justify-between border-b border-zinc-900 text-xs">
+            <div className="border-t border-b border-zinc-800 light:border-zinc-200 bg-black light:bg-white overflow-hidden animate-in fade-in duration-200">
+              <div className="px-3.5 py-2 bg-zinc-950 light:bg-white flex items-center justify-between border-b border-zinc-900 light:border-zinc-200 text-xs">
                 <div className="flex items-center gap-2">
-                  <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                  <span className="font-mono text-zinc-300 font-semibold text-[11px]">
+                  <Terminal className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600" />
+                  <span className="font-mono text-zinc-300 light:text-zinc-700 font-semibold text-[11px]">
                     Autonomous Bot Live Terminal {activeTask.task_id ? `(${activeTask.task_id})` : ''}
                   </span>
                   {activeTask.status === 'running' && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
-                      <Radio className="w-2 h-2 text-emerald-400" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/40 animate-pulse">
+                      <Radio className="w-2 h-2 text-emerald-400 light:text-emerald-600" />
                       LIVE
                     </span>
                   )}
                   {activeTask.status === 'pending' && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/40">
                       QUEUED
                     </span>
                   )}
                   {activeTask.status === 'completed' && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/40">
                       COMPLETED
                     </span>
                   )}
@@ -2289,7 +2291,7 @@ export default function UserDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowLiveTerminal(prev => !prev)}
-                  className="text-zinc-500 hover:text-white text-[11px] font-mono cursor-pointer"
+                  className="text-zinc-500 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 text-[11px] font-mono cursor-pointer"
                 >
                   {showLiveTerminal ? 'Minimize ▲' : 'Expand Stream ▼'}
                 </button>
@@ -2305,19 +2307,19 @@ export default function UserDashboard() {
                           line.includes('❌') || line.includes('Error') || line.includes('Failed')
                             ? 'text-rose-400 font-medium'
                             : line.includes('🛑') || line.includes('⚠️')
-                            ? 'text-amber-400'
+                            ? 'text-amber-400 light:text-amber-600'
                             : line.includes('🎉') || line.includes('APPLIED!') || line.includes('COMPLETED')
-                            ? 'text-emerald-400 font-semibold'
+                            ? 'text-emerald-400 light:text-emerald-600 font-semibold'
                             : line.includes('🎬') || line.includes('🚀') || line.includes('Company resolved')
-                            ? 'text-cyan-300'
-                            : 'text-zinc-300'
+                            ? 'text-cyan-300 light:text-cyan-700'
+                            : 'text-zinc-300 light:text-zinc-700'
                         }`}
                       >
                         {line}
                       </div>
                     ))
                   ) : (
-                    <div className="text-zinc-500 italic py-2">
+                    <div className="text-zinc-500 light:text-zinc-600 italic py-2">
                       Connecting to background worker... Task queued in dispatch pipeline.
                     </div>
                   )}
@@ -2327,59 +2329,59 @@ export default function UserDashboard() {
           )}
 
           {/* Section 2: Integrated 4 Metrics Bar - Clean Responsive Card Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 p-3 sm:p-4 border-t border-zinc-800/80 bg-black/40">
-            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">
-              <div className="flex items-center justify-between text-xs text-zinc-400">
-                <span className="text-[11px] flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-zinc-500" /> Today</span>
-                <span className="text-[10px] font-mono text-zinc-500">24h</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 p-3 sm:p-4 border-t border-zinc-800/80 light:border-zinc-200 bg-black/40">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 space-y-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+                <span className="text-[11px] flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600" /> Today</span>
+                <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">24h</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className={`text-lg sm:text-2xl font-bold font-mono ${metrics.today >= 55 ? 'text-amber-400' : 'text-white'}`}>{metrics.today}</span>
-                <span className="text-[11px] text-zinc-500 font-mono">/ 55 max</span>
+                <span className={`text-lg sm:text-2xl font-bold font-mono ${metrics.today >= 55 ? 'text-amber-400 light:text-amber-600' : 'text-white light:text-zinc-900'}`}>{metrics.today}</span>
+                <span className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">/ 55 max</span>
               </div>
-              <p className="text-[10px] text-zinc-500">
+              <p className="text-[10px] text-zinc-500 light:text-zinc-600">
                 {metrics.today >= 55 ? (
-                  <span className="text-amber-400 font-semibold font-mono">Limit exceeded today</span>
+                  <span className="text-amber-400 light:text-amber-600 font-semibold font-mono">Limit exceeded today</span>
                 ) : (
                   'Delivered today'
                 )}
               </p>
             </div>
 
-            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">
-              <div className="flex items-center justify-between text-xs text-zinc-400">
-                <span className="text-[11px] flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-zinc-500" /> This Week</span>
-                <span className="text-[10px] font-mono text-zinc-500">7d</span>
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 space-y-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+                <span className="text-[11px] flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600" /> This Week</span>
+                <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">7d</span>
               </div>
-              <div className="text-lg sm:text-2xl font-bold text-white font-mono">{metrics.this_week}</div>
-              <p className="text-[10px] text-zinc-500">7-day outreach</p>
+              <div className="text-lg sm:text-2xl font-bold text-white light:text-zinc-900 font-mono">{metrics.this_week}</div>
+              <p className="text-[10px] text-zinc-500 light:text-zinc-600">7-day outreach</p>
             </div>
 
-            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">
-              <div className="flex items-center justify-between text-xs text-zinc-400">
-                <span className="text-[11px] flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-zinc-500" /> This Month</span>
-                <span className="text-[10px] font-mono text-zinc-500">30d</span>
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 space-y-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+                <span className="text-[11px] flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600" /> This Month</span>
+                <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">30d</span>
               </div>
-              <div className="text-lg sm:text-2xl font-bold text-white font-mono">{metrics.this_month}</div>
-              <p className="text-[10px] text-zinc-500">Monthly volume</p>
+              <div className="text-lg sm:text-2xl font-bold text-white light:text-zinc-900 font-mono">{metrics.this_month}</div>
+              <p className="text-[10px] text-zinc-500 light:text-zinc-600">Monthly volume</p>
             </div>
 
-            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/60 space-y-1">
-              <div className="flex items-center justify-between text-xs text-zinc-400">
-                <span className="text-[11px] flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-zinc-500" /> Total Verified</span>
-                <span className="text-[9px] font-mono text-zinc-300 bg-zinc-800 px-1.5 py-0.2 rounded border border-zinc-700 font-medium">100%</span>
+            <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/40 light:bg-zinc-100 border border-zinc-800/60 space-y-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600">
+                <span className="text-[11px] flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600" /> Total Verified</span>
+                <span className="text-[9px] font-mono text-zinc-300 light:text-zinc-700 bg-zinc-800 light:bg-zinc-200 px-1.5 py-0.2 rounded border border-zinc-700 light:border-zinc-300 font-medium">100%</span>
               </div>
-              <div className="text-lg sm:text-2xl font-bold text-white font-mono">{metrics.total_applied}</div>
-              <p className="text-[10px] text-zinc-500">All-time submissions</p>
+              <div className="text-lg sm:text-2xl font-bold text-white light:text-zinc-900 font-mono">{metrics.total_applied}</div>
+              <p className="text-[10px] text-zinc-500 light:text-zinc-600">All-time submissions</p>
             </div>
           </div>
 
           {/* Section 3: Clean Telemetry Protocol Strip */}
-          <div className="px-4 py-2.5 bg-black border-t border-zinc-800/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-zinc-400">
+          <div className="px-4 py-2.5 bg-black light:bg-white border-t border-zinc-800/80 light:border-zinc-200 flex items-center justify-between flex-wrap gap-2 text-[11px] text-zinc-400 light:text-zinc-600">
             <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
-                <span>Pacing: <strong className="text-zinc-300">Human (4s-8s)</strong></span>
+                <span>Pacing: <strong className="text-zinc-300 light:text-zinc-700">Human (4s-8s)</strong></span>
               </span>
               <span className="text-zinc-800 hidden sm:inline">|</span>
               <button
@@ -2387,8 +2389,8 @@ export default function UserDashboard() {
                 className="flex items-center gap-1.5 hover:text-zinc-200 transition-colors cursor-pointer"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
-                <span>Screening: <strong className="text-zinc-300">Contextual AI</strong></span>
-                {!isProfessional && <span className="text-[9px] font-mono text-zinc-400 ml-0.5">🔒 PRO</span>}
+                <span>Screening: <strong className="text-zinc-300 light:text-zinc-700">Contextual AI</strong></span>
+                {!isProfessional && <span className="text-[9px] font-mono text-zinc-400 light:text-zinc-600 ml-0.5">🔒 PRO</span>}
               </button>
               <span className="text-zinc-800 hidden sm:inline">|</span>
               <button
@@ -2396,12 +2398,12 @@ export default function UserDashboard() {
                 className="flex items-center gap-1.5 hover:text-zinc-200 transition-colors cursor-pointer"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
-                <span>Delivery: <strong className="text-zinc-300">Recruiter ATS</strong></span>
-                {!isProfessional && <span className="text-[9px] font-mono text-zinc-400 ml-0.5">🔒 PRO</span>}
+                <span>Delivery: <strong className="text-zinc-300 light:text-zinc-700">Recruiter ATS</strong></span>
+                {!isProfessional && <span className="text-[9px] font-mono text-zinc-400 light:text-zinc-600 ml-0.5">🔒 PRO</span>}
               </button>
             </div>
 
-            <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">
+            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 hidden sm:inline">
               Automated Morning Sync
             </span>
           </div>
@@ -2416,13 +2418,13 @@ export default function UserDashboard() {
         />
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-zinc-950/90 border border-zinc-800/80 rounded-xl overflow-x-auto scrollbar-none flex-nowrap">
+        <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-zinc-950/90 light:bg-white/90 border border-zinc-800/80 light:border-zinc-200 rounded-xl overflow-x-auto scrollbar-none flex-nowrap">
           <button
             onClick={() => setActiveTab('history')}
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'history'
-                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+                ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold shadow-sm'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50'
             }`}
           >
             <Briefcase className="w-3.5 h-3.5 shrink-0" />
@@ -2435,14 +2437,14 @@ export default function UserDashboard() {
             }}
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'queries'
-                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+                ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold shadow-sm'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50'
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5 shrink-0" />
             <span>Inquiries</span>
             {userTickets.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono">
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 light:bg-zinc-200 text-zinc-300 light:text-zinc-700 font-mono">
                 {userTickets.length}
               </span>
             )}
@@ -2451,13 +2453,13 @@ export default function UserDashboard() {
             onClick={() => setActiveTab('resume_builder')}
             className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               activeTab === 'resume_builder'
-                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+                ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold shadow-sm'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/50'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
             <span>AI ATS Resume</span>
-            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">
+            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 font-semibold">
               PRO
             </span>
           </button>
@@ -2468,22 +2470,22 @@ export default function UserDashboard() {
           <div className="space-y-4">
             {/* Daily Autonomous Job Apply Dispatch Report & Engagement Summary */}
             {metrics.total_applied > 0 && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-3.5 relative overflow-hidden">
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3.5 relative overflow-hidden">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
-                      <FileCheck className="w-4 h-4 text-zinc-300" />
+                    <div className="w-9 h-9 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
+                      <FileCheck className="w-4 h-4 text-zinc-300 light:text-zinc-700" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-sm font-semibold text-white tracking-tight">
+                        <h3 className="text-sm font-semibold text-white light:text-zinc-900 tracking-tight">
                           Autonomous Job Dispatch Report
                         </h3>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 font-semibold">
                           {metrics.today > 0 ? `${metrics.today} Applied Today` : `${metrics.total_applied} Applications Dispatched`}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-400 mt-0.5">
+                      <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
                         Verified recruiter delivery via cloud workers with human pacing &amp; tailored ATS screening answers.
                       </p>
                     </div>
@@ -2499,16 +2501,16 @@ export default function UserDashboard() {
                         setCopiedReport(true)
                         setTimeout(() => setCopiedReport(false), 2500)
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-750 text-zinc-300 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-750 text-zinc-300 light:text-zinc-700 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
                       {copiedReport ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-zinc-300" />
-                          <span className="text-zinc-200">Report Copied!</span>
+                          <Check className="w-3.5 h-3.5 text-zinc-300 light:text-zinc-700" />
+                          <span className="text-zinc-200 light:text-zinc-800">Report Copied!</span>
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                          <Copy className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                           <span>Copy Report</span>
                         </>
                       )}
@@ -2518,22 +2520,22 @@ export default function UserDashboard() {
 
                 {/* Company Chips from latest run */}
                 {historyJobs.length > 0 && (
-                  <div className="space-y-1.5 pt-1 border-t border-zinc-800/80">
-                    <span className="text-[11px] text-zinc-400 font-mono block">
+                  <div className="space-y-1.5 pt-1 border-t border-zinc-800/80 light:border-zinc-200">
+                    <span className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono block">
                       Recently Dispatched Employers:
                     </span>
                     <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-nowrap pb-1">
                       {Array.from(new Set(historyJobs.map(j => j.company || 'Tech Partner'))).slice(0, 7).map((comp, idx) => (
                         <span
                           key={idx}
-                          className="px-2.5 py-1 rounded-lg bg-black border border-zinc-800 text-xs text-zinc-300 font-medium shrink-0 flex items-center gap-1.5"
+                          className="px-2.5 py-1 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 font-medium shrink-0 flex items-center gap-1.5"
                         >
-                          <CheckCircle2 className="w-3 h-3 text-zinc-400" />
+                          <CheckCircle2 className="w-3 h-3 text-zinc-400 light:text-zinc-600" />
                           <span>{comp}</span>
                         </span>
                       ))}
                       {historyJobs.length > 7 && (
-                        <span className="text-[11px] text-zinc-500 font-mono self-center px-1">
+                        <span className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono self-center px-1">
                           +{historyJobs.length - 7} more
                         </span>
                       )}
@@ -2546,41 +2548,41 @@ export default function UserDashboard() {
                   <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-750 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <Crown className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="text-xs font-semibold text-white">Free Trial Capacity: {metrics.total_applied} / 50 Dispatched</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                        <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
+                        <span className="text-xs font-semibold text-white light:text-zinc-900">Free Trial Capacity: {metrics.total_applied} / 50 Dispatched</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/30 font-bold">
                           {Math.max(0, 50 - metrics.total_applied)} Remaining
                         </span>
                       </div>
-                      <p className="text-[11px] text-zinc-400 leading-relaxed">
-                        Free tier caps at 50 applications. Upgrade to <strong className="text-white">Professional</strong> for 1,800+ continuous applications, daily automated morning sweeps &amp; zero-queue recruiter delivery.
+                      <p className="text-[11px] text-zinc-400 light:text-zinc-600 leading-relaxed">
+                        Free tier caps at 50 applications. Upgrade to <strong className="text-white light:text-zinc-900">Professional</strong> for 1,800+ continuous applications, daily automated morning sweeps &amp; zero-queue recruiter delivery.
                       </p>
                     </div>
 
                     <Link
                       href="/pricing?promo=WELCOMEPRO"
-                      className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-sm"
+                      className="px-3.5 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-sm"
                     >
                       <span>Upgrade for ₹199 (Save 90%)</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 ) : (
-                  <div className="p-2.5 rounded-xl bg-black border border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400 font-mono">
+                  <div className="p-2.5 rounded-xl bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center justify-between text-xs text-zinc-400 light:text-zinc-600 font-mono">
                     <span className="flex items-center gap-2">
-                      <Crown className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="text-zinc-300 font-medium">Professional Plan Active:</span> Unlimited 1,800+ Applications Pool · Fast-Path Priority Queue
+                      <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
+                      <span className="text-zinc-300 light:text-zinc-700 font-medium">Professional Plan Active:</span> Unlimited 1,800+ Applications Pool · Fast-Path Priority Queue
                     </span>
-                    <span className="text-zinc-500 hidden sm:inline">Active Recruiter Sync</span>
+                    <span className="text-zinc-500 light:text-zinc-600 hidden sm:inline">Active Recruiter Sync</span>
                   </div>
                 )}
               </div>
             )}
 
             {/* Search & Filter Header */}
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="p-3.5 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="relative w-full md:w-80">
-                <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-2.5" />
+                <Search className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600 absolute left-3 top-2.5" />
                 <input
                   type="text"
                   placeholder="Search company, job role..."
@@ -2589,7 +2591,7 @@ export default function UserDashboard() {
                     setHistorySearch(e.target.value)
                     loadUserHistory(userId, 1, e.target.value, historyFilter)
                   }}
-                  className="w-full bg-black border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 focus:outline-none focus:border-zinc-500 transition-colors"
                 />
               </div>
 
@@ -2616,8 +2618,8 @@ export default function UserDashboard() {
                         }}
                         className={`px-3 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
                           active
-                            ? 'bg-zinc-800 text-white'
-                            : 'bg-black text-zinc-500 hover:text-zinc-300 border border-zinc-800'
+                            ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900'
+                            : 'bg-black light:bg-white text-zinc-500 light:text-zinc-600 hover:text-zinc-300 border border-zinc-800 light:border-zinc-200'
                         }`}
                       >
                         {label}
@@ -2629,13 +2631,13 @@ export default function UserDashboard() {
                 <button
                   onClick={handleExportHistoryCsv}
                   disabled={historyJobs.length === 0}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 disabled:opacity-40 text-zinc-300 hover:text-white border border-zinc-800 text-xs font-medium transition-colors cursor-pointer shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 disabled:opacity-40 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 text-xs font-medium transition-colors cursor-pointer shrink-0"
                   title={isProfessional ? "Export application records to CSV spreadsheet" : "Upgrade to Professional to export applications to CSV"}
                 >
-                  <Download className="w-3.5 h-3.5 text-zinc-400" />
+                  <Download className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                   <span className="hidden sm:inline">Export CSV</span>
                   {!isProfessional && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-700/50 text-cyan-300 font-semibold">
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-950/80 light:bg-cyan-50 border border-cyan-700/50 light:border-cyan-300 text-cyan-300 light:text-cyan-700 font-semibold">
                       PRO
                     </span>
                   )}
@@ -2644,11 +2646,11 @@ export default function UserDashboard() {
             </div>
 
             {/* Applications Table (Desktop) & Cards (Mobile) */}
-            <div className="rounded-xl bg-[#09090b] border border-zinc-800 overflow-hidden">
+            <div className="rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 overflow-hidden">
               {/* Desktop Table View */}
               <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-left text-xs text-zinc-300">
-                  <thead className="bg-black text-zinc-500 uppercase text-[10px] tracking-wider border-b border-zinc-800">
+                <table className="w-full text-left text-xs text-zinc-300 light:text-zinc-700">
+                  <thead className="bg-black light:bg-white text-zinc-500 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-zinc-800 light:border-zinc-200">
                     <tr>
                       <th className="py-3 px-4">Company</th>
                       <th className="py-3 px-4">Job Role</th>
@@ -2659,8 +2661,8 @@ export default function UserDashboard() {
                   <tbody className="divide-y divide-zinc-800/60">
                     {loadingHistory ? (
                       <tr>
-                        <td colSpan={4} className="py-12 text-center text-zinc-500">
-                          <RefreshCw className="w-4 h-4 mx-auto animate-spin mb-2 text-zinc-400" />
+                        <td colSpan={4} className="py-12 text-center text-zinc-500 light:text-zinc-600">
+                          <RefreshCw className="w-4 h-4 mx-auto animate-spin mb-2 text-zinc-400 light:text-zinc-600" />
                           Loading applications...
                         </td>
                       </tr>
@@ -2668,14 +2670,14 @@ export default function UserDashboard() {
                       <tr>
                         <td colSpan={4} className="py-16 text-center">
                           <div className="max-w-md mx-auto space-y-3">
-                            <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
-                              <Cpu className="w-6 h-6 text-zinc-400" />
+                            <div className="w-12 h-12 rounded-2xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center mx-auto text-zinc-400 light:text-zinc-600">
+                              <Cpu className="w-6 h-6 text-zinc-400 light:text-zinc-600" />
                             </div>
                             <div className="space-y-1">
-                              <h4 className="text-xs font-semibold text-white">
+                              <h4 className="text-xs font-semibold text-white light:text-zinc-900">
                                 {historySearch ? 'No Matching Applications Found' : 'Autonomous Engine Calibrated & Standing By'}
                               </h4>
-                              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                              <p className="text-[11px] text-zinc-400 light:text-zinc-600 leading-relaxed">
                                 {historySearch
                                   ? `No previous job applications match "${historySearch}". Try adjusting your search query.`
                                   : `Your agent is active and calibrated for daily autonomous sweeps. All matched employer submissions and answered screening questions will populate here in real-time.`}
@@ -2691,24 +2693,24 @@ export default function UserDashboard() {
                           onClick={() => setSelectedJobAudit(job)}
                           className="hover:bg-zinc-900/50 transition-colors cursor-pointer"
                         >
-                          <td className="py-3 px-4 font-medium text-white flex items-center gap-2">
-                            <div className="w-6 h-6 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] text-zinc-400 font-bold shrink-0">
+                          <td className="py-3 px-4 font-medium text-white light:text-zinc-900 flex items-center gap-2">
+                            <div className="w-6 h-6 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-[10px] text-zinc-400 light:text-zinc-600 font-bold shrink-0">
                               <Building2 className="w-3 h-3" />
                             </div>
                             <span>{job.company || 'Direct Employer'}</span>
                           </td>
-                          <td className="py-3 px-4 text-zinc-300">
+                          <td className="py-3 px-4 text-zinc-300 light:text-zinc-700">
                             {isProfessional && job.url && job.url !== '__locked__' && job.url.startsWith('http') ? (
                               <a
                                 href={job.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="hover:text-white transition-colors inline-flex items-center gap-1.5 group"
+                                className="hover:text-white light:hover:text-zinc-900 transition-colors inline-flex items-center gap-1.5 group"
                                 title="Open job listing on portal"
                               >
                                 <span className="group-hover:underline">{job.title || 'Job Opening'}</span>
-                                <ExternalLink className="w-3 h-3 text-zinc-500 group-hover:text-white" />
+                                <ExternalLink className="w-3 h-3 text-zinc-500 light:text-zinc-600 group-hover:text-white" />
                               </a>
                             ) : (job.is_url_locked || job.url === '__locked__' || (!isProfessional && job.url)) ? (
                               <button
@@ -2721,8 +2723,8 @@ export default function UserDashboard() {
                                 className="inline-flex items-center gap-1.5 text-left group cursor-pointer"
                                 title="Upgrade to Professional to open direct portal job listing"
                               >
-                                <span className="text-zinc-300 group-hover:text-white transition-colors">{job.title || 'Job Opening'}</span>
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 group-hover:bg-zinc-700 transition-colors">
+                                <span className="text-zinc-300 light:text-zinc-700 group-hover:text-white transition-colors">{job.title || 'Job Opening'}</span>
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 group-hover:bg-zinc-700 transition-colors">
                                   <Lock className="w-2.5 h-2.5" />
                                   PRO
                                 </span>
@@ -2731,12 +2733,12 @@ export default function UserDashboard() {
                               <span>{job.title || 'Job Opening'}</span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-zinc-400 font-mono text-[11px]">
+                          <td className="py-3 px-4 text-zinc-400 light:text-zinc-600 font-mono text-[11px]">
                             {formatJobDate(job)}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-zinc-900 text-zinc-300 border border-zinc-800">
-                              <CheckCircle2 className="w-3 h-3 text-zinc-400" /> APPLIED
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-200">
+                              <CheckCircle2 className="w-3 h-3 text-zinc-400 light:text-zinc-600" /> APPLIED
                             </span>
                           </td>
                         </tr>
@@ -2749,17 +2751,17 @@ export default function UserDashboard() {
               {/* Mobile Card View */}
               <div className="md:hidden divide-y divide-zinc-800/60">
                 {loadingHistory ? (
-                  <div className="py-12 text-center text-zinc-500 text-xs">
-                    <RefreshCw className="w-4 h-4 mx-auto animate-spin mb-2 text-zinc-400" />
+                  <div className="py-12 text-center text-zinc-500 light:text-zinc-600 text-xs">
+                    <RefreshCw className="w-4 h-4 mx-auto animate-spin mb-2 text-zinc-400 light:text-zinc-600" />
                     Loading applications...
                   </div>
                 ) : historyJobs.length === 0 ? (
                   <div className="p-8 text-center space-y-2">
-                    <Cpu className="w-5 h-5 text-zinc-400 mx-auto" />
-                    <h4 className="text-xs font-semibold text-white">
+                    <Cpu className="w-5 h-5 text-zinc-400 light:text-zinc-600 mx-auto" />
+                    <h4 className="text-xs font-semibold text-white light:text-zinc-900">
                       {historySearch ? 'No Results Found' : 'Engine Standing By'}
                     </h4>
-                    <p className="text-[11px] text-zinc-400">
+                    <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                       {historySearch
                         ? `No previous job applications match "${historySearch}".`
                         : 'Autonomous sweeps apply daily. Verified applications will appear here.'}
@@ -2774,25 +2776,25 @@ export default function UserDashboard() {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-400 light:text-zinc-600 shrink-0">
                             <Building2 className="w-3.5 h-3.5" />
                           </div>
                           <div className="min-w-0">
-                            <h4 className="text-xs font-semibold text-white truncate">
+                            <h4 className="text-xs font-semibold text-white light:text-zinc-900 truncate">
                               {job.company || 'Direct Employer'}
                             </h4>
-                            <p className="text-[11px] text-zinc-400 truncate">
+                            <p className="text-[11px] text-zinc-400 light:text-zinc-600 truncate">
                               {job.title || 'Job Opening'}
                             </p>
                           </div>
                         </div>
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-zinc-900 text-zinc-300 border border-zinc-800 shrink-0">
-                          <CheckCircle2 className="w-2.5 h-2.5 text-zinc-400" /> APPLIED
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-200 shrink-0">
+                          <CheckCircle2 className="w-2.5 h-2.5 text-zinc-400 light:text-zinc-600" /> APPLIED
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono pt-1">
+                      <div className="flex items-center justify-between text-[10px] text-zinc-500 light:text-zinc-600 font-mono pt-1">
                         <span>{formatJobDate(job)}</span>
-                        <span className="text-cyan-400 flex items-center gap-0.5 font-medium">
+                        <span className="text-cyan-400 light:text-cyan-600 flex items-center gap-0.5 font-medium">
                           Audit Receipt &rarr;
                         </span>
                       </div>
@@ -2802,8 +2804,8 @@ export default function UserDashboard() {
               </div>
 
               {/* Pagination */}
-              <div className="bg-black px-4 py-2.5 border-t border-zinc-800 flex items-center justify-between">
-                <span className="text-xs text-zinc-500">
+              <div className="bg-black light:bg-white px-4 py-2.5 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+                <span className="text-xs text-zinc-500 light:text-zinc-600">
                   Showing {historyJobs.length > 0 ? (historyPage - 1) * 20 + 1 : 0} to{' '}
                   {Math.min(historyPage * 20, historyTotalCount)} of {historyTotalCount}
                 </span>
@@ -2811,17 +2813,17 @@ export default function UserDashboard() {
                   <button
                     onClick={() => loadUserHistory(userId, historyPage - 1, historySearch, historyFilter)}
                     disabled={historyPage <= 1 || loadingHistory}
-                    className="px-3 py-1 rounded text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                    className="px-3 py-1 rounded text-xs font-medium bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 disabled:opacity-40 disabled:pointer-events-none transition-colors"
                   >
                     Previous
                   </button>
-                  <span className="text-xs text-zinc-500 font-mono px-1">
+                  <span className="text-xs text-zinc-500 light:text-zinc-600 font-mono px-1">
                     {historyPage} / {historyTotalPages}
                   </span>
                   <button
                     onClick={() => loadUserHistory(userId, historyPage + 1, historySearch, historyFilter)}
                     disabled={historyPage >= historyTotalPages || loadingHistory}
-                    className="px-3 py-1 rounded text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                    className="px-3 py-1 rounded text-xs font-medium bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 disabled:opacity-40 disabled:pointer-events-none transition-colors"
                   >
                     Next
                   </button>
@@ -2833,19 +2835,19 @@ export default function UserDashboard() {
 
         {/* TAB 2 (FALLBACK): CANDIDATE PROFILE & CREDENTIALS */}
         {activeTab === 'profile' && (
-          <div className="p-8 rounded-2xl bg-[#09090b] border border-zinc-800 text-center space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-300">
+          <div className="p-8 rounded-2xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 text-center space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center mx-auto text-zinc-300 light:text-zinc-700">
               <User className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-white">Candidate Profile & Credentials</h3>
-              <p className="text-xs text-zinc-400 mt-1 max-w-md mx-auto">
+              <h3 className="text-base font-semibold text-white light:text-zinc-900">Candidate Profile & Credentials</h3>
+              <p className="text-xs text-zinc-400 light:text-zinc-600 mt-1 max-w-md mx-auto">
                 Candidate Profile, Resume, and Portal Credentials are now managed on the dedicated Profile Settings page.
               </p>
             </div>
             <Link
               href="/profile"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors"
             >
               <span>Open Profile Settings Page</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -2871,15 +2873,15 @@ export default function UserDashboard() {
         {activeTab === 'queries' && (
           <div className="space-y-4">
             {/* Header / Summary Card */}
-            <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-teal-400 shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-teal-400 light:text-cyan-600 shrink-0">
                   <MessageSquare className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">My Support Requests & Inquiries</h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Direct communications with JobFlux Administrator (<span className="text-teal-300 font-mono">technohmsit@gmail.com</span>).
+                  <h3 className="text-sm font-semibold text-white light:text-zinc-900">My Support Requests & Inquiries</h3>
+                  <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
+                    Direct communications with JobFlux Administrator (<span className="text-teal-300 light:text-cyan-700 font-mono">technohmsit@gmail.com</span>).
                   </p>
                 </div>
               </div>
@@ -2887,7 +2889,7 @@ export default function UserDashboard() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => loadUserTickets(userId)}
-                  className="px-3 py-1.5 rounded-lg bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-lg bg-black light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
                   title="Refresh my requests"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${loadingUserTickets ? 'animate-spin' : ''}`} />
@@ -2895,7 +2897,7 @@ export default function UserDashboard() {
                 </button>
                 <button
                   onClick={() => setIsHelpOpen(true)}
-                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Submit New Query</span>
@@ -2905,24 +2907,24 @@ export default function UserDashboard() {
 
             {/* Queries List */}
             {loadingUserTickets ? (
-              <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 text-center text-zinc-400">
-                <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-teal-400" />
+              <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 text-center text-zinc-400 light:text-zinc-600">
+                <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-teal-400 light:text-cyan-600" />
                 <span>Loading your inquiries...</span>
               </div>
             ) : userTickets.length === 0 ? (
-              <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 text-center space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 mx-auto flex items-center justify-center text-zinc-500">
+              <div className="p-12 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 text-center space-y-3">
+                <div className="w-12 h-12 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 mx-auto flex items-center justify-center text-zinc-500 light:text-zinc-600">
                   <MessageSquare className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-white">No Inquiries Submitted</h4>
-                  <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1">
+                  <h4 className="text-sm font-semibold text-white light:text-zinc-900">No Inquiries Submitted</h4>
+                  <p className="text-xs text-zinc-500 light:text-zinc-600 max-w-sm mx-auto mt-1">
                     Have questions about your daily auto-runs, need profile optimization, or experiencing issues? Submit a request and our administrator will assist you directly.
                   </p>
                 </div>
                 <button
                   onClick={() => setIsHelpOpen(true)}
-                  className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-all cursor-pointer"
                 >
                   Submit a Query
                 </button>
@@ -2932,23 +2934,23 @@ export default function UserDashboard() {
                 {userTickets.map((t) => (
                   <div
                     key={t.ticket_id || t.id}
-                    className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 space-y-3 transition-colors hover:border-zinc-700"
+                    className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 light:border-zinc-200 space-y-3 transition-colors hover:border-zinc-700 light:hover:border-zinc-300"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-zinc-800/80">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-zinc-800/80 light:border-zinc-200">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs font-semibold text-white">
+                        <span className="font-mono text-xs font-semibold text-white light:text-zinc-900">
                           #{t.ticket_id}
                         </span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider ${
                           t.priority === 'urgent'
                             ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
                             : t.priority === 'high'
-                            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                            : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                            ? 'bg-amber-500/15 text-amber-400 light:text-amber-600 border border-amber-500/30'
+                            : 'bg-zinc-800 light:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300'
                         }`}>
                           {t.priority || 'normal'}
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-black border border-zinc-800 text-zinc-400">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600">
                           {t.category?.replace('_', ' ') || 'General'}
                         </span>
                       </div>
@@ -2956,26 +2958,26 @@ export default function UserDashboard() {
                       <div className="flex items-center gap-2">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
                           t.status === 'resolved'
-                            ? 'bg-zinc-800 text-zinc-200 border border-zinc-700'
+                            ? 'bg-zinc-800 light:bg-zinc-200 text-zinc-200 light:text-zinc-800 border border-zinc-700 light:border-zinc-300'
                             : t.status === 'in_progress'
-                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                            ? 'bg-amber-500/10 text-amber-400 light:text-amber-600 border border-amber-500/30'
                             : t.status === 'closed'
-                            ? 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                            ? 'bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300'
                             : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
                         }`}>
                           {t.status === 'resolved' && <CheckCircle2 className="w-3 h-3" />}
                           {t.status === 'in_progress' && <RefreshCw className="w-3 h-3 animate-spin" />}
                           {t.status?.replace('_', ' ') || 'Open'}
                         </span>
-                        <span className="text-[10px] font-mono text-zinc-500">
+                        <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
                           {formatTimestamp(t.created_at)}
                         </span>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-semibold text-white mb-1">{t.subject}</h4>
-                      <p className="text-xs text-zinc-300 leading-relaxed bg-black/60 p-3 rounded-lg border border-zinc-800/80">
+                      <h4 className="text-xs font-semibold text-white light:text-zinc-900 mb-1">{t.subject}</h4>
+                      <p className="text-xs text-zinc-300 light:text-zinc-700 leading-relaxed bg-black/60 p-3 rounded-lg border border-zinc-800/80 light:border-zinc-200">
                         {t.message}
                       </p>
                     </div>
@@ -2984,23 +2986,23 @@ export default function UserDashboard() {
                     {t.admin_response ? (
                       <div className="p-3 rounded-lg bg-teal-950/20 border border-teal-800/40 space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-semibold text-teal-300 flex items-center gap-1.5">
-                            <Shield className="w-3 h-3 text-teal-400" />
+                          <span className="font-semibold text-teal-300 light:text-cyan-700 flex items-center gap-1.5">
+                            <Shield className="w-3 h-3 text-teal-400 light:text-cyan-600" />
                             Administrator Response (technohmsit@gmail.com)
                           </span>
                           {t.resolved_at && (
-                            <span className="text-[10px] font-mono text-teal-400">
+                            <span className="text-[10px] font-mono text-teal-400 light:text-cyan-600">
                               {formatTimestamp(t.resolved_at)}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-zinc-200 whitespace-pre-wrap font-sans leading-relaxed">
+                        <p className="text-xs text-zinc-200 light:text-zinc-800 whitespace-pre-wrap font-sans leading-relaxed">
                           {t.admin_response}
                         </p>
                       </div>
                     ) : (
-                      <div className="text-[11px] text-zinc-500 flex items-center gap-1.5">
-                        <Clock className="w-3 h-3 text-zinc-500" />
+                      <div className="text-[11px] text-zinc-500 light:text-zinc-600 flex items-center gap-1.5">
+                        <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600" />
                         <span>Awaiting Administrator review. Updates will appear here and in your inbox.</span>
                       </div>
                     )}
@@ -3015,7 +3017,7 @@ export default function UserDashboard() {
         <div className="block md:hidden p-4 rounded-2xl bg-[#0a0a0c] border border-zinc-800/90 shadow-xl space-y-3.5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-white text-xs shrink-0 relative overflow-hidden">
+              <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center font-bold text-white light:text-zinc-900 text-xs shrink-0 relative overflow-hidden">
                 {userPicture ? (
                   <img src={userPicture} alt={userName || 'Candidate'} className="w-full h-full object-cover" onError={() => setUserPicture('')} />
                 ) : (
@@ -3025,16 +3027,16 @@ export default function UserDashboard() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-xs font-bold text-white truncate max-w-[140px]">{userName || 'Candidate'}</span>
+                  <span className="text-xs font-bold text-white light:text-zinc-900 truncate max-w-[140px]">{userName || 'Candidate'}</span>
                   {(isVip || userPlan === 'vip') ? (
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold">VIP</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 light:text-amber-700 font-bold">VIP</span>
                   ) : isProfessional ? (
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold">PRO</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 font-bold">PRO</span>
                   ) : (
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-semibold">{userPlan ? userPlan.toUpperCase() : 'FREE'}</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 font-semibold">{userPlan ? userPlan.toUpperCase() : 'FREE'}</span>
                   )}
                 </div>
-                <p className="text-[11px] text-zinc-400 font-mono truncate">{userEmail}</p>
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono truncate">{userEmail}</p>
               </div>
             </div>
           </div>
@@ -3043,7 +3045,7 @@ export default function UserDashboard() {
             <button
               type="button"
               onClick={() => setIsReviewModalOpen(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-medium text-xs transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 light:text-amber-700 font-medium text-xs transition-colors cursor-pointer"
             >
               <Star className="w-3.5 h-3.5 fill-amber-400" />
               <span>Rate &amp; Review Your Experience</span>
@@ -3052,15 +3054,15 @@ export default function UserDashboard() {
             <div className="grid grid-cols-2 gap-2">
               <Link
                 href="/profile"
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-200 font-medium text-xs transition-colors"
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-850 border border-zinc-800 light:border-zinc-200 text-zinc-200 light:text-zinc-800 font-medium text-xs transition-colors"
               >
-                <User className="w-3.5 h-3.5 text-zinc-400" />
+                <User className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />
                 <span>Profile Settings</span>
               </Link>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-medium text-xs transition-colors cursor-pointer"
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 light:text-red-600 font-medium text-xs transition-colors cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5 text-red-400" />
                 <span>Sign Out</span>
@@ -3072,60 +3074,60 @@ export default function UserDashboard() {
         {/* AI Application Audit Receipt Modal */}
         {selectedJobAudit && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-black/80 light:bg-white/85 backdrop-blur-sm"
             onClick={() => setSelectedJobAudit(null)}
           >
             <div
-              className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#09090b] border border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5"
+              className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#09090b] border border-zinc-800 light:border-zinc-200 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-start justify-between pb-3 border-b border-zinc-800">
+              <div className="flex items-start justify-between pb-3 border-b border-zinc-800 light:border-zinc-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
                     <FileCheck className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-white">Application Delivery Receipt</h3>
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium">
+                      <h3 className="text-sm font-semibold text-white light:text-zinc-900">Application Delivery Receipt</h3>
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 font-medium">
                         Verified
                       </span>
                     </div>
-                    <p className="text-[11px] text-zinc-500 font-mono">
+                    <p className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">
                       JFX-{(selectedJobAudit._id || selectedJobAudit.id || '9842').toString().slice(-8).toUpperCase()}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedJobAudit(null)}
-                  className="p-1 rounded-lg text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                  className="p-1 rounded-lg text-zinc-500 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Target Opening Details */}
-              <div className="p-3.5 rounded-xl bg-black border border-zinc-800 space-y-1">
-                <div className="text-[10px] uppercase font-mono text-zinc-500">Target Position</div>
-                <div className="text-sm font-medium text-white">{selectedJobAudit.title || 'Job Opening'}</div>
-                <div className="text-xs text-zinc-400 flex items-center gap-1.5">
-                  <Building2 className="w-3 h-3 text-zinc-500" />
+              <div className="p-3.5 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-1">
+                <div className="text-[10px] uppercase font-mono text-zinc-500 light:text-zinc-600">Target Position</div>
+                <div className="text-sm font-medium text-white light:text-zinc-900">{selectedJobAudit.title || 'Job Opening'}</div>
+                <div className="text-xs text-zinc-400 light:text-zinc-600 flex items-center gap-1.5">
+                  <Building2 className="w-3 h-3 text-zinc-500 light:text-zinc-600" />
                   {selectedJobAudit.company || 'Verified Employer'}
                 </div>
               </div>
 
               {/* Delivery Metrics */}
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-black border border-zinc-800">
-                  <span className="text-[10px] uppercase font-mono text-zinc-500 block mb-1">Resume Fit</span>
-                  <div className="text-sm font-semibold text-white flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> 96% Match
+                <div className="p-3 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200">
+                  <span className="text-[10px] uppercase font-mono text-zinc-500 light:text-zinc-600 block mb-1">Resume Fit</span>
+                  <div className="text-sm font-semibold text-white light:text-zinc-900 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" /> 96% Match
                   </div>
                 </div>
-                <div className="p-3 rounded-xl bg-black border border-zinc-800">
-                  <span className="text-[10px] uppercase font-mono text-zinc-500 block mb-1">Dispatched</span>
-                  <div className="text-xs font-mono font-medium text-white mt-0.5">
+                <div className="p-3 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200">
+                  <span className="text-[10px] uppercase font-mono text-zinc-500 light:text-zinc-600 block mb-1">Dispatched</span>
+                  <div className="text-xs font-mono font-medium text-white light:text-zinc-900 mt-0.5">
                     {formatJobDate(selectedJobAudit)}
                   </div>
                 </div>
@@ -3133,21 +3135,21 @@ export default function UserDashboard() {
 
               {/* Screening Answers */}
               <div className="space-y-2">
-                <span className="text-[10px] uppercase font-mono text-zinc-500 block">
+                <span className="text-[10px] uppercase font-mono text-zinc-500 light:text-zinc-600 block">
                   Screening Responses Submitted by AI Engine
                 </span>
                 <div className="space-y-1.5 text-xs">
-                  <div className="p-2.5 rounded-lg bg-black border border-zinc-800/80 flex items-center justify-between">
-                    <span className="text-zinc-500">Notice Period:</span>
-                    <span className="font-medium text-zinc-200">Immediate / 15 Days</span>
+                  <div className="p-2.5 rounded-lg bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center justify-between">
+                    <span className="text-zinc-500 light:text-zinc-600">Notice Period:</span>
+                    <span className="font-medium text-zinc-200 light:text-zinc-800">Immediate / 15 Days</span>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-black border border-zinc-800/80 flex items-center justify-between">
-                    <span className="text-zinc-500">Relocation:</span>
-                    <span className="font-medium text-zinc-200">Open to Relocation</span>
+                  <div className="p-2.5 rounded-lg bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center justify-between">
+                    <span className="text-zinc-500 light:text-zinc-600">Relocation:</span>
+                    <span className="font-medium text-zinc-200 light:text-zinc-800">Open to Relocation</span>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-black border border-zinc-800/80 flex items-center justify-between">
-                    <span className="text-zinc-500">Compensation:</span>
-                    <span className="font-medium text-zinc-200">Negotiable / Standard</span>
+                  <div className="p-2.5 rounded-lg bg-black light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center justify-between">
+                    <span className="text-zinc-500 light:text-zinc-600">Compensation:</span>
+                    <span className="font-medium text-zinc-200 light:text-zinc-800">Negotiable / Standard</span>
                   </div>
                 </div>
               </div>
@@ -3159,7 +3161,7 @@ export default function UserDashboard() {
                     href={selectedJobAudit.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                    className="flex-1 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
                   >
                     <span>View Portal Opening</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -3171,16 +3173,16 @@ export default function UserDashboard() {
                       setProModalFeature('Job Redirect URL Access')
                       setShowProModal(true)
                     }}
-                    className="flex-1 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-cyan-500/40 hover:border-cyan-500/70 text-cyan-300 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    className="flex-1 py-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-cyan-500/40 light:border-cyan-300 hover:border-cyan-500/70 text-cyan-300 light:text-cyan-700 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
                     <Lock className="w-3.5 h-3.5" />
                     <span>View Portal Opening</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-700/50 text-cyan-300">PRO</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 light:bg-cyan-50 border border-cyan-700/50 light:border-cyan-300 text-cyan-300 light:text-cyan-700">PRO</span>
                   </button>
                 )}
                 <button
                   onClick={() => setSelectedJobAudit(null)}
-                  className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-200 text-xs font-medium transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -3197,14 +3199,14 @@ export default function UserDashboard() {
         <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full p-4 rounded-2xl bg-[#0d0f17]/95 border-2 border-amber-400 shadow-[0_15px_40px_rgba(0,0,0,0.85)] backdrop-blur-md animate-in slide-in-from-bottom-5">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
-                <Sparkles className="w-4 h-4 text-amber-300" />
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 light:text-amber-600 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+                <Sparkles className="w-4 h-4 text-amber-300 light:text-amber-700" />
               </div>
               <div>
-                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                <div className="text-xs font-bold text-white light:text-zinc-900 flex items-center gap-1.5">
                   <span>{inAppToast.title}</span>
                 </div>
-                <p className="text-[11px] text-zinc-300 mt-1 leading-relaxed">
+                <p className="text-[11px] text-zinc-300 light:text-zinc-700 mt-1 leading-relaxed">
                   {inAppToast.message}
                 </p>
                 {inAppToast.claim_url && (
@@ -3222,7 +3224,7 @@ export default function UserDashboard() {
             <button
               type="button"
               onClick={() => dismissToast(inAppToast.id)}
-              className="p-1 rounded-md text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="p-1 rounded-md text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors cursor-pointer"
               title="Dismiss alert"
             >
               <X className="w-4 h-4" />
