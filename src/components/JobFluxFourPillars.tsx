@@ -25,7 +25,7 @@ export default function JobFluxFourPillars({
 
         <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white light:text-zinc-900 tracking-tight leading-tight">
           The Unfair Advantage Ambitious <br className="hidden sm:inline" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-sky-300">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-sky-300 light:from-amber-600 light:via-amber-500 light:to-cyan-600">
             Tech Professionals Rely On.
           </span>
         </h2>
@@ -153,7 +153,7 @@ export default function JobFluxFourPillars({
       </div>
 
       {/* High-Impact Call to Action Banner */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-2xl">
+      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 light:from-zinc-100 light:via-white light:to-zinc-100 border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-2xl">
         <div className="space-y-1.5">
           <h3 className="text-lg sm:text-xl font-bold text-white light:text-zinc-900">
             Ready to experience 100% hands-free job applications?

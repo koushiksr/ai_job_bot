@@ -69,7 +69,7 @@ export default function HeroCareerLeapWidget({
   const calculatedOpenings = roleInfo.baseOpenings + expInfo.openingsBonus
 
   return (
-    <div className="w-full rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b]/90 backdrop-blur-xl p-5 sm:p-7 shadow-2xl relative overflow-hidden">
+    <div className="w-full rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b]/90 light:bg-white backdrop-blur-xl p-5 sm:p-7 shadow-2xl relative overflow-hidden">
       {/* Top subtle glow accent */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-500/50 to-transparent pointer-events-none" />
 

@@ -53,7 +53,7 @@ export default function HomeInteractiveToolsCard({
   }
 
   return (
-    <div className="w-full rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b]/90 backdrop-blur-xl p-5 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden card-featured-glow">
+    <div className="w-full rounded-2xl border border-zinc-800 light:border-zinc-200 bg-[#09090b]/90 light:bg-white backdrop-blur-xl p-5 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden card-featured-glow">
       {/* Subtle top border accent */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent pointer-events-none" />
 

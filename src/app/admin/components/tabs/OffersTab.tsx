@@ -320,7 +320,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
       )}
 
       {/* Sticky Metrics Overview Bar */}
-      <div className="sticky top-2 z-20 backdrop-blur-xl bg-[#09090b]/90 p-3 rounded-2xl border border-zinc-800 light:border-zinc-200 shadow-2xl transition-all space-y-2">
+      <div className="sticky top-2 z-20 backdrop-blur-xl bg-[#09090b]/90 light:bg-white p-3 rounded-2xl border border-zinc-800 light:border-zinc-200 shadow-2xl transition-all space-y-2">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />

@@ -3196,7 +3196,7 @@ export default function UserDashboard() {
 
       {/* Real-time In-App Candidate Promotional Offer Alert Toast */}
       {inAppToast && (
-        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full p-4 rounded-2xl bg-[#0d0f17]/95 border-2 border-amber-400 shadow-[0_15px_40px_rgba(0,0,0,0.85)] backdrop-blur-md animate-in slide-in-from-bottom-5">
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full p-4 rounded-2xl bg-[#0d0f17]/95 light:bg-white border-2 border-amber-400 shadow-[0_15px_40px_rgba(0,0,0,0.85)] backdrop-blur-md animate-in slide-in-from-bottom-5">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 light:text-amber-600 shrink-0 shadow-[0_0_10px_rgba(245,158,11,0.3)]">

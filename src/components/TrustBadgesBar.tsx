@@ -40,7 +40,7 @@ export default function TrustBadgesBar() {
         </div>
         <h3 className="text-xl sm:text-3xl font-bold text-white light:text-zinc-900 tracking-tight">
           Built for Senior Tech Engineers. <br className="hidden sm:inline" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 light:from-emerald-600 light:via-cyan-600 light:to-indigo-600">
             Guaranteed 100% Safe &amp; Confidential.
           </span>
         </h3>
