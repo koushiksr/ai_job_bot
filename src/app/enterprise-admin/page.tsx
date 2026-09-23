@@ -299,7 +299,7 @@ export default function EnterpriseAdminPortal() {
           : '.'
         setFeedback({
           type: 'success',
-          text: `🚀 Live on-demand sweep dispatched for ${member.name || member.email}! Position #${data.queue_position} in line${usageNote} Follow Live Log — its final summary states exactly what happened.`
+          text: `Live on-demand sweep dispatched for ${member.name || member.email}! Position #${data.queue_position} in line${usageNote} Follow Live Log — its final summary states exactly what happened.`
         })
         loadAllPortalData()
       } else {
@@ -443,7 +443,7 @@ export default function EnterpriseAdminPortal() {
         setInviteEmail('')
         setFeedback({
           type: 'success',
-          text: `🎉 Invitation sent to ${cleanEmail}! When they log in, an Enterprise acceptance banner will appear on their dashboard.`
+          text: `Invitation sent to ${cleanEmail}! When they log in, an Enterprise acceptance banner will appear on their dashboard.`
         })
         loadAllPortalData()
       } else {
@@ -497,7 +497,7 @@ export default function EnterpriseAdminPortal() {
       if (res.ok) {
         setOrg(prev => prev ? { ...prev, name: trimmedName } : prev)
         setEditingOrgName(false)
-        setFeedback({ type: 'success', text: `✅ Organisation renamed to "${trimmedName}" successfully!` })
+        setFeedback({ type: 'success', text: `Organisation renamed to "${trimmedName}" successfully!` })
       } else {
         setFeedback({ type: 'error', text: data.detail || 'Failed to update org name.' })
       }
@@ -526,7 +526,7 @@ export default function EnterpriseAdminPortal() {
       const data = await res.json()
       if (res.ok) {
         setOrg(prev => prev ? { ...prev, daily_sweep_time: t } : prev)
-        setFeedback({ type: 'success', text: `✅ Daily sweep time set to ${t} IST. All members queue one-by-one from that time each day.` })
+        setFeedback({ type: 'success', text: `Daily sweep time set to ${t} IST. All members queue one-by-one from that time each day.` })
       } else {
         setFeedback({ type: 'error', text: data.detail || 'Failed to update sweep time.' })
       }
@@ -545,26 +545,26 @@ export default function EnterpriseAdminPortal() {
   )
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div className="min-h-screen bg-black text-white selection:bg-cyan-500/30 selection:text-cyan-200">
       {/* Ambient Cyber Aurora Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 left-1/3 w-[600px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px]" />
+        <div className="absolute -top-40 left-1/3 w-[600px] h-[500px] bg-cyan-600/10 rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[140px]" />
       </div>
 
       {/* Top Navigation Bar */}
       <header className="sticky top-0 z-30 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 border border-indigo-400/30">
-              <Building2 className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-cyan-300" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm sm:text-base text-white tracking-tight">
                   {org?.name || 'Technohm SIT Org'}
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-800/60 text-indigo-300 font-semibold uppercase">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60 text-cyan-300 font-semibold uppercase">
                   Enterprise Portal
                 </span>
               </div>
@@ -615,7 +615,7 @@ export default function EnterpriseAdminPortal() {
                 ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
                 : feedback.type === 'error'
                   ? 'bg-rose-950/40 border-rose-800/60 text-rose-300'
-                  : 'bg-indigo-950/40 border-indigo-800/60 text-indigo-300'
+                  : 'bg-cyan-950/40 border-cyan-800/60 text-cyan-300'
             }`}
           >
             <div className="flex items-center gap-2">
@@ -655,7 +655,7 @@ export default function EnterpriseAdminPortal() {
         {/* Compact KPI Strip */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
           <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
-            <Users className="w-4 h-4 text-indigo-400 shrink-0" />
+            <Users className="w-4 h-4 text-cyan-400 shrink-0" />
             <div className="min-w-0">
               <div className="text-lg font-bold font-mono text-white leading-none">
                 {metrics?.total_members || members.length}
@@ -679,9 +679,9 @@ export default function EnterpriseAdminPortal() {
           </div>
 
           <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 flex items-center gap-2.5">
-            <Layers className="w-4 h-4 text-purple-400 shrink-0" />
+            <Layers className="w-4 h-4 text-cyan-400 shrink-0" />
             <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-purple-300 leading-none">
+              <div className="text-lg font-bold font-mono text-cyan-300 leading-none">
                 {metrics?.applied_this_week || 0}
               </div>
               <div className="text-[10px] text-zinc-500 font-mono truncate">
@@ -721,7 +721,7 @@ export default function EnterpriseAdminPortal() {
             {/* Org name + daily sweep time */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                <Building2 className="w-4 h-4 text-cyan-400 shrink-0" />
                 {editingOrgName ? (
                   <>
                     <input
@@ -729,14 +729,14 @@ export default function EnterpriseAdminPortal() {
                       value={orgNameInput}
                       onChange={e => setOrgNameInput(e.target.value)}
                       placeholder="Organisation name..."
-                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-indigo-700 focus:border-indigo-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-cyan-700 focus:border-cyan-500 focus:outline-none text-xs text-white placeholder-zinc-500"
                       autoFocus
                       onKeyDown={e => { if (e.key === 'Enter') handleSaveOrgName(); if (e.key === 'Escape') setEditingOrgName(false) }}
                     />
                     <button
                       onClick={handleSaveOrgName}
                       disabled={orgNameSaving}
-                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
+                      className="px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       {orgNameSaving ? 'Saving...' : 'Save'}
@@ -796,18 +796,18 @@ export default function EnterpriseAdminPortal() {
 
             {/* Invite */}
             <form onSubmit={handleSendInvite} className="flex items-center gap-2">
-              <Plus className="w-4 h-4 text-indigo-400 shrink-0" />
+              <Plus className="w-4 h-4 text-cyan-400 shrink-0" />
               <input
                 type="email"
                 value={inviteEmail}
                 onChange={e => setInviteEmail(e.target.value)}
                 placeholder="candidate@email.com — invite to org"
-                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-indigo-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-cyan-500 focus:outline-none text-xs text-white placeholder-zinc-500"
               />
               <button
                 type="submit"
                 disabled={inviteSubmitting}
-                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{inviteSubmitting ? 'Sending...' : 'Invite'}</span>
@@ -856,7 +856,7 @@ export default function EnterpriseAdminPortal() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Users className="w-4 h-4 text-indigo-400" />
+                <Users className="w-4 h-4 text-cyan-400" />
                 <span>Organization Candidates &amp; Automation Controls</span>
               </h3>
               <p className="text-xs text-zinc-400 mt-0.5">
@@ -871,7 +871,7 @@ export default function EnterpriseAdminPortal() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search member or email..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 focus:border-indigo-500 focus:outline-none text-xs text-white placeholder-zinc-500"
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 focus:border-cyan-500 focus:outline-none text-xs text-white placeholder-zinc-500"
               />
             </div>
           </div>
@@ -920,7 +920,7 @@ export default function EnterpriseAdminPortal() {
                         {/* Role & Plan */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-800/50 font-semibold">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/50 font-semibold">
                               {member.enterprise_role === 'admin' ? 'Org Admin' : 'Org Member'}
                             </span>
                             <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${
@@ -957,7 +957,7 @@ export default function EnterpriseAdminPortal() {
 
                         {/* On-Demand Usage */}
                         <td className="py-3.5 px-4 text-center">
-                          <span className="font-mono text-purple-300 font-semibold">
+                          <span className="font-mono text-cyan-300 font-semibold">
                             {member.on_demand_runs_used}
                           </span>
                           <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || 10} week</span>
@@ -1057,14 +1057,14 @@ export default function EnterpriseAdminPortal() {
                               <button
                                 onClick={() => handleTriggerOnDemand(member)}
                                 disabled={isProcessing || !isEnabled || org?.status === 'disabled'}
-                                className="px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 text-indigo-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
+                                className="px-2.5 py-1 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 text-cyan-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
                                 title={
                                   org?.status === 'disabled'
                                     ? 'Org is disabled by Super Admin — all runs are blocked'
                                     : `Dispatch instant on-demand sweep (${member.applied_today || 0}/55 used today — run tops up the rest from newly posted jobs)`
                                 }
                               >
-                                <Zap className="w-3 h-3 text-indigo-400" />
+                                <Zap className="w-3 h-3 text-cyan-400" />
                                 <span>On-Demand</span>
                               </button>
                             )}
