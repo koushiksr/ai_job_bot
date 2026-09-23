@@ -38,7 +38,7 @@ import FuturisticHeroCockpit from '@/components/FuturisticHeroCockpit'
 import EmployerProofMarquee from '@/components/EmployerProofMarquee'
 import TrustBadgesBar from '@/components/TrustBadgesBar'
 import Footer from '@/components/Footer'
-import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
+import { validatedIdentity } from '@/lib/sessionClient'
 import { trackSignUp } from '@/lib/tracker'
 
 const FAQS = [
@@ -142,14 +142,14 @@ export default function Home() {
     }, 400)
   }
 
-  // Check if already logged in -> auto navigate to dashboard
+  // Check if already logged in -> auto navigate to dashboard.
+  // Only with a server-validated session: stale localStorage alone used to
+  // bounce users between pages. Show the landing page until verified.
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUid = localStorage.getItem('user_id')
-      const storedEmail = localStorage.getItem('user_email') || ''
-      const storedRole = localStorage.getItem('user_role') || 'user'
-
-      if (storedUid) {
+      validatedIdentity().then(ident => {
+        if (!ident) return
+        const { uid: storedUid, email: storedEmail, role: storedRole } = ident
         setExistingUser({ id: storedUid, email: storedEmail, role: storedRole })
         // If already logged in, navigate directly based on role
         if (storedRole === 'admin' || storedUid === 'technohmsit' || storedEmail === 'technohmsit@gmail.com') {
@@ -159,8 +159,7 @@ export default function Home() {
         } else {
           window.location.replace('/dashboard')
         }
-        return
-      }
+      })
 
       const p = new URLSearchParams(window.location.search)
       const modeParam = p.get('mode')

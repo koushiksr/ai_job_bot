@@ -14,7 +14,7 @@ import {
   Building2
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
-import { APP_CONFIG } from '@/config/appConfig'
+import { validatedIdentity } from '@/lib/sessionClient'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -24,13 +24,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Redirect if already logged in
+  // Redirect only with a server-validated session (stale localStorage alone
+  // used to bounce users dashboard -> profile -> login -> dashboard).
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const uid = localStorage.getItem('user_id')
-      const role = localStorage.getItem('user_role') || 'user'
-      const storedEmail = localStorage.getItem('user_email') || ''
-      if (uid) {
+      validatedIdentity().then(ident => {
+        if (!ident) return
+        const { uid, role, email: storedEmail } = ident
         if (role === 'admin' || uid === 'technohmsit') {
           window.location.replace('/admin')
         } else if (role === 'enterprise_admin' || storedEmail === 'koushiksrmedala@gmail.com') {
@@ -38,7 +38,7 @@ export default function LoginPage() {
         } else {
           window.location.replace('/dashboard')
         }
-      }
+      })
 
       // Pre-fill error from URL
       const p = new URLSearchParams(window.location.search)
