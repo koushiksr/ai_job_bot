@@ -2,37 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { findActivePaymentForEmail, syncUserPaymentPlan } from '@/lib/paymentSync'
-import { APP_CONFIG } from '@/config/appConfig'
 import { issueSession } from '@/lib/session'
 import { exactMatchCI } from '@/lib/query'
+import { findProfileByEmail, ensureTechnohmProfile, resolveGoogleRole } from '@/lib/googleAuth'
 
 export const dynamic = 'force-dynamic'
-
-export async function GET() {
-  try {
-    const db = await getDb()
-    if (!db) {
-      return NextResponse.json({ accounts: [] }, { status: 200 })
-    }
-    const profiles = await db.collection('profiles')
-      .find({}, { projection: { user_id: 1, email: 1, name: 1, plan: 1, _id: 0 } })
-      .limit(10)
-      .toArray()
-
-    return NextResponse.json({
-      accounts: profiles
-        .filter(p => p.email)
-        .map(p => ({
-          user_id: p.user_id,
-          email: p.email,
-          name: p.name || p.user_id.replace(/^candidate\d+_/, '').replace(/_/g, ' '),
-          plan: p.plan || 'trial'
-        }))
-    })
-  } catch (err: any) {
-    return NextResponse.json({ accounts: [] }, { status: 200 })
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -78,40 +52,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Check if user already exists
-    let profile: any = await db.collection('users').findOne({
-      email: exactMatchCI(emailClean)
-    }) || await db.collection('profiles').findOne({
-      email: exactMatchCI(emailClean)
-    })
+    let profile: any = await findProfileByEmail(db, emailClean)
 
     const now = new Date()
 
     if (emailClean === 'technohmsit@gmail.com') {
-      if (!profile) {
-        profile = {
-          user_id: 'technohmsit',
-          name: name || 'Technohm SIT Administrator',
-          email: 'technohmsit@gmail.com',
-          role: 'admin',
-          plan: 'trial',
-          plan_name: 'JobFlux 3-Day Free Access',
-          created_at: now,
-          updated_at: now
-        }
-      } else {
-        profile.user_id = 'technohmsit'
-        profile.role = 'admin'
-      }
-      await db.collection('profiles').updateOne(
-        { email: { $regex: '^technohmsit@gmail\\.com$', $options: 'i' } },
-        { $set: { role: 'admin', user_id: 'technohmsit' } },
-        { upsert: true }
-      )
-      await db.collection('users').updateOne(
-        { email: { $regex: '^technohmsit@gmail\\.com$', $options: 'i' } },
-        { $set: { role: 'admin', user_id: 'technohmsit' } },
-        { upsert: true }
-      )
+      profile = await ensureTechnohmProfile(db, profile, name, now)
     }
 
     if (!profile) {
@@ -214,29 +160,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Failed to find or create profile.' }, { status: 500 })
     }
 
-    const isSuperAdmin = (
-      (emailClean === 'technohmsit@gmail.com' || profile.user_id === 'technohmsit') &&
-      profile.role === 'admin'
-    )
-
-    // Enterprise Admin designation (mirror of password + redirect OAuth flows)
-    const orgAsAdmin = await db.collection('enterprise_orgs').findOne({
-      $or: [
-        { admin_email: exactMatchCI(emailClean) },
-        { admin_user_id: profile.user_id }
-      ]
-    })
-    const isEntAdmin =
-      APP_CONFIG.enterpriseAdminEmails.map(e => e.toLowerCase()).includes(emailClean) ||
-      Boolean(orgAsAdmin) ||
-      profile.enterprise_role === 'admin'
-
-    let role = 'user'
-    if (isSuperAdmin) {
-      role = 'admin'
-    } else if (isEntAdmin) {
-      role = 'enterprise_admin'
+    if (!profile) {
+      return NextResponse.json({ detail: 'Failed to find or create profile.' }, { status: 500 })
     }
+
+    const { role, isSuperAdmin, isEntAdmin, orgAsAdmin } = await resolveGoogleRole(db, profile, emailClean)
     const enterpriseOrgId = profile.enterprise_org_id || orgAsAdmin?.org_id || (isEntAdmin ? 'org_technohmsit' : null)
 
     // Log Google GIS sign-in activity

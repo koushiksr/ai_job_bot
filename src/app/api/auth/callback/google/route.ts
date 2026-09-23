@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { issueSession } from '@/lib/session'
-import { exactMatchCI } from '@/lib/query'
+import { getGoogleOAuthConfig, findProfileByEmail, ensureTechnohmProfile, resolveGoogleRole } from '@/lib/googleAuth'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,18 +16,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL(`/?error=${msg}`, req.url))
   }
 
-  const clientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET
-
-  if (!clientId || !clientSecret) {
-    const msg = encodeURIComponent('Server configuration error: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET missing.')
+  let clientId: string
+  let clientSecret: string
+  let redirectUri: string
+  try {
+    const cfg = getGoogleOAuthConfig(req)
+    clientId = cfg.clientId
+    clientSecret = cfg.clientSecret
+    redirectUri = cfg.redirectUri
+  } catch (e: any) {
+    const msg = encodeURIComponent(e.message || 'Google OAuth is not configured.')
     return NextResponse.redirect(new URL(`/?error=${msg}`, req.url))
   }
-
-  const forwardedProto = req.headers.get('x-forwarded-proto') || 'https'
-  const host = req.headers.get('host') || 'jobfluxai.vercel.app'
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || `${forwardedProto}://${host}`).replace(/\/+$/, '')
-  const redirectUri = `${appUrl}/api/auth/callback/google`
 
   try {
     // 1. Exchange authorization code with Google for tokens
@@ -68,40 +68,12 @@ export async function GET(req: NextRequest) {
       throw new Error('Database connection failed.')
     }
 
-    let profile: any = await db.collection('users').findOne({
-      email: exactMatchCI(emailClean)
-    }) || await db.collection('profiles').findOne({
-      email: exactMatchCI(emailClean)
-    })
+    let profile: any = await findProfileByEmail(db, emailClean)
 
     const now = new Date()
 
     if (emailClean === 'technohmsit@gmail.com') {
-      if (!profile) {
-        profile = {
-          user_id: 'technohmsit',
-          name: name || 'Technohm SIT Administrator',
-          email: 'technohmsit@gmail.com',
-          role: 'admin',
-          plan: 'trial',
-          plan_name: 'JobFlux 3-Day Free Access',
-          created_at: now,
-          updated_at: now
-        }
-      } else {
-        profile.user_id = 'technohmsit'
-        profile.role = 'admin'
-      }
-      await db.collection('profiles').updateOne(
-        { email: { $regex: '^technohmsit@gmail\\.com$', $options: 'i' } },
-        { $set: { role: 'admin', user_id: 'technohmsit' } },
-        { upsert: true }
-      )
-      await db.collection('users').updateOne(
-        { email: { $regex: '^technohmsit@gmail\\.com$', $options: 'i' } },
-        { $set: { role: 'admin', user_id: 'technohmsit' } },
-        { upsert: true }
-      )
+      profile = await ensureTechnohmProfile(db, profile, name, now)
     }
 
     if (!profile) {
@@ -181,33 +153,9 @@ export async function GET(req: NextRequest) {
       profile.picture = picture
     }
 
-    // 4. Determine user role and redirect path
-    const isSuperAdmin = (
-      (emailClean === 'technohmsit@gmail.com' || profile.user_id === 'technohmsit') &&
-      profile.role === 'admin'
-    )
-
-    const isEntAdmin = (
-      emailClean === 'koushiksrmedala@gmail.com' ||
-      profile.enterprise_role === 'admin' ||
-      (await db.collection('enterprise_orgs').findOne({
-        $or: [
-          { admin_email: exactMatchCI(emailClean) },
-          { admin_user_id: profile.user_id }
-        ]
-      }))
-    )
-
-    let role = 'user'
-    let redirectPath = '/dashboard'
-
-    if (isSuperAdmin) {
-      role = 'admin'
-      redirectPath = '/admin'
-    } else if (isEntAdmin) {
-      role = 'enterprise_admin'
-      redirectPath = '/enterprise-admin'
-    }
+    // 4. Determine user role and redirect path (shared Google role mapping)
+    const { role, isSuperAdmin, isEntAdmin } = await resolveGoogleRole(db, profile, emailClean)
+    const redirectPath = role === 'admin' ? '/admin' : role === 'enterprise_admin' ? '/enterprise-admin' : '/dashboard'
 
     // Log Google OAuth Redirect login activity
     const { ip, userAgent } = getClientInfo(req)
