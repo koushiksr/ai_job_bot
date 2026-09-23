@@ -32,7 +32,8 @@ import {
   Radio,
   Coffee,
   Zap,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react'
 import ProfileSaveCelebrationModal from '@/components/ProfileSaveCelebrationModal'
 
@@ -141,6 +142,38 @@ export default function CandidateProfileEditor({
 
   // Advanced Raw JSON View
   const [showRawJson, setShowRawJson] = useState<boolean>(false)
+  const [activeStep, setActiveStep] = useState<number>(0)
+
+  // Guided setup steps (one section visible at a time — clean & simple)
+  const STEPS = [
+    { title: 'Resume', hint: 'Step 1 of 7 — Upload your resume PDF; AI extracts details and attaches it to applications.' },
+    { title: 'Account', hint: 'Step 2 of 7 — Your identity and Naukri login for automated applying.' },
+    { title: 'Experience & Pay', hint: 'Step 3 of 7 — Tenure, current company and CTC figures recruiters ask for.' },
+    { title: 'Job Preferences', hint: 'Step 4 of 7 — Roles, locations and skills the bot hunts for.' },
+    { title: 'Screening Answers', hint: 'Step 5 of 7 — How the bot answers recruiter screening questions as you.' },
+    { title: 'Work History', hint: 'Step 6 of 7 — Employers plus companies to never apply to.' },
+    { title: 'Review & Launch', hint: 'Step 7 of 7 — Automation controls, then save to go live.' }
+  ]
+  const stepDone = [
+    hasResumeUploaded,
+    Boolean(naukriEmail && naukriPassword),
+    Boolean(currentCompany && Number(currentCtcLpa) > 0),
+    targetRoles.length > 0,
+    false, false, false
+  ]
+  const goStep = (i: number) => {
+    setActiveStep(Math.max(0, Math.min(STEPS.length - 1, i)))
+    const el = document.getElementById('profile-form-top')
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    else window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const stepForErrors = (e: Record<string, string>): number => {
+    if (e.newUserId || e.name || e.email || e.password || e.location) return 1
+    if (e.company || e.experience || e.currentCtc || e.expectedCtc) return 2
+    if (e.targetRoles || e.targetLocations || e.skills) return 3
+    if (e.employment) return 5
+    return 1
+  }
   const [rawJsonStr, setRawJsonStr] = useState<string>('{\n}')
   const [jsonError, setJsonError] = useState<string>('')
 
@@ -599,9 +632,8 @@ export default function CandidateProfileEditor({
     if (Object.keys(errs).length > 0) {
       const firstKey = Object.keys(errs)[0]
       setSaveError(errs[firstKey])
-      // Smooth scroll to top of form so user sees the issue immediately
-      const el = document.getElementById('profile-form-top')
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // Jump straight to the step containing the first problem
+      goStep(stepForErrors(errs))
       return false
     }
 
@@ -1135,144 +1167,34 @@ export default function CandidateProfileEditor({
         </div>
       )}
 
-      {/* 4-STEP VISUAL JOURNEY & SIT BACK & RELAX ENGINE */}
-      <div className="rounded-2xl bg-zinc-950 border border-zinc-800 p-4 sm:p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-800">
-                <Sparkles className="w-3 h-3 text-zinc-400" />
-                <span>4-Step Quick Flow</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                <span>Sit Back & Relax Engine</span>
-              </span>
-            </div>
-            <h3 className="text-sm sm:text-base font-bold text-white mt-1.5">
-              How JobFlux Autonomous Job Apply Works
-            </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Configure once. After saving, our autonomous cloud bot searches and applies on your behalf every morning.
-            </p>
-          </div>
-
-          <div className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-medium flex items-center gap-2 shrink-0">
-            <Coffee className="w-4 h-4 text-zinc-400" />
-            <span>Morning Run: 6 AM</span>
-          </div>
-        </div>
-
-        {/* 4 Step Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-          {/* Step 1 */}
-          <div className="p-3.5 rounded-xl border bg-zinc-900/40 border-zinc-800/80 transition-colors hover:border-zinc-700">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-mono font-medium text-zinc-500">
-                STEP 1
-              </span>
-              {hasResumeUploaded ? (
-                <span className="text-[10px] font-mono text-zinc-200 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-750 px-1.5 py-0.5 rounded">
-                  <CheckCircle2 className="w-3 h-3 text-zinc-400" /> ✓ Completed
+      {/* GUIDED SETUP STEPPER — one step at a time */}
+      <div className="p-3 sm:p-4 rounded-2xl bg-zinc-950/70 border border-zinc-800/80">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          {STEPS.map((s, i) => {
+            const done = stepDone[i]
+            const current = i === activeStep
+            return (
+              <button
+                key={s.title}
+                type="button"
+                onClick={() => goStep(i)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border ${
+                  current
+                    ? 'bg-cyan-500/15 border-cyan-500/40 text-white'
+                    : 'text-zinc-400 hover:text-white border-transparent hover:bg-zinc-900'
+                }`}
+              >
+                <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0 ${
+                  done ? 'bg-emerald-500/20 text-emerald-300' : current ? 'bg-cyan-500 text-black' : 'bg-zinc-800 text-zinc-400'
+                }`}>
+                  {done ? <Check className="w-3 h-3" /> : i + 1}
                 </span>
-              ) : (
-                <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
-                  <Upload className="w-3 h-3 text-zinc-500" /> ● Incomplete
-                </span>
-              )}
-            </div>
-            <h4 className="text-xs font-semibold text-white">Upload Resume PDF</h4>
-            <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
-              {hasResumeUploaded ? 'Resume synced to cloud. Recruiters receive this document.' : 'Upload your PDF resume below to enable auto-apply.'}
-            </p>
-          </div>
-
-          {/* Step 2 */}
-          {(() => {
-            const step2Done = skills.length > 0 || Number(expectedCtcLpa) > 0
-            return (
-              <div className="p-3.5 rounded-xl border bg-zinc-900/40 border-zinc-800/80 transition-colors hover:border-zinc-700">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-mono font-medium text-zinc-500">
-                    STEP 2
-                  </span>
-                  {step2Done ? (
-                    <span className="text-[10px] font-mono text-zinc-200 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-750 px-1.5 py-0.5 rounded">
-                      <CheckCircle2 className="w-3 h-3 text-zinc-400" /> ✓ Completed
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
-                      <Sparkles className="w-3 h-3 text-zinc-500" /> ● Incomplete
-                    </span>
-                  )}
-                </div>
-                <h4 className="text-xs font-semibold text-white">1-Click AI Auto-Fill</h4>
-                <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
-                  {step2Done ? 'Credentials & skills populated by AI parser.' : 'Click "Auto-Fill with AI" to extract parameters in 5s.'}
-                </p>
-              </div>
+                <span className="hidden sm:inline">{s.title}</span>
+              </button>
             )
-          })()}
-
-          {/* Step 3 */}
-          {(() => {
-            const step3Done = Boolean(naukriEmail && naukriPassword && targetRoles.length > 0)
-            return (
-              <div className="p-3.5 rounded-xl border bg-zinc-900/40 border-zinc-800/80 transition-colors hover:border-zinc-700">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-mono font-medium text-zinc-500">
-                    STEP 3
-                  </span>
-                  {step3Done ? (
-                    <span className="text-[10px] font-mono text-zinc-200 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-750 px-1.5 py-0.5 rounded">
-                      <CheckCircle2 className="w-3 h-3 text-zinc-400" /> ✓ Completed
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
-                      <Save className="w-3 h-3 text-zinc-500" /> ● Incomplete
-                    </span>
-                  )}
-                </div>
-                <h4 className="text-xs font-semibold text-white">Review & Save Profile</h4>
-                <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
-                  {step3Done ? 'Naukri login & target criteria saved and synced.' : 'Verify login credentials & roles, then click Save.'}
-                </p>
-              </div>
-            )
-          })()}
-
-          {/* Step 4 */}
-          {(() => {
-            const step4Done = Boolean(hasResumeUploaded && naukriEmail && naukriPassword && targetRoles.length > 0)
-            return (
-              <div className="p-3.5 rounded-xl border bg-zinc-900/40 border-zinc-800/80 transition-colors hover:border-zinc-700">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-mono font-medium text-zinc-500">
-                    STEP 4
-                  </span>
-                  {step4Done ? (
-                    <span className="text-[10px] font-mono text-zinc-200 font-medium flex items-center gap-1 bg-zinc-900 border border-zinc-750 px-1.5 py-0.5 rounded">
-                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" /> ✓ Active & Ready
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-mono text-zinc-500 font-medium">
-                      ● Incomplete (Waiting 1-3)
-                    </span>
-                  )}
-                </div>
-                <h4 className="text-xs font-semibold text-white flex items-center gap-1.5">
-                  <span>Sit Back & Relax</span>
-                  <Coffee className="w-3.5 h-3.5 text-zinc-400" />
-                </h4>
-                <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
-                  {step4Done
-                    ? 'AI applies on your behalf every morning at 06:00 AM IST.'
-                    : 'Complete Steps 1-3 above to activate autonomous daily runs.'}
-                </p>
-              </div>
-            )
-          })()}
+          })}
         </div>
+        <p className="text-[11px] text-zinc-500 mt-1.5">{STEPS[activeStep].hint}</p>
       </div>
 
       {/* SMART MISSING DATA SUGGESTIONS CALLOUT */}
@@ -1284,19 +1206,19 @@ export default function CandidateProfileEditor({
           </div>
           <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px] text-zinc-400">
             {!hasResumeUploaded && (
-              <li className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 flex items-start gap-2">
+              <li onClick={() => goStep(0)} className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 hover:border-cyan-500/50 flex items-start gap-2 cursor-pointer transition-colors">
                 <span className="text-zinc-300 font-bold shrink-0">1.</span>
                 <span>Upload your <strong className="text-white">Resume PDF</strong> below so AI can extract details and attach to applications.</span>
               </li>
             )}
             {(!naukriEmail || !naukriPassword) && (
-              <li className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 flex items-start gap-2">
+              <li onClick={() => goStep(1)} className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 hover:border-cyan-500/50 flex items-start gap-2 cursor-pointer transition-colors">
                 <span className="text-zinc-300 font-bold shrink-0">2.</span>
                 <span>Enter your <strong className="text-white">Naukri Email & Password</strong> so the cloud bot can sign in to apply.</span>
               </li>
             )}
             {targetRoles.length === 0 && (
-              <li className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 flex items-start gap-2">
+              <li onClick={() => goStep(3)} className="p-2.5 rounded-lg bg-black/50 border border-zinc-800 hover:border-cyan-500/50 flex items-start gap-2 cursor-pointer transition-colors">
                 <span className="text-zinc-300 font-bold shrink-0">3.</span>
                 <span>Add at least 1 <strong className="text-white">Target Role</strong> so the bot targets matching recruiter openings.</span>
               </li>
@@ -1305,6 +1227,7 @@ export default function CandidateProfileEditor({
         </div>
       )}
 
+      {activeStep === 0 && (<>
       {/* 1. CANDIDATE RESUME PDF & AI AUTO-FILL (TOP HERO SECTION) */}
       <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -1454,6 +1377,9 @@ export default function CandidateProfileEditor({
         </div>
       </div>
 
+      </>)}
+
+      {activeStep === 1 && (<>
       {/* 2. NAUKRI CREDENTIALS & IDENTITY */}
       <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
@@ -1658,6 +1584,9 @@ export default function CandidateProfileEditor({
         </div>
       </div>
 
+      </>)}
+
+      {activeStep === 2 && (<>
       {/* 3. EXPERIENCE & COMPENSATION (CTC) */}
       <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
@@ -1819,6 +1748,9 @@ export default function CandidateProfileEditor({
         )}
       </div>
 
+      </>)}
+
+      {activeStep === 3 && (<>
       {/* 4. TARGET JOB FILTERS & PREFERENCES */}
       <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-5">
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
@@ -2119,6 +2051,9 @@ export default function CandidateProfileEditor({
         </div>
       </div>
 
+      </>)}
+
+      {activeStep === 4 && (<>
       {/* 5. RECRUITER SCREENING QUESTIONS (PREDEFINED ANSWERS) */}
       <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
@@ -2249,6 +2184,9 @@ export default function CandidateProfileEditor({
         </form>
       </div>
 
+      </>)}
+
+      {activeStep === 5 && (<>
       {/* 6. EMPLOYMENT HISTORY (STRICTLY AT MOST 1 CURRENT EMPLOYER) */}
       <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3 flex-wrap gap-2">
@@ -2572,6 +2510,9 @@ export default function CandidateProfileEditor({
         </div>
       </div>
 
+      </>)}
+
+      {activeStep === 6 && (<>
       {/* 8. BOT AUTOMATION CONTROLS */}
       <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 space-y-4">
         <div className="flex items-center justify-between">
@@ -2703,6 +2644,42 @@ export default function CandidateProfileEditor({
               spellCheck={false}
             />
           </div>
+        )}
+      </div>
+
+      </>)}
+
+      {/* STEP NAVIGATION */}
+      <div className="flex items-center justify-between gap-3 pt-1">
+        <button
+          type="button"
+          onClick={() => goStep(activeStep - 1)}
+          disabled={activeStep === 0}
+          className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back</span>
+        </button>
+        <span className="text-[11px] text-zinc-500 font-mono">Step {activeStep + 1} of {STEPS.length}</span>
+        {activeStep < STEPS.length - 1 ? (
+          <button
+            type="button"
+            onClick={() => goStep(activeStep + 1)}
+            className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <span>Continue</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSaveProfile}
+            disabled={savingProfile || isAnalyzing}
+            className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <span>{savingProfile ? 'Saving...' : 'Save & Launch'}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         )}
       </div>
 
