@@ -536,6 +536,12 @@ export default function CandidateProfileEditor({
         setHasResumeUploaded(Boolean(data.has_resume || data.last_resume_updated_at || (data.resume_filename && !data.resume_filename.includes('_Resume.pdf') && data.resume_filename !== 'Candidate_Resume.pdf')))
         populateStateFromObject(data)
       } else {
+        if (res.status === 401 || res.status === 403) {
+          // No (or expired) session — localStorage alone no longer authenticates.
+          // Send them to re-login instead of showing a cryptic error.
+          window.location.href = '/login?error=' + encodeURIComponent('Session expired. Please sign in again.')
+          return
+        }
         const err = await res.json().catch(() => ({}))
         setSaveError(err.detail || 'Failed to load profile.')
       }
@@ -672,6 +678,8 @@ export default function CandidateProfileEditor({
         if (!isNew && userId) loadProfileData(userId)
         if (onSaveSuccess) onSaveSuccess()
         setTimeout(() => setSaveSuccess(''), 5000)
+      } else if (res.status === 401 || res.status === 403) {
+        window.location.href = '/login?error=' + encodeURIComponent('Session expired. Please sign in again, then retry saving.')
       } else {
         const data = await res.json()
         setSaveError(data.detail || 'Failed to save profile.')
