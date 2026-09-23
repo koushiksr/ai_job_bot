@@ -211,7 +211,7 @@ export default function QueueTab({
               {selectedCandidate && (
                 <span className="text-sky-400 font-sans text-[11px]">
                   {selectedCandidate === 'admin'
-                    ? '👑 All Configured Profiles'
+                    ? 'All Configured Profiles'
                     : selectedUserObj?.plan ? `${selectedUserObj.plan.toUpperCase()} Plan` : 'Candidate Profile'}
                 </span>
               )}
@@ -224,8 +224,8 @@ export default function QueueTab({
                 className="w-full px-3.5 py-2.5 rounded-xl bg-black/90 light:bg-white/85 border border-zinc-700 light:border-zinc-300 text-white light:text-zinc-900 text-xs font-mono focus:outline-none focus:border-sky-500 transition-colors appearance-none cursor-pointer pr-10"
               >
                 <option value="">-- Choose Candidate to Run On-Demand ({candidateOptions.length} profiles available) --</option>
-                <option value="admin" className="font-bold text-amber-300 light:text-amber-700">
-                  👑 All Candidates (Sequential Sweep Across Entire Database)
+                <option value="admin" className="font-bold text-zinc-300 light:text-zinc-700">
+                  All Candidates (Sequential Sweep Across Entire Database)
                 </option>
                 <optgroup label="Individual Candidate Profiles">
                   {candidateOptions.map((u: any) => {
@@ -234,7 +234,7 @@ export default function QueueTab({
                     )
                     return (
                       <option key={u.user_id} value={u.user_id}>
-                        {u.name || u.email || u.user_id} ({u.user_id}) {u.plan ? `• ${u.plan.toUpperCase()}` : ''} {active ? '⚠️ [IN QUEUE]' : ''}
+                        {u.name || u.email || u.user_id} ({u.user_id}) {u.plan ? `• ${u.plan.toUpperCase()}` : ''} {active ? '[IN QUEUE]' : ''}
                       </option>
                     )
                   })}

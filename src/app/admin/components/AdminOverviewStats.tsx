@@ -124,7 +124,7 @@ export default function AdminOverviewStats({
             className="px-2.5 py-1 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 light:border-emerald-300 text-emerald-300 light:text-emerald-700 text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 shrink-0"
           >
             <Bell className="w-3 h-3" />
-            <span>{testNotificationSent ? 'Alert Sent! ✓' : 'Send Test Alert'}</span>
+            <span>{testNotificationSent ? 'Alert Sent' : 'Send Test Alert'}</span>
           </button>
         </div>
       )}

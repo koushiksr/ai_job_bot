@@ -644,7 +644,7 @@ export default function EnterpriseAdminPortal() {
               <AlertCircle className="w-4 h-4 text-rose-400 light:text-rose-600" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-rose-300 light:text-rose-600 mb-0.5">⛔ Organisation Temporarily Disabled</p>
+              <p className="text-sm font-bold text-rose-300 light:text-rose-600 mb-0.5">Organisation Temporarily Disabled</p>
               <p className="text-xs text-rose-400/80 leading-relaxed">
                 Your organisation <strong className="text-rose-300 light:text-rose-600">{org.name}</strong> has been disabled by the Super Admin.
                 All automated daily sweeps and on-demand runs are <strong>completely blocked</strong> for every member until re-enabled.
@@ -982,12 +982,14 @@ export default function EnterpriseAdminPortal() {
                             Last active {member.last_applied_at ? new Date(member.last_applied_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
                           </div>
                           {member.sweep_eligible === false ? (
-                            <div className="text-[10px] font-mono mt-1 text-amber-300 light:text-amber-700" title={(member.sweep_blockers || []).join('; ')}>
-                              ⚠️ Not queued: {(member.sweep_blockers || ['blocked'])[0]}
+                            <div className="text-[10px] font-mono mt-1 text-amber-300 light:text-amber-700 flex items-center gap-1" title={(member.sweep_blockers || []).join('; ')}>
+                              <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" />
+                              <span>Not queued: {(member.sweep_blockers || ['blocked'])[0]}</span>
                             </div>
                           ) : (
-                            <div className="text-[10px] font-mono mt-1 text-emerald-400/80">
-                              ✓ In daily sweep
+                            <div className="text-[10px] font-mono mt-1 text-emerald-400/80 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                              <span>In daily sweep</span>
                             </div>
                           )}
                         </td>

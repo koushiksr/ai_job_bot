@@ -244,7 +244,7 @@ export default function UserDashboard() {
 
           // 1. Browser Push Notification (only if user is not actively viewing this tab)
           if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
-            sendBrowserNotification(`🎁 Special Offer Assigned: ${latest.discount_badge}!`, {
+            sendBrowserNotification(`Special Offer Assigned: ${latest.discount_badge}!`, {
               body: `Exclusive deal: ${latest.offer_title} at ${latest.discounted_price}. 1-click claim locked to your account.`
             })
           }
@@ -252,7 +252,7 @@ export default function UserDashboard() {
           // 2. Real-time In-App Slide-over Toast
           setInAppToast({
             id: latest.id,
-            title: `🎁 Exclusive Offer Assigned to You: ${latest.discount_badge}!`,
+            title: `Exclusive Offer Assigned to You: ${latest.discount_badge}!`,
             message: `${latest.offer_title} (${latest.original_price} → ${latest.discounted_price}). Promo code: ${latest.promo_code}`,
             promo_code: latest.promo_code,
             claim_url: latest.claim_url || `/pricing?promo=${latest.promo_code}`
@@ -271,7 +271,7 @@ export default function UserDashboard() {
 
           // Dispatch native OS browser push notification only if tab is hidden (avoid double alert with in-app toast)
           if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
-            sendBrowserNotification(notif.title || '⚡ JobFlux AI Radar Alert', {
+            sendBrowserNotification(notif.title || 'JobFlux AI Radar Alert', {
               body: notif.message
             })
           }
@@ -279,7 +279,7 @@ export default function UserDashboard() {
           // Dispatch floating slide-over in-app toast
           setInAppToast({
             id: notif.id,
-            title: notif.title || '⚡ JobFlux Priority Alert',
+            title: notif.title || 'JobFlux Priority Alert',
             message: notif.message,
             promo_code: notif.promo_code,
             claim_url: notif.claim_url
@@ -330,7 +330,7 @@ export default function UserDashboard() {
         if (userEmail) {
           subscribeDeviceToPush(userEmail, userId).catch(() => {})
         }
-        sendBrowserNotification('⚡ JobFlux AI Notifications Active', {
+        sendBrowserNotification('JobFlux AI Notifications Active', {
           body: 'You will now receive background push notifications even when this tab is closed.'
         })
         setTestNotificationSent(true)
@@ -344,7 +344,7 @@ export default function UserDashboard() {
   }
 
   const handleSendTestNotification = () => {
-    sendBrowserNotification('⚡ JobFlux AI Radar Alert', {
+    sendBrowserNotification('JobFlux AI Radar Alert', {
       body: 'Push notifications are verified and active on your system!'
     })
     setTestNotificationSent(true)
@@ -411,7 +411,7 @@ export default function UserDashboard() {
         if (action === 'accept') {
           setTaskFeedback({
             type: 'success',
-            text: `🎉 Welcome to ${data.org_name || 'Enterprise Workspace'}! Enterprise perks activated: 10 weekly on-demand sweeps and 55 daily job applications.`
+            text: `Welcome to ${data.org_name || 'Enterprise Workspace'}! Enterprise perks activated: 10 weekly on-demand sweeps and 55 daily job applications.`
           })
           refreshAllDashboardData(userId)
         }
@@ -466,7 +466,7 @@ export default function UserDashboard() {
             if (verifyRes.ok && verifyData.verified) {
               localStorage.setItem('user_plan', 'org_pro')
               setUserPlan('org_pro')
-              setTaskFeedback({ type: 'success', text: '🎉 Org Pro activated! 15 on-demand sweeps/week unlocked. Priority queue enabled.' })
+              setTaskFeedback({ type: 'success', text: 'Org Pro activated! 15 on-demand sweeps/week unlocked. Priority queue enabled.' })
               refreshAllDashboardData(userId)
             } else {
               throw new Error(verifyData.detail || 'Payment verification failed.')
@@ -734,7 +734,7 @@ export default function UserDashboard() {
         setActiveTask(data.task || {
           task_id: data.task_id,
           status: data.status || 'pending',
-          logs: [`[${new Date().toLocaleTimeString()}] 🚀 On-demand sweep enqueued.`]
+          logs: [`[${new Date().toLocaleTimeString()}] On-demand sweep enqueued.`]
         })
         setTaskFeedback({
           type: 'info',
@@ -778,7 +778,7 @@ export default function UserDashboard() {
               clearInterval(interval)
               setIsTriggeringScout(false)
               setTaskFeedback({ type: 'success', text: data.task.summary || 'On-demand sweep completed! Results updated.' })
-              sendBrowserNotification('🚀 JobFlux AI Sweep Completed!', {
+              sendBrowserNotification('JobFlux AI Sweep Completed', {
                 body: data.task.summary || 'Autonomous engine applied to matching jobs. Telemetry refreshed.'
               })
               loadUserData(uid)
@@ -787,7 +787,7 @@ export default function UserDashboard() {
               clearInterval(interval)
               setIsTriggeringScout(false)
               setTaskFeedback({ type: 'error', text: data.task.summary || 'Task ended. Check logs for details.' })
-              sendBrowserNotification('⚠️ JobFlux AI Sweep Notice', {
+              sendBrowserNotification('JobFlux AI Sweep Notice', {
                 body: data.task.summary || 'Task execution ended. Check application logs.'
               })
             } else if (data.task.status === 'pending') {
@@ -2543,7 +2543,11 @@ export default function UserDashboard() {
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
                 <span>Screening: <strong className="text-zinc-300 light:text-zinc-700">Contextual AI</strong></span>
-                {!isProfessional && <span className="text-[9px] font-mono text-zinc-400 light:text-zinc-600 ml-0.5">🔒 PRO</span>}
+                {!isProfessional && (
+                  <span className="inline-flex items-center gap-0.5 text-[9px] font-mono text-zinc-400 light:text-zinc-600 ml-0.5">
+                    <Lock className="w-2.5 h-2.5" /> PRO
+                  </span>
+                )}
               </button>
               <span className="text-zinc-800 hidden sm:inline">|</span>
               <button
@@ -2552,7 +2556,11 @@ export default function UserDashboard() {
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
                 <span>Delivery: <strong className="text-zinc-300 light:text-zinc-700">Recruiter ATS</strong></span>
-                {!isProfessional && <span className="text-[9px] font-mono text-zinc-400 light:text-zinc-600 ml-0.5">🔒 PRO</span>}
+                {!isProfessional && (
+                  <span className="inline-flex items-center gap-0.5 text-[9px] font-mono text-zinc-400 light:text-zinc-600 ml-0.5">
+                    <Lock className="w-2.5 h-2.5" /> PRO
+                  </span>
+                )}
               </button>
             </div>
 
@@ -2652,7 +2660,7 @@ export default function UserDashboard() {
                       type="button"
                       onClick={() => {
                         const topCompanies = Array.from(new Set(historyJobs.slice(0, 6).map(j => j.company || 'Tech Employer'))).join(', ')
-                        const text = `JobFlux AI Job Dispatch Report:\n✅ Dispatched: ${metrics.total_applied} applications (${metrics.today} today)\n🏢 Top Companies: ${topCompanies}\n⚡ Status: Verified Recruiter ATS Delivery\nTrack live: https://jobfluxai.vercel.app/dashboard`
+                        const text = `JobFlux AI Job Dispatch Report:\nDispatched: ${metrics.total_applied} applications (${metrics.today} today)\nTop Companies: ${topCompanies}\nStatus: Verified Recruiter ATS Delivery\nTrack live: https://jobfluxai.vercel.app/dashboard`
                         navigator.clipboard.writeText(text)
                         setCopiedReport(true)
                         setTimeout(() => setCopiedReport(false), 2500)

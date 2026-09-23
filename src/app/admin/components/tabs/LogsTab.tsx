@@ -371,7 +371,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
               </div>
               <div className="text-[10px] text-emerald-400 light:text-emerald-600 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                {llmStats.avg_duration_ms < 500 ? '⚡ Ultra-Fast LPU Speed' : 'Standard Speed'}
+                {llmStats.avg_duration_ms < 500 ? 'Ultra-Fast LPU Speed' : 'Standard Speed'}
               </div>
             </div>
 
@@ -476,10 +476,10 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 className="px-3 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 font-mono focus:outline-none focus:border-indigo-500"
               >
                 <option value="all">All Providers</option>
-                <option value="groq">⚡ Groq (LPU)</option>
-                <option value="openrouter">🌐 OpenRouter</option>
-                <option value="openai">🤖 OpenAI (GPT)</option>
-                <option value="gemini">✨ Google Gemini</option>
+                <option value="groq">Groq (LPU)</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="openai">OpenAI (GPT)</option>
+                <option value="gemini">Google Gemini</option>
               </select>
 
               {/* Date Filter */}
@@ -668,7 +668,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                               ? 'bg-amber-500/10 text-amber-400 light:text-amber-600 border border-amber-500/30 light:border-amber-300'
                               : 'bg-rose-500/10 text-rose-400 light:text-rose-600 border border-rose-500/30'
                           }`}>
-                            ⚡ {log.duration_ms}ms
+                            {log.duration_ms}ms
                           </span>
                         </td>
 
@@ -740,7 +740,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                   </div>
                   <div className="p-2.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200">
                     <span className="text-[10px] text-zinc-500 light:text-zinc-600 uppercase block">Latency</span>
-                    <span className="text-emerald-400 light:text-emerald-600 font-semibold block">⚡ {selectedLlmLog.duration_ms}ms</span>
+                    <span className="text-emerald-400 light:text-emerald-600 font-semibold block">{selectedLlmLog.duration_ms}ms</span>
                   </div>
                   <div className="p-2.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200">
                     <span className="text-[10px] text-zinc-500 light:text-zinc-600 uppercase block">Tokens</span>

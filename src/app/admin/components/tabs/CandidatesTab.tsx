@@ -453,9 +453,9 @@ export default function CandidatesTab({
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5">
               {[
                 { key: 'all', label: 'All', count: usersList.length },
-                { key: 'applying', label: '⚡ Live', count: countApplying, color: 'text-sky-400 font-bold', pulse: true },
-                { key: 'applied_today', label: '✓ Done', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
-                { key: 'not_applied_today', label: '⚠️ Attention', count: countPaymentRequired + countNotAppliedToday, color: 'text-amber-300 light:text-amber-700 font-bold' }
+                { key: 'applying', label: 'Live', count: countApplying, color: 'text-sky-400 font-medium', pulse: true },
+                { key: 'applied_today', label: 'Done Today', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-700 font-medium' },
+                { key: 'not_applied_today', label: 'Needs Attention', count: countPaymentRequired + countNotAppliedToday, color: 'text-amber-400 light:text-amber-700 font-medium' }
               ].map(tab => (
                 <button
                   key={tab.key}
@@ -463,13 +463,13 @@ export default function CandidatesTab({
                   onClick={() => handleSetExecFilter(tab.key)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeExecFilter === tab.key
-                      ? 'bg-sky-950/80 text-white light:text-zinc-900 border border-sky-500 font-bold shadow-sm'
+                      ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 border border-zinc-700 light:border-zinc-300 font-semibold shadow-sm'
                       : 'bg-zinc-950/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200'
                   }`}
                 >
                   {tab.pulse && tab.count > 0 && <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping mr-0.5" />}
                   <span>{tab.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 light:bg-white font-bold ${tab.color || 'text-zinc-400 light:text-zinc-600'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 light:bg-white font-semibold ${tab.color || 'text-zinc-400 light:text-zinc-600'}`}>
                     {tab.count}
                   </span>
                 </button>
@@ -485,19 +485,19 @@ export default function CandidatesTab({
               onClick={() => setShowFilterMenu(!showFilterMenu)}
               className={`px-3 py-1.5 rounded-xl border text-xs font-mono transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
                 showFilterMenu || activeFilterCount > 0
-                  ? 'bg-sky-950/70 border-sky-500/80 text-sky-300 light:text-sky-700 shadow-sky-500/10'
+                  ? 'bg-zinc-800 light:bg-zinc-200 border-zinc-700 light:border-zinc-300 text-white light:text-zinc-900'
                   : 'bg-zinc-950 light:bg-zinc-100 border-zinc-800 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:bg-zinc-900 light:hover:bg-zinc-200'
               }`}
               title="Open Filter & Sort Options Menu"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-sky-400" />
+              <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400" />
               <span className="font-semibold">Filters &amp; Sort</span>
               {activeFilterCount > 0 ? (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-sky-500 text-white">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-zinc-700 light:bg-zinc-300 text-white light:text-zinc-900">
                   {activeFilterCount}
                 </span>
               ) : (
-                <MoreHorizontal className="w-3.5 h-3.5 text-zinc-400" />
+                <MoreHorizontal className="w-3.5 h-3.5 text-zinc-500" />
               )}
             </button>
 
@@ -517,17 +517,17 @@ export default function CandidatesTab({
             <button
               type="button"
               onClick={() => setShowStatusGuide(!showStatusGuide)}
-              className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-amber-400 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-zinc-200 light:hover:text-zinc-800 transition-colors cursor-pointer"
               title={showStatusGuide ? 'Hide Status Legend Guide' : 'Show Status Legend Guide'}
             >
-              <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+              <HelpCircle className="w-3.5 h-3.5 text-zinc-400" />
             </button>
 
             {/* Create Candidate Button */}
             <button
               type="button"
               onClick={() => setEditingUser({ isNew: true, user_id: '' })}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-md shadow-indigo-500/20 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-900 light:bg-zinc-900 light:hover:bg-zinc-800 light:text-white font-semibold text-xs transition-all shadow-sm cursor-pointer"
             >
               <User className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Create Candidate</span>
@@ -541,13 +541,13 @@ export default function CandidatesTab({
           <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-zinc-900 light:border-zinc-200 text-[11px] font-mono">
             <span className="text-zinc-500 light:text-zinc-600">Active filters:</span>
             {activeExecFilter !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-950/60 light:bg-sky-50 text-sky-300 light:text-sky-700 border border-sky-800/60 light:border-sky-300">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
                 <span>Bot: {activeExecFilter.replace(/_/g, ' ')}</span>
                 <button type="button" onClick={() => handleSetExecFilter('all')} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
             {candidateStatusFilter !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-950/60 light:bg-indigo-50 text-indigo-300 light:text-indigo-700 border border-indigo-800/60 light:border-indigo-300">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
                 <span>Plan: {candidateStatusFilter}</span>
                 <button type="button" onClick={() => {
                   setCandidateStatusFilter('all')
@@ -577,12 +577,12 @@ export default function CandidatesTab({
             {/* Popover Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800 light:border-zinc-200">
               <div className="flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-sky-400" />
+                <SlidersHorizontal className="w-4 h-4 text-zinc-400" />
                 <h4 className="text-xs font-bold text-white light:text-zinc-900 uppercase tracking-wider font-mono">
                   Filter &amp; Sort Candidates
                 </h4>
                 {activeFilterCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded text-[10px] bg-sky-500/20 text-sky-300 light:text-sky-700 border border-sky-500/40 font-mono font-bold">
+                  <span className="px-1.5 py-0.2 rounded text-[10px] bg-zinc-800 light:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300 font-mono font-bold">
                     {activeFilterCount} active
                   </span>
                 )}
@@ -599,8 +599,8 @@ export default function CandidatesTab({
             {/* Section 1: Bot Execution Filter */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-mono text-sky-400 font-bold uppercase flex items-center gap-1">
-                  <Cpu className="w-3 h-3 text-sky-400" /> Bot Execution Status:
+                <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 font-semibold uppercase flex items-center gap-1">
+                  <Cpu className="w-3.5 h-3.5 text-zinc-400" /> Bot Execution Status:
                 </span>
                 {activeExecFilter !== 'all' && (
                   <button type="button" onClick={() => handleSetExecFilter('all')} className="text-[10px] text-zinc-500 hover:text-zinc-300 font-mono cursor-pointer">
@@ -611,13 +611,13 @@ export default function CandidatesTab({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 {[
                   { key: 'all', label: 'All Candidates', count: usersList.length },
-                  { key: 'applying', label: '⚡ Applying', count: countApplying, color: 'text-sky-400 font-bold' },
-                  { key: 'applied_today', label: '✓ Applied Today', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
-                  { key: 'in_queue', label: '⏳ In Queue', count: countInQueue, color: 'text-amber-400 light:text-amber-600' },
-                  { key: 'enabled', label: '▶️ Bot Active', count: countEnabled, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
-                  { key: 'disabled', label: '⏸️ Bot Off', count: countDisabled, color: 'text-zinc-400' },
-                  { key: 'not_applied_today', label: '⚠️ Not Applied', count: countNotAppliedToday, color: 'text-amber-300 light:text-amber-700' },
-                  { key: 'payment_required', label: '💳 Payment Req.', count: countPaymentRequired, color: 'text-rose-400 light:text-rose-600' }
+                  { key: 'applying', label: 'Applying Live', count: countApplying, color: 'text-sky-400' },
+                  { key: 'applied_today', label: 'Applied Today', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-700' },
+                  { key: 'in_queue', label: 'In Queue', count: countInQueue, color: 'text-zinc-400' },
+                  { key: 'enabled', label: 'Bot Active', count: countEnabled, color: 'text-zinc-300 light:text-zinc-700' },
+                  { key: 'disabled', label: 'Bot Off', count: countDisabled, color: 'text-zinc-500' },
+                  { key: 'not_applied_today', label: 'Not Applied', count: countNotAppliedToday, color: 'text-amber-400 light:text-amber-700' },
+                  { key: 'payment_required', label: 'Payment Req.', count: countPaymentRequired, color: 'text-rose-400 light:text-rose-600' }
                 ].map(f => (
                   <button
                     key={f.key}
@@ -625,7 +625,7 @@ export default function CandidatesTab({
                     onClick={() => handleSetExecFilter(f.key)}
                     className={`p-1.5 rounded-lg text-[11px] font-mono transition-all text-left flex items-center justify-between cursor-pointer ${
                       activeExecFilter === f.key
-                        ? 'bg-sky-950/90 text-white light:text-zinc-900 border border-sky-500 font-bold shadow-sm'
+                        ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 border border-zinc-700 light:border-zinc-300 font-semibold shadow-sm'
                         : 'bg-zinc-950 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200'
                     }`}
                   >
@@ -639,8 +639,8 @@ export default function CandidatesTab({
             {/* Section 2: Plan Tier & Validity Filter */}
             <div className="space-y-1.5 pt-2 border-t border-zinc-900 light:border-zinc-200">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 font-bold uppercase flex items-center gap-1">
-                  <Filter className="w-3 h-3 text-zinc-400" /> Plan &amp; Expiry Filter:
+                <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 font-semibold uppercase flex items-center gap-1">
+                  <Filter className="w-3.5 h-3.5 text-zinc-400" /> Plan &amp; Expiry Filter:
                 </span>
                 {candidateStatusFilter !== 'all' && (
                   <button
@@ -658,14 +658,14 @@ export default function CandidatesTab({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                 {[
                   { key: 'all', label: 'All Plans', count: usersList.length },
-                  { key: 'elite', label: '💎 Elite (90d)', count: countElite, color: 'text-amber-400 light:text-amber-600 font-bold' },
-                  { key: 'pro', label: '⚡ Pro', count: countPro, color: 'text-indigo-400 font-bold' },
-                  { key: 'starter', label: '🚀 Starter', count: countStarter, color: 'text-sky-400 font-bold' },
-                  { key: 'trial', label: '🎁 Trial', count: countTrial, color: 'text-violet-400' },
-                  { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400 light:text-emerald-600' },
-                  { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300 light:text-amber-700' },
+                  { key: 'elite', label: 'Elite (90d)', count: countElite },
+                  { key: 'pro', label: 'Pro (30d)', count: countPro },
+                  { key: 'starter', label: 'Starter (30d)', count: countStarter },
+                  { key: 'trial', label: 'Trial', count: countTrial },
+                  { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400 light:text-emerald-700' },
+                  { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-400 light:text-amber-700' },
                   { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400 light:text-rose-600' },
-                  { key: 'vip', label: 'VIP Pass', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length, color: 'text-amber-400 light:text-amber-600' }
+                  { key: 'vip', label: 'VIP Pass', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length }
                 ].map(f => (
                   <button
                     key={f.key}
@@ -689,25 +689,25 @@ export default function CandidatesTab({
 
             {/* Section 3: Sort Options */}
             <div className="space-y-1.5 pt-2 border-t border-zinc-900 light:border-zinc-200">
-              <span className="text-[11px] font-mono text-indigo-400 font-bold uppercase flex items-center gap-1">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" /> Sort Candidates By:
+              <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 font-semibold uppercase flex items-center gap-1">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400" /> Sort Candidates By:
               </span>
               <div className="flex items-center gap-2">
                 <select
                   aria-label="Sort candidates by"
                   value={sortField}
                   onChange={e => handleSetSortField(e.target.value as any)}
-                  className="flex-1 bg-zinc-950 light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 text-white light:text-zinc-900 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500 cursor-pointer"
+                  className="flex-1 bg-zinc-950 light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 text-white light:text-zinc-900 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-zinc-500 cursor-pointer"
                 >
-                  <option value="plan">💎 Plan Tier (Highest First)</option>
-                  <option value="today">🎯 Applications Today (Highest First)</option>
-                  <option value="total">📊 Lifetime Total Applied (Highest First)</option>
-                  <option value="execution">🤖 Bot Execution Status (Applying Live First)</option>
-                  <option value="enabled">⚡ Auto-Apply Active First</option>
-                  <option value="name">👤 Candidate Name (A → Z)</option>
-                  <option value="email">✉️ Portal Email (A → Z)</option>
-                  <option value="last_login">🕒 Recent Login First</option>
-                  <option value="created_at">📅 Date Added (Newest First)</option>
+                  <option value="plan">Plan Tier (Highest First)</option>
+                  <option value="today">Applications Today (Highest First)</option>
+                  <option value="total">Lifetime Total Applied (Highest First)</option>
+                  <option value="execution">Bot Execution Status (Applying Live First)</option>
+                  <option value="enabled">Auto-Apply Active First</option>
+                  <option value="name">Candidate Name (A → Z)</option>
+                  <option value="email">Portal Email (A → Z)</option>
+                  <option value="last_login">Recent Login First</option>
+                  <option value="created_at">Date Added (Newest First)</option>
                 </select>
 
                 <button
@@ -716,7 +716,7 @@ export default function CandidatesTab({
                   className="px-2.5 py-1.5 rounded-lg bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs font-mono flex items-center gap-1 cursor-pointer"
                   title="Toggle Ascending / Descending"
                 >
-                  {sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-sky-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />}
+                  {sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-zinc-300" /> : <ArrowDown className="w-3.5 h-3.5 text-zinc-300" />}
                   <span>{sortOrder.toUpperCase()}</span>
                 </button>
               </div>
@@ -734,7 +734,7 @@ export default function CandidatesTab({
               <button
                 type="button"
                 onClick={() => setShowFilterMenu(false)}
-                className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold font-mono cursor-pointer"
+                className="px-3 py-1 rounded-lg bg-zinc-200 hover:bg-white text-zinc-900 light:bg-zinc-900 light:hover:bg-zinc-800 light:text-white text-xs font-semibold font-mono cursor-pointer"
               >
                 Done
               </button>
@@ -744,10 +744,10 @@ export default function CandidatesTab({
 
         {/* Expandable Status Legend Guide */}
         {showStatusGuide && (
-          <div className="p-4 rounded-xl bg-black/80 light:bg-white/85 border border-amber-500/30 light:border-amber-300 text-xs space-y-2.5 animate-fadeIn">
+          <div className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 text-xs space-y-2.5 animate-fadeIn shadow-lg">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-white light:text-zinc-900 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400 light:text-amber-600" />
+              <span className="font-semibold text-white light:text-zinc-900 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-zinc-400" />
                 <span>Candidate Plan Expiry Status &amp; Visual Indicator Guide</span>
               </span>
               <button
@@ -759,30 +759,30 @@ export default function CandidatesTab({
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
-              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-sky-900/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-sky-300 font-bold font-mono">
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 space-y-1">
+                <div className="flex items-center gap-1.5 text-sky-400 font-semibold font-mono">
                   <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-                  <span>⚡ Applying Live (Server Identity)</span>
+                  <span>Applying Live (Server Identity)</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Candidate actively claimed by a server machine (e.g. <span className="text-zinc-200 light:text-zinc-800 font-mono">macs-MacBook-Air.local</span>). Protected from duplicate execution across servers via atomic lock.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-emerald-900/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-300 light:text-emerald-700 font-bold font-mono">
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-400 light:text-emerald-700 font-semibold font-mono">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
-                  <span>✓ Applied Today (Completed)</span>
+                  <span>Applied Today (Completed)</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Daily run successfully executed for today&apos;s IST cycle. Machine identity, PID, and completion timestamp are permanently saved.
                 </p>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-amber-800/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-300 light:text-amber-700 font-bold font-mono">
-                  <Clock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                  <span>⏳ In Queue / Scheduled</span>
+              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 space-y-1">
+                <div className="flex items-center gap-1.5 text-zinc-400 font-semibold font-mono">
+                  <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>In Queue / Scheduled</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Pending in the automated queue, or waiting for the scheduled morning run (06:00 AM IST).
@@ -1021,14 +1021,14 @@ export default function CandidatesTab({
                         <div className="flex flex-col gap-2 min-w-[210px] max-w-[280px]">
                           {/* User Identity */}
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm">
+                            <div className="w-8 h-8 rounded-xl bg-zinc-800 light:bg-zinc-200 border border-zinc-700/60 light:border-zinc-300 flex items-center justify-center text-xs font-semibold text-zinc-200 light:text-zinc-800 shrink-0 shadow-sm">
                               {u.name ? u.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'C'}
                             </div>
                             <div className="min-w-0">
                               <div className="font-bold text-white light:text-zinc-900 flex items-center gap-1.5 flex-wrap">
                                 <span className="truncate">{u.name || u.user_id}</span>
                                 {selectedCandidateId === u.user_id && (
-                                  <span className="px-1.5 py-0.2 rounded text-[9px] bg-indigo-500/25 text-indigo-300 light:text-indigo-700 border border-indigo-500/40 font-mono font-bold">
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] bg-zinc-800 text-zinc-200 light:bg-zinc-200 light:text-zinc-800 border border-zinc-700 light:border-zinc-300 font-mono font-semibold">
                                     SELECTED
                                   </span>
                                 )}
@@ -1050,29 +1050,29 @@ export default function CandidatesTab({
                             return (
                               <div className="pt-1.5 border-t border-zinc-800/60 light:border-zinc-200/80 space-y-1">
                                 <div className="flex items-center justify-between text-[10px] font-mono">
-                                  <span className="flex items-center gap-1">
+                                  <span className="flex items-center gap-1.5">
                                     {isApplying ? (
-                                      <span className="flex items-center gap-1 text-sky-400 font-bold animate-pulse">
+                                      <span className="flex items-center gap-1 text-sky-400 font-semibold animate-pulse">
                                         <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
-                                        ⚡ Applying:
+                                        Applying:
                                       </span>
                                     ) : isQuotaMet ? (
-                                      <span className="flex items-center gap-1 text-emerald-400 light:text-emerald-600 font-bold">
+                                      <span className="flex items-center gap-1 text-emerald-400 light:text-emerald-700 font-semibold">
                                         <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
-                                        ✓ Quota Met:
+                                        Quota Met:
                                       </span>
                                     ) : (
                                       <span className="text-zinc-400 light:text-zinc-600 flex items-center gap-1">
-                                        🎯 Today:
+                                        Today:
                                       </span>
                                     )}
-                                    <strong className={appliedToday > 0 ? "text-emerald-400 light:text-emerald-600 font-bold" : "text-zinc-300 light:text-zinc-700"}>
+                                    <strong className={appliedToday > 0 ? "text-emerald-400 light:text-emerald-700 font-semibold" : "text-zinc-300 light:text-zinc-700"}>
                                       {appliedToday}/{limit}
                                     </strong>
                                     <span className="text-zinc-500 text-[9px]">({pct}%)</span>
                                   </span>
                                   <span className="text-zinc-500 light:text-zinc-500 text-[10px]" title="Lifetime Total Applications">
-                                    Σ {totalApplied}
+                                    Total: {totalApplied}
                                   </span>
                                 </div>
 
@@ -1081,11 +1081,11 @@ export default function CandidatesTab({
                                   <div
                                     className={`h-full rounded-full transition-all duration-500 ${
                                       isApplying
-                                        ? 'bg-gradient-to-r from-sky-500 to-cyan-400 animate-pulse'
+                                        ? 'bg-sky-500 animate-pulse'
                                         : isQuotaMet
-                                        ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'
+                                        ? 'bg-emerald-500'
                                         : appliedToday > 0
-                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                                        ? 'bg-emerald-500/80'
                                         : 'bg-transparent'
                                     }`}
                                     style={{ width: `${Math.max(appliedToday > 0 ? 5 : 0, pct)}%` }}
@@ -1245,36 +1245,27 @@ export default function CandidatesTab({
                           return (
                             <div className="flex flex-col items-start gap-1.5">
                               <div className="flex items-center gap-1.5">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                                  u.plan === 'elite' ? 'bg-amber-500/10 text-amber-400 light:text-amber-600 border border-amber-500/30 light:border-amber-300' :
-                                  u.plan === 'pro' ? 'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300' :
-                                  u.plan === 'starter' ? 'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300' :
-                                  u.plan === 'vip' ? 'bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]' :
-                                  u.plan === 'none' || u.plan === 'no_plan' ? 'bg-zinc-800/80 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300' :
-                                  'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300'
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
+                                  u.plan === 'none' || u.plan === 'no_plan' 
+                                    ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-500 light:text-zinc-500 border border-zinc-800 light:border-zinc-200' 
+                                    : 'bg-zinc-800/90 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300'
                                 }`}>
                                   {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
                                 </span>
                             {u.is_vip && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]">
-                                <Crown className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 fill-amber-400/40" />
-                                VIP PASS
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold bg-amber-500/10 text-amber-400 light:text-amber-700 border border-amber-500/30 light:border-amber-300">
+                                <Crown className="w-2.5 h-2.5 text-amber-400 light:text-amber-600" />
+                                VIP
                               </span>
                             )}
                             {(() => {
                               const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
                               return (
                                 <span 
-                                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${
-                                    limit >= 150
-                                      ? 'bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300'
-                                      : limit >= 50
-                                      ? 'bg-cyan-500/15 text-cyan-300 light:text-cyan-700 border border-cyan-500/30 light:border-cyan-300'
-                                      : 'bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300'
-                                  }`}
+                                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700/60 light:border-zinc-300"
                                   title={`Daily Application Limit: ${limit}/day on Naukri platform`}
                                 >
-                                  {limit >= 150 ? '⚡ 150 Max/d' : `🎯 ${limit}/d`}
+                                  {limit}/d
                                 </span>
                               )
                             })()}
@@ -1284,7 +1275,7 @@ export default function CandidatesTab({
                           <select
                             value={u.plan || 'trial'}
                             onChange={(e) => handleChangePlan(u.user_id, e.target.value)}
-                            className="bg-zinc-900 light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-100 border border-zinc-700/80 light:border-zinc-300 text-[10px] text-zinc-200 light:text-zinc-800 rounded-md px-1.5 py-1 focus:outline-none focus:border-cyan-500 light:focus:border-cyan-600 cursor-pointer font-mono font-medium transition-colors"
+                            className="bg-zinc-900 light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-100 border border-zinc-700/80 light:border-zinc-300 text-[10px] text-zinc-200 light:text-zinc-800 rounded-md px-1.5 py-1 focus:outline-none focus:border-zinc-500 light:focus:border-zinc-400 cursor-pointer font-mono font-medium transition-colors"
                             title="Admin Quick Action: Change this candidate's plan tier"
                           >
                             <option value="none">No Plan (Inactive)</option>
@@ -1298,15 +1289,15 @@ export default function CandidatesTab({
                           <button
                             type="button"
                             onClick={() => handleToggleVip(u.user_id, !u.is_vip)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition-all cursor-pointer ${
                               u.is_vip
-                                ? 'bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
-                                : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border border-zinc-800 light:border-zinc-300 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
+                                ? 'bg-amber-500/10 text-amber-400 light:text-amber-700 border border-amber-500/30 light:border-amber-300 hover:bg-rose-500/15 hover:text-rose-400 hover:border-rose-500/30'
+                                : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border border-zinc-800 light:border-zinc-300 hover:bg-zinc-800 hover:text-zinc-200 light:hover:bg-zinc-200'
                             }`}
                             title={u.is_vip ? "Click to Revoke VIP Pass" : "Click to Grant 3-Month VIP Pass"}
                           >
                             <Crown className="w-3 h-3 text-amber-400 light:text-amber-600" />
-                            {u.is_vip ? 'Revoke VIP' : 'Grant VIP Pass'}
+                            {u.is_vip ? 'Revoke VIP' : 'Grant VIP'}
                           </button>
 
                           {/* Expiry Countdown & Visual Status */}

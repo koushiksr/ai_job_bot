@@ -210,7 +210,7 @@ export default function AdminDashboard() {
   const [pushDiagnosticResult, setPushDiagnosticResult] = useState<any | null>(null)
   const [showCustomPushConfig, setShowCustomPushConfig] = useState<boolean>(false)
   const [customPushRecipient, setCustomPushRecipient] = useState<string>('')
-  const [customPushTitle, setCustomPushTitle] = useState<string>('⚡ JobFlux AI Priority Alert')
+  const [customPushTitle, setCustomPushTitle] = useState<string>('JobFlux AI Priority Alert')
   const [customPushMessage, setCustomPushMessage] = useState<string>('New high-match job opportunities discovered in your domain.')
   const [customPushUrl, setCustomPushUrl] = useState<string>('/dashboard')
   const [pushLogs, setPushLogs] = useState<any[]>([])
@@ -334,7 +334,7 @@ export default function AdminDashboard() {
       if (subRes.success) {
         setDeviceWebPushActive(true)
         setNotificationPermission('granted')
-        sendBrowserNotification('⚡ JobFlux AI Admin Notifications Active', {
+        sendBrowserNotification('JobFlux AI Admin Notifications Active', {
           body: 'This browser device is now registered to receive background push notifications even when closed.'
         })
         setTestNotificationSent(true)
@@ -384,7 +384,7 @@ export default function AdminDashboard() {
           targetType: 'single',
           targetEmail: APP_CONFIG.supportEmail,
           delaySeconds: 5,
-          title: '⚡ YouTube-Style Desktop Alert Delivered!',
+          title: 'Desktop Alert Delivered',
           message: 'JobFlux background Web Push arrived on your desktop with this tab closed/minimized!',
           claimUrl: '/dashboard'
         })
@@ -398,7 +398,7 @@ export default function AdminDashboard() {
       } else {
         setPushDiagnosticResult({
           success: true,
-          message: '✓ 5-second delayed push dispatched! Check your desktop notification center.'
+          message: 'Delayed push dispatched. Check your desktop notification center.'
         })
       }
     } catch (err: any) {
@@ -408,7 +408,7 @@ export default function AdminDashboard() {
   }
 
   const handleSendTestNotification = () => {
-    sendBrowserNotification('⚡ JobFlux AI Admin Alert', {
+    sendBrowserNotification('JobFlux AI Admin Alert', {
       body: 'Admin push notifications are verified and active on your system!'
     })
     setTestNotificationSent(true)
@@ -421,7 +421,7 @@ export default function AdminDashboard() {
       setNotificationPermission(perm)
       if (perm === 'granted') {
         setShowUnblockGuide(false)
-        sendBrowserNotification('⚡ Notifications Successfully Unblocked!', {
+        sendBrowserNotification('Notifications Successfully Unblocked', {
           body: 'JobFlux AI admin push alerts are now active.'
         })
       } else if (perm === 'denied') {
@@ -697,7 +697,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           targetType,
           targetEmail,
-          title: customPushTitle.trim() || '⚡ JobFlux AI Priority Alert',
+          title: customPushTitle.trim() || 'JobFlux AI Priority Alert',
           message: customPushMessage.trim() || 'You have a new update in your JobFlux AI Cockpit.',
           claimUrl: customPushUrl.trim() || '/dashboard'
         })
@@ -747,7 +747,7 @@ export default function AdminDashboard() {
       const data = await res.json()
       setMailDiagnosticResult(data)
       if (data.success) {
-        sendBrowserNotification('⚡ Diagnostic Email Delivered!', {
+        sendBrowserNotification('Diagnostic Email Delivered', {
           body: `Live email confirmed in ${diagnosticRecipient} inbox!`
         })
       }
@@ -781,7 +781,7 @@ export default function AdminDashboard() {
       if (data.success) {
         setNewAppPassInput('')
         setShowConfigPass(false)
-        sendBrowserNotification('⚡ App Password Verified & Saved!', {
+        sendBrowserNotification('App Password Verified & Saved', {
           body: `Google SMTP verified and test email sent to ${diagnosticRecipient}!`
         })
       }
@@ -858,7 +858,7 @@ export default function AdminDashboard() {
       const data = await res.json()
       setDispatchReportResult(data)
       if (data.success) {
-        sendBrowserNotification('🚀 Daily Report Dispatched!', {
+        sendBrowserNotification('Daily Report Dispatched', {
           body: `Live career report sent to ${data.candidate?.email || targetEmail} via ${channel.toUpperCase()}!`
         })
         fetchPushDiagnostics()
@@ -975,7 +975,7 @@ export default function AdminDashboard() {
         type: 'success',
         message: data.message || `Offer dispatched successfully to ${data.dispatched_count} candidate(s)!`
       })
-      sendBrowserNotification('⚡ JobFlux AI Campaign Dispatched', {
+      sendBrowserNotification('JobFlux AI Campaign Dispatched', {
         body: `Offer "${offerTitle}" dispatched to ${data.dispatched_count || 1} candidate(s)!`
       })
       setIsConfirmOfferModalOpen(false)
@@ -1026,7 +1026,7 @@ export default function AdminDashboard() {
         throw new Error(data.detail || 'Action failed')
       }
       setQueueNotification({ type: 'success', message: data.message })
-      sendBrowserNotification('⚡ JobFlux Queue Updated', {
+      sendBrowserNotification('JobFlux Queue Updated', {
         body: data.message || `Queue action "${action}" executed.`
       })
       if (action === 'cancel_all_pending') setShowConfirmCancelAll(false)
@@ -1424,7 +1424,7 @@ export default function AdminDashboard() {
       if (res.ok) {
         const data = await res.json()
         if (data.jobs && Array.isArray(data.jobs)) {
-          const lines = data.jobs.map((j: any) => `[${j.date}] ✅ Applied to: ${j.title} at ${j.company}`)
+          const lines = data.jobs.map((j: any) => `[${j.date}] Applied to: ${j.title} at ${j.company}`)
           setSelectedLogContent(lines.length ? lines : ['No application history found for this candidate yet.'])
         }
       }

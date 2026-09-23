@@ -387,12 +387,12 @@ export default function VisitorsTab() {
 
           {[
             { id: 'all', label: 'All Events' },
-            { id: 'payment_success', label: '🎉 Purchases', highlight: true },
-            { id: 'payment_click', label: '💳 Payment Clicks', highlight: true },
-            { id: 'signup', label: '📝 Signups' },
-            { id: 'page_view', label: '👁️ Page Views' },
-            { id: 'cta_click', label: '🚀 CTA Clicks' },
-            { id: 'pwa_install_click', label: '📲 PWA Actions' }
+            { id: 'payment_success', label: 'Purchases' },
+            { id: 'payment_click', label: 'Payment Clicks' },
+            { id: 'signup', label: 'Signups' },
+            { id: 'page_view', label: 'Page Views' },
+            { id: 'cta_click', label: 'CTA Clicks' },
+            { id: 'pwa_install_click', label: 'PWA Actions' }
           ].map((pill) => (
             <button
               key={pill.id}
@@ -400,12 +400,8 @@ export default function VisitorsTab() {
               onClick={() => { setEventTypeFilter(pill.id); setPage(1) }}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 eventTypeFilter === pill.id
-                  ? pill.highlight
-                    ? 'bg-amber-500 text-black font-bold shadow-sm'
-                    : 'bg-cyan-500 text-black light:text-white font-bold shadow-sm'
-                  : pill.highlight
-                    ? 'bg-amber-950/40 light:bg-amber-50 text-amber-300 light:text-amber-700 border border-amber-800/60 light:border-amber-300 hover:bg-amber-900/40'
-                    : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-zinc-200 border border-zinc-800 light:border-zinc-200'
+                  ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold border border-zinc-700 light:border-zinc-300 shadow-sm'
+                  : 'bg-zinc-900/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-800/80 light:border-zinc-200'
               }`}
             >
               {pill.label}

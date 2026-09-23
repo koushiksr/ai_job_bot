@@ -211,7 +211,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
               }}
               className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black light:text-white font-bold text-xs transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
             >
-              ⚡ Test Send to Koushik (Both)
+              Test Send to Koushik (Both)
             </button>
           </div>
 
@@ -224,7 +224,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
                   <strong className="text-sky-300 font-mono">{mailSender}</strong>
                   <span className="text-zinc-700">|</span>
                   <span className="text-emerald-400 light:text-emerald-600 font-mono text-[11px]">
-                    {mailMaskedPass ? `✓ Active Key: ${mailMaskedPass}` : '⚠️ No Key Loaded'}
+                    {mailMaskedPass ? `Active Key: ${mailMaskedPass}` : 'No Key Loaded'}
                   </span>
                 </div>
                 <p className="text-[11px] text-zinc-400 light:text-zinc-600">
@@ -408,52 +408,52 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => {
-                        setCustomPushTitle('🚀 47 Jobs Applied Today by JobFlux AI')
+                        setCustomPushTitle('47 Jobs Applied Today by JobFlux AI')
                         setCustomPushMessage('Dispatched to Infosys, MedBuddy, UST & 44 top employers with tailored screening answers. Tap to view your delivery receipts!')
                         setCustomPushUrl('/dashboard')
                       }}
                       className="p-2 rounded-lg bg-black light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-left text-xs transition-colors cursor-pointer"
                     >
-                      <span className="font-semibold text-white light:text-zinc-900 block text-[11px]">📋 Daily Jobs Report</span>
+                      <span className="font-semibold text-white light:text-zinc-900 block text-[11px]">Daily Jobs Report</span>
                       <span className="text-[10px] text-zinc-400 light:text-zinc-600 leading-snug line-clamp-1">47 Jobs Applied Today</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => {
-                        setCustomPushTitle('👀 4 Recruiters Viewed Your Profile Today')
+                        setCustomPushTitle('4 Recruiters Viewed Your Profile Today')
                         setCustomPushMessage('Your profile moved into the Top 5% in recruiter searches. Tap to see which companies accessed your resume.')
                         setCustomPushUrl('/dashboard')
                       }}
                       className="p-2 rounded-lg bg-black light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-left text-xs transition-colors cursor-pointer"
                     >
-                      <span className="font-semibold text-white light:text-zinc-900 block text-[11px]">👀 Recruiter Views</span>
+                      <span className="font-semibold text-white light:text-zinc-900 block text-[11px]">Recruiter Views</span>
                       <span className="text-[10px] text-zinc-400 light:text-zinc-600 leading-snug line-clamp-1">4 Hiring Managers Viewed</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => {
-                        setCustomPushTitle('⚡ 18 New Tech Openings Discovered')
+                        setCustomPushTitle('18 New Tech Openings Discovered')
                         setCustomPushMessage('New high-match roles detected in your domain. Autonomous cloud worker scheduled for morning dispatch.')
                         setCustomPushUrl('/dashboard')
                       }}
                       className="p-2 rounded-lg bg-black light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-left text-xs transition-colors cursor-pointer"
                     >
-                      <span className="font-semibold text-white light:text-zinc-900 block text-[11px]">⚡ Match Discovery</span>
+                      <span className="font-semibold text-white light:text-zinc-900 block text-[11px]">Match Discovery</span>
                       <span className="text-[10px] text-zinc-400 light:text-zinc-600 leading-snug line-clamp-1">18 Roles Found Today</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => {
-                        setCustomPushTitle('👑 Free Milestone Reached · Save 90%')
+                        setCustomPushTitle('Free Milestone Reached · Save 90%')
                         setCustomPushMessage('47 jobs applied! Upgrade to Professional for ₹199 to unlock 1,800+ applications & skip review queues.')
                         setCustomPushUrl('/pricing?promo=WELCOMEPRO')
                       }}
                       className="p-2 rounded-lg bg-black light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-200 border border-amber-500/40 light:border-amber-300 text-left text-xs transition-colors cursor-pointer"
                     >
-                      <span className="font-semibold text-amber-300 light:text-amber-700 block text-[11px]">👑 Upgrade Pass (₹199)</span>
+                      <span className="font-semibold text-amber-300 light:text-amber-700 block text-[11px]">Upgrade Pass (₹199)</span>
                       <span className="text-[10px] text-zinc-400 light:text-zinc-600 leading-snug line-clamp-1">Milestone + 90% Discount</span>
                     </button>
                   </div>
@@ -468,7 +468,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
                       type="text"
                       value={customPushTitle}
                       onChange={(e) => setCustomPushTitle(e.target.value)}
-                      placeholder="e.g. ⚡ JobFlux AI Radar Alert"
+                      placeholder="e.g. JobFlux AI Radar Alert"
                       className="w-full px-3 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 text-xs focus:outline-none focus:border-amber-400"
                     />
                   </div>

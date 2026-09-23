@@ -126,7 +126,7 @@ export default function DailyDispatchReportModal({
             ) : (
               <>
                 <Send className="w-3.5 h-3.5" />
-                <span>⚡ Test Send to koushiksr1999@gmail.com (Email + Push)</span>
+                <span>Test Send to koushiksr1999@gmail.com (Email + Push)</span>
               </>
             )}
           </button>

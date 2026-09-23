@@ -200,7 +200,7 @@ export default function EnterpriseOrgsTab({
   const handleToggleOrgStatus = async (org: EnterpriseOrg) => {
     const newStatus = org.status === 'disabled' ? 'active' : 'disabled'
     const action = newStatus === 'disabled' ? 'disable' : 're-enable'
-    if (!confirm(`${action === 'disable' ? '⚠️ DISABLE' : '✅ Enable'} organisation "${org.name}"?\n\n${newStatus === 'disabled' ? 'All daily and on-demand runs for EVERY member in this org will be BLOCKED immediately.' : 'All enabled members will resume normal daily and on-demand runs.'}`)) return
+    if (!confirm(`${action === 'disable' ? 'DISABLE' : 'Enable'} organisation "${org.name}"?\n\n${newStatus === 'disabled' ? 'All daily and on-demand runs for EVERY member in this org will be BLOCKED immediately.' : 'All enabled members will resume normal daily and on-demand runs.'}`)) return
 
     setActionLoadingId(org.org_id + '_status')
     try {

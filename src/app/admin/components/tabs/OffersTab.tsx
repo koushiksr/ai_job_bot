@@ -636,7 +636,7 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                 className="px-3 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/40 text-sky-300 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
               >
                 <Send className="w-3 h-3" />
-                <span>⚡ Send Real DB Report to koushiksr1999@gmail.com (Email + Push)</span>
+                <span>Send Real DB Report to koushiksr1999@gmail.com (Email + Push)</span>
               </button>
             </div>
 

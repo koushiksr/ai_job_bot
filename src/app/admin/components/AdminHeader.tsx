@@ -67,11 +67,11 @@ export default function AdminHeader({
           <button
             type="button"
             onClick={onOpenDispatchReport}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 hover:from-sky-400 hover:to-indigo-400 text-white light:text-zinc-900 shadow-md shadow-sky-500/25 transition-all cursor-pointer shrink-0 border border-sky-400/40"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 light:bg-zinc-900 light:hover:bg-zinc-800 text-white transition-all cursor-pointer shrink-0 border border-zinc-700 light:border-zinc-800"
             title="Manual Trigger: Send Today's Job Applied Notification (Email + Web Push)"
           >
-            <Send className="w-3.5 h-3.5 text-sky-200 animate-pulse" />
-            <span className="hidden sm:inline">⚡ Send Today&apos;s Report</span>
+            <Send className="w-3.5 h-3.5 text-zinc-300" />
+            <span className="hidden sm:inline">Send Today&apos;s Report</span>
           </button>
 
           <button

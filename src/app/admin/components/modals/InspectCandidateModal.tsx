@@ -103,7 +103,7 @@ export default function InspectCandidateModal({
                 return (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 animate-pulse">
                     <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
-                    ⚡ APPLYING NOW
+                    APPLYING NOW
                   </span>
                 )
               }
@@ -111,7 +111,7 @@ export default function InspectCandidateModal({
                 return (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300">
                     <Clock className="w-3 h-3 text-amber-400 light:text-amber-600 animate-spin" />
-                    ⏳ IN QUEUE
+                    IN QUEUE
                   </span>
                 )
               }
@@ -119,7 +119,7 @@ export default function InspectCandidateModal({
                 return (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 light:border-emerald-300">
                     <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
-                    ✓ APPLIED TODAY
+                    APPLIED TODAY
                   </span>
                 )
               }
@@ -240,7 +240,7 @@ export default function InspectCandidateModal({
               <div className="font-mono font-bold text-amber-300 light:text-amber-700">
                 {(() => {
                   const limit = candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20))
-                  return `${limit}/day ${limit >= 150 ? '⚡ (150 Max)' : ''}`
+                  return `${limit}/day ${limit >= 150 ? '(150 Max)' : ''}`
                 })()}
               </div>
             </div>
@@ -347,7 +347,7 @@ export default function InspectCandidateModal({
                       {rem.warning_tier || 'Alert'} ({rem.details?.hours_left !== undefined ? `${rem.details.hours_left}h left` : ''})
                     </span>
                     <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono">
-                      Email: {rem.channels?.email ? '✅ Sent' : '❌ Skipped'} · Push: {rem.channels?.push ? '✅ Sent' : '❌ Skipped'}
+                      Email: {rem.channels?.email ? 'Sent' : 'Skipped'} · Push: {rem.channels?.push ? 'Sent' : 'Skipped'}
                     </div>
                   </div>
                   <div className="text-[10px] font-mono text-zinc-400 light:text-zinc-600">
