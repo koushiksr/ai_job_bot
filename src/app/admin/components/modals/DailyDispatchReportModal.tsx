@@ -101,7 +101,7 @@ export default function DailyDispatchReportModal({
         </div>
 
         {/* Instant 1-Click Test Dispatch Banner */}
-        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-950/60 via-indigo-950/40 to-black border border-sky-500/35 flex flex-wrap items-center justify-between gap-3 text-xs shadow-inner">
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-950/60 via-indigo-950/40 to-black light:from-sky-50 light:via-white light:to-white border border-sky-500/35 flex flex-wrap items-center justify-between gap-3 text-xs shadow-inner">
           <div className="flex items-center gap-2 text-zinc-300 light:text-zinc-700">
             <Sparkles className="w-4 h-4 text-amber-400 light:text-amber-600 animate-pulse shrink-0" />
             <div>

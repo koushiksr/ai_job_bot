@@ -87,7 +87,7 @@ export default function InspectCandidateModal({
         </div>
 
         {/* Machine & Device Execution Telemetry */}
-        <div className="p-4 rounded-xl bg-gradient-to-b from-sky-950/30 to-black border border-sky-500/30 space-y-3 shadow-lg">
+        <div className="p-4 rounded-xl bg-gradient-to-b from-sky-950/30 to-black light:from-sky-50 light:to-white border border-sky-500/30 space-y-3 shadow-lg">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h4 className="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
               <Server className="w-4 h-4 text-sky-400" />

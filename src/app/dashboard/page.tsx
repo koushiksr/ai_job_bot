@@ -2658,7 +2658,7 @@ export default function UserDashboard() {
                       <th className="py-3 px-4 text-right">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-800/60">
+                  <tbody className="divide-y divide-zinc-800 light:divide-zinc-200/60">
                     {loadingHistory ? (
                       <tr>
                         <td colSpan={4} className="py-12 text-center text-zinc-500 light:text-zinc-600">
@@ -2749,7 +2749,7 @@ export default function UserDashboard() {
               </div>
 
               {/* Mobile Card View */}
-              <div className="md:hidden divide-y divide-zinc-800/60">
+              <div className="md:hidden divide-y divide-zinc-800 light:divide-zinc-200/60">
                 {loadingHistory ? (
                   <div className="py-12 text-center text-zinc-500 light:text-zinc-600 text-xs">
                     <RefreshCw className="w-4 h-4 mx-auto animate-spin mb-2 text-zinc-400 light:text-zinc-600" />

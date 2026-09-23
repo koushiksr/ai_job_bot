@@ -177,7 +177,7 @@ export default function QueueTab({
       )}
 
       {/* On-Demand Candidate Trigger Controller */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0b1017] to-zinc-950 border border-sky-500/30 shadow-lg shadow-sky-950/20 space-y-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-zinc-950 via-[#0b1017] to-zinc-950 light:from-white light:via-zinc-50 light:to-white border border-sky-500/30 shadow-lg shadow-sky-950/20 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 flex items-center justify-center shrink-0">
@@ -569,7 +569,7 @@ export default function QueueTab({
                   <th className="py-3 px-4 text-center">Admin Controls</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
+              <tbody className="divide-y divide-zinc-800 light:divide-zinc-200/60">
                 {queueTasks.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-zinc-500 light:text-zinc-600 italic">

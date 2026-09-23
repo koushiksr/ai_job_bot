@@ -326,7 +326,7 @@ export default function EnterpriseOrgsTab({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-zinc-900 to-black border border-indigo-500/20 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-zinc-900 to-black light:from-indigo-50 light:via-white light:to-white border border-indigo-500/20 light:border-indigo-300 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
@@ -425,7 +425,7 @@ export default function EnterpriseOrgsTab({
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-zinc-800/50">
+          <div className="divide-y divide-zinc-800 light:divide-zinc-200/50">
             {enterpriseOrgs.map((org) => {
               const isDisabled = org.status === 'disabled'
               const isExpanded = expandedOrgId === org.org_id
@@ -596,7 +596,7 @@ export default function EnterpriseOrgsTab({
                           No members in this organization yet.
                         </div>
                       ) : (
-                        <div className="divide-y divide-zinc-800/50">
+                        <div className="divide-y divide-zinc-800 light:divide-zinc-200/50">
                           {members.map(member => {
                             const isRemoving = actionLoadingId === member.user_id + '_remove'
                             const isToggling = actionLoadingId === member.user_id

@@ -247,7 +247,7 @@ export default function RequestsTab({
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
+              <tbody className="divide-y divide-zinc-800 light:divide-zinc-200/60">
                 {loadingTickets ? (
                   <tr>
                     <td colSpan={6} className="py-14 text-center text-zinc-400 light:text-zinc-600">

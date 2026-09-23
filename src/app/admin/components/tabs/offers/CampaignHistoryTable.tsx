@@ -107,7 +107,7 @@ export const CampaignHistoryTable: React.FC<CampaignHistoryTableProps> = ({
                   <th className="py-3 px-4 text-center">Status (Click Head to Shrink ▲)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
+              <tbody className="divide-y divide-zinc-800 light:divide-zinc-200/60">
                 {offersData.history.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-zinc-500 light:text-zinc-600 italic">

@@ -28,13 +28,13 @@ const TOP_EMPLOYERS: Employer[] = [
 
 export default function EmployerProofMarquee() {
   return (
-    <div className="w-full max-w-full py-6 sm:py-8 border-y border-zinc-900/80 light:border-zinc-200 bg-gradient-to-b from-black via-zinc-950/60 to-black relative overflow-hidden select-none touch-pan-y">
+    <div className="w-full max-w-full py-6 sm:py-8 border-y border-zinc-900/80 light:border-zinc-200 bg-gradient-to-b from-black via-zinc-950/60 to-black light:from-white light:via-zinc-100 light:to-white relative overflow-hidden select-none touch-pan-y">
       {/* Background Subtle Gradient Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-950/15 via-transparent to-transparent pointer-events-none" />
 
       {/* Left and Right Smooth Edge Fades to contain cards seamlessly */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-32 bg-gradient-to-r from-black via-black/90 to-transparent z-10" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-32 bg-gradient-to-l from-black via-black/90 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-32 bg-gradient-to-r from-black via-black/90 to-transparent light:from-white light:via-white/90 light:to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-32 bg-gradient-to-l from-black via-black/90 to-transparent light:from-white light:via-white/90 light:to-transparent z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-4 sm:mb-5 relative z-0">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">

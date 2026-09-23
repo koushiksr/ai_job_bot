@@ -891,7 +891,7 @@ export default function EnterpriseAdminPortal() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-900">
+              <tbody className="divide-y divide-zinc-900 light:divide-zinc-200">
                 {filteredMembers.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-zinc-500 light:text-zinc-600">

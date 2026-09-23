@@ -138,7 +138,7 @@ export const AssignedOffersTable: React.FC<AssignedOffersTableProps> = ({
                   <th className="py-3 px-4 text-right">Action (Click Head to Shrink ▲)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
+              <tbody className="divide-y divide-zinc-800 light:divide-zinc-200/60">
                 {(() => {
                   const filtered = (offersData.assigned_offers || []).filter((off: any) => {
                     if (assignedOfferFilter === 'active') return !off.claimed && !off.is_expired && !off.revoked

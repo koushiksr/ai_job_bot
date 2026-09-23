@@ -684,7 +684,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
                       <th className="py-2.5 px-3">Response / Error (Click Head to Shrink ▲)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-800/60 font-sans">
+                  <tbody className="divide-y divide-zinc-800 light:divide-zinc-200/60 font-sans">
                     {mailLogs.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-4 text-center text-zinc-500 light:text-zinc-600 italic">

@@ -393,7 +393,7 @@ export default function HomeInteractiveToolsCard({
               <p>
                 Hi [Recruiter Name], noticed {targetCompany} is expanding its core engineering group. With 4+ years scaling microservices in Python/Go handling 25,000+ RPS...
               </p>
-              <div className="h-6 bg-gradient-to-b from-transparent to-zinc-950 absolute inset-x-0 bottom-0 flex items-center justify-center">
+              <div className="h-6 bg-gradient-to-b from-transparent to-zinc-950 light:to-white absolute inset-x-0 bottom-0 flex items-center justify-center">
                 <span className="text-[10px] text-zinc-400 light:text-zinc-600 flex items-center gap-1 font-sans">
                   <Lock className="w-3 h-3 text-zinc-400 light:text-zinc-600" /> Remainder of pitch locked
                 </span>
