@@ -195,7 +195,7 @@ export async function POST(req: NextRequest) {
 
     const isPaid = initialPlan !== 'trial'
     const regRole = (newProfile.role === 'admin' || newProfile.role === 'enterprise_admin' ? newProfile.role : 'user') as 'admin' | 'enterprise_admin' | 'user'
-    return issueSession(
+    return await issueSession(
       NextResponse.json({
         status: 'success',
         role: newProfile.role,

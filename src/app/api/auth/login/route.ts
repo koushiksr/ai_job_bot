@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
           }
         })
 
-        return issueSession(
+        return await issueSession(
           NextResponse.json({
             status: 'success',
             role: assignedRole,

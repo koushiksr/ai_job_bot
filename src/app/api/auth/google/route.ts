@@ -303,7 +303,7 @@ export async function POST(req: NextRequest) {
       isPlanActive = trialExpires ? trialExpires > now : true
     }
 
-    return issueSession(
+    return await issueSession(
       NextResponse.json({
         status: 'success',
         role: role,

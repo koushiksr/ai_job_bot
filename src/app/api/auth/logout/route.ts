@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   // Bump the account's session version so any copied token dies server-side
   // too (stateless JWTs can't otherwise be revoked before expiry).
   try {
-    const sess = readSession(req)
+    const sess = await readSession(req)
     if (sess?.uid) {
       const db = await getDb()
       if (db) {
