@@ -8,7 +8,7 @@ import { issueSession } from '@/lib/session'
 
 export async function POST(req: NextRequest) {
   try {
-    const rateCheck = checkRateLimit(req, { limit: 12, windowSeconds: 60 })
+    const rateCheck = await checkRateLimit(req, { limit: 12, windowSeconds: 60 })
     if (!rateCheck.success) {
       return NextResponse.json(
         { detail: `Too many sign-in attempts. Please wait ${rateCheck.resetSeconds} seconds before trying again.` },

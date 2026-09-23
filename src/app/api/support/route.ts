@@ -131,7 +131,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const rateCheck = checkRateLimit(req, { limit: 8, windowSeconds: 60 })
+    const rateCheck = await checkRateLimit(req, { limit: 8, windowSeconds: 60 })
     if (!rateCheck.success) {
       return NextResponse.json(
         { detail: `Too many requests submitted. Please wait ${rateCheck.resetSeconds} seconds before submitting again.` },

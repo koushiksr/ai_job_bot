@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
   try {
-    const rateCheck = checkRateLimit(req, { limit: 10, windowSeconds: 60 })
+    const rateCheck = await checkRateLimit(req, { limit: 10, windowSeconds: 60 })
     if (!rateCheck.success) {
       return NextResponse.json(
         { detail: `Too many attempts. Please wait ${rateCheck.resetSeconds}s before trying again.` },
