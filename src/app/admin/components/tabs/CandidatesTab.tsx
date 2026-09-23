@@ -33,7 +33,11 @@ import {
   ArrowUp,
   ArrowDown,
   SlidersHorizontal,
-  Shield
+  Shield,
+  MoreHorizontal,
+  MoreVertical,
+  RotateCcw,
+  Check
 } from 'lucide-react'
 import { CandidateUser } from '../../types'
 
@@ -164,6 +168,43 @@ export default function CandidatesTab({
     try {
       localStorage.setItem('admin_candidate_sort_field', 'plan')
       localStorage.setItem('admin_candidate_sort_order', 'desc')
+    } catch {}
+  }
+
+  // Filter menu popover state and click-outside handler
+  const [showFilterMenu, setShowFilterMenu] = React.useState(false)
+  const filterMenuRef = React.useRef<HTMLDivElement>(null)
+
+  // Row action menu state
+  const [openRowActionMenuId, setOpenRowActionMenuId] = React.useState<string | null>(null)
+  const rowActionMenuRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target as Node)) {
+        setShowFilterMenu(false)
+      }
+      if (rowActionMenuRef.current && !rowActionMenuRef.current.contains(event.target as Node)) {
+        setOpenRowActionMenuId(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const isFiltered = activeExecFilter !== 'all' || candidateStatusFilter !== 'all' || userSearch.trim().length > 0 || sortField !== 'plan' || sortOrder !== 'desc'
+  const activeFilterCount = (activeExecFilter !== 'all' ? 1 : 0) + (candidateStatusFilter !== 'all' ? 1 : 0) + (sortField !== 'plan' || sortOrder !== 'desc' ? 1 : 0)
+
+  const handleClearAllFilters = () => {
+    handleSetExecFilter('all')
+    setCandidateStatusFilter('all')
+    try {
+      localStorage.setItem('admin_candidate_status_filter', 'all')
+    } catch {}
+    handleResetSort()
+    setUserSearch('')
+    try {
+      localStorage.removeItem('admin_candidate_search')
     } catch {}
   }
 
@@ -371,202 +412,335 @@ export default function CandidatesTab({
   return (
     <div className="space-y-4">
       {/* Search & Status Filters Header */}
-      <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 shadow-xl">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3 top-3" />
-            <input
-              type="text"
-              placeholder="Search by name, email, user ID, or server hostname..."
-              value={userSearch}
-              onChange={e => {
-                const val = e.target.value
-                setUserSearch(val)
-                try {
-                  localStorage.setItem('admin_candidate_search', val)
-                } catch {}
-              }}
-              className="w-full bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-300 rounded-xl pl-9 pr-4 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400 focus:outline-none focus:border-cyan-500 light:focus:border-cyan-600"
-            />
-            {userSearch && (
-              <button
-                type="button"
-                onClick={() => {
-                  setUserSearch('')
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 shadow-xl relative">
+        {/* Main Toolbar Row */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          {/* Left: Search input + Quick Filter Tabs */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-0 flex-wrap sm:flex-nowrap">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[200px] sm:max-w-xs">
+              <Search className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search candidates, servers..."
+                value={userSearch}
+                onChange={e => {
+                  const val = e.target.value
+                  setUserSearch(val)
                   try {
-                    localStorage.removeItem('admin_candidate_search')
+                    localStorage.setItem('admin_candidate_search', val)
                   } catch {}
                 }}
-                className="absolute right-3 top-2.5 text-zinc-500 light:text-zinc-600 hover:text-white light:hover:text-zinc-900"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="text-xs text-zinc-400 light:text-zinc-600 hidden lg:block">
-              Auto-scheduled run: <span className="text-emerald-400 light:text-emerald-600 font-semibold">Daily at 06:00 AM IST</span>
+                className="w-full bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-300 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400 focus:outline-none focus:border-sky-500 light:focus:border-sky-600"
+              />
+              {userSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserSearch('')
+                    try {
+                      localStorage.removeItem('admin_candidate_search')
+                    } catch {}
+                  }}
+                  className="absolute right-2.5 top-2 text-zinc-500 hover:text-white light:hover:text-zinc-900 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
+
+            {/* Quick 1-Click Status Tabs */}
+            <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5">
+              {[
+                { key: 'all', label: 'All', count: usersList.length },
+                { key: 'applying', label: '⚡ Live', count: countApplying, color: 'text-sky-400 font-bold', pulse: true },
+                { key: 'applied_today', label: '✓ Done', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
+                { key: 'not_applied_today', label: '⚠️ Attention', count: countPaymentRequired + countNotAppliedToday, color: 'text-amber-300 light:text-amber-700 font-bold' }
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => handleSetExecFilter(tab.key)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    activeExecFilter === tab.key
+                      ? 'bg-sky-950/80 text-white light:text-zinc-900 border border-sky-500 font-bold shadow-sm'
+                      : 'bg-zinc-950/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200'
+                  }`}
+                >
+                  {tab.pulse && tab.count > 0 && <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping mr-0.5" />}
+                  <span>{tab.label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 light:bg-white font-bold ${tab.color || 'text-zinc-400 light:text-zinc-600'}`}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Triple-Dot Filter Menu + Reset + Status Guide + Create Candidate */}
+          <div className="flex items-center gap-2 shrink-0 justify-end" ref={filterMenuRef}>
+            {/* TRIPLE-DOT FILTER & SORT MENU BUTTON */}
             <button
               type="button"
-              onClick={() => setEditingUser({ isNew: true, user_id: '' })}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white light:text-zinc-900 font-bold text-xs transition-all shadow-lg shadow-indigo-500/25 cursor-pointer"
+              onClick={() => setShowFilterMenu(!showFilterMenu)}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-mono transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+                showFilterMenu || activeFilterCount > 0
+                  ? 'bg-sky-950/70 border-sky-500/80 text-sky-300 light:text-sky-700 shadow-sky-500/10'
+                  : 'bg-zinc-950 light:bg-zinc-100 border-zinc-800 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:bg-zinc-900 light:hover:bg-zinc-200'
+              }`}
+              title="Open Filter & Sort Options Menu"
             >
-              <User className="w-4 h-4" /> Create Candidate
-            </button>
-          </div>
-        </div>
-
-        {/* Bot Execution & Multi-Server Status Filters */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-zinc-900 light:border-zinc-200">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-mono text-sky-400 uppercase mr-1 flex items-center gap-1 font-bold">
-              <Cpu className="w-3 h-3 text-sky-400" /> Bot Execution:
-            </span>
-            {[
-              { key: 'all', label: 'All Candidates', count: usersList.length, color: 'text-zinc-300 light:text-zinc-700' },
-              { key: 'applying', label: '⚡ Applying Live', count: countApplying, color: 'text-sky-400 font-bold', pulse: true },
-              { key: 'applied_today', label: '✓ Applied Today', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
-              { key: 'in_queue', label: '⏳ In Queue', count: countInQueue, color: 'text-amber-400 light:text-amber-600 font-bold' },
-              { key: 'enabled', label: '▶️ Bot Active (ON)', count: countEnabled, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
-              { key: 'disabled', label: '⏸️ Bot Off', count: countDisabled, color: 'text-zinc-400 light:text-zinc-600' },
-              { key: 'not_applied_today', label: '⚠️ Not Applied Today', count: countNotAppliedToday, color: 'text-amber-200 light:text-amber-800' },
-              { key: 'payment_required', label: '💳 Payment Required', count: countPaymentRequired, color: 'text-rose-400 light:text-rose-600' }
-            ].map(f => (
-              <button
-                key={f.key}
-                type="button"
-                onClick={() => handleSetExecFilter(f.key)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeExecFilter === f.key
-                    ? 'bg-sky-950/80 text-white light:text-zinc-900 border border-sky-500 font-bold shadow-md shadow-sky-500/20'
-                    : 'bg-zinc-950/60 light:bg-white text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200 hover:border-zinc-800 light:hover:border-zinc-200'
-                }`}
-              >
-                {f.pulse && f.count > 0 && <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping mr-0.5" />}
-                <span>{f.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 light:bg-white/85 font-bold ${f.color}`}>
-                  {f.count}
+              <SlidersHorizontal className="w-3.5 h-3.5 text-sky-400" />
+              <span className="font-semibold">Filters &amp; Sort</span>
+              {activeFilterCount > 0 ? (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-sky-500 text-white">
+                  {activeFilterCount}
                 </span>
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setShowStatusGuide(!showStatusGuide)}
-            className="text-xs text-zinc-400 light:text-zinc-600 hover:text-amber-300 flex items-center gap-1 transition-colors font-mono cursor-pointer ml-auto"
-          >
-            <HelpCircle className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-            <span>{showStatusGuide ? 'Hide Status Legend' : 'Status & Server Guide'}</span>
-          </button>
-        </div>
-
-        {/* Plan / Subscription Status Filters */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-zinc-900/60 light:border-zinc-200">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-mono text-zinc-500 light:text-zinc-600 uppercase mr-1 flex items-center gap-1">
-              <Filter className="w-3 h-3 text-zinc-400 light:text-zinc-600" /> Plan Filter:
-            </span>
-            {[
-              { key: 'all', label: 'All Plans', count: usersList.length, color: 'text-zinc-300 light:text-zinc-700' },
-              { key: 'elite', label: '💎 Elite (90d)', count: countElite, color: 'text-amber-400 light:text-amber-600 font-bold' },
-              { key: 'pro', label: '⚡ Pro', count: countPro, color: 'text-indigo-400 font-bold' },
-              { key: 'starter', label: '🚀 Starter', count: countStarter, color: 'text-sky-400 font-bold' },
-              { key: 'trial', label: '🎁 Trial', count: countTrial, color: 'text-violet-400' },
-              { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400 light:text-emerald-600' },
-              { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300 light:text-amber-700' },
-              { key: 'urgent', label: 'Urgent <24h', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-rose-300 light:text-rose-600' },
-              { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400 light:text-rose-600' },
-              { key: 'vip', label: 'VIP Pass (90d)', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length, color: 'text-amber-400 light:text-amber-600' },
-              { key: 'no_plan', label: 'No Plan', count: usersList.filter(u => u.plan_expiry_status === 'no_plan' || u.plan === 'none' || u.plan === 'no_plan').length, color: 'text-zinc-400 light:text-zinc-600' }
-            ].map(f => (
-              <button
-                key={f.key}
-                type="button"
-                onClick={() => {
-                  setCandidateStatusFilter(f.key)
-                  try {
-                    localStorage.setItem('admin_candidate_status_filter', f.key)
-                  } catch {}
-                }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
-                  candidateStatusFilter === f.key
-                    ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 border border-zinc-700 light:border-zinc-300 font-bold shadow-sm'
-                    : 'bg-zinc-950/60 light:bg-white text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200 hover:border-zinc-800 light:hover:border-zinc-200'
-                }`}
-              >
-                <span>{f.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 light:bg-white/85 font-bold ${f.color}`}>
-                  {f.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Sort Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-zinc-900/80 light:border-zinc-200 text-xs">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] font-mono text-indigo-400 uppercase flex items-center gap-1.5 font-bold">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" /> Sort Candidates:
-            </span>
-
-            <select
-              aria-label="Sort candidates by"
-              value={sortField}
-              onChange={e => handleSetSortField(e.target.value as any)}
-              className="bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-white light:text-zinc-900 rounded-lg px-3 py-1 text-xs font-mono focus:outline-none focus:border-indigo-500 cursor-pointer shadow-inner"
-            >
-              <option value="plan">💎 Plan Tier (Elite → Pro → Starter → Trial → Free)</option>
-              <option value="enabled">⚡ Auto-Apply Status (Enabled / Active First)</option>
-              <option value="today">🎯 Applications Today (Highest First)</option>
-              <option value="total">📊 Lifetime Total Applied (Highest First)</option>
-              <option value="execution">🤖 Bot Execution Status (Applying Live First)</option>
-              <option value="name">👤 Candidate Name (A → Z)</option>
-              <option value="email">✉️ Portal Email Address (A → Z)</option>
-              <option value="last_login">🕒 Last Login / Activity (Recent First)</option>
-              <option value="created_at">📅 Date Added (Newest First)</option>
-            </select>
-
-            <button
-              type="button"
-              onClick={handleToggleSortOrder}
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 hover:border-zinc-700 light:hover:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
-              title={`Current order: ${sortOrder === 'asc' ? 'Ascending' : 'Descending'}. Click to toggle.`}
-            >
-              {sortOrder === 'asc' ? (
-                <>
-                  <ArrowUp className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Ascending</span>
-                </>
               ) : (
-                <>
-                  <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Descending</span>
-                </>
+                <MoreHorizontal className="w-3.5 h-3.5 text-zinc-400" />
               )}
             </button>
 
-            {(sortField !== 'plan' || sortOrder !== 'desc') && (
+            {/* Quick Reset Button if filtered */}
+            {isFiltered && (
               <button
                 type="button"
-                onClick={handleResetSort}
-                className="text-[11px] text-zinc-500 light:text-zinc-600 hover:text-zinc-300 font-mono underline ml-1 cursor-pointer transition-colors"
+                onClick={handleClearAllFilters}
+                className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
+                title="Reset all filters and sorting to defaults"
               >
-                Reset Sort
+                <RotateCcw className="w-3.5 h-3.5" />
               </button>
             )}
-          </div>
 
-          <div className="text-[11px] font-mono text-zinc-500 light:text-zinc-600 ml-auto flex items-center gap-1.5">
-            <span>Sorting:</span>
-            <strong className="text-zinc-300 light:text-zinc-700 bg-zinc-900/80 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200 font-normal">
-              {getSortLabel(sortField)} ({sortOrder.toUpperCase()})
-            </strong>
+            {/* Status Guide Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowStatusGuide(!showStatusGuide)}
+              className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-amber-400 transition-colors cursor-pointer"
+              title={showStatusGuide ? 'Hide Status Legend Guide' : 'Show Status Legend Guide'}
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+            </button>
+
+            {/* Create Candidate Button */}
+            <button
+              type="button"
+              onClick={() => setEditingUser({ isNew: true, user_id: '' })}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-md shadow-indigo-500/20 cursor-pointer"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Create Candidate</span>
+              <span className="sm:hidden">Create</span>
+            </button>
           </div>
         </div>
+
+        {/* Active Filter Chips Bar (Shown when any filter is active) */}
+        {isFiltered && (
+          <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-zinc-900 light:border-zinc-200 text-[11px] font-mono">
+            <span className="text-zinc-500 light:text-zinc-600">Active filters:</span>
+            {activeExecFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-950/60 light:bg-sky-50 text-sky-300 light:text-sky-700 border border-sky-800/60 light:border-sky-300">
+                <span>Bot: {activeExecFilter.replace(/_/g, ' ')}</span>
+                <button type="button" onClick={() => handleSetExecFilter('all')} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            )}
+            {candidateStatusFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-950/60 light:bg-indigo-50 text-indigo-300 light:text-indigo-700 border border-indigo-800/60 light:border-indigo-300">
+                <span>Plan: {candidateStatusFilter}</span>
+                <button type="button" onClick={() => {
+                  setCandidateStatusFilter('all')
+                  try { localStorage.setItem('admin_candidate_status_filter', 'all') } catch {}
+                }} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            )}
+            {(sortField !== 'plan' || sortOrder !== 'desc') && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
+                <span>Sort: {sortField} ({sortOrder})</span>
+                <button type="button" onClick={handleResetSort} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleClearAllFilters}
+              className="text-zinc-500 hover:text-rose-400 underline ml-1 cursor-pointer transition-colors text-[10px]"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
+        {/* TRIPLE-DOT FILTER & SORT POPOVER MENU */}
+        {showFilterMenu && (
+          <div className="absolute top-full right-4 mt-2 w-[340px] sm:w-[500px] p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 space-y-4 animate-fadeIn">
+            {/* Popover Header */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800 light:border-zinc-200">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-sky-400" />
+                <h4 className="text-xs font-bold text-white light:text-zinc-900 uppercase tracking-wider font-mono">
+                  Filter &amp; Sort Candidates
+                </h4>
+                {activeFilterCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded text-[10px] bg-sky-500/20 text-sky-300 light:text-sky-700 border border-sky-500/40 font-mono font-bold">
+                    {activeFilterCount} active
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFilterMenu(false)}
+                className="text-zinc-400 hover:text-white light:hover:text-zinc-900 cursor-pointer p-1 rounded-lg"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Section 1: Bot Execution Filter */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono text-sky-400 font-bold uppercase flex items-center gap-1">
+                  <Cpu className="w-3 h-3 text-sky-400" /> Bot Execution Status:
+                </span>
+                {activeExecFilter !== 'all' && (
+                  <button type="button" onClick={() => handleSetExecFilter('all')} className="text-[10px] text-zinc-500 hover:text-zinc-300 font-mono cursor-pointer">
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                {[
+                  { key: 'all', label: 'All Candidates', count: usersList.length },
+                  { key: 'applying', label: '⚡ Applying', count: countApplying, color: 'text-sky-400 font-bold' },
+                  { key: 'applied_today', label: '✓ Applied Today', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
+                  { key: 'in_queue', label: '⏳ In Queue', count: countInQueue, color: 'text-amber-400 light:text-amber-600' },
+                  { key: 'enabled', label: '▶️ Bot Active', count: countEnabled, color: 'text-emerald-400 light:text-emerald-600 font-bold' },
+                  { key: 'disabled', label: '⏸️ Bot Off', count: countDisabled, color: 'text-zinc-400' },
+                  { key: 'not_applied_today', label: '⚠️ Not Applied', count: countNotAppliedToday, color: 'text-amber-300 light:text-amber-700' },
+                  { key: 'payment_required', label: '💳 Payment Req.', count: countPaymentRequired, color: 'text-rose-400 light:text-rose-600' }
+                ].map(f => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => handleSetExecFilter(f.key)}
+                    className={`p-1.5 rounded-lg text-[11px] font-mono transition-all text-left flex items-center justify-between cursor-pointer ${
+                      activeExecFilter === f.key
+                        ? 'bg-sky-950/90 text-white light:text-zinc-900 border border-sky-500 font-bold shadow-sm'
+                        : 'bg-zinc-950 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200'
+                    }`}
+                  >
+                    <span className="truncate">{f.label}</span>
+                    <span className={`text-[10px] font-bold shrink-0 ml-1 ${f.color || 'text-zinc-500'}`}>{f.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Section 2: Plan Tier & Validity Filter */}
+            <div className="space-y-1.5 pt-2 border-t border-zinc-900 light:border-zinc-200">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 font-bold uppercase flex items-center gap-1">
+                  <Filter className="w-3 h-3 text-zinc-400" /> Plan &amp; Expiry Filter:
+                </span>
+                {candidateStatusFilter !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCandidateStatusFilter('all')
+                      try { localStorage.setItem('admin_candidate_status_filter', 'all') } catch {}
+                    }}
+                    className="text-[10px] text-zinc-500 hover:text-zinc-300 font-mono cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {[
+                  { key: 'all', label: 'All Plans', count: usersList.length },
+                  { key: 'elite', label: '💎 Elite (90d)', count: countElite, color: 'text-amber-400 light:text-amber-600 font-bold' },
+                  { key: 'pro', label: '⚡ Pro', count: countPro, color: 'text-indigo-400 font-bold' },
+                  { key: 'starter', label: '🚀 Starter', count: countStarter, color: 'text-sky-400 font-bold' },
+                  { key: 'trial', label: '🎁 Trial', count: countTrial, color: 'text-violet-400' },
+                  { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400 light:text-emerald-600' },
+                  { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-300 light:text-amber-700' },
+                  { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400 light:text-rose-600' },
+                  { key: 'vip', label: 'VIP Pass', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length, color: 'text-amber-400 light:text-amber-600' }
+                ].map(f => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => {
+                      setCandidateStatusFilter(f.key)
+                      try { localStorage.setItem('admin_candidate_status_filter', f.key) } catch {}
+                    }}
+                    className={`p-1.5 rounded-lg text-[11px] font-mono transition-all text-left flex items-center justify-between cursor-pointer ${
+                      candidateStatusFilter === f.key
+                        ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 border border-zinc-700 light:border-zinc-300 font-bold shadow-sm'
+                        : 'bg-zinc-950 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200'
+                    }`}
+                  >
+                    <span className="truncate">{f.label}</span>
+                    <span className={`text-[10px] font-bold shrink-0 ml-1 ${f.color || 'text-zinc-500'}`}>{f.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Section 3: Sort Options */}
+            <div className="space-y-1.5 pt-2 border-t border-zinc-900 light:border-zinc-200">
+              <span className="text-[11px] font-mono text-indigo-400 font-bold uppercase flex items-center gap-1">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" /> Sort Candidates By:
+              </span>
+              <div className="flex items-center gap-2">
+                <select
+                  aria-label="Sort candidates by"
+                  value={sortField}
+                  onChange={e => handleSetSortField(e.target.value as any)}
+                  className="flex-1 bg-zinc-950 light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 text-white light:text-zinc-900 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500 cursor-pointer"
+                >
+                  <option value="plan">💎 Plan Tier (Highest First)</option>
+                  <option value="today">🎯 Applications Today (Highest First)</option>
+                  <option value="total">📊 Lifetime Total Applied (Highest First)</option>
+                  <option value="execution">🤖 Bot Execution Status (Applying Live First)</option>
+                  <option value="enabled">⚡ Auto-Apply Active First</option>
+                  <option value="name">👤 Candidate Name (A → Z)</option>
+                  <option value="email">✉️ Portal Email (A → Z)</option>
+                  <option value="last_login">🕒 Recent Login First</option>
+                  <option value="created_at">📅 Date Added (Newest First)</option>
+                </select>
+
+                <button
+                  type="button"
+                  onClick={handleToggleSortOrder}
+                  className="px-2.5 py-1.5 rounded-lg bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs font-mono flex items-center gap-1 cursor-pointer"
+                  title="Toggle Ascending / Descending"
+                >
+                  {sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-sky-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />}
+                  <span>{sortOrder.toUpperCase()}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Popover Footer */}
+            <div className="flex items-center justify-between pt-2 border-t border-zinc-900 light:border-zinc-200">
+              <button
+                type="button"
+                onClick={handleClearAllFilters}
+                className="text-xs font-mono text-zinc-500 hover:text-rose-400 underline cursor-pointer"
+              >
+                Clear all filters
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowFilterMenu(false)}
+                className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold font-mono cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Expandable Status Legend Guide */}
         {showStatusGuide && (
@@ -744,12 +918,30 @@ export default function CandidatesTab({
                 <tr className="bg-zinc-950 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-zinc-800 light:border-zinc-200">
                   <th 
                     onClick={() => handleSetSortField('name')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
+                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group min-w-[220px]"
                     title="Click to sort by Candidate Name (A → Z)"
                   >
-                    <div className="flex items-center gap-1.5">
-                      <span>Candidate</span>
-                      {renderSortIcon('name')}
+                    <div className="flex items-center justify-between gap-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span>Candidate &amp; Quota</span>
+                        {renderSortIcon('name')}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleSetSortField('today')
+                        }}
+                        className={`text-[9px] font-mono px-1.5 py-0.5 rounded border transition-colors flex items-center gap-1 cursor-pointer ${
+                          sortField === 'today'
+                            ? 'bg-sky-950/80 border-sky-500 text-sky-300 font-bold'
+                            : 'bg-zinc-900/60 light:bg-zinc-200 border-zinc-800 light:border-zinc-300 text-zinc-500 hover:text-zinc-300'
+                        }`}
+                        title="Sort by Today's Applications"
+                      >
+                        <span>Today</span>
+                        {renderSortIcon('today')}
+                      </button>
                     </div>
                   </th>
                   <th 
@@ -792,30 +984,20 @@ export default function CandidatesTab({
                       {renderSortIcon('last_login')}
                     </div>
                   </th>
-                  <th 
-                    onClick={() => handleSetSortField('today')}
-                    className="py-3.5 px-4 text-center cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
-                    title="Click to sort by Applications Today / Lifetime Total"
-                  >
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span>Today (Quota) / Total</span>
-                      {renderSortIcon('today')}
-                    </div>
-                  </th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/50 light:divide-zinc-200">
                 {loadingUsers ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-zinc-400 light:text-zinc-500">
+                    <td colSpan={6} className="py-12 text-center text-zinc-400 light:text-zinc-500">
                       <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                       Loading candidate profiles...
                     </td>
                   </tr>
                 ) : sortedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-zinc-500 light:text-zinc-500">
+                    <td colSpan={6} className="py-12 text-center text-zinc-500 light:text-zinc-500">
                       No candidate profiles match your search query.
                     </td>
                   </tr>
@@ -835,21 +1017,83 @@ export default function CandidatesTab({
                           : 'hover:bg-zinc-800/30 light:hover:bg-zinc-50'
                       }`}
                     >
-                      <td className="py-3 px-3 font-bold text-white light:text-zinc-900 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-600 flex items-center justify-center text-xs font-bold text-white light:text-zinc-900 shrink-0">
-                          {u.name ? u.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'C'}
-                        </div>
-                        <div>
-                          <div className="font-bold text-white light:text-zinc-900 flex items-center gap-1.5">
-                            <span>{u.name || u.user_id}</span>
-                            {selectedCandidateId === u.user_id && (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 font-mono font-bold">
-                                SELECTED
-                              </span>
-                            )}
+                      <td className="py-3 px-3.5 font-bold text-white light:text-zinc-900">
+                        <div className="flex flex-col gap-2 min-w-[210px] max-w-[280px]">
+                          {/* User Identity */}
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm">
+                              {u.name ? u.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'C'}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-white light:text-zinc-900 flex items-center gap-1.5 flex-wrap">
+                                <span className="truncate">{u.name || u.user_id}</span>
+                                {selectedCandidateId === u.user_id && (
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] bg-indigo-500/25 text-indigo-300 light:text-indigo-700 border border-indigo-500/40 font-mono font-bold">
+                                    SELECTED
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-zinc-500 font-mono truncate" title={u.user_id}>@{u.user_id}</div>
+                              <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono truncate" title={u.email}>{u.email}</div>
+                            </div>
                           </div>
-                          <div className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">{u.user_id}</div>
-                          <div className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono truncate max-w-[170px]" title={u.email}>{u.email}</div>
+
+                          {/* Symbolic Application Progress Meter */}
+                          {(() => {
+                            const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
+                            const appliedToday = u.applied_today || 0
+                            const totalApplied = u.total_applied || u.applied_count || 0
+                            const pct = Math.min(100, Math.round((appliedToday / Math.max(1, limit)) * 100))
+                            const isApplying = u.execution_summary?.is_applying || u.current_execution?.status === 'applying'
+                            const isQuotaMet = appliedToday >= limit && limit > 0
+
+                            return (
+                              <div className="pt-1.5 border-t border-zinc-800/60 light:border-zinc-200/80 space-y-1">
+                                <div className="flex items-center justify-between text-[10px] font-mono">
+                                  <span className="flex items-center gap-1">
+                                    {isApplying ? (
+                                      <span className="flex items-center gap-1 text-sky-400 font-bold animate-pulse">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                                        ⚡ Applying:
+                                      </span>
+                                    ) : isQuotaMet ? (
+                                      <span className="flex items-center gap-1 text-emerald-400 light:text-emerald-600 font-bold">
+                                        <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
+                                        ✓ Quota Met:
+                                      </span>
+                                    ) : (
+                                      <span className="text-zinc-400 light:text-zinc-600 flex items-center gap-1">
+                                        🎯 Today:
+                                      </span>
+                                    )}
+                                    <strong className={appliedToday > 0 ? "text-emerald-400 light:text-emerald-600 font-bold" : "text-zinc-300 light:text-zinc-700"}>
+                                      {appliedToday}/{limit}
+                                    </strong>
+                                    <span className="text-zinc-500 text-[9px]">({pct}%)</span>
+                                  </span>
+                                  <span className="text-zinc-500 light:text-zinc-500 text-[10px]" title="Lifetime Total Applications">
+                                    Σ {totalApplied}
+                                  </span>
+                                </div>
+
+                                {/* Symbolic Progress Track */}
+                                <div className="w-full h-1.5 rounded-full bg-zinc-900 light:bg-zinc-200 overflow-hidden relative border border-zinc-800/80 light:border-zinc-300">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      isApplying
+                                        ? 'bg-gradient-to-r from-sky-500 to-cyan-400 animate-pulse'
+                                        : isQuotaMet
+                                        ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'
+                                        : appliedToday > 0
+                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                                        : 'bg-transparent'
+                                    }`}
+                                    style={{ width: `${Math.max(appliedToday > 0 ? 5 : 0, pct)}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )
+                          })()}
                         </div>
                       </td>
                       {/* Bot Execution & Server Identity Status */}
@@ -1219,46 +1463,9 @@ export default function CandidatesTab({
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-3 text-center">
-                        <div className="inline-flex flex-col items-center gap-0.5">
-                          {(() => {
-                            const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
-                            const appliedToday = u.applied_today || 0
-                            return (
-                              <>
-                                <span 
-                                  className={`inline-flex items-center justify-center px-2 py-0.5 rounded font-mono text-[11px] font-bold border ${
-                                    appliedToday > 0 
-                                      ? 'bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border-emerald-500/30 light:border-emerald-300' 
-                                      : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-700 border-zinc-800 light:border-zinc-300'
-                                  }`}
-                                  title={`Today: ${appliedToday} applied / Daily Limit: ${limit}`}
-                                >
-                                  {appliedToday} / {limit}
-                                </span>
-                                <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-500" title="Lifetime Total Applications">
-                                  Total: {u.total_applied || 0}
-                                </span>
-                              </>
-                            )
-                          })()}
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              localStorage.setItem('user_id', u.user_id)
-                              localStorage.setItem('user_email', u.email)
-                              localStorage.setItem('user_role', 'admin')
-                              window.open('/dashboard', '_blank')
-                            }}
-                            className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300 transition-colors cursor-pointer"
-                            title="Open Candidate Dashboard"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </button>
+                      <td className="py-3 px-3.5 text-right relative">
+                        <div className="flex items-center justify-end gap-1.5" ref={openRowActionMenuId === u.user_id ? rowActionMenuRef : undefined}>
+                          {/* Primary Quick Action: Zap Sweep */}
                           {onTriggerOnDemand && (
                             <button
                               type="button"
@@ -1273,7 +1480,7 @@ export default function CandidatesTab({
                                   await onTriggerOnDemand(u.user_id, true)
                                 }
                               }}
-                              className="p-2 rounded-lg bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white transition-colors border border-cyan-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="p-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white transition-colors border border-cyan-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                               title={actionProcessingId === u.user_id ? 'Queuing on-demand run…' : 'Trigger immediate on-demand bot run for this candidate'}
                             >
                               {actionProcessingId === u.user_id ? (
@@ -1283,42 +1490,133 @@ export default function CandidatesTab({
                               )}
                             </button>
                           )}
+
+                          {/* Quick Inspect Button */}
                           <button
                             type="button"
-                            onClick={() => handleInspectCandidate(u)}
-                            className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-amber-300 light:text-amber-700 transition-colors border border-amber-500/30 light:border-amber-300 shadow-sm cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleInspectCandidate(u)
+                            }}
+                            className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-amber-300 light:text-amber-700 transition-colors border border-amber-500/30 light:border-amber-300 shadow-sm cursor-pointer"
                             title="Inspect candidate plan validity, assigned offers & reminder telemetry"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
-                          <button
-                            type="button"
-                            disabled={dispatchReportLoading}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onOpenDispatchReportForUser(u.email)
-                            }}
-                            className="p-2 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 light:text-sky-700 transition-colors border border-sky-500/30 light:border-sky-300 shadow-sm cursor-pointer disabled:opacity-50"
-                            title="Open Daily Job Dispatch Report Hub for this candidate (Email + Push)"
-                          >
-                            <Send className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingUser(u)}
-                            className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 transition-colors border border-zinc-800 light:border-zinc-300 cursor-pointer"
-                            title="Edit candidate profile"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteUser(u.user_id)}
-                            className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 light:text-rose-600 border border-rose-500/20 transition-colors cursor-pointer"
-                            title="Delete Candidate"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+
+                          {/* ROW TRIPLE-DOT ACTIONS MENU BUTTON */}
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setOpenRowActionMenuId(openRowActionMenuId === u.user_id ? null : u.user_id)
+                              }}
+                              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                                openRowActionMenuId === u.user_id
+                                  ? 'bg-sky-950 border-sky-500 text-sky-300'
+                                  : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 border-zinc-800 light:border-zinc-300'
+                              }`}
+                              title="More Candidate Actions"
+                            >
+                              <MoreVertical className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* ROW ACTION DROPDOWN */}
+                            {openRowActionMenuId === u.user_id && (
+                              <div
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-0 top-full mt-1 w-52 p-1.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 text-left space-y-0.5 animate-fadeIn"
+                              >
+                                {onTriggerOnDemand && (
+                                  <button
+                                    type="button"
+                                    disabled={Boolean(
+                                      u.execution_summary?.is_applying ||
+                                      u.current_execution?.status === 'applying' ||
+                                      actionProcessingId === u.user_id
+                                    )}
+                                    onClick={async () => {
+                                      setOpenRowActionMenuId(null)
+                                      if (confirm(`Trigger immediate on-demand application for "${u.name || u.user_id}"?\n(Bypasses daily lock to run on next available server)`)) {
+                                        await onTriggerOnDemand(u.user_id, true)
+                                      }
+                                    }}
+                                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-cyan-300 hover:bg-cyan-950/50 light:hover:bg-cyan-50 transition-colors cursor-pointer disabled:opacity-40"
+                                  >
+                                    <Zap className="w-3.5 h-3.5 shrink-0" />
+                                    <span>Run On-Demand Sweep</span>
+                                  </button>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenRowActionMenuId(null)
+                                    handleInspectCandidate(u)
+                                  }}
+                                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                  <span>Inspect Telemetry &amp; Plan</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  disabled={dispatchReportLoading}
+                                  onClick={() => {
+                                    setOpenRowActionMenuId(null)
+                                    onOpenDispatchReportForUser(u.email)
+                                  }}
+                                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50"
+                                >
+                                  <Send className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                                  <span>Send Dispatch Report</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenRowActionMenuId(null)
+                                    localStorage.setItem('user_id', u.user_id)
+                                    localStorage.setItem('user_email', u.email)
+                                    localStorage.setItem('user_role', 'admin')
+                                    window.open('/dashboard', '_blank')
+                                  }}
+                                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                                  <span>Candidate Dashboard</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenRowActionMenuId(null)
+                                    setEditingUser(u)
+                                  }}
+                                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer"
+                                >
+                                  <Edit className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                                  <span>Edit Profile</span>
+                                </button>
+
+                                <div className="border-t border-zinc-900 light:border-zinc-200 my-1" />
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenRowActionMenuId(null)
+                                    handleDeleteUser(u.user_id)
+                                  }}
+                                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-rose-400 hover:bg-rose-950/40 light:hover:bg-rose-50 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                                  <span>Delete Candidate</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
