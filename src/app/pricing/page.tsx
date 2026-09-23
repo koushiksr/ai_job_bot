@@ -438,7 +438,7 @@ export default function PricingPage() {
                 </div>
                 <Link
                   href="/dashboard"
-                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors flex items-center gap-1.5 shrink-0"
+                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-colors flex items-center gap-1.5 shrink-0"
                 >
                   <span>Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -465,7 +465,7 @@ export default function PricingPage() {
                 </Link>
                 <Link
                   href="/?mode=free"
-                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0 shadow-sm"
+                  className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-colors shrink-0 shadow-sm"
                 >
                   <span className="hidden sm:inline">Start for Free</span>
                   <span className="sm:hidden">Start Free</span>
@@ -621,7 +621,7 @@ export default function PricingPage() {
                       onClick={() => handleOpenPlanModal(plan)}
                       className={`w-full py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         isFeatured
-                          ? 'bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white shadow-sm'
+                          ? 'bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 shadow-sm'
                           : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-200 light:text-zinc-800 border border-zinc-800 light:border-zinc-200'
                       }`}
                     >
@@ -930,7 +930,7 @@ export default function PricingPage() {
                   <button
                     type="submit"
                     disabled={activating}
-                    className="w-full py-2.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-full py-2.5 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {activating ? (
                       <span>Connecting to gateway...</span>
@@ -955,7 +955,7 @@ export default function PricingPage() {
                   </div>
                   <Link
                     href="/dashboard"
-                    className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 text-black light:text-white hover:bg-zinc-200 light:hover:bg-zinc-800 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 text-black light:text-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-100 transition-colors"
                   >
                     <span>Go to Dashboard</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -1020,7 +1020,7 @@ export default function PricingPage() {
                   <div className="pt-3">
                     <button
                       onClick={() => setShowEnterpriseModal(false)}
-                      className="px-5 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors cursor-pointer"
+                      className="px-5 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors cursor-pointer"
                     >
                       Close Window
                     </button>
@@ -1114,7 +1114,7 @@ export default function PricingPage() {
                     <button
                       type="submit"
                       disabled={enterpriseSubmitting}
-                      className="w-full py-2.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                      className="w-full py-2.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                     >
                       {enterpriseSubmitting ? (
                         <>

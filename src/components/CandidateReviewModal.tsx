@@ -175,7 +175,7 @@ export default function CandidateReviewModal({
             <button
               type="button"
               onClick={handleCloseModal}
-              className="px-6 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors cursor-pointer"
+              className="px-6 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors cursor-pointer"
             >
               Done
             </button>

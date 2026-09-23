@@ -143,7 +143,7 @@ export default function BeginnerOnboardingGuide({
                 className={`w-full py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                   completeness.hasResume
                     ? 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700'
-                    : 'bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold'
+                    : 'bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold'
                 }`}
               >
                 <span>{completeness.hasResume ? 'View / Change PDF' : 'Upload Resume PDF →'}</span>
@@ -225,7 +225,7 @@ export default function BeginnerOnboardingGuide({
                     className={`w-full py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       step3Completed
                         ? 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700'
-                        : 'bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold'
+                        : 'bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold'
                     }`}
                   >
                     <span>{step3Completed ? 'Modify Settings' : 'Review & Save Profile →'}</span>
@@ -421,7 +421,7 @@ export default function BeginnerOnboardingGuide({
                 </div>
                 <Link
                   href="/pricing?promo=WELCOMEPRO"
-                  className="px-3.5 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shrink-0"
+                  className="px-3.5 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center gap-1.5 shrink-0"
                 >
                   <Zap className="w-3 h-3 fill-black" />
                   <span>Upgrade to Pro (₹199 / mo)</span>

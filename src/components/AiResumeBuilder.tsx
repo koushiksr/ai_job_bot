@@ -275,7 +275,7 @@ export default function AiResumeBuilder({
             onClick={() => setActiveSubTab('generator')}
             className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeSubTab === 'generator'
-                ? 'bg-white light:bg-zinc-900 text-black light:text-white shadow-sm'
+                ? 'bg-white light:bg-white light:ring-1 light:ring-zinc-300 text-black light:text-zinc-900 shadow-sm'
                 : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900'
             }`}
           >
@@ -402,7 +402,7 @@ export default function AiResumeBuilder({
               </span>
               <button
                 onClick={() => setActiveSubTab('generator')}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <span>Build Mine with AI Now</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -535,7 +535,7 @@ export default function AiResumeBuilder({
             <button
               type="submit"
               disabled={isGenerating}
-              className="w-full py-3 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-lg shadow-white/5"
+              className="w-full py-3 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-lg shadow-white/5"
             >
               {isGenerating ? (
                 <>
@@ -596,7 +596,7 @@ export default function AiResumeBuilder({
                         onClick={handlePrintDownload}
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-lg ${
                           isProfessional
-                            ? 'bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white shadow-white/10'
+                            ? 'bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 shadow-white/10'
                             : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-200 light:text-zinc-800 border border-zinc-700 light:border-zinc-300'
                         }`}
                         title={isProfessional ? "Download or Print ATS PDF" : "Upgrade to Professional to export PDF"}
@@ -695,7 +695,7 @@ export default function AiResumeBuilder({
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => onUpgradeClick('Download Full ATS Resume & Cloud Bot Sync')}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-black light:text-white bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-sm"
+                        className="flex items-center gap-1.5 text-xs font-semibold text-black light:text-zinc-900 bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-sm"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Buy Subscription to Download</span>
@@ -749,7 +749,7 @@ export default function AiResumeBuilder({
                       <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
                         <button
                           onClick={() => onUpgradeClick('Download Full ATS Resume & Cloud Bot Sync')}
-                          className="px-6 py-2.5 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+                          className="px-6 py-2.5 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
                         >
                           <Download className="w-4 h-4" />
                           <span>Buy Subscription to Download PDF</span>

@@ -376,7 +376,7 @@ export default function Home() {
                   </div>
                   <Link
                     href={existingUser.role === 'admin' ? '/admin' : '/dashboard'}
-                    className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0"
+                    className="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-colors shrink-0"
                   >
                     Dashboard
                   </Link>
@@ -399,7 +399,7 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => scrollToAuth('trial')}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-all shadow-sm cursor-pointer shrink-0"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-all shadow-sm cursor-pointer shrink-0"
                   >
                     <span className="hidden sm:inline">Start Free (AI Autopilot)</span>
                     <span className="sm:hidden">Start Free</span>
@@ -428,7 +428,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => scrollToAuth('trial')}
-                  className="px-3 py-1 rounded-md bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors cursor-pointer"
+                  className="px-3 py-1 rounded-md bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Start Free →
                 </button>
@@ -491,7 +491,7 @@ export default function Home() {
               {existingUser ? (
                 <Link
                   href={existingUser.role === 'admin' ? '/admin' : '/dashboard'}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/5"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/5"
                 >
                   <span>Open {existingUser.role === 'admin' ? 'Admin Portal' : 'Dashboard'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -551,7 +551,7 @@ export default function Home() {
                 <div className="space-y-2 pt-2">
                   <Link
                     href={existingUser.role === 'admin' ? '/admin' : '/dashboard'}
-                    className="w-full py-2.5 bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5"
                   >
                     <span>Go to {existingUser.role === 'admin' ? 'Admin Portal' : 'Dashboard'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -778,7 +778,7 @@ export default function Home() {
               </div>
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-between px-4 py-2.5 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white text-xs font-bold transition-all shadow-lg shadow-white/5"
+                className="inline-flex items-center justify-between px-4 py-2.5 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 text-xs font-bold transition-all shadow-lg shadow-white/5"
               >
                 <span>Get Started for ₹99 / Month</span>
                 <ArrowRight className="w-4 h-4" />
@@ -877,7 +877,7 @@ export default function Home() {
             <button
               type="button"
               onClick={handleGoogleAuth}
-              className="px-3.5 py-2 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-extrabold text-xs flex items-center gap-1.5 shadow-lg shrink-0 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-extrabold text-xs flex items-center gap-1.5 shadow-lg shrink-0 cursor-pointer"
             >
               <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

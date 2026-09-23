@@ -170,7 +170,7 @@ export default function ProfessionalUpgradeModal({
                 })
                 onClose()
               }}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
             >
               <span>{featureTitle.toLowerCase().includes('download') ? 'Buy Subscription to Download' : 'Upgrade to Professional'}</span>
               <ArrowRight className="w-4 h-4" />

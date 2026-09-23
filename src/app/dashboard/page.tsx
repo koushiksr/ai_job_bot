@@ -1388,7 +1388,7 @@ export default function UserDashboard() {
               ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
                 <Link
                   href="/pricing"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0 shadow-sm"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-colors shrink-0 shadow-sm"
                   title="Upgrade to unlock automated applications"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-zinc-800" />
@@ -1765,7 +1765,7 @@ export default function UserDashboard() {
                 type="button"
                 onClick={() => handleRespondToInvite(pendingEnterpriseInvites[0].invite_id, 'accept')}
                 disabled={isRespondingToInvite}
-                className="px-4 py-2 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4 text-emerald-300 light:text-emerald-700" />
                 <span>{isRespondingToInvite ? 'Accepting...' : 'Accept Invitation'}</span>
@@ -1892,7 +1892,7 @@ export default function UserDashboard() {
               <button
                 type="button"
                 onClick={handleRequestNotification}
-                className="px-3 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 text-xs font-bold transition-all shadow cursor-pointer flex items-center gap-1.5"
               >
                 <BellRing className="w-3.5 h-3.5" />
                 <span>Allow Notifications</span>
@@ -2110,7 +2110,7 @@ export default function UserDashboard() {
               ) : (
                 <Link
                   href={activeOfferBanner.claim_url || `/pricing?promo=${encodeURIComponent(activeOfferBanner.promo_code)}`}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
                 >
                   <span>Claim & Upgrade ({activeOfferBanner.discounted_price})</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -2158,7 +2158,7 @@ export default function UserDashboard() {
             </div>
             <Link
               href="/pricing?plan=elite"
-              className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
+              className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
             >
               <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : userPlan === 'pro' ? 'Upgrade to Pro (₹199)' : 'Upgrade Plan'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -2204,7 +2204,7 @@ export default function UserDashboard() {
                 type="button"
                 onClick={handleTriggerOnDemandScout}
                 disabled={isTriggeringScout || (activeTask && (activeTask.status === 'pending' || activeTask.status === 'running')) || (isProfessional && weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0)}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
                 title={!isProfessional ? "Upgrade to Professional to run on-demand sweeps" : (weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0) ? "Weekly on-demand sweep quota reached (5/5). Resets in rolling 7 days." : "Trigger instant real-time job application sweep"}
               >
                 {activeTask?.status === 'running' ? (
@@ -2561,7 +2561,7 @@ export default function UserDashboard() {
 
                     <Link
                       href="/pricing?promo=WELCOMEPRO"
-                      className="px-3.5 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-sm"
+                      className="px-3.5 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-sm"
                     >
                       <span>Upgrade for ₹199 (Save 90%)</span>
                       <ArrowRight className="w-3 h-3" />
@@ -2847,7 +2847,7 @@ export default function UserDashboard() {
             </div>
             <Link
               href="/profile"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors"
             >
               <span>Open Profile Settings Page</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -2897,7 +2897,7 @@ export default function UserDashboard() {
                 </button>
                 <button
                   onClick={() => setIsHelpOpen(true)}
-                  className="px-3.5 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Submit New Query</span>
@@ -2924,7 +2924,7 @@ export default function UserDashboard() {
                 </div>
                 <button
                   onClick={() => setIsHelpOpen(true)}
-                  className="px-4 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-all cursor-pointer"
                 >
                   Submit a Query
                 </button>
@@ -3161,7 +3161,7 @@ export default function UserDashboard() {
                     href={selectedJobAudit.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-2 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                    className="flex-1 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
                   >
                     <span>View Portal Opening</span>
                     <ExternalLink className="w-3.5 h-3.5" />

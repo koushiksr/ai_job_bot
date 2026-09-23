@@ -738,7 +738,7 @@ export default function EnterpriseAdminPortal() {
                     <button
                       onClick={handleSaveOrgName}
                       disabled={orgNameSaving}
-                      className="px-3 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
+                      className="px-3 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       {orgNameSaving ? 'Saving...' : 'Save'}
@@ -809,7 +809,7 @@ export default function EnterpriseAdminPortal() {
               <button
                 type="submit"
                 disabled={inviteSubmitting}
-                className="px-3.5 py-1.5 rounded-lg bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{inviteSubmitting ? 'Sending...' : 'Invite'}</span>
