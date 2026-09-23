@@ -1,21 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHash, timingSafeEqual } from 'crypto'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
 import { APP_CONFIG } from '@/config/appConfig'
 import { syncUserPaymentPlan } from '@/lib/paymentSync'
 import { issueSession } from '@/lib/session'
-
-function sha256Hex(s: string): string {
-  return createHash('sha256').update(s, 'utf-8').digest('hex')
-}
-
-function secretsEqual(a: string, b: string): boolean {
-  const ha = Buffer.from(sha256Hex(a))
-  const hb = Buffer.from(sha256Hex(b))
-  return ha.length === hb.length && timingSafeEqual(ha, hb)
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,50 +23,11 @@ export async function POST(req: NextRequest) {
 
     const db = await getDb()
 
-    // 1. Super-admin login via environment credentials (no hardcoded bypass).
-    // Works even when the DB is unreachable (break-glass).
-    const superEmail = (process.env.SUPER_ADMIN_EMAIL || 'technohmsit@gmail.com').toLowerCase().trim()
-    const superPass = process.env.SUPER_ADMIN_PASSWORD || ''
-    if (
-      emailClean && pwdClean && superPass &&
-      (emailClean === superEmail || emailClean === 'technohmsit' || emailClean === 'admin') &&
-      secretsEqual(pwdClean, superPass)
-    ) {
-      const adminUid = 'technohmsit'
-      const adminMail = superEmail.includes('@') ? superEmail : 'technohmsit@gmail.com'
+    // NOTE: technohmsit authenticates ONLY via its DB record (password stored
+    // in profiles/users). There is intentionally no env-based admin login —
+    // one credential store, audited in one place.
 
-      if (db) {
-        await logUserActivity(db, {
-          userId: adminUid,
-          email: adminMail,
-          eventType: 'login',
-          description: `Administrator signed in to central control hub (${adminMail})`,
-          ipAddress: ip,
-          userAgent: userAgent,
-          metadata: { method: 'admin_password', role: 'admin' }
-        })
-      }
-
-      // Carry the live session version so post-logout replays stay dead
-      let adminV = 0
-      try {
-        const rec = db ? await db.collection('profiles').findOne({ user_id: adminUid }) : null
-        adminV = Number(rec?.session_v || 0)
-      } catch { /* break-glass: stay at 0 */ }
-
-      return issueSession(
-        NextResponse.json({
-          status: 'success',
-          role: 'admin',
-          user_id: adminUid,
-          email: adminMail,
-          name: 'Technohm SIT Administrator'
-        }),
-        { uid: adminUid, email: adminMail, role: 'admin', v: adminV }
-      )
-    }
-
-    // 2. Authenticate against cloud users & profiles collections
+    // 1. Authenticate against cloud users & profiles collections
     if (!db) {
       return NextResponse.json(
         { detail: 'Database unavailable. Please try again later.' },
