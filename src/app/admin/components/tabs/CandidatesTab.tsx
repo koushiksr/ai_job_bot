@@ -374,7 +374,7 @@ export default function CandidatesTab({
       <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 shadow-xl">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3 top-3" />
             <input
               type="text"
               placeholder="Search by name, email, user ID, or server hostname..."
@@ -386,7 +386,7 @@ export default function CandidatesTab({
                   localStorage.setItem('admin_candidate_search', val)
                 } catch {}
               }}
-              className="w-full bg-slate-950 light:bg-zinc-50 border border-slate-800 light:border-zinc-300 rounded-xl pl-9 pr-4 py-2 text-xs text-white light:text-zinc-900 placeholder-slate-500 light:placeholder-zinc-400 focus:outline-none focus:border-indigo-500 light:focus:border-indigo-600"
+              className="w-full bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-300 rounded-xl pl-9 pr-4 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400 focus:outline-none focus:border-cyan-500 light:focus:border-cyan-600"
             />
             {userSearch && (
               <button
@@ -405,7 +405,7 @@ export default function CandidatesTab({
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="text-xs text-slate-400 hidden lg:block">
+            <div className="text-xs text-zinc-400 light:text-zinc-600 hidden lg:block">
               Auto-scheduled run: <span className="text-emerald-400 light:text-emerald-600 font-semibold">Daily at 06:00 AM IST</span>
             </div>
             <button
@@ -739,9 +739,9 @@ export default function CandidatesTab({
 
         {!candidatesTableCollapsed && (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
+            <table className="w-full min-w-[880px] text-left text-xs text-zinc-300 light:text-zinc-700">
               <thead className="select-none">
-                <tr className="bg-slate-950 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200">
+                <tr className="bg-zinc-950 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-zinc-800 light:border-zinc-200">
                   <th 
                     onClick={() => handleSetSortField('name')}
                     className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
@@ -750,16 +750,6 @@ export default function CandidatesTab({
                     <div className="flex items-center gap-1.5">
                       <span>Candidate</span>
                       {renderSortIcon('name')}
-                    </div>
-                  </th>
-                  <th 
-                    onClick={() => handleSetSortField('email')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
-                    title="Click to sort by Portal Email Address"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Portal Email</span>
-                      {renderSortIcon('email')}
                     </div>
                   </th>
                   <th 
@@ -795,21 +785,11 @@ export default function CandidatesTab({
                   <th 
                     onClick={() => handleSetSortField('last_login')}
                     className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
-                    title="Click to sort by Last Login Activity (Recent First)"
+                    title="Click to sort by recent activity (login / resume sync first)"
                   >
                     <div className="flex items-center gap-1.5">
-                      <span>Last Login</span>
+                      <span>Activity</span>
                       {renderSortIcon('last_login')}
-                    </div>
-                  </th>
-                  <th 
-                    onClick={() => handleSetSortField('created_at')}
-                    className="py-3.5 px-4 cursor-pointer hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-200/70 transition-colors group"
-                    title="Click to sort by Signup Date (Newest First)"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Profile &amp; Resume</span>
-                      {renderSortIcon('created_at')}
                     </div>
                   </th>
                   <th 
@@ -825,17 +805,17 @@ export default function CandidatesTab({
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
+              <tbody className="divide-y divide-zinc-800/50 light:divide-zinc-200">
                 {loadingUsers ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400 light:text-zinc-500">
+                    <td colSpan={7} className="py-12 text-center text-zinc-400 light:text-zinc-500">
                       <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
                       Loading candidate profiles...
                     </td>
                   </tr>
                 ) : sortedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-500 light:text-zinc-500">
+                    <td colSpan={7} className="py-12 text-center text-zinc-500 light:text-zinc-500">
                       No candidate profiles match your search query.
                     </td>
                   </tr>
@@ -852,10 +832,10 @@ export default function CandidatesTab({
                       className={`transition-colors cursor-pointer ${
                         selectedCandidateId === u.user_id
                           ? 'bg-indigo-950/40 light:bg-indigo-50/80 border-l-2 border-l-indigo-500 ring-1 ring-indigo-500/30'
-                          : 'hover:bg-slate-800/30 light:hover:bg-zinc-50'
+                          : 'hover:bg-zinc-800/30 light:hover:bg-zinc-50'
                       }`}
                     >
-                      <td className="py-4 px-4 font-bold text-white light:text-zinc-900 flex items-center gap-3">
+                      <td className="py-3 px-3 font-bold text-white light:text-zinc-900 flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-600 flex items-center justify-center text-xs font-bold text-white light:text-zinc-900 shrink-0">
                           {u.name ? u.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'C'}
                         </div>
@@ -868,14 +848,12 @@ export default function CandidatesTab({
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-500 font-mono">{u.user_id}</div>
+                          <div className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">{u.user_id}</div>
+                          <div className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono truncate max-w-[170px]" title={u.email}>{u.email}</div>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-slate-300 font-mono">
-                        {u.email}
-                      </td>
                       {/* Bot Execution & Server Identity Status */}
-                      <td className="py-4 px-4">
+                      <td className="py-3 px-3">
                         {(() => {
                           const summary: any = u.execution_summary || {}
                           const isApplying = summary.is_applying || u.current_execution?.status === 'applying'
@@ -913,18 +891,7 @@ export default function CandidatesTab({
                                       <span className="truncate max-w-[145px]">{device}</span>
                                     </div>
                                   )}
-                                  {macAddress && (
-                                    <div className="flex items-center gap-1 text-[9px] font-mono text-amber-300/90">
-                                      <Cpu className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 shrink-0" />
-                                      <span>MAC: {macAddress}</span>
-                                    </div>
-                                  )}
                                 </div>
-                                {summary.locked_at && (
-                                  <div className="text-[9px] font-mono text-zinc-500 light:text-zinc-600">
-                                    Started {formatTimestamp(summary.locked_at)}
-                                  </div>
-                                )}
                               </div>
                             )
                           }
@@ -964,12 +931,7 @@ export default function CandidatesTab({
                                       <span className="truncate max-w-[145px]">{device}</span>
                                     </div>
                                   )}
-                                  {macAddress && (
-                                    <div className="flex items-center gap-1 text-[9px] font-mono text-amber-300/80">
-                                      <Cpu className="w-2.5 h-2.5 text-amber-400 light:text-amber-600 shrink-0" />
-                                      <span>MAC: {macAddress}</span>
-                                    </div>
-                                  )}
+
                                 </div>
                                 {completedAt && (
                                   <div className="text-[9px] font-mono text-zinc-500 light:text-zinc-600">
@@ -1020,7 +982,7 @@ export default function CandidatesTab({
                           )
                         })()}
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-3 px-3">
                         {(() => {
                           const isAdmin = Boolean(u.is_admin || u.role === 'admin' || u.user_id === 'technohmsit' || u.email?.toLowerCase() === 'technohmsit@gmail.com')
                           if (isAdmin) {
@@ -1041,8 +1003,8 @@ export default function CandidatesTab({
                               <div className="flex items-center gap-1.5">
                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                                   u.plan === 'elite' ? 'bg-amber-500/10 text-amber-400 light:text-amber-600 border border-amber-500/30 light:border-amber-300' :
-                                  u.plan === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
-                                  u.plan === 'starter' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
+                                  u.plan === 'pro' ? 'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300' :
+                                  u.plan === 'starter' ? 'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300' :
                                   u.plan === 'vip' ? 'bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-500/25 text-amber-300 light:text-amber-700 border border-amber-400/80 shadow-[0_0_8px_rgba(245,158,11,0.25)]' :
                                   u.plan === 'none' || u.plan === 'no_plan' ? 'bg-zinc-800/80 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300' :
                                   'bg-cyan-500/10 text-cyan-400 light:text-cyan-600 border border-cyan-500/30 light:border-cyan-300'
@@ -1063,7 +1025,7 @@ export default function CandidatesTab({
                                     limit >= 150
                                       ? 'bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300'
                                       : limit >= 50
-                                      ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'
+                                      ? 'bg-cyan-500/15 text-cyan-300 light:text-cyan-700 border border-cyan-500/30 light:border-cyan-300'
                                       : 'bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300'
                                   }`}
                                   title={`Daily Application Limit: ${limit}/day on Naukri platform`}
@@ -1078,11 +1040,11 @@ export default function CandidatesTab({
                           <select
                             value={u.plan || 'trial'}
                             onChange={(e) => handleChangePlan(u.user_id, e.target.value)}
-                            className="bg-slate-900 light:bg-white hover:bg-slate-800 light:hover:bg-zinc-100 border border-slate-700/80 light:border-zinc-300 text-[10px] text-slate-200 light:text-zinc-800 rounded-md px-1.5 py-1 focus:outline-none focus:border-indigo-500 light:focus:border-indigo-600 cursor-pointer font-mono font-medium transition-colors"
+                            className="bg-zinc-900 light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-100 border border-zinc-700/80 light:border-zinc-300 text-[10px] text-zinc-200 light:text-zinc-800 rounded-md px-1.5 py-1 focus:outline-none focus:border-cyan-500 light:focus:border-cyan-600 cursor-pointer font-mono font-medium transition-colors"
                             title="Admin Quick Action: Change this candidate's plan tier"
                           >
                             <option value="none">No Plan (Inactive)</option>
-                            <option value="trial">Free Trial (7 Days)</option>
+                            <option value="trial">Free Trial (3 Days)</option>
                             <option value="starter">Starter (30d)</option>
                             <option value="pro">Pro (30d)</option>
                             <option value="elite">Professional (90d)</option>
@@ -1095,7 +1057,7 @@ export default function CandidatesTab({
                             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                               u.is_vip
                                 ? 'bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30'
-                                : 'bg-slate-900 light:bg-zinc-100 text-slate-400 light:text-zinc-600 border border-slate-800 light:border-zinc-300 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
+                                : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border border-zinc-800 light:border-zinc-300 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/40'
                             }`}
                             title={u.is_vip ? "Click to Revoke VIP Pass" : "Click to Grant 3-Month VIP Pass"}
                           >
@@ -1221,7 +1183,7 @@ export default function CandidatesTab({
                           )
                         })()}
                       </td>
-                      <td className="py-4 px-4 text-center">
+                      <td className="py-3 px-3 text-center">
                         <button
                           type="button"
                           onClick={() => handleToggleDaily(u.user_id, u.enabled_for_daily_run !== false)}
@@ -1233,44 +1195,31 @@ export default function CandidatesTab({
                               <ToggleRight className="w-4 h-4 text-emerald-400 light:text-emerald-600" /> ENABLED
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 light:bg-zinc-200 text-slate-400 light:text-zinc-600 border border-slate-700 light:border-zinc-300">
-                              <ToggleLeft className="w-4 h-4 text-slate-500 light:text-zinc-600" /> DISABLED
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300">
+                              <ToggleLeft className="w-4 h-4 text-zinc-500 light:text-zinc-600" /> DISABLED
                             </span>
                           )}
                         </button>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-3 px-3">
                         <div className="space-y-1">
-                          <div className="text-white light:text-zinc-900 font-mono text-[11px] flex items-center gap-1">
+                          <div className="text-zinc-100 light:text-zinc-900 font-mono text-[11px] flex items-center gap-1">
                             <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600 shrink-0" />
                             <span>{formatTimestamp(u.last_login_at)}</span>
+                            <span className="text-[9px] text-zinc-500 light:text-zinc-600">· {u.login_count || 0} logins</span>
                           </div>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700">
-                              {u.login_count || 0} logins
-                            </span>
-                            {u.last_login_ip && (
-                              <span className="text-[9px] font-mono text-zinc-500 light:text-zinc-600 truncate max-w-[80px]" title={u.last_login_ip}>
-                                {u.last_login_ip}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="space-y-1 text-xs">
-                          <div className="flex items-center gap-1 text-slate-300 light:text-zinc-700">
-                            <FileText className="w-3 h-3 text-slate-500 light:text-zinc-500 shrink-0" />
-                            <span className="truncate max-w-[120px]" title={u.resume_filename || 'No resume file recorded'}>
+                          <div className="flex items-center gap-1 text-[11px] text-zinc-700 light:text-zinc-700">
+                            <FileText className="w-3 h-3 text-zinc-500 light:text-zinc-500 shrink-0" />
+                            <span className="truncate max-w-[130px]" title={u.resume_filename || 'No resume file recorded'}>
                               {u.resume_filename || 'No PDF'}
                             </span>
-                          </div>
-                          <div className="text-[10px] text-slate-500 light:text-zinc-500">
-                            {u.last_resume_updated_at ? `PDF: ${formatTimestamp(u.last_resume_updated_at)}` : (u.last_profile_updated_at ? `Profile: ${formatTimestamp(u.last_profile_updated_at)}` : 'Synced')}
+                            <span className="text-[9px] text-zinc-500 light:text-zinc-500">
+                              · {u.last_resume_updated_at ? formatTimestamp(u.last_resume_updated_at) : (u.last_profile_updated_at ? formatTimestamp(u.last_profile_updated_at) : 'synced')}
+                            </span>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-center">
+                      <td className="py-3 px-3 text-center">
                         <div className="inline-flex flex-col items-center gap-0.5">
                           {(() => {
                             const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
@@ -1281,13 +1230,13 @@ export default function CandidatesTab({
                                   className={`inline-flex items-center justify-center px-2 py-0.5 rounded font-mono text-[11px] font-bold border ${
                                     appliedToday > 0 
                                       ? 'bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border-emerald-500/30 light:border-emerald-300' 
-                                      : 'bg-slate-900 light:bg-zinc-100 text-slate-400 light:text-zinc-700 border-slate-800 light:border-zinc-300'
+                                      : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-700 border-zinc-800 light:border-zinc-300'
                                   }`}
                                   title={`Today: ${appliedToday} applied / Daily Limit: ${limit}`}
                                 >
                                   {appliedToday} / {limit}
                                 </span>
-                                <span className="text-[10px] font-mono text-slate-500 light:text-zinc-500" title="Lifetime Total Applications">
+                                <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-500" title="Lifetime Total Applications">
                                   Total: {u.total_applied || 0}
                                 </span>
                               </>
@@ -1295,7 +1244,7 @@ export default function CandidatesTab({
                           })()}
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-right">
+                      <td className="py-3 px-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
@@ -1305,7 +1254,7 @@ export default function CandidatesTab({
                               localStorage.setItem('user_role', 'admin')
                               window.open('/dashboard', '_blank')
                             }}
-                            className="p-2 rounded-lg bg-slate-900 light:bg-zinc-100 hover:bg-slate-800 light:hover:bg-zinc-200 text-slate-300 light:text-zinc-700 border border-slate-800 light:border-zinc-300 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300 transition-colors cursor-pointer"
                             title="Open Candidate Dashboard"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -1324,25 +1273,23 @@ export default function CandidatesTab({
                                   await onTriggerOnDemand(u.user_id, true)
                                 }
                               }}
-                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white light:hover:text-zinc-900 font-bold text-xs transition-colors border border-indigo-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                              title="Trigger immediate on-demand bot run for this candidate"
+                              className="p-2 rounded-lg bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white transition-colors border border-cyan-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                              title={actionProcessingId === u.user_id ? 'Queuing on-demand run…' : 'Trigger immediate on-demand bot run for this candidate'}
                             >
                               {actionProcessingId === u.user_id ? (
-                                <RefreshCw className="w-3.5 h-3.5 text-indigo-300 animate-spin" />
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                               ) : (
-                                <Zap className="w-3.5 h-3.5 text-indigo-400" />
+                                <Zap className="w-3.5 h-3.5" />
                               )}
-                              <span>{actionProcessingId === u.user_id ? 'Queuing...' : 'Run Now'}</span>
                             </button>
                           )}
                           <button
                             type="button"
                             onClick={() => handleInspectCandidate(u)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-amber-300 light:text-amber-700 font-bold text-xs transition-colors border border-amber-500/30 light:border-amber-300 shadow-sm cursor-pointer"
+                            className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-amber-300 light:text-amber-700 transition-colors border border-amber-500/30 light:border-amber-300 shadow-sm cursor-pointer"
                             title="Inspect candidate plan validity, assigned offers & reminder telemetry"
                           >
-                            <Eye className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                            <span>Inspect</span>
+                            <Eye className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
@@ -1351,18 +1298,18 @@ export default function CandidatesTab({
                               e.stopPropagation()
                               onOpenDispatchReportForUser(u.email)
                             }}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 font-bold text-xs transition-colors border border-sky-500/30 shadow-sm cursor-pointer disabled:opacity-50"
+                            className="p-2 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 light:text-sky-700 transition-colors border border-sky-500/30 light:border-sky-300 shadow-sm cursor-pointer disabled:opacity-50"
                             title="Open Daily Job Dispatch Report Hub for this candidate (Email + Push)"
                           >
-                            <Send className="w-3.5 h-3.5 text-sky-400" />
-                            <span>⚡ Send Report</span>
+                            <Send className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditingUser(u)}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white light:text-zinc-900 font-bold transition-all shadow-md cursor-pointer"
+                            className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 transition-colors border border-zinc-800 light:border-zinc-300 cursor-pointer"
+                            title="Edit candidate profile"
                           >
-                            <Edit className="w-3.5 h-3.5" /> Edit Profile
+                            <Edit className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
