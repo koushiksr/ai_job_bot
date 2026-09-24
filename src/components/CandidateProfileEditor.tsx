@@ -2106,6 +2106,7 @@ export default function CandidateProfileEditor({
         <div className="space-y-2">
           <label className="block text-xs font-medium text-zinc-300 light:text-zinc-700">
             Target Job Titles / Roles ({targetRoles.length}) <span className="text-rose-400 light:text-rose-600">*</span>
+            <span className="ml-1.5 text-[10px] font-normal text-zinc-500 light:text-zinc-600">First role = main anchor, matches strongest. Abbreviations (SDET, QA, SDE) understood.</span>
           </label>
           <div className={`flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black light:bg-white border rounded-xl ${
             errors.targetRoles ? 'border-rose-500/80' : 'border-zinc-800 light:border-zinc-200'
@@ -2113,8 +2114,14 @@ export default function CandidateProfileEditor({
             {targetRoles.map((role, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs text-white light:text-zinc-900 font-medium"
+                title={idx === 0 ? 'Main anchor role — highest match weight' : 'Supporting role'}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium ${
+                  idx === 0
+                    ? 'bg-cyan-500/10 border-cyan-500/40 text-white light:text-zinc-900'
+                    : 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900'
+                }`}
               >
+                {idx === 0 && <span className="text-[9px] font-mono font-bold text-cyan-400 light:text-cyan-700">MAIN</span>}
                 <span>{role}</span>
                 <button
                   type="button"
