@@ -60,6 +60,7 @@ import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker }
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 import { checkIsPwaInstalled, shouldShowPwaAutoPrompt, markPwaAsDismissed } from '@/lib/pwaHelper'
 import { trackSignUp } from '@/lib/tracker'
+import { getDailyAppLimit, getCapUpgradeHint, getWeeklyOnDemandLimit } from '@/config/plans'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
@@ -141,6 +142,8 @@ export default function UserDashboard() {
   // Candidate account has Professional privileges if on an active Professional tier, Enterprise tier, OR VIP pass.
   const isEnterpriseMember = enterpriseRole === 'member' || userPlan === 'enterprise' || userPlan === 'org_pro'
   const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'org_pro' || userPlan === 'vip' || isVip || isEnterpriseMember) && isPlanActive
+  const dailyCap = getDailyAppLimit(userPlan)
+  const capHint = getCapUpgradeHint(userPlan)
 
   // Plan Expiry & Renewal Computations
   const planExpiryDate = planExpiresAt ? new Date(planExpiresAt) : null
@@ -1978,13 +1981,13 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* Daily 55-Job Limit Reached Banner */}
-        {userRole !== 'admin' && metrics.today >= 55 && (
+        {/* Daily Limit Reached Banner (plan-aware cap) */}
+        {userRole !== 'admin' && metrics.today >= dailyCap && (
           <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 flex items-center justify-between gap-3 text-xs shadow-lg">
             <div className="flex items-center gap-2.5">
               <AlertTriangle className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0" />
               <span>
-                <strong>Daily Limit Reached (55 max jobs):</strong> You have reached your daily limit of 55 applications for today. Limit is exceeded for today; automated sweeps will resume tomorrow at 06:00 AM IST.
+                <strong>Daily Limit Reached ({dailyCap} max jobs):</strong> You have reached your daily limit of {dailyCap} applications for today. Limit is exceeded for today; automated sweeps will resume tomorrow at 06:00 AM IST.{capHint ? ` ${capHint}` : ''}
               </span>
             </div>
           </div>
@@ -2284,9 +2287,13 @@ export default function UserDashboard() {
                       ? 'Subscription Expired · Renew to Resume Automated Applications'
                       : userPlan === 'pro'
                       ? 'Essentials Active · Upgrade to Professional for 1,800+ Applications'
-                      : metrics.total_applied >= 150
-                      ? 'Free Access Quota Reached (150/150)'
-                      : `Free Access Active · ${metrics.total_applied}/150 Dispatched`}
+                      : metrics.today >= dailyCap
+                      ? `Daily Limit Hit (${dailyCap}/${dailyCap})`
+                      : userPlan === 'trial'
+                      ? `Free Trial Active · ${metrics.today}/${dailyCap} Today`
+                      : userPlan === 'starter'
+                      ? `Starter Active · ${metrics.today}/${dailyCap} Today`
+                      : `Free Access Active · ${metrics.today}/${dailyCap} Dispatched`}
                   </span>
                   <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${
                     userPlan === 'none' || userPlan === 'no_plan'
@@ -2295,11 +2302,11 @@ export default function UserDashboard() {
                       ? 'bg-red-950/80 border-red-800 text-red-300 light:text-red-600'
                       : userPlan === 'pro'
                       ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700'
-                      : metrics.total_applied >= 150
+                      : metrics.today >= dailyCap
                       ? 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-amber-400 light:text-amber-600'
                       : 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600'
                   }`}>
-                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.total_applied >= 150 ? 'EXHAUSTED' : '3-DAY FREE'}
+                    {userPlan === 'none' || userPlan === 'no_plan' ? 'NO PLAN' : !isPlanActive ? 'EXPIRED' : userPlan === 'pro' ? 'ESSENTIALS' : metrics.today >= dailyCap ? 'LIMIT HIT' : userPlan === 'starter' ? 'STARTER' : '3-DAY FREE'}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
@@ -2355,7 +2362,7 @@ export default function UserDashboard() {
                 onClick={handleTriggerOnDemandScout}
                 disabled={isTriggeringScout || (activeTask && (activeTask.status === 'pending' || activeTask.status === 'running')) || (isProfessional && weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0)}
                 className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
-                title={!isProfessional ? "Upgrade to Professional to run on-demand sweeps" : (weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0) ? "Weekly on-demand sweep quota reached (5/5). Resets in rolling 7 days." : "Trigger instant real-time job application sweep"}
+                title={!isProfessional ? "Upgrade to Professional to run on-demand sweeps" : (weeklyQuota && !weeklyQuota.is_unlimited && weeklyQuota.remaining <= 0) ? `Weekly on-demand sweep quota reached (${weeklyQuota.limit}/${weeklyQuota.limit}). Resets in rolling 7 days.` : "Trigger instant real-time job application sweep"}
               >
                 {activeTask?.status === 'running' ? (
                   <>
@@ -2376,7 +2383,7 @@ export default function UserDashboard() {
                         <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold">VIP</span>
                       ) : (
                         <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-200 text-zinc-800 font-bold">
-                          {weeklyQuota ? `${weeklyQuota.remaining}/${weeklyQuota.limit || (isEnterpriseMember ? 10 : 5)}` : (isEnterpriseMember ? '10/10' : '5/5')}
+                          {weeklyQuota ? `${weeklyQuota.remaining}/${weeklyQuota.limit || getWeeklyOnDemandLimit(userPlan, isEnterpriseMember)}` : `${getWeeklyOnDemandLimit(userPlan, isEnterpriseMember)}/${getWeeklyOnDemandLimit(userPlan, isEnterpriseMember)}`}
                         </span>
                       )
                     ) : (
@@ -2486,11 +2493,11 @@ export default function UserDashboard() {
                 <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">24h</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className={`text-lg sm:text-2xl font-bold font-mono ${metrics.today >= 55 ? 'text-amber-400 light:text-amber-600' : 'text-white light:text-zinc-900'}`}>{metrics.today}</span>
-                <span className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">/ 55 max</span>
+                <span className={`text-lg sm:text-2xl font-bold font-mono ${metrics.today >= dailyCap ? 'text-amber-400 light:text-amber-600' : 'text-white light:text-zinc-900'}`}>{metrics.today}</span>
+                <span className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">/ {dailyCap} max</span>
               </div>
               <p className="text-[10px] text-zinc-500 light:text-zinc-600">
-                {metrics.today >= 55 ? (
+                {metrics.today >= dailyCap ? (
                   <span className="text-amber-400 light:text-amber-600 font-semibold font-mono">Limit exceeded today</span>
                 ) : (
                   'Delivered today'

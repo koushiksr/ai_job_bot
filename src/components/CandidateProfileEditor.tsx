@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { getDailyAppLimit } from '@/config/plans'
 import {
   User,
   Mail,
@@ -117,6 +118,7 @@ export default function CandidateProfileEditor({
   // 7. Bot Automation Settings
   const [enabledForDailyRun, setEnabledForDailyRun] = useState<boolean>(true)
   const [dailyApplicationLimit, setDailyApplicationLimit] = useState<number>(50)
+  const [planTier, setPlanTier] = useState<string>('trial')
   const [searchUrl, setSearchUrl] = useState<string>('https://www.naukri.com/mnjuser/recommendedjobs')
 
   // Validation state
@@ -471,6 +473,7 @@ export default function CandidateProfileEditor({
 
     // Daily run & search url
     setEnabledForDailyRun(data.enabled_for_daily_run !== false)
+    if (data.plan) setPlanTier(String(data.plan).toLowerCase())
     setDailyApplicationLimit(data.daily_application_limit ? Math.min(150, Math.max(1, Number(data.daily_application_limit))) : (data.plan === 'elite' || data.is_vip ? 150 : 50))
     setSearchUrl(data.search_url || 'https://www.naukri.com/mnjuser/recommendedjobs')
 
@@ -2669,8 +2672,8 @@ export default function CandidateProfileEditor({
         {/* Daily limit — fixed by plan, admin-managed. Candidates see it, only admins change it. */}
         <div className="pt-3 border-t border-zinc-900 light:border-zinc-200 flex items-center justify-between gap-2">
           <p className="text-[11px] text-zinc-500 light:text-zinc-600">
-            Daily limit: <span className="text-zinc-200 light:text-zinc-800 font-mono font-semibold">55 / day</span>
-            <span className="text-zinc-600"> · set by your plan</span>
+            Daily limit: <span className="text-zinc-200 light:text-zinc-800 font-mono font-semibold">{getDailyAppLimit(planTier)} / day</span>
+            <span className="text-zinc-600"> · set by your {planTier === 'trial' ? 'free trial' : planTier} plan</span>
           </p>
         </div>
       </div>

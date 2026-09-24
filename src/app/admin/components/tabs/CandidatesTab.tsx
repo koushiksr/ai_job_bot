@@ -1217,7 +1217,10 @@ export default function CandidatesTab({
                               </span>
                             </div>
                           ) : (() => {
-                            const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
+                            const planLc = (u.plan || 'trial').toLowerCase();
+                            const tierCap = planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55;
+                            const customLim = Number(u.daily_application_limit);
+                            const limit = u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap
                             const appliedToday = u.applied_today || 0
                             const totalApplied = u.total_applied || u.applied_count || 0
                             const pct = Math.min(100, Math.round((appliedToday / Math.max(1, limit)) * 100))
@@ -1467,7 +1470,10 @@ export default function CandidatesTab({
                               </span>
                             )}
                             {(() => {
-                              const limit = u.daily_application_limit || (u.is_vip || u.plan === 'elite' || u.plan === 'vip' ? 150 : (u.plan === 'pro' || u.plan === 'starter' ? 50 : 20))
+                              const planLc = (u.plan || 'trial').toLowerCase();
+                            const tierCap = planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55;
+                            const customLim = Number(u.daily_application_limit);
+                            const limit = u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap
                               return (
                                 <span 
                                   className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700/60 light:border-zinc-300"

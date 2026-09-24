@@ -324,9 +324,32 @@ export function isOrgPlanId(planId?: string | null): boolean {
 
 /** Weekly on-demand run allowance per plan. */
 export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMember = false): number {
-  if (planId === 'org_pro') return 15
-  if (planId === 'enterprise' || isEnterpriseMember) return 10
-  return 5
+  const p = (planId || '').toLowerCase()
+  if (p === 'org_pro') return 15
+  if (p === 'enterprise' || isEnterpriseMember) return 10
+  if (p === 'elite' || p === 'professional') return 10
+  if (p === 'pro') return 5
+  if (p === 'starter') return 3
+  return 0
+}
+
+/**
+ * Daily application cap per plan (mirrors backend db.PLAN_DAILY_CAPS).
+ * Trial 10 < starter 20 < paid/enterprise 55. Hard ceiling 55 always.
+ */
+export function getDailyAppLimit(planId?: string | null): number {
+  const p = (planId || 'trial').toLowerCase()
+  if (p === 'trial') return 10
+  if (p === 'starter') return 20
+  return 55
+}
+
+/** Upgrade nudge for capped tiers. Empty string when nothing to upsell. */
+export function getCapUpgradeHint(planId?: string | null): string {
+  const p = (planId || '').toLowerCase()
+  if (p === 'trial') return 'Free trial allows 10/day — upgrade to Pro for 55/day.'
+  if (p === 'starter') return 'Starter allows 20/day — upgrade to Pro for 55/day.'
+  return ''
 }
 
 /**
