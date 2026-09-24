@@ -76,6 +76,7 @@ export default function UserDashboard() {
   const [showCandidateTestingMode, setShowCandidateTestingMode] = useState<boolean>(false)
   const [isImpersonating, setIsImpersonating] = useState<boolean>(false)
   const [impersonatingTargetId, setImpersonatingTargetId] = useState<string>('')
+  const profileHref = isImpersonating && impersonatingTargetId ? `/profile?view_as=${encodeURIComponent(impersonatingTargetId)}` : '/profile'
 
   // Enterprise Org Membership & Invites State
   const [enterpriseOrgId, setEnterpriseOrgId] = useState<string | null>(null)
@@ -1232,7 +1233,7 @@ export default function UserDashboard() {
                     {/* Prominent Quick-Action Callout */}
                     <div className="p-2 border-b border-zinc-800/80 light:border-zinc-200">
                       <Link
-                        href="/profile"
+                        href={profileHref}
                         onClick={() => setIsUserMenuOpen(false)}
                         className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700/80 light:border-zinc-300 text-zinc-200 light:text-zinc-800 hover:text-white light:hover:text-zinc-900 font-medium transition-all text-xs"
                       >
@@ -1244,7 +1245,7 @@ export default function UserDashboard() {
                     {/* Navigation Items */}
                     <div className="py-1">
                       <Link
-                        href="/profile"
+                        href={profileHref}
                         onClick={() => setIsUserMenuOpen(false)}
                         className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
                       >
@@ -1521,7 +1522,7 @@ export default function UserDashboard() {
             {/* Candidate Identity Card (Clickable to open profile) */}
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-zinc-800/80 light:border-zinc-200">
               <Link
-                href="/profile"
+                href={profileHref}
                 onClick={() => setIsMobileNavOpen(false)}
                 className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity cursor-pointer"
                 title="Click to manage Candidate Profile & Resume"
@@ -1597,7 +1598,7 @@ export default function UserDashboard() {
 
             {/* Direct Edit Profile Action Banner in Mobile */}
             <Link
-              href="/profile"
+              href={profileHref}
               onClick={() => setIsMobileNavOpen(false)}
               className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 font-semibold transition-all text-xs"
             >
@@ -1608,7 +1609,7 @@ export default function UserDashboard() {
             {/* Quick Actions List */}
             <div className="space-y-1 text-xs">
               <Link
-                href="/profile"
+                href={profileHref}
                 onClick={() => setIsMobileNavOpen(false)}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
               >
@@ -2920,7 +2921,7 @@ export default function UserDashboard() {
               </p>
             </div>
             <Link
-              href="/profile"
+              href={profileHref}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors"
             >
               <span>Open Profile Settings Page</span>
@@ -3127,7 +3128,7 @@ export default function UserDashboard() {
 
             <div className="grid grid-cols-2 gap-2">
               <Link
-                href="/profile"
+                href={profileHref}
                 className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-850 border border-zinc-800 light:border-zinc-200 text-zinc-200 light:text-zinc-800 font-medium text-xs transition-colors"
               >
                 <User className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600" />

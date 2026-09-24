@@ -29,6 +29,9 @@ export default function CandidateProfilePage() {
   const [userPlan, setUserPlan] = useState<string>('free')
   const [isVip, setIsVip] = useState<boolean>(false)
   const [pageLoading, setPageLoading] = useState<boolean>(true)
+  // Super-admin inspecting another account (?view_as=uid): editor loads the
+  // TARGET profile; localStorage identity is never touched.
+  const [viewAsId, setViewAsId] = useState<string | null>(null)
 
   // Upgrade & Help Modals
   const [showProModal, setShowProModal] = useState<boolean>(false)
@@ -51,17 +54,26 @@ export default function CandidateProfilePage() {
       return
     }
 
-    setUserId(storedUid)
+    // Super-admin view-as (?view_as=uid): show the target's profile in the
+    // candidate interface. Server enforces admin session; nothing here
+    // overwrites the viewer's own localStorage identity.
+    const viewAsParam = new URLSearchParams(window.location.search).get('view_as')
+    const isSuperAdminViewer = storedRole === 'admin' || storedUid === 'technohmsit'
+    const viewTarget = viewAsParam && isSuperAdminViewer && viewAsParam !== storedUid ? viewAsParam : null
+    if (viewTarget) setViewAsId(viewTarget)
+
+    setUserId(viewTarget || storedUid)
     setUserEmail(storedEmail || '')
     setUserRole(storedRole || 'user')
     setUserPlan(storedPlan || 'free')
     setIsVip(storedVip)
     if (storedPicture) setUserPicture(storedPicture)
 
-    // Load candidate info & picture
+    // Load candidate info & picture (target account when viewing-as)
+    const effectiveUid = viewTarget || storedUid
     Promise.allSettled([
-      fetch(`/api/stats?user_id=${encodeURIComponent(storedUid)}`).then(res => res.json()),
-      fetch(`/api/profile?user_id=${encodeURIComponent(storedUid)}`).then(res => res.json())
+      fetch(`/api/stats?user_id=${encodeURIComponent(effectiveUid)}`).then(res => res.json()),
+      fetch(`/api/profile?user_id=${encodeURIComponent(effectiveUid)}`).then(res => res.json())
     ])
       .then(([statsRes, profileRes]) => {
         if (statsRes.status === 'fulfilled' && statsRes.value.candidate_name) {
@@ -71,7 +83,7 @@ export default function CandidateProfilePage() {
           if (profileRes.value.name) setUserName(profileRes.value.name)
           if (profileRes.value.picture) {
             setUserPicture(profileRes.value.picture)
-            localStorage.setItem('user_picture', profileRes.value.picture)
+            if (!viewTarget) localStorage.setItem('user_picture', profileRes.value.picture)
           }
         }
       })
@@ -175,6 +187,14 @@ export default function CandidateProfilePage() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-8 py-8 space-y-8">
+        {viewAsId && (
+          <div className="p-3 rounded-xl bg-cyan-950/40 light:bg-cyan-50 border border-cyan-800/50 light:border-cyan-300 text-xs text-cyan-200 light:text-cyan-800 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
+            <span>
+              Viewing <strong className="font-mono">{viewAsId}</strong>&rsquo;s profile as super-admin — saves apply to their account. Your own session is untouched.
+            </span>
+          </div>
+        )}
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 light:text-zinc-600">
           <Link href="/dashboard" className="hover:text-zinc-200 transition-colors">

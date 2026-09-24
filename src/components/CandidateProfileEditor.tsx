@@ -463,10 +463,10 @@ export default function CandidateProfileEditor({
     if (prefLoc || !isMerge) setPreferredLocation(prefLoc)
     if (customList.length > 0 || !isMerge) setCustomQaList(customList)
 
-    // Picture
+    // Picture (cache only for your own profile — viewing someone else must not touch viewer cache)
     if (data.picture) {
       setCandidatePicture(data.picture)
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && effectiveUserId === localStorage.getItem('user_id')) {
         localStorage.setItem('user_picture', data.picture)
       }
     }
@@ -961,7 +961,7 @@ export default function CandidateProfileEditor({
       reader.onload = async () => {
         const base64DataUrl = reader.result as string
         setCandidatePicture(base64DataUrl)
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && effectiveUserId === localStorage.getItem('user_id')) {
           localStorage.setItem('user_picture', base64DataUrl)
         }
         // Sync to MongoDB backend
@@ -988,7 +988,7 @@ export default function CandidateProfileEditor({
 
   const handleRemovePhoto = async () => {
     setCandidatePicture('')
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && effectiveUserId === localStorage.getItem('user_id')) {
       localStorage.removeItem('user_picture')
     }
     await fetch(`/api/profile/picture?user_id=${encodeURIComponent(effectiveUserId)}`, {
