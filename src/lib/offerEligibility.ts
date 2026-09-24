@@ -56,6 +56,19 @@ export function evaluateOfferEligibility(user: any): OfferEligibility {
   }
 
   const plan = (user.plan || "none").toLowerCase()
+  const isOrgMember = Boolean(user.org_id || user.enterprise_org_id || user.enterprise_role === 'member' || plan === 'enterprise')
+  if (isOrgMember && plan !== 'org_pro') {
+    return {
+      eligible: true,
+      reason: "Organization member (Base Enterprise Cover). Eligible for Org Pro member upgrade (15 sweeps/wk).",
+      badge: "Eligible: Org Member Upgrade",
+      plan: "enterprise",
+      hoursRemaining: null,
+      daysRemaining: null,
+      status: "no_plan"
+    }
+  }
+
   if (plan === "none" || plan === "no_plan" || plan === "free" || plan === "unsubscribed") {
     return {
       eligible: true,

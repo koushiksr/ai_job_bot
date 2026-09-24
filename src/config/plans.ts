@@ -49,6 +49,7 @@ export interface PromoDefinition {
     displayPrice: string
     label: string
   }
+  category?: 'individual' | 'org_member'
 }
 
 // ----------------------------------------------------------------------
@@ -274,7 +275,46 @@ export const MASTER_PROMOS: PromoDefinition[] = [
     pricingDisplay: {
       displayPrice: '₹299',
       label: '88% OFF 3-Month VIP Extension (Actual ₹2,500 Value)'
-    }
+    },
+    category: 'individual'
+  },
+  {
+    code: 'ORGPRO49',
+    presetId: 'org_pro_49',
+    name: 'Org Pro Member Flash Upgrade (₹49 / mo)',
+    offerTitle: 'Exclusive Org Member Upgrade: JobFlux Org Pro for ₹49',
+    discountBadge: '95% OFF (ORG MEMBER ONLY)',
+    originalPrice: '₹1,000 / mo',
+    discountedPrice: '₹49 / mo',
+    amountPaise: 4900,
+    allowedPlans: ['org_pro'],
+    durationDays: 30,
+    description: 'JobFlux Org Pro - 95% Flash Upgrade for Organization Members (30 Days)',
+    customMessage: 'Exclusive upgrade for organization members! Upgrade your account to Org Pro with up to 15 weekly on-demand sweeps, 55 daily applications, and priority server queue for just ₹49 (Regular ₹1,000/mo).',
+    pricingDisplay: {
+      displayPrice: '₹49',
+      label: '95% OFF Org Member Upgrade (Actual ₹1,000 / mo)'
+    },
+    category: 'org_member'
+  },
+  {
+    code: 'ORGPRO99',
+    presetId: 'org_pro_99',
+    name: 'Org Pro Member Official Pass (₹99 / mo)',
+    offerTitle: 'Organization Member Pass: JobFlux Org Pro for ₹99',
+    discountBadge: '90% OFF (ACTUAL ₹1,000)',
+    originalPrice: '₹1,000 / mo',
+    discountedPrice: '₹99 / mo',
+    amountPaise: 9900,
+    allowedPlans: ['org_pro'],
+    durationDays: 30,
+    description: 'JobFlux Org Pro - Member Upgrade (30 Days)',
+    customMessage: 'Upgrade to Org Pro: Up to 15 weekly on-demand sweeps, 55 daily applications, priority server queue, and AI resume optimization for ₹99.',
+    pricingDisplay: {
+      displayPrice: '₹99',
+      label: '90% OFF Org Pro Upgrade (Actual ₹1,000 / mo)'
+    },
+    category: 'org_member'
   }
 ]
 
@@ -402,7 +442,9 @@ export const OFFER_PRESETS = MASTER_PROMOS.map(p => ({
   originalPrice: p.originalPrice,
   discountedPrice: p.discountedPrice,
   promoCode: p.code,
-  customMessage: p.customMessage
+  customMessage: p.customMessage,
+  allowedPlans: p.allowedPlans,
+  category: p.category || 'individual'
 }))
 
 /**

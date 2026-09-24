@@ -2,6 +2,7 @@
 
 import React from 'react'
 import {
+  Building2,
   ChevronDown,
   ChevronUp,
   Edit,
@@ -96,6 +97,39 @@ export const OfferCampaignDesigner: React.FC<OfferCampaignDesignerProps> = ({
   toggleOffersPreview,
   setIsConfirmOfferModalOpen,
 }) => {
+  const [presetCategoryFilter, setPresetCategoryFilter] = React.useState<'all' | 'org_member' | 'individual'>('all')
+
+  const singleTargetCandidate = React.useMemo(() => {
+    if (targetType !== 'single') return null
+    const cleanTarget = (targetEmail || '').trim().toLowerCase()
+    return usersList.find(u => (u.email || u.user_id || '').toLowerCase() === cleanTarget)
+  }, [targetType, targetEmail, usersList])
+
+  const isTargetOrgMember = Boolean(
+    singleTargetCandidate?.org_id ||
+    singleTargetCandidate?.enterprise_org_id ||
+    singleTargetCandidate?.enterprise_role === 'member' ||
+    (singleTargetCandidate?.plan || '').toLowerCase() === 'enterprise' ||
+    (singleTargetCandidate?.plan || '').toLowerCase() === 'org_pro'
+  )
+
+  // Auto-switch to org_member presets when an org member is selected in single target mode
+  React.useEffect(() => {
+    if (isTargetOrgMember) {
+      setPresetCategoryFilter('org_member')
+    }
+  }, [isTargetOrgMember, targetEmail])
+
+  const filteredPresets = React.useMemo(() => {
+    if (presetCategoryFilter === 'org_member') {
+      return offersData.presets.filter((p: any) => p.category === 'org_member' || p.id?.includes('org_pro') || p.promoCode?.includes('ORGPRO'))
+    }
+    if (presetCategoryFilter === 'individual') {
+      return offersData.presets.filter((p: any) => p.category !== 'org_member' && !p.id?.includes('org_pro') && !p.promoCode?.includes('ORGPRO'))
+    }
+    return offersData.presets
+  }, [offersData.presets, presetCategoryFilter])
+
   return (
     <div className="space-y-4">
       <div 
@@ -160,27 +194,100 @@ export const OfferCampaignDesigner: React.FC<OfferCampaignDesignerProps> = ({
           {/* Left Column: Form Settings */}
           <div className={`${offersCollapsedPreview ? 'lg:col-span-12' : 'lg:col-span-7'} space-y-5 p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200`}>
             <div>
-              <h4 className="text-xs font-bold text-white light:text-zinc-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                <span>1. Select Offer Preset</span>
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                {offersData.presets.map((p) => (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <h4 className="text-xs font-bold text-white light:text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
+                  <span>1. Select Offer Preset</span>
+                </h4>
+                {/* Category Filter Tabs */}
+                <div className="flex items-center gap-1 bg-zinc-950 light:bg-zinc-100 p-0.5 rounded-lg border border-zinc-800 light:border-zinc-300">
                   <button
-                    key={p.id}
                     type="button"
-                    onClick={() => handleSelectPreset(p)}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      selectedPresetId === p.id
-                        ? 'bg-zinc-800/90 light:bg-zinc-200 border-amber-500/60 ring-1 ring-amber-500/40 text-white light:text-zinc-900'
-                        : 'bg-black/60 light:bg-white/85 border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:border-zinc-700 light:hover:border-zinc-300'
+                    onClick={() => setPresetCategoryFilter('all')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
+                      presetCategoryFilter === 'all'
+                        ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-bold'
+                        : 'text-zinc-400 light:text-zinc-600 hover:text-white'
                     }`}
                   >
-                    <span className="block text-[11px] font-bold text-amber-400 light:text-amber-600 mb-1">{p.discountBadge}</span>
-                    <span className="block text-xs font-semibold text-white light:text-zinc-900 truncate">{p.name}</span>
-                    <span className="block text-[11px] font-mono text-zinc-400 light:text-zinc-600 mt-1">{p.discountedPrice}</span>
+                    All ({offersData.presets.length})
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setPresetCategoryFilter('org_member')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono flex items-center gap-1 transition-all cursor-pointer ${
+                      presetCategoryFilter === 'org_member'
+                        ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                        : 'text-indigo-400 light:text-indigo-600 hover:text-indigo-300'
+                    }`}
+                  >
+                    <Building2 className="w-2.5 h-2.5" />
+                    <span>Org Member ({offersData.presets.filter((p: any) => p.category === 'org_member' || p.id?.includes('org_pro') || p.promoCode?.includes('ORGPRO')).length})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPresetCategoryFilter('individual')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
+                      presetCategoryFilter === 'individual'
+                        ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-bold'
+                        : 'text-zinc-400 light:text-zinc-600 hover:text-white'
+                    }`}
+                  >
+                    Individual ({offersData.presets.filter((p: any) => p.category !== 'org_member' && !p.id?.includes('org_pro') && !p.promoCode?.includes('ORGPRO')).length})
+                  </button>
+                </div>
+              </div>
+
+              {isTargetOrgMember && (
+                <div className="mb-2.5 p-2 rounded-xl bg-indigo-950/40 light:bg-indigo-50 border border-indigo-800/60 light:border-indigo-300 text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                    <div>
+                      <span className="font-bold text-indigo-200 light:text-indigo-900">
+                        Org Candidate: {singleTargetCandidate?.org_name || 'Enterprise Org'}
+                      </span>
+                      <span className="block text-[10px] text-indigo-400/90 light:text-indigo-700">
+                        Showing Org Member presets (Org Pro with 15 weekly sweeps &amp; 55 daily applications).
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 light:text-indigo-800 border border-indigo-500/30 whitespace-nowrap">
+                    ORG MEMBER
+                  </span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                {filteredPresets.map((p) => {
+                  const isOrgPreset = p.category === 'org_member' || p.id?.includes('org_pro') || p.promoCode?.includes('ORGPRO')
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => handleSelectPreset(p)}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        selectedPresetId === p.id
+                          ? (isOrgPreset 
+                              ? 'bg-indigo-950/60 light:bg-indigo-100 border-indigo-500 ring-1 ring-indigo-500/50 text-white light:text-zinc-900'
+                              : 'bg-zinc-800/90 light:bg-zinc-200 border-amber-500/60 ring-1 ring-amber-500/40 text-white light:text-zinc-900')
+                          : (isOrgPreset
+                              ? 'bg-indigo-950/20 light:bg-indigo-50/60 border-indigo-900/60 light:border-indigo-200 text-zinc-300 hover:border-indigo-700'
+                              : 'bg-black/60 light:bg-white/85 border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:border-zinc-700 light:hover:border-zinc-300')
+                      }`}
+                    >
+                      {isOrgPreset ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-400 light:text-indigo-700 mb-1">
+                          <Building2 className="w-2.5 h-2.5" />
+                          <span>{p.discountBadge}</span>
+                        </span>
+                      ) : (
+                        <span className="block text-[11px] font-bold text-amber-400 light:text-amber-600 mb-1">{p.discountBadge}</span>
+                      )}
+                      <span className="block text-xs font-semibold text-white light:text-zinc-900 truncate">{p.name}</span>
+                      <span className="block text-[11px] font-mono text-zinc-400 light:text-zinc-600 mt-1">{p.discountedPrice}</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -320,6 +427,21 @@ export const OfferCampaignDesigner: React.FC<OfferCampaignDesignerProps> = ({
                         </button>
                         <button
                           type="button"
+                          onClick={() => {
+                            const orgEmails = usersList
+                              .filter(u => u.org_id || u.enterprise_org_id || u.enterprise_role === 'member' || (u.plan || '').toLowerCase() === 'enterprise' || (u.plan || '').toLowerCase() === 'org_pro')
+                              .map(u => (u.email || (u.user_id?.includes('@') ? u.user_id : '')).toLowerCase().trim())
+                              .filter(e => e && e.includes('@'))
+                            setSelectedCandidates(Array.from(new Set([...selectedCandidates, ...orgEmails])))
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg bg-indigo-950/60 light:bg-indigo-100 hover:bg-indigo-900/60 border border-indigo-800/60 light:border-indigo-300 text-indigo-300 light:text-indigo-800 text-[11px] font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                          title="Select all candidates belonging to an organization"
+                        >
+                          <Building2 className="w-3 h-3 text-indigo-400" />
+                          <span>Select Org Members</span>
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setSelectedCandidates([])}
                           className="px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 text-[11px] cursor-pointer"
                         >
@@ -396,6 +518,15 @@ export const OfferCampaignDesigner: React.FC<OfferCampaignDesignerProps> = ({
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-1.5 shrink-0">
+                                    {(u.org_id || u.enterprise_org_id || u.enterprise_role === 'member' || (u.plan || '').toLowerCase() === 'enterprise' || (u.plan || '').toLowerCase() === 'org_pro') && (
+                                      <span 
+                                        className="px-1.5 py-0.5 rounded text-[9px] font-mono shrink-0 bg-indigo-500/20 text-indigo-300 light:text-indigo-700 border border-indigo-500/40 flex items-center gap-0.5"
+                                        title={`Organization: ${u.org_name || 'Enterprise Org'}`}
+                                      >
+                                        <Building2 className="w-2.5 h-2.5 text-indigo-400" />
+                                        <span>{u.org_name || 'Org Member'}</span>
+                                      </span>
+                                    )}
                                     {u.offer_eligibility ? (
                                       <span
                                         className={`px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 ${

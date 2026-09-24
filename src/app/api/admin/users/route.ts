@@ -409,6 +409,23 @@ export async function PATCH(req: NextRequest) {
         updates.vip_access = false
         updates.free_privilege = false
         if (updates.daily_application_limit === undefined) updates.daily_application_limit = 20
+      } else if (plan === 'enterprise') {
+        updates.plan = 'enterprise'
+        updates.plan_name = 'Enterprise Member (Org Cover)'
+        updates.enterprise_role = 'member'
+        updates.enabled_for_daily_run = true
+        updates.plan_expires_at = null
+        updates.trial_expires_at = null
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 55
+      } else if (plan === 'org_pro') {
+        const days = extend_days || 30
+        updates.plan = 'org_pro'
+        updates.plan_name = 'JobFlux Org Pro — Member Upgrade (30 Days)'
+        updates.enterprise_role = 'member'
+        updates.enabled_for_daily_run = true
+        updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        updates.trial_expires_at = null
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 55
       } else if (plan === 'none' || plan === 'no_plan') {
         updates.plan = 'none'
         updates.plan_name = 'No Active Plan'

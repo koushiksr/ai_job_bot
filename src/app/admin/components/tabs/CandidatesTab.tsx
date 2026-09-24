@@ -276,6 +276,16 @@ export default function CandidatesTab({
 
   const isAdministrativeUser = (u: CandidateUser) => isSuperAdminUser(u) || isOrgAdminUser(u)
 
+  const isOrgMemberUser = (u: CandidateUser) => Boolean(
+    !isSuperAdminUser(u) && !isOrgAdminUser(u) && (
+      u.org_id ||
+      u.enterprise_org_id ||
+      u.enterprise_role === 'member' ||
+      (u.plan || '').toLowerCase() === 'enterprise' ||
+      (u.plan || '').toLowerCase() === 'org_pro'
+    )
+  )
+
   // Weight calculators for clean, structured ranking
   const getPlanWeight = (u: CandidateUser): number => {
     if (isSuperAdminUser(u)) return 999
@@ -1462,14 +1472,28 @@ export default function CandidatesTab({
                           }
                           return (
                             <div className="flex flex-col items-start gap-1.5">
-                              <div className="flex items-center gap-1.5">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
-                                  u.plan === 'none' || u.plan === 'no_plan' 
-                                    ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-500 light:text-zinc-500 border border-zinc-800 light:border-zinc-200' 
-                                    : 'bg-zinc-800/90 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300'
-                                }`}>
-                                  {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
-                                </span>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {isOrgMemberUser(u) && (u.plan === 'enterprise' || u.plan === 'org_pro') ? (
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                                    u.plan === 'org_pro'
+                                      ? 'bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/40 shadow-sm'
+                                      : 'bg-indigo-500/20 text-indigo-300 light:text-indigo-700 border border-indigo-500/40 shadow-sm'
+                                  }`}>
+                                    {u.plan === 'org_pro' ? (
+                                      <><span>⚡</span><span>ORG PRO</span></>
+                                    ) : (
+                                      <><Building2 className="w-2.5 h-2.5" /><span>ENTERPRISE</span></>
+                                    )}
+                                  </span>
+                                ) : (
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
+                                    u.plan === 'none' || u.plan === 'no_plan' 
+                                      ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-500 light:text-zinc-500 border border-zinc-800 light:border-zinc-200' 
+                                      : 'bg-zinc-800/90 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300'
+                                  }`}>
+                                    {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
+                                  </span>
+                                )}
                             {u.is_vip && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold bg-amber-500/10 text-amber-400 light:text-amber-700 border border-amber-500/30 light:border-amber-300">
                                 <Crown className="w-2.5 h-2.5 text-amber-400 light:text-amber-600" />
@@ -1492,19 +1516,55 @@ export default function CandidatesTab({
                             })()}
                           </div>
 
+                          {/* If candidate is linked to an organization, display org tag */}
+                          {isOrgMemberUser(u) && (
+                            <div 
+                              className="flex items-center gap-1 text-[9px] font-mono text-indigo-400 light:text-indigo-600 truncate max-w-[170px]" 
+                              title={`Member of: ${u.org_name || 'Enterprise Org'}`}
+                            >
+                              <Building2 className="w-2.5 h-2.5 shrink-0 text-indigo-400" />
+                              <span className="truncate">{u.org_name || 'Org Member'}</span>
+                            </div>
+                          )}
+
                           {/* Admin Plan Override Dropdown */}
                           <select
-                            value={u.plan || 'trial'}
+                            value={u.plan || (isOrgMemberUser(u) ? 'enterprise' : 'trial')}
                             onChange={(e) => handleChangePlan(u.user_id, e.target.value)}
                             className="bg-zinc-900 light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-100 border border-zinc-700/80 light:border-zinc-300 text-[10px] text-zinc-200 light:text-zinc-800 rounded-md px-1.5 py-1 focus:outline-none focus:border-zinc-500 light:focus:border-zinc-400 cursor-pointer font-mono font-medium transition-colors"
                             title="Admin Quick Action: Change this candidate's plan tier"
                           >
-                            <option value="none">No Plan (Inactive)</option>
-                            <option value="trial">Free Trial (3 Days)</option>
-                            <option value="starter">Starter (30d)</option>
-                            <option value="pro">Pro (30d)</option>
-                            <option value="elite">Professional (90d)</option>
-                            <option value="vip">VIP Pass (3 Months / 90d)</option>
+                            {isOrgMemberUser(u) ? (
+                              <>
+                                <optgroup label="🏢 Organization Tier Plans">
+                                  <option value="enterprise">🏢 Enterprise Member (Base Org Cover)</option>
+                                  <option value="org_pro">⚡ Org Pro Member (30d Upgrade)</option>
+                                </optgroup>
+                                <optgroup label="Standard Individual Plans">
+                                  <option value="none">No Plan (Inactive)</option>
+                                  <option value="trial">Free Trial (3 Days)</option>
+                                  <option value="starter">Starter (30d)</option>
+                                  <option value="pro">Pro (30d)</option>
+                                  <option value="elite">Professional (90d)</option>
+                                  <option value="vip">VIP Pass (3 Months / 90d)</option>
+                                </optgroup>
+                              </>
+                            ) : (
+                              <>
+                                <optgroup label="Standard Individual Plans">
+                                  <option value="none">No Plan (Inactive)</option>
+                                  <option value="trial">Free Trial (3 Days)</option>
+                                  <option value="starter">Starter (30d)</option>
+                                  <option value="pro">Pro (30d)</option>
+                                  <option value="elite">Professional (90d)</option>
+                                  <option value="vip">VIP Pass (3 Months / 90d)</option>
+                                </optgroup>
+                                <optgroup label="🏢 Assign to Organization Tier">
+                                  <option value="enterprise">🏢 Enterprise Member (Org Cover)</option>
+                                  <option value="org_pro">⚡ Org Pro Member (30d Upgrade)</option>
+                                </optgroup>
+                              </>
+                            )}
                           </select>
 
                           <button
