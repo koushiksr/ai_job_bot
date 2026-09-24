@@ -369,7 +369,14 @@ export default function CandidateProfileEditor({
     }
 
     if (Array.isArray(filters.must_have_keywords) && filters.must_have_keywords.length > 0) {
-      setMustHaveKeywords(prev => isMerge ? Array.from(new Set([...prev, ...filters.must_have_keywords])) : filters.must_have_keywords)
+      // Clean on load: drop junk fragments and the core word itself (shown in
+      // the Main Technology input above, not duplicated here)
+      const coreLower = (filters.core_keyword || '').toLowerCase()
+      const cleanMust = filters.must_have_keywords
+        .map(String)
+        .map((s: string) => s.trim())
+        .filter((s: string) => s.length >= 2 && !JUNK_SKILL_WORDS.has(s.toLowerCase()) && s.toLowerCase() !== coreLower)
+      setMustHaveKeywords(prev => isMerge ? Array.from(new Set([...prev, ...cleanMust])) : cleanMust)
     } else if (!isMerge) {
       setMustHaveKeywords([])
     }
@@ -518,9 +525,8 @@ export default function CandidateProfileEditor({
         roles: targetRoles,
         location: targetLocations,
         keywords: skills,
-        must_have_keywords: coreKeyword && !mustHaveKeywords.some(k => k.toLowerCase() === coreKeyword.toLowerCase())
-          ? [coreKeyword, ...mustHaveKeywords]
-          : mustHaveKeywords,
+        // Clean supporting list only — backend merges the Main technology for scoring
+        must_have_keywords: mustHaveKeywords.filter(k => k.toLowerCase() !== (coreKeyword || '').toLowerCase()),
         avoid_companies: avoidCompanies,
         core_keyword: coreKeyword
       },
@@ -2062,19 +2068,19 @@ export default function CandidateProfileEditor({
           </div>
         </div>
 
-        {/* CORE TECHNOLOGY KEYWORD (ROOT ANCHOR) */}
+        {/* MAIN TECHNOLOGY KEYWORD (HIGHEST MATCH WEIGHT) */}
         <div className="p-3.5 rounded-xl bg-zinc-900/60 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 space-y-1.5">
           <div className="flex items-center justify-between flex-wrap gap-1">
             <label className="block text-xs font-semibold text-white light:text-zinc-900 flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Core Technology Focus Keyword</span>
+              <span>Main Technology Keyword</span>
             </label>
             <span className="text-[10px] font-mono text-cyan-400 light:text-cyan-700 bg-cyan-950/40 light:bg-cyan-50 px-2 py-0.5 rounded border border-cyan-800/40 light:border-cyan-300">
-              Root Keyword Matcher
+              Highest Match Weight
             </span>
           </div>
           <p className="text-[11px] text-zinc-400 light:text-zinc-600 leading-relaxed">
-            Primary technology term (e.g. <strong className="text-white light:text-zinc-900">Python</strong>). The autonomous bot matches any recruiter title containing this keyword (<em>Python Developer, Python Engineer, Software Engineer - Python</em>).
+            Your core stack (e.g. <strong className="text-white light:text-zinc-900">Python</strong>). Jobs matching it in the title rank first; it also counts toward the must-have gate below.
           </p>
           <div className="flex items-center gap-2 pt-1">
             <input
@@ -2330,13 +2336,13 @@ export default function CandidateProfileEditor({
           )}
         </div>
 
-        {/* Must-Have Keywords (Strict Match) */}
+        {/* SUPPORTING MUST-HAVE KEYWORDS (ANY-MATCH GATE) */}
         <div className="space-y-2">
           <label className="block text-xs font-medium text-zinc-300 light:text-zinc-700">
-            Must-Have Keywords (Strict Requirement) ({mustHaveKeywords.length})
+            Supporting Keywords ({mustHaveKeywords.length})
           </label>
           <p className="text-[11px] text-zinc-500 light:text-zinc-600">
-            The bot will only apply to jobs that contain at least one of these strict keywords in the job description.
+            A job passes if <strong className="text-zinc-300 light:text-zinc-700">any one</strong> of these (or your Main technology above) appears in its title or skills — or at least <strong className="text-zinc-300 light:text-zinc-700">two of them</strong> in its description. Keep this list to real skills; generic words alone never pass.
           </p>
           <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-xl">
             {mustHaveKeywords.map((kw, idx) => (
