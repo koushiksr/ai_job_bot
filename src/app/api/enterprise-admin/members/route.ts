@@ -92,16 +92,16 @@ export async function GET(req: NextRequest) {
 
       if (isVipUser) {
         effPlan = isPaidOrgPro ? 'org_pro' : (isPaidOrgStarter ? 'org_starter' : 'org_pro')
-        effPlanName = isPaidOrgPro ? 'JobFlux Org Pro (VIP)' : 'JobFlux Org Starter (VIP)'
+        effPlanName = isPaidOrgPro ? 'Org Pro (VIP)' : 'Org Starter (VIP)'
         isPlanActive = true
       } else if (isPaidOrgPro && isPlanValid) {
         effPlan = rawPlan === 'org_pro_3m' ? 'org_pro_3m' : 'org_pro'
-        effPlanName = rawPlan === 'org_pro_3m' ? 'JobFlux Org Pro (3 Months)' : 'JobFlux Org Pro'
+        effPlanName = rawPlan === 'org_pro_3m' ? 'Org Pro · 3 Months' : 'Org Pro'
         effExpiresAt = m.plan_expires_at
         isPlanActive = true
       } else if (isPaidOrgStarter && isPlanValid) {
         effPlan = 'org_starter'
-        effPlanName = 'JobFlux Org Starter'
+        effPlanName = 'Org Starter'
         effExpiresAt = m.plan_expires_at
         isPlanActive = true
       }
@@ -179,6 +179,11 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json()
+    // Plan assignment is a super-admin-only override. Org admins may pause /
+    // resume and pay via Razorpay, but never grant plans for free.
+    if (body.plan_id && !auth.isSuperAdmin) {
+      return NextResponse.json({ detail: 'Only Super Admin can assign plans directly. Please pay via Razorpay.' }, { status: 403 })
+    }
     const targetUserId = (body.user_id || '').trim()
     const targetEmail = (body.email || '').trim().toLowerCase()
     const enabled = Boolean(body.enabled)
@@ -211,10 +216,10 @@ export async function PATCH(req: NextRequest) {
       } else {
         updateFields.plan = planId
         updateFields.plan_name = planId === 'org_starter'
-          ? 'JobFlux Org Starter'
+          ? 'Org Starter'
           : planId === 'org_pro_3m'
-          ? 'JobFlux Org Pro (3 Months)'
-          : 'JobFlux Org Pro'
+          ? 'Org Pro · 3 Months'
+          : 'Org Pro'
         updateFields.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
         updateFields.daily_application_limit = planId.startsWith('org_pro') ? 55 : 20
         updateFields.enabled_for_daily_run = true
