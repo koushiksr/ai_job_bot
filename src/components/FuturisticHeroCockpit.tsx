@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { APP_CONFIG } from '@/config/appConfig'
 import { trackSignUp } from '@/lib/tracker'
+import { getDeviceId } from '@/lib/sessionClient'
 
 interface FuturisticHeroCockpitProps {
   onSuccess?: () => void
@@ -89,9 +90,10 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
             name: name.trim() || cleanEmail.split('@')[0],
             email: cleanEmail,
             password: undefined,
-            plan: 'trial'
+            plan: 'trial',
+            device_id: getDeviceId()
           }
-        : { email: cleanEmail, password: cleanPwd }
+        : { email: cleanEmail, password: cleanPwd, device_id: getDeviceId() }
 
       const res = await fetch(endpoint, {
         method: 'POST',

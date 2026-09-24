@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
-import { validatedIdentity } from '@/lib/sessionClient'
+import { validatedIdentity, getDeviceId } from '@/lib/sessionClient'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -29,6 +29,7 @@ export default function LoginPage() {
   // used to bounce users dashboard -> profile -> login -> dashboard).
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      getDeviceId() // ensure stable device id + cookie for OAuth-redirect logins
       validatedIdentity().then(ident => {
         if (!ident) return
         const { uid, role, email: storedEmail } = ident
@@ -67,7 +68,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, password: cleanPwd })
+        body: JSON.stringify({ email: cleanEmail, password: cleanPwd, device_id: getDeviceId() })
       })
       const data = await res.json()
 

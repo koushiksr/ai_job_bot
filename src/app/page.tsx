@@ -38,7 +38,7 @@ import FuturisticHeroCockpit from '@/components/FuturisticHeroCockpit'
 import EmployerProofMarquee from '@/components/EmployerProofMarquee'
 import TrustBadgesBar from '@/components/TrustBadgesBar'
 import Footer from '@/components/Footer'
-import { validatedIdentity } from '@/lib/sessionClient'
+import { validatedIdentity, getDeviceId } from '@/lib/sessionClient'
 import { trackSignUp } from '@/lib/tracker'
 
 const FAQS = [
@@ -147,6 +147,7 @@ export default function Home() {
   // bounce users between pages. Show the landing page until verified.
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      getDeviceId() // ensure stable device id + cookie for OAuth-redirect logins
       validatedIdentity().then(ident => {
         if (!ident) return
         const { uid: storedUid, email: storedEmail, role: storedRole } = ident
@@ -212,8 +213,8 @@ export default function Home() {
     try {
       const endpoint = authMode === 'trial' ? '/api/auth/register' : '/api/auth/login'
       const payload = authMode === 'trial'
-        ? { name, email: cleanEmail, password: cleanPwd, plan: 'trial' }
-        : { email: cleanEmail, password: cleanPwd }
+        ? { name, email: cleanEmail, password: cleanPwd, plan: 'trial', device_id: getDeviceId() }
+        : { email: cleanEmail, password: cleanPwd, device_id: getDeviceId() }
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -268,7 +269,7 @@ export default function Home() {
               const res = await fetch('/api/auth/google', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ credential: response.credential })
+                body: JSON.stringify({ credential: response.credential, device_id: getDeviceId() })
               })
               if (res.ok) {
                 const data = await res.json()

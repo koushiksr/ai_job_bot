@@ -126,3 +126,40 @@ export async function logUserActivity(
   }
 }
 
+/**
+ * Record (or refresh) a device identity on login without touching trust.
+ * Trust is granted explicitly by super-admin via /api/admin/devices.
+ */
+export async function recordLoginDevice(
+  db: Db | null,
+  args: { deviceId?: string; ip?: string; userAgent?: string; userId?: string; email?: string }
+): Promise<{ deviceId: string; label: string; trusted: boolean }> {
+  const { parseDeviceInfo } = await import('@/lib/device')
+  const deviceId = (args.deviceId || '').trim() || `ip-${(args.ip || 'unknown').replace(/[^a-zA-Z0-9]/g, '')}`
+  const { label } = parseDeviceInfo(args.userAgent || '')
+  if (!db || !deviceId) {
+    return { deviceId, label, trusted: false }
+  }
+  try {
+    const now = new Date()
+    await db.collection('trusted_devices').updateOne(
+      { device_id: deviceId },
+      {
+        $set: {
+          last_seen_at: now,
+          last_ip: args.ip || '',
+          last_user_id: args.userId || '',
+          last_email: (args.email || '').toLowerCase(),
+          label
+        },
+        $setOnInsert: { device_id: deviceId, trusted: false, created_at: now }
+      },
+      { upsert: true }
+    )
+    const rec = await db.collection('trusted_devices').findOne({ device_id: deviceId })
+    return { deviceId, label, trusted: Boolean(rec?.trusted) }
+  } catch {
+    return { deviceId, label, trusted: false }
+  }
+}
+

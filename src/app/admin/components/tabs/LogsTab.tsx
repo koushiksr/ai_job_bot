@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Activity,
   Brain,
@@ -16,7 +16,9 @@ import {
   RefreshCw,
   Search,
   X,
-  Zap
+  Zap,
+  ShieldCheck,
+  ShieldOff
 } from 'lucide-react'
 import {
   ActivityStats,
@@ -110,6 +112,47 @@ export const LogsTab: React.FC<LogsTabProps> = ({
   fetchSupportTickets,
   adminEmail,
 }) => {
+  // Device trust map (full device_id -> { trusted, label }) — super-admin exceptions.
+  // Fetched self-contained (session cookie authenticates); no prop threading needed.
+  const [trustMap, setTrustMap] = useState<Record<string, { trusted: boolean; label: string }>>({})
+  const [trustBusyId, setTrustBusyId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (logsSubTab !== 'activity') return
+    fetch('/api/admin/devices?limit=100')
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (!data?.devices) return
+        const map: Record<string, { trusted: boolean; label: string }> = {}
+        for (const d of data.devices) {
+          if (d.full_id) map[d.full_id] = { trusted: Boolean(d.trusted), label: d.label || '' }
+        }
+        setTrustMap(map)
+      })
+      .catch(() => {})
+  }, [logsSubTab, activityLogs.length])
+
+  const toggleTrust = async (fullId: string, label: string, currentlyTrusted: boolean) => {
+    if (!fullId) return
+    setTrustBusyId(fullId)
+    try {
+      const res = currentlyTrusted
+        ? await fetch(`/api/admin/devices?device_id=${encodeURIComponent(fullId)}`, { method: 'DELETE' })
+        : await fetch('/api/admin/devices', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_id: fullId, label })
+          })
+      if (res.ok) {
+        setTrustMap(prev => ({ ...prev, [fullId]: { trusted: !currentlyTrusted, label: prev[fullId]?.label || label } }))
+      }
+    } catch {
+      // silent — badge simply doesn't flip
+    } finally {
+      setTrustBusyId(null)
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Sub-Tabs Selector */}
@@ -328,6 +371,36 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                           <div className="text-[9px] text-zinc-600 truncate max-w-[160px]" title={log.user_agent}>
                             {log.user_agent || 'Unknown device'}
                           </div>
+                          {log.event_type === 'login' && log.metadata?.device_id && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              {trustMap[log.metadata.device_id]?.trusted ? (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border border-emerald-500/40" title={`Trusted device · ${trustMap[log.metadata.device_id]?.label || log.metadata?.device_label || ''}`}>
+                                  <ShieldCheck className="w-2.5 h-2.5" />
+                                  <span>Trusted · {String(log.metadata.device_id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 8)}</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300" title={log.metadata?.device_label || log.user_agent}>
+                                  <span>New device · {String(log.metadata.device_id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 8)}</span>
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                disabled={trustBusyId === log.metadata.device_id}
+                                onClick={() => toggleTrust(
+                                  log.metadata.device_id,
+                                  log.metadata?.device_label || '',
+                                  Boolean(trustMap[log.metadata.device_id]?.trusted)
+                                )}
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono text-zinc-400 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-300 hover:border-zinc-600 transition-colors cursor-pointer disabled:opacity-50"
+                                title={trustMap[log.metadata.device_id]?.trusted ? 'Revoke trust for this device' : 'Mark as my device (exception)'}
+                              >
+                                {trustMap[log.metadata.device_id]?.trusted
+                                  ? <ShieldOff className="w-2.5 h-2.5" />
+                                  : <ShieldCheck className="w-2.5 h-2.5" />}
+                                <span>{trustMap[log.metadata.device_id]?.trusted ? 'Untrust' : 'Trust'}</span>
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))

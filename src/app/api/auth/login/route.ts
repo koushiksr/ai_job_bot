@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
-import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { logUserActivity, getClientInfo, recordLoginDevice } from '@/lib/activityLogger'
 import { checkRateLimit } from '@/lib/rateLimit'
 import { APP_CONFIG } from '@/config/appConfig'
 import { syncUserPaymentPlan } from '@/lib/paymentSync'
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const emailClean = (body.email || '').trim().toLowerCase()
     const pwdClean = (body.password || '').trim()
     const { ip, userAgent } = getClientInfo(req)
+    const rawDeviceId = (body.device_id || req.cookies.get('jf_device_id')?.value || '').trim()
 
     const db = await getDb()
 
@@ -130,6 +131,7 @@ export async function POST(req: NextRequest) {
         const enterpriseOrgId = profile.enterprise_org_id || orgAsAdmin?.org_id || (isEntAdmin ? 'org_technohmsit' : null)
 
         // Log candidate/admin login event
+        const loginDevice = await recordLoginDevice(db, { deviceId: rawDeviceId, ip, userAgent, userId: profile.user_id, email: profile.email })
         await logUserActivity(db, {
           userId: profile.user_id,
           email: profile.email,
@@ -145,7 +147,10 @@ export async function POST(req: NextRequest) {
             method: 'password',
             role: assignedRole,
             plan: activePlan,
-            enterprise_org_id: enterpriseOrgId
+            enterprise_org_id: enterpriseOrgId,
+            device_id: loginDevice.deviceId,
+            device_label: loginDevice.label,
+            device_trusted: loginDevice.trusted
           }
         })
 

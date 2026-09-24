@@ -33,6 +33,9 @@ export function getMongoClientPromise(): Promise<MongoClient> | null {
         maxPoolSize: 10,
         minPoolSize: 1,
         serverSelectionTimeoutMS: 5000,
+        // Local-network escape hatch (e.g. IPv6-broken dev networks):
+        // set MONGO_IP_FAMILY=4 in .env.local. Never needed on Vercel.
+        ...(process.env.MONGO_IP_FAMILY ? { family: Number(process.env.MONGO_IP_FAMILY) } : {})
       })
       global._mongoClientPromise = client.connect()
     }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
-import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { logUserActivity, getClientInfo, recordLoginDevice } from '@/lib/activityLogger'
 import { findActivePaymentForEmail, syncUserPaymentPlan } from '@/lib/paymentSync'
 import { issueSession } from '@/lib/session'
 import { exactMatchCI } from '@/lib/query'
@@ -169,6 +169,10 @@ export async function POST(req: NextRequest) {
 
     // Log Google GIS sign-in activity
     const { ip, userAgent } = getClientInfo(req)
+    const gisDevice = await recordLoginDevice(db, {
+      deviceId: (body.device_id || req.cookies.get('jf_device_id')?.value || '').trim(),
+      ip, userAgent, userId: profile.user_id, email: profile.email
+    })
     await logUserActivity(db, {
       userId: profile.user_id,
       email: profile.email,
@@ -184,7 +188,10 @@ export async function POST(req: NextRequest) {
         method: 'google_gis',
         role: role,
         plan: profile.plan || 'trial',
-        enterprise_org_id: enterpriseOrgId
+        enterprise_org_id: enterpriseOrgId,
+        device_id: gisDevice.deviceId,
+        device_label: gisDevice.label,
+        device_trusted: gisDevice.trusted
       }
     })
 

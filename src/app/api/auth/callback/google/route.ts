@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
-import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
+import { logUserActivity, getClientInfo, recordLoginDevice } from '@/lib/activityLogger'
 import { issueSession } from '@/lib/session'
 import { getGoogleOAuthConfig, findProfileByEmail, ensureTechnohmProfile, resolveGoogleRole } from '@/lib/googleAuth'
 
@@ -159,6 +159,10 @@ export async function GET(req: NextRequest) {
 
     // Log Google OAuth Redirect login activity
     const { ip, userAgent } = getClientInfo(req)
+    const redirectDevice = await recordLoginDevice(db, {
+      deviceId: req.cookies.get('jf_device_id')?.value || '',
+      ip, userAgent, userId: profile.user_id, email: profile.email
+    })
     await logUserActivity(db, {
       userId: profile.user_id,
       email: profile.email,
@@ -169,7 +173,10 @@ export async function GET(req: NextRequest) {
       metadata: {
         method: 'google_oauth_redirect',
         role: role,
-        plan: profile.plan || 'trial'
+        plan: profile.plan || 'trial',
+        device_id: redirectDevice.deviceId,
+        device_label: redirectDevice.label,
+        device_trusted: redirectDevice.trusted
       }
     })
 

@@ -38,6 +38,28 @@ export function clearLocalIdentity() {
   } catch {}
 }
 
+/**
+ * Stable per-browser device UUID for login audit + trust exceptions.
+ * Created once, reused forever (survives logout). Also mirrored to a
+ * readable `jf_device_id` cookie so OAuth-redirect logins (no POST body)
+ * can be attributed to the same device.
+ */
+export function getDeviceId(): string {
+  if (typeof window === 'undefined') return ''
+  try {
+    let id = localStorage.getItem('jf_device_id') || ''
+    if (!id) {
+      id = (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
+        `dev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+      localStorage.setItem('jf_device_id', id)
+    }
+    document.cookie = `jf_device_id=${encodeURIComponent(id)}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
+    return id
+  } catch {
+    return ''
+  }
+}
+
 /** Returns the identity only if the server session is still valid. */
 export async function validatedIdentity(): Promise<LocalIdentity | null> {
   const local = readLocalIdentity()
