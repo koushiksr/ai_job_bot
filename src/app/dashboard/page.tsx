@@ -149,8 +149,8 @@ export default function UserDashboard() {
   // Plan Expiry & Renewal Computations
   const planExpiryDate = planExpiresAt ? new Date(planExpiresAt) : null
   const hoursUntilPlanExpiry = planExpiryDate ? Math.round((planExpiryDate.getTime() - Date.now()) / (1000 * 60 * 60)) : null
-  const isPlanExpiringSoon = !isVip && hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry > 0 && hoursUntilPlanExpiry <= 48
-  const isPlanExpired = !isVip && ((hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 0) || (!isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan'))
+  const isPlanExpiringSoon = !isVip && !isEnterpriseMember && hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry > 0 && hoursUntilPlanExpiry <= 48
+  const isPlanExpired = !isVip && !isEnterpriseMember && ((hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 0) || (!isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan'))
 
   // Browser Push Notifications State & Assistants
   const [notificationPermission, setNotificationPermission] = useState<string>('default')
