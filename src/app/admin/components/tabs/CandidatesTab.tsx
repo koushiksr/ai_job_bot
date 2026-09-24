@@ -191,21 +191,18 @@ export default function CandidatesTab({
 
   // Filter menu popover state and click-outside handler
   const [showFilterMenu, setShowFilterMenu] = React.useState(false)
-  const filterMenuRef = React.useRef<HTMLDivElement>(null)
 
   // Row action menu state
   const [openRowActionMenuId, setOpenRowActionMenuId] = React.useState<string | null>(null)
   const rowActionMenuRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
-    // NOTE: 'click' (not 'mousedown') — the filter popover and row menus render
-    // outside their ref containers, so mousedown would unmount them before the
-    // option's own click handler runs ("menu closes instead of selecting").
-    // With bubble-phase click, the option handler runs first, then this closes.
+    // NOTE: 'click' (not 'mousedown') — the row menu renders outside its ref
+    // container, so mousedown would unmount it before the item's own click
+    // handler runs. With bubble-phase click, the item handler runs first.
+    // The FILTER popover is intentionally NOT auto-closed: admins pick
+    // multiple filters, then close via Done / X / toggle.
     const handleClickOutside = (event: MouseEvent) => {
-      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target as Node)) {
-        setShowFilterMenu(false)
-      }
       if (rowActionMenuRef.current && !rowActionMenuRef.current.contains(event.target as Node)) {
         setOpenRowActionMenuId(null)
       }
@@ -599,7 +596,7 @@ export default function CandidatesTab({
           </div>
 
           {/* Right: Triple-Dot Filter Menu + Reset + Status Guide + Create Candidate */}
-          <div className="flex items-center gap-2 shrink-0 justify-end" ref={filterMenuRef}>
+          <div className="flex items-center gap-2 shrink-0 justify-end">
             {/* TRIPLE-DOT FILTER & SORT MENU BUTTON */}
             <button
               type="button"
