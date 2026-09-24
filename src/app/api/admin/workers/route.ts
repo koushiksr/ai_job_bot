@@ -32,11 +32,17 @@ export async function GET(req: NextRequest) {
     ).toArray()
     const taskById = new Map(liveTasks.map(t => [t.task_id, t]))
 
-    const workers = docs.map(w => {
+    const seen = new Set<string>()
+    const workers = []
+    for (const w of docs) {
+      const slotKey = `${w.hostname || ''}|${w.pool_slot || 'solo'}`
+      if (seen.has(slotKey)) continue // older duplicate of a slot we already have fresher
+      seen.add(slotKey)
       const hbTime = w.heartbeat_at ? new Date(w.heartbeat_at).getTime() : 0
       const ageS = hbTime ? Math.max(0, Math.floor((now - hbTime) / 1000)) : 999999
+      if (ageS > STALE_SECONDS) continue // dead boots stay out — fleet shows live workers only
       const task = w.current_task_id ? taskById.get(w.current_task_id) : null
-      return {
+      workers.push({
         worker_id: w.worker_id,
         hostname: w.hostname || '',
         platform: w.platform || '',
@@ -44,20 +50,19 @@ export async function GET(req: NextRequest) {
         pool_slot: w.pool_slot || 'solo',
         started_at: w.started_at || null,
         heartbeat_age_s: ageS,
-        online: ageS <= STALE_SECONDS,
+        online: true,
         current_task_id: w.current_task_id || null,
         current_task_user: task?.user_id || null,
         current_task_status: task?.status || null
-      }
-    })
+      })
+    }
 
-    const onlineCount = workers.filter(w => w.online).length
     const pendingCount = liveTasks.filter(t => t.status === 'pending').length
 
     return NextResponse.json({
       status: 'success',
       checked_at: new Date().toISOString(),
-      online_count: onlineCount,
+      online_count: workers.length,
       total_seen: workers.length,
       pending_tasks: pendingCount,
       workers

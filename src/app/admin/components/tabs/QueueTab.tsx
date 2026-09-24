@@ -397,7 +397,7 @@ export default function QueueTab({
             <span className="text-xs font-bold text-white light:text-zinc-900">Worker Fleet</span>
             {fleet ? (
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700">
-                {fleet.online_count} online / {fleet.total_seen} seen · {fleet.pending_tasks} pending
+                {fleet.online_count} online · {fleet.pending_tasks} pending
               </span>
             ) : (
               <span className="text-[10px] font-mono text-zinc-500">loading…</span>
