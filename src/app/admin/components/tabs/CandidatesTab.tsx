@@ -198,6 +198,10 @@ export default function CandidatesTab({
   const rowActionMenuRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
+    // NOTE: 'click' (not 'mousedown') — the filter popover and row menus render
+    // outside their ref containers, so mousedown would unmount them before the
+    // option's own click handler runs ("menu closes instead of selecting").
+    // With bubble-phase click, the option handler runs first, then this closes.
     const handleClickOutside = (event: MouseEvent) => {
       if (filterMenuRef.current && !filterMenuRef.current.contains(event.target as Node)) {
         setShowFilterMenu(false)
@@ -206,8 +210,8 @@ export default function CandidatesTab({
         setOpenRowActionMenuId(null)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
   const isFiltered = activeExecFilter !== 'all' || candidateStatusFilter !== 'all' || accountTypeFilter !== 'all' || userSearch.trim().length > 0 || sortField !== 'plan' || sortOrder !== 'desc'
@@ -327,6 +331,8 @@ export default function CandidatesTab({
   const countPro = usersList.filter(u => (u.plan || '').toLowerCase() === 'pro').length
   const countStarter = usersList.filter(u => (u.plan || '').toLowerCase() === 'starter').length
   const countTrial = usersList.filter(u => (u.plan || '').toLowerCase() === 'trial').length
+  const countEnterprise = usersList.filter(u => (u.plan || '').toLowerCase() === 'enterprise' || u.enterprise_role === 'member').length
+  const countOrgPro = usersList.filter(u => (u.plan || '').toLowerCase() === 'org_pro').length
 
   // Filter users by search, execution status, and plan status
   const filteredUsers = usersList.filter(u => {
@@ -382,6 +388,8 @@ export default function CandidatesTab({
     if (candidateStatusFilter === 'pro') return (u.plan || '').toLowerCase() === 'pro'
     if (candidateStatusFilter === 'starter') return (u.plan || '').toLowerCase() === 'starter'
     if (candidateStatusFilter === 'trial') return (u.plan || '').toLowerCase() === 'trial'
+    if (candidateStatusFilter === 'enterprise') return (u.plan || '').toLowerCase() === 'enterprise' || u.enterprise_role === 'member'
+    if (candidateStatusFilter === 'org_pro') return (u.plan || '').toLowerCase() === 'org_pro'
     if (candidateStatusFilter === 'expiring') return u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'urgent') return u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'expired') return u.plan_expiry_status === 'expired'
@@ -816,6 +824,8 @@ export default function CandidatesTab({
                   { key: 'pro', label: 'Pro (30d)', count: countPro },
                   { key: 'starter', label: 'Starter (30d)', count: countStarter },
                   { key: 'trial', label: 'Trial', count: countTrial },
+                  { key: 'enterprise', label: 'Enterprise', count: countEnterprise, color: 'text-cyan-400 light:text-cyan-700' },
+                  { key: 'org_pro', label: 'Org Pro', count: countOrgPro, color: 'text-amber-400 light:text-amber-700' },
                   { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400 light:text-emerald-700' },
                   { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-400 light:text-amber-700' },
                   { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400 light:text-rose-600' },
