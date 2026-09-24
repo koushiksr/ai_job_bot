@@ -230,6 +230,7 @@ Schema:
     "location": [],
     "roles": [],
     "keywords": [],
+    "core_keyword": "",
     "must_have_keywords": [],
     "avoid_companies": []
   },
@@ -245,10 +246,12 @@ Schema:
   }
 }
 
-Keyword rules:
-- skills and keywords must contain coherent technology terms (e.g. "Python", "FastAPI", "PostgreSQL", "Docker", "Machine Learning", "LangChain"). Do NOT split multi-word skills into isolated single words like "Machine", "Learning", "Development", "APIs", "REST".
+Keyword rules (these drive job matching — be strict):
+- skills and keywords must contain coherent technology terms (e.g. "Python", "FastAPI", "PostgreSQL", "Docker", "Machine Learning", "LangChain"). Do NOT split multi-word skills into isolated single words like "Machine", "Learning", "Development", "APIs", "REST". Never output junk fragments like "Assured", "Test way".
+- Prefer full canonical names ("Python", not "Py"; "JavaScript", not "JS"; "Kubernetes", not "K8s").
 - roles should contain 2 to 4 realistic, complete job titles matching the candidate's core expertise (e.g. "Python Developer", "Backend Engineer", "AI/ML Engineer"). NEVER output single-word fragments like "Gen", "Ai", "Agent", "Prompt", "Fde".
-- must_have_keywords must contain 1-3 core primary technologies/languages (e.g. "Python").
+- core_keyword: the SINGLE main technology defining this candidate (e.g. "Python"). Full name, not an abbreviation.
+- must_have_keywords: 3 to 8 real supporting skills (e.g. "Django", "PostgreSQL", "Docker"). Real multi-word skills are fine ("Rest Assured"); single generic words ("Git", "Agile", "JIRA") and junk fragments are forbidden here. Never repeat the core_keyword in this list.
 - avoid_companies must contain every past and present employer name.
 - predefined_answers["Current Company (payroll)?"] must equal current_company.
 - Incorporate custom user instructions where applicable.`

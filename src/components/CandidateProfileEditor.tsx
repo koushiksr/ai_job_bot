@@ -2083,7 +2083,7 @@ export default function CandidateProfileEditor({
             </span>
           </div>
           <p className="text-[11px] text-zinc-400 light:text-zinc-600 leading-relaxed">
-            Your core stack (e.g. <strong className="text-white light:text-zinc-900">Python</strong>). Jobs matching it in the title rank first; it also counts toward the must-have gate below.
+            Your core stack (e.g. <strong className="text-white light:text-zinc-900">Python</strong>). <strong className="text-zinc-300 light:text-zinc-700">How to enter:</strong> one technology, full name — never an abbreviation. <strong className="text-zinc-300 light:text-zinc-700">How it works:</strong> jobs matching it in the title rank first; it also counts toward the must-have gate below.
           </p>
           <div className="flex items-center gap-2 pt-1">
             <input
@@ -2352,7 +2352,7 @@ export default function CandidateProfileEditor({
             Supporting Keywords ({mustHaveKeywords.length})
           </label>
           <p className="text-[11px] text-zinc-500 light:text-zinc-600">
-            A job passes if <strong className="text-zinc-300 light:text-zinc-700">any one</strong> of these (or your Main technology above) appears in its title or skills — or at least <strong className="text-zinc-300 light:text-zinc-700">two of them</strong> in its description. Keep this list to real skills; generic words alone never pass.
+            <strong className="text-zinc-300 light:text-zinc-700">How to enter:</strong> real skills only (e.g. Django, PostgreSQL, Docker) — type & press Enter. Skip generic words (Git, Agile) and fragments. <strong className="text-zinc-300 light:text-zinc-700">How it works:</strong> a job passes if <strong className="text-zinc-300 light:text-zinc-700">any one</strong> of these (or your Main technology) appears in its title or skills — or at least <strong className="text-zinc-300 light:text-zinc-700">two of them</strong> in its description.
           </p>
           <div className="flex flex-wrap gap-1.5 min-h-[36px] p-2 bg-black light:bg-white border border-zinc-800 light:border-zinc-200 rounded-xl">
             {mustHaveKeywords.map((kw, idx) => (
