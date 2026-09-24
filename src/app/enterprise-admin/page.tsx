@@ -551,6 +551,10 @@ export default function EnterpriseAdminPortal() {
 
   // Open Live Log Stream Modal for a Candidate
   const handleOpenLiveLog = async (member: Member) => {
+    if (!member.plan_active) {
+      setFeedback({ type: 'info', text: 'Live Log is unavailable for candidates with No Plan.' })
+      return
+    }
     setLiveLogLoading(true)
     setSelectedLiveLog({
       task_id: '',
@@ -1275,8 +1279,9 @@ export default function EnterpriseAdminPortal() {
                             {/* View Live Log Button */}
                             <button
                               onClick={() => handleOpenLiveLog(member)}
-                              className="px-2 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-sky-300 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
-                              title="View real-time execution stream and bot logs"
+                              disabled={!member.plan_active || isProcessing}
+                              className="px-2 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-sky-300 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                              title={!member.plan_active ? 'Live Log unavailable — candidate has No Plan' : 'View real-time execution stream and bot logs'}
                             >
                               <Activity className="w-3 h-3 text-sky-400" />
                               <span>Live Log</span>
@@ -1529,7 +1534,9 @@ export default function EnterpriseAdminPortal() {
                       </button>
                       <button
                         onClick={() => handleOpenLiveLog(member)}
-                        className="flex-1 min-w-[88px] px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-white border border-zinc-800 light:border-zinc-200 text-sky-300 text-xs font-medium flex items-center justify-center gap-1 cursor-pointer"
+                        disabled={!member.plan_active || actionLoadingId === member.user_id}
+                        className="flex-1 min-w-[88px] px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-white border border-zinc-800 light:border-zinc-200 text-sky-300 text-xs font-medium flex items-center justify-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                        title={!member.plan_active ? 'Live Log unavailable — candidate has No Plan' : 'View real-time execution stream and bot logs'}
                       >
                         <Activity className="w-3 h-3 text-sky-400" />
                         <span>Live Log</span>
