@@ -202,7 +202,10 @@ export default function InspectCandidateModal({
               </span>
               <div className="font-mono text-xs font-bold">
                 {(() => {
-                  const limit = candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20))
+                  const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
+                  const limit = isOrg 
+                    ? Math.max(55, Number(candidate.daily_application_limit) || 55) 
+                    : (candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20)))
                   const todayCount = candidate.applied_today || 0
                   return (
                     <span className={todayCount > 0 ? 'text-emerald-300 light:text-emerald-700' : 'text-zinc-400 light:text-zinc-600'}>
@@ -233,13 +236,23 @@ export default function InspectCandidateModal({
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
             <div>
               <span className="text-zinc-500 light:text-zinc-600">Current Plan:</span>
-              <div className="font-bold text-white light:text-zinc-900 uppercase">{candidate.plan || 'Free'}</div>
+              <div className="font-bold text-white light:text-zinc-900 uppercase">
+                {(() => {
+                  const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
+                  if (candidate.plan === 'org_pro' || (isOrg && candidate.plan === 'pro')) return 'JobFlux Org Pro (15 Sweeps/wk)'
+                  if (candidate.plan === 'enterprise') return 'Enterprise Member (Org Cover)'
+                  return candidate.plan || 'Free'
+                })()}
+              </div>
             </div>
             <div>
               <span className="text-zinc-500 light:text-zinc-600">Daily Application Quota:</span>
               <div className="font-mono font-bold text-amber-300 light:text-amber-700">
                 {(() => {
-                  const limit = candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20))
+                  const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
+                  const limit = isOrg 
+                    ? Math.max(55, Number(candidate.daily_application_limit) || 55) 
+                    : (candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20)))
                   return `${limit}/day ${limit >= 150 ? '(150 Max)' : ''}`
                 })()}
               </div>

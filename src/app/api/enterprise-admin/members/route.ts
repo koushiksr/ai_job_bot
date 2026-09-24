@@ -81,12 +81,12 @@ export async function GET(req: NextRequest) {
       let effPlan = 'enterprise'
       let effPlanName = 'JobFlux Enterprise Member'
       let effExpiresAt: any = null
-      if (rawPlan === 'org_pro') {
+      if (rawPlan === 'org_pro' || rawPlan === 'pro') {
         const exp = m.plan_expires_at ? new Date(m.plan_expires_at) : null
-        if (exp && exp > now) {
+        if (!exp || exp > now) {
           effPlan = 'org_pro'
           effPlanName = 'JobFlux Org Pro'
-          effExpiresAt = m.plan_expires_at
+          effExpiresAt = m.plan_expires_at || null
         }
       }
 
