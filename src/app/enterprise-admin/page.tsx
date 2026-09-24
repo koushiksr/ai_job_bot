@@ -1162,12 +1162,14 @@ export default function EnterpriseAdminPortal() {
                           </div>
                         </td>
 
-                        {/* Role & Plan */}
+                        {/* Plan */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border border-cyan-800/50 light:border-cyan-300 font-semibold">
-                              {member.enterprise_role === 'admin' ? 'Org Admin' : 'Org Member'}
-                            </span>
+                            {member.enterprise_role === 'admin' && (
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border border-cyan-800/50 light:border-cyan-300 font-semibold">
+                                Org Admin
+                              </span>
+                            )}
                             <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${
                               !member.plan_active
                                 ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-700/60 light:border-zinc-300'
