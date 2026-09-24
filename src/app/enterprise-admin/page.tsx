@@ -32,7 +32,8 @@ import {
   MoreVertical,
   CreditCard,
   Crown,
-  RotateCcw
+  RotateCcw,
+  UserPlus
 } from 'lucide-react'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 
@@ -905,201 +906,305 @@ export default function EnterpriseAdminPortal() {
           </div>
         )}
 
-        {/* Compact KPI Strip */}
-        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5">
-            <Users className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
-            <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-white light:text-zinc-900 leading-none">
+        {/* Modern Enterprise KPI Strip */}
+        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+          {/* Candidates */}
+          <div className="p-4 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 light:text-zinc-500 font-mono">
+                Candidates
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 light:text-cyan-600">
+                <Users className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="text-2xl font-bold font-mono text-white light:text-zinc-900 tracking-tight">
                 {metrics?.total_members || members.length}
               </div>
-              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
-                Members · {metrics?.active_scheduled_members || 0} active
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-400 light:text-zinc-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <span><strong className="text-zinc-300 light:text-zinc-800">{metrics?.active_scheduled_members || 0}</strong> active runs</span>
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5">
-            <Activity className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
-            <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-cyan-400 light:text-cyan-600 leading-none">
+          {/* Today's Applications */}
+          <div className="p-4 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 light:text-zinc-500 font-mono">
+                Today's Applies
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 light:text-sky-600">
+                <Activity className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="text-2xl font-bold font-mono text-cyan-400 light:text-cyan-600 tracking-tight">
                 {metrics?.applied_today || 0}
               </div>
-              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
-                Today's Apps · 55/user max
+              <div className="mt-1 text-xs text-zinc-400 light:text-zinc-600">
+                Daily cap: 55 / member
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5">
-            <Layers className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
-            <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-cyan-300 light:text-cyan-700 leading-none">
+          {/* This Week */}
+          <div className="p-4 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 light:text-zinc-500 font-mono">
+                Weekly Volume
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 light:text-indigo-600">
+                <Layers className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="text-2xl font-bold font-mono text-indigo-300 light:text-indigo-600 tracking-tight">
                 {metrics?.applied_this_week || 0}
               </div>
-              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
-                This Week · rolling 7-day
+              <div className="mt-1 text-xs text-zinc-400 light:text-zinc-600">
+                Rolling 7-day total
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5">
-            <Sparkles className="w-4 h-4 text-emerald-400 light:text-emerald-600 shrink-0" />
-            <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-emerald-400 light:text-emerald-600 leading-none">
+          {/* Total Applications */}
+          <div className="p-4 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 light:text-zinc-500 font-mono">
+                All-Time Total
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 light:text-emerald-600">
+                <Sparkles className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="text-2xl font-bold font-mono text-emerald-400 light:text-emerald-600 tracking-tight">
                 {metrics?.total_applied || 0}
               </div>
-              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
-                Total Applications
+              <div className="mt-1 text-xs text-zinc-400 light:text-zinc-600">
+                Applications submitted
               </div>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 flex items-center gap-2.5 col-span-2 sm:col-span-1">
-            <Zap className="w-4 h-4 text-amber-400 light:text-amber-600 shrink-0" />
-            <div className="min-w-0">
-              <div className="text-lg font-bold font-mono text-amber-300 light:text-amber-700 leading-none">
+          {/* On-Demand Runs */}
+          <div className="p-4 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 shadow-sm flex flex-col justify-between col-span-2 sm:col-span-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 light:text-zinc-500 font-mono">
+                On-Demand Runs
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 light:text-amber-600">
+                <Zap className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="text-2xl font-bold font-mono text-amber-300 light:text-amber-600 tracking-tight">
                 {metrics?.on_demand_runs_used_this_week || 0}
               </div>
-              <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono truncate">
-                On-Demand · 3/day · 10/wk
+              <div className="mt-1 text-xs text-zinc-400 light:text-zinc-600">
+                Quota: 15 / week (Org Pro)
               </div>
             </div>
           </div>
         </section>
 
-        {/* Organisation Settings + Invite (single compact card) */}
-        <section className="p-4 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 backdrop-blur-md space-y-3">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {/* Org name + daily sweep time */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
+        {/* Workspace Management & Candidate Onboarding */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Card 1: Workspace & Automation Schedule (7 cols) */}
+          <div className="lg:col-span-7 p-5 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 shadow-sm flex flex-col justify-between space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 light:text-cyan-600 shrink-0">
+                  <Building2 className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-white light:text-zinc-900 tracking-tight">
+                    Workspace &amp; Daily Sweep Automation
+                  </h4>
+                  <p className="text-[11px] text-zinc-400 light:text-zinc-600">
+                    Manage organization name and automated morning sweep dispatch time.
+                  </p>
+                </div>
+              </div>
+              <span className="shrink-0 font-mono text-[10px] px-2.5 py-1 rounded-full bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 text-zinc-400 light:text-zinc-600">
+                ID: {org?.org_id || 'org_main'}
+              </span>
+            </div>
+
+            {/* Inputs Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {/* Org Name */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium font-mono text-zinc-400 light:text-zinc-600 uppercase tracking-wider block">
+                  Organization Name
+                </label>
                 {editingOrgName ? (
-                  <>
+                  <div className="flex items-center gap-1.5">
                     <input
                       type="text"
                       value={orgNameInput}
                       onChange={e => setOrgNameInput(e.target.value)}
-                      placeholder="Organisation name..."
-                      className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 light:bg-zinc-100 border border-cyan-700 focus:border-cyan-500 focus:outline-none text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400"
+                      placeholder="Organization name..."
+                      className="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-cyan-600 focus:outline-none text-xs text-white light:text-zinc-900 font-medium placeholder-zinc-500"
                       autoFocus
                       onKeyDown={e => { if (e.key === 'Enter') handleSaveOrgName(); if (e.key === 'Escape') setEditingOrgName(false) }}
                     />
                     <button
                       onClick={handleSaveOrgName}
                       disabled={orgNameSaving}
-                      className="px-3 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs flex items-center gap-1 disabled:opacity-60 cursor-pointer shrink-0"
+                      className="px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition-colors disabled:opacity-60 cursor-pointer shrink-0"
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
                       {orgNameSaving ? 'Saving...' : 'Save'}
                     </button>
                     <button
                       onClick={() => setEditingOrgName(false)}
-                      className="px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs cursor-pointer shrink-0"
+                      className="px-2.5 py-1.5 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs cursor-pointer shrink-0"
                     >
                       Cancel
                     </button>
-                  </>
+                  </div>
                 ) : (
-                  <>
-                    <span className="flex-1 min-w-0 truncate px-3 py-1.5 rounded-lg bg-zinc-900/50 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs text-white light:text-zinc-900 font-medium" title={org?.name || 'Unnamed Organisation'}>
-                      {org?.name || 'Unnamed Organisation'}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0 truncate px-3 py-1.5 rounded-xl bg-zinc-900/60 light:bg-zinc-100 border border-zinc-800/80 light:border-zinc-200 text-xs text-white light:text-zinc-900 font-medium">
+                      {org?.name || 'Unnamed Organization'}
+                    </div>
                     <button
                       onClick={() => { setOrgNameInput(org?.name || ''); setEditingOrgName(true) }}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium cursor-pointer shrink-0"
+                      className="px-3 py-1.5 rounded-xl bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium cursor-pointer transition-colors shrink-0"
                     >
                       Rename
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
+
+              {/* Sweep Time */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium font-mono text-zinc-400 light:text-zinc-600 uppercase tracking-wider block">
+                  Daily Sweep Dispatch Time
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 px-3 py-1 rounded-xl bg-zinc-900/60 light:bg-zinc-100 border border-zinc-800/80 light:border-zinc-200">
+                    <Clock className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600 shrink-0" />
+                    <input
+                      type="time"
+                      value={sweepTimeInput || org?.daily_sweep_time || '06:00'}
+                      onChange={e => setSweepTimeInput(e.target.value)}
+                      className="bg-transparent focus:outline-none text-xs text-white light:text-zinc-900 font-mono flex-1 [color-scheme:dark]"
+                    />
+                    <span className="text-[10px] font-mono text-zinc-500 font-semibold">IST</span>
+                  </div>
+                  <button
+                    onClick={handleSaveSweepTime}
+                    disabled={sweepTimeSaving}
+                    className="px-3 py-1.5 rounded-xl bg-cyan-950/60 light:bg-cyan-50 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 text-xs font-medium cursor-pointer disabled:opacity-60 transition-colors shrink-0"
+                  >
+                    {sweepTimeSaving ? 'Saving...' : 'Set Time'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Sweep Status Banner */}
+            <div className="p-3 rounded-xl bg-cyan-950/30 light:bg-cyan-50/60 border border-cyan-800/40 light:border-cyan-200 text-xs flex flex-wrap items-center justify-between gap-2 text-zinc-300 light:text-zinc-700">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
-                <span className="text-[11px] text-zinc-400 light:text-zinc-600">Daily sweep</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span className="text-zinc-300 light:text-zinc-700 font-medium">
+                  Autonomous queue triggers daily at <strong className="text-white light:text-zinc-900 font-mono">{org?.daily_sweep_time || '06:00'} IST</strong>
+                </span>
+              </div>
+              {(() => {
+                const t = (org?.daily_sweep_time || '06:00')
+                try {
+                  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false })
+                  const nowHm = fmt.format(new Date())
+                  const nextDay = t > nowHm ? 'today' : 'tomorrow'
+                  return (
+                    <span className="text-[11px] font-mono text-cyan-400 light:text-cyan-700 bg-cyan-900/40 light:bg-cyan-100/80 px-2 py-0.5 rounded-md border border-cyan-700/40 light:border-cyan-300">
+                      Next run: {nextDay} at {t} IST
+                    </span>
+                  )
+                } catch {
+                  return null
+                }
+              })()}
+            </div>
+          </div>
+
+          {/* Card 2: Candidate Onboarding & Invites (5 cols) */}
+          <div className="lg:col-span-5 p-5 rounded-2xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 shadow-sm flex flex-col justify-between space-y-4">
+            {/* Header */}
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 light:text-emerald-600 shrink-0">
+                <UserPlus className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white light:text-zinc-900 tracking-tight">
+                  Invite Candidate
+                </h4>
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
+                  Onboard new candidates into this organization.
+                </p>
+              </div>
+            </div>
+
+            {/* Invite Form */}
+            <form onSubmit={handleSendInvite} className="space-y-2">
+              <div className="flex items-center gap-2">
                 <input
-                  type="time"
-                  value={sweepTimeInput || org?.daily_sweep_time || '06:00'}
-                  onChange={e => setSweepTimeInput(e.target.value)}
-                  className="px-2 py-1 rounded-lg bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:outline-none text-xs text-white light:text-zinc-900 font-mono [color-scheme:dark]"
+                  type="email"
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  placeholder="candidate@email.com"
+                  className="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:outline-none text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400"
                 />
-                <span className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono">IST</span>
                 <button
-                  onClick={handleSaveSweepTime}
-                  disabled={sweepTimeSaving}
-                  className="px-3 py-1 rounded-lg bg-cyan-950/60 light:bg-cyan-50 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 text-xs font-medium cursor-pointer disabled:opacity-60 shrink-0"
+                  type="submit"
+                  disabled={inviteSubmitting}
+                  className="px-4 py-2 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0 transition-colors shadow-sm"
                 >
-                  {sweepTimeSaving ? 'Saving...' : 'Set Time'}
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{inviteSubmitting ? 'Sending...' : 'Invite'}</span>
                 </button>
-                <span className="text-[10px] text-zinc-600 font-mono hidden sm:inline">members queue one-by-one from this time daily</span>
-                {(() => {
-                  const t = (org?.daily_sweep_time || '06:00')
-                  try {
-                    const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false })
-                    const nowHm = fmt.format(new Date())
-                    const nextDay = t > nowHm ? 'today' : 'tomorrow'
-                    return <span className="text-[10px] font-mono text-cyan-400/90">· Next run {nextDay} {t} IST</span>
-                  } catch {
-                    return null
-                  }
-                })()}
               </div>
-            </div>
-
-            {/* Invite */}
-            <form onSubmit={handleSendInvite} className="flex items-center gap-2">
-              <Plus className="w-4 h-4 text-cyan-400 light:text-cyan-600 shrink-0" />
-              <input
-                type="email"
-                value={inviteEmail}
-                onChange={e => setInviteEmail(e.target.value)}
-                placeholder="candidate@email.com — invite to org"
-                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:outline-none text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400"
-              />
-              <button
-                type="submit"
-                disabled={inviteSubmitting}
-                className="px-3.5 py-1.5 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs flex items-center gap-1.5 disabled:opacity-60 cursor-pointer shrink-0"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>{inviteSubmitting ? 'Sending...' : 'Invite'}</span>
-              </button>
+              <p className="text-[10px] text-zinc-500 light:text-zinc-600">
+                Invited candidates can log in and link their Naukri credentials to participate in daily sweeps.
+              </p>
             </form>
-          </div>
 
-          <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono">
-            Org ID: <span className="text-zinc-400 light:text-zinc-600">{org?.org_id || 'org_technohmsit'}</span> · Sweep {org?.daily_sweep_time || '06:00'} IST daily
-          </div>
-
-          {/* Pending Invites List */}
-          {invites.filter(inv => inv.status === 'pending').length > 0 && (
-            <div className="pt-2 border-t border-zinc-900/80 light:border-zinc-200">
-              <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 uppercase tracking-wider">
-                Pending Invitations ({invites.filter(inv => inv.status === 'pending').length})
-              </span>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {invites
-                  .filter(inv => inv.status === 'pending')
-                  .map(inv => (
-                    <div
-                      key={inv.invite_id}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs font-mono"
-                    >
-                      <Clock className="w-3 h-3 text-amber-400 light:text-amber-600" />
-                      <span className="text-zinc-200 light:text-zinc-800">{inv.invited_email}</span>
-                      <button
-                        onClick={() => handleRevokeInvite(inv.invite_id, inv.invited_email)}
-                        className="text-zinc-500 light:text-zinc-600 hover:text-rose-400 transition-colors ml-1"
-                        title="Revoke Invite"
+            {/* Pending Invites List */}
+            {invites.filter(inv => inv.status === 'pending').length > 0 && (
+              <div className="pt-2 border-t border-zinc-900 light:border-zinc-200">
+                <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-500 uppercase tracking-wider block mb-1.5">
+                  Pending Invitations ({invites.filter(inv => inv.status === 'pending').length})
+                </span>
+                <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                  {invites
+                    .filter(inv => inv.status === 'pending')
+                    .map(inv => (
+                      <div
+                        key={inv.invite_id}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs font-mono"
                       >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+                        <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                        <span className="text-zinc-200 light:text-zinc-800 truncate max-w-[160px]">{inv.invited_email}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRevokeInvite(inv.invite_id, inv.invited_email)}
+                          className="text-zinc-500 hover:text-rose-400 transition-colors ml-0.5 cursor-pointer"
+                          title="Revoke Invite"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </section>
 
         {/* Org Member Management Table */}
