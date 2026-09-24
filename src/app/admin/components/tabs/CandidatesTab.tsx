@@ -1788,15 +1788,11 @@ export default function CandidatesTab({
                                   type="button"
                                   onClick={() => {
                                     setOpenRowActionMenuId(null)
-                                    localStorage.setItem('user_id', u.user_id)
-                                    localStorage.setItem('user_email', u.email)
-                                    localStorage.setItem('user_role', isSuperAdminUser(u) ? 'admin' : (isOrgAdminUser(u) ? 'enterprise_admin' : 'candidate'))
                                     const orgParam = u.org_id || u.enterprise_org_id || ''
                                     const adminEmailParam = u.email || ''
-                                    if (orgParam) localStorage.setItem('enterprise_org_id', orgParam)
                                     const targetUrl = isOrgAdminUser(u)
                                       ? `/enterprise-admin?${orgParam ? `org_id=${encodeURIComponent(orgParam)}&` : ''}admin_email=${encodeURIComponent(adminEmailParam)}`
-                                      : (isSuperAdminUser(u) ? '/admin' : '/dashboard')
+                                      : (isSuperAdminUser(u) ? '/admin' : `/dashboard?view_as=${encodeURIComponent(u.user_id)}`)
                                     window.open(targetUrl, '_blank')
                                   }}
                                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer"
@@ -1804,17 +1800,17 @@ export default function CandidatesTab({
                                   {isOrgAdminUser(u) ? (
                                     <>
                                       <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                                      <span>Org Enterprise Portal</span>
+                                      <span>Org Enterprise Portal ↗</span>
                                     </>
                                   ) : isSuperAdminUser(u) ? (
                                     <>
                                       <Shield className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                                      <span>Super Admin Portal</span>
+                                      <span>Super Admin Portal ↗</span>
                                     </>
                                   ) : (
                                     <>
-                                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                                      <span>Candidate Dashboard</span>
+                                      <ExternalLink className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                                      <span>Inspect Candidate Dashboard ↗</span>
                                     </>
                                   )}
                                 </button>

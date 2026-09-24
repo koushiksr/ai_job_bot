@@ -504,6 +504,16 @@ export default function EnterpriseAdminPortal() {
   }
 
   const handleSignOut = () => {
+    if (isSuperAdmin) {
+      if (typeof window !== 'undefined') {
+        if (window.opener) {
+          window.close()
+        } else {
+          window.location.href = '/admin'
+        }
+      }
+      return
+    }
     try { navigator.sendBeacon('/api/auth/logout') } catch {}
     localStorage.clear()
     window.location.href = '/login'
@@ -583,59 +593,102 @@ export default function EnterpriseAdminPortal() {
         <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[140px]" />
       </div>
 
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-30 border-b border-zinc-900 light:border-zinc-200 bg-zinc-950/80 light:bg-white/85 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-cyan-300 light:text-cyan-700" />
+      {/* Top Navigation Bar with Super Admin Org Management Banner */}
+      <div className="sticky top-0 z-30">
+        {isSuperAdmin && (
+          <div className="bg-gradient-to-r from-sky-950 via-indigo-950 to-sky-950 border-b border-sky-500/30 px-4 sm:px-6 py-2 text-xs flex flex-wrap items-center justify-between gap-2 text-sky-200 shadow-lg backdrop-blur-md">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-sky-400 shrink-0" />
+              <span className="font-bold text-white tracking-wide">Super Admin Org Management View:</span>
+              <span className="text-zinc-300">
+                Managing workspace <strong>{org?.name || currentOrgId || 'Organization'}</strong> ({org?.org_id || currentOrgId})
+              </span>
+              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-sky-900/60 border border-sky-600/40 text-sky-300 hidden sm:inline-block">
+                Super Admin Session Active
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-sm sm:text-base text-white light:text-zinc-900 tracking-tight">
-                  {org?.name || 'Technohm SIT Org'}
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 light:bg-cyan-50 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 font-semibold uppercase">
-                  Enterprise Portal
-                </span>
-              </div>
-              <p className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono">
-                Admin: {org?.admin_email || currentUserEmail}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <ThemeToggle />
-            {isSuperAdmin && (
-              <Link
-                href="/admin"
-                className="px-3 py-1.5 rounded-lg bg-sky-950/50 hover:bg-sky-900/50 border border-sky-800/50 text-sky-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined' && window.opener) {
+                    window.close()
+                  } else {
+                    window.location.href = '/admin'
+                  }
+                }}
+                className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
               >
                 <Shield className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Super Admin Panel</span>
-              </Link>
-            )}
-
-            <button
-              onClick={() => loadAllPortalData()}
-              disabled={loading}
-              className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 transition-colors"
-              title="Refresh Data"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-
-            <button
-              onClick={handleSignOut}
-              className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1.5 transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sign Out</span>
-            </button>
+                <span>Return to Super Admin Console</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        )}
+
+        <header className="border-b border-zinc-900 light:border-zinc-200 bg-zinc-950/80 light:bg-white/85 backdrop-blur-xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-cyan-300 light:text-cyan-700" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm sm:text-base text-white light:text-zinc-900 tracking-tight">
+                    {org?.name || 'Technohm SIT Org'}
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 light:bg-cyan-50 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 font-semibold uppercase">
+                    Enterprise Portal
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono">
+                  Admin: {org?.admin_email || currentUserEmail}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <ThemeToggle />
+              {isSuperAdmin && (
+                <Link
+                  href="/admin"
+                  className="px-3 py-1.5 rounded-lg bg-sky-950/50 hover:bg-sky-900/50 border border-sky-800/50 text-sky-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Super Admin Panel</span>
+                </Link>
+              )}
+
+              <button
+                onClick={() => loadAllPortalData()}
+                disabled={loading}
+                className="p-2 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 transition-colors"
+                title="Refresh Data"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+
+              <button
+                onClick={handleSignOut}
+                className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1.5 transition-colors"
+              >
+                {isSuperAdmin ? (
+                  <>
+                    <Shield className="w-3.5 h-3.5 text-sky-400" />
+                    <span className="hidden sm:inline">Back to Super Admin</span>
+                    <span className="sm:hidden">Exit</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Sign Out</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </header>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 relative z-10">

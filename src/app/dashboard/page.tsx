@@ -73,6 +73,8 @@ export default function UserDashboard() {
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
   const [isVip, setIsVip] = useState<boolean>(false)
   const [showCandidateTestingMode, setShowCandidateTestingMode] = useState<boolean>(false)
+  const [isImpersonating, setIsImpersonating] = useState<boolean>(false)
+  const [impersonatingTargetId, setImpersonatingTargetId] = useState<string>('')
 
   // Enterprise Org Membership & Invites State
   const [enterpriseOrgId, setEnterpriseOrgId] = useState<string | null>(null)
@@ -562,6 +564,21 @@ export default function UserDashboard() {
       return
     }
 
+    const p = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+    const viewAsParam = p?.get('view_as')
+    const isSuperAdminViewer = storedRole === 'admin' || storedUid === 'technohmsit' || storedEmail === 'technohmsit@gmail.com'
+    const isViewingCandidate = Boolean(viewAsParam && isSuperAdminViewer)
+
+    if (isViewingCandidate) {
+      const targetCandidateUid = viewAsParam!
+      setIsImpersonating(true)
+      setImpersonatingTargetId(targetCandidateUid)
+      setUserId(targetCandidateUid)
+      setUserRole('user')
+      refreshAllDashboardData(targetCandidateUid, true, true)
+      return
+    }
+
     // Enterprise Admins manage their org from the Enterprise Portal, not the candidate dashboard
     if (storedRole === 'enterprise_admin') {
       window.location.replace('/enterprise-admin')
@@ -584,7 +601,7 @@ export default function UserDashboard() {
       }
     }
 
-    refreshAllDashboardData(storedUid, true)
+    refreshAllDashboardData(storedUid, true, false)
   }, [])
 
   // Real-time polling for candidate-assigned promotional offers & push notifications
@@ -618,7 +635,7 @@ export default function UserDashboard() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isUserMenuOpen, isMobileNavOpen, selectedJobAudit, showUnblockGuide])
 
-  const refreshAllDashboardData = async (uid: string, isInitial = false) => {
+  const refreshAllDashboardData = async (uid: string, isInitial = false, isViewMode = isImpersonating) => {
     if (!uid) return
     if (isInitial) {
       setPageLoading(true)
@@ -628,9 +645,9 @@ export default function UserDashboard() {
     const startTime = Date.now()
 
     try {
-      const emailToQuery = userEmail || (typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : '')
+      const emailToQuery = (!isViewMode && userEmail) || (typeof window !== 'undefined' && !isViewMode ? localStorage.getItem('user_email') || '' : userEmail)
       await Promise.allSettled([
-        loadUserData(uid),
+        loadUserData(uid, isViewMode),
         loadUserHistory(uid, 1, historySearch, historyFilter),
         loadUserTickets(uid),
         checkActiveTask(uid),
@@ -818,20 +835,20 @@ export default function UserDashboard() {
     }, 3000)
   }
 
-  const loadUserData = async (uid: string) => {
+  const loadUserData = async (uid: string, isViewMode = isImpersonating) => {
     try {
       const pRes = await fetch(`/api/profile?user_id=${uid}&t=${Date.now()}`)
       if (pRes.ok) {
         const pData = await pRes.json()
         if (pData.name) {
           setUserName(pData.name)
-          if (typeof window !== 'undefined') {
+          if (!isViewMode && typeof window !== 'undefined') {
             localStorage.setItem('user_name', pData.name)
           }
         }
         if (pData.picture) {
           setUserPicture(pData.picture)
-          if (typeof window !== 'undefined') {
+          if (!isViewMode && typeof window !== 'undefined') {
             localStorage.setItem('user_picture', pData.picture)
           }
         }
@@ -844,8 +861,8 @@ export default function UserDashboard() {
         setIsPlanActive(active)
         setPlanExpiresAt(pData.plan_expires_at || pData.trial_expires_at || null)
 
-        // Sync verified plan and VIP status from server to localStorage
-        if (typeof window !== 'undefined') {
+        // Sync verified plan and VIP status from server to localStorage only if not inspecting
+        if (!isViewMode && typeof window !== 'undefined') {
           localStorage.setItem('user_plan', verifiedPlan)
           localStorage.setItem('user_is_vip', vip ? 'true' : 'false')
         }
@@ -855,7 +872,7 @@ export default function UserDashboard() {
 
         if (pData.email) {
           setUserEmail(pData.email)
-          if (typeof window !== 'undefined') {
+          if (!isViewMode && typeof window !== 'undefined') {
             localStorage.setItem('user_email', pData.email)
           }
           loadUserOffers(pData.email)
@@ -956,6 +973,16 @@ export default function UserDashboard() {
   }
 
   const handleLogout = () => {
+    if (isImpersonating) {
+      if (typeof window !== 'undefined') {
+        if (window.opener) {
+          window.close()
+        } else {
+          window.location.href = '/admin'
+        }
+      }
+      return
+    }
     try { navigator.sendBeacon('/api/auth/logout') } catch {}
     localStorage.clear()
     window.location.href = '/'
@@ -1049,8 +1076,40 @@ export default function UserDashboard() {
         />
       )}
 
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-black/90 light:bg-white/90 backdrop-blur-xl border-b border-zinc-900 light:border-zinc-200 px-3.5 sm:px-6 py-2 sm:py-2.5">
+      {/* Top Navbar with Super Admin Candidate Inspection Banner */}
+      <div className="sticky top-0 z-40">
+        {isImpersonating && (
+          <div className="bg-gradient-to-r from-purple-950 via-indigo-950 to-purple-950 border-b border-purple-500/40 px-3.5 sm:px-6 py-2 text-xs flex flex-wrap items-center justify-between gap-2 text-purple-200 shadow-lg backdrop-blur-md">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse shrink-0" />
+              <span className="font-bold text-white tracking-wide">Candidate Inspection Mode:</span>
+              <span className="text-zinc-300">
+                Viewing dashboard for <strong className="text-white underline">{userName || impersonatingTargetId}</strong> ({impersonatingTargetId})
+              </span>
+              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-purple-900/60 border border-purple-600/40 text-purple-300 hidden sm:inline-block">
+                Super Admin Session Active
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined' && window.opener) {
+                    window.close()
+                  } else {
+                    window.location.href = '/admin'
+                  }
+                }}
+                className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Return to Super Admin Console</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        <header className="bg-black/90 light:bg-white/90 backdrop-blur-xl border-b border-zinc-900 light:border-zinc-200 px-3.5 sm:px-6 py-2 sm:py-2.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
           
           {/* LEFT: Candidate Profile Section (Swapped to Left for Instant Trust & Easy Profile Access) */}
@@ -1281,7 +1340,7 @@ export default function UserDashboard() {
                         </button>
                       )}
 
-                      {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
+                      {(isImpersonating || (userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit'))) && (
                         <Link
                           href="/admin"
                           onClick={() => setIsUserMenuOpen(false)}
@@ -1346,7 +1405,7 @@ export default function UserDashboard() {
             )}
 
             {/* Direct Admin Console Link strictly for technohmsit administrator */}
-            {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
+            {(isImpersonating || (userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit'))) && (
               <Link
                 href="/admin"
                 className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 light:text-cyan-700 border border-cyan-500/40 light:border-cyan-300 transition-all shrink-0 cursor-pointer shadow-sm"
@@ -1443,6 +1502,7 @@ export default function UserDashboard() {
 
         </div>
       </header>
+    </div>
 
       {/* Floating Mobile Popover Sheet with Backdrop (Zero Header Layout Shifts) */}
       {isMobileNavOpen && (
@@ -1643,7 +1703,7 @@ export default function UserDashboard() {
                 </>
               )}
 
-              {userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit') && (
+              {(isImpersonating || (userRole === 'admin' && (userEmail === 'technohmsit@gmail.com' || userId === 'technohmsit'))) && (
                 <Link
                   href="/admin"
                   onClick={() => setIsMobileNavOpen(false)}
