@@ -2189,7 +2189,9 @@ export default function UserDashboard() {
                 <p className="text-xs text-zinc-300 light:text-zinc-700 mt-0.5">
                   {isPlanExpired
                     ? 'Your subscription plan has expired. Automated application submissions are paused. Renew now to resume daily job applications.'
-                    : `Your current plan expires in ${hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 24 ? `${hoursUntilPlanExpiry} hours` : `${Math.ceil((hoursUntilPlanExpiry || 48) / 24)} days`}. Renew today to prevent application pauses.`}
+                    : hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry > 24
+                    ? `Your current plan expires in ${Math.floor(hoursUntilPlanExpiry / 24)} day${Math.floor(hoursUntilPlanExpiry / 24) === 1 ? '' : 's'}. Renew today to prevent application pauses.`
+                    : `Your current plan expires in ${hoursUntilPlanExpiry} hours. Renew today to prevent application pauses.`}
                 </p>
               </div>
             </div>

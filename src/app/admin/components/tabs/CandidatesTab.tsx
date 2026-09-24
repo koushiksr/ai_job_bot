@@ -1574,20 +1574,22 @@ export default function CandidatesTab({
                             }
 
                             if (u.plan_expiry_status === 'expiring_soon_2d' || (hoursLeft !== null && hoursLeft !== undefined && hoursLeft <= 48)) {
-                              const days = Math.ceil((hoursLeft || 1) / 24)
+                              // Floor days so 31h reads "1d" (completed days), hours shown exact
+                              const days = Math.floor((hoursLeft || 0) / 24)
+                              const dayLabel = days > 0 ? `${days}d` : `${hoursLeft}h`
                               return (
                                 <div
                                   className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/40 light:bg-amber-50 text-amber-300 light:text-amber-700 border border-amber-800/60 light:border-amber-300"
-                                  title={`Expires in ${hoursLeft} hours (${days}d). Within 1-2 days renewal retention window.`}
+                                  title={`Expires in ${hoursLeft} hours. Within 1-2 days renewal retention window.`}
                                 >
                                   <Clock className="w-3 h-3 text-amber-400 light:text-amber-600 shrink-0" />
-                                  <span className="font-bold text-amber-300 light:text-amber-700">Expiring: {days}d ({hoursLeft}h left)</span>
+                                  <span className="font-bold text-amber-300 light:text-amber-700">Expiring: {dayLabel} ({hoursLeft}h left)</span>
                                 </div>
                               )
                             }
 
                             if (hoursLeft !== null && hoursLeft !== undefined && hoursLeft > 48) {
-                              const days = Math.ceil(hoursLeft / 24)
+                              const days = Math.floor(hoursLeft / 24)
                               return (
                                 <div
                                   className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950/30 text-emerald-300 light:text-emerald-700 border border-emerald-800/40"
