@@ -133,16 +133,15 @@ export async function GET(req: NextRequest) {
       const rawExp = p.plan_expires_at || p.trial_expires_at || null
       const isVip = Boolean(isAdminAccount || p.is_vip || p.vip_access || p.free_privilege || p.plan === 'vip')
       const planClean = (p.plan || 'trial').toLowerCase()
-      const isOrgMemberCandidate = Boolean(assignedOrg?.org_id || p.enterprise_org_id || p.enterprise_role === 'member')
-      const isOrgProCandidate = isOrgMemberCandidate && (planClean === 'org_pro' || planClean === 'pro')
-      const effectiveCandidatePlan = isOrgProCandidate
-        ? 'org_pro'
-        : (isOrgMemberCandidate)
-        ? 'enterprise'
-        : planClean
+      const isOrgMemberCandidate = Boolean(
+        assignedOrg?.org_id || 
+        p.enterprise_org_id || 
+        p.org_id || 
+        p.enterprise_role === 'member' ||
+        ['enterprise', 'org_starter', 'org_pro', 'org_pro_3m', 'unpaid'].includes(planClean)
+      )
 
-      const isNoPlan = effectiveCandidatePlan === 'none' || effectiveCandidatePlan === 'no_plan'
-
+      let effectiveCandidatePlan = planClean
       let planExpiryStatus: 'active' | 'expiring_soon_2d' | 'expiring_soon_1d' | 'expired' | 'no_expiry' | 'vip_lifetime' | 'no_plan' | 'admin' | 'org_admin' = 'no_expiry'
       let planHoursLeft: number | null = null
 
@@ -152,16 +151,39 @@ export async function GET(req: NextRequest) {
         planExpiryStatus = 'org_admin'
       } else if (isVip) {
         planExpiryStatus = 'vip_lifetime'
-      } else if (isNoPlan) {
+        effectiveCandidatePlan = isOrgMemberCandidate ? 'org_pro' : (['elite', 'professional'].includes(planClean) ? planClean : 'vip')
+      } else if (isOrgMemberCandidate) {
+        // Strict org member rule: NO free trial. If not paid, limit = 0 and execution blocked.
+        const orgExpires = p.plan_expires_at ? new Date(p.plan_expires_at) : null
+        if (orgExpires && orgExpires > now) {
+          planHoursLeft = Math.round((orgExpires.getTime() - now.getTime()) / 3600000)
+          if (planClean === 'org_starter' || planClean === 'starter') {
+            effectiveCandidatePlan = 'org_starter'
+          } else if (planClean === 'org_pro_3m') {
+            effectiveCandidatePlan = 'org_pro_3m'
+          } else {
+            effectiveCandidatePlan = 'org_pro'
+          }
+          if (planHoursLeft <= 24) {
+            planExpiryStatus = 'expiring_soon_1d'
+          } else if (planHoursLeft <= 48) {
+            planExpiryStatus = 'expiring_soon_2d'
+          } else {
+            planExpiryStatus = 'active'
+          }
+        } else {
+          // Unpaid or expired org member -> cannot apply even one job
+          effectiveCandidatePlan = 'unpaid'
+          planExpiryStatus = orgExpires ? 'expired' : 'no_plan'
+          planHoursLeft = orgExpires ? Math.round((orgExpires.getTime() - now.getTime()) / 3600000) : null
+        }
+      } else if (effectiveCandidatePlan === 'none' || effectiveCandidatePlan === 'no_plan') {
         planExpiryStatus = 'no_plan'
-      } else if (isOrgMemberCandidate && effectiveCandidatePlan === 'enterprise') {
-        // Enterprise Base Plan: Active org base coverage, no trial expiration
-        planExpiryStatus = 'no_expiry'
       } else if (rawExp) {
         const expDate = new Date(rawExp)
         planHoursLeft = Math.round((expDate.getTime() - now.getTime()) / 3600000)
         if (planHoursLeft <= 0) {
-          planExpiryStatus = isOrgMemberCandidate ? 'no_expiry' : 'expired' // Org members fallback to active org base
+          planExpiryStatus = 'expired'
         } else if (planHoursLeft <= 24) {
           planExpiryStatus = 'expiring_soon_1d'
         } else if (planHoursLeft <= 48) {
@@ -227,6 +249,8 @@ export async function GET(req: NextRequest) {
         executionStatus = 'admin'
       } else if (isOrgAdmin) {
         executionStatus = 'org_admin'
+      } else if (isOrgMemberCandidate && (effectiveCandidatePlan === 'unpaid' || planExpiryStatus === 'expired' || planExpiryStatus === 'no_plan')) {
+        executionStatus = 'payment_required'
       } else if (isApplying) {
         executionStatus = 'applying'
       } else if (isInQueue) {
@@ -266,17 +290,34 @@ export async function GET(req: NextRequest) {
         source: curExec.source || lastExec.source || (activeTask ? 'queue' : null)
       }
 
-      // Default daily limit based on plan or custom override (Enterprise Base = 20 Starter equivalent, Org Pro = 55)
-      const defaultLimit = isOrgMemberCandidate
-        ? (isOrgProCandidate ? 55 : 20)
-        : (isVip || ['elite', 'professional', 'vip'].includes(effectiveCandidatePlan))
-        ? 150
-        : (effectiveCandidatePlan === 'pro' ? 50 : 20)
-      const dailyApplicationLimit = (isAdminAccount || isOrgAdmin) 
-        ? 0 
-        : isOrgMemberCandidate
-        ? (p.daily_application_limit ? Math.min(isOrgProCandidate ? 55 : 20, Math.max(1, Number(p.daily_application_limit))) : (isOrgProCandidate ? 55 : 20))
-        : (p.daily_application_limit ? Math.min(150, Math.max(1, Number(p.daily_application_limit))) : defaultLimit)
+      let dailyApplicationLimit = 0
+      if (isAdminAccount || isOrgAdmin) {
+        dailyApplicationLimit = 0
+      } else if (isOrgMemberCandidate) {
+        if (effectiveCandidatePlan === 'unpaid' || planExpiryStatus === 'expired' || planExpiryStatus === 'no_plan') {
+          dailyApplicationLimit = 0
+        } else if (effectiveCandidatePlan === 'org_starter') {
+          dailyApplicationLimit = 20
+        } else if (effectiveCandidatePlan === 'org_pro' || effectiveCandidatePlan === 'org_pro_3m') {
+          dailyApplicationLimit = 55
+        } else {
+          dailyApplicationLimit = 0
+        }
+      } else if (isVip || ['elite', 'professional', 'vip'].includes(effectiveCandidatePlan)) {
+        dailyApplicationLimit = p.daily_application_limit ? Math.min(150, Math.max(1, Number(p.daily_application_limit))) : 150
+      } else if (effectiveCandidatePlan === 'pro') {
+        dailyApplicationLimit = p.daily_application_limit ? Math.min(55, Math.max(1, Number(p.daily_application_limit))) : 50
+      } else if (effectiveCandidatePlan === 'starter') {
+        dailyApplicationLimit = p.daily_application_limit ? Math.min(20, Math.max(1, Number(p.daily_application_limit))) : 20
+      } else if (effectiveCandidatePlan === 'trial') {
+        dailyApplicationLimit = 10
+      }
+
+      const enabledForDailyRun = (isAdminAccount || isOrgAdmin)
+        ? false
+        : isOrgMemberCandidate && (effectiveCandidatePlan === 'unpaid' || planExpiryStatus === 'expired' || planExpiryStatus === 'no_plan')
+        ? false
+        : (p.enabled_for_daily_run !== false)
 
       return {
         id: p.user_id,
@@ -294,18 +335,22 @@ export async function GET(req: NextRequest) {
         experience: p.experience || 0,
         current_ctc: p.current_ctc || 0,
         expected_ctc: p.expected_ctc || 0,
-        enabled_for_daily_run: (isAdminAccount || isOrgAdmin) ? false : (p.enabled_for_daily_run !== false),
+        enabled_for_daily_run: enabledForDailyRun,
         plan: isAdminAccount ? 'admin' : (isOrgAdmin ? 'org_admin' : effectiveCandidatePlan),
         plan_name: isAdminAccount
           ? 'Master Administrator (No Plan Required)'
           : isOrgAdmin
           ? `Org Admin • ${assignedOrg?.name || 'Enterprise Org'}`
-          : (effectiveCandidatePlan === 'org_pro'
-              ? 'JobFlux Org Pro'
-              : effectiveCandidatePlan === 'enterprise'
-              ? 'Enterprise Base (Starter Tier)'
-              : (p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '3-Day Free Access'))),
-        plan_expires_at: (isAdminAccount || isOrgAdmin) ? null : (isOrgMemberCandidate && effectiveCandidatePlan === 'enterprise' ? null : rawExp),
+          : isOrgMemberCandidate
+          ? (effectiveCandidatePlan === 'org_pro'
+              ? 'JobFlux Org Pro (55/d)'
+              : effectiveCandidatePlan === 'org_pro_3m'
+              ? 'JobFlux Org Pro (3 Months · 55/d)'
+              : effectiveCandidatePlan === 'org_starter'
+              ? 'JobFlux Org Starter (20/d)'
+              : 'Unpaid Org Member (Payment Required)')
+          : (p.plan_name || (p.plan ? `JobFlux ${p.plan.toUpperCase()}` : '3-Day Free Access')),
+        plan_expires_at: (isAdminAccount || isOrgAdmin) ? null : rawExp,
         trial_expires_at: (isAdminAccount || isOrgAdmin || isOrgMemberCandidate) ? null : (p.trial_expires_at || null),
         plan_expiry_status: planExpiryStatus,
         plan_hours_left: (isAdminAccount || isOrgAdmin) ? null : planHoursLeft,
@@ -407,17 +452,17 @@ export async function PATCH(req: NextRequest) {
         existingUser?.enterprise_org_id ||
         existingUser?.org_id ||
         existingUser?.enterprise_role === 'member' ||
-        existingUser?.plan === 'enterprise' ||
-        existingUser?.plan === 'org_pro'
+        ['enterprise', 'org_starter', 'org_pro', 'org_pro_3m'].includes(existingUser?.plan)
       )
 
       let targetPlan = plan
       if (isOrgUser) {
-        if (targetPlan === 'pro' || targetPlan === 'starter') {
+        if (targetPlan === 'pro') {
           targetPlan = 'org_pro'
+        } else if (targetPlan === 'starter') {
+          targetPlan = 'org_starter'
         } else if (targetPlan === 'trial') {
-          // Free trial is not allowed for organization members — default to enterprise base
-          targetPlan = 'enterprise'
+          targetPlan = 'none'
         }
       }
 
@@ -436,6 +481,15 @@ export async function PATCH(req: NextRequest) {
         updates.plan_name = 'JobFlux PROFESSIONAL'
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
         if (updates.daily_application_limit === undefined) updates.daily_application_limit = 150
+      } else if (targetPlan === 'org_pro_3m') {
+        const days = extend_days || 90
+        updates.plan = 'org_pro_3m'
+        updates.plan_name = 'JobFlux Org Pro (90 Days)'
+        updates.enterprise_role = 'member'
+        updates.enabled_for_daily_run = true
+        updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        updates.trial_expires_at = null
+        updates.daily_application_limit = 55
       } else if (targetPlan === 'org_pro') {
         const days = extend_days || 30
         updates.plan = 'org_pro'
@@ -444,25 +498,33 @@ export async function PATCH(req: NextRequest) {
         updates.enabled_for_daily_run = true
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
         updates.trial_expires_at = null
-        if (updates.daily_application_limit === undefined || updates.daily_application_limit < 55) {
-          updates.daily_application_limit = 55
-        }
-      } else if (targetPlan === 'enterprise') {
-        // Enterprise Base Plan: Starter tier equivalent for org members (20 applies/day)
-        updates.plan = 'enterprise'
-        updates.plan_name = 'Enterprise Base (Starter Tier)'
+        updates.daily_application_limit = 55
+      } else if (targetPlan === 'org_starter') {
+        const days = extend_days || 30
+        updates.plan = 'org_starter'
+        updates.plan_name = 'JobFlux Org Starter (30 Days)'
         updates.enterprise_role = 'member'
         updates.enabled_for_daily_run = true
+        updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        updates.trial_expires_at = null
+        updates.daily_application_limit = 20
+      } else if (targetPlan === 'enterprise' || targetPlan === 'unpaid' || ((targetPlan === 'none' || targetPlan === 'no_plan') && isOrgUser)) {
+        // Unpaid Org Member: 0 applications allowed
+        updates.plan = 'enterprise'
+        updates.plan_name = 'Unpaid Org Member (Payment Required)'
+        updates.enterprise_role = 'member'
+        updates.enabled_for_daily_run = false
         updates.plan_expires_at = null
         updates.trial_expires_at = null
-        if (updates.daily_application_limit === undefined || updates.daily_application_limit > 20) {
-          updates.daily_application_limit = 20
-        }
+        updates.daily_application_limit = 0
+        updates.is_vip = false
+        updates.vip_access = false
+        updates.free_privilege = false
       } else if (targetPlan === 'pro' || targetPlan === 'starter') {
         const days = extend_days || 30
-        updates.plan_name = 'JobFlux PRO'
+        updates.plan_name = targetPlan === 'pro' ? 'JobFlux PRO' : 'JobFlux STARTER'
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
-        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 50
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = targetPlan === 'pro' ? 50 : 20
       } else if (targetPlan === 'trial') {
         updates.plan_name = 'JobFlux 3-Day Free Access'
         updates.trial_started_at = now
@@ -471,13 +533,14 @@ export async function PATCH(req: NextRequest) {
         updates.is_vip = false
         updates.vip_access = false
         updates.free_privilege = false
-        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 20
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 10
       } else if (targetPlan === 'none' || targetPlan === 'no_plan') {
         updates.plan = 'none'
         updates.plan_name = 'No Active Plan'
         updates.plan_expires_at = null
         updates.trial_expires_at = null
         updates.enabled_for_daily_run = false
+        updates.daily_application_limit = 0
         updates.is_vip = false
         updates.vip_access = false
         updates.free_privilege = false

@@ -282,7 +282,10 @@ export default function CandidatesTab({
       u.enterprise_org_id ||
       u.enterprise_role === 'member' ||
       (u.plan || '').toLowerCase() === 'enterprise' ||
-      (u.plan || '').toLowerCase() === 'org_pro'
+      (u.plan || '').toLowerCase() === 'org_pro' ||
+      (u.plan || '').toLowerCase() === 'org_pro_3m' ||
+      (u.plan || '').toLowerCase() === 'org_starter' ||
+      (u.plan || '').toLowerCase() === 'unpaid'
     )
   )
 
@@ -293,7 +296,9 @@ export default function CandidatesTab({
     const isVip = Boolean(u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime')
     const p = (u.plan || u.plan_name || '').toLowerCase()
 
-    if (p.includes('enterprise') || p.includes('org_pro')) return 120
+    if (p.includes('org_pro')) return 120
+    if (p.includes('org_starter')) return 85
+    if (p.includes('enterprise') || p.includes('unpaid')) return 10
     if (p.includes('elite') || p.includes('professional')) return isVip ? 115 : 100
     if (isVip) return 95
     if (p.includes('pro')) return 80
@@ -338,8 +343,9 @@ export default function CandidatesTab({
   const countPro = usersList.filter(u => !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'pro').length
   const countStarter = usersList.filter(u => !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'starter').length
   const countTrial = usersList.filter(u => !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'trial').length
-  const countEnterprise = usersList.filter(u => isOrgMemberUser(u) && (u.plan || '').toLowerCase() !== 'org_pro').length
-  const countOrgPro = usersList.filter(u => isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'org_pro').length
+  const countOrgPro = usersList.filter(u => isOrgMemberUser(u) && ['org_pro', 'org_pro_3m'].includes((u.plan || '').toLowerCase())).length
+  const countOrgStarter = usersList.filter(u => isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'org_starter').length
+  const countOrgUnpaid = usersList.filter(u => isOrgMemberUser(u) && !['org_pro', 'org_pro_3m', 'org_starter'].includes((u.plan || '').toLowerCase())).length
 
   // Filter users by search, execution status, and plan status
   const filteredUsers = usersList.filter(u => {
@@ -395,8 +401,9 @@ export default function CandidatesTab({
     if (candidateStatusFilter === 'pro') return !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'pro'
     if (candidateStatusFilter === 'starter') return !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'starter'
     if (candidateStatusFilter === 'trial') return !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'trial'
-    if (candidateStatusFilter === 'enterprise') return isOrgMemberUser(u) && (u.plan || '').toLowerCase() !== 'org_pro'
-    if (candidateStatusFilter === 'org_pro') return isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'org_pro'
+    if (candidateStatusFilter === 'org_pro') return isOrgMemberUser(u) && ['org_pro', 'org_pro_3m'].includes((u.plan || '').toLowerCase())
+    if (candidateStatusFilter === 'org_starter') return isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'org_starter'
+    if (candidateStatusFilter === 'org_unpaid' || candidateStatusFilter === 'enterprise') return isOrgMemberUser(u) && !['org_pro', 'org_pro_3m', 'org_starter'].includes((u.plan || '').toLowerCase())
     if (candidateStatusFilter === 'expiring') return u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'urgent') return u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'expired') return u.plan_expiry_status === 'expired'
@@ -1475,18 +1482,20 @@ export default function CandidatesTab({
                           return (
                             <div className="flex flex-col items-start gap-1.5">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                {isOrgMemberUser(u) && (u.plan === 'enterprise' || u.plan === 'org_pro' || u.plan === 'pro') ? (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
-                                    u.plan === 'org_pro' || u.plan === 'pro'
-                                      ? 'bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/40 shadow-sm'
-                                      : 'bg-indigo-500/20 text-indigo-300 light:text-indigo-700 border border-indigo-500/40 shadow-sm'
-                                  }`}>
-                                    {u.plan === 'org_pro' || u.plan === 'pro' ? (
-                                      <><span>⚡</span><span>ORG PRO</span></>
-                                    ) : (
-                                      <><Building2 className="w-2.5 h-2.5" /><span>ENTERPRISE BASE</span></>
-                                    )}
-                                  </span>
+                                {isOrgMemberUser(u) ? (
+                                  (u.plan === 'org_pro' || u.plan === 'org_pro_3m' || (u.plan === 'pro' && !isSuperAdminUser(u))) ? (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/40 shadow-sm">
+                                      <span>⚡</span><span>{u.plan === 'org_pro_3m' ? 'ORG PRO 3M' : 'ORG PRO'}</span>
+                                    </span>
+                                  ) : (u.plan === 'org_starter' || u.plan === 'starter') ? (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 bg-cyan-500/20 text-cyan-300 light:text-cyan-700 border border-cyan-500/40 shadow-sm">
+                                      <Building2 className="w-2.5 h-2.5" /><span>ORG STARTER</span>
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 bg-rose-500/20 text-rose-300 light:text-rose-700 border border-rose-500/40 shadow-sm" title="Unpaid org candidate — 0 daily applications allowed until paid">
+                                      <AlertCircle className="w-2.5 h-2.5" /><span>ORG UNPAID</span>
+                                    </span>
+                                  )
                                 ) : (
                                   <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
                                     u.plan === 'none' || u.plan === 'no_plan' 
@@ -1505,14 +1514,34 @@ export default function CandidatesTab({
                             {(() => {
                               const isOrg = isOrgMemberUser(u);
                               const planLc = (u.plan || 'trial').toLowerCase();
-                              const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'pro');
-                              const tierCap = isOrg ? (isOrgPro ? 55 : 20) : (planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55);
-                              const customLim = Number(u.daily_application_limit);
-                              const limit = isOrg ? (isOrgPro ? 55 : (!isNaN(customLim) && customLim > 0 ? Math.min(20, customLim) : 20)) : (u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap);
+                              const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'org_pro_3m' || planLc === 'pro');
+                              const isOrgStarter = isOrg && (planLc === 'org_starter' || planLc === 'starter');
+                              const isOrgUnpaid = isOrg && !isOrgPro && !isOrgStarter;
+
+                              let limit = 0;
+                              if (isOrg) {
+                                if (isOrgUnpaid) {
+                                  limit = 0;
+                                } else if (isOrgPro) {
+                                  limit = 55;
+                                } else if (isOrgStarter) {
+                                  const customLim = Number(u.daily_application_limit);
+                                  limit = !isNaN(customLim) && customLim > 0 ? Math.min(20, customLim) : 20;
+                                }
+                              } else {
+                                const tierCap = planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55;
+                                const customLim = Number(u.daily_application_limit);
+                                limit = u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap;
+                              }
+
                               return (
                                 <span 
-                                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700/60 light:border-zinc-300"
-                                  title={`Daily Application Limit: ${limit}/day on Naukri platform`}
+                                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-medium border ${
+                                    limit === 0
+                                      ? 'bg-rose-950/40 text-rose-300 border-rose-800/60'
+                                      : 'bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700/60 light:border-zinc-300'
+                                  }`}
+                                  title={`Daily Application Limit: ${limit}/day on Naukri platform${limit === 0 ? ' (Payment Required)' : ''}`}
                                 >
                                   {limit}/d
                                 </span>
@@ -1535,7 +1564,7 @@ export default function CandidatesTab({
                           <select
                             value={
                               isOrgMemberUser(u)
-                                ? (u.plan === 'pro' || u.plan === 'org_pro' ? 'org_pro' : (u.plan || 'enterprise'))
+                                ? (u.plan === 'org_pro_3m' ? 'org_pro_3m' : (u.plan === 'pro' || u.plan === 'org_pro' ? 'org_pro' : (u.plan === 'org_starter' || u.plan === 'starter' ? 'org_starter' : 'none')))
                                 : (u.plan || 'trial')
                             }
                             onChange={(e) => handleChangePlan(u.user_id, e.target.value)}
@@ -1545,14 +1574,14 @@ export default function CandidatesTab({
                             {isOrgMemberUser(u) ? (
                               <>
                                 <optgroup label="🏢 Organization Tier Plans">
-                                  <option value="enterprise">🏢 Enterprise Base (Starter Tier - 20/d)</option>
-                                  <option value="org_pro">⚡ Org Pro Member (Full Tier - 55/d · 15 Sweeps/wk)</option>
+                                  <option value="none">⚠️ Unpaid / Payment Required (0 applies)</option>
+                                  <option value="org_starter">🏢 Org Starter (30d · ₹79 · 20/d · No On-Demand)</option>
+                                  <option value="org_pro">⚡ Org Pro (30d · ₹99 · 55/d · 15 Sweeps/wk)</option>
+                                  <option value="org_pro_3m">🚀 Org Pro 3-Month (90d · ₹289 · 55/d · 15 Sweeps/wk)</option>
                                 </optgroup>
                                 <optgroup label="Standard Paid Individual Plans">
-                                  <option value="none">No Plan (Inactive)</option>
-                                  <option value="starter">Starter (30d - 20/d)</option>
-                                  <option value="pro">Pro (30d - 55/d)</option>
-                                  <option value="elite">Professional (90d - 55/d)</option>
+                                  <option value="pro">Pro (30d - ₹399 · 55/d)</option>
+                                  <option value="elite">Professional (90d - ₹199 · 55/d)</option>
                                   <option value="vip">VIP Pass (3 Months / 90d)</option>
                                 </optgroup>
                               </>
@@ -1561,14 +1590,16 @@ export default function CandidatesTab({
                                 <optgroup label="Standard Individual Plans">
                                   <option value="none">No Plan (Inactive)</option>
                                   <option value="trial">Free Trial (3 Days)</option>
-                                  <option value="starter">Starter (30d)</option>
-                                  <option value="pro">Pro (30d)</option>
-                                  <option value="elite">Professional (90d)</option>
+                                  <option value="starter">Starter (30d - 20/d)</option>
+                                  <option value="pro">Pro (30d - ₹399 · 55/d)</option>
+                                  <option value="elite">Professional (90d · 55/d)</option>
                                   <option value="vip">VIP Pass (3 Months / 90d)</option>
                                 </optgroup>
                                 <optgroup label="🏢 Assign to Organization Tier">
-                                  <option value="enterprise">🏢 Enterprise Member (Org Cover)</option>
-                                  <option value="org_pro">⚡ Org Pro Member (30d Upgrade)</option>
+                                  <option value="none">⚠️ Org Unpaid (Payment Required - 0/d)</option>
+                                  <option value="org_starter">🏢 Org Starter (30d · ₹79 · 20/d)</option>
+                                  <option value="org_pro">⚡ Org Pro Member (30d · ₹99 · 55/d)</option>
+                                  <option value="org_pro_3m">🚀 Org Pro 3-Month (90d · ₹289 · 55/d)</option>
                                 </optgroup>
                               </>
                             )}
@@ -1598,6 +1629,18 @@ export default function CandidatesTab({
                                 >
                                   <Crown className="w-3 h-3 text-amber-400 light:text-amber-600 shrink-0" />
                                   <span className="font-semibold">VIP Pass (90d Active)</span>
+                                </div>
+                              )
+                            }
+
+                            if (isOrgMemberUser(u) && (u.plan === 'unpaid' || u.plan === 'enterprise' || u.plan === 'none' || u.plan === 'no_plan' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan')) {
+                              return (
+                                <div
+                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/40 light:bg-rose-50 text-rose-300 light:text-rose-600 border border-rose-800/60 light:border-rose-300"
+                                  title="Unpaid organization candidate. Payment required to begin automated job applications."
+                                >
+                                  <AlertCircle className="w-3 h-3 text-rose-400 light:text-rose-600 shrink-0" />
+                                  <span className="font-bold">Payment Required (0/d)</span>
                                 </div>
                               )
                             }

@@ -1009,22 +1009,24 @@ export default function EnterpriseAdminPortal() {
                               {member.enterprise_role === 'admin' ? 'Org Admin' : 'Org Member'}
                             </span>
                             <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${
-                              member.plan === 'org_pro'
+                              !member.plan_active
+                                ? 'bg-rose-950/40 text-rose-300 border-rose-800/60'
+                                : member.plan === 'org_pro' || member.plan === 'org_pro_3m'
                                 ? 'bg-amber-950/60 light:bg-amber-50 text-amber-300 light:text-amber-700 border-amber-700/60 light:border-amber-300'
-                                : 'bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border-zinc-800 light:border-zinc-200'
+                                : 'bg-cyan-950/60 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border-cyan-800/60 light:border-cyan-300'
                             }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${(member.plan_active ?? true) ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+                              <span className={`w-1.5 h-1.5 rounded-full ${member.plan_active ? 'bg-emerald-400' : 'bg-rose-500'}`} />
                               {member.plan_name}
                             </span>
                           </div>
-                          {member.plan === 'org_pro' && member.plan_expires_at && (
+                          {member.plan_active && member.plan_expires_at && (
                             <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono mt-1">
                               valid till {new Date(member.plan_expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </div>
                           )}
-                          {member.plan !== 'org_pro' && (
-                            <div className="text-[10px] text-zinc-600 font-mono mt-1">
-                              Org base plan · Starter Tier (20/d)
+                          {!member.plan_active && (
+                            <div className="text-[10px] text-rose-400/90 font-mono mt-1">
+                              Unpaid · 0 applications allowed
                             </div>
                           )}
                         </td>
@@ -1032,13 +1034,16 @@ export default function EnterpriseAdminPortal() {
                         {/* Today's Applications */}
                         <td className="py-3.5 px-4 text-center">
                           {(() => {
-                            const memberCap = member.daily_application_limit || (member.plan === 'org_pro' ? 55 : 20)
+                            const memberCap = member.daily_application_limit ?? 0
                             return (
                               <>
-                                <span className={`font-mono font-bold ${member.applied_today >= memberCap ? 'text-amber-400 light:text-amber-600' : 'text-cyan-300 light:text-cyan-700'}`}>
+                                <span className={`font-mono font-bold ${
+                                  !member.plan_active ? 'text-zinc-500' :
+                                  member.applied_today >= memberCap && memberCap > 0 ? 'text-amber-400 light:text-amber-600' : 'text-cyan-300 light:text-cyan-700'
+                                }`}>
                                   {member.applied_today}
                                 </span>
-                                <span className="text-zinc-600 font-mono"> / {memberCap} max</span>
+                                <span className="text-zinc-600 font-mono"> / {memberCap} max {!member.plan_active ? '(Unpaid)' : ''}</span>
                               </>
                             )
                           })()}
@@ -1052,12 +1057,17 @@ export default function EnterpriseAdminPortal() {
                           <span className="font-mono text-cyan-300 light:text-cyan-700 font-semibold">
                             {member.on_demand_runs_used}
                           </span>
-                          <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || (member.plan === 'org_pro' ? 15 : 5)} week</span>
+                          <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || 0} week {member.on_demand_quota === 0 ? '(None)' : ''}</span>
                         </td>
 
-                        {/* Automated Run Status (Active or Paused) */}
+                        {/* Automated Run Status (Active, Paused, or Payment Required) */}
                         <td className="py-3.5 px-4 text-center">
-                          {isEnabled ? (
+                          {!member.plan_active ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-950/60 light:bg-rose-50 border border-rose-800/60 text-rose-300 light:text-rose-600 text-[10px] font-mono">
+                              <AlertCircle className="w-2.5 h-2.5 text-rose-400 shrink-0" />
+                              Payment Required
+                            </span>
+                          ) : isEnabled ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/60 light:bg-emerald-50 border border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700 text-[10px] font-mono">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                               Active Runs
@@ -1071,13 +1081,17 @@ export default function EnterpriseAdminPortal() {
                           <div className="text-[10px] text-zinc-600 font-mono mt-1">
                             Last active {member.last_applied_at ? new Date(member.last_applied_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
                           </div>
-                          {member.sweep_eligible === false ? (
-                            <div className="text-[10px] font-mono mt-1 text-amber-300 light:text-amber-700 flex items-center gap-1" title={(member.sweep_blockers || []).join('; ')}>
+                          {!member.plan_active ? (
+                            <div className="text-[10px] font-mono mt-1 text-rose-400/90 flex items-center justify-center gap-1">
+                              <span>Not queued: Payment required</span>
+                            </div>
+                          ) : member.sweep_eligible === false ? (
+                            <div className="text-[10px] font-mono mt-1 text-amber-300 light:text-amber-700 flex items-center justify-center gap-1" title={(member.sweep_blockers || []).join('; ')}>
                               <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" />
                               <span>Not queued: {(member.sweep_blockers || ['blocked'])[0]}</span>
                             </div>
                           ) : (
-                            <div className="text-[10px] font-mono mt-1 text-emerald-400/80 flex items-center gap-1">
+                            <div className="text-[10px] font-mono mt-1 text-emerald-400/80 flex items-center justify-center gap-1">
                               <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
                               <span>In daily sweep</span>
                             </div>
@@ -1090,13 +1104,13 @@ export default function EnterpriseAdminPortal() {
                             {/* Toggle Enable/Disable Button */}
                             <button
                               onClick={() => handleToggleMember(member)}
-                              disabled={isProcessing}
-                              className={`px-2.5 py-1 rounded-lg border text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
+                              disabled={isProcessing || !member.plan_active}
+                              className={`px-2.5 py-1 rounded-lg border text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-40 ${
                                 isEnabled
                                   ? 'bg-zinc-900 light:bg-zinc-100 hover:bg-rose-950/50 border-zinc-800 light:border-zinc-200 hover:border-rose-700/60 text-zinc-300 light:text-zinc-700 hover:text-rose-300'
                                   : 'bg-emerald-950/40 hover:bg-emerald-900/50 border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700'
                               }`}
-                              title={isEnabled ? 'Pause candidate from automated daily runs' : 'Enable candidate for automated daily runs'}
+                              title={!member.plan_active ? 'Payment required: subscribe to a plan to enable runs' : isEnabled ? 'Pause candidate from automated daily runs' : 'Enable candidate for automated daily runs'}
                             >
                               {isEnabled ? (
                                 <>
@@ -1150,12 +1164,16 @@ export default function EnterpriseAdminPortal() {
                             ) : (
                               <button
                                 onClick={() => handleTriggerOnDemand(member)}
-                                disabled={isProcessing || !isEnabled || org?.status === 'disabled'}
+                                disabled={isProcessing || !isEnabled || org?.status === 'disabled' || !member.plan_active || (member.on_demand_quota || 0) === 0}
                                 className="px-2.5 py-1 rounded-lg bg-cyan-950/60 light:bg-cyan-50 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
                                 title={
-                                  org?.status === 'disabled'
+                                  !member.plan_active
+                                    ? 'Payment required — member has not purchased an active plan'
+                                    : (member.on_demand_quota || 0) === 0
+                                    ? 'Org Starter plan includes scheduled morning sweeps only (upgrade to Org Pro for on-demand)'
+                                    : org?.status === 'disabled'
                                     ? 'Org is disabled by Super Admin — all runs are blocked'
-                                    : `Dispatch instant on-demand sweep (${member.applied_today || 0}/55 used today — run tops up the rest from newly posted jobs)`
+                                    : `Dispatch instant on-demand sweep (${member.applied_today || 0}/${member.daily_application_limit || 55} used today)`
                                 }
                               >
                                 <Zap className="w-3 h-3 text-cyan-400 light:text-cyan-600" />

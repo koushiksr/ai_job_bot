@@ -75,19 +75,35 @@ export async function GET(req: NextRequest) {
       const todayIstStr = istNow.toISOString().slice(0, 10)
       const todayCount = s.last_date === todayIstStr ? (s.today || 0) : 0
 
-      // Resolve effective current plan: active Org Pro purchase wins,
-      // otherwise the free org-provided Enterprise base (always active for members - Starter tier equivalent)
-      const rawPlan = (m.plan || 'enterprise').toLowerCase()
-      let effPlan = 'enterprise'
-      let effPlanName = 'Enterprise Base (Starter Tier)'
+      // Resolve effective current plan:
+      // If an organization candidate has NOT paid anything, they cannot apply even one job.
+      // Must hold an active Org Starter (₹79), Org Pro (₹99 / ₹289), or VIP access.
+      const rawPlan = (m.plan || 'none').toLowerCase()
+      const isPaidOrgPro = (rawPlan === 'org_pro' || rawPlan === 'org_pro_3m' || rawPlan === 'pro')
+      const isPaidOrgStarter = (rawPlan === 'org_starter' || rawPlan === 'starter')
+      const exp = m.plan_expires_at ? new Date(m.plan_expires_at) : null
+      const isPlanValid = exp ? exp > now : false
+      const isVipUser = Boolean(m.is_vip || m.vip_access || m.free_privilege)
+
+      let effPlan = 'unpaid'
+      let effPlanName = 'Unpaid Member (Payment Required)'
       let effExpiresAt: any = null
-      if (rawPlan === 'org_pro' || rawPlan === 'pro') {
-        const exp = m.plan_expires_at ? new Date(m.plan_expires_at) : null
-        if (!exp || exp > now) {
-          effPlan = 'org_pro'
-          effPlanName = 'JobFlux Org Pro'
-          effExpiresAt = m.plan_expires_at || null
-        }
+      let isPlanActive = false
+
+      if (isVipUser) {
+        effPlan = isPaidOrgPro ? 'org_pro' : (isPaidOrgStarter ? 'org_starter' : 'org_pro')
+        effPlanName = isPaidOrgPro ? 'JobFlux Org Pro (VIP)' : 'JobFlux Org Starter (VIP)'
+        isPlanActive = true
+      } else if (isPaidOrgPro && isPlanValid) {
+        effPlan = rawPlan === 'org_pro_3m' ? 'org_pro_3m' : 'org_pro'
+        effPlanName = rawPlan === 'org_pro_3m' ? 'JobFlux Org Pro (3 Months)' : 'JobFlux Org Pro'
+        effExpiresAt = m.plan_expires_at
+        isPlanActive = true
+      } else if (isPaidOrgStarter && isPlanValid) {
+        effPlan = 'org_starter'
+        effPlanName = 'JobFlux Org Starter'
+        effExpiresAt = m.plan_expires_at
+        isPlanActive = true
       }
 
       const activeDoc = activeTasks.find(t => t.user_id === m.user_id) || null
@@ -97,28 +113,16 @@ export async function GET(req: NextRequest) {
         queue_position: activeDoc.status === 'running' ? 0 : (pendingIndex.get(activeDoc.task_id) || null)
       } : null
 
-      // Sweep eligibility: will this member actually be queued at sweep time?
-      // Mirrors backend plan rules: org base + active Org Pro + active paid/trial/VIP.
+      // Sweep eligibility: member must have active paid subscription to be queued
       const blockers: string[] = []
       if (orgDisabled) blockers.push('Org disabled by Super Admin')
       if (m.enabled_for_daily_run === false) blockers.push('Daily run paused')
       if ((m.enterprise_status || 'active') === 'disabled') blockers.push('Member disabled')
       if (!m.password || !String(m.password).trim()) blockers.push('Naukri password missing')
-      const mPlan = (m.plan || 'enterprise').toLowerCase()
-      const nowMs = Date.now()
-      const expOk = (d: any) => {
-        if (!d) return false
-        const t = new Date(d).getTime()
-        return !isNaN(t) && t > nowMs
-      }
-      const planOk =
-        mPlan === 'enterprise' ||
-        mPlan === 'org_pro' || // paid upgrade; expired falls back to org base cover
-        mPlan === 'trial' ||   // org members never locked to trial, covered by org base
-        Boolean(m.is_vip || m.vip_access || m.free_privilege) ||
-        (['starter', 'pro', 'elite', 'professional', 'paid'].includes(mPlan) && expOk(m.plan_expires_at)) ||
-        mPlan === 'vip'
-      if (!planOk) blockers.push(`No active plan (${mPlan})`)
+      if (!isPlanActive) blockers.push('Payment required — no active paid plan')
+
+      const dailyLimit = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') ? 55 : 20)
+      const onDemandQuota = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') ? 15 : 0)
 
       return {
         user_id: m.user_id,
@@ -127,21 +131,21 @@ export async function GET(req: NextRequest) {
         role: m.role,
         enterprise_role: m.enterprise_role || (m.email === 'koushiksrmedala@gmail.com' ? 'admin' : 'member'),
         enterprise_status: m.enterprise_status || 'active',
-        enabled_for_daily_run: m.enabled_for_daily_run !== false,
+        enabled_for_daily_run: m.enabled_for_daily_run !== false && isPlanActive,
         plan: effPlan,
         plan_name: effPlanName,
-        plan_active: true,
+        plan_active: isPlanActive,
         plan_expires_at: effExpiresAt,
         applied_today: todayCount,
         applied_this_week: s.this_week || 0,
         applied_this_month: s.this_month || 0,
         total_applied: s.total_applied || 0,
         on_demand_runs_used: onDemandUsed,
-        on_demand_quota: effPlan === 'org_pro' ? 15 : 5,
+        on_demand_quota: onDemandQuota,
         sweep_eligible: blockers.length === 0,
         sweep_blockers: blockers,
         active_task: activeTask,
-        daily_application_limit: effPlan === 'org_pro' ? 55 : (m.daily_application_limit ? Math.min(20, Number(m.daily_application_limit)) : 20),
+        daily_application_limit: dailyLimit,
         last_applied_at: s.last_applied_at || null,
         created_at: m.created_at || null
       }

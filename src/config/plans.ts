@@ -82,9 +82,9 @@ export const MASTER_PLANS: PlanDefinition[] = [
     name: 'Essentials',
     subtitle: 'For candidates with daily proactive application demands.',
     badge: 'POPULAR',
-    price: '₹99',
+    price: '₹399',
     originalPrice: '₹1,000',
-    amountPaise: 9900,
+    amountPaise: 39900,
     period: '/ month',
     durationDays: 30,
     featuresIntro: 'Everything in Free, with 600+ monthly applications, plus...',
@@ -97,7 +97,7 @@ export const MASTER_PLANS: PlanDefinition[] = [
       { text: 'Priority Cloud Worker Queue' },
       { text: 'Live Application History & Recruiter Links' }
     ],
-    cta: 'Get 1 Month for ₹99',
+    cta: 'Get 1 Month for ₹399',
     popular: true,
     highlight: true
   },
@@ -315,6 +315,44 @@ export const MASTER_PROMOS: PromoDefinition[] = [
       label: '90% OFF Org Pro Upgrade (Actual ₹1,000 / mo)'
     },
     category: 'org_member'
+  },
+  {
+    code: 'ORGSTART79',
+    presetId: 'org_starter_79',
+    name: 'Org Starter Member Pass (₹79 / mo)',
+    offerTitle: 'Organization Member Starter: JobFlux Org Starter for ₹79',
+    discountBadge: 'ORG STARTER (₹79)',
+    originalPrice: '₹499 / mo',
+    discountedPrice: '₹79 / mo',
+    amountPaise: 7900,
+    allowedPlans: ['org_starter'],
+    durationDays: 30,
+    description: 'JobFlux Org Starter - Member Pass (30 Days)',
+    customMessage: 'Activate your Org Starter pass! Get 30 days of autonomous morning applications (20 applies/day, scheduled sweeps) for just ₹79.',
+    pricingDisplay: {
+      displayPrice: '₹79',
+      label: 'Org Starter Member Pass (₹79 / mo)'
+    },
+    category: 'org_member'
+  },
+  {
+    code: 'ORGPRO289',
+    presetId: 'org_pro_289',
+    name: 'Org Pro 3-Month Comprehensive Pass (₹289 / 3 mos)',
+    offerTitle: 'Organization Member 90-Day Pipeline: JobFlux Org Pro for ₹289',
+    discountBadge: 'ORG PRO 3-MO (₹289)',
+    originalPrice: '₹2,500 / 3 mos',
+    discountedPrice: '₹289 / 3 mos',
+    amountPaise: 28900,
+    allowedPlans: ['org_pro_3m', 'org_pro'],
+    durationDays: 90,
+    description: 'JobFlux Org Pro - 3-Month Comprehensive Pass (90 Days)',
+    customMessage: 'Unlock 90 days of continuous auto-apply (55 daily applications, 15 weekly on-demand sweeps, VIP priority queue) for just ₹289.',
+    pricingDisplay: {
+      displayPrice: '₹289',
+      label: 'Org Pro 3-Month Pass (₹289 / 3 mos)'
+    },
+    category: 'org_member'
   }
 ]
 
@@ -331,25 +369,71 @@ export const PLANS = MASTER_PLANS
  */
 export const ORG_PLANS: PlanDefinition[] = [
   {
+    id: 'org_starter',
+    name: 'Org Starter',
+    subtitle: 'Essential daily job automation for org candidates.',
+    badge: 'STARTER',
+    price: '₹79',
+    originalPrice: '₹499',
+    amountPaise: 7900,
+    period: '/ month',
+    durationDays: 30,
+    featuresIntro: 'Continuous automated applications without on-demand sweeps...',
+    features: [
+      { text: '30 Days of Continuous Daily Auto-Apply' },
+      { text: 'Up to 20 Verified Job Applications / Day' },
+      { text: 'Daily Morning Scheduled Sweep (06:00 AM IST)' },
+      { text: 'Automated Recruiter Screening Responses' },
+      { text: 'No On-Demand Sweeps (Scheduled Daily Only)' },
+      { text: 'Stays linked to your organization & admin' }
+    ],
+    cta: 'Get Org Starter (₹79)',
+    highlight: false
+  },
+  {
     id: 'org_pro',
     name: 'Org Pro',
-    subtitle: 'Exclusive upgrade for organization members.',
-    badge: 'ORG MEMBER',
+    subtitle: 'Maximum speed, higher volume, and on-demand sweeps.',
+    badge: 'POPULAR',
     price: '₹99',
     originalPrice: '₹1,000',
     amountPaise: 9900,
     period: '/ month',
     durationDays: 30,
-    featuresIntro: 'Everything in Enterprise, plus member-only extras...',
+    featuresIntro: 'Everything in Starter, plus 55/day and priority sweeps...',
     features: [
       { text: '30 Days of Continuous Daily Auto-Apply' },
+      { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
       { text: 'On-Demand Real-Time Sweeps (Up to 15x / week)' },
-      { text: 'Priority Cloud Worker Queue' },
+      { text: 'Priority Cloud Worker Queue Slot' },
       { text: 'AI Resume Optimization & Keyword Match' },
       { text: 'Stays linked to your organization & admin' }
     ],
     cta: 'Upgrade to Org Pro (₹99)',
-    highlight: true
+    highlight: true,
+    popular: true
+  },
+  {
+    id: 'org_pro_3m',
+    name: 'Org Pro (3 Months)',
+    subtitle: 'Best value 90-day comprehensive pipeline until hired.',
+    badge: 'BEST VALUE',
+    price: '₹289',
+    originalPrice: '₹2,500',
+    amountPaise: 28900,
+    period: '/ 3 months',
+    durationDays: 90,
+    featuresIntro: 'Extended 90-day pipeline with priority worker queue...',
+    features: [
+      { text: '90 Days of Continuous Daily Auto-Apply' },
+      { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
+      { text: 'On-Demand Real-Time Sweeps (Up to 15x / week)' },
+      { text: 'VIP Priority Cloud Worker Queue Slot' },
+      { text: 'AI Resume Optimization & Keyword Match' },
+      { text: 'Stays linked to your organization & admin' }
+    ],
+    cta: 'Get Org Pro 3 Months (₹289)',
+    highlight: false
   }
 ]
 
@@ -357,16 +441,17 @@ export function getOrgPlan(planId: string): PlanDefinition | undefined {
   return ORG_PLANS.find(p => p.id === planId)
 }
 
-/** True for organization-linked plans (enterprise base + paid org upgrades). */
+/** True for organization-linked plans. */
 export function isOrgPlanId(planId?: string | null): boolean {
-  return planId === 'enterprise' || planId === 'org_pro'
+  return planId === 'enterprise' || planId === 'org_starter' || planId === 'org_pro' || planId === 'org_pro_3m'
 }
 
 /** Weekly on-demand run allowance per plan. */
 export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMember = false): number {
   const p = (planId || '').toLowerCase()
-  if (p === 'org_pro') return 15
-  if (p === 'enterprise' || isEnterpriseMember) return 5
+  if (p === 'org_pro' || p === 'org_pro_3m') return 15
+  if (p === 'org_starter') return 0 // No on-demand sweeps for org starter
+  if (p === 'enterprise' || (isEnterpriseMember && !p.startsWith('org_pro'))) return 0 // Unpaid enterprise member gets 0
   if (p === 'elite' || p === 'professional') return 10
   if (p === 'pro') return 5
   if (p === 'starter') return 3
@@ -374,37 +459,48 @@ export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMembe
 }
 
 /**
- * Daily application cap per plan (mirrors backend db.PLAN_DAILY_CAPS).
- * Trial 10 < starter/enterprise 20 < paid/org_pro 55. Hard ceiling 55 always.
- * Enterprise Base Plan acts as the Starter pack for organization members (20 applies/day).
- * Org Pro acts as the full upgraded tier for organization members (55 applies/day).
+ * Daily application cap per plan.
+ * If an enterprise member has NOT paid, they cannot apply even one job (0 applies/day).
+ * Org Starter: 20 applies/day.
+ * Org Pro (1m or 3m): 55 applies/day.
  */
-export function getDailyAppLimit(planId?: string | null): number {
-  const p = (planId || 'trial').toLowerCase()
+export function getDailyAppLimit(planId?: string | null, isEnterpriseMember = false): number {
+  const p = (planId || '').toLowerCase()
+  if (isEnterpriseMember) {
+    if (p === 'org_pro' || p === 'org_pro_3m' || p === 'pro' || p === 'elite' || p === 'vip') return 55
+    if (p === 'org_starter' || p === 'starter') return 20
+    return 0 // Unpaid org member cannot apply even one job
+  }
   if (p === 'trial') return 10
-  if (p === 'starter' || p === 'enterprise') return 20
+  if (p === 'starter' || p === 'org_starter') return 20
+  if (p === 'none' || p === 'no_plan' || p === 'unpaid' || !p) return 0
   return 55
 }
 
 /** Upgrade nudge for capped tiers. Empty string when nothing to upsell. */
-export function getCapUpgradeHint(planId?: string | null): string {
+export function getCapUpgradeHint(planId?: string | null, isEnterpriseMember = false): number | string {
   const p = (planId || '').toLowerCase()
+  if (isEnterpriseMember && (p === 'enterprise' || p === 'none' || p === 'unpaid' || !p)) {
+    return 'Payment required to apply. Subscribe to Org Starter (₹79) or Org Pro (₹99) to begin applications.'
+  }
+  if (p === 'org_starter') return 'Org Starter allows 20/day with 0 on-demand sweeps — upgrade to Org Pro for 55/day and 15 weekly sweeps.'
   if (p === 'trial') return 'Free trial allows 10/day — upgrade to Pro for 55/day.'
   if (p === 'starter') return 'Starter allows 20/day — upgrade to Pro for 55/day.'
-  if (p === 'enterprise') return 'Enterprise base allows 20/day — upgrade to Org Pro for 55/day and 15 sweeps/week.'
   return ''
 }
 
 /**
  * Backend Razorpay Plan Amounts Map
- * Supports both canonical IDs and historical aliases (starter, professional).
+ * Supports canonical IDs and historical aliases.
  */
 export const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: number }> = {
-  starter: { amount: 9900, name: 'JobFlux 1-Month Plan (30 Days)', days: 30 },
-  pro: { amount: 9900, name: 'JobFlux 1-Month Career Pro (30 Days)', days: 30 },
+  starter: { amount: 39900, name: 'JobFlux 1-Month Plan (30 Days)', days: 30 },
+  pro: { amount: 39900, name: 'JobFlux 1-Month Career Pro (30 Days)', days: 30 },
   elite: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 },
   professional: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 },
-  org_pro: { amount: 9900, name: 'JobFlux Org Pro — Member Upgrade (30 Days)', days: 30 }
+  org_starter: { amount: 7900, name: 'JobFlux Org Starter (30 Days)', days: 30 },
+  org_pro: { amount: 9900, name: 'JobFlux Org Pro — Member Upgrade (30 Days)', days: 30 },
+  org_pro_3m: { amount: 28900, name: 'JobFlux Org Pro — 3-Month Pass (90 Days)', days: 90 }
 }
 
 /**
@@ -415,7 +511,9 @@ export const PLAN_DAYS: Record<string, number> = {
   pro: 30,
   elite: 90,
   professional: 90,
-  org_pro: 30
+  org_starter: 30,
+  org_pro: 30,
+  org_pro_3m: 90
 }
 
 /**

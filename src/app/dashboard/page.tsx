@@ -140,17 +140,17 @@ export default function UserDashboard() {
   const [showProModal, setShowProModal] = useState<boolean>(false)
   const [proModalFeature, setProModalFeature] = useState<string>('On-Demand Application Sweeps (Up to 5x / week)')
 
-  // Candidate account has Professional privileges if on an active Professional tier, Enterprise tier, OR VIP pass.
-  const isEnterpriseMember = enterpriseRole === 'member' || userPlan === 'enterprise' || userPlan === 'org_pro'
-  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'enterprise' || userPlan === 'org_pro' || userPlan === 'vip' || isVip || isEnterpriseMember) && isPlanActive
-  const dailyCap = getDailyAppLimit(userPlan)
-  const capHint = getCapUpgradeHint(userPlan)
+  // Candidate account has Professional privileges if on an active Professional tier, VIP pass, or paid Org Pro tier.
+  const isEnterpriseMember = enterpriseRole === 'member' || userPlan === 'enterprise' || userPlan === 'org_pro' || userPlan === 'org_starter' || userPlan === 'org_pro_3m' || userPlan === 'unpaid'
+  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'vip' || isVip || (isEnterpriseMember && (userPlan === 'org_pro' || userPlan === 'org_pro_3m'))) && isPlanActive
+  const dailyCap = getDailyAppLimit(userPlan, isEnterpriseMember)
+  const capHint = getCapUpgradeHint(userPlan, isEnterpriseMember)
 
   // Plan Expiry & Renewal Computations
   const planExpiryDate = planExpiresAt ? new Date(planExpiresAt) : null
   const hoursUntilPlanExpiry = planExpiryDate ? Math.round((planExpiryDate.getTime() - Date.now()) / (1000 * 60 * 60)) : null
   const isPlanExpiringSoon = !isVip && !isEnterpriseMember && hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry > 0 && hoursUntilPlanExpiry <= 48
-  const isPlanExpired = !isVip && !isEnterpriseMember && ((hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 0) || (!isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan'))
+  const isPlanExpired = !isVip && ((hoursUntilPlanExpiry !== null && hoursUntilPlanExpiry <= 0) || (!isPlanActive && userPlan !== 'none' && userPlan !== 'no_plan') || (isEnterpriseMember && (!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid')))
 
   // Browser Push Notifications State & Assistants
   const [notificationPermission, setNotificationPermission] = useState<string>('default')
@@ -429,27 +429,33 @@ export default function UserDashboard() {
     }
   }
 
-  // Org Pro upgrade (members-only plan, ₹99/30 days, 15 on-demand/week)
-  const handleOrgProUpgrade = async () => {
+  // Organization member plan checkout (₹79 Org Starter, ₹99 Org Pro, ₹289 Org Pro 3-Month)
+  const handleOrgCheckout = async (planId: 'org_starter' | 'org_pro' | 'org_pro_3m' = 'org_pro') => {
     setOrgProLoading(true)
     setOrgProError('')
     try {
       const orderRes = await fetch('/api/payment/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan_id: 'org_pro', user_id: userId, email: userEmail })
+        body: JSON.stringify({ plan_id: planId, user_id: userId, email: userEmail })
       })
       const orderData = await orderRes.json()
       if (!orderRes.ok) throw new Error(orderData.detail || 'Failed to initiate payment')
       if (typeof window === 'undefined' || !(window as any).Razorpay) {
         throw new Error('Payment gateway is still loading. Please refresh and try again.')
       }
+      const planDesc = planId === 'org_starter'
+        ? 'Org Starter (30 Days · ₹79)'
+        : planId === 'org_pro_3m'
+        ? 'Org Pro 3-Month (90 Days · ₹289)'
+        : 'Org Pro (30 Days · ₹99)'
+
       const rzp = new (window as any).Razorpay({
         key: orderData.key_id,
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'JobFlux AI',
-        description: 'Org Pro — Member Upgrade (30 Days)',
+        description: planDesc,
         image: '/images/icon.png',
         order_id: orderData.order_id,
         prefill: { email: userEmail },
@@ -463,16 +469,20 @@ export default function UserDashboard() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-                plan_id: 'org_pro',
+                plan_id: planId,
                 user_id: userId,
                 email: userEmail
               })
             })
             const verifyData = await verifyRes.json()
             if (verifyRes.ok && verifyData.verified) {
-              localStorage.setItem('user_plan', 'org_pro')
-              setUserPlan('org_pro')
-              setTaskFeedback({ type: 'success', text: 'Org Pro activated! 15 on-demand sweeps/week unlocked. Priority queue enabled.' })
+              localStorage.setItem('user_plan', planId)
+              setUserPlan(planId)
+              setIsPlanActive(true)
+              const msg = planId === 'org_starter'
+                ? 'Org Starter activated! 20 daily applications enabled with morning sweeps.'
+                : 'Org Pro activated! 55 daily applications and 15 weekly on-demand sweeps unlocked.'
+              setTaskFeedback({ type: 'success', text: msg })
               refreshAllDashboardData(userId)
             } else {
               throw new Error(verifyData.detail || 'Payment verification failed.')
@@ -495,6 +505,8 @@ export default function UserDashboard() {
       setOrgProLoading(false)
     }
   }
+
+  const handleOrgProUpgrade = () => handleOrgCheckout('org_pro')
 
   // Compute Daily Sweep Status
   useEffect(() => {
@@ -708,6 +720,22 @@ export default function UserDashboard() {
   }
 
   const handleTriggerOnDemandScout = async () => {
+    if (isEnterpriseMember && (!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid' || userPlan === 'none')) {
+      setTaskFeedback({
+        type: 'error',
+        text: 'Payment required: Organization candidates must subscribe to Org Starter (₹79) or Org Pro (₹99) to activate applications.'
+      })
+      return
+    }
+
+    if (isEnterpriseMember && userPlan === 'org_starter') {
+      setTaskFeedback({
+        type: 'error',
+        text: 'Org Starter includes scheduled morning sweeps only (0 on-demand sweeps). Upgrade to Org Pro (₹99) to unlock 15 weekly on-demand sweeps.'
+      })
+      return
+    }
+
     if (!isProfessional) {
       setProModalFeature('On-Demand Application Sweeps (Up to 5x / week)')
       setShowProModal(true)
@@ -1949,37 +1977,122 @@ export default function UserDashboard() {
 
         {/* Enterprise Member Workspace Active Callout */}
         {userRole !== 'admin' && isEnterpriseMember && (
-          <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-950/70 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-cyan-900/50 border border-cyan-700/50 light:border-cyan-300 flex items-center justify-center shrink-0">
-                <Building2 className="w-3.5 h-3.5 text-cyan-400 light:text-cyan-600" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-white light:text-zinc-900">Enterprise Workspace Active</span>
-                  <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-cyan-950 border border-cyan-700/70 text-cyan-300 light:text-cyan-700 font-semibold uppercase">
-                    {userPlan === 'org_pro' ? 'Org Pro' : 'Enterprise Base'}
+          <div className="p-4 rounded-xl bg-zinc-950/80 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex flex-col gap-3 text-xs shadow-md">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-cyan-900/50 border border-cyan-700/50 light:border-cyan-300 flex items-center justify-center shrink-0">
+                  <Building2 className="w-4 h-4 text-cyan-400 light:text-cyan-600" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-white light:text-zinc-900">Enterprise Candidate Portal</span>
+                    <span className={`text-[10px] font-mono px-2 py-0.2 rounded-full font-semibold uppercase ${
+                      !isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
+                        ? 'bg-rose-950/80 border border-rose-700/80 text-rose-300'
+                        : userPlan === 'org_starter'
+                        ? 'bg-cyan-950 border border-cyan-700/70 text-cyan-300 light:text-cyan-700'
+                        : 'bg-amber-950 border border-amber-700/70 text-amber-300 light:text-amber-700'
+                    }`}>
+                      {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
+                        ? 'Payment Required'
+                        : userPlan === 'org_starter'
+                        ? 'Org Starter (20/d)'
+                        : userPlan === 'org_pro_3m'
+                        ? 'Org Pro (3 Months · 55/d)'
+                        : 'Org Pro (55/d)'}
+                    </span>
+                  </div>
+                  <span className="text-zinc-400 light:text-zinc-600 text-[11px] font-mono block sm:inline">
+                    {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
+                      ? 'No active plan. Subscribe below to begin automated job applications (0 applications permitted until paid).'
+                      : userPlan === 'org_starter'
+                      ? 'Scheduled Morning Sweeps (06:00 AM IST) • 20 Daily Application Limit • 0 On-Demand Sweeps'
+                      : '15 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch'}
                   </span>
                 </div>
-                <span className="text-zinc-400 light:text-zinc-600 text-[11px] font-mono block sm:inline">
-                  {userPlan === 'org_pro' 
-                    ? '15 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch' 
-                    : '5 Weekly On-Demand Sweeps • 20 Daily Application Limit (Starter Tier)'}
-                </span>
               </div>
+
+              {/* If on Org Starter, offer quick upgrade to Org Pro */}
+              {isPlanActive && userPlan === 'org_starter' && (
+                <button
+                  type="button"
+                  onClick={() => handleOrgCheckout('org_pro')}
+                  disabled={orgProLoading}
+                  className="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 light:text-amber-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 shrink-0 self-end sm:self-auto"
+                  title="Upgrade to Org Pro for 55 daily applications and 15 on-demand sweeps/week"
+                >
+                  <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
+                  <span>{orgProLoading ? 'Opening…' : 'Upgrade to Org Pro (55/d · ₹99)'}</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              )}
             </div>
-            {userPlan === 'enterprise' && isPlanActive && (
-              <button
-                type="button"
-                onClick={handleOrgProUpgrade}
-                disabled={orgProLoading}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 light:text-amber-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 shrink-0 self-end sm:self-auto"
-                title="Upgrade to Org Pro for 55 daily applications and 15 on-demand sweeps/week"
-              >
-                <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                <span>{orgProLoading ? 'Opening…' : 'Upgrade to Org Pro (55/d · ₹99)'}</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
+
+            {/* If unpaid, show the 3 available organization member plans */}
+            {(!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid' || userPlan === 'none') && (
+              <div className="pt-2 border-t border-zinc-800/80 light:border-zinc-200">
+                <div className="text-[11px] font-semibold text-zinc-300 light:text-zinc-700 mb-2">
+                  Select your organization member plan to activate applications:
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-700 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-white text-xs">Org Starter</span>
+                        <span className="text-xs font-mono font-bold text-cyan-400">₹79 / mo</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-1">20 applies/day · Scheduled morning sweeps · No on-demand</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOrgCheckout('org_starter')}
+                      disabled={orgProLoading}
+                      className="mt-2.5 w-full py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition cursor-pointer"
+                    >
+                      Subscribe ₹79
+                    </button>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-amber-950/20 border border-amber-500/40 flex flex-col justify-between relative overflow-hidden">
+                    <div className="absolute top-0 right-0 bg-amber-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">
+                      POPULAR
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-amber-200 text-xs">Org Pro (1 Month)</span>
+                        <span className="text-xs font-mono font-bold text-amber-400">₹99 / mo</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly on-demand sweeps · Priority queue</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOrgCheckout('org_pro')}
+                      disabled={orgProLoading}
+                      className="mt-2.5 w-full py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition cursor-pointer"
+                    >
+                      Subscribe ₹99
+                    </button>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-700 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-white text-xs">Org Pro (3 Months)</span>
+                        <span className="text-xs font-mono font-bold text-emerald-400">₹289 / 3 mos</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly sweeps · 90-day pipeline until hired</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOrgCheckout('org_pro_3m')}
+                      disabled={orgProLoading}
+                      className="mt-2.5 w-full py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition cursor-pointer"
+                    >
+                      Subscribe ₹289
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}

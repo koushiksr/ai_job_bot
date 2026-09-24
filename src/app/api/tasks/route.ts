@@ -161,16 +161,22 @@ export async function POST(req: NextRequest) {
     const now = new Date()
     const isSuperUser = role === 'admin' || user_id === 'admin' || user_id === 'technohmsit'
     const isVip = Boolean(profile?.is_vip || profile?.vip_access || profile?.free_privilege)
-    const isEnterpriseMember = profile?.enterprise_role === 'member' || plan === 'enterprise' || plan === 'org_pro'
+    const isEnterpriseMember = profile?.enterprise_role === 'member' || Boolean(profile?.enterprise_org_id || profile?.org_id) || ['enterprise', 'org_starter', 'org_pro', 'org_pro_3m'].includes(plan)
     const isProTier = plan === 'elite' || plan === 'professional' || plan === 'vip'
     const hasActiveExpiration = profile?.plan_expires_at ? new Date(profile.plan_expires_at) > now : false
-    const isPro = isSuperUser || isVip || isEnterpriseMember || (isProTier && hasActiveExpiration)
+    const isOrgProActive = isEnterpriseMember && (plan === 'org_pro' || plan === 'org_pro_3m' || plan === 'pro') && (hasActiveExpiration || isVip)
+    const isPro = isSuperUser || isVip || isOrgProActive || (!isEnterpriseMember && isProTier && hasActiveExpiration)
 
     if (!isPro) {
+      const reason = isEnterpriseMember
+        ? (plan === 'org_starter'
+            ? 'Org Starter includes scheduled morning sweeps only (0 on-demand sweeps). Upgrade to Org Pro (₹99) to unlock 15 weekly on-demand sweeps.'
+            : 'Payment required: Please subscribe to Org Starter (₹79) or Org Pro (₹99) to activate applications.')
+        : 'On-Demand real-time job application sweeps are a Professional exclusive feature. Upgrade to trigger on-demand sweeps directly.'
       return NextResponse.json({
-        detail: 'On-Demand real-time job application sweeps are a Professional and Enterprise exclusive feature. Upgrade to trigger on-demand sweeps directly.',
+        detail: reason,
         code: 'UPGRADE_REQUIRED',
-        required_plan: 'professional'
+        required_plan: isEnterpriseMember ? 'org_pro' : 'professional'
       }, { status: 403 })
     }
 

@@ -60,25 +60,43 @@ export async function GET(req: NextRequest) {
     let verifiedPlanName = 'JobFlux 3-Day Free Access'
     let isPlanActive = true
 
-    if (rawPlan === 'org_pro') {
-      const orgProExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
-      if (orgProExpires && orgProExpires > now) {
+    const isOrgMember = Boolean(
+      profile.enterprise_role === 'member' ||
+      profile.enterprise_org_id ||
+      profile.org_id ||
+      ['enterprise', 'org_starter', 'org_pro', 'org_pro_3m'].includes(rawPlan)
+    )
+
+    if (isOrgMember) {
+      // Organization members NEVER have free trial.
+      // If they have not paid anything, they cannot apply to even one job (0 applies/day).
+      const orgExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
+      const isOrgVip = Boolean(profile.is_vip || profile.vip_access || profile.free_privilege || rawPlan === 'vip')
+
+      if (isOrgVip) {
         verifiedPlan = 'org_pro'
-        verifiedPlanName = 'JobFlux Org Pro'
+        verifiedPlanName = 'JobFlux Org Pro (VIP Active)'
         isPlanActive = true
-      } else if (profile.enterprise_role === 'member') {
-        verifiedPlan = 'enterprise'
-        verifiedPlanName = 'JobFlux Enterprise Member'
-        isPlanActive = true
+      } else if (orgExpires && orgExpires > now) {
+        if (rawPlan === 'org_starter' || rawPlan === 'starter') {
+          verifiedPlan = 'org_starter'
+          verifiedPlanName = 'JobFlux Org Starter (20/d)'
+          isPlanActive = true
+        } else if (rawPlan === 'org_pro_3m') {
+          verifiedPlan = 'org_pro_3m'
+          verifiedPlanName = 'JobFlux Org Pro (3 Months · 55/d)'
+          isPlanActive = true
+        } else {
+          verifiedPlan = 'org_pro'
+          verifiedPlanName = 'JobFlux Org Pro (55/d)'
+          isPlanActive = true
+        }
       } else {
-        verifiedPlan = 'none'
-        verifiedPlanName = 'Plan Expired (No Active Plan)'
+        // Unpaid or expired org member -> payment required, 0 applications allowed
+        verifiedPlan = 'unpaid'
+        verifiedPlanName = 'Payment Required (Org Member)'
         isPlanActive = false
       }
-    } else if (profile.enterprise_role === 'member' || rawPlan === 'enterprise') {
-      verifiedPlan = 'enterprise'
-      verifiedPlanName = 'JobFlux Enterprise Member'
-      isPlanActive = true
     } else if (rawPlan === 'none' || rawPlan === 'no_plan') {
       verifiedPlan = 'none'
       verifiedPlanName = 'No Active Plan'
@@ -108,6 +126,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    const calculatedDailyLimit = isOrgMember
+      ? (!isPlanActive ? 0 : verifiedPlan === 'org_starter' ? 20 : 55)
+      : (!isPlanActive ? 0 : verifiedPlan === 'trial' ? 10 : verifiedPlan === 'starter' ? 20 : 55)
+
     const responseData = {
       user_id: profile.user_id,
       name: profile.name || '',
@@ -123,8 +145,8 @@ export async function GET(req: NextRequest) {
       enterprise_status: profile.enterprise_status || 'active',
       plan_activated_at: profile.plan_activated_at || null,
       plan_expires_at: profile.plan_expires_at || null,
-      trial_started_at: profile.trial_started_at || null,
-      trial_expires_at: profile.trial_expires_at || null,
+      trial_started_at: isOrgMember ? null : (profile.trial_started_at || null),
+      trial_expires_at: isOrgMember ? null : (profile.trial_expires_at || null),
       is_vip: Boolean(profile.is_vip || profile.vip_access),
       last_payment_id: profile.last_payment_id || null,
       experience: profile.experience || 0,
@@ -140,8 +162,8 @@ export async function GET(req: NextRequest) {
       resume_filename: profile.resume_filename || `${userId}_Resume.pdf`,
       picture: profile.picture || profile.avatar_url || '',
       has_resume: Boolean(profile.has_resume || profile.last_resume_updated_at || (profile.resume_upload_count && profile.resume_upload_count > 0)),
-      enabled_for_daily_run: profile.enabled_for_daily_run !== false,
-      daily_application_limit: 55,
+      enabled_for_daily_run: isOrgMember ? (isPlanActive && profile.enabled_for_daily_run !== false) : (profile.enabled_for_daily_run !== false),
+      daily_application_limit: calculatedDailyLimit,
       last_login_at: profile.last_login_at || null,
       last_login_ip: profile.last_login_ip || null,
       login_count: profile.login_count || 0,

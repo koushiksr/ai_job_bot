@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'Invalid plan selected' }, { status: 400 })
     }
 
-    // Org Pro is exclusive to verified organization members (members-only banner)
-    if (plan_id === 'org_pro') {
+    // Org plans are exclusive to verified organization members (members-only upgrade)
+    if (plan_id === 'org_starter' || plan_id === 'org_pro' || plan_id === 'org_pro_3m') {
       const db = await getDb()
       const cleanEmail = ((email || '') as string).toLowerCase().trim()
       const cleanUid = ((user_id || '') as string).trim()
@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
           ...(cleanEmail ? [{ email: exactMatchCI(cleanEmail) }] : [])
         ]
       }) : null
-      if (!memberProfile?.enterprise_org_id) {
-        return NextResponse.json({ detail: 'Org Pro is available only to organization members. Join an organization first.' }, { status: 403 })
+      if (!memberProfile?.enterprise_org_id && !memberProfile?.org_id) {
+        return NextResponse.json({ detail: 'This plan is available only to organization members. Join an organization first.' }, { status: 403 })
       }
     }
 

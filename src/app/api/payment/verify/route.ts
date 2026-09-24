@@ -91,12 +91,26 @@ export async function POST(req: NextRequest) {
       query = { email: exactMatchCI(cleanEmail) }
     }
 
-    const planDisplayName = plan_id === 'org_pro' ? 'Org Pro' : plan_id.toUpperCase()
+    const planDisplayName = 
+      plan_id === 'org_starter' ? 'Org Starter' :
+      plan_id === 'org_pro' ? 'Org Pro' :
+      plan_id === 'org_pro_3m' ? 'Org Pro (3 Months)' :
+      plan_id.toUpperCase()
+
+    const resolvedDailyLimit = 
+      (plan_id === 'org_pro' || plan_id === 'org_pro_3m' || plan_id === 'pro' || plan_id === 'elite') ? 55 : 20
+
     const updateFields: any = {
       plan: plan_id,
-      plan_name: plan_id === 'org_pro' ? 'JobFlux Org Pro' : `JobFlux ${plan_id.toUpperCase()}`,
+      plan_name: 
+        plan_id === 'org_starter' ? 'JobFlux Org Starter' :
+        plan_id === 'org_pro' ? 'JobFlux Org Pro' :
+        plan_id === 'org_pro_3m' ? 'JobFlux Org Pro (3 Months)' :
+        `JobFlux ${plan_id.toUpperCase()}`,
+      daily_application_limit: resolvedDailyLimit,
       plan_activated_at: now,
       plan_expires_at: expiresAt,
+      trial_expires_at: null,
       enabled_for_daily_run: true,
       last_payment_id: razorpay_payment_id,
       last_order_id: razorpay_order_id,
