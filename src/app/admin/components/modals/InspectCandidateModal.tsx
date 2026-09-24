@@ -203,8 +203,9 @@ export default function InspectCandidateModal({
               <div className="font-mono text-xs font-bold">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
+                  const isOrgPro = isOrg && (candidate.plan === 'org_pro' || candidate.plan === 'pro')
                   const limit = isOrg 
-                    ? Math.max(55, Number(candidate.daily_application_limit) || 55) 
+                    ? (isOrgPro ? 55 : (candidate.daily_application_limit ? Math.min(20, Number(candidate.daily_application_limit)) : 20))
                     : (candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20)))
                   const todayCount = candidate.applied_today || 0
                   return (
@@ -239,8 +240,8 @@ export default function InspectCandidateModal({
               <div className="font-bold text-white light:text-zinc-900 uppercase">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
-                  if (candidate.plan === 'org_pro' || (isOrg && candidate.plan === 'pro')) return 'JobFlux Org Pro (15 Sweeps/wk)'
-                  if (candidate.plan === 'enterprise') return 'Enterprise Member (Org Cover)'
+                  if (candidate.plan === 'org_pro' || (isOrg && candidate.plan === 'pro')) return 'JobFlux Org Pro (55/d · 15 Sweeps/wk)'
+                  if (candidate.plan === 'enterprise' || isOrg) return 'Enterprise Base (Starter Tier · 20/d)'
                   return candidate.plan || 'Free'
                 })()}
               </div>
@@ -250,8 +251,9 @@ export default function InspectCandidateModal({
               <div className="font-mono font-bold text-amber-300 light:text-amber-700">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
+                  const isOrgPro = isOrg && (candidate.plan === 'org_pro' || candidate.plan === 'pro')
                   const limit = isOrg 
-                    ? Math.max(55, Number(candidate.daily_application_limit) || 55) 
+                    ? (isOrgPro ? 55 : (candidate.daily_application_limit ? Math.min(20, Number(candidate.daily_application_limit)) : 20))
                     : (candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20)))
                   return `${limit}/day ${limit >= 150 ? '(150 Max)' : ''}`
                 })()}

@@ -335,11 +335,11 @@ export default function CandidatesTab({
   const countAdminsOnly = usersList.filter(u => isAdministrativeUser(u)).length
 
   const countElite = usersList.filter(u => (u.plan || '').toLowerCase().includes('elite') || (u.plan || '').toLowerCase().includes('professional')).length
-  const countPro = usersList.filter(u => (u.plan || '').toLowerCase() === 'pro').length
-  const countStarter = usersList.filter(u => (u.plan || '').toLowerCase() === 'starter').length
-  const countTrial = usersList.filter(u => (u.plan || '').toLowerCase() === 'trial').length
-  const countEnterprise = usersList.filter(u => (u.plan || '').toLowerCase() === 'enterprise' || u.enterprise_role === 'member').length
-  const countOrgPro = usersList.filter(u => (u.plan || '').toLowerCase() === 'org_pro').length
+  const countPro = usersList.filter(u => !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'pro').length
+  const countStarter = usersList.filter(u => !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'starter').length
+  const countTrial = usersList.filter(u => !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'trial').length
+  const countEnterprise = usersList.filter(u => isOrgMemberUser(u) && (u.plan || '').toLowerCase() !== 'org_pro').length
+  const countOrgPro = usersList.filter(u => isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'org_pro').length
 
   // Filter users by search, execution status, and plan status
   const filteredUsers = usersList.filter(u => {
@@ -392,11 +392,11 @@ export default function CandidatesTab({
     if (candidateStatusFilter === 'all') return true
     if (candidateStatusFilter === 'active') return u.plan_expiry_status === 'active'
     if (candidateStatusFilter === 'elite') return (u.plan || '').toLowerCase().includes('elite') || (u.plan || '').toLowerCase().includes('professional')
-    if (candidateStatusFilter === 'pro') return (u.plan || '').toLowerCase() === 'pro'
-    if (candidateStatusFilter === 'starter') return (u.plan || '').toLowerCase() === 'starter'
-    if (candidateStatusFilter === 'trial') return (u.plan || '').toLowerCase() === 'trial'
-    if (candidateStatusFilter === 'enterprise') return (u.plan || '').toLowerCase() === 'enterprise' || u.enterprise_role === 'member'
-    if (candidateStatusFilter === 'org_pro') return (u.plan || '').toLowerCase() === 'org_pro'
+    if (candidateStatusFilter === 'pro') return !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'pro'
+    if (candidateStatusFilter === 'starter') return !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'starter'
+    if (candidateStatusFilter === 'trial') return !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'trial'
+    if (candidateStatusFilter === 'enterprise') return isOrgMemberUser(u) && (u.plan || '').toLowerCase() !== 'org_pro'
+    if (candidateStatusFilter === 'org_pro') return isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'org_pro'
     if (candidateStatusFilter === 'expiring') return u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'urgent') return u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'expired') return u.plan_expiry_status === 'expired'
@@ -1236,9 +1236,10 @@ export default function CandidatesTab({
                           ) : (() => {
                             const isOrg = isOrgMemberUser(u);
                             const planLc = (u.plan || 'trial').toLowerCase();
-                            const tierCap = isOrg ? 55 : (planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55);
+                            const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'pro');
+                            const tierCap = isOrg ? (isOrgPro ? 55 : 20) : (planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55);
                             const customLim = Number(u.daily_application_limit);
-                            const limit = isOrg ? Math.max(55, !isNaN(customLim) ? customLim : 55) : (u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap);
+                            const limit = isOrg ? (isOrgPro ? 55 : (!isNaN(customLim) && customLim > 0 ? Math.min(20, customLim) : 20)) : (u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap);
                             const appliedToday = u.applied_today || 0
                             const totalApplied = u.total_applied || u.applied_count || 0
                             const pct = Math.min(100, Math.round((appliedToday / Math.max(1, limit)) * 100))
@@ -1483,7 +1484,7 @@ export default function CandidatesTab({
                                     {u.plan === 'org_pro' || u.plan === 'pro' ? (
                                       <><span>⚡</span><span>ORG PRO</span></>
                                     ) : (
-                                      <><Building2 className="w-2.5 h-2.5" /><span>ENTERPRISE</span></>
+                                      <><Building2 className="w-2.5 h-2.5" /><span>ENTERPRISE BASE</span></>
                                     )}
                                   </span>
                                 ) : (
@@ -1504,9 +1505,10 @@ export default function CandidatesTab({
                             {(() => {
                               const isOrg = isOrgMemberUser(u);
                               const planLc = (u.plan || 'trial').toLowerCase();
-                              const tierCap = isOrg ? 55 : (planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55);
+                              const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'pro');
+                              const tierCap = isOrg ? (isOrgPro ? 55 : 20) : (planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55);
                               const customLim = Number(u.daily_application_limit);
-                              const limit = isOrg ? Math.max(55, !isNaN(customLim) ? customLim : 55) : (u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap);
+                              const limit = isOrg ? (isOrgPro ? 55 : (!isNaN(customLim) && customLim > 0 ? Math.min(20, customLim) : 20)) : (u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap);
                               return (
                                 <span 
                                   className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700/60 light:border-zinc-300"
@@ -1543,15 +1545,14 @@ export default function CandidatesTab({
                             {isOrgMemberUser(u) ? (
                               <>
                                 <optgroup label="🏢 Organization Tier Plans">
-                                  <option value="enterprise">🏢 Enterprise Member (Base Org Cover)</option>
-                                  <option value="org_pro">⚡ Org Pro Member (30d Upgrade)</option>
+                                  <option value="enterprise">🏢 Enterprise Base (Starter Tier - 20/d)</option>
+                                  <option value="org_pro">⚡ Org Pro Member (Full Tier - 55/d · 15 Sweeps/wk)</option>
                                 </optgroup>
-                                <optgroup label="Standard Individual Plans">
+                                <optgroup label="Standard Paid Individual Plans">
                                   <option value="none">No Plan (Inactive)</option>
-                                  <option value="trial">Free Trial (3 Days)</option>
-                                  <option value="starter">Starter (30d)</option>
-                                  <option value="pro">Pro (30d)</option>
-                                  <option value="elite">Professional (90d)</option>
+                                  <option value="starter">Starter (30d - 20/d)</option>
+                                  <option value="pro">Pro (30d - 55/d)</option>
+                                  <option value="elite">Professional (90d - 55/d)</option>
                                   <option value="vip">VIP Pass (3 Months / 90d)</option>
                                 </optgroup>
                               </>

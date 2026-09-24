@@ -1958,11 +1958,13 @@ export default function UserDashboard() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-semibold text-white light:text-zinc-900">Enterprise Workspace Active</span>
                   <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-cyan-950 border border-cyan-700/70 text-cyan-300 light:text-cyan-700 font-semibold uppercase">
-                    {userPlan === 'org_pro' ? 'Org Pro' : 'Enterprise'}
+                    {userPlan === 'org_pro' ? 'Org Pro' : 'Enterprise Base'}
                   </span>
                 </div>
                 <span className="text-zinc-400 light:text-zinc-600 text-[11px] font-mono block sm:inline">
-                  {userPlan === 'org_pro' ? '15' : '10'} Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch
+                  {userPlan === 'org_pro' 
+                    ? '15 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch' 
+                    : '5 Weekly On-Demand Sweeps • 20 Daily Application Limit (Starter Tier)'}
                 </span>
               </div>
             </div>
@@ -1972,10 +1974,10 @@ export default function UserDashboard() {
                 onClick={handleOrgProUpgrade}
                 disabled={orgProLoading}
                 className="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 light:text-amber-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 shrink-0 self-end sm:self-auto"
-                title="Upgrade to Org Pro for 15 on-demand sweeps/week"
+                title="Upgrade to Org Pro for 55 daily applications and 15 on-demand sweeps/week"
               >
                 <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                <span>{orgProLoading ? 'Opening…' : 'Upgrade to Org Pro (₹99)'}</span>
+                <span>{orgProLoading ? 'Opening…' : 'Upgrade to Org Pro (55/d · ₹99)'}</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             )}

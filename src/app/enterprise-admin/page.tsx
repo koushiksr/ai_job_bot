@@ -1024,17 +1024,24 @@ export default function EnterpriseAdminPortal() {
                           )}
                           {member.plan !== 'org_pro' && (
                             <div className="text-[10px] text-zinc-600 font-mono mt-1">
-                              Org base plan · free
+                              Org base plan · Starter Tier (20/d)
                             </div>
                           )}
                         </td>
 
                         {/* Today's Applications */}
                         <td className="py-3.5 px-4 text-center">
-                          <span className={`font-mono font-bold ${member.applied_today >= 55 ? 'text-amber-400 light:text-amber-600' : 'text-cyan-300 light:text-cyan-700'}`}>
-                            {member.applied_today}
-                          </span>
-                          <span className="text-zinc-600 font-mono"> / 55 max</span>
+                          {(() => {
+                            const memberCap = member.daily_application_limit || (member.plan === 'org_pro' ? 55 : 20)
+                            return (
+                              <>
+                                <span className={`font-mono font-bold ${member.applied_today >= memberCap ? 'text-amber-400 light:text-amber-600' : 'text-cyan-300 light:text-cyan-700'}`}>
+                                  {member.applied_today}
+                                </span>
+                                <span className="text-zinc-600 font-mono"> / {memberCap} max</span>
+                              </>
+                            )
+                          })()}
                           <div className="text-[10px] text-zinc-600 font-mono mt-0.5">
                             Week {member.applied_this_week || 0} · Month {member.applied_this_month || 0}
                           </div>
@@ -1045,7 +1052,7 @@ export default function EnterpriseAdminPortal() {
                           <span className="font-mono text-cyan-300 light:text-cyan-700 font-semibold">
                             {member.on_demand_runs_used}
                           </span>
-                          <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || 10} week</span>
+                          <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || (member.plan === 'org_pro' ? 15 : 5)} week</span>
                         </td>
 
                         {/* Automated Run Status (Active or Paused) */}

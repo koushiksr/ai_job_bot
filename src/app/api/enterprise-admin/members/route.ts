@@ -76,10 +76,10 @@ export async function GET(req: NextRequest) {
       const todayCount = s.last_date === todayIstStr ? (s.today || 0) : 0
 
       // Resolve effective current plan: active Org Pro purchase wins,
-      // otherwise the free org-provided Enterprise base (always active for members)
+      // otherwise the free org-provided Enterprise base (always active for members - Starter tier equivalent)
       const rawPlan = (m.plan || 'enterprise').toLowerCase()
       let effPlan = 'enterprise'
-      let effPlanName = 'JobFlux Enterprise Member'
+      let effPlanName = 'Enterprise Base (Starter Tier)'
       let effExpiresAt: any = null
       if (rawPlan === 'org_pro' || rawPlan === 'pro') {
         const exp = m.plan_expires_at ? new Date(m.plan_expires_at) : null
@@ -114,9 +114,9 @@ export async function GET(req: NextRequest) {
       const planOk =
         mPlan === 'enterprise' ||
         mPlan === 'org_pro' || // paid upgrade; expired falls back to org base cover
+        mPlan === 'trial' ||   // org members never locked to trial, covered by org base
         Boolean(m.is_vip || m.vip_access || m.free_privilege) ||
         (['starter', 'pro', 'elite', 'professional', 'paid'].includes(mPlan) && expOk(m.plan_expires_at)) ||
-        (mPlan === 'trial' && (!m.trial_expires_at || expOk(m.trial_expires_at))) ||
         mPlan === 'vip'
       if (!planOk) blockers.push(`No active plan (${mPlan})`)
 
@@ -137,11 +137,11 @@ export async function GET(req: NextRequest) {
         applied_this_month: s.this_month || 0,
         total_applied: s.total_applied || 0,
         on_demand_runs_used: onDemandUsed,
-        on_demand_quota: effPlan === 'org_pro' ? 15 : 10,
+        on_demand_quota: effPlan === 'org_pro' ? 15 : 5,
         sweep_eligible: blockers.length === 0,
         sweep_blockers: blockers,
         active_task: activeTask,
-        daily_application_limit: 55,
+        daily_application_limit: effPlan === 'org_pro' ? 55 : (m.daily_application_limit ? Math.min(20, Number(m.daily_application_limit)) : 20),
         last_applied_at: s.last_applied_at || null,
         created_at: m.created_at || null
       }

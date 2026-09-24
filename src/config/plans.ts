@@ -366,7 +366,7 @@ export function isOrgPlanId(planId?: string | null): boolean {
 export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMember = false): number {
   const p = (planId || '').toLowerCase()
   if (p === 'org_pro') return 15
-  if (p === 'enterprise' || isEnterpriseMember) return 10
+  if (p === 'enterprise' || isEnterpriseMember) return 5
   if (p === 'elite' || p === 'professional') return 10
   if (p === 'pro') return 5
   if (p === 'starter') return 3
@@ -375,12 +375,14 @@ export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMembe
 
 /**
  * Daily application cap per plan (mirrors backend db.PLAN_DAILY_CAPS).
- * Trial 10 < starter 20 < paid/enterprise 55. Hard ceiling 55 always.
+ * Trial 10 < starter/enterprise 20 < paid/org_pro 55. Hard ceiling 55 always.
+ * Enterprise Base Plan acts as the Starter pack for organization members (20 applies/day).
+ * Org Pro acts as the full upgraded tier for organization members (55 applies/day).
  */
 export function getDailyAppLimit(planId?: string | null): number {
   const p = (planId || 'trial').toLowerCase()
   if (p === 'trial') return 10
-  if (p === 'starter') return 20
+  if (p === 'starter' || p === 'enterprise') return 20
   return 55
 }
 
@@ -389,6 +391,7 @@ export function getCapUpgradeHint(planId?: string | null): string {
   const p = (planId || '').toLowerCase()
   if (p === 'trial') return 'Free trial allows 10/day — upgrade to Pro for 55/day.'
   if (p === 'starter') return 'Starter allows 20/day — upgrade to Pro for 55/day.'
+  if (p === 'enterprise') return 'Enterprise base allows 20/day — upgrade to Org Pro for 55/day and 15 sweeps/week.'
   return ''
 }
 
