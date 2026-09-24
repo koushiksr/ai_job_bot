@@ -85,8 +85,8 @@ export async function GET(req: NextRequest) {
       const isPlanValid = exp ? exp > now : false
       const isVipUser = Boolean(m.is_vip || m.vip_access || m.free_privilege)
 
-      let effPlan = 'unpaid'
-      let effPlanName = 'Unpaid Member (Payment Required)'
+      let effPlan = 'none'
+      let effPlanName = 'No Plan'
       let effExpiresAt: any = null
       let isPlanActive = false
 
@@ -119,7 +119,7 @@ export async function GET(req: NextRequest) {
       if (m.enabled_for_daily_run === false) blockers.push('Daily run paused')
       if ((m.enterprise_status || 'active') === 'disabled') blockers.push('Member disabled')
       if (!m.password || !String(m.password).trim()) blockers.push('Naukri password missing')
-      if (!isPlanActive) blockers.push('Payment required — no active paid plan')
+      if (!isPlanActive) blockers.push('No active plan')
 
       const dailyLimit = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') ? 55 : 20)
       const onDemandQuota = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') ? 15 : 0)
@@ -189,10 +189,37 @@ export async function PATCH(req: NextRequest) {
 
     const query: any = targetUserId ? { user_id: targetUserId } : { email: targetEmail }
 
-    const updateFields = {
-      enabled_for_daily_run: enabled,
-      enterprise_status: enabled ? 'active' : 'disabled',
+    const updateFields: any = {
       updated_at: new Date()
+    }
+
+    if (body.enabled !== undefined) {
+      updateFields.enabled_for_daily_run = Boolean(body.enabled)
+      updateFields.enterprise_status = Boolean(body.enabled) ? 'active' : 'disabled'
+    }
+
+    if (body.plan_id) {
+      const planId = body.plan_id
+      const days = planId === 'org_pro_3m' ? 90 : 30
+      const now = new Date()
+      if (planId === 'none' || planId === 'unpaid') {
+        updateFields.plan = 'none'
+        updateFields.plan_name = 'No Plan'
+        updateFields.plan_expires_at = null
+        updateFields.daily_application_limit = 0
+        updateFields.enabled_for_daily_run = false
+      } else {
+        updateFields.plan = planId
+        updateFields.plan_name = planId === 'org_starter'
+          ? 'JobFlux Org Starter'
+          : planId === 'org_pro_3m'
+          ? 'JobFlux Org Pro (3 Months)'
+          : 'JobFlux Org Pro'
+        updateFields.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        updateFields.daily_application_limit = planId.startsWith('org_pro') ? 55 : 20
+        updateFields.enabled_for_daily_run = true
+        updateFields.enterprise_role = 'member'
+      }
     }
 
     await db.collection('profiles').updateOne(query, { $set: updateFields })
@@ -200,10 +227,11 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({
       status: 'success',
-      message: `Member ${enabled ? 'enabled' : 'disabled'} successfully. ${enabled ? 'Automated sweeps will include this member.' : 'Future automated runs will skip this member.'}`,
+      message: body.plan_id
+        ? `Plan updated to ${updateFields.plan_name || body.plan_id} successfully.`
+        : `Member ${body.enabled ? 'enabled' : 'disabled'} successfully.`,
       user_id: targetUserId,
-      enabled_for_daily_run: enabled,
-      enterprise_status: enabled ? 'active' : 'disabled'
+      ...updateFields
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Error updating member status' }, { status: 500 })

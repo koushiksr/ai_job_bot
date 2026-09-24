@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Script from 'next/script'
 import { ThemeToggle } from '@/components/ThemeProvider'
 import {
   Building2,
@@ -27,7 +28,11 @@ import {
   X,
   Radio,
   StopCircle,
-  FileText
+  FileText,
+  MoreVertical,
+  CreditCard,
+  Crown,
+  RotateCcw
 } from 'lucide-react'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 
@@ -109,6 +114,17 @@ export default function EnterpriseAdminPortal() {
   const [inviteSubmitting, setInviteSubmitting] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
+  const [openActionMenuUserId, setOpenActionMenuUserId] = useState<string | null>(null)
+  const [paymentProcessingUserId, setPaymentProcessingUserId] = useState<string | null>(null)
+
+  // Close 3-dots dropdown menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setOpenActionMenuUserId(null)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('click', handleClickOutside)
+      return () => window.removeEventListener('click', handleClickOutside)
+    }
+  }, [])
 
   // Live Execution Log Stream State
   const [selectedLiveLog, setSelectedLiveLog] = useState<{
@@ -338,6 +354,150 @@ export default function EnterpriseAdminPortal() {
       }
     } catch (e: any) {
       setFeedback({ type: 'error', text: e.message || 'Failed to trigger task' })
+    } finally {
+      setActionLoadingId(null)
+    }
+  }
+
+  // Trigger Razorpay Payment for an Individual Candidate
+  const handlePayForMember = async (member: Member, planId: 'org_starter' | 'org_pro' | 'org_pro_3m') => {
+    setOpenActionMenuUserId(null)
+    setPaymentProcessingUserId(member.user_id)
+    setFeedback({ type: 'info', text: `Initiating payment checkout for ${member.name || member.email}...` })
+
+    try {
+      if (typeof window === 'undefined' || !(window as any).Razorpay) {
+        throw new Error('Razorpay gateway is still loading. Please refresh and try again.')
+      }
+
+      const planDisplayNames: Record<string, string> = {
+        org_starter: 'Org Starter (₹79/mo)',
+        org_pro: 'Org Pro (₹99/mo)',
+        org_pro_3m: 'Org Pro 3-Month (₹289/3 mos)'
+      }
+
+      // 1. Create Razorpay order on backend
+      const orderRes = await fetch('/api/payment/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan_id: planId,
+          user_id: member.user_id,
+          email: member.email
+        })
+      })
+
+      const orderData = await orderRes.json()
+      if (!orderRes.ok) {
+        throw new Error(orderData.detail || 'Failed to create payment order')
+      }
+
+      // 2. Launch Razorpay Checkout Modal
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'JobFlux AI',
+        description: `${planDisplayNames[planId]} for ${member.name || member.email}`,
+        image: '/images/icon.png',
+        order_id: orderData.order_id,
+        prefill: {
+          email: member.email,
+          name: member.name || member.user_id
+        },
+        theme: {
+          color: '#06b6d4'
+        },
+        handler: async (response: any) => {
+          try {
+            setFeedback({ type: 'info', text: `Verifying payment for ${member.name || member.email}...` })
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                plan_id: planId,
+                user_id: member.user_id,
+                email: member.email
+              })
+            })
+
+            const verifyData = await verifyRes.json()
+            if (verifyRes.ok && verifyData.verified) {
+              setFeedback({
+                type: 'success',
+                text: `Payment confirmed! ${planDisplayNames[planId]} successfully activated for ${member.name || member.email}.`
+              })
+              const uid = localStorage.getItem('user_id') || ''
+              const em = localStorage.getItem('user_email') || ''
+              loadAllPortalData(uid, em)
+            } else {
+              setFeedback({
+                type: 'error',
+                text: verifyData.detail || 'Payment verification failed.'
+              })
+            }
+          } catch (vErr: any) {
+            setFeedback({ type: 'error', text: `Verification error: ${vErr.message}` })
+          } finally {
+            setPaymentProcessingUserId(null)
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setPaymentProcessingUserId(null)
+          }
+        }
+      }
+
+      const rzp = new (window as any).Razorpay(options)
+      rzp.on('payment.failed', (response: any) => {
+        setPaymentProcessingUserId(null)
+        setFeedback({
+          type: 'error',
+          text: `Payment failed: ${response.error?.description || response.error?.reason || 'Cancelled'}`
+        })
+      })
+      rzp.open()
+    } catch (err: any) {
+      setPaymentProcessingUserId(null)
+      setFeedback({ type: 'error', text: err.message || 'Payment initiation failed' })
+    }
+  }
+
+  // Direct Plan Assignment (Admin Override)
+  const handleAssignPlan = async (member: Member, planId: 'org_starter' | 'org_pro' | 'org_pro_3m' | 'none') => {
+    setOpenActionMenuUserId(null)
+    setActionLoadingId(member.user_id)
+    setFeedback(null)
+
+    try {
+      const res = await fetch('/api/enterprise-admin/members', {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          target_user_id: member.user_id,
+          target_email: member.email,
+          plan_id: planId
+        })
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        setFeedback({
+          type: 'success',
+          text: `Plan updated to ${planId === 'none' ? 'No Plan' : planId} for ${member.name || member.email}.`
+        })
+        const uid = localStorage.getItem('user_id') || ''
+        const em = localStorage.getItem('user_email') || ''
+        loadAllPortalData(uid, em)
+      } else {
+        setFeedback({ type: 'error', text: data.detail || 'Failed to update plan' })
+      }
+    } catch (e: any) {
+      setFeedback({ type: 'error', text: e.message || 'Network error updating plan' })
     } finally {
       setActionLoadingId(null)
     }
@@ -962,7 +1122,7 @@ export default function EnterpriseAdminPortal() {
           </div>
 
           {/* Members Table */}
-          <div className="overflow-x-auto rounded-xl border border-zinc-900 light:border-zinc-200">
+          <div className="overflow-x-auto min-h-[380px] rounded-xl border border-zinc-900 light:border-zinc-200">
             <table className="w-full text-left text-xs">
               <thead className="bg-zinc-900/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 font-mono uppercase text-[10px] tracking-wider border-b border-zinc-900 light:border-zinc-200">
                 <tr>
@@ -985,6 +1145,8 @@ export default function EnterpriseAdminPortal() {
                   filteredMembers.map(member => {
                     const isProcessing = actionLoadingId === member.user_id
                     const isEnabled = member.enabled_for_daily_run
+                    const isActionMenuOpen = openActionMenuUserId === member.user_id
+                    const isPaying = paymentProcessingUserId === member.user_id
 
                     return (
                       <tr key={member.user_id} className="hover:bg-zinc-900/30 light:hover:bg-zinc-50 transition-colors">
@@ -1010,13 +1172,13 @@ export default function EnterpriseAdminPortal() {
                             </span>
                             <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${
                               !member.plan_active
-                                ? 'bg-rose-950/40 text-rose-300 border-rose-800/60'
+                                ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-700/60 light:border-zinc-300'
                                 : member.plan === 'org_pro' || member.plan === 'org_pro_3m'
                                 ? 'bg-amber-950/60 light:bg-amber-50 text-amber-300 light:text-amber-700 border-amber-700/60 light:border-amber-300'
                                 : 'bg-cyan-950/60 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border-cyan-800/60 light:border-cyan-300'
                             }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${member.plan_active ? 'bg-emerald-400' : 'bg-rose-500'}`} />
-                              {member.plan_name}
+                              <span className={`w-1.5 h-1.5 rounded-full ${member.plan_active ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
+                              {member.plan_active ? member.plan_name : 'No Plan'}
                             </span>
                           </div>
                           {member.plan_active && member.plan_expires_at && (
@@ -1025,8 +1187,8 @@ export default function EnterpriseAdminPortal() {
                             </div>
                           )}
                           {!member.plan_active && (
-                            <div className="text-[10px] text-rose-400/90 font-mono mt-1">
-                              Unpaid · 0 applications allowed
+                            <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono mt-1">
+                              No active plan · 0 apps allowed
                             </div>
                           )}
                         </td>
@@ -1043,7 +1205,7 @@ export default function EnterpriseAdminPortal() {
                                 }`}>
                                   {member.applied_today}
                                 </span>
-                                <span className="text-zinc-600 font-mono"> / {memberCap} max {!member.plan_active ? '(Unpaid)' : ''}</span>
+                                <span className="text-zinc-600 font-mono"> / {memberCap} max {!member.plan_active ? '(No Plan)' : ''}</span>
                               </>
                             )
                           })()}
@@ -1060,12 +1222,12 @@ export default function EnterpriseAdminPortal() {
                           <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || 0} week {member.on_demand_quota === 0 ? '(None)' : ''}</span>
                         </td>
 
-                        {/* Automated Run Status (Active, Paused, or Payment Required) */}
+                        {/* Automated Run Status */}
                         <td className="py-3.5 px-4 text-center">
                           {!member.plan_active ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-950/60 light:bg-rose-50 border border-rose-800/60 text-rose-300 light:text-rose-600 text-[10px] font-mono">
-                              <AlertCircle className="w-2.5 h-2.5 text-rose-400 shrink-0" />
-                              Payment Required
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/60 light:bg-zinc-100 border border-zinc-700/60 light:border-zinc-300 text-zinc-400 light:text-zinc-600 text-[10px] font-mono">
+                              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                              No Plan
                             </span>
                           ) : isEnabled ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/60 light:bg-emerald-50 border border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700 text-[10px] font-mono">
@@ -1073,8 +1235,8 @@ export default function EnterpriseAdminPortal() {
                               Active Runs
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-950/60 light:bg-rose-50 border border-rose-800/60 text-rose-300 light:text-rose-600 text-[10px] font-mono">
-                              <Pause className="w-2.5 h-2.5 text-rose-400 light:text-rose-600" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/80 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-400 light:text-zinc-600 text-[10px] font-mono">
+                              <Pause className="w-2.5 h-2.5 text-zinc-400 light:text-zinc-600" />
                               Paused
                             </span>
                           )}
@@ -1082,8 +1244,8 @@ export default function EnterpriseAdminPortal() {
                             Last active {member.last_applied_at ? new Date(member.last_applied_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
                           </div>
                           {!member.plan_active ? (
-                            <div className="text-[10px] font-mono mt-1 text-rose-400/90 flex items-center justify-center gap-1">
-                              <span>Not queued: Payment required</span>
+                            <div className="text-[10px] font-mono mt-1 text-zinc-500 light:text-zinc-600 flex items-center justify-center gap-1">
+                              <span>Not queued: No active plan</span>
                             </div>
                           ) : member.sweep_eligible === false ? (
                             <div className="text-[10px] font-mono mt-1 text-amber-300 light:text-amber-700 flex items-center justify-center gap-1" title={(member.sweep_blockers || []).join('; ')}>
@@ -1098,7 +1260,7 @@ export default function EnterpriseAdminPortal() {
                           )}
                         </td>
 
-                        {/* Action Buttons: Enable/Disable + Trigger On-Demand */}
+                        {/* Action Buttons: Enable/Disable + Trigger On-Demand + Three-Dots Menu */}
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             {/* Toggle Enable/Disable Button */}
@@ -1110,17 +1272,17 @@ export default function EnterpriseAdminPortal() {
                                   ? 'bg-zinc-900 light:bg-zinc-100 hover:bg-rose-950/50 border-zinc-800 light:border-zinc-200 hover:border-rose-700/60 text-zinc-300 light:text-zinc-700 hover:text-rose-300'
                                   : 'bg-emerald-950/40 hover:bg-emerald-900/50 border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700'
                               }`}
-                              title={!member.plan_active ? 'Payment required: subscribe to a plan to enable runs' : isEnabled ? 'Pause candidate from automated daily runs' : 'Enable candidate for automated daily runs'}
+                              title={!member.plan_active ? 'No active plan: assign or pay for a plan to enable runs' : isEnabled ? 'Pause candidate from automated daily runs' : 'Enable candidate for automated daily runs'}
                             >
                               {isEnabled ? (
                                 <>
                                   <Pause className="w-3 h-3 text-rose-400 light:text-rose-600" />
-                                  <span>Pause Daily Run</span>
+                                  <span>Pause</span>
                                 </>
                               ) : (
                                 <>
                                   <Play className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
-                                  <span>Resume Daily Run</span>
+                                  <span>Resume</span>
                                 </>
                               )}
                             </button>
@@ -1135,7 +1297,7 @@ export default function EnterpriseAdminPortal() {
                               <span>Live Log</span>
                             </button>
 
-                            {/* On-Demand Sweep Button — blocked with live status while member has an active task */}
+                            {/* On-Demand Sweep Button */}
                             {member.active_task ? (
                               <button
                                 type="button"
@@ -1146,8 +1308,8 @@ export default function EnterpriseAdminPortal() {
                                     : 'bg-sky-950/50 border-sky-800/60 text-sky-300'
                                 }`}
                                 title={member.active_task.status === 'running'
-                                  ? 'Sweep is RUNNING live right now — open Live Log to watch. Button unlocks when it finishes.'
-                                  : `Sweep queued at position #${member.active_task.queue_position ?? '?'} — starts automatically in order. Button unlocks when it finishes.`}
+                                  ? 'Sweep is RUNNING live right now — open Live Log to watch.'
+                                  : `Sweep queued at position #${member.active_task.queue_position ?? '?'}.`}
                               >
                                 {member.active_task.status === 'running' ? (
                                   <>
@@ -1168,7 +1330,7 @@ export default function EnterpriseAdminPortal() {
                                 className="px-2.5 py-1 rounded-lg bg-cyan-950/60 light:bg-cyan-50 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
                                 title={
                                   !member.plan_active
-                                    ? 'Payment required — member has not purchased an active plan'
+                                    ? 'No active plan — assign or pay for a plan'
                                     : (member.on_demand_quota || 0) === 0
                                     ? 'Org Starter plan includes scheduled morning sweeps only (upgrade to Org Pro for on-demand)'
                                     : org?.status === 'disabled'
@@ -1180,6 +1342,148 @@ export default function EnterpriseAdminPortal() {
                                 <span>On-Demand</span>
                               </button>
                             )}
+
+                            {/* Three Dots Menu for Individual Payments & Plan Assignment */}
+                            <div className="relative">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setOpenActionMenuUserId(isActionMenuOpen ? null : member.user_id)
+                                }}
+                                disabled={isProcessing || isPaying}
+                                className={`p-1.5 rounded-lg border text-xs transition-colors cursor-pointer flex items-center justify-center ${
+                                  isActionMenuOpen
+                                    ? 'bg-zinc-800 text-white border-zinc-600'
+                                    : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border-zinc-800 light:border-zinc-200 text-zinc-400 hover:text-white light:hover:text-zinc-900'
+                                }`}
+                                title="Candidate options: Pay subscription or configure plan"
+                              >
+                                {isPaying ? (
+                                  <RefreshCw className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+                                ) : (
+                                  <MoreVertical className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+
+                              {/* Dropdown Menu */}
+                              {isActionMenuOpen && (
+                                <div
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="absolute right-0 top-full mt-1.5 w-72 rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 p-2 divide-y divide-zinc-900 light:divide-zinc-100 text-left font-sans"
+                                >
+                                  {/* Candidate Header */}
+                                  <div className="px-2 pb-2">
+                                    <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 light:text-zinc-600">
+                                      Candidate Subscription
+                                    </div>
+                                    <div className="text-xs font-semibold text-white light:text-zinc-900 truncate">
+                                      {member.name || member.email}
+                                    </div>
+                                    <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono mt-0.5 flex items-center justify-between">
+                                      <span>Current: <span className="text-cyan-400 font-medium">{member.plan_active ? member.plan_name : 'No Plan'}</span></span>
+                                      {member.plan_active && member.plan_expires_at && (
+                                        <span className="text-zinc-500 text-[10px]">
+                                          till {new Date(member.plan_expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Pay 1-by-1 Section */}
+                                  <div className="py-1.5 space-y-1">
+                                    <div className="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-semibold flex items-center gap-1">
+                                      <CreditCard className="w-3 h-3" />
+                                      <span>Pay Plan (Razorpay 1-by-1)</span>
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handlePayForMember(member, 'org_starter')}
+                                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-900 light:hover:bg-zinc-100 text-xs text-zinc-200 light:text-zinc-800 flex items-center justify-between group transition-colors cursor-pointer"
+                                    >
+                                      <div>
+                                        <div className="font-medium group-hover:text-cyan-300">Org Starter</div>
+                                        <div className="text-[10px] text-zinc-500 font-mono">20 apps/day · 30 Days</div>
+                                      </div>
+                                      <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
+                                        ₹79
+                                      </span>
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handlePayForMember(member, 'org_pro')}
+                                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-900 light:hover:bg-zinc-100 text-xs text-zinc-200 light:text-zinc-800 flex items-center justify-between group transition-colors cursor-pointer"
+                                    >
+                                      <div>
+                                        <div className="font-medium flex items-center gap-1 group-hover:text-amber-300">
+                                          <Crown className="w-3 h-3 text-amber-400" />
+                                          <span>Org Pro</span>
+                                        </div>
+                                        <div className="text-[10px] text-zinc-500 font-mono">55 apps/day · 15 Sweeps · 30 Days</div>
+                                      </div>
+                                      <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
+                                        ₹99
+                                      </span>
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handlePayForMember(member, 'org_pro_3m')}
+                                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-900 light:hover:bg-zinc-100 text-xs text-zinc-200 light:text-zinc-800 flex items-center justify-between group transition-colors cursor-pointer"
+                                    >
+                                      <div>
+                                        <div className="font-medium flex items-center gap-1 group-hover:text-amber-300">
+                                          <Crown className="w-3 h-3 text-amber-400" />
+                                          <span>Org Pro (3 Months)</span>
+                                        </div>
+                                        <div className="text-[10px] text-zinc-500 font-mono">55 apps/day · 15 Sweeps · 90 Days</div>
+                                      </div>
+                                      <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
+                                        ₹289
+                                      </span>
+                                    </button>
+                                  </div>
+
+                                  {/* Direct Assign Override */}
+                                  <div className="pt-1.5 space-y-0.5">
+                                    <div className="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-zinc-500 light:text-zinc-600 font-semibold">
+                                      Admin Direct Override
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleAssignPlan(member, 'org_starter')}
+                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                    >
+                                      Assign Starter (20 apps/d)
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleAssignPlan(member, 'org_pro')}
+                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                    >
+                                      Assign Pro (55 apps/d)
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleAssignPlan(member, 'org_pro_3m')}
+                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                    >
+                                      Assign Pro 3-Month (55 apps/d)
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleAssignPlan(member, 'none')}
+                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-rose-950/30 text-[11px] text-zinc-400 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1"
+                                    >
+                                      <RotateCcw className="w-3 h-3 text-zinc-400" />
+                                      <span>Reset to No Plan</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -1299,6 +1603,9 @@ export default function EnterpriseAdminPortal() {
           </div>
         </div>
       )}
+
+      {/* Razorpay Checkout Script */}
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
     </div>
   )
 }
