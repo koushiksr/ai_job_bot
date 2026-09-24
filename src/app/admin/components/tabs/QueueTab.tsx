@@ -18,7 +18,8 @@ import {
   Clock,
   Trash2,
   Zap,
-  Sparkles
+  Sparkles,
+  Server
 } from 'lucide-react'
 import { AdminQueueMetrics, AdminWorkerStatus } from '../../types'
 
@@ -65,6 +66,20 @@ export default function QueueTab({
 }: QueueTabProps) {
   const [selectedCandidate, setSelectedCandidate] = React.useState<string>('')
   const [forceTrigger, setForceTrigger] = React.useState<boolean>(false)
+  // Worker fleet (parallel daemons) — self-contained, refreshes every 15s
+  const [fleet, setFleet] = React.useState<{ online_count: number; total_seen: number; pending_tasks: number; workers: any[] } | null>(null)
+  React.useEffect(() => {
+    let alive = true
+    const load = () => {
+      fetch('/api/admin/workers')
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => { if (alive && data) setFleet(data) })
+        .catch(() => {})
+    }
+    load()
+    const t = setInterval(load, 15000)
+    return () => { alive = false; clearInterval(t) }
+  }, [])
 
   // Deduplicated and sorted list of available candidates
   const candidateOptions = React.useMemo(() => {
@@ -371,6 +386,58 @@ export default function QueueTab({
             <StopCircle className="w-3.5 h-3.5" />
             <span>Abort Active Run</span>
           </button>
+        )}
+      </div>
+
+      {/* Worker Fleet — every running daemon (pool slots + machines) */}
+      <div className="p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2.5">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <Server className="w-4 h-4 text-cyan-400 light:text-cyan-600" />
+            <span className="text-xs font-bold text-white light:text-zinc-900">Worker Fleet</span>
+            {fleet ? (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700">
+                {fleet.online_count} online / {fleet.total_seen} seen · {fleet.pending_tasks} pending
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono text-zinc-500">loading…</span>
+            )}
+          </div>
+          <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">pulse every 30s · stale after 120s · auto-refresh 15s</span>
+        </div>
+        {fleet && fleet.workers.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {fleet.workers.map((w: any) => (
+              <div
+                key={w.worker_id}
+                className={`p-2.5 rounded-xl border flex items-center gap-2.5 ${
+                  w.online
+                    ? 'bg-emerald-950/20 border-emerald-800/40 light:border-emerald-300'
+                    : 'bg-zinc-900/50 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 opacity-70'
+                }`}
+                title={`${w.worker_id}\nPlatform: ${w.platform || '—'}\nStarted: ${w.started_at || '—'}`}
+              >
+                <span className={`w-2 h-2 rounded-full shrink-0 ${w.online ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-600'}`} />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-mono font-bold text-zinc-100 light:text-zinc-900 truncate">
+                    {w.hostname || 'unknown-host'}{w.pool_slot && w.pool_slot !== 'solo' ? ` · W${w.pool_slot}` : ''}
+                  </div>
+                  <div className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 truncate">
+                    {w.online
+                      ? w.current_task_user
+                        ? `running ${w.current_task_user} · pulse ${w.heartbeat_age_s}s ago`
+                        : `idle · pulse ${w.heartbeat_age_s}s ago`
+                      : `offline · last pulse ${w.heartbeat_age_s}s ago`}
+                  </div>
+                </div>
+                <span className="text-[9px] font-mono text-zinc-500 light:text-zinc-600 shrink-0">pid {w.pid ?? '—'}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[11px] text-zinc-500 light:text-zinc-600 font-mono">
+            No worker heartbeats yet — start <span className="text-zinc-300 light:text-zinc-800">worker_daemon.bat</span> (set WORKER_COUNT=2/3 for parallel).
+          </p>
         )}
       </div>
 
