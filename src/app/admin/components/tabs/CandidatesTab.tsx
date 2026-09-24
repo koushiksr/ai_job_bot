@@ -346,6 +346,7 @@ export default function CandidatesTab({
   const countOrgPro = usersList.filter(u => isOrgMemberUser(u) && ['org_pro', 'org_pro_3m'].includes((u.plan || '').toLowerCase())).length
   const countOrgStarter = usersList.filter(u => isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'org_starter').length
   const countOrgUnpaid = usersList.filter(u => isOrgMemberUser(u) && !['org_pro', 'org_pro_3m', 'org_starter'].includes((u.plan || '').toLowerCase())).length
+  const countEnterprise = usersList.filter(u => isOrgMemberUser(u) || (u.plan || '').toLowerCase().includes('enterprise') || (u.plan || '').toLowerCase().startsWith('org_')).length
 
   // Filter users by search, execution status, and plan status
   const filteredUsers = usersList.filter(u => {
@@ -403,7 +404,8 @@ export default function CandidatesTab({
     if (candidateStatusFilter === 'trial') return !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'trial'
     if (candidateStatusFilter === 'org_pro') return isOrgMemberUser(u) && ['org_pro', 'org_pro_3m'].includes((u.plan || '').toLowerCase())
     if (candidateStatusFilter === 'org_starter') return isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'org_starter'
-    if (candidateStatusFilter === 'org_unpaid' || candidateStatusFilter === 'enterprise') return isOrgMemberUser(u) && !['org_pro', 'org_pro_3m', 'org_starter'].includes((u.plan || '').toLowerCase())
+    if (candidateStatusFilter === 'enterprise') return isOrgMemberUser(u) || (u.plan || '').toLowerCase().includes('enterprise') || (u.plan || '').toLowerCase().startsWith('org_')
+    if (candidateStatusFilter === 'org_unpaid') return isOrgMemberUser(u) && !['org_pro', 'org_pro_3m', 'org_starter'].includes((u.plan || '').toLowerCase())
     if (candidateStatusFilter === 'expiring') return u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'urgent') return u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'expired') return u.plan_expiry_status === 'expired'
@@ -838,8 +840,10 @@ export default function CandidatesTab({
                   { key: 'pro', label: 'Pro (30d)', count: countPro },
                   { key: 'starter', label: 'Starter (30d)', count: countStarter },
                   { key: 'trial', label: 'Trial', count: countTrial },
-                  { key: 'enterprise', label: 'Enterprise', count: countEnterprise, color: 'text-cyan-400 light:text-cyan-700' },
+                  { key: 'enterprise', label: 'All Org Members', count: countEnterprise, color: 'text-cyan-400 light:text-cyan-700' },
                   { key: 'org_pro', label: 'Org Pro', count: countOrgPro, color: 'text-amber-400 light:text-amber-700' },
+                  { key: 'org_starter', label: 'Org Starter', count: countOrgStarter, color: 'text-cyan-400 light:text-cyan-700' },
+                  { key: 'org_unpaid', label: 'Org No Plan', count: countOrgUnpaid, color: 'text-zinc-400 light:text-zinc-600' },
                   { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400 light:text-emerald-700' },
                   { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-400 light:text-amber-700' },
                   { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400 light:text-rose-600' },
