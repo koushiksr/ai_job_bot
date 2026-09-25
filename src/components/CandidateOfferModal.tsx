@@ -28,15 +28,15 @@ export default function CandidateOfferModal({
 
   // Fallback default offer if no specific assigned offer was provided
   const activeOffer = offer || {
-    id: 'flash-pro-50',
-    promo_code: 'FAST50',
-    preset_id: 'flash_50',
-    offer_title: 'JobFlux Autonomous Elite Dispatcher',
-    discount_badge: '⚡ 50% OFF VIP ACCESS',
-    original_price: '₹199',
-    discounted_price: '₹99',
-    claim_url: '/pricing?promo=FAST50',
-    custom_message: 'Exclusive candidate promotional discount for unlimited daily autonomous job applications and ATS optimization.',
+    id: 'pro-399',
+    promo_code: 'PRO399',
+    preset_id: 'pro_399',
+    offer_title: 'JobFlux Autonomous Pro Dispatcher',
+    discount_badge: '⚡ ₹100 OFF PRO ACCESS',
+    original_price: '₹499',
+    discounted_price: '₹399',
+    claim_url: '/pricing?promo=PRO399',
+    custom_message: 'Exclusive candidate promotional discount for continuous daily autonomous job applications and ATS optimization.',
     created_at: new Date().toISOString()
   }
 

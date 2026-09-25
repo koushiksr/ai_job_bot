@@ -424,7 +424,7 @@ export default function BeginnerOnboardingGuide({
                   className="px-3.5 py-1.5 rounded-lg bg-white light:bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 light:hover:bg-zinc-100 text-black light:text-zinc-900 light:text-zinc-900 font-semibold text-xs transition-colors flex items-center gap-1.5 shrink-0"
                 >
                   <Zap className="w-3 h-3 fill-black" />
-                  <span>Upgrade to Pro (₹199 / mo)</span>
+                  <span>Upgrade to Pro (from ₹399)</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>

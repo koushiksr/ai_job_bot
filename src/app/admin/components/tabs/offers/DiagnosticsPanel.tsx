@@ -447,13 +447,13 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => {
-                        setCustomPushTitle('Free Milestone Reached · Save 90%')
-                        setCustomPushMessage('47 jobs applied! Upgrade to Professional for ₹199 to unlock 1,800+ applications & skip review queues.')
+                        setCustomPushTitle('Free Milestone Reached · Save with Pro')
+                        setCustomPushMessage('47 jobs applied! Upgrade to Pro for ₹399 to unlock continuous applications & skip review queues.')
                         setCustomPushUrl('/pricing?promo=WELCOMEPRO')
                       }}
                       className="p-2 rounded-lg bg-black light:bg-white hover:bg-zinc-800 light:hover:bg-zinc-200 border border-amber-500/40 light:border-amber-300 text-left text-xs transition-colors cursor-pointer"
                     >
-                      <span className="font-semibold text-amber-300 light:text-amber-700 block text-[11px]">Upgrade Pass (₹199)</span>
+                      <span className="font-semibold text-amber-300 light:text-amber-700 block text-[11px]">Upgrade Pass (₹399)</span>
                       <span className="text-[10px] text-zinc-400 light:text-zinc-600 leading-snug line-clamp-1">Milestone + 90% Discount</span>
                     </button>
                   </div>

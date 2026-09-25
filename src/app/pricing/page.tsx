@@ -22,7 +22,8 @@ import {
   Sparkles,
   LogOut,
   ShieldCheck,
-  Lock
+  Lock,
+  Gift
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
@@ -43,6 +44,7 @@ export default function PricingPage() {
   const [currentUserEmail, setCurrentUserEmail] = useState('')
   const [currentUserId, setCurrentUserId] = useState('')
   const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const [isOrgMember, setIsOrgMember] = useState(false)
 
   // Enterprise & Bulk Inquiry Modal State
   const [showEnterpriseModal, setShowEnterpriseModal] = useState(false)
@@ -158,6 +160,11 @@ export default function PricingPage() {
     if (typeof window !== 'undefined') {
       const email = localStorage.getItem('user_email') || ''
       const uid = localStorage.getItem('user_id') || ''
+      const plan = (localStorage.getItem('user_plan') || '').toLowerCase()
+      const role = (localStorage.getItem('user_role') || '').toLowerCase()
+      if (plan.startsWith('org_') || plan === 'enterprise' || role === 'enterprise_member') {
+        setIsOrgMember(true)
+      }
       if (email || uid) {
         setIsLoggedIn(true)
         setCurrentUserEmail(email)
@@ -418,6 +425,17 @@ export default function PricingPage() {
 
           <div className="flex items-center gap-2.5 sm:gap-4">
             <ThemeToggle />
+
+            {/* Viral Refer & Earn Button */}
+            <Link
+              href="/profile#referrals"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 transition-all shrink-0 shadow-sm"
+              title="Refer friends & get ₹200 cash direct to Bank or UPI"
+            >
+              <Gift className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Refer & Earn ₹200</span>
+            </Link>
+
             <button
               onClick={() => setIsHelpOpen(true)}
               className="text-xs text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors font-medium cursor-pointer flex items-center gap-1 shrink-0"
@@ -479,6 +497,30 @@ export default function PricingPage() {
       {/* Hero & Auth0 Pricing Header */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:px-8 md:py-16 space-y-12 z-10">
         
+        {/* Org Member Subsidized Plan Banner & Redirect Notice */}
+        {isOrgMember && (
+          <div className="max-w-4xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-zinc-900 to-black border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg animate-in fade-in">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  🏛️ Organization Member
+                </span>
+                <span className="text-xs font-semibold text-white">Subsidized Rates Active</span>
+              </div>
+              <p className="text-xs text-zinc-300">
+                You belong to an affiliated organization! Exclusive plans starting from <strong className="text-emerald-400">₹79 (Starter)</strong> and <strong className="text-emerald-400">₹99 (Org Pro)</strong> are activated directly in your Candidate Dashboard.
+              </p>
+            </div>
+            <Link
+              href="/dashboard#plans"
+              className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-md"
+            >
+              <span>Go to Candidate Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+
         {/* Title */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <h1 className="text-3xl sm:text-5xl font-semibold text-white light:text-zinc-900 tracking-tight">

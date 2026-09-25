@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Pricing & Plans | JobFlux AI Autonomous Job Apply Bot',
   description:
-    'Start for free (₹0, no credit card required). Upgrade to 1-Month Essentials (₹99, was ₹1,000) or 3-Month Professional (₹199, was ₹2,500 / 1,800+ applications) for daily 6 AM automated recruiter applications.',
+    'Start for free (₹0, no credit card required). Upgrade to 1-Month Pro (₹499) or 3-Month Pro (₹1,299) for continuous daily automated recruiter applications.',
   keywords: [
     'job apply bot pricing',
     'auto apply bot cost',

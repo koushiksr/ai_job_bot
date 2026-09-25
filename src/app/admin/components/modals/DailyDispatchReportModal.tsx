@@ -224,9 +224,8 @@ export default function DailyDispatchReportModal({
               className="w-full px-3 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
             >
               <option value="auto">Auto-Detect Active or Best Tier Offer</option>
-              <option value="vip299">3-Month VIP Professional Extension (₹299 / 90d)</option>
-              <option value="welcomepro">1-Month Essentials Unlimited (₹149 / 30d)</option>
-              <option value="choc29">1-Month Starter Deal (₹29 / 30d)</option>
+              <option value="vip299">3-Month Pro Saver (₹999 / 90d)</option>
+              <option value="welcomepro">1-Month Pro Special Pass (₹399 / 30d)</option>
               <option value="none">No Offer (Stats &amp; Companies Only)</option>
             </select>
           </div>

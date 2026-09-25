@@ -1511,8 +1511,8 @@ export default function CandidatesTab({
                                   <option value="org_pro_3m">🚀 Org Pro 3-Month (90d · ₹289 · 55/d · 15 Sweeps/wk)</option>
                                 </optgroup>
                                 <optgroup label="Standard Paid Individual Plans">
-                                  <option value="pro">Pro (30d - ₹399 · 55/d)</option>
-                                  <option value="elite">Professional (90d - ₹199 · 55/d)</option>
+                                  <option value="pro">Pro (30d - ₹499 · 55/d)</option>
+                                  <option value="elite">Pro 3 Months (90d - ₹1,299 · 55/d)</option>
                                 </optgroup>
                               </>
                             ) : (
@@ -1521,8 +1521,8 @@ export default function CandidatesTab({
                                   <option value="none">No Plan (Inactive)</option>
                                   <option value="trial">Free Trial (3 Days)</option>
                                   <option value="starter">Starter (30d - 20/d)</option>
-                                  <option value="pro">Pro (30d - ₹399 · 55/d)</option>
-                                  <option value="elite">Professional (90d · 55/d)</option>
+                                  <option value="pro">Pro (30d - ₹499 · 55/d)</option>
+                                  <option value="elite">Pro 3 Months (90d - ₹1,299 · 55/d)</option>
                                 </optgroup>
                                 <optgroup label="🏢 Assign to Organization Tier">
                                   <option value="none">⚠️ Org Unpaid (Payment Required - 0/d)</option>

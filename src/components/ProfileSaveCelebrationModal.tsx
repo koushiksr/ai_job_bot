@@ -133,12 +133,12 @@ export default function ProfileSaveCelebrationModal({
 
               <div>
                 <h4 className="text-sm sm:text-base font-bold text-white light:text-zinc-900 flex items-center gap-2">
-                  <span>Upgrade to Professional for 10x More Interview Calls</span>
-                  <span className="text-xs line-through text-zinc-500 light:text-zinc-600 font-mono">₹1,000</span>
-                  <span className="text-sm font-bold text-white light:text-zinc-900 font-mono">₹199 / mo</span>
+                  <span>Upgrade to Pro for 10x More Interview Calls</span>
+                  <span className="text-xs line-through text-zinc-500 light:text-zinc-600 font-mono">₹499</span>
+                  <span className="text-sm font-bold text-white light:text-zinc-900 font-mono">₹399 / mo</span>
                 </h4>
                 <p className="text-[11px] text-zinc-400 light:text-zinc-600 mt-1 leading-relaxed">
-                  Free Access includes up to 150 applications across 3 days (50/day). Professional unlocks <strong className="text-white light:text-zinc-900 font-medium">1,800+ continuous applications</strong>, zero-queue recruiter priority delivery, and the FAANG ATS Resume Studio.
+                  Free Access includes daily automated applications. Pro unlocks <strong className="text-white light:text-zinc-900 font-medium">up to 55 verified applies/day</strong>, zero-queue recruiter priority delivery, and Harvard ATS Resume Studio.
                 </p>
               </div>
 
@@ -149,7 +149,7 @@ export default function ProfileSaveCelebrationModal({
                   className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
                   <Zap className="w-3.5 h-3.5 fill-black" />
-                  <span>Claim Welcome Pass for ₹199 (Save 80%)</span>
+                  <span>Claim Welcome Pass for ₹399</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
                 <button

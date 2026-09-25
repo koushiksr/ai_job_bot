@@ -493,7 +493,7 @@ export default function ResumeBuilderPage() {
             PDF Export, Print Preview, and Cloud Bot Synchronization are exclusively reserved for <strong>Professional Plan</strong> members.
           </p>
           <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px' }}>
-            Upgrade today for ₹199 to unlock unlimited, unwatermarked PDF downloads and 1,800+ automated job applications.
+            Upgrade today to unlock unlimited, unwatermarked PDF downloads and continuous automated job applications.
           </p>
           <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#000000', fontFamily: 'monospace' }}>
             https://jobfluxai.vercel.app/pricing

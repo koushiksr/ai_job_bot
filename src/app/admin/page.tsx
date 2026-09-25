@@ -920,26 +920,19 @@ export default function AdminDashboard() {
       let offerPayload: any = {}
       if (offerOverride) {
         offerPayload = offerOverride
-      } else if (dispatchReportOfferChoice === 'vip299') {
+      } else if (dispatchReportOfferChoice === 'vip299' || dispatchReportOfferChoice === 'pro999') {
         offerPayload = {
-          promoCode: 'VIP299',
-          discountedPrice: '₹299',
-          originalPrice: '₹2,500',
-          offerTitle: '3-Month VIP Professional Extension'
+          promoCode: 'PRO999',
+          discountedPrice: '₹999',
+          originalPrice: '₹1,299',
+          offerTitle: '3-Month Pro Comprehensive Saver'
         }
-      } else if (dispatchReportOfferChoice === 'welcomepro') {
+      } else if (dispatchReportOfferChoice === 'welcomepro' || dispatchReportOfferChoice === 'pro399') {
         offerPayload = {
           promoCode: 'WELCOMEPRO',
-          discountedPrice: '₹149',
-          originalPrice: '₹999',
-          offerTitle: '1-Month Essentials Unlimited Access'
-        }
-      } else if (dispatchReportOfferChoice === 'choc29') {
-        offerPayload = {
-          promoCode: 'CHOC29',
-          discountedPrice: '₹29',
+          discountedPrice: '₹399',
           originalPrice: '₹499',
-          offerTitle: '1-Month Starter Direct Activation'
+          offerTitle: '1-Month Pro Special Pass'
         }
       }
 

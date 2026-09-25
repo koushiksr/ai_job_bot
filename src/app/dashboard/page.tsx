@@ -41,7 +41,8 @@ import {
   Radio,
   Users,
   Layers,
-  CreditCard
+  CreditCard,
+  Gift
 } from 'lucide-react'
 import Link from 'next/link'
 import CandidateProfileEditor from '@/components/CandidateProfileEditor'
@@ -1424,6 +1425,18 @@ export default function UserDashboard() {
           {/* RIGHT: Actions, Telemetry Refresh & Controls */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <ThemeToggle />
+
+            {/* Viral Refer & Earn Button */}
+            <Link
+              href="/profile#referrals"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 transition-all shrink-0 shadow-sm"
+              title="Refer friends & get ₹200 cash direct to Bank or UPI"
+            >
+              <Gift className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="hidden sm:inline">Refer & Earn ₹200</span>
+              <span className="sm:hidden text-[11px] font-bold">₹200</span>
+            </Link>
+
             {/* Candidate Offer Button */}
             {userRole !== 'admin' && (
               <button
@@ -1461,6 +1474,15 @@ export default function UserDashboard() {
                   <Sparkles className="w-3.5 h-3.5 fill-black/20" />
                   <span>Claim Deal ({activeOfferBanner.discounted_price})</span>
                 </Link>
+              ) : isEnterpriseMember ? (
+                <a
+                  href="#plans"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0 shadow-sm"
+                  title="Activate Org Member Plan"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Org Plans (from ₹79)</span>
+                </a>
               ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
                 <Link
                   href="/pricing"
@@ -1477,7 +1499,7 @@ export default function UserDashboard() {
                   title="Upgrade to Professional"
                 >
                   <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                  <span>Upgrade to Professional (₹199)</span>
+                  <span>Upgrade to 3-Month Pro</span>
                 </Link>
               ) : (
                 <Link
@@ -2435,10 +2457,10 @@ export default function UserDashboard() {
               </div>
             </div>
             <Link
-              href="/pricing?plan=elite"
+              href={isEnterpriseMember ? '#plans' : '/pricing'}
               className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : userPlan === 'pro' ? 'Upgrade to Pro (₹199)' : 'Upgrade Plan'}</span>
+              <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : userPlan === 'pro' ? 'Upgrade to 3-Month Pro' : isEnterpriseMember ? 'View Org Plans' : 'Upgrade Plan'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

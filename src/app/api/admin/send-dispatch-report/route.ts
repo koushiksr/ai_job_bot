@@ -493,10 +493,10 @@ async function dispatchReportForCandidate(
     is_expired: { $ne: true }
   })
 
-  const promoCode = offerOverrides.promoCode || activeAssignedOffer?.promo_code || (isPaidPlan ? 'VIP299' : 'WELCOMEPRO')
-  const discountedPrice = offerOverrides.discountedPrice || activeAssignedOffer?.discounted_price || (isPaidPlan ? '₹299' : '₹149')
-  const originalPrice = offerOverrides.originalPrice || activeAssignedOffer?.original_price || (isPaidPlan ? '₹2,500' : '₹999')
-  const offerTitle = offerOverrides.offerTitle || activeAssignedOffer?.title || (isPaidPlan ? '3-Month VIP Professional Extension' : '1-Month Essentials Unlimited Access')
+  const promoCode = offerOverrides.promoCode || activeAssignedOffer?.promo_code || (isPaidPlan ? 'PRO999' : 'WELCOMEPRO')
+  const discountedPrice = offerOverrides.discountedPrice || activeAssignedOffer?.discounted_price || (isPaidPlan ? '₹999' : '₹399')
+  const originalPrice = offerOverrides.originalPrice || activeAssignedOffer?.original_price || (isPaidPlan ? '₹1,299' : '₹499')
+  const offerTitle = offerOverrides.offerTitle || activeAssignedOffer?.title || (isPaidPlan ? '3-Month Pro Comprehensive Saver' : '1-Month Pro Special Pass')
 
   let emailResult: any = null
   let pushResult: any = null

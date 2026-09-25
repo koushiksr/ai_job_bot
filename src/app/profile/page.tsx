@@ -11,7 +11,8 @@ import {
   LogOut,
   Crown,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Gift
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
@@ -258,18 +259,40 @@ export default function CandidateProfilePage() {
           </div>
         )}
 
-        {/* Full Visual Candidate Profile & Credentials Builder */}
-        <CandidateProfileEditor
-          userId={userId}
-          isAdmin={false}
-          onSaveSuccess={() => {
-            setShowSaveBanner(true)
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-          }}
-        />
+        {/* Quick Section Anchor Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <a
+            href="#referrals"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 light:text-emerald-700 font-semibold hover:bg-emerald-500/20 transition-all shrink-0 shadow-sm"
+          >
+            <Gift className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🎁 Refer & Earn ₹200 (Bank / UPI)</span>
+          </a>
+          <a
+            href="#editor"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 font-medium hover:border-zinc-700 transition-all shrink-0"
+          >
+            <User className="w-3.5 h-3.5 text-zinc-400" />
+            <span>Candidate Resume & Credentials</span>
+          </a>
+        </div>
 
-        {/* Viral Referral Program & Cash Payout Settings */}
-        <ReferralPayoutSection userId={userId} />
+        {/* Viral Referral Program & Cash Payout Settings (Top Prominence) */}
+        <div id="referrals" className="scroll-mt-6">
+          <ReferralPayoutSection userId={userId} />
+        </div>
+
+        {/* Full Visual Candidate Profile & Credentials Builder */}
+        <div id="editor" className="scroll-mt-6">
+          <CandidateProfileEditor
+            userId={userId}
+            isAdmin={false}
+            onSaveSuccess={() => {
+              setShowSaveBanner(true)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+          />
+        </div>
 
         {/* Bottom Navigation Helper */}
         <div className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">

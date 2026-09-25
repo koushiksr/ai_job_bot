@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import JobFluxLogo from './JobFluxLogo'
 import { trackPaymentClick } from '@/lib/tracker'
+import { PLANS } from '@/config/plans'
 
 interface ProfessionalUpgradeModalProps {
   isOpen: boolean
@@ -29,6 +30,18 @@ export default function ProfessionalUpgradeModal({
   onClose,
   featureTitle = 'On-Demand Turbo Scout'
 }: ProfessionalUpgradeModalProps) {
+  const [isOrgMember, setIsOrgMember] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const plan = (localStorage.getItem('user_plan') || '').toLowerCase()
+      const role = (localStorage.getItem('user_role') || '').toLowerCase()
+      if (plan.startsWith('org_') || plan === 'enterprise' || role === 'enterprise_member') {
+        setIsOrgMember(true)
+      }
+    }
+  }, [])
+
   // Close on Escape key
   React.useEffect(() => {
     if (!isOpen) return
@@ -149,39 +162,55 @@ export default function ProfessionalUpgradeModal({
           <div className="p-4 rounded-xl bg-zinc-900/50 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-white light:text-zinc-900 uppercase tracking-wider">Professional Plan</span>
+                <span className="text-xs font-semibold text-white light:text-zinc-900 uppercase tracking-wider">
+                  {isOrgMember ? 'Org Pro Plan' : 'Pro (1 Month) & Pro (3 Months)'}
+                </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 font-semibold">
-                  SAVE 92% · BEST VALUE
+                  {isOrgMember ? 'ORG EXCLUSIVE' : 'UNLIMITED APPLIES'}
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-2xl font-bold text-white light:text-zinc-900 font-mono">₹199</span>
-                <span className="text-xs text-zinc-500 light:text-zinc-600 line-through">₹2,500</span>
-                <span className="text-xs text-zinc-400 light:text-zinc-600 font-mono">/ 3 Full Months (1,800+ Applications)</span>
+                <span className="text-2xl font-bold text-white light:text-zinc-900 font-mono">
+                  {isOrgMember ? '₹99' : '₹499'}
+                </span>
+                <span className="text-xs text-zinc-500 light:text-zinc-600 line-through">
+                  {isOrgMember ? '₹1,000' : '₹1,499'}
+                </span>
+                <span className="text-xs text-zinc-400 light:text-zinc-600 font-mono">
+                  {isOrgMember ? '/ month (Dashboard Exclusive)' : '/ month (or ₹1,299 for 3 Months)'}
+                </span>
               </div>
             </div>
 
             <Link
-              href="/pricing?plan=elite"
+              href={isOrgMember ? '/dashboard' : '/pricing'}
               onClick={() => {
-                trackPaymentClick('elite', 'JobFlux Professional', 199, {
+                trackPaymentClick(isOrgMember ? 'org_pro' : 'pro', isOrgMember ? 'JobFlux Org Pro' : 'JobFlux Pro', isOrgMember ? 99 : 499, {
                   step: 'professional_upgrade_modal_click',
                   feature_trigger: featureTitle
                 })
                 onClose()
               }}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white light:bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 light:hover:bg-zinc-100 text-black light:text-zinc-900 light:text-zinc-900 font-semibold text-xs transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
             >
-              <span>{featureTitle.toLowerCase().includes('download') ? 'Buy Subscription to Download' : 'Upgrade to Professional'}</span>
+              <span>{isOrgMember ? 'Activate in Dashboard' : 'View Plans on Pricing'}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
           {/* Footer Note */}
           <div className="mt-4 flex items-center justify-between text-[11px] text-zinc-500 light:text-zinc-600">
-            <span>Or start with 1-Month Essentials for ₹99 (was ₹1,000)</span>
-            <Link href="/pricing" onClick={onClose} className="text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 underline transition-colors font-medium">
-              View All Tiers →
+            <span>
+              {isOrgMember 
+                ? 'Org Starter is also available in your Dashboard for ₹79/mo' 
+                : '3-Month Pro available for ₹1,299 with VIP priority server queue'}
+            </span>
+            <Link 
+              href={isOrgMember ? '/dashboard' : '/pricing'} 
+              onClick={onClose} 
+              className="text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 underline transition-colors font-medium"
+            >
+              {isOrgMember ? 'Go to Dashboard →' : 'View All Tiers →'}
             </Link>
           </div>
         </motion.div>

@@ -153,129 +153,116 @@ export const MASTER_PLANS: PlanDefinition[] = [
 
 export const MASTER_PROMOS: PromoDefinition[] = [
   {
+    code: 'PRO399',
+    presetId: 'pro_399',
+    name: '1-Month Pro Starter Pass (₹399 / mo)',
+    offerTitle: 'Introductory Special: 1-Month JobFlux Pro for ₹399',
+    discountBadge: '₹100 OFF (STARTER PASS)',
+    originalPrice: '₹499 / mo',
+    discountedPrice: '₹399 / mo',
+    amountPaise: 39900,
+    allowedPlans: ['pro', 'starter'],
+    durationDays: 30,
+    description: 'JobFlux Pro - 1-Month Starter Pass (30 Days)',
+    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (55 applies/day), Harvard ATS resume formatting, and direct priority recruiter submission for just ₹399 (Regular ₹499/mo).',
+    pricingDisplay: {
+      displayPrice: '₹399',
+      label: 'Special Starter Pass (Regular ₹499 / mo)'
+    },
+    category: 'individual'
+  },
+  {
+    code: 'PRO999',
+    presetId: 'pro_999',
+    name: '3-Month Pro Comprehensive Saver (₹999 / 3 mos)',
+    offerTitle: 'Comprehensive 90-Day Pipeline: JobFlux Pro for ₹999',
+    discountBadge: 'SAVE ₹300 (BEST VALUE)',
+    originalPrice: '₹1,299 / 3 mos',
+    discountedPrice: '₹999 / 3 mos',
+    amountPaise: 99900,
+    allowedPlans: ['elite', 'professional'],
+    durationDays: 90,
+    description: 'JobFlux Pro - 3-Month Comprehensive Pass (90 Days)',
+    customMessage: 'Get 90 days of continuous automated applications (55 applies/day), on-demand sweeps up to 15x/week, and VIP queue priority at ₹999 (Regular ₹1,299/3 mos).',
+    pricingDisplay: {
+      displayPrice: '₹999',
+      label: '3-Month Comprehensive Saver (Regular ₹1,299 / 3 mos)'
+    },
+    category: 'individual'
+  },
+  {
+    code: 'WELCOMEPRO',
+    presetId: 'welcome_pro',
+    name: 'Candidate Welcome Special (₹399 / mo)',
+    offerTitle: 'Candidate Welcome Special: JobFlux Pro for ₹399',
+    discountBadge: 'WELCOME SPECIAL (₹399)',
+    originalPrice: '₹499 / mo',
+    discountedPrice: '₹399 / mo',
+    amountPaise: 39900,
+    allowedPlans: ['pro', 'starter'],
+    durationDays: 30,
+    description: 'JobFlux Pro - Candidate Welcome Special (30 Days)',
+    customMessage: 'Welcome offer! Get 30 days of continuous autonomous job applications (55 applies/day) for only ₹399.',
+    pricingDisplay: {
+      displayPrice: '₹399',
+      label: 'New Candidate Special (Regular ₹499 / mo)'
+    },
+    category: 'individual'
+  },
+  {
     code: 'OFFER90',
     presetId: 'offer_99',
-    name: 'Essentials 90% Welcome Pass (₹99 / mo)',
-    offerTitle: 'Candidate Welcome: 90% Off JobFlux Essentials for ₹99',
-    discountBadge: '90% OFF (ACTUAL ₹1,000)',
-    originalPrice: '₹1,000 / mo',
-    discountedPrice: '₹99 / mo',
-    amountPaise: 9900,
+    name: '1-Month Pro Special Pass (₹399 / mo)',
+    offerTitle: 'Candidate Special: JobFlux Pro for ₹399',
+    discountBadge: 'SPECIAL PASS (₹399)',
+    originalPrice: '₹499 / mo',
+    discountedPrice: '₹399 / mo',
+    amountPaise: 39900,
     allowedPlans: ['pro', 'starter'],
     durationDays: 30,
-    description: 'JobFlux Essentials - 90% Special Pass (30 Days)',
-    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (600+ applies), Harvard ATS resume formatting, and direct priority recruiter submission at 90% discount (Regular ₹1,000/mo) for just ₹99.',
+    description: 'JobFlux Pro - Special Pass (30 Days)',
+    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (55 applies/day) for just ₹399.',
     pricingDisplay: {
-      displayPrice: '₹99',
-      label: '90% OFF Special Pass (Actual ₹1,000 / mo)'
-    }
-  },
-  {
-    code: 'CHOC29',
-    presetId: 'choc_29',
-    name: '1-Month Starter Sprint (₹29 / mo)',
-    offerTitle: 'Introductory Special: 1-Month JobFlux Sprint for ₹29',
-    discountBadge: '97% OFF (INTRO SPECIAL)',
-    originalPrice: '₹1,000 / mo',
-    discountedPrice: '₹29 / mo',
-    amountPaise: 2900,
-    allowedPlans: ['pro', 'starter'],
-    durationDays: 30,
-    description: 'JobFlux Essentials - 1-Month Special Sprint (30 Days)',
-    customMessage: 'Claim the ₹29 introductory sprint! Get 30 days of autonomous job applications (600+ applications) for just ₹29.',
-    pricingDisplay: {
-      displayPrice: '₹29',
-      label: 'Special 1-Month Sprint (Actual ₹1,000 / mo)'
-    }
-  },
-  {
-    code: 'FLASH49',
-    presetId: 'flash_49',
-    name: 'Essentials Flash Pass (₹49 / mo)',
-    offerTitle: 'Exclusive 95% Flash Discount: JobFlux Essentials for ₹49',
-    discountBadge: '95% OFF (ACTUAL ₹1,000)',
-    originalPrice: '₹1,000 / mo',
-    discountedPrice: '₹49 / mo',
-    amountPaise: 4900,
-    allowedPlans: ['pro', 'starter'],
-    durationDays: 30,
-    description: 'JobFlux Essentials - 95% Flash Pass (30 Days)',
-    customMessage: 'Claim an exclusive 95% flash pass! Get 30 days of autonomous job applications for just ₹49 (Regular ₹1,000/mo).',
-    pricingDisplay: {
-      displayPrice: '₹49',
-      label: '95% OFF Flash Pass (Actual ₹1,000 / mo)'
-    }
-  },
-  {
-    code: 'SPRINT69',
-    presetId: 'sprint_69',
-    name: 'Weekend Career Sprint (₹69 / mo)',
-    offerTitle: 'Weekend Career Sprint: 1-Month JobFlux Essentials for ₹69',
-    discountBadge: '93% OFF (ACTUAL ₹1,000)',
-    originalPrice: '₹1,000 / mo',
-    discountedPrice: '₹69 / mo',
-    amountPaise: 6900,
-    allowedPlans: ['pro', 'starter'],
-    durationDays: 30,
-    description: 'JobFlux Essentials - 93% Sprint Pass (30 Days)',
-    customMessage: 'Kickstart your interview pipeline this week with 600+ verified applications and daily smart scans at 93% discount (Regular ₹1,000/mo) for only ₹69.',
-    pricingDisplay: {
-      displayPrice: '₹69',
-      label: '93% OFF Weekend Sprint (Actual ₹1,000 / mo)'
-    }
+      displayPrice: '₹399',
+      label: 'Special Pass (Regular ₹499 / mo)'
+    },
+    category: 'individual'
   },
   {
     code: 'PRO199',
     presetId: 'pro_199',
-    name: 'Professional 3-Month Plan (₹199 / 3 mos)',
-    offerTitle: 'Comprehensive 90-Day Pipeline: JobFlux Professional for ₹199',
-    discountBadge: '92% OFF (ACTUAL ₹2,500)',
-    originalPrice: '₹2,500 / 3 mos',
-    discountedPrice: '₹199 / 3 mos',
-    amountPaise: 19900,
+    name: '3-Month Pro Saver (₹999 / 3 mos)',
+    offerTitle: 'Comprehensive 90-Day Pipeline: JobFlux Pro for ₹999',
+    discountBadge: 'SAVE ₹300 (₹999)',
+    originalPrice: '₹1,299 / 3 mos',
+    discountedPrice: '₹999 / 3 mos',
+    amountPaise: 99900,
     allowedPlans: ['elite', 'professional'],
     durationDays: 90,
-    description: 'JobFlux Professional - 92% 3-Month Pass (90 Days)',
-    customMessage: 'Get 90 days of continuous automated applications (1,800+ applies), on-demand sweeps up to 5x/week, and VIP queue priority at 92% off (Regular ₹2,500) for ₹199.',
+    description: 'JobFlux Pro - 3-Month Pipeline (90 Days)',
+    customMessage: 'Get 90 days of continuous automated applications (55 applies/day) with VIP priority for ₹999.',
     pricingDisplay: {
-      displayPrice: '₹199',
-      label: '92% OFF 3-Month Full Pass (Actual ₹2,500 / 3 mos)'
-    }
-  },
-  {
-    code: 'PRO129',
-    presetId: 'pro_129',
-    name: 'Professional 3-Month Fast-Track (₹129)',
-    offerTitle: 'Career Fast-Track: 3 Months of JobFlux Professional for ₹129',
-    discountBadge: '95% OFF (ACTUAL ₹2,500)',
-    originalPrice: '₹2,500 / 3 mos',
-    discountedPrice: '₹129 / 3 mos',
-    amountPaise: 12900,
-    allowedPlans: ['elite', 'professional'],
-    durationDays: 90,
-    description: 'JobFlux Professional - 95% Fast-Track (90 Days)',
-    customMessage: 'Accelerate your interview shortlists with 90 days of continuous automated applies (1,800+ applications), on-demand sweeps up to 5x/week, and VIP priority queue at 95% off (Regular ₹2,500) for just ₹129.',
-    pricingDisplay: {
-      displayPrice: '₹129',
-      label: '95% OFF 3-Month Fast-Track (Actual ₹2,500 / 3 mos)'
-    }
+      displayPrice: '₹999',
+      label: '3-Month Saver Pass (Regular ₹1,299 / 3 mos)'
+    },
+    category: 'individual'
   },
   {
     code: 'VIP299',
     presetId: 'vip_299',
-    name: '3-Month VIP Professional Extension (₹299)',
-    offerTitle: '3-Month VIP Extension: Continuous Autonomous Job Applications for ₹299',
-    discountBadge: '88% OFF (ACTUAL ₹2,500)',
-    originalPrice: '₹2,500 / 3 mos',
-    discountedPrice: '₹299 / 3 mos',
-    amountPaise: 29900,
+    name: '3-Month VIP Pro Extension (₹999 / 3 mos)',
+    offerTitle: '3-Month VIP Extension: Continuous Job Applications for ₹999',
+    discountBadge: 'VIP EXTENSION (₹999)',
+    originalPrice: '₹1,299 / 3 mos',
+    discountedPrice: '₹999 / 3 mos',
+    amountPaise: 99900,
     allowedPlans: ['elite', 'professional'],
     durationDays: 90,
-    description: 'JobFlux Professional - 88% VIP 3-Month Extension (90 Days)',
-    customMessage: 'Extend your autonomous job applications for 3 full months (90 days / 1,800+ applications) with VIP priority server queue and on-demand sweeps at 88% discount (Regular ₹2,500) for only ₹299.',
+    description: 'JobFlux Pro - VIP 3-Month Extension (90 Days)',
+    customMessage: 'Extend your autonomous job applications for 3 full months with VIP priority server queue for only ₹999.',
     pricingDisplay: {
-      displayPrice: '₹299',
-      label: '88% OFF 3-Month VIP Extension (Actual ₹2,500 Value)'
+      displayPrice: '₹999',
+      label: '3-Month VIP Extension (Regular ₹1,299 Value)'
     },
     category: 'individual'
   },

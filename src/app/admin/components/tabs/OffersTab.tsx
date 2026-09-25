@@ -732,16 +732,14 @@ export const OffersTab: React.FC<OffersTabProps> = ({
                   className="w-full px-3 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-700 light:border-zinc-300 text-zinc-200 light:text-zinc-800 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
                 >
                   <option value="auto">Auto-Detect Active or Best Tier Offer</option>
-                  <option value="vip299">3-Month VIP Professional Extension (₹299 / 90d)</option>
-                  <option value="welcomepro">1-Month Essentials Unlimited (₹149 / 30d)</option>
-                  <option value="choc29">1-Month Starter Deal (₹29 / 30d)</option>
+                  <option value="vip299">3-Month Pro Saver (₹999 / 90d)</option>
+                  <option value="welcomepro">1-Month Pro Special Pass (₹399 / 30d)</option>
                   <option value="none">No Offer (Stats &amp; Companies Only)</option>
                 </select>
                 <p className="text-[10px] text-zinc-500 light:text-zinc-600">
-                  {dispatchReportOfferChoice === 'auto' && 'Picks assigned promo code from DB or smart tier (VIP299 for paid, WELCOMEPRO for trial).'}
-                  {dispatchReportOfferChoice === 'vip299' && 'Forces 3-Month VIP Extension at ₹299 (90 days continuous access).'}
-                  {dispatchReportOfferChoice === 'welcomepro' && 'Forces 1-Month Essentials Unlimited at ₹149.'}
-                  {dispatchReportOfferChoice === 'choc29' && 'Forces 1-Month Starter Direct Activation at ₹29.'}
+                  {dispatchReportOfferChoice === 'auto' && 'Picks assigned promo code from DB or smart tier (PRO999 for paid, WELCOMEPRO for trial).'}
+                  {dispatchReportOfferChoice === 'vip299' && 'Forces 3-Month Pro Saver at ₹999 (90 days continuous access).'}
+                  {dispatchReportOfferChoice === 'welcomepro' && 'Forces 1-Month Pro Special Pass at ₹399.'}
                   {dispatchReportOfferChoice === 'none' && 'Omits pricing callout and delivers pure career telemetry.'}
                 </p>
               </div>

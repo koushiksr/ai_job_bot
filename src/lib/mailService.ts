@@ -611,8 +611,8 @@ export function generateJobDispatchReportHtml({
   dashboardUrl = 'https://jobfluxai.vercel.app/dashboard',
   upgradeUrl = 'https://jobfluxai.vercel.app/pricing',
   promoCode = 'WELCOMEPRO',
-  discountedPrice = '₹199',
-  originalPrice = '₹2,500',
+  discountedPrice = '₹399',
+  originalPrice = '₹499',
   dateString = 'Today',
   sectionTitle
 }: JobDispatchReportOptions): string {
