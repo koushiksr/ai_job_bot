@@ -714,47 +714,6 @@ export default function CandidatesTab({
           </div>
         </div>
 
-        {/* Active Filter Chips Bar (Shown when any filter is active) */}
-        {isFiltered && (
-          <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-zinc-900 light:border-zinc-200 text-[11px] font-mono">
-            <span className="text-zinc-500 light:text-zinc-600">Active filters:</span>
-            {accountTypeFilter !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
-                <span>Account: {accountTypeFilter === 'candidates' ? 'Candidates Only' : 'Admins & Orgs Only'}</span>
-                <button type="button" onClick={() => handleSetAccountTypeFilter('all')} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {activeExecFilter !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
-                <span>Bot: {activeExecFilter.replace(/_/g, ' ')}</span>
-                <button type="button" onClick={() => handleSetExecFilter('all')} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {candidateStatusFilter !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
-                <span>Plan: {candidateStatusFilter}</span>
-                <button type="button" onClick={() => {
-                  setCandidateStatusFilter('all')
-                  try { localStorage.setItem('admin_candidate_status_filter', 'all') } catch {}
-                }} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            {(sortField !== 'plan' || sortOrder !== 'desc') && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-300">
-                <span>Sort: {sortField} ({sortOrder})</span>
-                <button type="button" onClick={handleResetSort} className="hover:text-white cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={handleClearAllFilters}
-              className="text-zinc-500 hover:text-rose-400 underline ml-1 cursor-pointer transition-colors text-[10px]"
-            >
-              Clear all
-            </button>
-          </div>
-        )}
-
         {/* TRIPLE-DOT FILTER & SORT POPOVER MENU */}
         {showFilterMenu && (
           <div className="absolute top-full right-4 mt-2 w-[340px] sm:w-[500px] p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 space-y-4 animate-fadeIn">
@@ -1069,9 +1028,9 @@ export default function CandidatesTab({
       <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
         <div 
           onClick={toggleCandidatesTable}
-          className="px-5 py-4 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 light:hover:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
+          className="px-4 py-2.5 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 light:hover:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
         >
-          <div>
+          <div title="Live candidate profiles, automated apply status, ATS resumes, and daily job report actions.">
             <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
               <Users className="w-4 h-4 text-sky-400" />
               <span>Candidate Profiles Directory</span>
@@ -1079,9 +1038,6 @@ export default function CandidatesTab({
                 {filteredUsers.length} profiles
               </span>
             </h4>
-            <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
-              Live candidate profiles, automated apply status, ATS resumes, and daily job report actions.
-            </p>
           </div>
           <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <button
