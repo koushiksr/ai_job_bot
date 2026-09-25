@@ -323,7 +323,47 @@ async function dispatchReportForCandidate(
     }
   }
 
-  // 5. Zero-Jobs Safeguard: Do NOT email candidate with old or 0 jobs if nothing applied today
+  // 5. Zero-Jobs Safeguard: Do NOT email candidate with old or 0 jobs if nothing applied today.
+  // Exception: final_empty (notify-once exhaustion) sends one short, honest
+  // "where you stand" note instead of suppressing.
+  if (todayApplied === 0 && options.status === 'final_empty') {
+    const emptyHtml = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:24px;background:#f8fafc;color:#18181b;border-radius:12px;border:1px solid #e2e8f0;max-width:560px;margin:0 auto;">
+      <p style="font-size:14px;line-height:1.6;margin:0 0 12px 0;">Hi <strong>${candidateName}</strong>,</p>
+      <p style="font-size:14px;line-height:1.6;color:#475569;margin:0 0 12px 0;">Today's sweeps found no new matching jobs for your profile (${totalAppliedCount} total applications active). The system keeps watching new postings and will apply automatically when matches appear — no action needed from you.</p>
+      <a href="https://jobfluxai.vercel.app/dashboard" style="display:inline-block;padding:12px 26px;background:#09090b;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;font-size:13px;">Open JobFlux Cockpit &rarr;</a>
+    </div>`
+    let emptyMail: any = null
+    try {
+      if (channel === 'both' || channel === 'email') {
+        emptyMail = await sendEmail({ to: resolvedEmail, subject: `Hi ${candidateName}, no new matches today — we're still watching`, html: emptyHtml, fromName: 'JobFlux AI' })
+      }
+      if (channel === 'both' || channel === 'push') {
+        const emptyPushTitle = `Hi ${candidateName}, no new matches today`
+        const emptyPushMsg = `Nothing new matched your filters today · ${totalAppliedCount} total active. We'll apply automatically when matches appear.`
+        try {
+          await sendPushToUser(resolvedEmail, { title: emptyPushTitle, body: emptyPushMsg, url: '/dashboard' })
+          await db.collection('user_notifications').insertOne({
+            user_email: resolvedEmail, email: resolvedEmail, user_id: resolvedUserId || resolvedEmail,
+            title: emptyPushTitle, message: emptyPushMsg, url: '/dashboard',
+            type: 'final_empty', read: false, created_at: new Date()
+          })
+        } catch {}
+      }
+    } catch (e) {
+      console.warn('final_empty dispatch warning:', (e as any)?.message)
+    }
+    await db.collection('admin_push_logs').insertOne({
+      target_email: resolvedEmail, user_id: resolvedUserId, target_type: 'single',
+      title: `Final empty-day note (0 jobs)`, message: `One notify-once exhaustion note sent to ${resolvedEmail} via ${channel}.`,
+      claim_url: '/dashboard', channel, dispatched_at: new Date(), recipient_count: 1,
+      status: emptyMail?.success ? 'delivered' : 'failed'
+    })
+    return {
+      success: true, channel,
+      candidate: { name: candidateName, email: resolvedEmail, userId: resolvedUserId, todayApplied: 0, totalApplied: totalAppliedCount },
+      emailResult: emptyMail, pushResult: null
+    }
+  }
   if (todayApplied === 0) {
     console.log(`ℹ️ [Dispatch] Candidate ${resolvedEmail} has 0 jobs applied for today (${todayIstStr}). Suppressing email to candidate and notifying admin.`)
 
