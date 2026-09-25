@@ -216,6 +216,51 @@ export default function AdminDashboard() {
   const [candidateStatusFilter, setCandidateStatusFilter] = useState<string>('all')
   const [showStatusGuide, setShowStatusGuide] = useState<boolean>(false)
 
+  // Server-persisted UI prefs (MongoDB `admin_preferences`, tagged by admin user).
+  // localStorage stays as instant cache; server is the cross-device source of truth.
+  const serverPrefsReadyRef = React.useRef(false)
+  const savePrefsTimerRef = React.useRef<any>(null)
+  const applyServerPrefs = (prefs: Record<string, string>) => {
+    try {
+      if (prefs.active_tab && ['candidates', 'requests', 'queue', 'payments', 'offers', 'enterprise_leads', 'enterprise_orgs', 'logs', 'visitors', 'reviews'].includes(prefs.active_tab)) {
+        setActiveAdminTab(prefs.active_tab as any)
+        try { localStorage.setItem('admin_active_tab', prefs.active_tab) } catch {}
+      }
+      if (typeof prefs.candidate_search === 'string') {
+        setUserSearch(prefs.candidate_search)
+        try { localStorage.setItem('admin_candidate_search', prefs.candidate_search) } catch {}
+      }
+      if (typeof prefs.candidate_status_filter === 'string' && prefs.candidate_status_filter) {
+        setCandidateStatusFilter(prefs.candidate_status_filter)
+        try { localStorage.setItem('admin_candidate_status_filter', prefs.candidate_status_filter) } catch {}
+      }
+      if (typeof prefs.selected_candidate_id === 'string' && prefs.selected_candidate_id) {
+        setSelectedCandidateId(prefs.selected_candidate_id)
+        try { localStorage.setItem('admin_selected_candidate_id', prefs.selected_candidate_id) } catch {}
+      }
+      if (prefs.assigned_offer_filter && ['all', 'active', 'claimed', 'expired'].includes(prefs.assigned_offer_filter)) {
+        setAssignedOfferFilter(prefs.assigned_offer_filter as any)
+        try { localStorage.setItem('admin_assigned_offer_filter', prefs.assigned_offer_filter) } catch {}
+      }
+      if (prefs.logs_sub_tab && ['activity', 'llm_telemetry', 'job_history', 'tickets'].includes(prefs.logs_sub_tab)) {
+        setLogsSubTab(prefs.logs_sub_tab as any)
+        try { localStorage.setItem('admin_logs_sub_tab', prefs.logs_sub_tab) } catch {}
+      }
+    } catch {}
+  }
+  const loadServerPrefs = async () => {
+    try {
+      const res = await fetch('/api/admin/preferences', { headers: getAdminHeaders() })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.prefs && typeof data.prefs === 'object') applyServerPrefs(data.prefs)
+      }
+    } catch {}
+    finally {
+      serverPrefsReadyRef.current = true
+    }
+  }
+
   // Live Email Diagnostic State
   const [mailDiagnosticLoading, setMailDiagnosticLoading] = useState<boolean>(false)
   const [mailDiagnosticResult, setMailDiagnosticResult] = useState<any | null>(null)
@@ -1301,6 +1346,7 @@ export default function AdminDashboard() {
       } catch {}
 
       // 4. Verify server-side against MongoDB
+      loadServerPrefs()
       fetchOverviewAndUsers()
       fetchPayments()
       fetchEnterpriseLeads()
@@ -1372,6 +1418,36 @@ export default function AdminDashboard() {
       fetchEnterpriseOrgs()
     }
   }
+
+  // Persist UI prefs to MongoDB (debounced) — survives logins & devices.
+  // Skipped until the server copy has loaded, so first paint never overwrites it.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !serverPrefsReadyRef.current) return
+    try {
+      const prefs = {
+        active_tab: activeAdminTab,
+        candidate_search: userSearch || '',
+        candidate_status_filter: candidateStatusFilter || 'all',
+        selected_candidate_id: selectedCandidateId || '',
+        assigned_offer_filter: assignedOfferFilter || 'all',
+        logs_sub_tab: logsSubTab || 'activity'
+      }
+      try {
+        localStorage.setItem('admin_candidate_search', prefs.candidate_search)
+        localStorage.setItem('admin_candidate_status_filter', prefs.candidate_status_filter)
+        if (prefs.selected_candidate_id) localStorage.setItem('admin_selected_candidate_id', prefs.selected_candidate_id)
+      } catch {}
+      clearTimeout(savePrefsTimerRef.current)
+      savePrefsTimerRef.current = setTimeout(() => {
+        fetch('/api/admin/preferences', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(prefs)
+        }).catch(() => {})
+      }, 1000)
+    } catch {}
+    return () => clearTimeout(savePrefsTimerRef.current)
+  }, [activeAdminTab, userSearch, candidateStatusFilter, selectedCandidateId, assignedOfferFilter, logsSubTab])
 
   const handleInspectCandidate = (u: any | null) => {
     setInspectCandidate(u)
