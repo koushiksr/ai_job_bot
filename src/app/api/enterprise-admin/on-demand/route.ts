@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyEnterpriseAdminRequest } from '@/lib/adminAuth'
+import { sendPushToUser } from '@/lib/webPushService'
 
 export const dynamic = 'force-dynamic'
 
@@ -173,6 +174,36 @@ export async function POST(req: NextRequest) {
         $inc: { on_demand_run_count: 1 }
       }
     )
+
+    // Start signal: when someone ELSE (org admin, never super-admin) triggers,
+    // the candidate gets a push + in-app notification. Their dashboard picks
+    // up the live task on load and streams progress from there.
+    if (!auth.isSuperAdmin) {
+      try {
+        const memberName = targetProfile.name || targetUserId
+        const triggerName = auth.email || 'your org admin'
+        const startTitle = `Hi ${memberName}, an on-demand sweep just started`
+        const startMsg = `${triggerName} started a live application sweep for you · queued #${queuePosition} · watch your dashboard for progress.`
+        await db.collection('user_notifications').insertOne({
+          user_email: (targetProfile.email || '').toLowerCase(),
+          email: (targetProfile.email || '').toLowerCase(),
+          user_id: targetUserId,
+          title: startTitle,
+          message: startMsg,
+          url: '/dashboard',
+          type: 'sweep_started',
+          task_id: taskId,
+          triggered_by: auth.email || '',
+          read: false,
+          created_at: now
+        })
+        await sendPushToUser((targetProfile.email || '').toLowerCase(), {
+          title: startTitle,
+          body: startMsg,
+          url: '/dashboard'
+        })
+      } catch {}
+    }
 
     return NextResponse.json({
       status: 'success',

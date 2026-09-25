@@ -363,6 +363,7 @@ export async function GET(req: NextRequest) {
         assigned_offers: (isAdminAccount || isOrgAdmin) ? [] : userOffers,
         reminders_sent: (isAdminAccount || isOrgAdmin) ? [] : userReminders,
         is_vip: Boolean(p.is_vip || p.vip_access || p.free_privilege),
+        apk_access: Boolean(p.apk_access),
         total_applied: s.total_applied || 0,
         applied_today: isAppliedToday ? realTodayApplied : 0,
         daily_application_limit: dailyApplicationLimit,
@@ -446,6 +447,9 @@ export async function PATCH(req: NextRequest) {
     }
     if (typeof enabled_for_daily_run === 'boolean') {
       updates.enabled_for_daily_run = enabled_for_daily_run
+    }
+    if (typeof body.apk_access === 'boolean') {
+      updates.apk_access = body.apk_access
     }
     if (plan) {
       const existingUser = await db.collection('profiles').findOne({ user_id }) ||

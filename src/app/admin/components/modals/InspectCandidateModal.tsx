@@ -57,6 +57,12 @@ export default function InspectCandidateModal({
   // Full dossier: timeline, payments, org journey, runs, activity
   const [dossier, setDossier] = useState<any | null>(null)
   const [dossierLoading, setDossierLoading] = useState<boolean>(false)
+  // APK download permission (in-app distribution only)
+  const [apkAccess, setApkAccess] = useState<boolean>(false)
+  const [apkBusy, setApkBusy] = useState<boolean>(false)
+  useEffect(() => {
+    setApkAccess(Boolean(candidate?.apk_access))
+  }, [candidate?.user_id])
   useEffect(() => {
     const uid = candidate?.user_id
     if (!uid) {
@@ -582,6 +588,33 @@ export default function InspectCandidateModal({
             Anti-flooding safeguards enforce an 18-hour quiet window unless manually triggered.
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={apkBusy}
+              onClick={async () => {
+                setApkBusy(true)
+                try {
+                  const res = await fetch('/api/admin/users', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ user_id: candidate.user_id, apk_access: !apkAccess })
+                  })
+                  if (res.ok) setApkAccess(!apkAccess)
+                } catch {}
+                finally {
+                  setApkBusy(false)
+                }
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-50 border transition-colors ${
+                apkAccess
+                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                  : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+              }`}
+              title="Allow / revoke in-app APK download for this candidate"
+            >
+              {apkBusy ? '…' : apkAccess ? 'APK ✓' : 'APK Access'}
+            </button>
             <button
               type="button"
               onClick={onClose}
