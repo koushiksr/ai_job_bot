@@ -203,7 +203,8 @@ export default function InspectCandidateModal({
               <div className="font-mono text-xs font-bold">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
-                  const isOrgPro = isOrg && (candidate.plan === 'org_pro' || candidate.plan === 'pro')
+                  const isVipPro = Boolean(candidate.is_vip || candidate.plan_expiry_status === 'vip_lifetime')
+                  const isOrgPro = isOrg && (candidate.plan === 'org_pro' || candidate.plan === 'org_pro_3m' || candidate.plan === 'pro' || isVipPro)
                   const limit = isOrg 
                     ? (isOrgPro ? 55 : (candidate.daily_application_limit ? Math.min(20, Number(candidate.daily_application_limit)) : 20))
                     : (candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20)))
@@ -240,8 +241,10 @@ export default function InspectCandidateModal({
               <div className="font-bold text-white light:text-zinc-900 uppercase">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
-                  if (candidate.plan === 'org_pro' || (isOrg && candidate.plan === 'pro')) return 'JobFlux Org Pro (55/d · 15 Sweeps/wk)'
-                  if (candidate.plan === 'enterprise' || isOrg) return 'Enterprise Base (Starter Tier · 20/d)'
+                  if (candidate.plan === 'org_pro' || candidate.plan === 'org_pro_3m' || (isOrg && candidate.plan === 'pro') || (isOrg && (candidate.is_vip || candidate.plan_expiry_status === 'vip_lifetime'))) return 'Org Pro (55/d · 15 Sweeps/wk)'
+                  if (candidate.plan_expiry_status === 'expired' || candidate.plan_expiry_status === 'no_plan' || candidate.plan === 'unpaid') return 'No Plan (Payment Required)'
+                  if (candidate.plan === 'org_starter' || (isOrg && candidate.plan === 'starter')) return 'Org Starter (20/d)'
+                  if (candidate.plan === 'enterprise' || isOrg) return 'Enterprise Base (55/d)'
                   return candidate.plan || 'Free'
                 })()}
               </div>
@@ -251,7 +254,8 @@ export default function InspectCandidateModal({
               <div className="font-mono font-bold text-amber-300 light:text-amber-700">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
-                  const isOrgPro = isOrg && (candidate.plan === 'org_pro' || candidate.plan === 'pro')
+                  const isVipPro = Boolean(candidate.is_vip || candidate.plan_expiry_status === 'vip_lifetime')
+                  const isOrgPro = isOrg && (candidate.plan === 'org_pro' || candidate.plan === 'org_pro_3m' || candidate.plan === 'pro' || isVipPro)
                   const limit = isOrg 
                     ? (isOrgPro ? 55 : (candidate.daily_application_limit ? Math.min(20, Number(candidate.daily_application_limit)) : 20))
                     : (candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20)))

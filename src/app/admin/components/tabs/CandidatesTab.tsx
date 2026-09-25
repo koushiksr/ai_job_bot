@@ -1247,7 +1247,8 @@ export default function CandidatesTab({
                           ) : (() => {
                             const isOrg = isOrgMemberUser(u);
                             const planLc = (u.plan || 'trial').toLowerCase();
-                            const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'pro');
+                            const isVipPro = Boolean(u.is_vip || u.plan_expiry_status === 'vip_lifetime');
+                            const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'org_pro_3m' || planLc === 'pro' || isVipPro);
                             const tierCap = isOrg ? (isOrgPro ? 55 : 20) : (planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55);
                             const customLim = Number(u.daily_application_limit);
                             const limit = isOrg ? (isOrgPro ? 55 : (!isNaN(customLim) && customLim > 0 ? Math.min(20, customLim) : 20)) : (u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap);
@@ -1518,7 +1519,8 @@ export default function CandidatesTab({
                             {(() => {
                               const isOrg = isOrgMemberUser(u);
                               const planLc = (u.plan || 'trial').toLowerCase();
-                              const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'org_pro_3m' || planLc === 'pro');
+                              const isVipPro = Boolean(u.is_vip || u.plan_expiry_status === 'vip_lifetime');
+                              const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'org_pro_3m' || planLc === 'pro' || isVipPro);
                               const isOrgStarter = isOrg && (planLc === 'org_starter' || planLc === 'starter');
                               const isOrgUnpaid = isOrg && !isOrgPro && !isOrgStarter;
 
