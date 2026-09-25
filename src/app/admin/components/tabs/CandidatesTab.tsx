@@ -376,8 +376,33 @@ export default function CandidatesTab({
     return 0
   }
 
+  const isCandidateCapped = (u: any) => {
+    if (isAdministrativeUser(u)) return false
+    const isOrg = isOrgMemberUser(u)
+    const planLc = (u.plan || 'trial').toLowerCase()
+    const isVipPro = Boolean(u.is_vip || u.plan_expiry_status === 'vip_lifetime')
+    const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'org_pro_3m' || planLc === 'pro' || isVipPro)
+    const tierCap = isOrg ? (isOrgPro ? 55 : 20) : (planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55)
+    const customLim = Number(u.daily_application_limit)
+    const limit = isOrg ? (isOrgPro ? 55 : (!isNaN(customLim) && customLim > 0 ? Math.min(20, customLim) : 20)) : (u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap)
+    const appliedToday = u.applied_today || 0
+    const isApp = u.execution_summary?.is_applying || u.current_execution?.status === 'applying'
+    return !isApp && ((appliedToday >= limit && limit > 0) || u.match_status === 'capped')
+  }
+
+  const isCandidateNoMatch = (u: any) => {
+    if (isAdministrativeUser(u)) return false
+    const capped = isCandidateCapped(u)
+    const isApp = u.execution_summary?.is_applying || u.current_execution?.status === 'applying'
+    const isQueued = u.execution_summary?.is_in_queue || u.execution_summary?.status === 'in_queue'
+    const isDone = u.execution_summary?.is_applied_today || (u.applied_today && u.applied_today > 0)
+    return !capped && !isApp && !isQueued && (u.match_status === 'exhausted' || (isDone && !capped))
+  }
+
   // Pre-calculate real-time execution & plan counts for filters
   const countApplying = usersList.filter(u => u.execution_summary?.status === 'applying' || u.current_execution?.status === 'applying').length
+  const countCapped = usersList.filter(isCandidateCapped).length
+  const countNoMatch = usersList.filter(isCandidateNoMatch).length
   const countAppliedToday = usersList.filter(u => u.execution_summary?.status === 'applied_today' || u.execution_summary?.is_applied_today || (u.applied_today && u.applied_today > 0)).length
   const countInQueue = usersList.filter(u => u.execution_summary?.status === 'in_queue' || u.execution_summary?.is_in_queue).length
   const countEnabled = usersList.filter(u => !isAdministrativeUser(u) && u.enabled_for_daily_run !== false).length
@@ -442,6 +467,8 @@ export default function CandidatesTab({
       const isQueued = summary?.is_in_queue || summary?.status === 'in_queue'
 
       if (activeExecFilter === 'applying' && !isApp) return false
+      if (activeExecFilter === 'capped' && !isCandidateCapped(u)) return false
+      if (activeExecFilter === 'no_match' && !isCandidateNoMatch(u)) return false
       if (activeExecFilter === 'applied_today' && (!isDone || isApp)) return false
       if (activeExecFilter === 'in_queue' && !isQueued) return false
       if (activeExecFilter === 'enabled' && u.enabled_for_daily_run === false) return false
@@ -743,6 +770,8 @@ export default function CandidatesTab({
                 {[
                   { key: 'all', label: 'All Candidates', count: usersList.length },
                   { key: 'applying', label: 'Applying Live', count: countApplying, color: 'text-sky-400' },
+                  { key: 'capped', label: 'Capped (100%)', count: countCapped, color: 'text-emerald-400 light:text-emerald-600' },
+                  { key: 'no_match', label: 'No Match', count: countNoMatch, color: 'text-amber-400 light:text-amber-600' },
                   { key: 'applied_today', label: 'Applied Today', count: countAppliedToday, color: 'text-emerald-400 light:text-emerald-700' },
                   { key: 'in_queue', label: 'In Queue', count: countInQueue, color: 'text-zinc-400' },
                   { key: 'enabled', label: 'Bot Active', count: countEnabled, color: 'text-zinc-300 light:text-zinc-700' },
@@ -1214,15 +1243,33 @@ export default function CandidatesTab({
                       </td>
                       {/* Bot Execution & Server Identity Status */}
                       <td className="py-3 px-3">
-                        {u.match_status === 'exhausted' && (
-                          <div
-                            className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-amber-950/40 text-amber-300 light:text-amber-700 border border-amber-800/60 light:border-amber-300"
-                            title="2 consecutive runs found 0 new matching jobs today — pool exhausted for current filters. Top-ups keep watching for new postings."
-                          >
-                            <AlertCircle className="w-3 h-3 text-amber-400 light:text-amber-600" />
-                            <span>NO MATCH</span>
-                          </div>
-                        )}
+                        {(() => {
+                          const capped = isCandidateCapped(u);
+                          const noMatch = isCandidateNoMatch(u);
+                          if (capped) {
+                            return (
+                              <div
+                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-emerald-950/40 text-emerald-300 light:text-emerald-700 border border-emerald-800/60 light:border-emerald-300 shadow-sm"
+                                title={`Daily application quota fully reached (${u.applied_today || 0} applied). Automated sweeps completed for today.`}
+                              >
+                                <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
+                                <span>CAPPED</span>
+                              </div>
+                            );
+                          }
+                          if (noMatch) {
+                            return (
+                              <div
+                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-amber-950/40 text-amber-300 light:text-amber-700 border border-amber-800/60 light:border-amber-300 shadow-sm"
+                                title={`Matching pool exhausted: applied ${u.applied_today || 0} jobs today. No more matching jobs found on Naukri for current profile filters.`}
+                              >
+                                <AlertCircle className="w-3 h-3 text-amber-400 light:text-amber-600 shrink-0" />
+                                <span>NO MATCH</span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                         {(() => {
                           const summary: any = u.execution_summary || {}
                           const isApplying = summary.is_applying || u.current_execution?.status === 'applying'

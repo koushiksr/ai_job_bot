@@ -401,8 +401,13 @@ export async function GET(req: NextRequest) {
         daily_status: p.daily_status || null,
         current_execution: p.current_execution || null,
         last_execution: p.last_execution || null,
-        execution_summary: executionSummary,
-        match_status: poolStateByUser[p.user_id] || 'matching',
+        match_status: poolStateByUser[p.user_id] || (
+          totalTodayApplied >= dailyApplicationLimit && dailyApplicationLimit > 0
+            ? 'capped'
+            : isAppliedToday && totalTodayApplied < dailyApplicationLimit && !isApplying && !isInQueue
+            ? 'exhausted'
+            : 'matching'
+        ),
       }
     })
 
