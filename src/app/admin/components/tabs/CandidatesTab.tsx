@@ -389,8 +389,10 @@ export default function CandidatesTab({
   const countOrgUnpaid = usersList.filter(u => isOrgMemberUser(u) && !['org_pro', 'org_pro_3m', 'org_starter'].includes((u.plan || '').toLowerCase())).length
   const countEnterprise = usersList.filter(u => isOrgMemberUser(u) || (u.plan || '').toLowerCase().includes('enterprise') || (u.plan || '').toLowerCase().startsWith('org_')).length
 
-  // Filter users by search, execution status, and plan status
-  const filteredUsers = usersList.filter(u => {
+  // Filter users by search, execution status, and plan status.
+  // Memoized: without this, every keystroke/re-render re-scans the list AND
+  // invalidates the sortedUsers memo below (new array identity each time).
+  const filteredUsers = React.useMemo(() => usersList.filter(u => {
     // 0. Account Type Filter (All / Candidates Only / Admins Only)
     if (accountTypeFilter === 'candidates' && isAdministrativeUser(u)) return false
     if (accountTypeFilter === 'admins' && !isAdministrativeUser(u)) return false
@@ -453,7 +455,7 @@ export default function CandidatesTab({
     if (candidateStatusFilter === 'no_plan') return u.plan_expiry_status === 'no_plan' || u.plan === 'none' || u.plan === 'no_plan'
 
     return true
-  })
+  }), [usersList, accountTypeFilter, userSearch, activeExecFilter, candidateStatusFilter])
 
   // 4. Sort Candidates Multi-Attribute Comparator
   const sortedUsers = React.useMemo(() => {
@@ -1199,7 +1201,7 @@ export default function CandidatesTab({
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/50 light:divide-zinc-200">
-                {loadingUsers ? (
+                {loadingUsers && usersList.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-zinc-400 light:text-zinc-500">
                       <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />

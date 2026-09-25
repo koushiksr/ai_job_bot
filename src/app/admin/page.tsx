@@ -502,7 +502,42 @@ export default function AdminDashboard() {
     }
   }
 
+  const applyUsersList = (users: any[]) => {
+    setUsersList(users)
+
+    let total = 0
+    let today = 0
+    let week = 0
+    let month = 0
+
+    users.forEach((u: any) => {
+      total += u.total_applied || 0
+      today += u.applied_today || 0
+      week += u.applied_this_week || 0
+      month += u.applied_this_month || 0
+    })
+
+    setOverviewMetrics({
+      total_profiles: users.length,
+      scheduled_profiles_active: users.filter((u: any) => u.enabled_for_daily_run !== false).length,
+      vip_profiles_count: users.filter((u: any) => u.is_vip).length,
+      applied_today: today,
+      applied_this_week: week,
+      applied_this_month: month,
+      total_applied: total
+    })
+    setIsAuthorized(true)
+  }
+
   const fetchOverviewAndUsers = async () => {
+    // Instant paint: render last-known list from cache while fresh data loads.
+    try {
+      const cached = localStorage.getItem('admin_cached_users')
+      if (cached) {
+        const users = JSON.parse(cached)
+        if (Array.isArray(users) && users.length > 0) applyUsersList(users)
+      }
+    } catch {}
     setLoadingUsers(true)
     try {
       const uRes = await fetch('/api/admin/users', {
@@ -520,30 +555,8 @@ export default function AdminDashboard() {
       }
       const uData = await uRes.json()
       const users = uData.users || []
-      setUsersList(users)
-
-      let total = 0
-      let today = 0
-      let week = 0
-      let month = 0
-
-      users.forEach((u: any) => {
-        total += u.total_applied || 0
-        today += u.applied_today || 0
-        week += u.applied_this_week || 0
-        month += u.applied_this_month || 0
-      })
-
-      setOverviewMetrics({
-        total_profiles: users.length,
-        scheduled_profiles_active: users.filter((u: any) => u.enabled_for_daily_run !== false).length,
-        vip_profiles_count: users.filter((u: any) => u.is_vip).length,
-        applied_today: today,
-        applied_this_week: week,
-        applied_this_month: month,
-        total_applied: total
-      })
-      setIsAuthorized(true)
+      applyUsersList(users)
+      try { localStorage.setItem('admin_cached_users', JSON.stringify(users)) } catch {}
 
       // Fetch reviews metrics for tab badge
       try {

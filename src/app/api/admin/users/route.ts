@@ -19,13 +19,15 @@ export async function GET(req: NextRequest) {
       )
     }
 
+    // Lean projections: profile photos (base64, MBs) and task log tails must
+    // never ride the list payload — they turned this call into ~6MB.
     const [userDocs, profileDocs, statsList, assignedOffersList, remindersList, activeTasks, orgDocs] = await Promise.all([
-      db.collection('users').find({}).toArray(),
-      db.collection('profiles').find({}).toArray(),
+      db.collection('users').find({}, { projection: { picture: 0 } }).toArray(),
+      db.collection('profiles').find({}, { projection: { picture: 0 } }).toArray(),
       db.collection('user_stats').find({}).toArray(),
       db.collection('assigned_offers').find({}).toArray(),
       db.collection('expiry_reminders_sent').find({}).toArray(),
-      db.collection('tasks').find({ status: { $in: ['pending', 'running'] } }).sort({ created_at: -1 }).toArray(),
+      db.collection('tasks').find({ status: { $in: ['pending', 'running'] } }, { projection: { logs: 0 } }).sort({ created_at: -1 }).toArray(),
       db.collection('enterprise_orgs').find({}).toArray()
     ])
 
