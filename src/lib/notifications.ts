@@ -155,6 +155,12 @@ export async function subscribeDeviceToPush(
 
     return { success: true, subscription }
   } catch (err: any) {
+    // Expected environment failures (push service unreachable, permission
+    // revoked mid-flight) are benign — report without console spam.
+    const name = err?.name || ''
+    if (name === 'AbortError' || name === 'NotAllowedError' || name === 'InvalidStateError') {
+      return { success: false, error: err.message || 'Push subscription unavailable on this device.' }
+    }
     console.error('Failed to subscribe device to Web Push:', err)
     return { success: false, error: err.message || 'Push subscription failed.' }
   }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHmac, timingSafeEqual } from 'crypto'
+import { createHmac, randomUUID, timingSafeEqual } from 'crypto'
 
 /**
  * Cookie session auth — the ONLY server-side auth mechanism.
@@ -23,6 +23,17 @@ export interface SessionPayload {
   entRole?: string | null
   v: number
   exp: number
+  // Per-device token id. Absent on pre-registry tokens (honored via `v` only).
+  jti?: string
+}
+
+/** Fresh random id for one login = one device session. */
+export function newSessionId(): string {
+  try {
+    return randomUUID()
+  } catch {
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`
+  }
 }
 
 function getSessionSecret(): string {
@@ -64,6 +75,7 @@ export function verifySession(token: string | null | undefined): SessionPayload 
     if (!payload.uid || !payload.exp || payload.exp < Math.floor(Date.now() / 1000)) return null
     if (!['admin', 'enterprise_admin', 'user'].includes(payload.role)) return null
     if (typeof payload.v !== 'number') return null
+    if (payload.jti !== undefined && typeof payload.jti !== 'string') return null
     return payload
   } catch {
     return null

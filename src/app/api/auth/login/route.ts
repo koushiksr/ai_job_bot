@@ -5,6 +5,7 @@ import { checkRateLimit } from '@/lib/rateLimit'
 import { APP_CONFIG } from '@/config/appConfig'
 import { syncUserPaymentPlan } from '@/lib/paymentSync'
 import { issueSession } from '@/lib/session'
+import { mintDeviceSession } from '@/lib/sessionRegistry'
 import { exactMatchCI } from '@/lib/query'
 
 export async function POST(req: NextRequest) {
@@ -176,7 +177,8 @@ export async function POST(req: NextRequest) {
             role: assignedRole as 'admin' | 'enterprise_admin' | 'user',
             orgId: enterpriseOrgId,
             entRole: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
-            v: Number(profile.session_v || 0)
+            v: Number(profile.session_v || 0),
+            jti: await mintDeviceSession(profile.user_id, userAgent)
           }
         )
       } else {

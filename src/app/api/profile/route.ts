@@ -3,15 +3,17 @@ import { getDb } from '@/lib/mongodb'
 import crypto from 'crypto'
 import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 import { readSession } from '@/lib/session'
+import { isSessionRevoked } from '@/lib/sessionRegistry'
 
 /**
  * Ownership gate: the caller must be the profile owner (session uid matches)
  * or a super-admin. Everything in this file returns or mutates sensitive
  * data (including Naukri credentials), so anonymous access is forbidden.
  */
-function isSelfOrAdmin(req: NextRequest, userId: string): boolean {
+async function isSelfOrAdmin(req: NextRequest, userId: string): Promise<boolean> {
   const sess = readSession(req)
   if (!sess) return false
+  if (await isSessionRevoked(sess)) return false
   if (sess.uid === userId) return true
   if (sess.role === 'admin') return true
   return false
@@ -24,7 +26,7 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ detail: 'user_id required' }, { status: 400 })
     }
-    if (!isSelfOrAdmin(req, userId)) {
+    if (!(await isSelfOrAdmin(req, userId))) {
       return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }
 
@@ -200,7 +202,7 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ detail: 'user_id is required' }, { status: 400 })
     }
-    if (!isSelfOrAdmin(req, userId)) {
+    if (!(await isSelfOrAdmin(req, userId))) {
       return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }
 
@@ -331,7 +333,7 @@ export async function DELETE(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ detail: 'user_id required' }, { status: 400 })
     }
-    if (!isSelfOrAdmin(req, userId)) {
+    if (!(await isSelfOrAdmin(req, userId))) {
       return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }
 

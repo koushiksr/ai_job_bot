@@ -3,6 +3,7 @@ import { Db } from 'mongodb'
 
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 import { readSession } from '@/lib/session'
+import { isSessionRevoked } from '@/lib/sessionRegistry'
 import { exactMatchCI } from '@/lib/query'
 
 /**
@@ -49,8 +50,12 @@ export async function verifyAdminRequest(
     if (!(rec.role === 'admin' || isAdminUser(rec.email) || rec.user_id === 'technohmsit')) {
       return { authorized: false, userId: '' }
     }
-    // Session version must match (bumped on logout → old tokens die)
+    // Session version must match (bumped on "logout everywhere" → old tokens die)
     if (Number(rec.session_v || 0) !== sess.v) {
+      return { authorized: false, userId: '' }
+    }
+    // Per-device check: a single-device logout revokes only its own token
+    if (await isSessionRevoked(sess)) {
       return { authorized: false, userId: '' }
     }
     return { authorized: true, userId: sess.uid, email: sess.email }
@@ -122,8 +127,12 @@ export async function verifyEnterpriseAdminRequest(
         { user_id: userId }
       ]
     })
-    // Session version must match (bumped on logout → old tokens die)
+    // Session version must match (bumped on "logout everywhere" → old tokens die)
     if (liveProfile && Number(liveProfile.session_v || 0) !== sess.v) {
+      return denied
+    }
+    // Per-device check: a single-device logout revokes only its own token
+    if (await isSessionRevoked(sess)) {
       return denied
     }
 

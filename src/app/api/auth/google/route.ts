@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo, recordLoginDevice } from '@/lib/activityLogger'
 import { findActivePaymentForEmail, syncUserPaymentPlan } from '@/lib/paymentSync'
 import { issueSession } from '@/lib/session'
+import { mintDeviceSession } from '@/lib/sessionRegistry'
 import { exactMatchCI } from '@/lib/query'
 import { findProfileByEmail, ensureTechnohmProfile, resolveGoogleRole } from '@/lib/googleAuth'
 
@@ -262,7 +263,8 @@ export async function POST(req: NextRequest) {
         role: (role === 'admin' || role === 'enterprise_admin' ? role : 'user') as 'admin' | 'enterprise_admin' | 'user',
         orgId: enterpriseOrgId,
         entRole: isEntAdmin ? 'admin' : (profile.enterprise_role || null),
-        v: Number(profile.session_v || 0)
+        v: Number(profile.session_v || 0),
+        jti: await mintDeviceSession(profile.user_id, req.headers.get('user-agent'))
       }
     )
   } catch (err: any) {

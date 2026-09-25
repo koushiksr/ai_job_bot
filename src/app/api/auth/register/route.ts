@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb'
 import { findActivePaymentForEmail } from '@/lib/paymentSync'
 import { APP_CONFIG } from '@/config/appConfig'
 import { issueSession } from '@/lib/session'
+import { mintDeviceSession } from '@/lib/sessionRegistry'
 import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
@@ -213,7 +214,7 @@ export async function POST(req: NextRequest) {
           ? `Your verified purchase (${initialPlanName}) has been automatically linked and activated!`
           : 'Your 3-Day Free Access has been activated! Start applying for jobs today.'
       }),
-      { uid: userId, email: emailClean, role: regRole, orgId: enterpriseOrgId, entRole: enterpriseRole, v: 0 }
+      { uid: userId, email: emailClean, role: regRole, orgId: enterpriseOrgId, entRole: enterpriseRole, v: 0, jti: await mintDeviceSession(userId, req.headers.get('user-agent')) }
     )
   } catch (err: any) {
     return NextResponse.json(

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { getWeeklyOnDemandLimit } from '@/config/plans'
 import { readSession } from '@/lib/session'
+import { isSessionRevoked } from '@/lib/sessionRegistry'
 import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
@@ -36,6 +37,9 @@ export async function GET(req: NextRequest) {
 
     // Private per-user data — owner or admin only
     const sess = await readSession(req)
+    if (sess && (await isSessionRevoked(sess))) {
+      return NextResponse.json({ detail: 'Session revoked. Please sign in again.' }, { status: 401 })
+    }
     const isOwner = sess && (sess.uid === profile.user_id || sess.uid === userId)
     if (!isOwner && sess?.role !== 'admin') {
       return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })

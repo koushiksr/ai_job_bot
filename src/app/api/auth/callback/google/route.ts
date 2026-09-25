@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { logUserActivity, getClientInfo, recordLoginDevice } from '@/lib/activityLogger'
 import { issueSession } from '@/lib/session'
+import { mintDeviceSession } from '@/lib/sessionRegistry'
 import { getGoogleOAuthConfig, findProfileByEmail, ensureTechnohmProfile, resolveGoogleRole } from '@/lib/googleAuth'
 
 export const dynamic = 'force-dynamic'
@@ -224,7 +225,8 @@ export async function GET(req: NextRequest) {
       role: (role === 'admin' || role === 'enterprise_admin' ? role : 'user') as 'admin' | 'enterprise_admin' | 'user',
       orgId: profile.enterprise_org_id || null,
       entRole: profile.enterprise_role || null,
-      v: Number(profile.session_v || 0)
+      v: Number(profile.session_v || 0),
+      jti: await mintDeviceSession(profile.user_id, req.headers.get('user-agent'))
     })
   } catch (err: any) {
     const msg = encodeURIComponent(err.message || 'Authentication with Google failed.')

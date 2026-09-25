@@ -200,6 +200,9 @@ export default function VisitorsTab() {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}))
+        // Session died (e.g. signed out elsewhere): stop polling instead of
+        // hammering a 403 every 10s and spamming the console.
+        if (res.status === 403) setAutoRefresh(false)
         throw new Error(errData.detail || `Failed to fetch visitors (Status ${res.status})`)
       }
 
