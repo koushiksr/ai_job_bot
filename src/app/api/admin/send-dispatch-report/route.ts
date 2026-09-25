@@ -252,10 +252,10 @@ async function dispatchReportForCandidate(
 
   const notJobUrlCondition = { job_url: { $not: { $regex: /developer-jobs|-jobs-in-|\/search\?/i } } }
 
-  // A. Query jobs from this specific task if provided
-  let sweepJobs: any[] = []
+  // A. This run's rows (for the list + "new this run" note)
+  let runJobs: any[] = []
   if (candidateInput.taskId) {
-    sweepJobs = await db.collection('applied_jobs').find({
+    runJobs = await db.collection('applied_jobs').find({
       $and: [
         candidateCondition,
         notJobUrlCondition,
@@ -264,30 +264,30 @@ async function dispatchReportForCandidate(
     }).sort({ applied_at: -1, created_at: -1 }).toArray()
   }
 
-  // B. If no specific task jobs found, query today's jobs (strictly IST date or start of today UTC)
-  if (sweepJobs.length === 0) {
-    sweepJobs = await db.collection('applied_jobs').find({
-      $and: [
-        candidateCondition,
-        notJobUrlCondition,
-        {
-          $or: [
-            { applied_date: todayIstStr },
-            { applied_at: { $gte: startOfTodayUtc } }
-          ]
-        }
-      ]
-    }).sort({ applied_at: -1, created_at: -1 }).toArray()
-  }
+  // B. Today's true rows — ALWAYS queried. This is the single source of truth
+  // for the headline count (never stats counters, never Math.max merges).
+  const todayJobs = await db.collection('applied_jobs').find({
+    $and: [
+      candidateCondition,
+      notJobUrlCondition,
+      {
+        $or: [
+          { applied_date: todayIstStr },
+          { applied_at: { $gte: startOfTodayUtc } }
+        ]
+      }
+    ]
+  }).sort({ applied_at: -1, created_at: -1 }).toArray()
+
+  if (runJobs.length === 0) runJobs = todayJobs
 
   const totalAppliedCount = stats?.total_applied || (await db.collection('applied_jobs').countDocuments({
     $and: [candidateCondition, notJobUrlCondition]
   })) || 0
 
-  let todayApplied = sweepJobs.length
-  if (stats?.today && stats?.last_date === todayIstStr) {
-    todayApplied = Math.max(todayApplied, stats.today)
-  }
+  // Headline = actual rows applied today. List = this run's rows.
+  const todayApplied = todayJobs.length
+  const newThisRun = candidateInput.taskId ? runJobs.length : todayApplied
 
   // 4. Deduplication Check: If already mailed today, do NOT mail again unless triggered on-demand
   const isOnDemand = options.isOnDemand ?? (options.force || ['on_demand', 'web_dashboard_on_demand', 'manual_cli_on_demand', 'admin_on_demand'].includes(options.source || ''))
@@ -324,7 +324,7 @@ async function dispatchReportForCandidate(
   }
 
   // 5. Zero-Jobs Safeguard: Do NOT email candidate with old or 0 jobs if nothing applied today
-  if (sweepJobs.length === 0) {
+  if (todayApplied === 0) {
     console.log(`ℹ️ [Dispatch] Candidate ${resolvedEmail} has 0 jobs applied for today (${todayIstStr}). Suppressing email to candidate and notifying admin.`)
 
     // Alert admin if this was an automated run
@@ -359,20 +359,23 @@ async function dispatchReportForCandidate(
     }
   }
 
-  let displayJobs = sweepJobs.slice(0, 8)
+  let displayJobs = runJobs.slice(0, 5)
 
-  // 6. Plan status & package intelligence
-  const plan = user?.plan || profile?.plan || 'trial'
+  // 6. Plan status & package intelligence (org-aware).
+  // Pro-level (individual paid, Org Pro, active Enterprise base, VIP) gets NO
+  // offer blocks. Starter / trial / none / expired DO get upgrade offers.
+  const rawPlan = (user?.plan || profile?.plan || 'trial').toLowerCase()
   const planName = user?.plan_name || profile?.plan_name || (
-    plan === 'elite' || plan === 'professional' ? 'JobFlux Professional' :
-    plan === 'pro' ? 'JobFlux Essentials' : 'JobFlux Free Trial'
+    rawPlan === 'elite' || rawPlan === 'professional' ? 'JobFlux Professional' :
+    rawPlan === 'pro' ? 'JobFlux Essentials' : 'JobFlux Free Trial'
   )
   const planExpiresAt = user?.plan_expires_at || profile?.plan_expires_at || null
-  const isPaidPlan = Boolean(
-    planExpiresAt &&
-    new Date(planExpiresAt) > new Date() &&
-    (plan === 'elite' || plan === 'professional' || plan === 'pro' || plan === 'starter' || plan === 'vip')
-  )
+  const planValid = Boolean(planExpiresAt && new Date(planExpiresAt) > new Date())
+  const hasVipGrant = Boolean(user?.is_vip || profile?.is_vip || user?.vip_access || profile?.vip_access || user?.free_privilege || profile?.free_privilege)
+  const isProLevel = hasVipGrant || (planValid && ['org_pro', 'org_pro_3m', 'pro', 'elite', 'professional', 'vip', 'enterprise'].includes(rawPlan))
+  const isStarterLevel = !isProLevel && planValid && ['org_starter', 'starter'].includes(rawPlan)
+  // Legacy flag (kept for logs/response shape): paid == pro-level here.
+  const isPaidPlan = isProLevel
 
   let daysRemaining = 0
   if (isPaidPlan && planExpiresAt) {
@@ -396,12 +399,7 @@ async function dispatchReportForCandidate(
       } catch (_) {}
     }
 
-    let score = j.match_score || 0
-    if (score <= 0) {
-      const idCode = (j._id?.toString() || '').slice(-3)
-      const varOffset = parseInt(idCode, 16) % 9
-      score = 90 + varOffset
-    }
+    let score = Number(j.match_score) || 0
 
     return {
       name: parsed.company,
@@ -415,12 +413,11 @@ async function dispatchReportForCandidate(
     }
   })
 
-  // Dynamic ATS Match Score & Recruiter Views calculation
-  const matchScore = topCompanies.length > 0
-    ? Math.round(topCompanies.reduce((acc: number, c: any) => acc + (c.matchScore || 94), 0) / topCompanies.length)
-    : (profile?.ats_score || 94)
-
-  const recruiterViews = Math.min(18, Math.max(2, Math.floor(todayApplied * 0.12) + (isPaidPlan ? 3 : 1)))
+  // Real average of stored match scores only — never fabricated. Null when unknown.
+  const realScores = topCompanies.map((c: any) => c.matchScore).filter((s: number) => s > 0)
+  const matchScore = realScores.length > 0
+    ? Math.round(realScores.reduce((acc: number, s: number) => acc + s, 0) / realScores.length)
+    : null
 
   const dateString = new Date().toLocaleDateString('en-IN', {
     weekday: 'long',
@@ -451,8 +448,9 @@ async function dispatchReportForCandidate(
       appliedCount: todayApplied,
       totalApplied: totalAppliedCount,
       matchScore,
-      recruiterViews,
       isPaidPlan,
+      showOffer: !isProLevel,
+      isStarterLevel,
       planName,
       planExpiresAt,
       daysRemaining,
@@ -463,7 +461,10 @@ async function dispatchReportForCandidate(
       promoCode,
       discountedPrice,
       originalPrice,
-      sectionTitle: `Today's Verified Applications (${topCompanies.length})`
+      sectionTitle: `Today's Verified Applications (${topCompanies.length})`,
+      runLine: candidateInput.taskId && newThisRun < todayApplied
+        ? `${newThisRun} new in this run · ${todayApplied} total today`
+        : ''
     })
 
     const subject = todayApplied > 0
@@ -478,7 +479,7 @@ async function dispatchReportForCandidate(
     })
   }
 
-  // 8. Dispatch Push Notification & In-App Notification
+  // 8. Dispatch Push Notification & In-App Notification (real numbers only)
   if (channel === 'both' || channel === 'push') {
     const companySummary = topCompanies.slice(0, 2).map(c => c.name).join(', ')
     const pushTitle = todayApplied > 0
@@ -486,7 +487,7 @@ async function dispatchReportForCandidate(
       : `✨ Daily Recruiter Sweep Complete`
 
     const pushMessage = todayApplied > 0 && companySummary
-      ? `Dispatched: ${companySummary} & more. ${recruiterViews} recruiter reviews active.`
+      ? `Latest: ${companySummary}${todayApplied > 2 ? ` +${todayApplied - 2} more today` : ' today'}.`
       : `All active vacancies up to date (${totalAppliedCount} total applications).`
 
     const pushUrl = '/dashboard'

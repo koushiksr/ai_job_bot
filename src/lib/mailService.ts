@@ -557,9 +557,12 @@ export interface JobDispatchReportOptions {
   appliedCount: number
   totalApplied?: number
   totalTargetCount?: number
-  matchScore?: number
+  matchScore?: number | null
   recruiterViews?: number
   isPaidPlan?: boolean
+  showOffer?: boolean
+  isStarterLevel?: boolean
+  runLine?: string
   planName?: string
   planExpiresAt?: string | Date | null
   daysRemaining?: number
@@ -593,9 +596,12 @@ export function generateJobDispatchReportHtml({
   candidateName = 'Candidate',
   appliedCount = 0,
   totalApplied = 0,
-  matchScore = 94,
-  recruiterViews = 4,
+  matchScore = null,
+  recruiterViews = 0,
   isPaidPlan = false,
+  showOffer = true,
+  isStarterLevel = false,
+  runLine = '',
   planName = 'JobFlux Professional',
   planExpiresAt = null,
   daysRemaining = 0,
@@ -612,9 +618,10 @@ export function generateJobDispatchReportHtml({
 }: JobDispatchReportOptions): string {
   const remainingFree = Math.max(0, freeTrialLimit - freeTrialUsed)
   const percentUsed = Math.min(100, Math.round((freeTrialUsed / freeTrialLimit) * 100))
+  // Inbox preview: real numbers only — never fabricated views or scores.
   const previewText = appliedCount > 0
-    ? `JobFlux AI: ${appliedCount} jobs applied today · ${isPaidPlan ? `${planName} Active` : `${remainingFree} free applications remaining`} · ${recruiterViews} recruiter views`
-    : `JobFlux AI: Daily recruiter sweep completed · ${totalApplied} total applications active · ${isPaidPlan ? `${planName} Active` : `${remainingFree} free applications remaining`}`
+    ? `JobFlux AI: ${appliedCount} jobs applied today${runLine ? ` (${runLine})` : ''} · ${totalApplied} total`
+    : `JobFlux AI: daily sweep complete · ${totalApplied} total applications`
 
   let formattedExpiry = 'Active'
   if (planExpiresAt) {
@@ -726,65 +733,51 @@ export function generateJobDispatchReportHtml({
                 ${emailOverview}
               </p>
 
-              <!-- Metric Grid (2x2 table) -->
+              <!-- Metric Grid: real stats only (today / lifetime / plan) -->
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:22px;">
                 <tr>
-                  <td class="mobile-col-half" width="50%" valign="top" style="padding-right:5px;padding-bottom:10px;">
-                    <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:14px;text-align:center;">
+                  <td class="mobile-col-half" width="33%" valign="top" style="padding-right:4px;padding-bottom:10px;">
+                    <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:14px 8px;text-align:center;">
                       <div style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
-                        Applications Sent
+                        Applied Today
                       </div>
                       <div class="mobile-stat-number" style="font-size:28px;font-weight:700;color:#ffffff;font-family:monospace;line-height:1.1;">
                         ${appliedCount}
                       </div>
                       <div style="font-size:11px;color:#71717a;margin-top:3px;">
-                        ${appliedCount > 0 ? 'Dispatched Today' : 'Today'} ${totalApplied > 0 ? `(${totalApplied} Total)` : ''}
+                        Verified dispatches
                       </div>
                     </div>
                   </td>
-                  <td class="mobile-col-half" width="50%" valign="top" style="padding-left:5px;padding-bottom:10px;">
-                    <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:14px;text-align:center;">
+                  <td class="mobile-col-half" width="34%" valign="top" style="padding-left:2px;padding-right:2px;padding-bottom:10px;">
+                    <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:14px 8px;text-align:center;">
                       <div style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
-                        ATS Match Rate
+                        Lifetime Total
                       </div>
                       <div class="mobile-stat-number" style="font-size:28px;font-weight:700;color:#38bdf8;font-family:monospace;line-height:1.1;">
-                        ${matchScore}%
+                        ${totalApplied}
                       </div>
                       <div style="font-size:11px;color:#71717a;margin-top:3px;">
-                        Target Precision
+                        All-time applications
                       </div>
                     </div>
                   </td>
-                </tr>
-                <tr>
-                  <td class="mobile-col-half" width="50%" valign="top" style="padding-right:5px;">
-                    <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:14px;text-align:center;">
+                  <td class="mobile-col-half" width="33%" valign="top" style="padding-left:4px;padding-bottom:10px;">
+                    <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:14px 8px;text-align:center;">
                       <div style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
-                        Recruiter Views
+                        Plan
                       </div>
-                      <div class="mobile-stat-number" style="font-size:28px;font-weight:700;color:#ffffff;font-family:monospace;line-height:1.1;">
-                        ${recruiterViews}
+                      <div class="mobile-stat-number" style="font-size:15px;font-weight:700;color:#ffffff;line-height:1.5;padding-top:5px;">
+                        ${isPaidPlan ? planName.replace('JobFlux ', '') : (isStarterLevel ? 'Starter' : 'Free')}
                       </div>
                       <div style="font-size:11px;color:#71717a;margin-top:3px;">
-                        Active HR Reviews
-                      </div>
-                    </div>
-                  </td>
-                  <td class="mobile-col-half" width="50%" valign="top" style="padding-left:5px;">
-                    <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:14px;text-align:center;">
-                      <div style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
-                        Harvard ATS Resume
-                      </div>
-                      <div class="mobile-stat-number" style="font-size:20px;font-weight:700;color:#ffffff;font-family:monospace;line-height:1.2;padding-top:4px;">
-                        Synced ✓
-                      </div>
-                      <div style="font-size:11px;color:#71717a;margin-top:3px;">
-                        FAANG Standard
+                        ${isPaidPlan && daysRemaining > 0 ? `${daysRemaining}d left` : isPaidPlan ? formattedExpiry : 'Upgrade for daily runs'}
                       </div>
                     </div>
                   </td>
                 </tr>
               </table>
+              ${runLine ? `<p style="margin:-12px 0 20px 0;font-size:12px;color:#71717a;text-align:center;">${runLine}</p>` : ''}
 
               <!-- Verified Employers Section -->
               <div style="margin-bottom:24px;">
@@ -858,32 +851,10 @@ export function generateJobDispatchReportHtml({
                 <div style="margin-top:14px;padding-top:12px;border-top:1px solid #222428;">
                   <ul style="margin:0;padding-left:18px;font-size:12px;color:#9ca3af;line-height:1.8;">
                     <li><strong style="color:#ffffff;">Daily Auto-Apply:</strong> Active (Dispatched ${appliedCount} jobs today${totalApplied > 0 ? `, ${totalApplied} total` : ''})</li>
-                    <li><strong style="color:#ffffff;">On-Demand Sweeps:</strong> 5x/Week real-time radar sweeps unlocked</li>
+                    <li><strong style="color:#ffffff;">On-Demand Sweeps:</strong> Real-time radar sweeps unlocked</li>
                     <li><strong style="color:#ffffff;">Harvard ATS Resume:</strong> PDF Print &amp; Export Unlocked</li>
                     <li><strong style="color:#ffffff;">Recruiter Telemetry:</strong> Live recruiter application links enabled</li>
                   </ul>
-                </div>
-
-                <!-- VIP Opportunity for Active Subscribers -->
-                <div style="margin-top:14px;background-color:#0b0c0e;border:1px solid #2e3035;border-radius:8px;padding:12px;">
-                  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
-                    <tr>
-                      <td valign="middle">
-                        <div style="font-size:10px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">
-                          Subscriber Extension Opportunity
-                        </div>
-                        <div style="font-size:13px;font-weight:700;color:#ffffff;">
-                          3-Month VIP Professional Extension &bull; ₹299 <span style="font-size:11px;color:#71717a;text-decoration:line-through;">₹2,500</span>
-                        </div>
-                        <div style="font-size:11px;color:#9ca3af;margin-top:2px;">
-                          Add 90 days of continuous automated sweeps, priority queue slot, and on-demand radar sweeps.
-                        </div>
-                      </td>
-                      <td align="right" valign="middle">
-                        <span style="font-size:10px;font-family:monospace;color:#38bdf8;border:1px solid #28303d;padding:2px 6px;border-radius:4px;">CODE: VIP299</span>
-                      </td>
-                    </tr>
-                  </table>
                 </div>
               </div>
               ` : `
@@ -896,7 +867,7 @@ export function generateJobDispatchReportHtml({
                         Account Usage Status
                       </div>
                       <div style="font-size:15px;font-weight:700;color:#ffffff;margin:3px 0 6px 0;">
-                        ${freeTrialUsed} of ${freeTrialLimit} Free Applications Used
+                        ${isStarterLevel ? 'Starter Plan · 20 applications/day' : `${freeTrialUsed} of ${freeTrialLimit} Free Applications Used`}
                       </div>
                     </td>
                     <td align="right" valign="middle">
@@ -907,14 +878,18 @@ export function generateJobDispatchReportHtml({
                   </tr>
                 </table>
 
-                <!-- Clean Progress Bar -->
+                <!-- Clean Progress Bar (trial users only) -->
+                ${!isStarterLevel ? `
                 <div style="background-color:#0b0c0e;border-radius:9999px;height:6px;width:100%;overflow:hidden;margin:8px 0 10px 0;">
                   <div style="background-color:#38bdf8;width:${percentUsed}%;height:100%;border-radius:9999px;"></div>
                 </div>
 
                 <p style="margin:0 0 12px 0;font-size:12px;line-height:1.6;color:#9ca3af;">
                   <strong>Why morning continuity matters:</strong> Recruiters review inbound candidates between 9 AM and 11 AM. Once your remaining <strong>${remainingFree} free applications</strong> are completed, automatic daily sweeps pause, causing you to miss high-priority applicant windows.
-                </p>
+                </p>` : `
+                <p style="margin:0 0 12px 0;font-size:12px;line-height:1.6;color:#9ca3af;">
+                  Your Starter plan runs scheduled morning sweeps. Upgrade to Professional for 55 applications/day plus on-demand radar sweeps.
+                </p>`}
 
                 <!-- Detailed Upgrade Options Breakdown -->
                 <div style="border-top:1px solid #222428;padding-top:12px;margin-top:10px;">
@@ -967,9 +942,13 @@ export function generateJobDispatchReportHtml({
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="${isPaidPlan ? `${upgradeUrl}?promo=VIP299` : `${upgradeUrl}?promo=${promoCode}`}" class="mobile-btn" style="display:inline-block;background-color:#ffffff;color:#0b0c0e;font-size:14px;font-weight:700;text-decoration:none;padding:14px 34px;border-radius:8px;letter-spacing:-0.2px;">
-                      ${isPaidPlan ? 'Extend 3 Months with VIP Pass (₹299) &rarr;' : `Upgrade to Professional (${discountedPrice}) &rarr;`}
-                    </a>
+                    ${showOffer ? `
+                    <a href="${upgradeUrl}?promo=${promoCode}" class="mobile-btn" style="display:inline-block;background-color:#ffffff;color:#0b0c0e;font-size:14px;font-weight:700;text-decoration:none;padding:14px 34px;border-radius:8px;letter-spacing:-0.2px;">
+                      ${`Upgrade to Professional (${discountedPrice}) &rarr;`}
+                    </a>` : `
+                    <a href="${dashboardUrl}" class="mobile-btn" style="display:inline-block;background-color:#ffffff;color:#0b0c0e;font-size:14px;font-weight:700;text-decoration:none;padding:14px 34px;border-radius:8px;letter-spacing:-0.2px;">
+                      Open JobFlux Cockpit &rarr;
+                    </a>`}
                   </td>
                 </tr>
                 <tr>

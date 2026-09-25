@@ -1,6 +1,6 @@
 export type AdminTabType = 'candidates' | 'requests' | 'queue' | 'payments' | 'offers' | 'enterprise_leads' | 'enterprise_orgs' | 'logs' | 'visitors' | 'reviews'
 
-export type LogsSubTabType = 'activity' | 'llm_telemetry' | 'job_history' | 'tickets'
+export type LogsSubTabType = 'activity' | 'llm_telemetry' | 'job_history' | 'tickets' | 'notifications'
 
 export interface AdminOverviewMetrics {
   total_profiles: number

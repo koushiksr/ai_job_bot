@@ -72,6 +72,170 @@ interface LogsTabProps {
   adminEmail: string
 }
 
+interface UserNotificationRow {
+  id: string
+  kind: string
+  channel: string
+  email: string
+  user_id: string
+  title: string
+  message: string
+  status: string
+  at: string | null
+}
+
+// What-users-received view: self-contained (own fetch + filters)
+function UserNotificationsView({ formatTimestamp }: { formatTimestamp: (ts: any) => string }) {
+  const [rows, setRows] = useState<UserNotificationRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [email, setEmail] = useState('')
+  const [channel, setChannel] = useState('all')
+
+  const fetchRows = async (emailQ = email, chan = channel) => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (emailQ.trim()) params.set('email', emailQ.trim())
+      if (chan !== 'all') params.set('channel', chan)
+      params.set('limit', '100')
+      const res = await fetch(`/api/admin/notifications?${params.toString()}`, { credentials: 'same-origin' })
+      if (res.ok) {
+        const data = await res.json()
+        setRows(data.notifications || [])
+      }
+    } catch {}
+    finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRows()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const kindStyle = (kind: string) =>
+    kind === 'email'
+      ? 'bg-sky-950/60 text-sky-300 border-sky-800/60'
+      : kind === 'push'
+      ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60'
+      : kind === 'admin_alert'
+      ? 'bg-rose-950/60 text-rose-300 border-rose-800/60'
+      : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+
+  return (
+    <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
+      <div className="p-4 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center gap-3 bg-black light:bg-white">
+        <div>
+          <h3 className="text-xs font-semibold text-white light:text-zinc-900">
+            What Users Received
+          </h3>
+          <p className="text-[11px] text-zinc-500 light:text-zinc-600">
+            Every dispatch email, push and admin alert — filter by recipient email.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') fetchRows() }}
+              placeholder="Filter by recipient email…"
+              className="pl-8 pr-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs text-white light:text-zinc-900 placeholder-zinc-500 focus:outline-none focus:border-cyan-500 w-56"
+            />
+          </div>
+          <select
+            value={channel}
+            onChange={(e) => { setChannel(e.target.value); }}
+            className="px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 focus:outline-none focus:border-cyan-500 cursor-pointer"
+          >
+            <option value="all">All channels</option>
+            <option value="email">Email</option>
+            <option value="push">Push / in-app</option>
+            <option value="alert">Admin alerts</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => fetchRows()}
+            className="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Apply
+          </button>
+          <button
+            onClick={() => fetchRows(email, channel)}
+            className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 cursor-pointer"
+            title="Refresh"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
+          <thead className="bg-slate-950 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200">
+            <tr>
+              <th className="py-3 px-4">Time</th>
+              <th className="py-3 px-4">Recipient</th>
+              <th className="py-3 px-4">Channel</th>
+              <th className="py-3 px-4">Subject / Title</th>
+              <th className="py-3 px-4">Message</th>
+              <th className="py-3 px-4">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
+            {loading && rows.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-12 text-center text-slate-400 light:text-zinc-500">
+                  <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-cyan-400" />
+                  Loading notifications…
+                </td>
+              </tr>
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-12 text-center text-slate-500 light:text-zinc-500">
+                  No notifications found{email ? ` for "${email}"` : ''}. Try clearing the email filter.
+                </td>
+              </tr>
+            ) : (
+              rows.map((n) => (
+                <tr key={n.id} className="hover:bg-slate-800/30 light:hover:bg-zinc-50 transition-colors align-top">
+                  <td className="py-3 px-4 text-[11px] font-mono text-zinc-400 light:text-zinc-600 whitespace-nowrap">
+                    {formatTimestamp(n.at)}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="font-mono text-[11px] text-white light:text-zinc-900 truncate max-w-[200px]" title={n.email}>{n.email || '—'}</div>
+                    {n.user_id && <div className="text-[10px] font-mono text-zinc-500">UID: {n.user_id}</div>}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase border ${kindStyle(n.kind)}`}>
+                      {n.kind === 'admin_alert' ? 'alert' : n.channel}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 max-w-[260px]">
+                    <div className="font-semibold text-white light:text-zinc-900 text-xs truncate" title={n.title}>{n.title}</div>
+                  </td>
+                  <td className="py-3 px-4 max-w-[320px]">
+                    <div className="text-[11px] text-zinc-400 light:text-zinc-600 truncate" title={n.message}>{n.message || '—'}</div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
+                      n.status === 'failed' ? 'bg-rose-950/40 text-rose-300 border-rose-800/60' : 'bg-emerald-950/40 text-emerald-300 border-emerald-800/60'
+                    }`}>
+                      {n.status || 'sent'}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export const LogsTab: React.FC<LogsTabProps> = ({
   logsSubTab,
   handleLogsSubTabChange,
@@ -202,6 +366,17 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             }`}
           >
             Support Inquiries ({supportTickets.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLogsSubTabChange('notifications' as any)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+              logsSubTab === 'notifications'
+                ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-sm'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-black light:bg-white border border-zinc-800 light:border-zinc-200'
+            }`}
+          >
+            User Notifications
           </button>
         </div>
 
@@ -1049,6 +1224,11 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             </table>
           </div>
         </div>
+      )}
+
+      {/* VIEW 4: WHAT USERS RECEIVED */}
+      {(logsSubTab as string) === 'notifications' && (
+        <UserNotificationsView formatTimestamp={formatTimestamp} />
       )}
     </div>
   )

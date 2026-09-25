@@ -242,7 +242,7 @@ export default function AdminDashboard() {
         setAssignedOfferFilter(prefs.assigned_offer_filter as any)
         cachePref('admin_assigned_offer_filter', prefs.assigned_offer_filter)
       }
-      if (prefs.logs_sub_tab && ['activity', 'llm_telemetry', 'job_history', 'tickets'].includes(prefs.logs_sub_tab)) {
+      if (prefs.logs_sub_tab && ['activity', 'llm_telemetry', 'job_history', 'tickets', 'notifications'].includes(prefs.logs_sub_tab)) {
         setLogsSubTab(prefs.logs_sub_tab as any)
         cachePref('admin_logs_sub_tab', prefs.logs_sub_tab)
       }
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
   const [requestStatusFilter, setRequestStatusFilter] = useState<string>('all')
   const [ticketNotes, setTicketNotes] = useState<{ [id: string]: string }>({})
   const [savingTicketId, setSavingTicketId] = useState<string | null>(null)
-  const [logsSubTab, setLogsSubTab] = useState<'activity' | 'llm_telemetry' | 'job_history' | 'tickets'>('activity')
+  const [logsSubTab, setLogsSubTab] = useState<'activity' | 'llm_telemetry' | 'job_history' | 'tickets' | 'notifications'>('activity')
   const [llmLogs, setLlmLogs] = useState<any[]>([])
   const [loadingLlmLogs, setLoadingLlmLogs] = useState<boolean>(false)
   const [llmStats, setLlmStats] = useState<{
@@ -676,7 +676,7 @@ export default function AdminDashboard() {
     try { localStorage.setItem('admin_assigned_offer_filter', filter) } catch {}
   }
 
-  const handleLogsSubTabChange = (tab: 'activity' | 'llm_telemetry' | 'job_history' | 'tickets') => {
+  const handleLogsSubTabChange = (tab: 'activity' | 'llm_telemetry' | 'job_history' | 'tickets' | 'notifications') => {
     setLogsSubTab(tab)
     try { localStorage.setItem('admin_logs_sub_tab', tab) } catch {}
     if (tab === 'activity') fetchActivityLogs()
@@ -1339,7 +1339,7 @@ export default function AdminDashboard() {
         const sAssignedFilter = localStorage.getItem('admin_assigned_offer_filter')
         if (sAssignedFilter && ['all', 'active', 'claimed', 'expired'].includes(sAssignedFilter)) setAssignedOfferFilter(sAssignedFilter as any)
         const sLogsSub = localStorage.getItem('admin_logs_sub_tab')
-        if (sLogsSub && ['activity', 'llm_telemetry', 'job_history', 'tickets'].includes(sLogsSub)) {
+        if (sLogsSub && ['activity', 'llm_telemetry', 'job_history', 'tickets', 'notifications'].includes(sLogsSub)) {
           setLogsSubTab(sLogsSub as any)
         }
 
