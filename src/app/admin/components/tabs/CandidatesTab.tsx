@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  Crown,
   Users,
   ChevronDown,
   ChevronUp,
@@ -409,7 +408,6 @@ export default function CandidatesTab({
     if (candidateStatusFilter === 'expiring') return u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'urgent') return u.plan_expiry_status === 'expiring_soon_1d'
     if (candidateStatusFilter === 'expired') return u.plan_expiry_status === 'expired'
-    if (candidateStatusFilter === 'vip') return u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime'
     if (candidateStatusFilter === 'no_plan') return u.plan_expiry_status === 'no_plan' || u.plan === 'none' || u.plan === 'no_plan'
 
     return true
@@ -847,7 +845,6 @@ export default function CandidatesTab({
                   { key: 'active', label: 'Active Plan', count: usersList.filter(u => u.plan_expiry_status === 'active').length, color: 'text-emerald-400 light:text-emerald-700' },
                   { key: 'expiring', label: 'Expiring 1-2d', count: usersList.filter(u => u.plan_expiry_status === 'expiring_soon_2d' || u.plan_expiry_status === 'expiring_soon_1d').length, color: 'text-amber-400 light:text-amber-700' },
                   { key: 'expired', label: 'Expired', count: usersList.filter(u => u.plan_expiry_status === 'expired').length, color: 'text-rose-400 light:text-rose-600' },
-                  { key: 'vip', label: 'VIP Pass', count: usersList.filter(u => u.is_vip || u.plan === 'vip' || u.plan_expiry_status === 'vip_lifetime').length }
                 ].map(f => (
                   <button
                     key={f.key}
@@ -1008,16 +1005,6 @@ export default function CandidatesTab({
                 </div>
                 <p className="text-[11px] text-zinc-400 light:text-zinc-600">
                   Validity ended. Candidate is paused and eligible for win-back discount offers and immediate reactivation.
-                </p>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-zinc-950 light:bg-white border border-amber-500/30 light:border-amber-300 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-300 light:text-amber-700 font-bold font-mono">
-                  <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                  <span>VIP Pass (3 Months / 90d)</span>
-                </div>
-                <p className="text-[11px] text-zinc-400 light:text-zinc-600">
-                  Candidate holds an active VIP access pass (90 days). Renewable upon completion.
                 </p>
               </div>
 
@@ -1386,11 +1373,7 @@ export default function CandidatesTab({
 
                           if (isAppliedToday) {
                             return (
-                              <div className="space-y-1.5 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to inspect execution device details">
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 light:border-emerald-300">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
-                                  <span>APPLIED TODAY</span>
-                                </div>
+                              <div className="space-y-0.5 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to inspect execution device details">
                                 <div className="space-y-0.5">
                                   <div className="flex items-center gap-1 text-[11px] font-bold text-white light:text-zinc-900 group-hover:text-emerald-300 transition-colors">
                                     <Laptop className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
@@ -1485,75 +1468,48 @@ export default function CandidatesTab({
                             )
                           }
                           return (
-                            <div className="flex flex-col items-start gap-1.5">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                {isOrgMemberUser(u) ? (
-                                  (u.plan === 'org_pro' || u.plan === 'org_pro_3m' || (u.plan === 'pro' && !isSuperAdminUser(u))) ? (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/40 shadow-sm">
-                                      <span>⚡</span><span>{u.plan === 'org_pro_3m' ? 'ORG PRO 3M' : 'ORG PRO'}</span>
-                                    </span>
-                                  ) : (u.plan === 'org_starter' || u.plan === 'starter') ? (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 bg-cyan-500/20 text-cyan-300 light:text-cyan-700 border border-cyan-500/40 shadow-sm">
-                                      <Building2 className="w-2.5 h-2.5" /><span>ORG STARTER</span>
-                                    </span>
-                                  ) : (
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 bg-rose-500/20 text-rose-300 light:text-rose-700 border border-rose-500/40 shadow-sm" title="Unpaid org candidate — 0 daily applications allowed until paid">
-                                      <AlertCircle className="w-2.5 h-2.5" /><span>ORG UNPAID</span>
-                                    </span>
-                                  )
-                                ) : (
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
-                                    u.plan === 'none' || u.plan === 'no_plan' 
-                                      ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-500 light:text-zinc-500 border border-zinc-800 light:border-zinc-200' 
-                                      : 'bg-zinc-800/90 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300'
-                                  }`}>
-                                    {u.plan === 'none' || u.plan === 'no_plan' ? 'NO PLAN' : (u.plan || 'trial')}
-                                  </span>
-                                )}
-                            {u.is_vip && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold bg-amber-500/10 text-amber-400 light:text-amber-700 border border-amber-500/30 light:border-amber-300">
-                                <Crown className="w-2.5 h-2.5 text-amber-400 light:text-amber-600" />
-                                VIP
-                              </span>
-                            )}
-                            {(() => {
-                              const isOrg = isOrgMemberUser(u);
-                              const planLc = (u.plan || 'trial').toLowerCase();
-                              const isVipPro = Boolean(u.is_vip || u.plan_expiry_status === 'vip_lifetime');
-                              const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'org_pro_3m' || planLc === 'pro' || isVipPro);
-                              const isOrgStarter = isOrg && (planLc === 'org_starter' || planLc === 'starter');
-                              const isOrgUnpaid = isOrg && !isOrgPro && !isOrgStarter;
-
-                              let limit = 0;
-                              if (isOrg) {
-                                if (isOrgUnpaid) {
-                                  limit = 0;
-                                } else if (isOrgPro) {
-                                  limit = 55;
-                                } else if (isOrgStarter) {
+                            <div className="flex flex-col items-start gap-1">
+                              {(() => {
+                                const isOrg = isOrgMemberUser(u);
+                                const planLc = (u.plan || 'trial').toLowerCase();
+                                const isVipPro = Boolean(u.is_vip || u.plan_expiry_status === 'vip_lifetime');
+                                const isOrgPro = isOrg && (planLc === 'org_pro' || planLc === 'org_pro_3m' || planLc === 'pro' || isVipPro);
+                                const isOrgStarter = isOrg && (planLc === 'org_starter' || planLc === 'starter');
+                                let label = (u.plan || 'trial').toUpperCase();
+                                let limit = 0;
+                                let pill = 'bg-zinc-800/90 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border-zinc-700 light:border-zinc-300';
+                                let icon: React.ReactNode = null;
+                                if (isOrg) {
+                                  if (isOrgPro) {
+                                    label = planLc === 'org_pro_3m' ? 'ORG PRO 3M' : 'ORG PRO';
+                                    limit = 55;
+                                    pill = 'bg-amber-500/20 text-amber-300 light:text-amber-700 border-amber-500/40';
+                                    icon = <span>⚡</span>;
+                                  } else if (isOrgStarter) {
+                                    const customLim = Number(u.daily_application_limit);
+                                    limit = !isNaN(customLim) && customLim > 0 ? Math.min(20, customLim) : 20;
+                                    label = 'ORG STARTER';
+                                    pill = 'bg-cyan-500/20 text-cyan-300 light:text-cyan-700 border-cyan-500/40';
+                                  } else {
+                                    label = 'ORG UNPAID';
+                                    limit = 0;
+                                    pill = 'bg-rose-500/20 text-rose-300 light:text-rose-700 border-rose-500/40';
+                                  }
+                                } else {
+                                  const tierCap = planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55;
                                   const customLim = Number(u.daily_application_limit);
-                                  limit = !isNaN(customLim) && customLim > 0 ? Math.min(20, customLim) : 20;
+                                  limit = u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap;
+                                  label = (planLc === 'none' || planLc === 'no_plan') ? 'NO PLAN' : (u.plan || 'trial').toUpperCase();
                                 }
-                              } else {
-                                const tierCap = planLc === 'trial' ? 10 : planLc === 'starter' ? 20 : 55;
-                                const customLim = Number(u.daily_application_limit);
-                                limit = u.daily_application_limit != null && !isNaN(customLim) ? Math.min(tierCap, customLim) : tierCap;
-                              }
-
-                              return (
-                                <span 
-                                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-medium border ${
-                                    limit === 0
-                                      ? 'bg-rose-950/40 text-rose-300 border-rose-800/60'
-                                      : 'bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700/60 light:border-zinc-300'
-                                  }`}
-                                  title={`Daily Application Limit: ${limit}/day on Naukri platform${limit === 0 ? ' (Payment Required)' : ''}`}
-                                >
-                                  {limit}/d
-                                </span>
-                              )
-                            })()}
-                          </div>
+                                return (
+                                  <span
+                                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1 border ${pill}`}
+                                    title={isOrg && limit === 0 ? 'Unpaid org candidate — 0 daily applications until paid' : `Daily Application Limit: ${limit}/day on Naukri platform`}
+                                  >
+                                    {icon}<span>{label} · {limit}/d</span>
+                                  </span>
+                                )
+                              })()}
 
                           {/* If candidate is linked to an organization, display org tag */}
                           {isOrgMemberUser(u) && (
@@ -1588,7 +1544,6 @@ export default function CandidatesTab({
                                 <optgroup label="Standard Paid Individual Plans">
                                   <option value="pro">Pro (30d - ₹399 · 55/d)</option>
                                   <option value="elite">Professional (90d - ₹199 · 55/d)</option>
-                                  <option value="vip">VIP Pass (3 Months / 90d)</option>
                                 </optgroup>
                               </>
                             ) : (
@@ -1599,7 +1554,6 @@ export default function CandidatesTab({
                                   <option value="starter">Starter (30d - 20/d)</option>
                                   <option value="pro">Pro (30d - ₹399 · 55/d)</option>
                                   <option value="elite">Professional (90d · 55/d)</option>
-                                  <option value="vip">VIP Pass (3 Months / 90d)</option>
                                 </optgroup>
                                 <optgroup label="🏢 Assign to Organization Tier">
                                   <option value="none">⚠️ Org Unpaid (Payment Required - 0/d)</option>
@@ -1611,34 +1565,8 @@ export default function CandidatesTab({
                             )}
                           </select>
 
-                          <button
-                            type="button"
-                            onClick={() => handleToggleVip(u.user_id, !u.is_vip)}
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition-all cursor-pointer ${
-                              u.is_vip
-                                ? 'bg-amber-500/10 text-amber-400 light:text-amber-700 border border-amber-500/30 light:border-amber-300 hover:bg-rose-500/15 hover:text-rose-400 hover:border-rose-500/30'
-                                : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border border-zinc-800 light:border-zinc-300 hover:bg-zinc-800 hover:text-zinc-200 light:hover:bg-zinc-200'
-                            }`}
-                            title={u.is_vip ? "Click to Revoke VIP Pass" : "Click to Grant 3-Month VIP Pass"}
-                          >
-                            <Crown className="w-3 h-3 text-amber-400 light:text-amber-600" />
-                            {u.is_vip ? 'Revoke VIP' : 'Grant VIP'}
-                          </button>
-
                           {/* Expiry Countdown & Visual Status */}
                           {(() => {
-                            if (u.is_vip || u.plan === 'vip') {
-                              return (
-                                <div
-                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 text-amber-300 light:text-amber-700 bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-500/30 light:border-amber-300"
-                                  title="Candidate has active VIP access (90d)."
-                                >
-                                  <Crown className="w-3 h-3 text-amber-400 light:text-amber-600 shrink-0" />
-                                  <span className="font-semibold">VIP Pass (90d Active)</span>
-                                </div>
-                              )
-                            }
-
                             if (isOrgMemberUser(u) && (u.plan === 'unpaid' || u.plan === 'enterprise' || u.plan === 'none' || u.plan === 'no_plan' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan')) {
                               return (
                                 <div
