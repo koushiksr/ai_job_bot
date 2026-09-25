@@ -42,14 +42,26 @@ export async function GET(req: NextRequest) {
     const now = new Date()
     const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
-    // Auto-expire stale notifications in MongoDB so they never haunt candidates
+    // Helper: get IST date string (YYYY-MM-DD) for any Date
+    const toISTDate = (d: Date) =>
+      d.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+    const todayIST = toISTDate(now)
+
+    // Auto-expire stale notifications in MongoDB so they never haunt candidates.
+    // Also expire dispatch_report / "applied today" notifications from a previous IST calendar day.
     await db.collection('user_notifications').updateMany(
       {
         email: cleanEmail,
         read: false,
         $or: [
           { expires_at: { $lte: now } },
-          { expires_at: { $exists: false }, created_at: { $lte: cutoff24h } }
+          { expires_at: { $exists: false }, created_at: { $lte: cutoff24h } },
+          // Dispatch-report notifications are strictly tied to the IST calendar day they were sent.
+          // Mark all prior-day dispatch_report / "applied today" notifications as expired.
+          {
+            type: 'dispatch_report',
+            created_at: { $lt: new Date(todayIST + 'T00:00:00+05:30') }
+          }
         ]
       },
       {
@@ -58,7 +70,7 @@ export async function GET(req: NextRequest) {
     )
 
     // 2. Fetch ONLY fresh, unexpired unread notifications
-    const notifications = await db.collection('user_notifications')
+    const rawNotifications = await db.collection('user_notifications')
       .find({
         email: cleanEmail,
         read: false,
@@ -70,6 +82,19 @@ export async function GET(req: NextRequest) {
       .sort({ created_at: -1 })
       .limit(10)
       .toArray()
+
+    // Client-side IST-day guard: filter out any dispatch_report / "applied today" notifications
+    // that somehow slipped through (e.g. created late last night with a future expires_at).
+    const notifications = rawNotifications.filter(n => {
+      if (
+        n.type === 'dispatch_report' ||
+        (typeof n.title === 'string' && n.title.toLowerCase().includes('applied today')) ||
+        (typeof n.message === 'string' && n.message.toLowerCase().includes('applied today'))
+      ) {
+        return toISTDate(new Date(n.created_at)) === todayIST
+      }
+      return true
+    })
     const mappedOffers = assignedOffers.map(o => {
       const exp = o.expires_at ? new Date(o.expires_at) : null
       const isExpired = exp ? now > exp : false

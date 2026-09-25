@@ -275,6 +275,11 @@ export default function UserDashboard() {
       // 3. Process fresh, unexpired real-time push notifications
       const notifs = data.notifications || []
       const nowMs = Date.now()
+      // Helper: get YYYY-MM-DD string in IST for a given timestamp
+      const toISTDateStr = (ms: number) =>
+        new Date(ms).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+      const todayISTStr = toISTDateStr(nowMs)
+
       for (const notif of notifs) {
         // Expiration check: if notification has expired or is older than 6 hours, dismiss and skip
         if (notif.expires_at && new Date(notif.expires_at).getTime() < nowMs) {
@@ -284,6 +289,28 @@ export default function UserDashboard() {
         if (notif.created_at && (nowMs - new Date(notif.created_at).getTime()) > 6 * 3600 * 1000) {
           markNotificationAsRead(notif.id, userEmail)
           continue
+        }
+
+        // IST calendar-day guard for dispatch_report / "applied today" notifications:
+        // these are only relevant for the day they were generated. If the IST date
+        // has rolled over, auto-dismiss and skip to prevent stale "54 jobs applied today"
+        // toasts appearing the next morning when today's count is 0.
+        const isDispatchReport =
+          (notif as any).type === 'dispatch_report' ||
+          (typeof notif.title === 'string' && notif.title.toLowerCase().includes('applied today')) ||
+          (typeof notif.message === 'string' && notif.message.toLowerCase().includes('applied today'))
+        if (isDispatchReport) {
+          const notifDateIST = notif.created_at ? toISTDateStr(new Date(notif.created_at).getTime()) : null
+          if (notifDateIST !== todayISTStr) {
+            // Notification is from a previous IST calendar day — silently expire it
+            markNotificationAsRead(notif.id, userEmail)
+            continue
+          }
+          // Even if same day, if dashboard already shows 0 applied today, don't confuse the user
+          if (metrics.today === 0) {
+            markNotificationAsRead(notif.id, userEmail)
+            continue
+          }
         }
 
         const notifKey = `jobflux_seen_notif_${notif.id}`

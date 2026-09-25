@@ -575,12 +575,23 @@ async function dispatchReportForCandidate(
     const pushUrl = '/dashboard'
 
     try {
-      const reportExpiry = new Date(Date.now() + 12 * 3600 * 1000)
+      // Expire at end of current IST calendar day (23:59:59.999 IST), or +4 h, whichever is sooner.
+      // This prevents "applied today" dispatch notifications from bleeding into the next calendar day.
+      const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000
+      const nowUtcMs = Date.now()
+      const nowIst = new Date(nowUtcMs + IST_OFFSET_MS)
+      const endOfDayIst = new Date(
+        Date.UTC(nowIst.getUTCFullYear(), nowIst.getUTCMonth(), nowIst.getUTCDate(), 18, 29, 59, 999)
+        // 18:29:59 UTC = 23:59:59 IST  (18h 29m 59s UTC + 5h 30m = 23h 59m 59s IST)
+      )
+      const reportExpiryMs = Math.min(nowUtcMs + 4 * 3600 * 1000, endOfDayIst.getTime())
+      const reportExpiry = new Date(reportExpiryMs)
+      const ttlSeconds = Math.max(0, Math.floor((reportExpiryMs - nowUtcMs) / 1000))
       pushResult = await sendPushToUser(resolvedEmail, {
         title: pushTitle,
         body: pushMessage,
         url: pushUrl,
-        ttlSeconds: 12 * 3600,
+        ttlSeconds,
         expiresAt: reportExpiry.getTime(),
         ...(richImage ? { image: richImage } : {})
       })
