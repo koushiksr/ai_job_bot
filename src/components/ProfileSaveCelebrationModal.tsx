@@ -149,7 +149,7 @@ export default function ProfileSaveCelebrationModal({
                   className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
                   <Zap className="w-3.5 h-3.5 fill-black" />
-                  <span>Claim Welcome Pass for ₹399</span>
+                  <span>Claim Welcome Pass</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
                 <button

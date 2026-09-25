@@ -508,14 +508,14 @@ export default function PricingPage() {
                 <span className="text-xs font-semibold text-white">Subsidized Rates Active</span>
               </div>
               <p className="text-xs text-zinc-300">
-                You belong to an affiliated organization! Exclusive plans starting from <strong className="text-emerald-400">₹79 (Starter)</strong> and <strong className="text-emerald-400">₹99 (Org Pro)</strong> are activated directly in your Candidate Dashboard.
+                You belong to an affiliated organization! Exclusive subsidized rates for <strong className="text-emerald-400">Starter</strong> and <strong className="text-emerald-400">Org Pro</strong> are activated directly in your Candidate Dashboard.
               </p>
             </div>
             <Link
               href="/dashboard#plans"
               className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-md"
             >
-              <span>Go to Candidate Dashboard</span>
+              <span>View Org Plans in Dashboard</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

@@ -61,7 +61,7 @@ import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker }
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 import { checkIsPwaInstalled, shouldShowPwaAutoPrompt, markPwaAsDismissed } from '@/lib/pwaHelper'
 import { trackSignUp } from '@/lib/tracker'
-import { getDailyAppLimit, getCapUpgradeHint, getWeeklyOnDemandLimit } from '@/config/plans'
+import { getDailyAppLimit, getCapUpgradeHint, getWeeklyOnDemandLimit, ORG_PLANS } from '@/config/plans'
 
 export default function UserDashboard() {
   const [userId, setUserId] = useState<string>('')
@@ -616,6 +616,9 @@ export default function UserDashboard() {
       return
     }
 
+    const storedPlan = localStorage.getItem('user_plan')
+    if (storedPlan) setUserPlan(storedPlan)
+
     setUserId(storedUid)
     setUserEmail(storedEmail || '')
     setUserRole(storedRole || 'user')
@@ -634,6 +637,37 @@ export default function UserDashboard() {
 
     refreshAllDashboardData(storedUid, true, false)
   }, [])
+
+  // Deep-link anchor handling for #plans
+  useEffect(() => {
+    const handleHashNavigation = () => {
+      if (typeof window === 'undefined') return
+      if (window.location.hash === '#plans') {
+        const storedPlan = localStorage.getItem('user_plan') || userPlan
+        const storedRole = localStorage.getItem('user_role')
+        const storedEnterpriseRole = localStorage.getItem('enterprise_role') || enterpriseRole
+        const isOrg = isEnterpriseMember || storedEnterpriseRole === 'member' || storedRole === 'member' || storedPlan === 'enterprise' || storedPlan === 'org_starter' || storedPlan === 'org_pro' || storedPlan === 'org_pro_3m' || storedPlan === 'unpaid'
+
+        if (isOrg) {
+          setTimeout(() => {
+            const el = document.getElementById('plans')
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              el.classList.add('ring-2', 'ring-cyan-500/60')
+              setTimeout(() => el.classList.remove('ring-2', 'ring-cyan-500/60'), 2500)
+            }
+          }, 350)
+        } else if (userEmail) {
+          // Candidates not in an organization belong on public /pricing
+          window.location.href = '/pricing'
+        }
+      }
+    }
+
+    handleHashNavigation()
+    window.addEventListener('hashchange', handleHashNavigation)
+    return () => window.removeEventListener('hashchange', handleHashNavigation)
+  }, [isEnterpriseMember, userEmail, userPlan, enterpriseRole])
 
   // Real-time polling for candidate-assigned promotional offers & push notifications
   useEffect(() => {
@@ -769,7 +803,7 @@ export default function UserDashboard() {
     if (isEnterpriseMember && userPlan === 'org_starter') {
       setTaskFeedback({
         type: 'error',
-        text: 'Org Starter includes scheduled morning sweeps only (0 on-demand sweeps). Upgrade to Org Pro (₹99) to unlock 15 weekly on-demand sweeps.'
+        text: 'Org Starter includes scheduled morning sweeps only (0 on-demand sweeps). Upgrade to Org Pro to unlock 15 weekly on-demand sweeps.'
       })
       return
     }
@@ -1514,10 +1548,10 @@ export default function UserDashboard() {
                 <a
                   href="#plans"
                   className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0 shadow-sm"
-                  title="Activate Org Member Plan"
+                  title="View Organization Member Plans"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Org Plans (from ₹79)</span>
+                  <span>Org Plans</span>
                 </a>
               ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
                 <Link
@@ -2035,9 +2069,9 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* Enterprise Member Workspace Active Callout */}
+        {/* Enterprise Member Workspace Active Callout & Plans Section */}
         {userRole !== 'admin' && isEnterpriseMember && (
-          <div className="p-4 rounded-xl bg-zinc-950/80 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex flex-col gap-3 text-xs shadow-md">
+          <div id="plans" className="scroll-mt-24 p-4 rounded-xl bg-zinc-950/80 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex flex-col gap-3 text-xs shadow-md transition-all duration-300">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-cyan-900/50 border border-cyan-700/50 light:border-cyan-300 flex items-center justify-center shrink-0">
@@ -2082,78 +2116,119 @@ export default function UserDashboard() {
                   title="Upgrade to Org Pro for 55 daily applications and 15 on-demand sweeps/week"
                 >
                   <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                  <span>{orgProLoading ? 'Opening…' : 'Upgrade to Org Pro (55/d · ₹99)'}</span>
+                  <span>{orgProLoading ? 'Opening…' : 'Upgrade to Org Pro'}</span>
                   <ArrowRight className="w-3 h-3" />
                 </button>
               )}
             </div>
 
-            {/* If unpaid, show the 3 available organization member plans */}
-            {(!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid' || userPlan === 'none') && (
-              <div className="pt-2 border-t border-zinc-800/80 light:border-zinc-200">
-                <div className="text-[11px] font-semibold text-zinc-300 light:text-zinc-700 mb-2">
-                  Select your organization member plan to activate applications:
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-700 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-white text-xs">Org Starter</span>
-                        <span className="text-xs font-mono font-bold text-cyan-400">₹79 / mo</span>
-                      </div>
-                      <p className="text-[11px] text-zinc-400 mt-1">20 applies/day · Scheduled morning sweeps · No on-demand</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleOrgCheckout('org_starter')}
-                      disabled={orgProLoading}
-                      className="mt-2.5 w-full py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition cursor-pointer"
-                    >
-                      Subscribe ₹79
-                    </button>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-amber-950/20 border border-amber-500/40 flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute top-0 right-0 bg-amber-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">
-                      POPULAR
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-amber-200 text-xs">Org Pro (1 Month)</span>
-                        <span className="text-xs font-mono font-bold text-amber-400">₹99 / mo</span>
-                      </div>
-                      <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly on-demand sweeps · Priority queue</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleOrgCheckout('org_pro')}
-                      disabled={orgProLoading}
-                      className="mt-2.5 w-full py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition cursor-pointer"
-                    >
-                      Subscribe ₹99
-                    </button>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-zinc-900/90 border border-zinc-700 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-white text-xs">Org Pro (3 Months)</span>
-                        <span className="text-xs font-mono font-bold text-emerald-400">₹289 / 3 mos</span>
-                      </div>
-                      <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly sweeps · 90-day pipeline until hired</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleOrgCheckout('org_pro_3m')}
-                      disabled={orgProLoading}
-                      className="mt-2.5 w-full py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition cursor-pointer"
-                    >
-                      Subscribe ₹289
-                    </button>
-                  </div>
+            {/* Subsidized Organization Plans Grid */}
+            <div className="pt-2 border-t border-zinc-800/80 light:border-zinc-200">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="text-[11px] font-semibold text-zinc-300 light:text-zinc-700">
+                  {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid' || userPlan === 'none'
+                    ? 'Select your organization member plan to activate applications:'
+                    : 'Subsidized Organization Plans (Switch or Renew):'}
                 </div>
               </div>
-            )}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {/* Org Starter */}
+                <div className={`p-3 rounded-lg bg-zinc-900/90 border flex flex-col justify-between ${
+                  isPlanActive && userPlan === 'org_starter' ? 'border-cyan-500/80 ring-1 ring-cyan-500/30' : 'border-zinc-700'
+                }`}>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-white text-xs">Org Starter</span>
+                        {isPlanActive && userPlan === 'org_starter' && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-700/60">
+                            ACTIVE
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs font-mono font-bold text-cyan-400">
+                        {ORG_PLANS.find(p => p.id === 'org_starter')?.price || '₹79'} {ORG_PLANS.find(p => p.id === 'org_starter')?.period || '/ mo'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1">20 applies/day · Scheduled morning sweeps · No on-demand</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleOrgCheckout('org_starter')}
+                    disabled={orgProLoading}
+                    className={`mt-2.5 w-full py-1.5 rounded font-semibold text-xs transition cursor-pointer ${
+                      isPlanActive && userPlan === 'org_starter'
+                        ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-750'
+                        : 'bg-cyan-600 hover:bg-cyan-500 text-white'
+                    }`}
+                  >
+                    {isPlanActive && userPlan === 'org_starter' ? 'Renew Org Starter' : 'Get Org Starter'}
+                  </button>
+                </div>
+
+                {/* Org Pro (1 Month) */}
+                <div className={`p-3 rounded-lg bg-amber-950/20 border flex flex-col justify-between relative overflow-hidden ${
+                  isPlanActive && userPlan === 'org_pro' ? 'border-amber-400 ring-1 ring-amber-400/40' : 'border-amber-500/40'
+                }`}>
+                  <div className="absolute top-0 right-0 bg-amber-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">
+                    {isPlanActive && userPlan === 'org_pro' ? 'ACTIVE' : 'POPULAR'}
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-amber-200 text-xs">Org Pro (1 Month)</span>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-amber-400">
+                        {ORG_PLANS.find(p => p.id === 'org_pro')?.price || '₹99'} {ORG_PLANS.find(p => p.id === 'org_pro')?.period || '/ mo'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly on-demand sweeps · Priority queue</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleOrgCheckout('org_pro')}
+                    disabled={orgProLoading}
+                    className="mt-2.5 w-full py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition cursor-pointer"
+                  >
+                    {isPlanActive && userPlan === 'org_pro'
+                      ? 'Renew Org Pro'
+                      : isPlanActive && userPlan === 'org_starter'
+                      ? 'Upgrade to Org Pro'
+                      : 'Get Org Pro'}
+                  </button>
+                </div>
+
+                {/* Org Pro (3 Months) */}
+                <div className={`p-3 rounded-lg bg-zinc-900/90 border flex flex-col justify-between ${
+                  isPlanActive && userPlan === 'org_pro_3m' ? 'border-emerald-400 ring-1 ring-emerald-400/40' : 'border-zinc-700'
+                }`}>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-white text-xs">Org Pro (3 Months)</span>
+                        {isPlanActive && userPlan === 'org_pro_3m' && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/60">
+                            ACTIVE
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs font-mono font-bold text-emerald-400">
+                        {ORG_PLANS.find(p => p.id === 'org_pro_3m')?.price || '₹289'} {ORG_PLANS.find(p => p.id === 'org_pro_3m')?.period || '/ 3 mos'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly sweeps · 90-day pipeline until hired</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleOrgCheckout('org_pro_3m')}
+                    disabled={orgProLoading}
+                    className="mt-2.5 w-full py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition cursor-pointer"
+                  >
+                    {isPlanActive && userPlan === 'org_pro_3m' ? 'Renew Org Pro (3 Months)' : 'Get Org Pro (3 Months)'}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

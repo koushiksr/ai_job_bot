@@ -776,17 +776,17 @@ export default function Home() {
                   <Zap className="w-6 h-6 text-zinc-300 light:text-zinc-700" />
                 </div>
                 <h3 className="text-lg font-bold text-white light:text-zinc-900">
-                  The ROI: Why ₹99 is a Complete No-Brainer
+                  The ROI: Why Automation is a Complete No-Brainer
                 </h3>
                 <p className="text-xs text-zinc-400 light:text-zinc-600 leading-relaxed">
-                  As a software engineer, your time is worth ₹1,000 to ₹3,000 per hour. Spending 60 hours clicking apply manually costs you ₹60,000+ in wasted personal time and burnout. JobFlux AI costs just ₹99 for a full month (down from ₹1,000) to run in the background while you focus on interview prep.
+                  As a candidate, your time is worth ₹1,000 to ₹3,000 per hour. Spending 60 hours clicking apply manually costs you ₹60,000+ in wasted personal time and burnout. JobFlux AI runs autonomously in the background while you focus on interview prep.
                 </p>
               </div>
               <Link
                 href="/pricing"
                 className="inline-flex items-center justify-between px-4 py-2.5 rounded-xl bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 text-xs font-bold transition-all shadow-lg shadow-white/5"
               >
-                <span>Get Started for ₹99 / Month</span>
+                <span>View All Plans</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>

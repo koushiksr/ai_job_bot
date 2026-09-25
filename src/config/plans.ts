@@ -97,7 +97,7 @@ export const MASTER_PLANS: PlanDefinition[] = [
       { text: 'Priority Cloud Worker Queue Slot' },
       { text: 'Live Application History & Recruiter Links' }
     ],
-    cta: 'Get 1 Month for ₹499',
+    cta: 'Get Pro (1 Month)',
     popular: true,
     highlight: true
   },
@@ -121,7 +121,7 @@ export const MASTER_PLANS: PlanDefinition[] = [
       { text: 'Continuous Applications Until Hired' },
       { text: 'Dedicated Recruiter Response Priority' }
     ],
-    cta: 'Get 3 Months for ₹1,299',
+    cta: 'Get Pro (3 Months)',
     highlight: false
   },
   {
@@ -375,7 +375,7 @@ export const ORG_PLANS: PlanDefinition[] = [
       { text: 'No On-Demand Sweeps (Scheduled Daily Only)' },
       { text: 'Stays linked to your organization & admin' }
     ],
-    cta: 'Get Org Starter (₹79)',
+    cta: 'Get Org Starter',
     highlight: false
   },
   {
@@ -397,7 +397,7 @@ export const ORG_PLANS: PlanDefinition[] = [
       { text: 'AI Resume Optimization & Keyword Match' },
       { text: 'Stays linked to your organization & admin' }
     ],
-    cta: 'Upgrade to Org Pro (₹99)',
+    cta: 'Get Org Pro',
     highlight: true,
     popular: true
   },
@@ -420,7 +420,7 @@ export const ORG_PLANS: PlanDefinition[] = [
       { text: 'AI Resume Optimization & Keyword Match' },
       { text: 'Stays linked to your organization & admin' }
     ],
-    cta: 'Get Org Pro 3 Months (₹289)',
+    cta: 'Get Org Pro (3 Months)',
     highlight: false
   }
 ]

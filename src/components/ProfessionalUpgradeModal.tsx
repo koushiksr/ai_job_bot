@@ -202,15 +202,15 @@ export default function ProfessionalUpgradeModal({
           <div className="mt-4 flex items-center justify-between text-[11px] text-zinc-500 light:text-zinc-600">
             <span>
               {isOrgMember 
-                ? 'Org Starter is also available in your Dashboard for ₹79/mo' 
-                : '3-Month Pro available for ₹1,299 with VIP priority server queue'}
+                ? 'Subsidized organization plans are also available in your Dashboard' 
+                : '3-Month Pro available with VIP priority server queue'}
             </span>
             <Link 
-              href={isOrgMember ? '/dashboard' : '/pricing'} 
+              href={isOrgMember ? '/dashboard#plans' : '/pricing'} 
               onClick={onClose} 
               className="text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 underline transition-colors font-medium"
             >
-              {isOrgMember ? 'Go to Dashboard →' : 'View All Tiers →'}
+              {isOrgMember ? 'View Org Plans →' : 'View All Tiers →'}
             </Link>
           </div>
         </motion.div>
