@@ -5,6 +5,7 @@ import { APP_CONFIG } from '@/config/appConfig'
 import { issueSession } from '@/lib/session'
 import { mintDeviceSession } from '@/lib/sessionRegistry'
 import { exactMatchCI } from '@/lib/query'
+import { generateUniqueReferralCode, findReferrer } from '@/lib/referral'
 
 export const dynamic = 'force-dynamic'
 
@@ -130,6 +131,18 @@ export async function POST(req: NextRequest) {
         )
       }
 
+      // Handle referral code generation and referrer association
+      const rawRefCode = (body.referral_code || body.ref || '').toString().trim()
+      let referredByCode: string | null = null
+      if (rawRefCode) {
+        const referrerDoc = await findReferrer(db, rawRefCode)
+        if (referrerDoc && referrerDoc.user_id !== userId) {
+          referredByCode = referrerDoc.referral_code || referrerDoc.user_id
+        }
+      }
+
+      const userReferralCode = await generateUniqueReferralCode(db)
+
       const newProfile = {
         user_id: userId,
         name: name || userId.replace('_', ' '),
@@ -165,6 +178,16 @@ export async function POST(req: NextRequest) {
         plan_expires_at: planExpiresAt,
         last_payment_id: lastPaymentId,
         last_order_id: lastOrderId,
+        referral_code: userReferralCode,
+        referred_by: referredByCode,
+        payout_type: 'upi',
+        upi_id: '',
+        bank_details: {
+          account_number: '',
+          ifsc_code: '',
+          account_holder_name: '',
+          bank_name: ''
+        },
         created_at: now,
         updated_at: now
       }

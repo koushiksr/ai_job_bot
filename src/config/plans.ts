@@ -79,48 +79,49 @@ export const MASTER_PLANS: PlanDefinition[] = [
   },
   {
     id: 'pro',
-    name: 'Essentials',
-    subtitle: 'For candidates with daily proactive application demands.',
+    name: 'Pro (1 Month)',
+    subtitle: 'Maximum speed, automated daily applies, and priority queue.',
     badge: 'POPULAR',
-    price: '₹399',
-    originalPrice: '₹1,000',
-    amountPaise: 39900,
+    price: '₹499',
+    originalPrice: '₹1,499',
+    amountPaise: 49900,
     period: '/ month',
     durationDays: 30,
-    featuresIntro: 'Everything in Free, with 600+ monthly applications, plus...',
+    featuresIntro: 'Everything in Free, with 55 daily applications and priority queue...',
     features: [
       { text: '30 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 600+ Verified Job Applications' },
-      { text: 'Daily Autonomous Application Sweeps' },
+      { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
+      { text: 'On-Demand Real-Time Sweeps (Up to 10x / week)' },
+      { text: 'Harvard ATS Resume Optimization & Keyword Match' },
       { text: 'AI Tailored Responses for Recruiter Screening' },
-      { text: 'Target Role, Location & Salary Filters' },
-      { text: 'Priority Cloud Worker Queue' },
+      { text: 'Priority Cloud Worker Queue Slot' },
       { text: 'Live Application History & Recruiter Links' }
     ],
-    cta: 'Get 1 Month for ₹399',
+    cta: 'Get 1 Month for ₹499',
     popular: true,
     highlight: true
   },
   {
     id: 'elite',
-    name: 'Professional',
-    subtitle: 'Best for comprehensive pipeline until you sign an offer.',
-    price: '₹199',
-    originalPrice: '₹2,500',
-    amountPaise: 19900,
+    name: 'Pro (3 Months)',
+    subtitle: 'Best value 90-day comprehensive pipeline until you sign an offer.',
+    badge: 'BEST VALUE',
+    price: '₹1,299',
+    originalPrice: '₹3,999',
+    amountPaise: 129900,
     period: '/ 3 months',
     durationDays: 90,
-    featuresIntro: 'Everything in Essentials, with extended 90-day pipeline, plus...',
+    featuresIntro: 'Everything in 1-Month Pro, with extended 90-day pipeline, plus...',
     features: [
       { text: '90 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 1,800+ Verified Job Applications' },
+      { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
       { text: 'VIP Priority Server Queue Slot' },
-      { text: 'AI Resume Optimization & Keyword Match' },
-      { text: 'On-Demand Real-Time Sweeps (Up to 5x / week)' },
+      { text: 'Harvard ATS Resume Optimization & Keyword Match' },
+      { text: 'On-Demand Real-Time Sweeps (Up to 15x / week)' },
       { text: 'Continuous Applications Until Hired' },
       { text: 'Dedicated Recruiter Response Priority' }
     ],
-    cta: 'Get 3 Months (₹199)',
+    cta: 'Get 3 Months for ₹1,299',
     highlight: false
   },
   {
@@ -452,9 +453,9 @@ export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMembe
   if (p === 'org_pro' || p === 'org_pro_3m') return 15
   if (p === 'org_starter') return 0 // No on-demand sweeps for org starter
   if (p === 'enterprise' || (isEnterpriseMember && !p.startsWith('org_pro'))) return 0 // Unpaid enterprise member gets 0
-  if (p === 'elite' || p === 'professional') return 10
-  if (p === 'pro') return 5
-  if (p === 'starter') return 3
+  if (p === 'elite' || p === 'professional') return 15
+  if (p === 'pro') return 10
+  if (p === 'starter') return 5
   return 0
 }
 
@@ -494,10 +495,10 @@ export function getCapUpgradeHint(planId?: string | null, isEnterpriseMember = f
  * Supports canonical IDs and historical aliases.
  */
 export const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: number }> = {
-  starter: { amount: 39900, name: 'JobFlux 1-Month Plan (30 Days)', days: 30 },
-  pro: { amount: 39900, name: 'JobFlux 1-Month Career Pro (30 Days)', days: 30 },
-  elite: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 },
-  professional: { amount: 19900, name: 'JobFlux 3-Month Professional Plan (90 Days)', days: 90 },
+  starter: { amount: 49900, name: 'JobFlux Pro (1 Month)', days: 30 },
+  pro: { amount: 49900, name: 'JobFlux Pro (1 Month)', days: 30 },
+  elite: { amount: 129900, name: 'JobFlux Pro (3 Months)', days: 90 },
+  professional: { amount: 129900, name: 'JobFlux Pro (3 Months)', days: 90 },
   org_starter: { amount: 7900, name: 'JobFlux Org Starter (30 Days)', days: 30 },
   org_pro: { amount: 9900, name: 'JobFlux Org Pro — Member Upgrade (30 Days)', days: 30 },
   org_pro_3m: { amount: 28900, name: 'JobFlux Org Pro — 3-Month Pass (90 Days)', days: 90 }

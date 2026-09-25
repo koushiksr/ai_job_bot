@@ -188,6 +188,11 @@ export default function Home() {
       if (errParam) {
         setError(decodeURIComponent(errParam))
       }
+
+      const refParam = p.get('ref') || p.get('referral')
+      if (refParam) {
+        try { localStorage.setItem('jobflux_referral_code', refParam.trim().toUpperCase()) } catch {}
+      }
     }
   }, [])
 
@@ -212,8 +217,9 @@ export default function Home() {
 
     try {
       const endpoint = authMode === 'trial' ? '/api/auth/register' : '/api/auth/login'
+      const refCode = (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('ref') || localStorage.getItem('jobflux_referral_code') || '' : '').trim()
       const payload = authMode === 'trial'
-        ? { name, email: cleanEmail, password: cleanPwd, plan: 'trial', device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() }
+        ? { name, email: cleanEmail, password: cleanPwd, plan: 'trial', ref: refCode, referral_code: refCode, device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() }
         : { email: cleanEmail, password: cleanPwd, device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() }
 
       const res = await fetch(endpoint, {

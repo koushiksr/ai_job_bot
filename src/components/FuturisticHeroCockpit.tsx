@@ -85,12 +85,15 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
       }
 
       const endpoint = authMode === 'trial' ? '/api/auth/register' : '/api/auth/login'
+      const refCode = (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('ref') || localStorage.getItem('jobflux_referral_code') || '' : '').trim()
       const payload = authMode === 'trial'
         ? {
             name: name.trim() || cleanEmail.split('@')[0],
             email: cleanEmail,
             password: undefined,
             plan: 'trial',
+            ref: refCode,
+            referral_code: refCode,
             device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })()
           }
         : { email: cleanEmail, password: cleanPwd, device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() }

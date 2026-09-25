@@ -19,6 +19,7 @@ import CandidateProfileEditor from '@/components/CandidateProfileEditor'
 import ProfessionalUpgradeModal from '@/components/ProfessionalUpgradeModal'
 import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import AiLoadingScreen from '@/components/AiLoadingScreen'
+import ReferralPayoutSection from '@/components/ReferralPayoutSection'
 
 export default function CandidateProfilePage() {
   const [userId, setUserId] = useState<string>('')
@@ -266,6 +267,9 @@ export default function CandidateProfilePage() {
             window.scrollTo({ top: 0, behavior: 'smooth' })
           }}
         />
+
+        {/* Viral Referral Program & Cash Payout Settings */}
+        <ReferralPayoutSection userId={userId} />
 
         {/* Bottom Navigation Helper */}
         <div className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">

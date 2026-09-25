@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { getDb } from '@/lib/mongodb'
-import { PLAN_DAYS, PROMO_DISCOUNTS } from '@/config/plans'
+import { PLAN_DAYS, PROMO_DISCOUNTS, PLAN_AMOUNTS } from '@/config/plans'
 import { exactMatchCI } from '@/lib/query'
+import { recordReferralReward } from '@/lib/referral'
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,7 +55,8 @@ export async function POST(req: NextRequest) {
     const now = new Date()
     const cleanPromo = (promo_code || '').trim().toUpperCase()
     let durationDays = PLAN_DAYS[plan_id] || 30
-    let recordedAmount = plan_id === 'elite' || plan_id === 'professional' ? '₹199' : '₹99'
+    const basePlan = PLAN_AMOUNTS[plan_id]
+    let recordedAmount = basePlan ? `₹${basePlan.amount / 100}` : (plan_id === 'elite' || plan_id === 'professional' ? '₹1,299' : '₹499')
 
     if (cleanPromo && PROMO_DISCOUNTS[cleanPromo]) {
       const discount = PROMO_DISCOUNTS[cleanPromo]
@@ -154,6 +156,20 @@ export async function POST(req: NextRequest) {
       expires_at: expiresAt,
       status: 'captured'
     })
+
+    // 5. If referee was referred and purchased an eligible retail plan, record ₹200 cash reward
+    try {
+      await recordReferralReward(db, {
+        refereeUserId: resolvedUserId || '',
+        refereeEmail: cleanEmail || '',
+        planId: plan_id,
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id,
+        purchaseAmount: recordedAmount
+      })
+    } catch (refErr) {
+      console.error('Error logging referral reward:', refErr)
+    }
 
     return NextResponse.json({
       success: true,

@@ -553,6 +553,32 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Viral Referral Program Highlight Banner */}
+        <div className="max-w-4xl mx-auto p-4 rounded-2xl bg-gradient-to-r from-emerald-950/50 via-zinc-900 to-black light:from-emerald-50 light:via-white light:to-zinc-50 border border-emerald-500/30 light:border-emerald-300 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3 text-left">
+            <span className="text-2xl shrink-0">🎁</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-white light:text-zinc-900">
+                  Refer Friends &amp; Earn ₹200 Direct Cash
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/40">
+                  Instant UPI
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
+                Share your invite link with peers or college mates. When they subscribe to any Pro plan, you get ₹200 cash sent directly to your UPI or Bank Account!
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/profile"
+            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shrink-0 transition-colors shadow-sm"
+          >
+            Get Invite Link →
+          </Link>
+        </div>
+
         {/* 4 Pricing Cards Grid (Auth0 Architecture) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
           {PLANS.map((plan) => {
@@ -598,13 +624,13 @@ export default function PricingPage() {
                             {plan.originalPrice}
                           </span>
                           {plan.id === 'pro' && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 light:text-amber-700 border border-amber-500/30">
-                              90% OFF
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/30">
+                              67% OFF
                             </span>
                           )}
                           {plan.id === 'elite' && (
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-800 light:bg-zinc-200 text-zinc-200 light:text-zinc-800 border border-zinc-700 light:border-zinc-300">
-                              92% OFF
+                              68% OFF
                             </span>
                           )}
                         </>

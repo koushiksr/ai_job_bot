@@ -6,6 +6,7 @@ import { issueSession } from '@/lib/session'
 import { mintDeviceSession } from '@/lib/sessionRegistry'
 import { exactMatchCI } from '@/lib/query'
 import { findProfileByEmail, ensureTechnohmProfile, resolveGoogleRole } from '@/lib/googleAuth'
+import { generateUniqueReferralCode, findReferrer } from '@/lib/referral'
 
 export const dynamic = 'force-dynamic'
 
@@ -126,6 +127,16 @@ export async function POST(req: NextRequest) {
         plan_expires_at: planExpiresAt,
         last_payment_id: lastPaymentId,
         last_order_id: lastOrderId,
+        referral_code: await generateUniqueReferralCode(db),
+        referred_by: (body.referral_code || body.ref || null)?.toString().trim() || null,
+        payout_type: 'upi',
+        upi_id: '',
+        bank_details: {
+          account_number: '',
+          ifsc_code: '',
+          account_holder_name: '',
+          bank_name: ''
+        },
         created_at: now,
         updated_at: now
       }
