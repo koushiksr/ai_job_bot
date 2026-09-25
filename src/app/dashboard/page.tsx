@@ -144,7 +144,7 @@ export default function UserDashboard() {
 
   // Candidate account has Professional privileges if on an active Professional tier, VIP pass, or paid Org Pro tier.
   const isEnterpriseMember = enterpriseRole === 'member' || userPlan === 'enterprise' || userPlan === 'org_pro' || userPlan === 'org_starter' || userPlan === 'org_pro_3m' || userPlan === 'unpaid'
-  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'vip' || isVip || (isEnterpriseMember && (userPlan === 'org_pro' || userPlan === 'org_pro_3m'))) && isPlanActive
+  const isProfessional = (userPlan === 'elite' || userPlan === 'professional' || userPlan === 'vip' || isVip || (isEnterpriseMember && (userPlan === 'org_pro' || userPlan === 'org_pro_3m' || userPlan === 'org_starter'))) && isPlanActive
   const dailyCap = getDailyAppLimit(userPlan, isEnterpriseMember)
   const capHint = getCapUpgradeHint(userPlan, isEnterpriseMember)
 
@@ -459,11 +459,8 @@ export default function UserDashboard() {
       if (typeof window === 'undefined' || !(window as any).Razorpay) {
         throw new Error('Payment gateway is still loading. Please refresh and try again.')
       }
-      const planDesc = planId === 'org_starter'
-        ? 'Org Starter (30 Days · ₹79)'
-        : planId === 'org_pro_3m'
-        ? 'Org Pro 3-Month (90 Days · ₹289)'
-        : 'Org Pro (30 Days · ₹99)'
+      const pDef = ORG_PLANS.find(p => p.id === planId)
+      const planDesc = pDef ? `${pDef.name} (${pDef.durationDays} Days)` : 'Organization Plan'
 
       const rzp = new (window as any).Razorpay({
         key: orderData.key_id,
@@ -495,8 +492,8 @@ export default function UserDashboard() {
               setUserPlan(planId)
               setIsPlanActive(true)
               const msg = planId === 'org_starter'
-                ? 'Org Starter activated! 20 daily applications enabled with morning sweeps.'
-                : 'Org Pro activated! 55 daily applications and 15 weekly on-demand sweeps unlocked.'
+                ? 'Org Starter activated! 35 daily applications enabled with morning sweeps & placement sync.'
+                : 'Org Pro activated! 55 daily applications, enhanced sweeps & institutional priority unlocked.'
               setTaskFeedback({ type: 'success', text: msg })
               refreshAllDashboardData(userId)
             } else {
@@ -795,15 +792,7 @@ export default function UserDashboard() {
     if (isEnterpriseMember && (!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid' || userPlan === 'none')) {
       setTaskFeedback({
         type: 'error',
-        text: 'Payment required: Organization candidates must subscribe to Org Starter (₹79) or Org Pro (₹99) to activate applications.'
-      })
-      return
-    }
-
-    if (isEnterpriseMember && userPlan === 'org_starter') {
-      setTaskFeedback({
-        type: 'error',
-        text: 'Org Starter includes scheduled morning sweeps only (0 on-demand sweeps). Upgrade to Org Pro to unlock 15 weekly on-demand sweeps.'
+        text: 'Payment required: Organization candidates must subscribe to an Organization Member Plan to activate automated applications.'
       })
       return
     }
@@ -2090,7 +2079,7 @@ export default function UserDashboard() {
                       {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
                         ? 'Payment Required'
                         : userPlan === 'org_starter'
-                        ? 'Org Starter (20/d)'
+                        ? 'Org Starter (35/d)'
                         : userPlan === 'org_pro_3m'
                         ? 'Org Pro (3 Months · 55/d)'
                         : 'Org Pro (55/d)'}
@@ -2100,8 +2089,8 @@ export default function UserDashboard() {
                     {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
                       ? 'No active plan. Subscribe below to begin automated job applications (0 applications permitted until paid).'
                       : userPlan === 'org_starter'
-                      ? 'Scheduled Morning Sweeps (06:00 AM IST) • 20 Daily Application Limit • 0 On-Demand Sweeps'
-                      : '15 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch'}
+                      ? 'Scheduled Morning Sweeps (06:00 AM IST) • 35 Daily Application Limit • 5 Weekly On-Demand Sweeps • Placement Sync'
+                      : '15–20 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch • Institutional Queue'}
                   </span>
                 </div>
               </div>
@@ -2147,10 +2136,10 @@ export default function UserDashboard() {
                         )}
                       </div>
                       <span className="text-xs font-mono font-bold text-cyan-400">
-                        {ORG_PLANS.find(p => p.id === 'org_starter')?.price || '₹79'} {ORG_PLANS.find(p => p.id === 'org_starter')?.period || '/ mo'}
+                        {ORG_PLANS.find(p => p.id === 'org_starter')?.price || '₹399'} {ORG_PLANS.find(p => p.id === 'org_starter')?.period || '/ mo'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-zinc-400 mt-1">20 applies/day · Scheduled morning sweeps · No on-demand</p>
+                    <p className="text-[11px] text-zinc-400 mt-1">35 applies/day · Scheduled morning sweeps + 5 weekly sweeps · Placement sync</p>
                   </div>
                   <button
                     type="button"
@@ -2179,10 +2168,10 @@ export default function UserDashboard() {
                         <span className="font-bold text-amber-200 text-xs">Org Pro (1 Month)</span>
                       </div>
                       <span className="text-xs font-mono font-bold text-amber-400">
-                        {ORG_PLANS.find(p => p.id === 'org_pro')?.price || '₹99'} {ORG_PLANS.find(p => p.id === 'org_pro')?.period || '/ mo'}
+                        {ORG_PLANS.find(p => p.id === 'org_pro')?.price || '₹499'} {ORG_PLANS.find(p => p.id === 'org_pro')?.period || '/ mo'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly on-demand sweeps · Priority queue</p>
+                    <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly on-demand sweeps · Priority queue & placement sync</p>
                   </div>
                   <button
                     type="button"
@@ -2213,10 +2202,10 @@ export default function UserDashboard() {
                         )}
                       </div>
                       <span className="text-xs font-mono font-bold text-emerald-400">
-                        {ORG_PLANS.find(p => p.id === 'org_pro_3m')?.price || '₹289'} {ORG_PLANS.find(p => p.id === 'org_pro_3m')?.period || '/ 3 mos'}
+                        {ORG_PLANS.find(p => p.id === 'org_pro_3m')?.price || '₹1,299'} {ORG_PLANS.find(p => p.id === 'org_pro_3m')?.period || '/ 3 mos'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly sweeps · 90-day pipeline until hired</p>
+                    <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 20 weekly sweeps · VIP queue, 90-day pipeline until placed</p>
                   </div>
                   <button
                     type="button"
