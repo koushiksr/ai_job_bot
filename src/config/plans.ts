@@ -53,6 +53,68 @@ export interface PromoDefinition {
 }
 
 // ----------------------------------------------------------------------
+// 0. Master Pricing Constants — SINGLE SOURCE OF TRUTH
+//    Change a price here and it propagates everywhere:
+//    MASTER_PLANS, ORG_PLANS, MASTER_PROMOS, OFFER_PRESETS, PLAN_AMOUNTS
+// ----------------------------------------------------------------------
+
+export const PRICING = {
+  // ── Individual plans (public pricing page) ──────────────────────────
+  pro1m: {
+    amountPaise: 49900,           // ₹499
+    display: '₹499',
+    period: '/ month',
+    originalDisplay: '₹1,499',   // crossed-out MRP
+  },
+  pro3m: {
+    amountPaise: 129900,          // ₹1,299
+    display: '₹1,299',
+    period: '/ 3 months',
+    originalDisplay: '₹3,999',
+  },
+  // ── Org member promo prices (exclusive, not public) ──────────────────
+  orgPro1mFlash: {
+    amountPaise: 4900,            // ₹49
+    display: '₹49',
+    originalDisplay: '₹1,000',
+  },
+  orgPro1m: {
+    amountPaise: 9900,            // ₹99
+    display: '₹99',
+    originalDisplay: '₹1,000',
+  },
+  orgStarter1m: {
+    amountPaise: 7900,            // ₹79
+    display: '₹79',
+    originalDisplay: '₹499',
+  },
+  orgPro3m: {
+    amountPaise: 28900,           // ₹289
+    display: '₹289',
+    originalDisplay: '₹2,500',
+  },
+  // ── Individual promo prices ───────────────────────────────────────────
+  proPromo1m: {
+    amountPaise: 39900,           // ₹399
+    display: '₹399',
+  },
+  proPromo3m: {
+    amountPaise: 99900,           // ₹999
+    display: '₹999',
+  },
+} as const
+
+// Convenience helpers for display strings
+const p1m = `${PRICING.pro1m.display} ${PRICING.pro1m.period}`          // "₹499 / month"
+const p3m = `${PRICING.pro3m.display} ${PRICING.pro3m.period}`          // "₹1,299 / 3 months"
+const promo1m = `${PRICING.proPromo1m.display} / mo`                    // "₹399 / mo"
+const promo3m = `${PRICING.proPromo3m.display} / 3 mos`                 // "₹999 / 3 mos"
+const orgFlash = `${PRICING.orgPro1mFlash.display} / mo`                // "₹49 / mo"
+const orgPro1mStr = `${PRICING.orgPro1m.display} / mo`                  // "₹99 / mo"
+const orgStart = `${PRICING.orgStarter1m.display} / mo`                 // "₹79 / mo"
+const orgPro3mStr = `${PRICING.orgPro3m.display} / 3 mos`              // "₹289 / 3 mos"
+
+// ----------------------------------------------------------------------
 // 1. Master Plan Definitions
 // ----------------------------------------------------------------------
 
@@ -82,10 +144,10 @@ export const MASTER_PLANS: PlanDefinition[] = [
     name: 'Pro (1 Month)',
     subtitle: 'Maximum speed, automated daily applies, and priority queue.',
     badge: 'POPULAR',
-    price: '₹499',
-    originalPrice: '₹1,499',
-    amountPaise: 49900,
-    period: '/ month',
+    price: PRICING.pro1m.display,
+    originalPrice: PRICING.pro1m.originalDisplay,
+    amountPaise: PRICING.pro1m.amountPaise,
+    period: PRICING.pro1m.period,
     durationDays: 30,
     featuresIntro: 'Everything in Free, with 55 daily applications and priority queue...',
     features: [
@@ -106,10 +168,10 @@ export const MASTER_PLANS: PlanDefinition[] = [
     name: 'Pro (3 Months)',
     subtitle: 'Best value 90-day comprehensive pipeline until you sign an offer.',
     badge: 'BEST VALUE',
-    price: '₹1,299',
-    originalPrice: '₹3,999',
-    amountPaise: 129900,
-    period: '/ 3 months',
+    price: PRICING.pro3m.display,
+    originalPrice: PRICING.pro3m.originalDisplay,
+    amountPaise: PRICING.pro3m.amountPaise,
+    period: PRICING.pro3m.period,
     durationDays: 90,
     featuresIntro: 'Everything in 1-Month Pro, with extended 90-day pipeline, plus...',
     features: [
@@ -155,190 +217,190 @@ export const MASTER_PROMOS: PromoDefinition[] = [
   {
     code: 'PRO399',
     presetId: 'pro_399',
-    name: '1-Month Pro Starter Pass (₹399 / mo)',
-    offerTitle: 'Introductory Special: 1-Month JobFlux Pro for ₹399',
-    discountBadge: '₹100 OFF (STARTER PASS)',
-    originalPrice: '₹499 / mo',
-    discountedPrice: '₹399 / mo',
-    amountPaise: 39900,
+    name: `1-Month Pro Starter Pass (${PRICING.proPromo1m.display} / mo)`,
+    offerTitle: `Introductory Special: 1-Month JobFlux Pro for ${PRICING.proPromo1m.display}`,
+    discountBadge: `₹${(PRICING.pro1m.amountPaise - PRICING.proPromo1m.amountPaise) / 100} OFF (STARTER PASS)`,
+    originalPrice: `${PRICING.pro1m.display} / mo`,
+    discountedPrice: promo1m,
+    amountPaise: PRICING.proPromo1m.amountPaise,
     allowedPlans: ['pro', 'starter'],
     durationDays: 30,
     description: 'JobFlux Pro - 1-Month Starter Pass (30 Days)',
-    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (55 applies/day), Harvard ATS resume formatting, and direct priority recruiter submission for just ₹399 (Regular ₹499/mo).',
+    customMessage: `Unlock 30 days of continuous daily autonomous job applications (55 applies/day), Harvard ATS resume formatting, and direct priority recruiter submission for just ${PRICING.proPromo1m.display} (Regular ${PRICING.pro1m.display}/mo).`,
     pricingDisplay: {
-      displayPrice: '₹399',
-      label: 'Special Starter Pass (Regular ₹499 / mo)'
+      displayPrice: PRICING.proPromo1m.display,
+      label: `Special Starter Pass (Regular ${PRICING.pro1m.display} / mo)`
     },
     category: 'individual'
   },
   {
     code: 'PRO999',
     presetId: 'pro_999',
-    name: '3-Month Pro Comprehensive Saver (₹999 / 3 mos)',
-    offerTitle: 'Comprehensive 90-Day Pipeline: JobFlux Pro for ₹999',
-    discountBadge: 'SAVE ₹300 (BEST VALUE)',
-    originalPrice: '₹1,299 / 3 mos',
-    discountedPrice: '₹999 / 3 mos',
-    amountPaise: 99900,
+    name: `3-Month Pro Comprehensive Saver (${PRICING.proPromo3m.display} / 3 mos)`,
+    offerTitle: `Comprehensive 90-Day Pipeline: JobFlux Pro for ${PRICING.proPromo3m.display}`,
+    discountBadge: `SAVE ₹${(PRICING.pro3m.amountPaise - PRICING.proPromo3m.amountPaise) / 100} (BEST VALUE)`,
+    originalPrice: `${PRICING.pro3m.display} / 3 mos`,
+    discountedPrice: promo3m,
+    amountPaise: PRICING.proPromo3m.amountPaise,
     allowedPlans: ['elite', 'professional'],
     durationDays: 90,
     description: 'JobFlux Pro - 3-Month Comprehensive Pass (90 Days)',
-    customMessage: 'Get 90 days of continuous automated applications (55 applies/day), on-demand sweeps up to 15x/week, and VIP queue priority at ₹999 (Regular ₹1,299/3 mos).',
+    customMessage: `Get 90 days of continuous automated applications (55 applies/day), on-demand sweeps up to 15x/week, and VIP queue priority at ${PRICING.proPromo3m.display} (Regular ${PRICING.pro3m.display}/3 mos).`,
     pricingDisplay: {
-      displayPrice: '₹999',
-      label: '3-Month Comprehensive Saver (Regular ₹1,299 / 3 mos)'
+      displayPrice: PRICING.proPromo3m.display,
+      label: `3-Month Comprehensive Saver (Regular ${PRICING.pro3m.display} / 3 mos)`
     },
     category: 'individual'
   },
   {
     code: 'WELCOMEPRO',
     presetId: 'welcome_pro',
-    name: 'Candidate Welcome Special (₹399 / mo)',
-    offerTitle: 'Candidate Welcome Special: JobFlux Pro for ₹399',
-    discountBadge: 'WELCOME SPECIAL (₹399)',
-    originalPrice: '₹499 / mo',
-    discountedPrice: '₹399 / mo',
-    amountPaise: 39900,
+    name: `Candidate Welcome Special (${PRICING.proPromo1m.display} / mo)`,
+    offerTitle: `Candidate Welcome Special: JobFlux Pro for ${PRICING.proPromo1m.display}`,
+    discountBadge: `WELCOME SPECIAL (${PRICING.proPromo1m.display})`,
+    originalPrice: `${PRICING.pro1m.display} / mo`,
+    discountedPrice: promo1m,
+    amountPaise: PRICING.proPromo1m.amountPaise,
     allowedPlans: ['pro', 'starter'],
     durationDays: 30,
     description: 'JobFlux Pro - Candidate Welcome Special (30 Days)',
-    customMessage: 'Welcome offer! Get 30 days of continuous autonomous job applications (55 applies/day) for only ₹399.',
+    customMessage: `Welcome offer! Get 30 days of continuous autonomous job applications (55 applies/day) for only ${PRICING.proPromo1m.display}.`,
     pricingDisplay: {
-      displayPrice: '₹399',
-      label: 'New Candidate Special (Regular ₹499 / mo)'
+      displayPrice: PRICING.proPromo1m.display,
+      label: `New Candidate Special (Regular ${PRICING.pro1m.display} / mo)`
     },
     category: 'individual'
   },
   {
     code: 'OFFER90',
     presetId: 'offer_99',
-    name: '1-Month Pro Special Pass (₹399 / mo)',
-    offerTitle: 'Candidate Special: JobFlux Pro for ₹399',
-    discountBadge: 'SPECIAL PASS (₹399)',
-    originalPrice: '₹499 / mo',
-    discountedPrice: '₹399 / mo',
-    amountPaise: 39900,
+    name: `1-Month Pro Special Pass (${PRICING.proPromo1m.display} / mo)`,
+    offerTitle: `Candidate Special: JobFlux Pro for ${PRICING.proPromo1m.display}`,
+    discountBadge: `SPECIAL PASS (${PRICING.proPromo1m.display})`,
+    originalPrice: `${PRICING.pro1m.display} / mo`,
+    discountedPrice: promo1m,
+    amountPaise: PRICING.proPromo1m.amountPaise,
     allowedPlans: ['pro', 'starter'],
     durationDays: 30,
     description: 'JobFlux Pro - Special Pass (30 Days)',
-    customMessage: 'Unlock 30 days of continuous daily autonomous job applications (55 applies/day) for just ₹399.',
+    customMessage: `Unlock 30 days of continuous daily autonomous job applications (55 applies/day) for just ${PRICING.proPromo1m.display}.`,
     pricingDisplay: {
-      displayPrice: '₹399',
-      label: 'Special Pass (Regular ₹499 / mo)'
+      displayPrice: PRICING.proPromo1m.display,
+      label: `Special Pass (Regular ${PRICING.pro1m.display} / mo)`
     },
     category: 'individual'
   },
   {
     code: 'PRO199',
     presetId: 'pro_199',
-    name: '3-Month Pro Saver (₹999 / 3 mos)',
-    offerTitle: 'Comprehensive 90-Day Pipeline: JobFlux Pro for ₹999',
-    discountBadge: 'SAVE ₹300 (₹999)',
-    originalPrice: '₹1,299 / 3 mos',
-    discountedPrice: '₹999 / 3 mos',
-    amountPaise: 99900,
+    name: `3-Month Pro Saver (${PRICING.proPromo3m.display} / 3 mos)`,
+    offerTitle: `Comprehensive 90-Day Pipeline: JobFlux Pro for ${PRICING.proPromo3m.display}`,
+    discountBadge: `SAVE ₹${(PRICING.pro3m.amountPaise - PRICING.proPromo3m.amountPaise) / 100} (${PRICING.proPromo3m.display})`,
+    originalPrice: `${PRICING.pro3m.display} / 3 mos`,
+    discountedPrice: promo3m,
+    amountPaise: PRICING.proPromo3m.amountPaise,
     allowedPlans: ['elite', 'professional'],
     durationDays: 90,
     description: 'JobFlux Pro - 3-Month Pipeline (90 Days)',
-    customMessage: 'Get 90 days of continuous automated applications (55 applies/day) with VIP priority for ₹999.',
+    customMessage: `Get 90 days of continuous automated applications (55 applies/day) with VIP priority for ${PRICING.proPromo3m.display}.`,
     pricingDisplay: {
-      displayPrice: '₹999',
-      label: '3-Month Saver Pass (Regular ₹1,299 / 3 mos)'
+      displayPrice: PRICING.proPromo3m.display,
+      label: `3-Month Saver Pass (Regular ${PRICING.pro3m.display} / 3 mos)`
     },
     category: 'individual'
   },
   {
     code: 'VIP299',
     presetId: 'vip_299',
-    name: '3-Month VIP Pro Extension (₹999 / 3 mos)',
-    offerTitle: '3-Month VIP Extension: Continuous Job Applications for ₹999',
-    discountBadge: 'VIP EXTENSION (₹999)',
-    originalPrice: '₹1,299 / 3 mos',
-    discountedPrice: '₹999 / 3 mos',
-    amountPaise: 99900,
+    name: `3-Month VIP Pro Extension (${PRICING.proPromo3m.display} / 3 mos)`,
+    offerTitle: `3-Month VIP Extension: Continuous Job Applications for ${PRICING.proPromo3m.display}`,
+    discountBadge: `VIP EXTENSION (${PRICING.proPromo3m.display})`,
+    originalPrice: `${PRICING.pro3m.display} / 3 mos`,
+    discountedPrice: promo3m,
+    amountPaise: PRICING.proPromo3m.amountPaise,
     allowedPlans: ['elite', 'professional'],
     durationDays: 90,
     description: 'JobFlux Pro - VIP 3-Month Extension (90 Days)',
-    customMessage: 'Extend your autonomous job applications for 3 full months with VIP priority server queue for only ₹999.',
+    customMessage: `Extend your autonomous job applications for 3 full months with VIP priority server queue for only ${PRICING.proPromo3m.display}.`,
     pricingDisplay: {
-      displayPrice: '₹999',
-      label: '3-Month VIP Extension (Regular ₹1,299 Value)'
+      displayPrice: PRICING.proPromo3m.display,
+      label: `3-Month VIP Extension (Regular ${PRICING.pro3m.display} Value)`
     },
     category: 'individual'
   },
   {
     code: 'ORGPRO49',
     presetId: 'org_pro_49',
-    name: 'Org Pro Member Flash Upgrade (₹49 / mo)',
-    offerTitle: 'Exclusive Org Member Upgrade: JobFlux Org Pro for ₹49',
-    discountBadge: '95% OFF (ORG MEMBER ONLY)',
-    originalPrice: '₹1,000 / mo',
-    discountedPrice: '₹49 / mo',
-    amountPaise: 4900,
+    name: `Org Pro Member Flash Upgrade (${PRICING.orgPro1mFlash.display} / mo)`,
+    offerTitle: `Exclusive Org Member Upgrade: JobFlux Org Pro for ${PRICING.orgPro1mFlash.display}`,
+    discountBadge: `${Math.round((1 - PRICING.orgPro1mFlash.amountPaise / (parseInt(PRICING.orgPro1mFlash.originalDisplay.replace(/[₹,]/g, '')) * 100)) * 100)}% OFF (ORG MEMBER ONLY)`,
+    originalPrice: `${PRICING.orgPro1mFlash.originalDisplay} / mo`,
+    discountedPrice: orgFlash,
+    amountPaise: PRICING.orgPro1mFlash.amountPaise,
     allowedPlans: ['org_pro'],
     durationDays: 30,
     description: 'JobFlux Org Pro - 95% Flash Upgrade for Organization Members (30 Days)',
-    customMessage: 'Exclusive upgrade for organization members! Upgrade your account to Org Pro with up to 15 weekly on-demand sweeps, 55 daily applications, and priority server queue for just ₹49 (Regular ₹1,000/mo).',
+    customMessage: `Exclusive upgrade for organization members! Upgrade your account to Org Pro with up to 15 weekly on-demand sweeps, 55 daily applications, and priority server queue for just ${PRICING.orgPro1mFlash.display} (Regular ${PRICING.orgPro1mFlash.originalDisplay}/mo).`,
     pricingDisplay: {
-      displayPrice: '₹49',
-      label: '95% OFF Org Member Upgrade (Actual ₹1,000 / mo)'
+      displayPrice: PRICING.orgPro1mFlash.display,
+      label: `95% OFF Org Member Upgrade (Actual ${PRICING.orgPro1mFlash.originalDisplay} / mo)`
     },
     category: 'org_member'
   },
   {
     code: 'ORGPRO99',
     presetId: 'org_pro_99',
-    name: 'Org Pro Member Official Pass (₹99 / mo)',
-    offerTitle: 'Organization Member Pass: JobFlux Org Pro for ₹99',
-    discountBadge: '90% OFF (ACTUAL ₹1,000)',
-    originalPrice: '₹1,000 / mo',
-    discountedPrice: '₹99 / mo',
-    amountPaise: 9900,
+    name: `Org Pro Member Official Pass (${PRICING.orgPro1m.display} / mo)`,
+    offerTitle: `Organization Member Pass: JobFlux Org Pro for ${PRICING.orgPro1m.display}`,
+    discountBadge: `${Math.round((1 - PRICING.orgPro1m.amountPaise / (parseInt(PRICING.orgPro1m.originalDisplay.replace(/[₹,]/g, '')) * 100)) * 100)}% OFF (ACTUAL ${PRICING.orgPro1m.originalDisplay})`,
+    originalPrice: `${PRICING.orgPro1m.originalDisplay} / mo`,
+    discountedPrice: orgPro1mStr,
+    amountPaise: PRICING.orgPro1m.amountPaise,
     allowedPlans: ['org_pro'],
     durationDays: 30,
     description: 'JobFlux Org Pro - Member Upgrade (30 Days)',
-    customMessage: 'Upgrade to Org Pro: Up to 15 weekly on-demand sweeps, 55 daily applications, priority server queue, and AI resume optimization for ₹99.',
+    customMessage: `Upgrade to Org Pro: Up to 15 weekly on-demand sweeps, 55 daily applications, priority server queue, and AI resume optimization for ${PRICING.orgPro1m.display}.`,
     pricingDisplay: {
-      displayPrice: '₹99',
-      label: '90% OFF Org Pro Upgrade (Actual ₹1,000 / mo)'
+      displayPrice: PRICING.orgPro1m.display,
+      label: `90% OFF Org Pro Upgrade (Actual ${PRICING.orgPro1m.originalDisplay} / mo)`
     },
     category: 'org_member'
   },
   {
     code: 'ORGSTART79',
     presetId: 'org_starter_79',
-    name: 'Org Starter Member Pass (₹79 / mo)',
-    offerTitle: 'Organization Member Starter: JobFlux Org Starter for ₹79',
-    discountBadge: 'ORG STARTER (₹79)',
-    originalPrice: '₹499 / mo',
-    discountedPrice: '₹79 / mo',
-    amountPaise: 7900,
+    name: `Org Starter Member Pass (${PRICING.orgStarter1m.display} / mo)`,
+    offerTitle: `Organization Member Starter: JobFlux Org Starter for ${PRICING.orgStarter1m.display}`,
+    discountBadge: `ORG STARTER (${PRICING.orgStarter1m.display})`,
+    originalPrice: `${PRICING.orgStarter1m.originalDisplay} / mo`,
+    discountedPrice: orgStart,
+    amountPaise: PRICING.orgStarter1m.amountPaise,
     allowedPlans: ['org_starter'],
     durationDays: 30,
     description: 'JobFlux Org Starter - Member Pass (30 Days)',
-    customMessage: 'Activate your Org Starter pass! Get 30 days of autonomous morning applications (20 applies/day, scheduled sweeps) for just ₹79.',
+    customMessage: `Activate your Org Starter pass! Get 30 days of autonomous morning applications (20 applies/day, scheduled sweeps) for just ${PRICING.orgStarter1m.display}.`,
     pricingDisplay: {
-      displayPrice: '₹79',
-      label: 'Org Starter Member Pass (₹79 / mo)'
+      displayPrice: PRICING.orgStarter1m.display,
+      label: `Org Starter Member Pass (${PRICING.orgStarter1m.display} / mo)`
     },
     category: 'org_member'
   },
   {
     code: 'ORGPRO289',
     presetId: 'org_pro_289',
-    name: 'Org Pro 3-Month Comprehensive Pass (₹289 / 3 mos)',
-    offerTitle: 'Organization Member 90-Day Pipeline: JobFlux Org Pro for ₹289',
-    discountBadge: 'ORG PRO 3-MO (₹289)',
-    originalPrice: '₹2,500 / 3 mos',
-    discountedPrice: '₹289 / 3 mos',
-    amountPaise: 28900,
+    name: `Org Pro 3-Month Comprehensive Pass (${PRICING.orgPro3m.display} / 3 mos)`,
+    offerTitle: `Organization Member 90-Day Pipeline: JobFlux Org Pro for ${PRICING.orgPro3m.display}`,
+    discountBadge: `ORG PRO 3-MO (${PRICING.orgPro3m.display})`,
+    originalPrice: `${PRICING.orgPro3m.originalDisplay} / 3 mos`,
+    discountedPrice: orgPro3mStr,
+    amountPaise: PRICING.orgPro3m.amountPaise,
     allowedPlans: ['org_pro_3m', 'org_pro'],
     durationDays: 90,
     description: 'JobFlux Org Pro - 3-Month Comprehensive Pass (90 Days)',
-    customMessage: 'Unlock 90 days of continuous auto-apply (55 daily applications, 15 weekly on-demand sweeps, VIP priority queue) for just ₹289.',
+    customMessage: `Unlock 90 days of continuous auto-apply (55 daily applications, 15 weekly on-demand sweeps, VIP priority queue) for just ${PRICING.orgPro3m.display}.`,
     pricingDisplay: {
-      displayPrice: '₹289',
-      label: 'Org Pro 3-Month Pass (₹289 / 3 mos)'
+      displayPrice: PRICING.orgPro3m.display,
+      label: `Org Pro 3-Month Pass (${PRICING.orgPro3m.display} / 3 mos)`
     },
     category: 'org_member'
   }
@@ -361,9 +423,9 @@ export const ORG_PLANS: PlanDefinition[] = [
     name: 'Org Pro (1 Month)',
     subtitle: 'Maximum speed, higher volume, priority queue & institutional placement tracking.',
     badge: 'POPULAR',
-    price: '₹499',
-    originalPrice: '₹1,499',
-    amountPaise: 49900,
+    price: PRICING.orgPro1m.display,
+    originalPrice: PRICING.orgPro1m.originalDisplay,
+    amountPaise: PRICING.orgPro1m.amountPaise,
     period: '/ month',
     durationDays: 30,
     featuresIntro: 'Everything in 1-Month Pro, with enhanced 15 sweeps/week and institutional sync...',
@@ -387,9 +449,9 @@ export const ORG_PLANS: PlanDefinition[] = [
     name: 'Org Pro (3 Months)',
     subtitle: 'Best value 90-day comprehensive pipeline with VIP placement guarantee support.',
     badge: 'BEST VALUE',
-    price: '₹1,299',
-    originalPrice: '₹3,999',
-    amountPaise: 129900,
+    price: PRICING.orgPro3m.display,
+    originalPrice: PRICING.orgPro3m.originalDisplay,
+    amountPaise: PRICING.orgPro3m.amountPaise,
     period: '/ 3 months',
     durationDays: 90,
     featuresIntro: 'Everything in 3-Month Pro, with 20 sweeps/week, VIP queue & placement support...',
@@ -467,13 +529,13 @@ export function getCapUpgradeHint(planId?: string | null, isEnterpriseMember = f
  * Supports canonical IDs and historical aliases.
  */
 export const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: number }> = {
-  pro: { amount: 49900, name: 'JobFlux Pro (1 Month)', days: 30 },
-  elite: { amount: 129900, name: 'JobFlux Pro (3 Months)', days: 90 },
-  professional: { amount: 129900, name: 'JobFlux Pro (3 Months)', days: 90 },
-  org_pro: { amount: 49900, name: 'JobFlux Org Pro (1 Month)', days: 30 },
-  org_pro_3m: { amount: 129900, name: 'JobFlux Org Pro — 3-Month Pass (90 Days)', days: 90 },
-  starter: { amount: 49900, name: 'JobFlux Pro (1 Month)', days: 30 },
-  org_starter: { amount: 49900, name: 'JobFlux Org Pro (1 Month)', days: 30 }
+  pro:         { amount: PRICING.pro1m.amountPaise,    name: 'JobFlux Pro (1 Month)',                   days: 30 },
+  elite:       { amount: PRICING.pro3m.amountPaise,    name: 'JobFlux Pro (3 Months)',                  days: 90 },
+  professional:{ amount: PRICING.pro3m.amountPaise,    name: 'JobFlux Pro (3 Months)',                  days: 90 },
+  org_pro:     { amount: PRICING.orgPro1m.amountPaise, name: 'JobFlux Org Pro (1 Month)',               days: 30 },
+  org_pro_3m:  { amount: PRICING.orgPro3m.amountPaise, name: 'JobFlux Org Pro — 3-Month Pass (90 Days)',days: 90 },
+  starter:     { amount: PRICING.pro1m.amountPaise,    name: 'JobFlux Pro (1 Month)',                   days: 30 },
+  org_starter: { amount: PRICING.orgStarter1m.amountPaise, name: 'JobFlux Org Starter (1 Month)',      days: 30 }
 }
 
 /**
