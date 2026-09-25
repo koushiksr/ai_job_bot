@@ -57,6 +57,7 @@ import AiLoadingScreen from '@/components/AiLoadingScreen'
 import BeginnerOnboardingGuide, { ProfileCompleteness } from '@/components/BeginnerOnboardingGuide'
 import CandidateOfferModal from '@/components/CandidateOfferModal'
 import PwaInstallPromptModal from '@/components/PwaInstallPromptModal'
+import OrgPlansModal from '@/components/OrgPlansModal'
 import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 import { checkIsPwaInstalled, shouldShowPwaAutoPrompt, markPwaAsDismissed } from '@/lib/pwaHelper'
@@ -98,6 +99,7 @@ export default function UserDashboard() {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState<boolean>(false)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false)
+  const [isOrgPlansModalOpen, setIsOrgPlansModalOpen] = useState<boolean>(false)
 
   // Initial Load & On-Demand Telemetry Refresh States
   const [pageLoading, setPageLoading] = useState<boolean>(true)
@@ -444,8 +446,8 @@ export default function UserDashboard() {
     }
   }
 
-  // Organization member plan checkout (₹79 Org Starter, ₹99 Org Pro, ₹289 Org Pro 3-Month)
-  const handleOrgCheckout = async (planId: 'org_starter' | 'org_pro' | 'org_pro_3m' = 'org_pro') => {
+  // Organization member plan checkout
+  const handleOrgCheckout = async (planId: string = 'org_pro') => {
     setOrgProLoading(true)
     setOrgProError('')
     try {
@@ -646,6 +648,7 @@ export default function UserDashboard() {
         const isOrg = isEnterpriseMember || storedEnterpriseRole === 'member' || storedRole === 'member' || storedPlan === 'enterprise' || storedPlan === 'org_starter' || storedPlan === 'org_pro' || storedPlan === 'org_pro_3m' || storedPlan === 'unpaid'
 
         if (isOrg) {
+          setIsOrgPlansModalOpen(true)
           setTimeout(() => {
             const el = document.getElementById('plans')
             if (el) {
@@ -1489,11 +1492,11 @@ export default function UserDashboard() {
             <Link
               href="/profile#referrals"
               className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 transition-all shrink-0 shadow-sm"
-              title="Refer friends & get ₹200 cash direct to Bank or UPI"
+              title="Refer friends & get ₹150 cash direct to Bank or UPI"
             >
               <Gift className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="hidden sm:inline">Refer & Earn ₹200</span>
-              <span className="sm:hidden text-[11px] font-bold">₹200</span>
+              <span className="hidden sm:inline">Refer & Earn ₹150</span>
+              <span className="sm:hidden text-[11px] font-bold">₹150</span>
             </Link>
 
             {/* Candidate Offer Button */}
@@ -1534,14 +1537,15 @@ export default function UserDashboard() {
                   <span>Claim Deal ({activeOfferBanner.discounted_price})</span>
                 </Link>
               ) : isEnterpriseMember ? (
-                <a
-                  href="#plans"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0 shadow-sm"
+                <button
+                  type="button"
+                  onClick={() => setIsOrgPlansModalOpen(true)}
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-white light:bg-zinc-900 hover:bg-zinc-200 light:hover:bg-zinc-800 text-black light:text-white transition-colors shrink-0 shadow-sm cursor-pointer"
                   title="View Organization Member Plans"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                   <span>Org Plans</span>
-                </a>
+                </button>
               ) : (!isProfessional && (userPlan === 'none' || userPlan === 'no_plan' || userPlan === 'trial')) ? (
                 <Link
                   href="/pricing"
@@ -2060,164 +2064,50 @@ export default function UserDashboard() {
 
         {/* Enterprise Member Workspace Active Callout & Plans Section */}
         {userRole !== 'admin' && isEnterpriseMember && (
-          <div id="plans" className="scroll-mt-24 p-4 rounded-xl bg-zinc-950/80 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex flex-col gap-3 text-xs shadow-md transition-all duration-300">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-cyan-900/50 border border-cyan-700/50 light:border-cyan-300 flex items-center justify-center shrink-0">
-                  <Building2 className="w-4 h-4 text-cyan-400 light:text-cyan-600" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-white light:text-zinc-900">Enterprise Candidate Portal</span>
-                    <span className={`text-[10px] font-mono px-2 py-0.2 rounded-full font-semibold uppercase ${
-                      !isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
-                        ? 'bg-rose-950/80 border border-rose-700/80 text-rose-300'
-                        : userPlan === 'org_starter'
-                        ? 'bg-cyan-950 border border-cyan-700/70 text-cyan-300 light:text-cyan-700'
-                        : 'bg-amber-950 border border-amber-700/70 text-amber-300 light:text-amber-700'
-                    }`}>
-                      {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
-                        ? 'Payment Required'
-                        : userPlan === 'org_starter'
-                        ? 'Org Starter (35/d)'
-                        : userPlan === 'org_pro_3m'
-                        ? 'Org Pro (3 Months · 55/d)'
-                        : 'Org Pro (55/d)'}
-                    </span>
-                  </div>
-                  <span className="text-zinc-400 light:text-zinc-600 text-[11px] font-mono block sm:inline">
-                    {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
-                      ? 'No active plan. Subscribe below to begin automated job applications (0 applications permitted until paid).'
+          <div id="plans" className="scroll-mt-24 p-4 rounded-xl bg-zinc-950/80 light:bg-white border border-zinc-800/80 light:border-zinc-200 text-cyan-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-md transition-all duration-300">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-cyan-900/50 border border-cyan-700/50 light:border-cyan-300 flex items-center justify-center shrink-0">
+                <Building2 className="w-4 h-4 text-cyan-400 light:text-cyan-600" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold text-white light:text-zinc-900">Enterprise Candidate Portal</span>
+                  <span className={`text-[10px] font-mono px-2 py-0.2 rounded-full font-semibold uppercase ${
+                    !isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
+                      ? 'bg-rose-950/80 border border-rose-700/80 text-rose-300'
                       : userPlan === 'org_starter'
-                      ? 'Scheduled Morning Sweeps (06:00 AM IST) • 35 Daily Application Limit • 5 Weekly On-Demand Sweeps • Placement Sync'
-                      : '15–20 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch • Institutional Queue'}
+                      ? 'bg-cyan-950 border border-cyan-700/70 text-cyan-300 light:text-cyan-700'
+                      : 'bg-amber-950 border border-amber-700/70 text-amber-300 light:text-amber-700'
+                  }`}>
+                    {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
+                      ? 'Payment Required'
+                      : userPlan === 'org_starter'
+                      ? 'Org Starter (35/d)'
+                      : userPlan === 'org_pro_3m'
+                      ? 'Org Pro (3 Months · 55/d)'
+                      : 'Org Pro (55/d)'}
                   </span>
                 </div>
-              </div>
-
-              {/* If on Org Starter, offer quick upgrade to Org Pro */}
-              {isPlanActive && userPlan === 'org_starter' && (
-                <button
-                  type="button"
-                  onClick={() => handleOrgCheckout('org_pro')}
-                  disabled={orgProLoading}
-                  className="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 light:text-amber-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 shrink-0 self-end sm:self-auto"
-                  title="Upgrade to Org Pro for 55 daily applications and 15 on-demand sweeps/week"
-                >
-                  <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
-                  <span>{orgProLoading ? 'Opening…' : 'Upgrade to Org Pro'}</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-
-            {/* Subsidized Organization Plans Grid */}
-            <div className="pt-2 border-t border-zinc-800/80 light:border-zinc-200">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="text-[11px] font-semibold text-zinc-300 light:text-zinc-700">
-                  {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid' || userPlan === 'none'
-                    ? 'Select your organization member plan to activate applications:'
-                    : 'Subsidized Organization Plans (Switch or Renew):'}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                {/* Org Starter */}
-                <div className={`p-3 rounded-lg bg-zinc-900/90 border flex flex-col justify-between ${
-                  isPlanActive && userPlan === 'org_starter' ? 'border-cyan-500/80 ring-1 ring-cyan-500/30' : 'border-zinc-700'
-                }`}>
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-white text-xs">Org Starter</span>
-                        {isPlanActive && userPlan === 'org_starter' && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-700/60">
-                            ACTIVE
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs font-mono font-bold text-cyan-400">
-                        {ORG_PLANS.find(p => p.id === 'org_starter')?.price || '₹399'} {ORG_PLANS.find(p => p.id === 'org_starter')?.period || '/ mo'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 mt-1">35 applies/day · Scheduled morning sweeps + 5 weekly sweeps · Placement sync</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleOrgCheckout('org_starter')}
-                    disabled={orgProLoading}
-                    className={`mt-2.5 w-full py-1.5 rounded font-semibold text-xs transition cursor-pointer ${
-                      isPlanActive && userPlan === 'org_starter'
-                        ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-750'
-                        : 'bg-cyan-600 hover:bg-cyan-500 text-white'
-                    }`}
-                  >
-                    {isPlanActive && userPlan === 'org_starter' ? 'Renew Org Starter' : 'Get Org Starter'}
-                  </button>
-                </div>
-
-                {/* Org Pro (1 Month) */}
-                <div className={`p-3 rounded-lg bg-amber-950/20 border flex flex-col justify-between relative overflow-hidden ${
-                  isPlanActive && userPlan === 'org_pro' ? 'border-amber-400 ring-1 ring-amber-400/40' : 'border-amber-500/40'
-                }`}>
-                  <div className="absolute top-0 right-0 bg-amber-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">
-                    {isPlanActive && userPlan === 'org_pro' ? 'ACTIVE' : 'POPULAR'}
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-amber-200 text-xs">Org Pro (1 Month)</span>
-                      </div>
-                      <span className="text-xs font-mono font-bold text-amber-400">
-                        {ORG_PLANS.find(p => p.id === 'org_pro')?.price || '₹499'} {ORG_PLANS.find(p => p.id === 'org_pro')?.period || '/ mo'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 15 weekly on-demand sweeps · Priority queue & placement sync</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleOrgCheckout('org_pro')}
-                    disabled={orgProLoading}
-                    className="mt-2.5 w-full py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition cursor-pointer"
-                  >
-                    {isPlanActive && userPlan === 'org_pro'
-                      ? 'Renew Org Pro'
-                      : isPlanActive && userPlan === 'org_starter'
-                      ? 'Upgrade to Org Pro'
-                      : 'Get Org Pro'}
-                  </button>
-                </div>
-
-                {/* Org Pro (3 Months) */}
-                <div className={`p-3 rounded-lg bg-zinc-900/90 border flex flex-col justify-between ${
-                  isPlanActive && userPlan === 'org_pro_3m' ? 'border-emerald-400 ring-1 ring-emerald-400/40' : 'border-zinc-700'
-                }`}>
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-white text-xs">Org Pro (3 Months)</span>
-                        {isPlanActive && userPlan === 'org_pro_3m' && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/60">
-                            ACTIVE
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs font-mono font-bold text-emerald-400">
-                        {ORG_PLANS.find(p => p.id === 'org_pro_3m')?.price || '₹1,299'} {ORG_PLANS.find(p => p.id === 'org_pro_3m')?.period || '/ 3 mos'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 mt-1">55 applies/day · 20 weekly sweeps · VIP queue, 90-day pipeline until placed</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleOrgCheckout('org_pro_3m')}
-                    disabled={orgProLoading}
-                    className="mt-2.5 w-full py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition cursor-pointer"
-                  >
-                    {isPlanActive && userPlan === 'org_pro_3m' ? 'Renew Org Pro (3 Months)' : 'Get Org Pro (3 Months)'}
-                  </button>
-                </div>
+                <span className="text-zinc-400 light:text-zinc-600 text-[11px] font-mono block sm:inline">
+                  {!isPlanActive || userPlan === 'enterprise' || userPlan === 'unpaid'
+                    ? 'No active plan. Activate an institutional plan to begin automated job applications.'
+                    : userPlan === 'org_starter'
+                    ? 'Scheduled Morning Sweeps (06:00 AM IST) • 35 Daily Application Limit • 5 Weekly On-Demand Sweeps • Placement Sync'
+                    : '15–20 Weekly On-Demand Sweeps • 55 Daily Application Limit • Priority Dispatch • Institutional Queue'}
+                </span>
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setIsOrgPlansModalOpen(true)}
+              className="px-3.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 light:text-amber-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 self-end sm:self-auto shadow-sm"
+              title="View subsidized organization plans"
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
+              <span>{!isPlanActive ? 'Activate Plan' : 'Change / Upgrade Plan'}</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
         )}
 
@@ -2556,13 +2446,24 @@ export default function UserDashboard() {
                 </p>
               </div>
             </div>
-            <Link
-              href={isEnterpriseMember ? '#plans' : '/pricing'}
-              className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
-            >
-              <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : userPlan === 'pro' ? 'Upgrade to 3-Month Pro' : isEnterpriseMember ? 'View Org Plans' : 'Upgrade Plan'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            {isEnterpriseMember ? (
+              <button
+                type="button"
+                onClick={() => setIsOrgPlansModalOpen(true)}
+                className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <span>{!isPlanActive ? 'Activate Plan' : 'Change / Upgrade Plan'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <Link
+                href="/pricing"
+                className="w-full sm:w-auto px-3.5 py-1.5 sm:py-2 rounded-lg bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 font-semibold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <span>{userPlan === 'none' || userPlan === 'no_plan' ? 'Choose Plan' : !isPlanActive ? 'Renew Plan' : userPlan === 'pro' ? 'Upgrade to 3-Month Pro' : 'Upgrade Plan'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
           </div>
         ) : null}
 
@@ -3604,6 +3505,16 @@ export default function UserDashboard() {
         initialEmail={userEmail}
         initialUserId={userId}
         initialAvatar={userPicture}
+      />
+
+      {/* Subsidized Organization Plans Modal */}
+      <OrgPlansModal
+        isOpen={isOrgPlansModalOpen}
+        onClose={() => setIsOrgPlansModalOpen(false)}
+        userPlan={userPlan}
+        isPlanActive={isPlanActive}
+        onSelectPlan={handleOrgCheckout}
+        isLoading={orgProLoading}
       />
     </div>
   )

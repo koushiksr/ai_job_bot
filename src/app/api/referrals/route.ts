@@ -66,9 +66,9 @@ export async function GET(req: NextRequest) {
     const pendingRewards = rewards.filter(r => r.status === 'pending_payout')
     const paidRewards = rewards.filter(r => r.status === 'paid')
 
-    const pendingCash = pendingRewards.reduce((sum, r) => sum + (r.reward_amount || 200), 0)
-    const paidCash = paidRewards.reduce((sum, r) => sum + (r.reward_amount || 200), 0)
-    const totalEarnedCash = rewards.reduce((sum, r) => sum + (r.reward_amount || 200), 0)
+    const pendingCash = pendingRewards.reduce((sum, r) => sum + (r.reward_amount || 150), 0)
+    const paidCash = paidRewards.reduce((sum, r) => sum + (r.reward_amount || 150), 0)
+    const totalEarnedCash = rewards.reduce((sum, r) => sum + (r.reward_amount || 150), 0)
 
     const origin = req.headers.get('origin') || 'https://jobfluxai.vercel.app'
     const shareUrl = `${origin}/register?ref=${referralCode}`
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
       referee_name: r.referee_name || maskEmail(r.referee_email),
       referee_email_masked: maskEmail(r.referee_email),
       plan_id: r.plan_id,
-      reward_amount: r.reward_amount || 200,
+      reward_amount: r.reward_amount || 150,
       status: r.status,
       created_at: r.created_at,
       paid_at: r.paid_at,
@@ -178,7 +178,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Payout details saved successfully! Your ₹200 rewards will be disbursed here.',
+      message: 'Payout details saved successfully! Your ₹150 rewards will be disbursed here.',
       payout_settings: {
         payout_type: payoutType,
         upi_id: upiId,

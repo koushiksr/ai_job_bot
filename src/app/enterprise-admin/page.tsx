@@ -36,6 +36,7 @@ import {
   UserPlus
 } from 'lucide-react'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
+import { ORG_PLANS } from '@/config/plans'
 
 interface Member {
   user_id: string
@@ -364,7 +365,7 @@ export default function EnterpriseAdminPortal() {
   }
 
   // Trigger Razorpay Payment for an Individual Candidate
-  const handlePayForMember = async (member: Member, planId: 'org_starter' | 'org_pro' | 'org_pro_3m') => {
+  const handlePayForMember = async (member: Member, planId: string) => {
     setOpenActionMenuUserId(null)
     setPaymentProcessingUserId(member.user_id)
     setFeedback({ type: 'info', text: `Initiating payment checkout for ${member.name || member.email}...` })
@@ -374,11 +375,8 @@ export default function EnterpriseAdminPortal() {
         throw new Error('Razorpay gateway is still loading. Please refresh and try again.')
       }
 
-      const planDisplayNames: Record<string, string> = {
-        org_starter: 'Org Starter (₹79/mo)',
-        org_pro: 'Org Pro (₹99/mo)',
-        org_pro_3m: 'Org Pro 3-Month (₹289/3 mos)'
-      }
+      const selectedPlan = ORG_PLANS.find(p => p.id === planId)
+      const planTitle = selectedPlan ? `${selectedPlan.name} (${selectedPlan.price})` : planId
 
       // 1. Create Razorpay order on backend
       const orderRes = await fetch('/api/payment/order', {
@@ -402,7 +400,7 @@ export default function EnterpriseAdminPortal() {
         amount: orderData.amount,
         currency: orderData.currency || 'INR',
         name: 'JobFlux AI',
-        description: `${planDisplayNames[planId]} for ${member.name || member.email}`,
+        description: `${planTitle} for ${member.name || member.email}`,
         image: '/images/icon.png',
         order_id: orderData.order_id,
         prefill: {
@@ -472,7 +470,7 @@ export default function EnterpriseAdminPortal() {
   }
 
   // Direct Plan Assignment (SUPER-ADMIN ONLY override — org admins never see it)
-  const handleAssignPlan = async (member: Member, planId: 'org_starter' | 'org_pro' | 'org_pro_3m' | 'none') => {
+  const handleAssignPlan = async (member: Member, planId: 'org_pro' | 'org_pro_3m' | 'none' | string) => {
     if (!isSuperAdmin) {
       setFeedback({ type: 'error', text: 'Only Super Admin can assign plans directly. Please pay via Razorpay.' })
       return
@@ -1503,53 +1501,46 @@ export default function EnterpriseAdminPortal() {
                                       <span>Pay per member</span>
                                     </div>
 
-                                    <button
-                                      type="button"
-                                      onClick={() => handlePayForMember(member, 'org_starter')}
-                                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-900 light:hover:bg-zinc-100 text-xs text-zinc-200 light:text-zinc-800 flex items-center justify-between group transition-colors cursor-pointer"
-                                    >
-                                      <div>
-                                        <div className="font-medium group-hover:text-cyan-300">Org Starter</div>
-                                        <div className="text-[10px] text-zinc-500 font-mono">20/day · 30 days</div>
-                                      </div>
-                                      <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
-                                        ₹79
-                                      </span>
-                                    </button>
+                                    {ORG_PLANS.map(plan => {
+                                      const memberCurrentPlan = ORG_PLANS.find(p => p.id === member.plan)
+                                      const memberCurrentAmount = member.plan_active && memberCurrentPlan ? memberCurrentPlan.amountPaise : 0
+                                      const isActive = !!(member.plan_active && member.plan === plan.id)
+                                      const isLowerTier = !!(member.plan_active && memberCurrentAmount > plan.amountPaise)
+                                      const isDisabled = isActive || isLowerTier
 
-                                    <button
-                                      type="button"
-                                      onClick={() => handlePayForMember(member, 'org_pro')}
-                                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-900 light:hover:bg-zinc-100 text-xs text-zinc-200 light:text-zinc-800 flex items-center justify-between group transition-colors cursor-pointer"
-                                    >
-                                      <div>
-                                        <div className="font-medium flex items-center gap-1 group-hover:text-amber-300">
-                                          <Crown className="w-3 h-3 text-amber-400" />
-                                          <span>Org Pro</span>
-                                        </div>
-                                        <div className="text-[10px] text-zinc-500 font-mono">55/day · 30 days</div>
-                                      </div>
-                                      <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
-                                        ₹99
-                                      </span>
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      onClick={() => handlePayForMember(member, 'org_pro_3m')}
-                                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-900 light:hover:bg-zinc-100 text-xs text-zinc-200 light:text-zinc-800 flex items-center justify-between group transition-colors cursor-pointer"
-                                    >
-                                      <div>
-                                        <div className="font-medium flex items-center gap-1 group-hover:text-amber-300">
-                                          <Crown className="w-3 h-3 text-amber-400" />
-                                          <span>Org Pro · 3 Months</span>
-                                        </div>
-                                        <div className="text-[10px] text-zinc-500 font-mono">55/day · 90 days</div>
-                                      </div>
-                                      <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
-                                        ₹289
-                                      </span>
-                                    </button>
+                                      return (
+                                        <button
+                                          key={plan.id}
+                                          type="button"
+                                          onClick={() => !isDisabled && handlePayForMember(member, plan.id)}
+                                          disabled={isDisabled}
+                                          className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between group transition-colors ${
+                                            isDisabled
+                                              ? 'opacity-40 cursor-not-allowed bg-zinc-900/30 light:bg-zinc-100/50'
+                                              : 'hover:bg-zinc-900 light:hover:bg-zinc-100 text-zinc-200 light:text-zinc-800 cursor-pointer'
+                                          }`}
+                                        >
+                                          <div>
+                                            <div className={`font-medium flex items-center gap-1 ${isActive ? 'text-amber-300 font-semibold' : 'group-hover:text-amber-300'}`}>
+                                              <Crown className="w-3 h-3 text-amber-400" />
+                                              <span>{plan.name}</span>
+                                              {isActive && (
+                                                <span className="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-1 py-0.2 rounded border border-amber-700/50">
+                                                  ACTIVE
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="text-[10px] text-zinc-500 font-mono">
+                                              {plan.dailyLimit}/day · {plan.id === 'org_pro_3m' ? '90 days' : '30 days'}
+                                              {isLowerTier && ' · (Included)'}
+                                            </div>
+                                          </div>
+                                          <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
+                                            {plan.price}
+                                          </span>
+                                        </button>
+                                      )
+                                    })}
                                   </div>
 
                                   {/* Direct assign — SUPER ADMIN ONLY */}
@@ -1559,14 +1550,6 @@ export default function EnterpriseAdminPortal() {
                                       <span>Super Admin Privilege</span>
                                       <span className="text-[9px] text-zinc-500">Free Grant</span>
                                     </div>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleAssignPlan(member, 'org_starter')}
-                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer flex items-center justify-between"
-                                    >
-                                      <span>Grant Starter Privilege</span>
-                                      <span className="text-[10px] font-mono text-zinc-500">30 days</span>
-                                    </button>
                                     <button
                                       type="button"
                                       onClick={() => handleAssignPlan(member, 'org_pro')}
@@ -1700,21 +1683,35 @@ export default function EnterpriseAdminPortal() {
                     {isActionMenuOpen && (
                       <div className="rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 p-2 space-y-1">
                         <div className="px-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">Pay per member</div>
-                        {([
-                          { id: 'org_starter' as const, label: 'Org Starter', sub: '20/day · 30 days', price: '₹79' },
-                          { id: 'org_pro' as const, label: 'Org Pro', sub: '55/day · 30 days', price: '₹99' },
-                          { id: 'org_pro_3m' as const, label: 'Org Pro · 3 Months', sub: '55/day · 90 days', price: '₹289' }
-                        ]).map(opt => (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            onClick={() => handlePayForMember(member, opt.id)}
-                            className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-900 light:hover:bg-zinc-100 text-xs text-zinc-200 light:text-zinc-800 flex items-center justify-between cursor-pointer"
-                          >
-                            <span>{opt.label} <span className="text-zinc-500 font-mono text-[10px]">· {opt.sub}</span></span>
-                            <span className="font-mono font-bold text-emerald-400">{opt.price}</span>
-                          </button>
-                        ))}
+                        {ORG_PLANS.map(plan => {
+                          const memberCurrentPlan = ORG_PLANS.find(p => p.id === member.plan)
+                          const memberCurrentAmount = member.plan_active && memberCurrentPlan ? memberCurrentPlan.amountPaise : 0
+                          const isActive = !!(member.plan_active && member.plan === plan.id)
+                          const isLowerTier = !!(member.plan_active && memberCurrentAmount > plan.amountPaise)
+                          const isDisabled = isActive || isLowerTier
+
+                          return (
+                            <button
+                              key={plan.id}
+                              type="button"
+                              onClick={() => !isDisabled && handlePayForMember(member, plan.id)}
+                              disabled={isDisabled}
+                              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
+                                isDisabled
+                                  ? 'opacity-40 cursor-not-allowed bg-zinc-900/30 light:bg-zinc-100/50'
+                                  : 'hover:bg-zinc-900 light:hover:bg-zinc-100 text-zinc-200 light:text-zinc-800 cursor-pointer'
+                              }`}
+                            >
+                              <div>
+                                <span className={isActive ? 'text-amber-300 font-semibold' : ''}>{plan.name}</span>
+                                <span className="text-zinc-500 font-mono text-[10px]"> · {plan.dailyLimit}/day</span>
+                                {isActive && <span className="ml-1.5 text-[9px] font-bold text-amber-400 bg-amber-950/60 px-1 py-0.2 rounded border border-amber-700/50">ACTIVE</span>}
+                                {isLowerTier && <span className="ml-1.5 text-[9px] text-zinc-500">(Included)</span>}
+                              </div>
+                              <span className="font-mono font-bold text-emerald-400">{plan.price}</span>
+                            </button>
+                          )
+                        })}
                         {isSuperAdmin && (
                           <div className="pt-1.5 border-t border-zinc-800/80 light:border-zinc-200 space-y-1">
                             <div className="px-2 text-[10px] font-mono uppercase tracking-wider text-amber-400 light:text-amber-600 font-semibold flex items-center justify-between">
@@ -1722,7 +1719,6 @@ export default function EnterpriseAdminPortal() {
                               <span className="text-[9px] text-zinc-500">Free Grant</span>
                             </div>
                             {([
-                              { id: 'org_starter' as const, label: 'Grant Starter Privilege', duration: '30 days' },
                               { id: 'org_pro' as const, label: 'Grant Pro Privilege', duration: '30 days' },
                               { id: 'org_pro_3m' as const, label: 'Grant Pro · 3M Privilege', duration: '90 days' }
                             ]).map(opt => (

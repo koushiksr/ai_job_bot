@@ -158,7 +158,7 @@ export default function PaymentsTab({
             }`}
           >
             <Gift className="w-4 h-4 text-emerald-400" />
-            <span>Referral Payouts (₹200 Cash)</span>
+            <span>Referral Payouts (₹150 Cash)</span>
             {payoutStats.pending_count > 0 && (
               <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-amber-500 text-black">
                 {payoutStats.pending_count} pending
@@ -401,7 +401,7 @@ export default function PaymentsTab({
                   </span>
                 </h3>
                 <p className="text-xs text-slate-400 light:text-zinc-600 mt-0.5">
-                  Send ₹200 via UPI or Bank transfer to the referrer, then click &apos;Mark as Paid&apos; to update their dashboard.
+                  Send ₹150 via UPI or Bank transfer to the referrer, then click &apos;Mark as Paid&apos; to update their dashboard.
                 </p>
               </div>
             </div>
@@ -410,7 +410,7 @@ export default function PaymentsTab({
               <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
                 <thead className="bg-slate-950/70 light:bg-zinc-100 text-slate-400 light:text-zinc-600 uppercase text-[10px] tracking-wider border-b border-slate-800 light:border-zinc-200">
                   <tr>
-                    <th className="py-3.5 px-4">Referrer (Gets ₹200)</th>
+                    <th className="py-3.5 px-4">Referrer (Gets ₹150)</th>
                     <th className="py-3.5 px-4">Payout Destination (UPI / Bank)</th>
                     <th className="py-3.5 px-4">Referee (Purchased)</th>
                     <th className="py-3.5 px-4">Plan / Amount</th>
@@ -433,7 +433,7 @@ export default function PaymentsTab({
                         <Gift className="w-8 h-8 mx-auto text-slate-600 mb-2" />
                         No referral rewards generated yet.
                         <div className="text-[11px] text-slate-600 mt-1">
-                          When users invite friends who purchase a Pro plan, ₹200 cash reward tasks will appear here.
+                          When users invite friends who purchase a Pro plan, ₹150 cash reward tasks will appear here.
                         </div>
                       </td>
                     </tr>
@@ -502,7 +502,7 @@ export default function PaymentsTab({
                               {item.plan_id}
                             </span>
                             <span className="font-mono text-emerald-400 light:text-emerald-700 font-bold">
-                              ₹200 Reward
+                              ₹150 Reward
                             </span>
                           </div>
                         </td>
@@ -571,7 +571,7 @@ export default function PaymentsTab({
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
                 <Wallet className="w-4 h-4 text-emerald-400" />
-                Confirm ₹200 Cash Disbursal
+                Confirm ₹150 Cash Disbursal
               </h3>
               <button
                 onClick={() => setActiveModalItem(null)}
@@ -582,7 +582,7 @@ export default function PaymentsTab({
             </div>
 
             <p className="text-xs text-zinc-300 light:text-zinc-700">
-              Please send ₹200 to <strong className="text-white light:text-zinc-900">{activeModalItem.referrer_name || activeModalItem.referrer_id}</strong> via:
+              Please send ₹150 to <strong className="text-white light:text-zinc-900">{activeModalItem.referrer_name || activeModalItem.referrer_id}</strong> via:
             </p>
 
             <div className="p-3 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-xs font-mono space-y-1">

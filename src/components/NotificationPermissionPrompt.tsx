@@ -127,7 +127,7 @@ export default function NotificationPermissionPrompt() {
       {!subscribedSuccess ? (
         <div className="mt-3 space-y-2.5">
           <p className="text-[11px] text-zinc-300 light:text-zinc-700 leading-relaxed">
-            Get instant alerts when 55+ daily jobs match your criteria and claim ₹200 referral cash rewards — even after you close this browser.
+            Get instant alerts when 55+ daily jobs match your criteria and claim ₹150 referral cash rewards — even after you close this browser.
           </p>
 
           <div className="space-y-1 text-[10px] text-zinc-400 light:text-zinc-600 font-medium">
@@ -137,7 +137,7 @@ export default function NotificationPermissionPrompt() {
             </div>
             <div className="flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-indigo-400 shrink-0" />
-              <span>₹200 referral cash bonuses &amp; candidate passes</span>
+              <span>₹150 referral cash bonuses &amp; candidate passes</span>
             </div>
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="w-3 h-3 text-cyan-400 shrink-0" />

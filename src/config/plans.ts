@@ -357,29 +357,6 @@ export const PLANS = MASTER_PLANS
  */
 export const ORG_PLANS: PlanDefinition[] = [
   {
-    id: 'org_starter',
-    name: 'Org Starter',
-    subtitle: 'Essential daily job automation for org candidates with added placement sync.',
-    badge: 'STARTER',
-    price: '₹399',
-    originalPrice: '₹799',
-    amountPaise: 39900,
-    period: '/ month',
-    durationDays: 30,
-    featuresIntro: 'Everything in Starter, plus institutional placement sync and extra volume...',
-    features: [
-      { text: '30 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 35 Verified Job Applications / Day' },
-      { text: 'Daily Morning Scheduled Sweep (06:00 AM IST)' },
-      { text: '5 Weekly On-Demand Real-Time Sweeps (Included)' },
-      { text: 'Automated Recruiter Screening Responses' },
-      { text: 'Institutional Placement Coordinator Dashboard Sync' },
-      { text: 'Stays linked to your organization & admin' }
-    ],
-    cta: 'Get Org Starter',
-    highlight: false
-  },
-  {
     id: 'org_pro',
     name: 'Org Pro (1 Month)',
     subtitle: 'Maximum speed, higher volume, priority queue & institutional placement tracking.',
@@ -490,13 +467,13 @@ export function getCapUpgradeHint(planId?: string | null, isEnterpriseMember = f
  * Supports canonical IDs and historical aliases.
  */
 export const PLAN_AMOUNTS: Record<string, { amount: number; name: string; days: number }> = {
-  starter: { amount: 39900, name: 'JobFlux Starter Pass (30 Days)', days: 30 },
   pro: { amount: 49900, name: 'JobFlux Pro (1 Month)', days: 30 },
   elite: { amount: 129900, name: 'JobFlux Pro (3 Months)', days: 90 },
   professional: { amount: 129900, name: 'JobFlux Pro (3 Months)', days: 90 },
-  org_starter: { amount: 39900, name: 'JobFlux Org Starter (30 Days)', days: 30 },
   org_pro: { amount: 49900, name: 'JobFlux Org Pro (1 Month)', days: 30 },
-  org_pro_3m: { amount: 129900, name: 'JobFlux Org Pro — 3-Month Pass (90 Days)', days: 90 }
+  org_pro_3m: { amount: 129900, name: 'JobFlux Org Pro — 3-Month Pass (90 Days)', days: 90 },
+  starter: { amount: 49900, name: 'JobFlux Pro (1 Month)', days: 30 },
+  org_starter: { amount: 49900, name: 'JobFlux Org Pro (1 Month)', days: 30 }
 }
 
 /**

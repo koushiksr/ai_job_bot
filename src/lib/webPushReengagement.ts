@@ -23,12 +23,12 @@ export const DRIP_CAMPAIGNS: DripCampaign[] = [
     category: 'welcome_offer'
   },
   {
-    id: 'camp_referral_200',
-    title: '💰 Earn ₹200 Direct Cash on JobFlux!',
-    body: 'Refer your college friends or developer peers. Receive ₹200 cash sent directly to your UPI or Bank Account on every Pro upgrade!',
+    id: 'camp_referral_150',
+    title: '💰 Earn ₹150 Direct Cash on JobFlux!',
+    body: 'Refer your college friends or developer peers. Receive ₹150 cash sent directly to your UPI or Bank Account on every Pro upgrade!',
     url: '/profile',
-    tag: 'drip_referral_200',
-    badgeText: '₹200 Cash Reward',
+    tag: 'drip_referral_150',
+    badgeText: '₹150 Cash Reward',
     category: 'referral_cash'
   },
   {

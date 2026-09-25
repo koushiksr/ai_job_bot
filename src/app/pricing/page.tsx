@@ -430,10 +430,10 @@ export default function PricingPage() {
             <Link
               href="/profile#referrals"
               className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 light:text-emerald-700 border border-emerald-500/30 transition-all shrink-0 shadow-sm"
-              title="Refer friends & get ₹200 cash direct to Bank or UPI"
+              title="Refer friends & get ₹150 cash direct to Bank or UPI"
             >
               <Gift className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>Refer & Earn ₹200</span>
+              <span>Refer & Earn ₹150</span>
             </Link>
 
             <button
@@ -602,14 +602,14 @@ export default function PricingPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-white light:text-zinc-900">
-                  Refer Friends &amp; Earn ₹200 Direct Cash
+                  Refer Friends &amp; Earn ₹150 Direct Cash
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/40">
                   Instant UPI
                 </span>
               </div>
               <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
-                Share your invite link with peers or college mates. When they subscribe to any Pro plan, you get ₹200 cash sent directly to your UPI or Bank Account!
+                Share your invite link with peers or college mates. When they subscribe to any Pro plan, you get ₹150 cash sent directly to your UPI or Bank Account!
               </p>
             </div>
           </div>

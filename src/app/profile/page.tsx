@@ -266,7 +266,7 @@ export default function CandidateProfilePage() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 light:text-emerald-700 font-semibold hover:bg-emerald-500/20 transition-all shrink-0 shadow-sm"
           >
             <Gift className="w-3.5 h-3.5 text-emerald-400" />
-            <span>🎁 Refer & Earn ₹200 (Bank / UPI)</span>
+            <span>🎁 Refer & Earn ₹150 (Bank / UPI)</span>
           </a>
           <a
             href="#editor"

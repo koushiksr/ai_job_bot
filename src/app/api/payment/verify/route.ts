@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
       status: 'captured'
     })
 
-    // 5. If referee was referred and purchased an eligible retail plan, record ₹200 cash reward
+    // 5. If referee was referred and purchased an eligible retail plan, record ₹150 cash reward
     try {
       await recordReferralReward(db, {
         refereeUserId: resolvedUserId || '',

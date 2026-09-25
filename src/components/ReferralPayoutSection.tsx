@@ -203,14 +203,14 @@ export default function ReferralPayoutSection({ userId }: { userId: string }) {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-bold text-white light:text-zinc-900">
-                  Refer Friends &amp; Earn ₹200 Cash
+                  Refer Friends &amp; Earn ₹150 Cash
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/40">
                   Direct Cash
                 </span>
               </div>
               <p className="text-xs text-zinc-400 light:text-zinc-600 mt-0.5">
-                Share your invite link with college friends or peers. When they buy any Pro plan, you get ₹200 cash sent directly to your UPI or Bank Account!
+                Share your invite link with college friends or peers. When they buy any Pro plan, you get ₹150 cash sent directly to your UPI or Bank Account!
               </p>
             </div>
           </div>
@@ -256,7 +256,7 @@ export default function ReferralPayoutSection({ userId }: { userId: string }) {
             <div className="text-xl sm:text-2xl font-bold font-mono text-emerald-300 light:text-emerald-700 mt-1">
               ₹{stats.total_earned_cash}
             </div>
-            <div className="text-[10px] text-emerald-400/70 light:text-emerald-600/80 mt-0.5">₹200 per active purchase</div>
+            <div className="text-[10px] text-emerald-400/70 light:text-emerald-600/80 mt-0.5">₹150 per active purchase</div>
           </div>
 
           <div className="p-3.5 rounded-xl bg-amber-950/20 light:bg-amber-50/60 border border-amber-500/20 light:border-amber-300">
@@ -304,7 +304,7 @@ export default function ReferralPayoutSection({ userId }: { userId: string }) {
             <div className="flex items-center gap-2">
               <Wallet className="w-4 h-4 text-emerald-400" />
               <h3 className="text-sm font-semibold text-white light:text-zinc-900">
-                Where should we send your ₹200 cash rewards?
+                Where should we send your ₹150 cash rewards?
               </h3>
             </div>
             {payoutSettings.upi_id || payoutSettings.bank_details?.account_number ? (
@@ -362,7 +362,7 @@ export default function ReferralPayoutSection({ userId }: { userId: string }) {
                   className="w-full bg-black/60 light:bg-white border border-zinc-800 light:border-zinc-300 rounded-lg px-3 py-2 text-xs text-white light:text-zinc-900 placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
                 />
                 <p className="text-[11px] text-zinc-500 light:text-zinc-400">
-                  Admin will disburse ₹200 directly to this UPI address on every eligible referral purchase.
+                  Admin will disburse ₹150 directly to this UPI address on every eligible referral purchase.
                 </p>
               </div>
             ) : (
