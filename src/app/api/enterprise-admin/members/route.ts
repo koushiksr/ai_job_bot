@@ -83,17 +83,28 @@ export async function GET(req: NextRequest) {
       const isPaidOrgPro = (rawPlan === 'org_pro' || rawPlan === 'org_pro_3m' || rawPlan === 'pro')
       const isPaidOrgStarter = (rawPlan === 'org_starter' || rawPlan === 'starter')
       const exp = m.plan_expires_at ? new Date(m.plan_expires_at) : null
+      const isExpired = exp ? exp <= now : false
       const isPlanValid = exp ? exp > now : false
-      const isVipUser = Boolean(m.is_vip || m.vip_access || m.free_privilege)
+      const isVipUser = Boolean(m.is_vip || m.vip_access || m.free_privilege || m.granted_by_super_admin)
 
       let effPlan = 'none'
       let effPlanName = 'No Plan'
       let effExpiresAt: any = null
       let isPlanActive = false
 
-      if (isVipUser) {
-        effPlan = isPaidOrgPro ? 'org_pro' : (isPaidOrgStarter ? 'org_starter' : 'org_pro')
-        effPlanName = isPaidOrgPro ? 'Org Pro (VIP)' : 'Org Starter (VIP)'
+      if (isExpired) {
+        effPlan = 'none'
+        effPlanName = 'Plan Expired'
+        effExpiresAt = m.plan_expires_at
+        isPlanActive = false
+      } else if (isVipUser && (isPlanValid || !exp)) {
+        effPlan = isPaidOrgStarter ? 'org_starter' : (rawPlan === 'org_pro_3m' ? 'org_pro_3m' : 'org_pro')
+        effPlanName = isPaidOrgStarter
+          ? 'Org Starter (Privilege)'
+          : rawPlan === 'org_pro_3m'
+          ? 'Org Pro · 3M (Privilege)'
+          : 'Org Pro (Privilege)'
+        effExpiresAt = m.plan_expires_at
         isPlanActive = true
       } else if (isPaidOrgPro && isPlanValid) {
         effPlan = rawPlan === 'org_pro_3m' ? 'org_pro_3m' : 'org_pro'
@@ -105,7 +116,7 @@ export async function GET(req: NextRequest) {
         effPlanName = 'Org Starter'
         effExpiresAt = m.plan_expires_at
         isPlanActive = true
-      } else if (rawPlan === 'enterprise' && (isVipUser || isPlanValid)) {
+      } else if (rawPlan === 'enterprise' && isPlanValid) {
         // Org base (covered by the organization) — active with base quotas.
         effPlan = 'enterprise'
         effPlanName = 'Enterprise Base'
@@ -228,18 +239,29 @@ export async function PATCH(req: NextRequest) {
         updateFields.plan_expires_at = null
         updateFields.daily_application_limit = 0
         updateFields.enabled_for_daily_run = false
+        updateFields.is_vip = false
+        updateFields.vip_access = false
+        updateFields.free_privilege = false
+        updateFields.granted_by_super_admin = false
       } else {
-        updateFields.plan = planId
-        updateFields.plan_name = planId === 'org_starter'
-          ? 'Org Starter'
+        const isPro = planId.startsWith('org_pro')
+        const planLabel = planId === 'org_starter'
+          ? 'Org Starter (Privilege)'
           : planId === 'org_pro_3m'
-          ? 'Org Pro · 3 Months'
-          : 'Org Pro'
+          ? 'Org Pro · 3M (Privilege)'
+          : 'Org Pro (Privilege)'
+
+        updateFields.plan = planId
+        updateFields.plan_name = planLabel
         updateFields.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
         updateFields.plan_activated_at = now
-        updateFields.daily_application_limit = planId.startsWith('org_pro') ? 55 : 20
+        updateFields.daily_application_limit = isPro ? 55 : 20
         updateFields.enabled_for_daily_run = true
         updateFields.enterprise_role = 'member'
+        updateFields.granted_by_super_admin = true
+        updateFields.free_privilege = true
+        updateFields.is_vip = true
+        updateFields.vip_access = true
       }
     }
 

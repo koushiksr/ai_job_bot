@@ -40,11 +40,12 @@ async function getWeeklyOnDemandQuota(db: any, userId: string, isSuperUser: bool
   })
   // Org Pro buyers get 15 weekly on-demand runs (vs 10 enterprise base, 5 pro)
   const weeklyLimit = getWeeklyOnDemandLimit(plan, isEnterpriseMember)
+  const isUnlimited = isSuperUser || (isVip && !isEnterpriseMember)
   return {
     limit: weeklyLimit,
     used: usedCount,
-    remaining: isSuperUser || isVip ? 999 : Math.max(0, weeklyLimit - usedCount),
-    is_unlimited: isSuperUser || isVip,
+    remaining: isUnlimited ? 999 : Math.max(0, weeklyLimit - usedCount),
+    is_unlimited: isUnlimited,
     is_enterprise: isEnterpriseMember
   }
 }
@@ -164,8 +165,8 @@ export async function POST(req: NextRequest) {
     const isEnterpriseMember = profile?.enterprise_role === 'member' || Boolean(profile?.enterprise_org_id || profile?.org_id) || ['enterprise', 'org_starter', 'org_pro', 'org_pro_3m'].includes(plan)
     const isProTier = plan === 'elite' || plan === 'professional' || plan === 'vip'
     const hasActiveExpiration = profile?.plan_expires_at ? new Date(profile.plan_expires_at) > now : false
-    const isOrgProActive = isEnterpriseMember && (plan === 'org_pro' || plan === 'org_pro_3m' || plan === 'pro') && (hasActiveExpiration || isVip)
-    const isPro = isSuperUser || isVip || isOrgProActive || (!isEnterpriseMember && isProTier && hasActiveExpiration)
+    const isOrgProActive = isEnterpriseMember && (plan === 'org_pro' || plan === 'org_pro_3m' || plan === 'pro') && (hasActiveExpiration || (!profile?.plan_expires_at && isVip))
+    const isPro = isSuperUser || (!isEnterpriseMember && isVip) || isOrgProActive || (!isEnterpriseMember && isProTier && hasActiveExpiration)
 
     if (!isPro) {
       const reason = isEnterpriseMember

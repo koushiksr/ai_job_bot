@@ -71,13 +71,20 @@ export async function GET(req: NextRequest) {
       // Organization members NEVER have free trial.
       // If they have not paid anything, they cannot apply to even one job (0 applies/day).
       const orgExpires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null
-      const isOrgVip = Boolean(profile.is_vip || profile.vip_access || profile.free_privilege || rawPlan === 'vip')
+      const isExpired = orgExpires ? orgExpires <= now : false
+      const isPlanValid = orgExpires ? orgExpires > now : false
+      const isOrgVip = Boolean(profile.is_vip || profile.vip_access || profile.free_privilege || rawPlan === 'vip' || profile.granted_by_super_admin)
 
-      if (isOrgVip) {
+      if (isExpired) {
+        // Expired after 30/90 days
+        verifiedPlan = 'unpaid'
+        verifiedPlanName = 'Plan Expired (Org Member)'
+        isPlanActive = false
+      } else if (isOrgVip && (isPlanValid || !orgExpires)) {
         verifiedPlan = 'org_pro'
-        verifiedPlanName = 'JobFlux Org Pro (VIP Active)'
+        verifiedPlanName = profile.plan_name || 'JobFlux Org Pro (Privilege)'
         isPlanActive = true
-      } else if (orgExpires && orgExpires > now) {
+      } else if (isPlanValid) {
         if (rawPlan === 'org_starter' || rawPlan === 'starter') {
           verifiedPlan = 'org_starter'
           verifiedPlanName = 'JobFlux Org Starter (20/d)'

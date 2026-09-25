@@ -1550,38 +1550,42 @@ export default function EnterpriseAdminPortal() {
 
                                   {/* Direct assign — SUPER ADMIN ONLY */}
                                   {isSuperAdmin && (
-                                  <div className="pt-1.5 space-y-0.5">
-                                    <div className="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-zinc-500 light:text-zinc-600 font-semibold">
-                                      Super Admin Assign
+                                  <div className="pt-1.5 space-y-0.5 border-t border-zinc-800/80 light:border-zinc-200 mt-1">
+                                    <div className="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-amber-400 light:text-amber-600 font-semibold flex items-center justify-between">
+                                      <span>Super Admin Privilege</span>
+                                      <span className="text-[9px] text-zinc-500">Free Grant</span>
                                     </div>
                                     <button
                                       type="button"
                                       onClick={() => handleAssignPlan(member, 'org_starter')}
-                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer flex items-center justify-between"
                                     >
-                                      Assign Starter
+                                      <span>Grant Starter Privilege</span>
+                                      <span className="text-[10px] font-mono text-zinc-500">30 days</span>
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleAssignPlan(member, 'org_pro')}
-                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-cyan-950/40 light:hover:bg-cyan-50 text-[11px] text-cyan-300 light:text-cyan-700 font-medium transition-colors cursor-pointer flex items-center justify-between"
                                     >
-                                      Assign Pro
+                                      <span>Grant Pro Privilege</span>
+                                      <span className="text-[10px] font-mono text-cyan-400">30 days</span>
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleAssignPlan(member, 'org_pro_3m')}
-                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer flex items-center justify-between"
                                     >
-                                      Assign Pro · 3 Months
+                                      <span>Grant Pro · 3M Privilege</span>
+                                      <span className="text-[10px] font-mono text-zinc-500">90 days</span>
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleAssignPlan(member, 'none')}
-                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-rose-950/30 text-[11px] text-zinc-400 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1"
+                                      className="w-full text-left px-2.5 py-1 rounded hover:bg-rose-950/30 text-[11px] text-rose-400 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1"
                                     >
-                                      <RotateCcw className="w-3 h-3 text-zinc-400" />
-                                      <span>Reset to No Plan</span>
+                                      <RotateCcw className="w-3 h-3 text-rose-400" />
+                                      <span>Revoke Plan Privilege</span>
                                     </button>
                                   </div>
                                   )}
@@ -1621,16 +1625,23 @@ export default function EnterpriseAdminPortal() {
                           {member.email}
                         </div>
                       </div>
-                      <span className={`shrink-0 inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full border font-semibold ${
-                        !member.plan_active
-                          ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-700/60 light:border-zinc-300'
-                          : member.plan === 'org_pro' || member.plan === 'org_pro_3m'
-                          ? 'bg-amber-950/60 light:bg-amber-50 text-amber-300 light:text-amber-700 border-amber-700/60 light:border-amber-300'
-                          : 'bg-cyan-950/60 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border-cyan-800/60 light:border-cyan-300'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${member.plan_active ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
-                        {member.plan_active ? member.plan_name : 'No Plan'}
-                      </span>
+                      <div className="shrink-0 flex flex-col items-end">
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full border font-semibold ${
+                          !member.plan_active
+                            ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-700/60 light:border-zinc-300'
+                            : member.plan === 'org_pro' || member.plan === 'org_pro_3m'
+                            ? 'bg-amber-950/60 light:bg-amber-50 text-amber-300 light:text-amber-700 border-amber-700/60 light:border-amber-300'
+                            : 'bg-cyan-950/60 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border-cyan-800/60 light:border-cyan-300'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${member.plan_active ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
+                          {member.plan_active ? member.plan_name : 'No Plan'}
+                        </span>
+                        {member.plan_active && member.plan_expires_at && (
+                          <span className="text-[9px] text-zinc-500 light:text-zinc-600 font-mono mt-0.5">
+                            till {new Date(member.plan_expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-4 text-[11px] font-mono text-zinc-400 light:text-zinc-600">
                       <span>Today <strong className="text-white light:text-zinc-900">{member.applied_today}/{member.daily_application_limit ?? 0}</strong></span>
@@ -1701,30 +1712,35 @@ export default function EnterpriseAdminPortal() {
                           </button>
                         ))}
                         {isSuperAdmin && (
-                          <>
-                            <div className="px-2 pt-1 text-[10px] font-mono uppercase tracking-wider text-zinc-500">Super Admin Assign</div>
+                          <div className="pt-1.5 border-t border-zinc-800/80 light:border-zinc-200 space-y-1">
+                            <div className="px-2 text-[10px] font-mono uppercase tracking-wider text-amber-400 light:text-amber-600 font-semibold flex items-center justify-between">
+                              <span>Super Admin Privilege</span>
+                              <span className="text-[9px] text-zinc-500">Free Grant</span>
+                            </div>
                             {([
-                              { id: 'org_starter' as const, label: 'Assign Starter' },
-                              { id: 'org_pro' as const, label: 'Assign Pro' },
-                              { id: 'org_pro_3m' as const, label: 'Assign Pro · 3 Months' }
+                              { id: 'org_starter' as const, label: 'Grant Starter Privilege', duration: '30 days' },
+                              { id: 'org_pro' as const, label: 'Grant Pro Privilege', duration: '30 days' },
+                              { id: 'org_pro_3m' as const, label: 'Grant Pro · 3M Privilege', duration: '90 days' }
                             ]).map(opt => (
                               <button
                                 key={opt.id}
                                 type="button"
                                 onClick={() => handleAssignPlan(member, opt.id)}
-                                className="w-full text-left px-2.5 py-1 rounded text-[11px] text-zinc-300 light:text-zinc-700 cursor-pointer"
+                                className="w-full text-left px-2.5 py-1 rounded text-[11px] text-zinc-300 light:text-zinc-700 cursor-pointer flex items-center justify-between hover:bg-zinc-900 light:hover:bg-zinc-100"
                               >
-                                {opt.label}
+                                <span>{opt.label}</span>
+                                <span className="text-[10px] font-mono text-zinc-500">{opt.duration}</span>
                               </button>
                             ))}
                             <button
                               type="button"
                               onClick={() => handleAssignPlan(member, 'none')}
-                              className="w-full text-left px-2.5 py-1 rounded text-[11px] text-zinc-400 cursor-pointer"
+                              className="w-full text-left px-2.5 py-1 rounded text-[11px] text-rose-400 cursor-pointer hover:bg-rose-950/30 flex items-center gap-1"
                             >
-                              Reset to No Plan
+                              <RotateCcw className="w-3 h-3 text-rose-400" />
+                              <span>Revoke Plan Privilege</span>
                             </button>
-                          </>
+                          </div>
                         )}
                       </div>
                     )}
