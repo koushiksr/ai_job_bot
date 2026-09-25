@@ -67,10 +67,23 @@ export async function GET(req: NextRequest) {
       event_type: 'login',
       $or: [{ user_id: userId }, { userId }, ...(email ? [{ email }] : [])]
     }
-    const [loginsToday, loginsWeek, loginsMonth] = await Promise.all([
+    // On-demand sweep quota (mirrors enterprise on-demand rate limits)
+    const istOffsetMs = 5.5 * 60 * 60 * 1000
+    const istNow = new Date(now.getTime() + istOffsetMs)
+    const todayIstStr = istNow.toISOString().slice(0, 10)
+    const todayStartIst = new Date(new Date(todayIstStr + 'T00:00:00+05:30').getTime())
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const ON_DEMAND_SOURCES = ['enterprise_admin_on_demand', 'web_dashboard_on_demand', 'manual_cli_on_demand', 'admin_on_demand', 'on_demand']
+    const rawPlan = (profile.plan || '').toLowerCase()
+    const isVipQ = Boolean(profile.is_vip || profile.vip_access || profile.free_privilege)
+    const isOrgQ = profile.enterprise_role === 'member' || Boolean(profile.enterprise_org_id) || ['enterprise', 'org_starter', 'org_pro', 'org_pro_3m'].includes(rawPlan)
+    const weeklySweepLimit = !isOrgQ ? 5 : (isVipQ || ['org_pro', 'org_pro_3m', 'pro'].includes(rawPlan) ? 15 : 10)
+    const [loginsToday, loginsWeek, loginsMonth, sweepsToday, sweepsWeek] = await Promise.all([
       db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: dayStart } }),
       db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: weekStart } }),
-      db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: monthStart } })
+      db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: monthStart } }),
+      db.collection('tasks').countDocuments({ user_id: userId, source: { $in: ON_DEMAND_SOURCES }, created_at: { $gte: todayStartIst } }),
+      db.collection('tasks').countDocuments({ user_id: userId, source: { $in: ON_DEMAND_SOURCES }, created_at: { $gte: weekAgo } })
     ])
 
     return NextResponse.json({
@@ -143,6 +156,15 @@ export async function GET(req: NextRequest) {
         week: loginsWeek,
         month: loginsMonth,
         total: profile.login_count || 0
+      },
+      sweeps: {
+        used_today: sweepsToday,
+        daily_limit: 3,
+        remaining_today: Math.max(0, 3 - sweepsToday),
+        used_week: sweepsWeek,
+        weekly_limit: weeklySweepLimit,
+        remaining_week: Math.max(0, weeklySweepLimit - sweepsWeek),
+        lifetime: profile.on_demand_run_count || 0
       }
     })
   } catch (err: any) {

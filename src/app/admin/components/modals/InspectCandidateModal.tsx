@@ -155,6 +155,18 @@ export default function InspectCandidateModal({
                   <span title="Lifetime login count">total <strong className="text-white light:text-zinc-900">{dossier?.logins?.total ?? candidate.login_count ?? '—'}</strong></span>
                   <span className="text-zinc-600" title="Applications today / this week / this month / lifetime">applies <strong className="text-emerald-400 light:text-emerald-600">{dossier?.stats ? `${dossier.stats.today}/${dossier.stats.this_week}/${dossier.stats.this_month}/${dossier.stats.total_applied}` : '—'}</strong></span>
                 </div>
+                <div className="mt-2 px-2 py-1.5 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800/70 light:border-zinc-200 text-[11px] font-mono text-zinc-400 light:text-zinc-600 flex items-center gap-x-4 gap-y-0.5 flex-wrap">
+                  <span className="uppercase text-[10px] text-zinc-500">Sweep quota</span>
+                  <span title="On-demand sweeps used today (resets midnight IST)">today <strong className="text-white light:text-zinc-900">{dossier?.sweeps ? `${dossier.sweeps.used_today}/${dossier.sweeps.daily_limit}` : '—'}</strong></span>
+                  <span title="On-demand sweeps used in the rolling 7 days">7d <strong className="text-white light:text-zinc-900">{dossier?.sweeps ? `${dossier.sweeps.used_week}/${dossier.sweeps.weekly_limit}` : '—'}</strong></span>
+                  <span title="Lifetime on-demand sweeps triggered">total <strong className="text-white light:text-zinc-900">{dossier?.sweeps?.lifetime ?? '—'}</strong></span>
+                  {dossier?.sweeps && dossier.sweeps.remaining_today === 0 && (
+                    <span className="text-amber-400 light:text-amber-600" title="Daily on-demand quota exhausted — resets midnight IST">daily maxed</span>
+                  )}
+                  {dossier?.sweeps && dossier.sweeps.remaining_week === 0 && (
+                    <span className="text-rose-400 light:text-rose-600" title="Weekly on-demand quota exhausted — rolling 7-day window">weekly maxed</span>
+                  )}
+                </div>
                 <div className="mt-2 p-2 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800/70 light:border-zinc-200 text-xs">
                   <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase mb-1">
                     <Building2 className="w-3 h-3 text-indigo-400" /> Org journey
