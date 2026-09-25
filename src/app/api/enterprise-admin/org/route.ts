@@ -61,17 +61,65 @@ export async function GET(req: NextRequest) {
       user_id: { $in: memberUserIds }
     }).toArray()
 
-    let appliedToday = 0
-    let appliedThisWeek = 0
-    let appliedThisMonth = 0
-    let totalApplied = 0
+    const istOffsetMs = 5.5 * 60 * 60 * 1000
+    const nowIst = new Date(Date.now() + istOffsetMs)
+    const todayIstStr = nowIst.toISOString().slice(0, 10)
+    const sevenDaysAgoDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const sevenDaysAgoIst = new Date(sevenDaysAgoDate.getTime() + istOffsetMs).toISOString().slice(0, 10)
+    const monthStartIst = `${todayIstStr.slice(0, 7)}-01`
 
+    // Aggregate real job records from applied_jobs collection
+    const jobStats = await db.collection('applied_jobs').aggregate([
+      {
+        $match: {
+          user_id: { $in: memberUserIds },
+          status: { $in: ['applied', 'success'] }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total_applied: { $sum: 1 },
+          applied_today: {
+            $sum: {
+              $cond: [{ $eq: ['$applied_date', todayIstStr] }, 1, 0]
+            }
+          },
+          applied_this_week: {
+            $sum: {
+              $cond: [{ $gte: ['$applied_date', sevenDaysAgoIst] }, 1, 0]
+            }
+          },
+          applied_this_month: {
+            $sum: {
+              $cond: [{ $gte: ['$applied_date', monthStartIst] }, 1, 0]
+            }
+          }
+        }
+      }
+    ]).toArray()
+
+    const realJobAgg = jobStats[0] || {
+      total_applied: 0,
+      applied_today: 0,
+      applied_this_week: 0,
+      applied_this_month: 0
+    }
+
+    let statsToday = 0
+    let statsTotal = 0
     statsList.forEach(s => {
-      appliedToday += (s.today || 0)
-      appliedThisWeek += (s.this_week || 0)
-      appliedThisMonth += (s.this_month || 0)
-      totalApplied += (s.total_applied || 0)
+      if (s.last_date === todayIstStr) {
+        statsToday += (s.today || 0)
+      }
+      statsTotal += (s.total_applied || 0)
     })
+
+    // Mathematical invariant: total_applied >= applied_this_month >= applied_this_week >= applied_today
+    const appliedToday = Math.max(realJobAgg.applied_today, statsToday)
+    const totalApplied = Math.max(realJobAgg.total_applied, statsTotal, appliedToday)
+    const appliedThisWeek = Math.min(totalApplied, Math.max(realJobAgg.applied_this_week, appliedToday))
+    const appliedThisMonth = Math.min(totalApplied, Math.max(realJobAgg.applied_this_month, appliedThisWeek))
 
     // Count on-demand runs used in the last 7 days by org members
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
