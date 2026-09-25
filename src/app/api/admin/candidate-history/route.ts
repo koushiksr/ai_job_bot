@@ -67,13 +67,15 @@ export async function GET(req: NextRequest) {
       event_type: 'login',
       $or: [{ user_id: userId }, { userId }, ...(email ? [{ email }] : [])]
     }
-    // On-demand sweep quota (mirrors enterprise on-demand rate limits)
+    // On-demand sweep quota (mirrors enterprise on-demand rate limits).
+    // Super-admin triggers (admin_on_demand / manual_cli) NEVER count toward
+    // the user's quota — only user + org-admin triggers do.
+    const USER_ON_DEMAND_SOURCES = ['enterprise_admin_on_demand', 'web_dashboard_on_demand']
     const istOffsetMs = 5.5 * 60 * 60 * 1000
     const istNow = new Date(now.getTime() + istOffsetMs)
     const todayIstStr = istNow.toISOString().slice(0, 10)
     const todayStartIst = new Date(new Date(todayIstStr + 'T00:00:00+05:30').getTime())
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const ON_DEMAND_SOURCES = ['enterprise_admin_on_demand', 'web_dashboard_on_demand', 'manual_cli_on_demand', 'admin_on_demand', 'on_demand']
     const rawPlan = (profile.plan || '').toLowerCase()
     const isVipQ = Boolean(profile.is_vip || profile.vip_access || profile.free_privilege)
     const isOrgQ = profile.enterprise_role === 'member' || Boolean(profile.enterprise_org_id) || ['enterprise', 'org_starter', 'org_pro', 'org_pro_3m'].includes(rawPlan)
@@ -82,8 +84,8 @@ export async function GET(req: NextRequest) {
       db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: dayStart } }),
       db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: weekStart } }),
       db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: monthStart } }),
-      db.collection('tasks').countDocuments({ user_id: userId, source: { $in: ON_DEMAND_SOURCES }, created_at: { $gte: todayStartIst } }),
-      db.collection('tasks').countDocuments({ user_id: userId, source: { $in: ON_DEMAND_SOURCES }, created_at: { $gte: weekAgo } })
+      db.collection('tasks').countDocuments({ user_id: userId, source: { $in: USER_ON_DEMAND_SOURCES }, created_at: { $gte: todayStartIst } }),
+      db.collection('tasks').countDocuments({ user_id: userId, source: { $in: USER_ON_DEMAND_SOURCES }, created_at: { $gte: weekAgo } })
     ])
 
     return NextResponse.json({
