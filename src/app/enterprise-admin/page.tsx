@@ -270,7 +270,8 @@ export default function EnterpriseAdminPortal() {
   // Toggle Member Enabled / Disabled
   const handleToggleMember = async (member: Member) => {
     const newStatus = !member.enabled_for_daily_run
-    setActionLoadingId(member.user_id)
+    const targetKey = member.user_id || member.email
+    setActionLoadingId(targetKey)
     setFeedback(null)
 
     try {
@@ -278,8 +279,10 @@ export default function EnterpriseAdminPortal() {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          user_id: member.user_id,
-          email: member.email,
+          user_id: member.user_id || member.email,
+          email: member.email || member.user_id,
+          target_user_id: member.user_id || member.email,
+          target_email: member.email || member.user_id,
           enabled: newStatus
         })
       })
@@ -288,7 +291,7 @@ export default function EnterpriseAdminPortal() {
       if (res.ok) {
         setMembers(prev =>
           prev.map(m =>
-            m.user_id === member.user_id
+            (m.user_id === member.user_id || (m.email && m.email === member.email))
               ? { ...m, enabled_for_daily_run: newStatus, enterprise_status: newStatus ? 'active' : 'disabled' }
               : m
           )
@@ -383,8 +386,8 @@ export default function EnterpriseAdminPortal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan_id: planId,
-          user_id: member.user_id,
-          email: member.email
+          user_id: member.user_id || member.email,
+          email: member.email || member.user_id
         })
       })
 
@@ -420,8 +423,8 @@ export default function EnterpriseAdminPortal() {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 plan_id: planId,
-                user_id: member.user_id,
-                email: member.email
+                user_id: member.user_id || member.email,
+                email: member.email || member.user_id
               })
             })
 
@@ -475,7 +478,8 @@ export default function EnterpriseAdminPortal() {
       return
     }
     setOpenActionMenuUserId(null)
-    setActionLoadingId(member.user_id)
+    const targetKey = member.user_id || member.email
+    setActionLoadingId(targetKey)
     setFeedback(null)
 
     try {
@@ -483,8 +487,10 @@ export default function EnterpriseAdminPortal() {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify({
-          target_user_id: member.user_id,
-          target_email: member.email,
+          user_id: member.user_id || member.email,
+          email: member.email || member.user_id,
+          target_user_id: member.user_id || member.email,
+          target_email: member.email || member.user_id,
           plan_id: planId
         })
       })
@@ -497,7 +503,7 @@ export default function EnterpriseAdminPortal() {
         })
         const uid = localStorage.getItem('user_id') || ''
         const em = localStorage.getItem('user_email') || ''
-        loadAllPortalData(uid, em)
+        loadAllPortalData(uid, em, true)
       } else {
         setFeedback({ type: 'error', text: data.detail || 'Failed to update plan' })
       }
@@ -1254,13 +1260,14 @@ export default function EnterpriseAdminPortal() {
                   </tr>
                 ) : (
                   filteredMembers.map(member => {
-                    const isProcessing = actionLoadingId === member.user_id
+                    const memberKey = member.user_id || member.email
+                    const isProcessing = actionLoadingId === member.user_id || (member.email && actionLoadingId === member.email)
                     const isEnabled = member.enabled_for_daily_run
-                    const isActionMenuOpen = openActionMenuUserId === member.user_id
-                    const isPaying = paymentProcessingUserId === member.user_id
+                    const isActionMenuOpen = openActionMenuUserId === memberKey
+                    const isPaying = paymentProcessingUserId === memberKey
 
                     return (
-                      <tr key={member.user_id} className="hover:bg-zinc-900/30 light:hover:bg-zinc-50 transition-colors">
+                      <tr key={memberKey} className="hover:bg-zinc-900/30 light:hover:bg-zinc-50 transition-colors">
                         {/* Candidate Identity */}
                         <td className="py-3.5 px-4">
                           <div className="font-semibold text-white light:text-zinc-900">
@@ -1444,7 +1451,7 @@ export default function EnterpriseAdminPortal() {
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  setOpenActionMenuUserId(isActionMenuOpen ? null : member.user_id)
+                                  setOpenActionMenuUserId(isActionMenuOpen ? null : memberKey)
                                 }}
                                 disabled={isProcessing || isPaying}
                                 className={`p-1.5 rounded-lg border text-xs transition-colors cursor-pointer flex items-center justify-center ${
@@ -1599,9 +1606,12 @@ export default function EnterpriseAdminPortal() {
               </div>
             ) : (
               filteredMembers.map(member => {
+                const memberKey = member.user_id || member.email
                 const isEnabled = member.enabled_for_daily_run
+                const isProcessing = actionLoadingId === member.user_id || (member.email && actionLoadingId === member.email)
+                const isActionMenuOpen = openActionMenuUserId === memberKey
                 return (
-                  <div key={member.user_id} className="p-3.5 rounded-2xl bg-zinc-900/40 light:bg-zinc-50 border border-zinc-800/80 light:border-zinc-200 space-y-2.5">
+                  <div key={memberKey} className="p-3.5 rounded-2xl bg-zinc-900/40 light:bg-zinc-50 border border-zinc-800/80 light:border-zinc-200 space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="font-semibold text-sm text-white light:text-zinc-900 truncate">
@@ -1632,14 +1642,14 @@ export default function EnterpriseAdminPortal() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => handleToggleMember(member)}
-                        disabled={actionLoadingId === member.user_id || !member.plan_active}
+                        disabled={isProcessing || !member.plan_active}
                         className="flex-1 min-w-[88px] px-2.5 py-1.5 rounded-lg border text-xs font-medium flex items-center justify-center gap-1 transition-colors cursor-pointer disabled:opacity-40 bg-zinc-900 light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-200 light:text-zinc-800"
                       >
                         {isEnabled ? <><Pause className="w-3 h-3 text-rose-400" /><span>Pause</span></> : <><Play className="w-3 h-3 text-emerald-400" /><span>Resume</span></>}
                       </button>
                       <button
                         onClick={() => handleOpenLiveLog(member)}
-                        disabled={!member.plan_active || actionLoadingId === member.user_id}
+                        disabled={!member.plan_active || isProcessing}
                         className="flex-1 min-w-[88px] px-2.5 py-1.5 rounded-lg bg-zinc-900 light:bg-white border border-zinc-800 light:border-zinc-200 text-sky-300 text-xs font-medium flex items-center justify-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         title={!member.plan_active ? 'Live Log unavailable — candidate has No Plan' : 'View real-time execution stream and bot logs'}
                       >
@@ -1653,7 +1663,7 @@ export default function EnterpriseAdminPortal() {
                       ) : (
                         <button
                           onClick={() => handleTriggerOnDemand(member)}
-                          disabled={actionLoadingId === member.user_id || !isEnabled || !member.plan_active || (member.on_demand_quota || 0) === 0}
+                          disabled={isProcessing || !isEnabled || !member.plan_active || (member.on_demand_quota || 0) === 0}
                           className="flex-1 min-w-[88px] px-2.5 py-1.5 rounded-lg bg-cyan-950/60 border border-cyan-800/60 text-cyan-300 text-xs font-medium flex items-center justify-center gap-1 disabled:opacity-40 cursor-pointer"
                         >
                           <Zap className="w-3 h-3" />
@@ -1664,7 +1674,7 @@ export default function EnterpriseAdminPortal() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation()
-                          setOpenActionMenuUserId(openActionMenuUserId === member.user_id ? null : member.user_id)
+                          setOpenActionMenuUserId(isActionMenuOpen ? null : memberKey)
                         }}
                         className="px-3 py-1.5 rounded-lg border text-xs bg-zinc-900 light:bg-white border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 cursor-pointer flex items-center gap-1"
                       >
@@ -1672,7 +1682,7 @@ export default function EnterpriseAdminPortal() {
                         <span>Plan</span>
                       </button>
                     </div>
-                    {openActionMenuUserId === member.user_id && (
+                    {isActionMenuOpen && (
                       <div className="rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 p-2 space-y-1">
                         <div className="px-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">Pay per member</div>
                         {([

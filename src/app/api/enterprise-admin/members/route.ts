@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { verifyEnterpriseAdminRequest } from '@/lib/adminAuth'
+import { exactMatchCI } from '@/lib/query'
 
 export const dynamic = 'force-dynamic'
 
@@ -131,9 +132,9 @@ export async function GET(req: NextRequest) {
       const onDemandQuota = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') ? 15 : effPlan === 'enterprise' ? 10 : 0)
 
       return {
-        user_id: m.user_id,
-        email: m.email,
-        name: m.name || m.user_id,
+        user_id: m.user_id || m.email || '',
+        email: m.email || m.user_id || '',
+        name: m.name || m.user_id || m.email,
         role: m.role,
         enterprise_role: m.enterprise_role || (m.email === 'koushiksrmedala@gmail.com' ? 'admin' : 'member'),
         enterprise_status: m.enterprise_status || 'active',
@@ -190,15 +191,23 @@ export async function PATCH(req: NextRequest) {
     if (body.plan_id && !auth.isSuperAdmin) {
       return NextResponse.json({ detail: 'Only Super Admin can assign plans directly. Please pay via Razorpay.' }, { status: 403 })
     }
-    const targetUserId = (body.user_id || '').trim()
-    const targetEmail = (body.email || '').trim().toLowerCase()
+    const targetUserId = (body.user_id || body.target_user_id || '').trim()
+    const targetEmail = (body.email || body.target_email || '').trim().toLowerCase()
     const enabled = Boolean(body.enabled)
 
     if (!targetUserId && !targetEmail) {
       return NextResponse.json({ detail: 'user_id or email is required' }, { status: 400 })
     }
 
-    const query: any = targetUserId ? { user_id: targetUserId } : { email: targetEmail }
+    const orClauses: any[] = []
+    if (targetUserId) {
+      orClauses.push({ user_id: targetUserId })
+    }
+    if (targetEmail) {
+      orClauses.push({ email: exactMatchCI(targetEmail) })
+      orClauses.push({ user_id: targetEmail })
+    }
+    const query: any = orClauses.length === 1 ? orClauses[0] : { $or: orClauses }
 
     const updateFields: any = {
       updated_at: new Date()
@@ -227,21 +236,22 @@ export async function PATCH(req: NextRequest) {
           ? 'Org Pro · 3 Months'
           : 'Org Pro'
         updateFields.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        updateFields.plan_activated_at = now
         updateFields.daily_application_limit = planId.startsWith('org_pro') ? 55 : 20
         updateFields.enabled_for_daily_run = true
         updateFields.enterprise_role = 'member'
       }
     }
 
-    await db.collection('profiles').updateOne(query, { $set: updateFields })
-    await db.collection('users').updateOne(query, { $set: updateFields })
+    await db.collection('profiles').updateMany(query, { $set: updateFields })
+    await db.collection('users').updateMany(query, { $set: updateFields })
 
     return NextResponse.json({
       status: 'success',
       message: body.plan_id
         ? `Plan updated to ${updateFields.plan_name || body.plan_id} successfully.`
         : `Member ${body.enabled ? 'enabled' : 'disabled'} successfully.`,
-      user_id: targetUserId,
+      user_id: targetUserId || targetEmail,
       ...updateFields
     })
   } catch (err: any) {
