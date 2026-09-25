@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     // session email/uid, plus same-browser anonymous rows via visitor cookie).
     // $ne also matches docs where the field is missing — anonymous rows survive.
     if (excludeAdmin) {
-      if (adminEmail) andClauses.push({ email: { $ne: adminEmail } })
+      if (adminEmail) andClauses.push({ $nor: [{ email: { $regex: `^${escapeRegExp(adminEmail)}$`, $options: 'i' } }] })
       if (adminUid) andClauses.push({ user_id: { $ne: adminUid } })
       andClauses.push({ user_id: { $nin: ['technohmsit', 'admin'] } })
     }
@@ -62,6 +62,27 @@ export async function GET(req: NextRequest) {
     if (country && country !== 'all') {
       andClauses.push({ $or: [{ country_name: country }, { country: country }] })
     }
+
+    // Persistent per-admin ignore list: your other accounts, devices and
+    // browsers. $nin also matches docs where the field is missing, so
+    // anonymous rows survive an email-ignore and vice versa.
+    try {
+      const prefDoc = await db.collection('admin_preferences').findOne({ user_id: adminUid })
+      const ig = prefDoc?.prefs || {}
+      const cleanList = (v: any): string[] =>
+        Array.isArray(v)
+          ? v.filter((e: any) => typeof e === 'string' && e.trim()).map((e: string) => e.trim()).slice(0, 50)
+          : []
+      const xEmails = cleanList(ig.x_emails).map((e) => e.toLowerCase())
+      const xVids = cleanList(ig.x_vids)
+      const xIps = cleanList(ig.x_ips)
+      // Case-insensitive exact email match ($nin would miss differently-cased rows)
+      if (xEmails.length > 0) {
+        andClauses.push({ $nor: xEmails.map((e) => ({ email: { $regex: `^${escapeRegExp(e)}$`, $options: 'i' } })) })
+      }
+      if (xVids.length > 0) andClauses.push({ visitor_id: { $nin: xVids } })
+      if (xIps.length > 0) andClauses.push({ ip_address: { $nin: xIps } })
+    } catch {}
 
     if (andClauses.length > 0) query.$and = andClauses
 

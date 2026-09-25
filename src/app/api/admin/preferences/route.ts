@@ -38,6 +38,26 @@ const ALLOWED_KEYS = [
 
 type Prefs = Partial<Record<(typeof ALLOWED_KEYS)[number], string>>
 
+// Persistent ignore lists (multi-device / multi-account coverage).
+// Stored as arrays under the same per-admin doc; capped to stay tiny.
+const ARRAY_KEYS = ['x_emails', 'x_vids', 'x_ips'] as const
+type ArrayKey = (typeof ARRAY_KEYS)[number]
+
+function sanitizeArrays(input: any): Record<ArrayKey, string[]> {
+  const out: Record<ArrayKey, string[]> = { x_emails: [], x_vids: [], x_ips: [] }
+  if (!input || typeof input !== 'object') return out
+  for (const k of ARRAY_KEYS) {
+    const v = input[k]
+    if (!Array.isArray(v)) continue
+    out[k] = v
+      .filter((e: any) => typeof e === 'string')
+      .map((e: string) => (k === 'x_emails' ? e.toLowerCase() : e).trim())
+      .filter((e: string) => e.length > 0 && e.length <= 120)
+      .slice(0, 50)
+  }
+  return out
+}
+
 function sanitize(input: any): Prefs {
   const out: Prefs = {}
   if (!input || typeof input !== 'object') return out
@@ -58,7 +78,7 @@ export async function GET(req: NextRequest) {
 
     await db.collection('admin_preferences').createIndex({ user_id: 1 }, { unique: true })
     const doc = await db.collection('admin_preferences').findOne({ user_id: userId })
-    return NextResponse.json({ status: 'success', prefs: sanitize(doc?.prefs || {}) })
+    return NextResponse.json({ status: 'success', prefs: sanitize(doc?.prefs || {}), ignore: sanitizeArrays(doc?.prefs || {}) })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Failed to load preferences.' }, { status: 500 })
   }
@@ -72,14 +92,19 @@ export async function PUT(req: NextRequest) {
     const { authorized, userId } = await verifyAdminRequest(req, db)
     if (!authorized) return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
 
-    const prefs = sanitize(await req.json().catch(() => ({})))
+    const body = await req.json().catch(() => ({}))
+    const prefs = sanitize(body)
+    const arrays = sanitizeArrays(body)
     await db.collection('admin_preferences').createIndex({ user_id: 1 }, { unique: true })
-    if (Object.keys(prefs).length === 0) {
-      return NextResponse.json({ status: 'success', prefs: {} })
-    }
     // Merge (not replace) so tabs saving concurrently never wipe each other.
     const setOps: Record<string, any> = { user_id: userId, updated_at: new Date() }
     for (const [k, v] of Object.entries(prefs)) setOps[`prefs.${k}`] = v
+    for (const k of ARRAY_KEYS) {
+      if (Array.isArray(body?.[k])) setOps[`prefs.${k}`] = arrays[k]
+    }
+    if (Object.keys(setOps).length <= 2) {
+      return NextResponse.json({ status: 'success', prefs: {} })
+    }
     await db.collection('admin_preferences').updateOne(
       { user_id: userId },
       { $set: setOps },

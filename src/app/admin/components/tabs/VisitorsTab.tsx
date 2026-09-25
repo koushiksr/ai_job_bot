@@ -16,6 +16,7 @@ import {
   Filter,
   CheckCircle2,
   EyeOff,
+  Ban,
   X,
   Copy,
   Check,
@@ -64,30 +65,79 @@ export default function VisitorsTab() {
   const [inspectEvent, setInspectEvent] = useState<VisitorEventRecord | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
+  // Persistent ignore list: your other accounts / devices / browsers.
+  // Stored per-admin in MongoDB, applied server-side on every fetch.
+  const [ignored, setIgnored] = useState<{ emails: string[]; vids: string[]; ips: string[] }>({ emails: [], vids: [], ips: [] })
+  const [showIgnoreMgr, setShowIgnoreMgr] = useState<boolean>(false)
+  const [ignoreBusy, setIgnoreBusy] = useState<boolean>(false)
+  const ignoredCount = ignored.emails.length + ignored.vids.length + ignored.ips.length
+
+  const saveIgnoreLists = async (next: { emails: string[]; vids: string[]; ips: string[] }) => {
+    setIgnored(next)
+    setIgnoreBusy(true)
+    try {
+      await fetch('/api/admin/preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ x_emails: next.emails, x_vids: next.vids, x_ips: next.ips })
+      })
+    } catch {}
+    finally {
+      setIgnoreBusy(false)
+    }
+    setPage(1)
+    fetchVisitors(false)
+  }
+
+  const ignoreTrail = (evt: { email?: string | null; visitor_id?: string; ip_address?: string }, includeIp = false) => {
+    const emails = [...ignored.emails]
+    const vids = [...ignored.vids]
+    const ips = [...ignored.ips]
+    if (evt.email && !emails.map((e) => e.toLowerCase()).includes(evt.email.toLowerCase())) emails.push(evt.email.toLowerCase())
+    if (evt.visitor_id && !vids.includes(evt.visitor_id)) vids.push(evt.visitor_id)
+    if (includeIp && evt.ip_address && !ips.includes(evt.ip_address)) ips.push(evt.ip_address)
+    saveIgnoreLists({ emails: emails.slice(0, 50), vids: vids.slice(0, 50), ips: ips.slice(0, 50) })
+  }
+
+  const removeIgnore = (kind: 'emails' | 'vids' | 'ips', value: string) => {
+    saveIgnoreLists({ ...ignored, [kind]: ignored[kind].filter((v) => v !== value) })
+  }
+
   // Server-persisted filters (per admin user; localStorage is instant cache).
   const serverPrefsReadyRef = React.useRef(false)
   useEffect(() => {
     let alive = true
-    loadAdminPrefs().then((prefs) => {
-      if (!alive) return
-      try {
-        const events = ['all', 'payment_success', 'payment_click', 'signup', 'page_view', 'cta_click', 'pwa_install_click']
-        const devices = ['all', 'desktop', 'mobile', 'tablet']
-        const times = ['today', '24h', '7d', '30d', 'all']
-        const identities = ['all', 'known', 'anonymous']
-        if (prefs.v_event && events.includes(prefs.v_event)) setEventTypeFilter(prefs.v_event)
-        if (prefs.v_device && devices.includes(prefs.v_device)) setDeviceFilter(prefs.v_device)
-        if (prefs.v_time && times.includes(prefs.v_time)) setTimeRange(prefs.v_time)
-        if (prefs.v_identity && identities.includes(prefs.v_identity)) setIdentityFilter(prefs.v_identity)
-        if (typeof prefs.v_country === 'string') setCountryFilter(prefs.v_country || 'all')
-        if (prefs.v_hide === '1' || prefs.v_hide === '0') {
-          setHideMine(prefs.v_hide === '1')
-          try { localStorage.setItem('admin_visitors_hide_mine', prefs.v_hide) } catch {}
-        }
-        if (prefs.v_limit && ['25', '50', '100'].includes(prefs.v_limit)) setLimit(Number(prefs.v_limit))
-      } catch {}
-      serverPrefsReadyRef.current = true
-    }).catch(() => { serverPrefsReadyRef.current = true })
+    fetch('/api/admin/preferences', { credentials: 'same-origin' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!alive || !data) return
+        const prefs = data.prefs || {}
+        try {
+          const events = ['all', 'payment_success', 'payment_click', 'signup', 'page_view', 'cta_click', 'pwa_install_click']
+          const devices = ['all', 'desktop', 'mobile', 'tablet']
+          const times = ['today', '24h', '7d', '30d', 'all']
+          const identities = ['all', 'known', 'anonymous']
+          if (prefs.v_event && events.includes(prefs.v_event)) setEventTypeFilter(prefs.v_event)
+          if (prefs.v_device && devices.includes(prefs.v_device)) setDeviceFilter(prefs.v_device)
+          if (prefs.v_time && times.includes(prefs.v_time)) setTimeRange(prefs.v_time)
+          if (prefs.v_identity && identities.includes(prefs.v_identity)) setIdentityFilter(prefs.v_identity)
+          if (typeof prefs.v_country === 'string') setCountryFilter(prefs.v_country || 'all')
+          if (prefs.v_hide === '1' || prefs.v_hide === '0') {
+            setHideMine(prefs.v_hide === '1')
+            try { localStorage.setItem('admin_visitors_hide_mine', prefs.v_hide) } catch {}
+          }
+          if (prefs.v_limit && ['25', '50', '100'].includes(prefs.v_limit)) setLimit(Number(prefs.v_limit))
+          const ig = data.ignore || {}
+          setIgnored({
+            emails: Array.isArray(ig.x_emails) ? ig.x_emails.filter((e: any) => typeof e === 'string') : [],
+            vids: Array.isArray(ig.x_vids) ? ig.x_vids.filter((e: any) => typeof e === 'string') : [],
+            ips: Array.isArray(ig.x_ips) ? ig.x_ips.filter((e: any) => typeof e === 'string') : []
+          })
+        } catch {}
+        serverPrefsReadyRef.current = true
+      })
+      .catch(() => { serverPrefsReadyRef.current = true })
     return () => { alive = false }
   }, [])
   useEffect(() => {
@@ -473,7 +523,58 @@ export default function VisitorsTab() {
             <EyeOff className="w-3.5 h-3.5" />
             <span>{hideMine ? 'Trail hidden: you' : 'Show my trail'}</span>
           </button>
+
+          {/* Ignore manager: your other accounts / devices / browsers */}
+          <button
+            type="button"
+            onClick={() => setShowIgnoreMgr(!showIgnoreMgr)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors border cursor-pointer ${
+              ignoredCount > 0
+                ? 'bg-rose-950/40 text-rose-300 border-rose-800/60'
+                : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-800 light:border-zinc-200 hover:text-zinc-200'
+            }`}
+            title="Emails, browsers and IPs you never want to see (stored per admin)"
+          >
+            <Ban className="w-3.5 h-3.5" />
+            <span>Ignored ({ignoredCount})</span>
+          </button>
         </div>
+
+        {/* Ignore list manager */}
+        {showIgnoreMgr && (
+          <div className="p-3 rounded-xl bg-zinc-900/60 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {([
+              { kind: 'emails' as const, label: 'Ignored emails', items: ignored.emails },
+              { kind: 'vids' as const, label: 'Ignored browsers', items: ignored.vids },
+              { kind: 'ips' as const, label: 'Ignored IPs', items: ignored.ips }
+            ]).map((group) => (
+              <div key={group.kind}>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 light:text-zinc-600 mb-1.5">
+                  {group.label} ({group.items.length})
+                </div>
+                {group.items.length === 0 ? (
+                  <div className="text-[11px] text-zinc-600 font-mono">— none —</div>
+                ) : (
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {group.items.map((v) => (
+                      <div key={v} className="flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 text-[11px] font-mono text-zinc-300 light:text-zinc-700">
+                        <span className="truncate" title={v}>{v}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeIgnore(group.kind, v)}
+                          className="text-zinc-500 hover:text-emerald-300 shrink-0 cursor-pointer"
+                          title="Stop ignoring (show again)"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Filter Pills */}
         <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-zinc-900 light:border-zinc-200">
@@ -740,13 +841,24 @@ export default function VisitorsTab() {
 
                       {/* Details / Action */}
                       <td className="py-3 px-4 text-right whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => setInspectEvent(evt)}
-                          className="px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 text-[11px] font-medium transition-colors cursor-pointer"
-                        >
-                          Inspect
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setInspectEvent(evt)}
+                            className="px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 text-[11px] font-medium transition-colors cursor-pointer"
+                          >
+                            Inspect
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => ignoreTrail(evt)}
+                            disabled={ignoreBusy}
+                            className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-rose-950/50 text-zinc-500 light:text-zinc-600 hover:text-rose-300 border border-zinc-800 light:border-zinc-200 hover:border-rose-800/60 transition-colors cursor-pointer disabled:opacity-50"
+                            title={evt.email ? `Never show ${evt.email} or this browser again` : 'Never show this browser again'}
+                          >
+                            <Ban className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -911,6 +1023,45 @@ export default function VisitorsTab() {
               >
                 Close
               </button>
+            </div>
+
+            {/* Ignore this trail forever (your other accounts / devices / browsers) */}
+            <div className="mt-3 p-3 rounded-xl bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200">
+              <div className="text-[11px] font-semibold text-zinc-300 light:text-zinc-700 flex items-center gap-1.5 mb-2">
+                <Ban className="w-3.5 h-3.5 text-rose-400" />
+                Ignore this trail forever
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {inspectEvent.email && (
+                  <button
+                    type="button"
+                    disabled={ignoreBusy}
+                    onClick={() => { ignoreTrail({ email: inspectEvent.email }); }}
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950/50 border border-zinc-700 hover:border-rose-800/60 text-[11px] font-mono text-zinc-300 hover:text-rose-200 transition-colors cursor-pointer disabled:opacity-50"
+                    title="Hide every event from this email on all devices"
+                  >
+                    ✕ {inspectEvent.email}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  disabled={ignoreBusy}
+                  onClick={() => { ignoreTrail({ visitor_id: inspectEvent.visitor_id }); }}
+                  className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950/50 border border-zinc-700 hover:border-rose-800/60 text-[11px] font-mono text-zinc-300 hover:text-rose-200 transition-colors cursor-pointer disabled:opacity-50"
+                  title="Hide every event from this browser"
+                >
+                  ✕ this browser ({inspectEvent.visitor_id.slice(0, 10)}…)
+                </button>
+                <button
+                  type="button"
+                  disabled={ignoreBusy}
+                  onClick={() => { ignoreTrail({ ip_address: inspectEvent.ip_address }, true); }}
+                  className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950/50 border border-zinc-700 hover:border-rose-800/60 text-[11px] font-mono text-zinc-300 hover:text-rose-200 transition-colors cursor-pointer disabled:opacity-50"
+                  title="Careful: shared / office networks hide other people too"
+                >
+                  ✕ IP {inspectEvent.ip_address}
+                </button>
+              </div>
             </div>
           </div>
         </div>
