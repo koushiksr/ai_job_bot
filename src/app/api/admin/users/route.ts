@@ -74,6 +74,21 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // Pool-exhaustion flags (set by worker after 2 fruitless runs): one query.
+    let poolStateByUser: Record<string, string> = {}
+    try {
+      const poolDocs = await db.collection('dispatch_state').find(
+        {},
+        { projection: { user_id: 1, date_ist: 1, pool_state: 1 } }
+      ).toArray()
+      const nowIst = new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().slice(0, 10)
+      for (const d of poolDocs) {
+        if (d.date_ist === nowIst && d.user_id && d.pool_state) {
+          poolStateByUser[d.user_id] = d.pool_state
+        }
+      }
+    } catch {}
+
     const now = new Date()
     // Current IST date (UTC + 5:30)
     const istOffsetMs = 5.5 * 60 * 60 * 1000
@@ -384,7 +399,8 @@ export async function GET(req: NextRequest) {
         daily_status: p.daily_status || null,
         current_execution: p.current_execution || null,
         last_execution: p.last_execution || null,
-        execution_summary: executionSummary
+        execution_summary: executionSummary,
+        match_status: poolStateByUser[p.user_id] || 'matching',
       }
     })
 

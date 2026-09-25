@@ -186,6 +186,17 @@ export async function GET(req: NextRequest) {
       version_hash: versionHash
     }
 
+    // Pool state for today (exhausted = 2 fruitless runs, capped = limit hit)
+    try {
+      const istNow = new Date(Date.now() + 5.5 * 60 * 60 * 1000)
+      const todayIstStr = istNow.toISOString().slice(0, 10)
+      const ds = await db.collection<any>('dispatch_state').findOne({ _id: `ds_${userId}_${todayIstStr}` })
+      if (ds?.pool_state) (responseData as any).match_status = ds.pool_state
+      else (responseData as any).match_status = 'matching'
+    } catch {
+      (responseData as any).match_status = 'matching'
+    }
+
     const res = NextResponse.json(responseData)
     res.headers.set('ETag', `"${versionHash}"`)
     res.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300')

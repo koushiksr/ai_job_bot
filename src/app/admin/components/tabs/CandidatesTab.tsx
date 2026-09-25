@@ -1214,6 +1214,15 @@ export default function CandidatesTab({
                       </td>
                       {/* Bot Execution & Server Identity Status */}
                       <td className="py-3 px-3">
+                        {u.match_status === 'exhausted' && (
+                          <div
+                            className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-amber-950/40 text-amber-300 light:text-amber-700 border border-amber-800/60 light:border-amber-300"
+                            title="2 consecutive runs found 0 new matching jobs today — pool exhausted for current filters. Top-ups keep watching for new postings."
+                          >
+                            <AlertCircle className="w-3 h-3 text-amber-400 light:text-amber-600" />
+                            <span>NO MATCH</span>
+                          </div>
+                        )}
                         {(() => {
                           const summary: any = u.execution_summary || {}
                           const isApplying = summary.is_applying || u.current_execution?.status === 'applying'

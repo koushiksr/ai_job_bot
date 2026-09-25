@@ -65,6 +65,21 @@ export async function GET(req: NextRequest) {
     ).sort({ created_at: 1 }).toArray()
     const pendingIndex = new Map(allPending.map((t, i) => [t.task_id, i + 1]))
 
+    // Pool-exhaustion flags for today (worker-set after 2 fruitless runs)
+    let poolStateByUser: Record<string, string> = {}
+    try {
+      const poolDocs = await db.collection('dispatch_state').find(
+        {},
+        { projection: { user_id: 1, date_ist: 1, pool_state: 1 } }
+      ).toArray()
+      const nowIstStr = new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().slice(0, 10)
+      for (const d of poolDocs) {
+        if (d.date_ist === nowIstStr && d.user_id && d.pool_state) {
+          poolStateByUser[d.user_id] = d.pool_state
+        }
+      }
+    } catch {}
+
     const memberList = members.map(m => {
       const s = statsMap.get(m.user_id) || {}
       const userTasks = recentTasks.filter(t => t.user_id === m.user_id)
@@ -164,6 +179,7 @@ export async function GET(req: NextRequest) {
         sweep_blockers: blockers,
         active_task: activeTask,
         daily_application_limit: dailyLimit,
+        match_status: poolStateByUser[m.user_id] || 'matching',
         last_applied_at: s.last_applied_at || null,
         created_at: m.created_at || null
       }

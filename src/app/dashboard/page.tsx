@@ -72,6 +72,7 @@ export default function UserDashboard() {
   const [userPlanName, setUserPlanName] = useState<string>('JobFlux 3-Day Free Access')
   const [isPlanActive, setIsPlanActive] = useState<boolean>(true)
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null)
+  const [matchStatus, setMatchStatus] = useState<string>('matching')
   const [isVip, setIsVip] = useState<boolean>(false)
   const [showCandidateTestingMode, setShowCandidateTestingMode] = useState<boolean>(false)
   const [isImpersonating, setIsImpersonating] = useState<boolean>(false)
@@ -892,6 +893,7 @@ export default function UserDashboard() {
         setUserPlanName(pData.plan_name || (verifiedPlan === 'trial' ? 'JobFlux 3-Day Free Access' : `JobFlux ${verifiedPlan.toUpperCase()}`))
         setIsPlanActive(active)
         setPlanExpiresAt(pData.plan_expires_at || pData.trial_expires_at || null)
+        setMatchStatus(pData.match_status || 'matching')
 
         // Sync verified plan and VIP status from server to localStorage only if not inspecting
         if (!isViewMode && typeof window !== 'undefined') {
@@ -2534,6 +2536,14 @@ export default function UserDashboard() {
               >
                 ✕
               </button>
+            </div>
+          )}
+
+          {/* Pool-exhaustion notice: no new matches right now */}
+          {matchStatus === 'exhausted' && !activeTask && (
+            <div className="px-3.5 py-2.5 text-xs flex items-center gap-2 border-t border-b border-amber-800/40 bg-amber-950/20 text-amber-300 light:text-amber-700" title="Two consecutive sweeps found no new matching jobs. The system keeps checking new postings automatically.">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+              <span>No new matching jobs right now — all current matches already applied. New postings are picked up automatically.</span>
             </div>
           )}
 

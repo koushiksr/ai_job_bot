@@ -1351,6 +1351,10 @@ export default function EnterpriseAdminPortal() {
                           <div className="text-[10px] font-mono mt-1 truncate max-w-[180px] mx-auto" title={(member.sweep_blockers || []).join('; ')}>
                             {!member.plan_active ? (
                               <span className="text-zinc-500 light:text-zinc-600">No active plan</span>
+                            ) : (member as any).match_status === 'exhausted' ? (
+                              <span className="text-amber-300 light:text-amber-700" title="2 consecutive runs found 0 new matching jobs today — pool exhausted for current filters. Top-ups keep watching.">
+                                No new matches
+                              </span>
                             ) : member.sweep_eligible === false ? (
                               <span className="text-amber-300 light:text-amber-700">
                                 {(member.sweep_blockers || ['blocked'])[0]}
