@@ -15,6 +15,7 @@ import {
   Shield,
   Filter,
   CheckCircle2,
+  EyeOff,
   X,
   Copy,
   Check,
@@ -47,6 +48,16 @@ export default function VisitorsTab() {
   const [totalPages, setTotalPages] = useState<number>(1)
   const [totalRecords, setTotalRecords] = useState<number>(0)
   const [limit, setLimit] = useState<number>(50)
+  // Advanced tracking filters: hide own trail, identity, country
+  const [hideMine, setHideMine] = useState<boolean>(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('admin_visitors_hide_mine') : null
+      return saved === null ? true : saved === '1'
+    } catch { return true }
+  })
+  const [identityFilter, setIdentityFilter] = useState<string>('all')
+  const [countryFilter, setCountryFilter] = useState<string>('all')
+  const [countries, setCountries] = useState<string[]>([])
 
   // Inspect Modal state
   const [inspectEvent, setInspectEvent] = useState<VisitorEventRecord | null>(null)
@@ -77,6 +88,15 @@ export default function VisitorsTab() {
       if (eventTypeFilter !== 'all') params.set('event_type', eventTypeFilter)
       if (deviceFilter !== 'all') params.set('device_type', deviceFilter)
       if (selectedVisitorId) params.set('visitor_id', selectedVisitorId)
+      if (identityFilter !== 'all') params.set('identity', identityFilter)
+      if (countryFilter !== 'all') params.set('country', countryFilter)
+      if (hideMine) {
+        params.set('exclude_admin', '1')
+        try {
+          const myVid = localStorage.getItem('jobflux_visitor_id')
+          if (myVid) params.set('exclude_visitor_id', myVid)
+        } catch {}
+      }
 
       const res = await fetch(`/api/admin/visitors?${params.toString()}`, {
         headers: {
@@ -94,6 +114,7 @@ export default function VisitorsTab() {
       const data = await res.json()
       setEvents(data.events || [])
       setMetrics(data.metrics || null)
+      if (Array.isArray(data.countries)) setCountries(data.countries)
       setErrorNotice(null)
       if (data.pagination) {
         setTotalPages(data.pagination.total_pages || 1)
@@ -106,7 +127,7 @@ export default function VisitorsTab() {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [page, limit, timeRange, search, eventTypeFilter, deviceFilter, selectedVisitorId])
+  }, [page, limit, timeRange, search, eventTypeFilter, deviceFilter, selectedVisitorId, identityFilter, countryFilter, hideMine])
 
   useEffect(() => {
     fetchVisitors()
@@ -377,6 +398,39 @@ export default function VisitorsTab() {
             <option value={50}>50 / page</option>
             <option value={100}>100 / page</option>
           </select>
+
+          {/* Country Dropdown (populated live from traffic) */}
+          <select
+            value={countryFilter}
+            onChange={(e) => { setCountryFilter(e.target.value); setPage(1) }}
+            className="px-3 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer max-w-[160px]"
+            title="Filter by visitor country"
+          >
+            <option value="all">All Countries</option>
+            {countries.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+
+          {/* Hide my trail: drops your own admin traffic (email + this browser) */}
+          <button
+            type="button"
+            onClick={() => {
+              const next = !hideMine
+              setHideMine(next)
+              setPage(1)
+              try { localStorage.setItem('admin_visitors_hide_mine', next ? '1' : '0') } catch {}
+            }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors border cursor-pointer ${
+              hideMine
+                ? 'bg-emerald-950/50 text-emerald-300 light:text-emerald-700 border-emerald-800/80'
+                : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-800 light:border-zinc-200 hover:text-zinc-200'
+            }`}
+            title="Hide events from your own admin email and this browser — see only other visitors"
+          >
+            <EyeOff className="w-3.5 h-3.5" />
+            <span>{hideMine ? 'Trail hidden: you' : 'Show my trail'}</span>
+          </button>
         </div>
 
         {/* Filter Pills */}
@@ -421,6 +475,32 @@ export default function VisitorsTab() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Identity Filter Pills: identified leads vs anonymous lurkers */}
+        <div className="flex items-center gap-2 flex-wrap pt-1">
+          <span className="text-xs text-zinc-500 light:text-zinc-600 flex items-center gap-1 mr-1">
+            <Users className="w-3 h-3" /> Identity:
+          </span>
+
+          {[
+            { id: 'all', label: 'Everyone' },
+            { id: 'known', label: 'Identified (email)' },
+            { id: 'anonymous', label: 'Anonymous lurkers' }
+          ].map((pill) => (
+            <button
+              key={pill.id}
+              type="button"
+              onClick={() => { setIdentityFilter(pill.id); setPage(1) }}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                identityFilter === pill.id
+                  ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 font-semibold border border-zinc-700 light:border-zinc-300 shadow-sm'
+                  : 'bg-zinc-900/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-800/80 light:border-zinc-200'
+              }`}
+            >
+              {pill.label}
+            </button>
+          ))}
         </div>
       </div>
 

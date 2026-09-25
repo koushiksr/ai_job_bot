@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })
     }
 
-    const { authorized } = await verifyAdminRequest(req, db)
+    const { authorized, userId: adminUid, email: adminEmail } = await verifyAdminRequest(req, db)
     if (!authorized) {
       return NextResponse.json(
         { detail: 'Forbidden: Administrator privileges required.' },
@@ -29,9 +29,41 @@ export async function GET(req: NextRequest) {
     const hasPaymentIntent = searchParams.get('has_payment_intent')
     const visitorId = searchParams.get('visitor_id')
     const timeRange = searchParams.get('time_range') || 'all'
+    // Advanced tracking filters
+    const excludeAdmin = searchParams.get('exclude_admin') === '1'
+    const excludeVisitorId = (searchParams.get('exclude_visitor_id') || '').trim()
+    const identity = searchParams.get('identity') // known | anonymous
+    const country = (searchParams.get('country') || '').trim()
 
     // Build MongoDB query
     const query: any = {}
+    const andClauses: any[] = []
+
+    // "Hide my trail": drop the admin's own traffic (identified rows by
+    // session email/uid, plus same-browser anonymous rows via visitor cookie).
+    // $ne also matches docs where the field is missing — anonymous rows survive.
+    if (excludeAdmin) {
+      if (adminEmail) andClauses.push({ email: { $ne: adminEmail } })
+      if (adminUid) andClauses.push({ user_id: { $ne: adminUid } })
+      andClauses.push({ user_id: { $nin: ['technohmsit', 'admin'] } })
+    }
+    if (excludeVisitorId) {
+      andClauses.push({ visitor_id: { $ne: excludeVisitorId } })
+    }
+
+    // Identity: identified (linked email) vs anonymous lurkers
+    if (identity === 'known') {
+      andClauses.push({ email: { $exists: true, $nin: [null, ''] } })
+    } else if (identity === 'anonymous') {
+      andClauses.push({ $or: [{ email: { $exists: false } }, { email: null }, { email: '' }] })
+    }
+
+    // Country (matches full name or code)
+    if (country && country !== 'all') {
+      andClauses.push({ $or: [{ country_name: country }, { country: country }] })
+    }
+
+    if (andClauses.length > 0) query.$and = andClauses
 
     if (visitorId && visitorId.trim()) {
       query.visitor_id = visitorId.trim()
@@ -135,7 +167,8 @@ export async function GET(req: NextRequest) {
       todayPaymentClicks,
       todayUniqueVisitorsArray,
       topPagesAgg,
-      devicesAgg
+      devicesAgg,
+      countryList
     ] = await Promise.all([
       db.collection('visitors_summary').countDocuments({}),
       db.collection('visitor_events').distinct('visitor_id'),
@@ -161,7 +194,8 @@ export async function GET(req: NextRequest) {
       ]).toArray(),
       db.collection('visitor_events').aggregate([
         { $group: { _id: '$device_type', count: { $sum: 1 } } }
-      ]).toArray()
+      ]).toArray(),
+      db.collection('visitor_events').distinct('country_name')
     ])
 
     const totalUniqueVisitors = Math.max(summaryCount, distinctVisitorIds.length)
@@ -178,6 +212,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       events: formattedEvents,
+      countries: (countryList || []).filter(Boolean).sort().slice(0, 100),
       metrics: {
         total_unique_visitors: totalUniqueVisitors,
         total_page_views: totalPageViews,
