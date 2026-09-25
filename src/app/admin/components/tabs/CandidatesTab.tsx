@@ -1245,8 +1245,11 @@ export default function CandidatesTab({
                                   </span>
                                 )}
                               </div>
-                              <div className="text-[10px] text-zinc-500 font-mono truncate" title={u.user_id}>@{u.user_id}</div>
-                              <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono truncate" title={u.email}>{u.email}</div>
+                              <div className="text-[11px] font-mono truncate" title={`${u.user_id} · ${u.email}`}>
+                                <span className="text-zinc-500">@{u.user_id}</span>
+                                <span className="text-zinc-600"> · </span>
+                                <span className="text-zinc-400 light:text-zinc-600">{u.email}</span>
+                              </div>
                             </div>
                           </div>
 
@@ -1375,7 +1378,7 @@ export default function CandidatesTab({
 
                           if (isApplying) {
                             return (
-                              <div className="space-y-1.5 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to inspect live device telemetry">
+                              <div className="space-y-0.5 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to inspect live device telemetry">
                                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_8px_rgba(56,189,248,0.3)] animate-pulse">
                                   <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
                                   <Sparkles className="w-3 h-3 text-sky-400" />
@@ -1402,13 +1405,10 @@ export default function CandidatesTab({
 
                           if (isInQueue) {
                             return (
-                              <div className="space-y-1">
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300">
+                              <div className="space-y-0.5">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300" title="Queued — awaiting a free worker slot, runs automatically in order">
                                   <Clock className="w-3 h-3 text-amber-400 light:text-amber-600 animate-spin" />
                                   <span>IN QUEUE</span>
-                                </div>
-                                <div className="text-[10px] font-mono text-zinc-400 light:text-zinc-600">
-                                  Awaiting worker slot
                                 </div>
                               </div>
                             )
@@ -1422,62 +1422,46 @@ export default function CandidatesTab({
                                     <Laptop className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
                                     <span className="truncate max-w-[145px]">{hardwareModel || 'Apple Mac'}</span>
                                   </div>
-                                  {device && (
-                                    <div
-                                      className="flex items-center gap-1 text-[10px] font-mono text-zinc-300 light:text-zinc-700"
-                                      title={`Server: ${device}\nWorker: ${workerId || 'N/A'}${platform ? `\nPlatform: ${platform}` : ''}`}
-                                    >
-                                      <Server className="w-2.5 h-2.5 text-zinc-400 light:text-zinc-600 shrink-0" />
-                                      <span className="truncate max-w-[145px]">{device}</span>
-                                    </div>
-                                  )}
-
-                                </div>
-                                {completedAt && (
-                                  <div className="text-[9px] font-mono text-zinc-500 light:text-zinc-600">
-                                    {formatTimestamp(completedAt)}
+                                  <div
+                                    className="flex items-center gap-1 text-[10px] font-mono text-zinc-400 light:text-zinc-600"
+                                    title={`Server: ${device || '—'}\nWorker: ${workerId || 'N/A'}${platform ? `\nPlatform: ${platform}` : ''}${pidVal ? `\nPID: ${pidVal}` : ''}${completedAt ? `\nDone: ${formatTimestamp(completedAt)}` : ''}`}
+                                  >
+                                    <Server className="w-2.5 h-2.5 text-zinc-500 light:text-zinc-600 shrink-0" />
+                                    <span className="truncate max-w-[145px]">{device || '—'}{completedAt ? ` · ${formatTimestamp(completedAt)}` : ''}</span>
                                   </div>
-                                )}
+                                </div>
                               </div>
                             )
                           }
 
                           if (u.enabled_for_daily_run === false) {
                             return (
-                              <div className="space-y-1">
-                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-500 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200">
+                              <div className="space-y-0.5">
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-500 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200" title="Daily bot disabled for this candidate">
                                   <AlertCircle className="w-3 h-3 text-zinc-500 light:text-zinc-600" />
                                   <span>AUTO-APPLY OFF</span>
                                 </div>
-                                <div className="text-[10px] font-mono text-zinc-600">Daily bot disabled</div>
                               </div>
                             )
                           }
 
                           if (u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan') {
                             return (
-                              <div className="space-y-1">
-                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-rose-400 light:text-rose-600 bg-rose-950/30 border border-rose-800/40">
+                              <div className="space-y-0.5">
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-rose-400 light:text-rose-600 bg-rose-950/30 border border-rose-800/40" title="Auto-apply paused — payment required">
                                   <AlertCircle className="w-3 h-3 text-rose-400 light:text-rose-600" />
                                   <span>PLAN REQUIRED</span>
                                 </div>
-                                <div className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Auto-apply paused</div>
                               </div>
                             )
                           }
 
                           return (
-                            <div className="space-y-1 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title="Click to view candidate details">
+                            <div className="space-y-0.5 cursor-pointer group" onClick={() => handleInspectCandidate(u)} title={`Next automatic sweep 06:00 AM${(hardwareModel || device) ? `\nLast device: ${hardwareModel || device}` : ''}`}>
                               <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-amber-300 light:text-amber-700 bg-amber-950/20 border border-amber-800/40">
                                 <Clock className="w-3 h-3 text-amber-400 light:text-amber-600" />
                                 <span>NOT APPLIED TODAY</span>
                               </div>
-                              <div className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">Next cycle: 06:00 AM</div>
-                              {(hardwareModel || device) && (
-                                <div className="text-[9px] font-mono text-zinc-500 light:text-zinc-600 truncate max-w-[140px]">
-                                  Last: {hardwareModel || device}
-                                </div>
-                              )}
                             </div>
                           )
                         })()}
