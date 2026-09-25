@@ -29,6 +29,7 @@ import {
   Code
 } from 'lucide-react'
 import { VisitorEventRecord, VisitorMetrics } from '../../types'
+import { loadAdminPrefs, saveAdminPrefs } from '@/lib/adminPrefs'
 
 export default function VisitorsTab() {
   const [events, setEvents] = useState<VisitorEventRecord[]>([])
@@ -62,6 +63,47 @@ export default function VisitorsTab() {
   // Inspect Modal state
   const [inspectEvent, setInspectEvent] = useState<VisitorEventRecord | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  // Server-persisted filters (per admin user; localStorage is instant cache).
+  const serverPrefsReadyRef = React.useRef(false)
+  useEffect(() => {
+    let alive = true
+    loadAdminPrefs().then((prefs) => {
+      if (!alive) return
+      try {
+        const events = ['all', 'payment_success', 'payment_click', 'signup', 'page_view', 'cta_click', 'pwa_install_click']
+        const devices = ['all', 'desktop', 'mobile', 'tablet']
+        const times = ['today', '24h', '7d', '30d', 'all']
+        const identities = ['all', 'known', 'anonymous']
+        if (prefs.v_event && events.includes(prefs.v_event)) setEventTypeFilter(prefs.v_event)
+        if (prefs.v_device && devices.includes(prefs.v_device)) setDeviceFilter(prefs.v_device)
+        if (prefs.v_time && times.includes(prefs.v_time)) setTimeRange(prefs.v_time)
+        if (prefs.v_identity && identities.includes(prefs.v_identity)) setIdentityFilter(prefs.v_identity)
+        if (typeof prefs.v_country === 'string') setCountryFilter(prefs.v_country || 'all')
+        if (prefs.v_hide === '1' || prefs.v_hide === '0') {
+          setHideMine(prefs.v_hide === '1')
+          try { localStorage.setItem('admin_visitors_hide_mine', prefs.v_hide) } catch {}
+        }
+        if (prefs.v_limit && ['25', '50', '100'].includes(prefs.v_limit)) setLimit(Number(prefs.v_limit))
+      } catch {}
+      serverPrefsReadyRef.current = true
+    }).catch(() => { serverPrefsReadyRef.current = true })
+    return () => { alive = false }
+  }, [])
+  useEffect(() => {
+    if (!serverPrefsReadyRef.current) return
+    try { localStorage.setItem('admin_visitors_hide_mine', hideMine ? '1' : '0') } catch {}
+    saveAdminPrefs({
+      v_event: eventTypeFilter,
+      v_device: deviceFilter,
+      v_time: timeRange,
+      v_identity: identityFilter,
+      v_country: countryFilter,
+      v_hide: hideMine ? '1' : '0',
+      v_limit: String(limit)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventTypeFilter, deviceFilter, timeRange, identityFilter, countryFilter, hideMine, limit])
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text)

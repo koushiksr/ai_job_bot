@@ -41,6 +41,7 @@ import {
   Check
 } from 'lucide-react'
 import { CandidateUser } from '../../types'
+import { loadAdminPrefs, saveAdminPrefs } from '@/lib/adminPrefs'
 
 interface CandidatesTabProps {
   userSearch: string
@@ -187,6 +188,47 @@ export default function CandidatesTab({
       localStorage.setItem('admin_candidate_sort_order', 'desc')
     } catch {}
   }
+
+  // Server-persisted filters (per admin user; localStorage is instant cache).
+  // executionStatusFilter prop (from shell) wins when provided; otherwise internal.
+  const serverPrefsReadyRef = React.useRef(false)
+  React.useEffect(() => {
+    let alive = true
+    loadAdminPrefs().then((prefs) => {
+      if (!alive) return
+      try {
+        if (prefs.c_exec) {
+          if (setExecutionStatusFilter) setExecutionStatusFilter(prefs.c_exec)
+          else setInternalExecFilter(prefs.c_exec)
+          try { localStorage.setItem('admin_candidate_exec_filter', prefs.c_exec) } catch {}
+        }
+        if (prefs.c_acct && ['all', 'candidates', 'admins'].includes(prefs.c_acct)) {
+          setAccountTypeFilter(prefs.c_acct as any)
+          try { localStorage.setItem('admin_account_type_filter', prefs.c_acct) } catch {}
+        }
+        if (prefs.c_sort) {
+          setSortField(prefs.c_sort as any)
+          try { localStorage.setItem('admin_candidate_sort_field', prefs.c_sort) } catch {}
+        }
+        if (prefs.c_order === 'asc' || prefs.c_order === 'desc') {
+          setSortOrder(prefs.c_order)
+          try { localStorage.setItem('admin_candidate_sort_order', prefs.c_order) } catch {}
+        }
+      } catch {}
+      serverPrefsReadyRef.current = true
+    }).catch(() => { serverPrefsReadyRef.current = true })
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  React.useEffect(() => {
+    if (!serverPrefsReadyRef.current) return
+    saveAdminPrefs({
+      c_exec: executionStatusFilter ?? internalExecFilter,
+      c_acct: accountTypeFilter,
+      c_sort: sortField,
+      c_order: sortOrder
+    })
+  }, [executionStatusFilter, internalExecFilter, accountTypeFilter, sortField, sortOrder])
 
   // Filter menu popover state and click-outside handler
   const [showFilterMenu, setShowFilterMenu] = React.useState(false)

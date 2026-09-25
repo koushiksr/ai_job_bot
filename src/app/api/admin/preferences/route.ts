@@ -9,14 +9,31 @@ export const dynamic = 'force-dynamic'
  * (collection `admin_preferences`, one doc per user_id) so filters,
  * tabs and selections survive logins and follow the admin across devices.
  * localStorage remains as an instant client-side cache; this is the source of truth.
+ *
+ * PUT merges keys (dot-notation $set) so independent tabs can save their
+ * own slice concurrently without clobbering each other.
  */
 const ALLOWED_KEYS = [
+  // Shell (admin/page.tsx)
   'active_tab',
   'candidate_search',
   'candidate_status_filter',
   'selected_candidate_id',
   'assigned_offer_filter',
-  'logs_sub_tab'
+  'logs_sub_tab',
+  // Candidates tab
+  'c_exec',
+  'c_acct',
+  'c_sort',
+  'c_order',
+  // Visitors tab
+  'v_event',
+  'v_device',
+  'v_time',
+  'v_identity',
+  'v_country',
+  'v_hide',
+  'v_limit'
 ] as const
 
 type Prefs = Partial<Record<(typeof ALLOWED_KEYS)[number], string>>
@@ -57,9 +74,15 @@ export async function PUT(req: NextRequest) {
 
     const prefs = sanitize(await req.json().catch(() => ({})))
     await db.collection('admin_preferences').createIndex({ user_id: 1 }, { unique: true })
+    if (Object.keys(prefs).length === 0) {
+      return NextResponse.json({ status: 'success', prefs: {} })
+    }
+    // Merge (not replace) so tabs saving concurrently never wipe each other.
+    const setOps: Record<string, any> = { user_id: userId, updated_at: new Date() }
+    for (const [k, v] of Object.entries(prefs)) setOps[`prefs.${k}`] = v
     await db.collection('admin_preferences').updateOne(
       { user_id: userId },
-      { $set: { user_id: userId, prefs, updated_at: new Date() } },
+      { $set: setOps },
       { upsert: true }
     )
     return NextResponse.json({ status: 'success', prefs })
