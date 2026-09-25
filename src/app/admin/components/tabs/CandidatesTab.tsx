@@ -16,7 +16,6 @@ import {
   ChevronUp,
   RefreshCw,
   Tag,
-  ToggleRight,
   ToggleLeft,
   FileText,
   ExternalLink,
@@ -1523,6 +1522,18 @@ export default function CandidatesTab({
                                 let limit = 0;
                                 let pill = 'bg-zinc-800/90 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border-zinc-700 light:border-zinc-300';
                                 let icon: React.ReactNode = null;
+                                // Days left, short form (⏳27D) — full date lives in the tooltip
+                                const hrsLeft = u.plan_hours_left ?? u.hours_until_expiry;
+                                let daysLeft: number | null = null;
+                                let expDate = '';
+                                if (u.plan_expires_at) {
+                                  try { expDate = new Date(u.plan_expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); } catch {}
+                                }
+                                if (hrsLeft !== null && hrsLeft !== undefined) {
+                                  daysLeft = Math.max(0, Math.floor(hrsLeft / 24));
+                                } else if (u.plan_expires_at) {
+                                  try { daysLeft = Math.max(0, Math.ceil((new Date(u.plan_expires_at).getTime() - Date.now()) / 86400000)); } catch {}
+                                }
                                 if (isOrg) {
                                   if (isOrgPro) {
                                     label = planLc === 'org_pro_3m' ? 'ORG PRO 3M' : 'ORG PRO';
@@ -1548,9 +1559,11 @@ export default function CandidatesTab({
                                 return (
                                   <span
                                     className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1 border ${pill}`}
-                                    title={isOrg && limit === 0 ? 'Unpaid org candidate — 0 daily applications until paid' : `Daily Application Limit: ${limit}/day on Naukri platform`}
+                                    title={isOrg && limit === 0
+                                      ? 'Unpaid org candidate — 0 daily applications until paid'
+                                      : `Daily limit ${limit}/day on Naukri${daysLeft !== null && limit > 0 ? ` · ⏳${daysLeft}D left${expDate ? ` (valid till ${expDate})` : ''}` : expDate ? ` · valid till ${expDate}` : ''}`}
                                   >
-                                    {icon}<span>{label} · {limit}/d</span>
+                                    {icon}<span>{label} · {limit}/d{daysLeft !== null && limit > 0 ? ` · ⏳${daysLeft}D` : ''}</span>
                                   </span>
                                 )
                               })()}
@@ -1676,34 +1689,9 @@ export default function CandidatesTab({
                               )
                             }
 
-                            if (hoursLeft !== null && hoursLeft !== undefined && hoursLeft > 48) {
-                              const days = Math.floor(hoursLeft / 24)
-                              return (
-                                <div
-                                  className="text-[10px] font-mono mt-1 flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950/30 text-emerald-300 light:text-emerald-700 border border-emerald-800/40"
-                                  title={`Active plan until ${u.plan_expires_at ? formatTimestamp(u.plan_expires_at) : ''} (${days} days left). Protected from discount offers.`}
-                                >
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
-                                  <span className="font-medium text-emerald-300 light:text-emerald-700">Active ({days}d left)</span>
-                                </div>
-                              )
-                            }
-
-                            if (u.plan_expires_at) {
-                              return (
-                                <div className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
-                                  <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600 shrink-0" />
-                                  <span>Expires: {formatTimestamp(u.plan_expires_at)}</span>
-                                </div>
-                              )
-                            }
-
-                            return (
-                              <div className="text-[10px] font-mono mt-1 flex items-center gap-1 text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
-                                <Clock className="w-3 h-3 text-zinc-500 light:text-zinc-600 shrink-0" />
-                                <span>Trial (Standard)</span>
-                              </div>
-                            )
+                            // Healthy active plan: nothing to show — quota + ⏳D already
+                            // live in the plan pill above (hover it for the full date).
+                            return null
                           })()}
 
                           {/* Assigned Offers Chips */}
@@ -1745,8 +1733,11 @@ export default function CandidatesTab({
                             title="Toggle automated daily apply"
                           >
                             {u.enabled_for_daily_run !== false ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 light:text-emerald-600 border border-emerald-500/30 light:border-emerald-300">
-                                <ToggleRight className="w-4 h-4 text-emerald-400 light:text-emerald-600" /> ENABLED
+                              <span
+                                className="relative inline-flex w-9 h-5 rounded-full bg-emerald-500/25 border border-emerald-500/50 cursor-pointer shrink-0"
+                                title="Auto-apply ON — click to pause this candidate"
+                              >
+                                <span className="absolute right-0.5 top-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-sm" />
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300">
