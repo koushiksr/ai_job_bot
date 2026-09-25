@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   User,
   Clock,
@@ -15,7 +15,11 @@ import {
   Laptop,
   CheckCircle2,
   Sparkles,
-  Zap
+  Zap,
+  CreditCard,
+  Building2,
+  History,
+  CalendarDays
 } from 'lucide-react'
 
 interface InspectCandidateModalProps {
@@ -50,7 +54,33 @@ export default function InspectCandidateModal({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [candidate, onClose])
 
+  // Full dossier: timeline, payments, org journey, runs, activity
+  const [dossier, setDossier] = useState<any | null>(null)
+  const [dossierLoading, setDossierLoading] = useState<boolean>(false)
+  useEffect(() => {
+    const uid = candidate?.user_id
+    if (!uid) {
+      setDossier(null)
+      return
+    }
+    let alive = true
+    setDossierLoading(true)
+    fetch(`/api/admin/candidate-history?user_id=${encodeURIComponent(uid)}`, { credentials: 'same-origin' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (alive && data?.status === 'success') setDossier(data) })
+      .catch(() => {})
+      .finally(() => { if (alive) setDossierLoading(false) })
+    return () => { alive = false }
+  }, [candidate?.user_id])
+
   if (!candidate) return null
+
+  const fmtDate = (v: any) => {
+    if (!v) return '—'
+    try {
+      return new Date(v).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    } catch { return '—' }
+  }
 
   return (
     <div 
@@ -84,6 +114,66 @@ export default function InspectCandidateModal({
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Account Timeline & Org Journey (full history, fetched on open) */}
+        <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3">
+          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
+            <CalendarDays className="w-3.5 h-3.5 text-sky-400" />
+            <span>Account Timeline &amp; Org Journey</span>
+            {dossierLoading && <RefreshCw className="w-3 h-3 animate-spin text-sky-400" />}
+          </h4>
+          {(() => {
+            const t = dossier?.timeline || {}
+            const o = dossier?.org || {}
+            const rows: Array<[string, string]> = [
+              ['Joined', fmtDate(t.joined_at)],
+              ['Trial started', fmtDate(t.trial_started_at)],
+              ['Trial ends', fmtDate(t.trial_expires_at)],
+              ['Plan activated', fmtDate(t.plan_activated_at)],
+              ['Logins', `${t.login_count ?? candidate.login_count ?? 0} total · last ${t.last_login_at ? fmtDate(t.last_login_at) : (candidate.last_login_at ? fmtDate(candidate.last_login_at) : '—')}`],
+              ['Profile edits', `${t.profile_update_count ?? candidate.profile_update_count ?? 0} · last ${fmtDate(t.last_profile_updated_at || candidate.last_profile_updated_at)}`],
+              ['Resume uploads', `${t.resume_upload_count ?? candidate.resume_upload_count ?? 0} · last ${fmtDate(t.last_resume_updated_at || candidate.last_resume_updated_at)}`],
+              ['On-demand runs', `${t.on_demand_run_count ?? candidate.on_demand_run_count ?? 0} lifetime`]
+            ]
+            const invites = dossier?.invites || []
+            return (
+              <div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  {rows.map(([label, value]) => (
+                    <div key={label} className="p-2 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800/70 light:border-zinc-200">
+                      <div className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase">{label}</div>
+                      <div className="font-semibold text-zinc-100 light:text-zinc-900 mt-0.5 truncate" title={value}>{value}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 p-2 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800/70 light:border-zinc-200 text-xs">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase mb-1">
+                    <Building2 className="w-3 h-3 text-indigo-400" /> Org journey
+                  </div>
+                  {o.org_id || candidate.enterprise_org_id ? (
+                    <div className="font-mono text-[11px] text-zinc-300 light:text-zinc-700 space-y-0.5">
+                      <div>Org: <strong className="text-white light:text-zinc-900">{o.org_name || candidate.org_name || o.org_id || candidate.enterprise_org_id}</strong>
+                        {' · '}<span className={o.enterprise_status === 'disabled' || candidate.enterprise_status === 'disabled' ? 'text-rose-400' : 'text-emerald-400 light:text-emerald-600'}>
+                          {o.enterprise_status || candidate.enterprise_status || 'active'}
+                        </span>
+                        {o.org_status && o.org_status !== 'active' ? <span className="text-rose-400"> (org {o.org_status})</span> : ''}
+                      </div>
+                      {invites.length > 0 ? invites.map((inv: any, i: number) => (
+                        <div key={i}>
+                          Invited {fmtDate(inv.invited_at)}{inv.invited_by ? ` by ${inv.invited_by}` : ''} → {inv.status === 'accepted' ? `joined ${fmtDate(inv.responded_at)}` : inv.status || 'pending'}
+                        </div>
+                      )) : (
+                        <div className="text-zinc-500">Role: {o.enterprise_role || candidate.enterprise_role || 'member'}</div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-zinc-500">Individual account — never joined an org.</div>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
         </div>
 
         {/* Machine & Device Execution Telemetry */}
@@ -302,6 +392,43 @@ export default function InspectCandidateModal({
           </div>
         </div>
 
+        {/* Payment History (full record, fetched on open) */}
+        <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2">
+          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
+            <CreditCard className="w-3.5 h-3.5 text-emerald-400 light:text-emerald-600" />
+            <span>Payment History ({dossier ? dossier.payments.length : 0})</span>
+            {dossierLoading && <RefreshCw className="w-3 h-3 animate-spin text-sky-400" />}
+          </h4>
+          {!dossier ? (
+            <p className="text-xs text-zinc-500 light:text-zinc-600">Loading payment records…</p>
+          ) : dossier.payments.length === 0 ? (
+            <p className="text-xs text-zinc-500 light:text-zinc-600">No payments recorded for this candidate.</p>
+          ) : (
+            <div className="space-y-1.5 max-h-52 overflow-y-auto">
+              {dossier.payments.map((p: any, i: number) => (
+                <div key={i} className="p-2 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 text-xs flex items-center justify-between gap-3">
+                  <div>
+                    <div className="font-bold text-white light:text-zinc-900">
+                      {p.plan_id || 'Plan'} {p.amount ? <span className="text-emerald-400 light:text-emerald-600 font-mono">· {p.amount}</span> : ''}
+                    </div>
+                    <div className="text-[10px] text-zinc-500 light:text-zinc-600 font-mono mt-0.5">
+                      Paid {fmtDate(p.verified_at)}{p.expires_at ? ` · valid till ${fmtDate(p.expires_at)}` : ''}
+                      {p.payment_id ? ` · ${p.payment_id}` : ''}
+                    </div>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase shrink-0 ${
+                    (p.status || '').toLowerCase() === 'captured' || (p.status || '').toLowerCase() === 'success'
+                      ? 'bg-emerald-950 text-emerald-300 light:text-emerald-700 border border-emerald-800'
+                      : 'bg-zinc-900 light:bg-zinc-100 text-zinc-400 border border-zinc-800 light:border-zinc-200'
+                  }`}>
+                    {p.status || 'recorded'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Assigned Offers Section */}
         <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2">
           <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
@@ -372,6 +499,57 @@ export default function InspectCandidateModal({
                   <div className="text-[10px] font-mono text-zinc-400 light:text-zinc-600">
                     {formatTimestamp(rem.sent_at)}
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Run History + Recent Activity (fetched on open) */}
+        <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3">
+          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
+            <History className="w-3.5 h-3.5 text-sky-400" />
+            <span>Run History ({dossier ? dossier.runs.length : 0})</span>
+            {dossierLoading && <RefreshCw className="w-3 h-3 animate-spin text-sky-400" />}
+          </h4>
+          {!dossier ? (
+            <p className="text-xs text-zinc-500 light:text-zinc-600">Loading run records…</p>
+          ) : dossier.runs.length === 0 ? (
+            <p className="text-xs text-zinc-500 light:text-zinc-600">No automation runs yet for this candidate.</p>
+          ) : (
+            <div className="space-y-1 max-h-52 overflow-y-auto">
+              {dossier.runs.map((r: any, i: number) => (
+                <div key={i} className="px-2 py-1.5 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 text-[11px] font-mono flex items-center justify-between gap-2" title={r.summary || r.task_id || ''}>
+                  <span className="text-zinc-400 light:text-zinc-600 shrink-0">{fmtDate(r.created_at)}</span>
+                  <span className="text-zinc-500 truncate">{r.source === 'daily_scheduled' ? 'daily sweep' : (r.source || 'run')}</span>
+                  <span className={`font-bold shrink-0 ${
+                    r.status === 'completed' ? 'text-emerald-400 light:text-emerald-600'
+                    : r.status === 'failed' ? 'text-rose-400 light:text-rose-600'
+                    : r.status === 'running' ? 'text-sky-400' : 'text-zinc-400'
+                  }`}>
+                    {r.status}{r.applied !== null && r.applied !== undefined ? ` · +${r.applied}` : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5 pt-1">
+            <Clock className="w-3.5 h-3.5 text-amber-400 light:text-amber-600" />
+            <span>Recent Activity ({dossier ? dossier.activity.length : 0})</span>
+          </h4>
+          {!dossier ? (
+            <p className="text-xs text-zinc-500 light:text-zinc-600">Loading activity…</p>
+          ) : dossier.activity.length === 0 ? (
+            <p className="text-xs text-zinc-500 light:text-zinc-600">No recorded logins or actions.</p>
+          ) : (
+            <div className="space-y-1 max-h-44 overflow-y-auto">
+              {dossier.activity.map((a: any, i: number) => (
+                <div key={i} className="px-2 py-1.5 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 text-[11px] flex items-center justify-between gap-2">
+                  <span className="text-zinc-300 light:text-zinc-700 truncate" title={a.description || ''}>
+                    <span className="font-semibold">{a.event_type || 'event'}</span>
+                    {a.description ? <span className="text-zinc-500"> · {a.description.slice(0, 80)}</span> : ''}
+                  </span>
+                  <span className="text-zinc-500 font-mono shrink-0">{fmtDate(a.created_at)}{a.ip_address ? ` · ${a.ip_address}` : ''}</span>
                 </div>
               ))}
             </div>
