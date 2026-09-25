@@ -252,13 +252,17 @@ async function dispatchReportForCandidate(
 
   const notJobUrlCondition = { job_url: { $not: { $regex: /developer-jobs|-jobs-in-|\/search\?/i } } }
 
-  // A. This run's rows (for the list + "new this run" note)
+  // A. This run's rows (for the list + "new this run" note).
+  // Only countable statuses (applied/success) drive the headline — external
+  // direct submissions are tracked separately, never in the cap number.
+  const countedStatuses = { status: { $in: ['applied', 'success'] } }
   let runJobs: any[] = []
   if (candidateInput.taskId) {
     runJobs = await db.collection('applied_jobs').find({
       $and: [
         candidateCondition,
         notJobUrlCondition,
+        countedStatuses,
         { task_id: candidateInput.taskId }
       ]
     }).sort({ applied_at: -1, created_at: -1 }).toArray()
@@ -270,6 +274,7 @@ async function dispatchReportForCandidate(
     $and: [
       candidateCondition,
       notJobUrlCondition,
+      countedStatuses,
       {
         $or: [
           { applied_date: todayIstStr },
@@ -279,10 +284,25 @@ async function dispatchReportForCandidate(
     ]
   }).sort({ applied_at: -1, created_at: -1 }).toArray()
 
+  // External direct submissions today (shown separately, never in the cap).
+  const externalToday = await db.collection('applied_jobs').countDocuments({
+    $and: [
+      candidateCondition,
+      notJobUrlCondition,
+      { status: 'external' },
+      {
+        $or: [
+          { applied_date: todayIstStr },
+          { applied_at: { $gte: startOfTodayUtc } }
+        ]
+      }
+    ]
+  })
+
   if (runJobs.length === 0) runJobs = todayJobs
 
   const totalAppliedCount = stats?.total_applied || (await db.collection('applied_jobs').countDocuments({
-    $and: [candidateCondition, notJobUrlCondition]
+    $and: [candidateCondition, notJobUrlCondition, countedStatuses]
   })) || 0
 
   // Headline = actual rows applied today. List = this run's rows.
@@ -502,9 +522,10 @@ async function dispatchReportForCandidate(
       discountedPrice,
       originalPrice,
       sectionTitle: `Today's Verified Applications (${topCompanies.length})`,
-      runLine: candidateInput.taskId && newThisRun < todayApplied
-        ? `${newThisRun} new in this run · ${todayApplied} total today`
-        : ''
+      runLine: [
+        candidateInput.taskId && newThisRun < todayApplied ? `${newThisRun} new in this run · ${todayApplied} total today` : '',
+        externalToday > 0 ? `+${externalToday} direct submission${externalToday === 1 ? '' : 's'}` : ''
+      ].filter(Boolean).join(' · ')
     })
 
     const subject = todayApplied > 0
@@ -529,7 +550,7 @@ async function dispatchReportForCandidate(
       : `Hi ${candidateName}, today's sweep is complete`
 
     const pushMessage = todayApplied > 0 && companySummary
-      ? `${companySummary}${extraCount > 0 ? ` +${extraCount} more` : ''} · ${totalAppliedCount} total`
+      ? `${companySummary}${extraCount > 0 ? ` +${extraCount} more` : ''} · ${totalAppliedCount} total${externalToday > 0 ? ` · +${externalToday} direct` : ''}`
       : `All active vacancies up to date · ${totalAppliedCount} total applications.`
 
     // Rich image: top employer's logo via favicon service (brand icon stays
