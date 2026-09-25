@@ -45,11 +45,14 @@ export default function VisitorsTab() {
   const [deviceFilter, setDeviceFilter] = useState<string>('all')
   const [timeRange, setTimeRange] = useState<string>('all')
   const [selectedVisitorId, setSelectedVisitorId] = useState<string | null>(null)
-  const [autoRefresh, setAutoRefresh] = useState<boolean>(true)
+  // Lazy by default: first page loads on mount, no auto-polling after tab
+  // switches — user hits Refresh for fresh data. Keeps tab switches cheap.
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false)
   const [page, setPage] = useState<number>(1)
   const [totalPages, setTotalPages] = useState<number>(1)
   const [totalRecords, setTotalRecords] = useState<number>(0)
-  const [limit, setLimit] = useState<number>(50)
+  const [limit, setLimit] = useState<number>(25)
+  // Debounced search — typing filters locally, API fires 500ms after pause.
   // Advanced tracking filters: hide own trail, identity, country
   const [hideMine, setHideMine] = useState<boolean>(() => {
     try {
@@ -206,6 +209,12 @@ export default function VisitorsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventTypeFilter, deviceFilter, timeRange, identityFilter, countryFilter, hideMine, limit])
 
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('')
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 500)
+    return () => clearTimeout(t)
+  }, [search])
+
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text)
     setCopiedId(id)
@@ -227,7 +236,7 @@ export default function VisitorsTab() {
       params.set('auth_user_id', uid || 'technohmsit')
       params.set('auth_email', uEmail || 'technohmsit@gmail.com')
 
-      if (search.trim()) params.set('search', search.trim())
+      if (debouncedSearch) params.set('search', debouncedSearch)
       if (eventTypeFilter !== 'all') params.set('event_type', eventTypeFilter)
       if (deviceFilter !== 'all') params.set('device_type', deviceFilter)
       if (selectedVisitorId) params.set('visitor_id', selectedVisitorId)
@@ -273,8 +282,9 @@ export default function VisitorsTab() {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [page, limit, timeRange, search, eventTypeFilter, deviceFilter, selectedVisitorId, identityFilter, countryFilter, hideMine])
+  }, [page, limit, timeRange, debouncedSearch, eventTypeFilter, deviceFilter, selectedVisitorId, identityFilter, countryFilter, hideMine])
 
+  // Lazy first-page load on mount; tab switches remount cheaply (25 rows, no auto-poll).
   useEffect(() => {
     fetchVisitors()
   }, [fetchVisitors])
