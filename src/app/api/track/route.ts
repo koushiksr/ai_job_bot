@@ -173,12 +173,9 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      if (email) {
-        summaryUpdate.$set.identified_email = email
-      }
-      if (userId) {
-        summaryUpdate.$set.identified_user_id = userId
-      }
+      // NOTE: identified_email/user_id are maintained by linkVisitorToUser()
+      // below (manual-tag aware) — never $set them here, or a later login on
+      // the same browser would silently clobber a super-admin manual tag.
       if (eventType === 'payment_click') {
         summaryUpdate.$set.has_payment_intent = true
         summaryUpdate.$set.last_payment_intent_at = now
@@ -189,6 +186,15 @@ export async function POST(req: NextRequest) {
         summaryUpdate,
         { upsert: true }
       )
+
+      // Bind this browser to the identity (auto-learned). Never overwrites a
+      // different manual super-admin tag — see lib/visitorIdentity.
+      if (email) {
+        try {
+          const { linkVisitorToUser } = await import('@/lib/visitorIdentity')
+          await linkVisitorToUser(db, { visitor_id: visitorId, email, user_id: userId || null })
+        } catch {}
+      }
     }
 
     return NextResponse.json({ status: 'ok' })

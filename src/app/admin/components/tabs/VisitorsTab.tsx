@@ -65,6 +65,57 @@ export default function VisitorsTab() {
   const [inspectEvent, setInspectEvent] = useState<VisitorEventRecord | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
+  // Manual browser→identity tagging
+  const [tagEmail, setTagEmail] = useState<string>('')
+  const [tagBusy, setTagBusy] = useState<boolean>(false)
+  const [tagNotice, setTagNotice] = useState<string | null>(null)
+
+  const submitTag = async () => {
+    if (!inspectEvent || tagBusy) return
+    const clean = tagEmail.trim().toLowerCase()
+    if (!clean || !clean.includes('@')) {
+      setTagNotice('Enter a valid email to tag this browser.')
+      return
+    }
+    setTagBusy(true)
+    setTagNotice(null)
+    try {
+      const res = await fetch('/api/admin/visitor-identities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ visitor_id: inspectEvent.visitor_id, email: clean })
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.detail || 'Tagging failed.')
+      setInspectEvent({ ...inspectEvent, linked: { email: clean, user_id: data.user_id || inspectEvent.linked?.user_id || null, manual: true } })
+      setTagEmail('')
+      setTagNotice(`Tagged — this browser now resolves to ${clean}.`)
+    } catch (err: any) {
+      setTagNotice(err.message || 'Tagging failed.')
+    } finally {
+      setTagBusy(false)
+    }
+  }
+
+  const removeTag = async () => {
+    if (!inspectEvent || tagBusy) return
+    setTagBusy(true)
+    setTagNotice(null)
+    try {
+      await fetch(`/api/admin/visitor-identities?visitor_id=${encodeURIComponent(inspectEvent.visitor_id)}`, {
+        method: 'DELETE',
+        credentials: 'same-origin'
+      })
+      setInspectEvent({ ...inspectEvent, linked: null })
+      setTagNotice('Manual tag removed.')
+    } catch (err: any) {
+      setTagNotice(err.message || 'Untag failed.')
+    } finally {
+      setTagBusy(false)
+    }
+  }
+
   // Persistent ignore list: your other accounts / devices / browsers.
   // Stored per-admin in MongoDB, applied server-side on every fetch.
   const [ignored, setIgnored] = useState<{ emails: string[]; vids: string[]; ips: string[] }>({ emails: [], vids: [], ips: [] })
@@ -730,9 +781,20 @@ export default function VisitorsTab() {
                               <span>{evt.visitor_id.slice(0, 14)}...</span>
                               <Filter className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100" />
                             </button>
-                            <span className="text-[10px] text-zinc-600 block">
-                              Anonymous Visitor
-                            </span>
+                            {evt.linked?.email ? (
+                              <span
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-cyan-950/60 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border border-cyan-800/60 light:border-cyan-300 text-[10px] font-medium"
+                                title={evt.linked.manual ? 'Manually tagged browser — mapped by super-admin' : 'Known browser — mapped automatically at login'}
+                              >
+                                <CheckCircle2 className="w-2.5 h-2.5" />
+                                🔗 {evt.linked.email}
+                                {evt.linked.manual ? ' · tagged' : ''}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-zinc-600 block">
+                                Anonymous Visitor
+                              </span>
+                            )}
                           </div>
                         )}
                       </td>
@@ -847,7 +909,7 @@ export default function VisitorsTab() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
-                            onClick={() => setInspectEvent(evt)}
+                            onClick={() => { setInspectEvent(evt); setTagEmail(''); setTagNotice(null) }}
                             className="px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 text-[11px] font-medium transition-colors cursor-pointer"
                           >
                             Inspect
@@ -983,6 +1045,55 @@ export default function VisitorsTab() {
                   Ref: {inspectEvent.referrer || 'Direct'}
                 </div>
               </div>
+            </div>
+
+            {/* Identity: stored, linked, or taggable */}
+            <div className="p-3 rounded-xl bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 mb-4">
+              <span className="text-[10px] text-zinc-500 light:text-zinc-600 uppercase font-semibold block mb-1.5">Browser Identity</span>
+              {inspectEvent.email ? (
+                <div className="text-xs font-medium text-emerald-400 light:text-emerald-600">
+                  {inspectEvent.email} <span className="text-zinc-500 font-normal">(signed-in on this event)</span>
+                </div>
+              ) : inspectEvent.linked?.email ? (
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="text-xs font-medium text-cyan-300 light:text-cyan-700">
+                    🔗 {inspectEvent.linked.email}
+                    <span className="text-zinc-500 font-normal"> ({inspectEvent.linked.manual ? 'tagged by you' : 'auto-mapped at login'})</span>
+                  </div>
+                  {inspectEvent.linked.manual && (
+                    <button
+                      type="button"
+                      onClick={removeTag}
+                      disabled={tagBusy}
+                      className="text-[11px] text-zinc-400 hover:text-rose-300 cursor-pointer disabled:opacity-50"
+                    >
+                      Untag
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="email"
+                    value={tagEmail}
+                    onChange={(e) => setTagEmail(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') submitTag() }}
+                    placeholder="Tag this browser to an email…"
+                    className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-zinc-200 light:text-zinc-800 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={submitTag}
+                    disabled={tagBusy}
+                    className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+                  >
+                    {tagBusy ? '…' : 'Tag'}
+                  </button>
+                </div>
+              )}
+              {tagNotice && (
+                <div className="text-[11px] text-zinc-400 light:text-zinc-600 mt-1.5">{tagNotice}</div>
+              )}
             </div>
 
             {/* Raw JSON Payload Viewer */}

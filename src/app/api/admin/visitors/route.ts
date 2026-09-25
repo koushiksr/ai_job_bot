@@ -147,6 +147,17 @@ export async function GET(req: NextRequest) {
       db.collection('visitor_events').countDocuments(query)
     ])
 
+    // Resolve stored-email-less rows to known browsers (auto-learned at login
+    // or manually tagged) so they don't read as anonymous strangers.
+    let identityMap = new Map<string, { email: string | null; user_id: string | null; manual: boolean }>()
+    try {
+      const { getIdentityMap } = await import('@/lib/visitorIdentity')
+      const anonVids = [...new Set(
+        rawEvents.filter((e: any) => !e.email).map((e: any) => e.visitor_id).filter(Boolean)
+      )]
+      identityMap = await getIdentityMap(db, anonVids)
+    } catch {}
+
     const formattedEvents = rawEvents.map((evt) => ({
       id: evt._id.toString(),
       visitor_id: evt.visitor_id,
@@ -172,7 +183,12 @@ export async function GET(req: NextRequest) {
       screen_resolution: evt.screen_resolution,
       language: evt.language,
       metadata: evt.metadata || {},
-      created_at: evt.created_at
+      created_at: evt.created_at,
+      linked: (() => {
+        if (evt.email) return null
+        const hit = identityMap.get(evt.visitor_id)
+        return hit ? { email: hit.email, user_id: hit.user_id, manual: hit.manual } : null
+      })()
     }))
 
     // Calculate system-wide telemetry metrics

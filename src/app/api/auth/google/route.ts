@@ -174,6 +174,14 @@ export async function POST(req: NextRequest) {
       deviceId: (body.device_id || req.cookies.get('jf_device_id')?.value || '').trim(),
       ip, userAgent, userId: profile.user_id, email: profile.email
     })
+    // Bind this browser to the identity
+    try {
+      const gisVid = (body.visitor_id || '').trim()
+      if (gisVid) {
+        const { linkVisitorToUser } = await import('@/lib/visitorIdentity')
+        await linkVisitorToUser(db, { visitor_id: gisVid, email: profile.email, user_id: profile.user_id })
+      }
+    } catch {}
     await logUserActivity(db, {
       userId: profile.user_id,
       email: profile.email,

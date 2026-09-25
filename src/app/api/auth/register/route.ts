@@ -178,6 +178,15 @@ export async function POST(req: NextRequest) {
       { $set: { user_id: userId } }
     )
 
+    // Bind this browser to the new identity
+    try {
+      const regVid = (body.visitor_id || '').trim()
+      if (regVid) {
+        const { linkVisitorToUser } = await import('@/lib/visitorIdentity')
+        await linkVisitorToUser(db, { visitor_id: regVid, email: emailClean, user_id: userId })
+      }
+    } catch {}
+
     // Initialize clean user_stats record
     await db.collection('user_stats').updateOne(
       { user_id: userId },

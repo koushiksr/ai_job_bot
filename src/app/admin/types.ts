@@ -235,6 +235,7 @@ export interface VisitorEventRecord {
   language?: string
   metadata: Record<string, any>
   created_at: string
+  linked?: { email: string | null; user_id: string | null; manual: boolean } | null
 }
 
 export interface VisitorMetrics {

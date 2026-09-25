@@ -16,6 +16,7 @@ import {
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
 import { validatedIdentity, getDeviceId } from '@/lib/sessionClient'
+import { getVisitorId } from '@/lib/tracker'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -68,7 +69,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, password: cleanPwd, device_id: getDeviceId() })
+        body: JSON.stringify({ email: cleanEmail, password: cleanPwd, device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() })
       })
       const data = await res.json()
 

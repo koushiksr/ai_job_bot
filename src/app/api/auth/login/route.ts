@@ -133,6 +133,14 @@ export async function POST(req: NextRequest) {
 
         // Log candidate/admin login event
         const loginDevice = await recordLoginDevice(db, { deviceId: rawDeviceId, ip, userAgent, userId: profile.user_id, email: profile.email })
+        // Bind this browser to the identity so past/future anonymous rows resolve
+        try {
+          const loginVid = (body.visitor_id || '').trim()
+          if (loginVid) {
+            const { linkVisitorToUser } = await import('@/lib/visitorIdentity')
+            await linkVisitorToUser(db, { visitor_id: loginVid, email: profile.email, user_id: profile.user_id })
+          }
+        } catch {}
         await logUserActivity(db, {
           userId: profile.user_id,
           email: profile.email,

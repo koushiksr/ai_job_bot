@@ -39,7 +39,7 @@ import EmployerProofMarquee from '@/components/EmployerProofMarquee'
 import TrustBadgesBar from '@/components/TrustBadgesBar'
 import Footer from '@/components/Footer'
 import { validatedIdentity, getDeviceId } from '@/lib/sessionClient'
-import { trackSignUp } from '@/lib/tracker'
+import { trackSignUp, getVisitorId } from '@/lib/tracker'
 
 const FAQS = [
   {
@@ -213,8 +213,8 @@ export default function Home() {
     try {
       const endpoint = authMode === 'trial' ? '/api/auth/register' : '/api/auth/login'
       const payload = authMode === 'trial'
-        ? { name, email: cleanEmail, password: cleanPwd, plan: 'trial', device_id: getDeviceId() }
-        : { email: cleanEmail, password: cleanPwd, device_id: getDeviceId() }
+        ? { name, email: cleanEmail, password: cleanPwd, plan: 'trial', device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() }
+        : { email: cleanEmail, password: cleanPwd, device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() }
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -269,7 +269,7 @@ export default function Home() {
               const res = await fetch('/api/auth/google', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ credential: response.credential, device_id: getDeviceId() })
+                body: JSON.stringify({ credential: response.credential, device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() })
               })
               if (res.ok) {
                 const data = await res.json()
