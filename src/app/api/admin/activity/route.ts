@@ -22,7 +22,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const userId = searchParams.get('user_id')
     const eventType = searchParams.get('event_type')
-    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10), 1), 200)
+    // Paginated fetch — small first page keeps the Logs tab snappy.
+    // Supports both `page`+`limit` (UI) and legacy `skip`+`limit`.
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '25', 10), 1), 200)
+    const pageParam = parseInt(searchParams.get('page') || '', 10)
+    const skipParam = parseInt(searchParams.get('skip') || '', 10)
+    const page = !isNaN(pageParam) && pageParam > 0 ? pageParam : null
+    const skip = page !== null
+      ? (page - 1) * limit
+      : Math.max(isNaN(skipParam) ? 0 : skipParam, 0)
 
     const query: any = {}
     if (userId && userId.trim()) {
@@ -32,12 +40,16 @@ export async function GET(req: NextRequest) {
       query.event_type = eventType.trim()
     }
 
-    const rawLogs = await db
-      .collection('user_activity_logs')
-      .find(query)
-      .sort({ created_at: -1 })
-      .limit(limit)
-      .toArray()
+    const [rawLogs, totalCount] = await Promise.all([
+      db
+        .collection('user_activity_logs')
+        .find(query)
+        .sort({ created_at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      db.collection('user_activity_logs').countDocuments(query)
+    ])
 
     const formattedLogs = rawLogs.map(log => ({
       id: log._id.toString(),
@@ -61,6 +73,14 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       logs: formattedLogs,
+      pagination: {
+        total: totalCount,
+        limit,
+        skip,
+        page: page ?? Math.floor(skip / limit) + 1,
+        total_pages: Math.ceil(totalCount / limit) || 1,
+        has_more: totalCount > skip + limit
+      },
       stats: {
         total_logins: loginCount,
         total_profile_updates: profileCount,

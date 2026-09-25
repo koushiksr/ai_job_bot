@@ -81,29 +81,6 @@ export default function AdminTabsNav({
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" title="Worker busy" />
             ) : null}
           </button>
-
-          {/* User Requests */}
-          <button
-            type="button"
-            onClick={() => onTabChange('requests')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'requests'
-                ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-sm ring-1 ring-teal-500/30'
-                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-100'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5 text-teal-400 light:text-cyan-600" />
-            <span>Support</span>
-            {ticketStats.open > 0 ? (
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 light:text-rose-700 border border-rose-500/30">
-                {ticketStats.open}
-              </span>
-            ) : (
-              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-400">
-                {ticketStats.total}
-              </span>
-            )}
-          </button>
         </div>
 
         {/* Divider */}
@@ -237,6 +214,29 @@ export default function AdminTabsNav({
                 {pendingReviewsCount}
               </span>
             ) : null}
+          </button>
+
+          {/* Support — right-most, next to Reviews */}
+          <button
+            type="button"
+            onClick={() => onTabChange('requests')}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              activeTab === 'requests'
+                ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-sm ring-1 ring-teal-500/30'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900/60 light:hover:bg-zinc-100'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-teal-400 light:text-cyan-600" />
+            <span>Support</span>
+            {ticketStats.open > 0 ? (
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 light:text-rose-700 border border-rose-500/30">
+                {ticketStats.open}
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-400">
+                {ticketStats.total}
+              </span>
+            )}
           </button>
         </div>
       </div>

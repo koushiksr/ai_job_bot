@@ -35,8 +35,13 @@ interface LogsTabProps {
   activityStats: ActivityStats
   activityFilter: string
   setActivityFilter: (filter: string) => void
-  fetchActivityLogs: (filter?: string) => Promise<void> | void
+  fetchActivityLogs: (filter?: string, page?: number, limit?: number) => Promise<void> | void
   loadingActivity: boolean
+  activityPage: number
+  setActivityPage: (page: number) => void
+  activityLimit: number
+  setActivityLimit: (limit: number) => void
+  activityTotal: number
   activityTableCollapsed: boolean
   toggleActivityTable: () => void
   formatTimestamp: (ts: any) => string
@@ -53,6 +58,11 @@ interface LogsTabProps {
   llmFilterDate: string
   setLlmFilterDate: (date: string) => void
   fetchLlmLogs: (params?: any) => Promise<void> | void
+  llmPage: number
+  setLlmPage: (page: number) => void
+  llmLimit: number
+  setLlmLimit: (limit: number) => void
+  llmTotal: number
   usersList: CandidateUser[]
   llmTableCollapsed: boolean
   toggleLlmTable: () => void
@@ -245,6 +255,11 @@ export const LogsTab: React.FC<LogsTabProps> = ({
   setActivityFilter,
   fetchActivityLogs,
   loadingActivity,
+  activityPage,
+  setActivityPage,
+  activityLimit,
+  setActivityLimit,
+  activityTotal,
   activityTableCollapsed,
   toggleActivityTable,
   formatTimestamp,
@@ -260,6 +275,11 @@ export const LogsTab: React.FC<LogsTabProps> = ({
   llmFilterDate,
   setLlmFilterDate,
   fetchLlmLogs,
+  llmPage,
+  setLlmPage,
+  llmLimit,
+  setLlmLimit,
+  llmTotal,
   usersList,
   llmTableCollapsed,
   toggleLlmTable,
@@ -331,7 +351,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 bg-black light:bg-white border border-zinc-800 light:border-zinc-200'
             }`}
           >
-            Live Activity Audit Trail ({activityLogs.length})
+            Live Activity Audit Trail ({activityTotal > 0 ? activityTotal : activityLogs.length})
           </button>
           <button
             type="button"
@@ -354,7 +374,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             }`}
           >
             <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-            <span>AI Q&amp;A &amp; Inference Telemetry ({llmStats.total_calls || llmLogs.length})</span>
+            <span>AI Q&amp;A &amp; Inference Telemetry ({llmTotal > 0 ? llmTotal : (llmStats.total_calls || llmLogs.length)})</span>
           </button>
           <button
             type="button"
@@ -387,9 +407,10 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 key={type}
                 onClick={() => {
                   setActivityFilter(type)
-                  fetchActivityLogs(type)
+                  setActivityPage(1)
+                  fetchActivityLogs(type, 1, activityLimit)
                 }}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider transition-colors cursor-pointer ${
                   activityFilter === type
                     ? 'bg-sky-600 text-white light:text-zinc-900 font-bold'
                     : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-800 light:border-zinc-200'
@@ -398,12 +419,27 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 {type.replace('_', ' ')}
               </button>
             ))}
+            <select
+              value={activityLimit}
+              onChange={(e) => {
+                const next = Number(e.target.value)
+                setActivityLimit(next)
+                setActivityPage(1)
+                fetchActivityLogs(activityFilter, 1, next)
+              }}
+              className="px-2 py-1 rounded-md bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 text-[11px] font-mono focus:outline-none focus:border-sky-500 cursor-pointer"
+              title="Rows per page"
+            >
+              <option value={25}>25 / page</option>
+              <option value={50}>50 / page</option>
+              <option value={100}>100 / page</option>
+            </select>
             <button
-              onClick={() => fetchActivityLogs(activityFilter)}
+              onClick={() => fetchActivityLogs(activityFilter, activityPage, activityLimit)}
               className="p-1.5 rounded-md bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors ml-1 cursor-pointer"
               title="Refresh Activity Logs"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingActivity ? 'animate-spin' : ''}`} />
             </button>
           </div>
         )}
@@ -450,7 +486,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 <Activity className="w-4 h-4 text-sky-400" />
                 <span className="font-bold text-sm text-white light:text-zinc-900">Live Activity Audit Trail</span>
                 <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 px-2 py-0.5 rounded-full">
-                  {activityLogs.length} events
+                  {(activityTotal || activityLogs.length).toLocaleString()} events
                 </span>
               </div>
               <button
@@ -474,6 +510,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             )}
 
             {!activityTableCollapsed && (
+            <>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
                 <thead
@@ -493,7 +530,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
-                  {loadingActivity ? (
+                  {loadingActivity && activityLogs.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-12 text-center text-slate-400 light:text-zinc-500">
                         <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
@@ -583,6 +620,44 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 </tbody>
               </table>
             </div>
+            {/* Paginated footer — first page lazy, manual Refresh for fresh data */}
+            <div className="px-4 py-3 bg-slate-950 light:bg-white border-t border-slate-800 light:border-zinc-200 flex items-center justify-between flex-wrap gap-3 text-xs text-zinc-400 light:text-zinc-600">
+              <div>
+                Showing <strong className="text-white light:text-zinc-900">{activityLogs.length}</strong> of{' '}
+                <strong className="text-white light:text-zinc-900">{(activityTotal || activityLogs.length).toLocaleString()}</strong> events
+                {loadingActivity && <span className="ml-2 text-sky-400">· loading…</span>}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={activityPage <= 1 || loadingActivity}
+                  onClick={() => {
+                    const next = Math.max(1, activityPage - 1)
+                    setActivityPage(next)
+                    fetchActivityLogs(activityFilter, next, activityLimit)
+                  }}
+                  className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 disabled:opacity-30 border border-zinc-800 light:border-zinc-200 cursor-pointer"
+                >
+                  <ChevronDown className="w-4 h-4 rotate-90" />
+                </button>
+                <span className="font-mono text-zinc-300 light:text-zinc-700 px-2">
+                  Page {activityPage} of {Math.max(1, Math.ceil((activityTotal || activityLogs.length) / activityLimit))}
+                </span>
+                <button
+                  type="button"
+                  disabled={loadingActivity || activityLogs.length < activityLimit || (activityTotal > 0 && activityPage >= Math.ceil(activityTotal / activityLimit))}
+                  onClick={() => {
+                    const next = activityPage + 1
+                    setActivityPage(next)
+                    fetchActivityLogs(activityFilter, next, activityLimit)
+                  }}
+                  className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 disabled:opacity-30 border border-zinc-800 light:border-zinc-200 cursor-pointer"
+                >
+                  <ChevronDown className="w-4 h-4 -rotate-90" />
+                </button>
+              </div>
+            </div>
+            </>
             )}
           </div>
         </div>
@@ -690,7 +765,8 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                   onChange={e => setLlmSearchQuery(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
-                      fetchLlmLogs({ search: llmSearchQuery })
+                      setLlmPage(1)
+                      fetchLlmLogs({ search: llmSearchQuery, page: 1 })
                     }
                   }}
                   className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-white light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400 focus:outline-none focus:border-indigo-500 font-mono"
@@ -702,7 +778,8 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 value={llmFilterUser}
                 onChange={e => {
                   setLlmFilterUser(e.target.value)
-                  fetchLlmLogs({ user: e.target.value })
+                  setLlmPage(1)
+                  fetchLlmLogs({ user: e.target.value, page: 1 })
                 }}
                 className="px-3 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 font-mono focus:outline-none focus:border-indigo-500"
               >
@@ -719,7 +796,8 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 value={llmFilterProvider}
                 onChange={e => {
                   setLlmFilterProvider(e.target.value)
-                  fetchLlmLogs({ provider: e.target.value })
+                  setLlmPage(1)
+                  fetchLlmLogs({ provider: e.target.value, page: 1 })
                 }}
                 className="px-3 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 font-mono focus:outline-none focus:border-indigo-500"
               >
@@ -742,7 +820,8 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                     key={d.id}
                     onClick={() => {
                       setLlmFilterDate(d.id)
-                      fetchLlmLogs({ date: d.id })
+                      setLlmPage(1)
+                      fetchLlmLogs({ date: d.id, page: 1 })
                     }}
                     className={`px-2.5 py-1 rounded text-[11px] font-mono transition-colors cursor-pointer ${
                       llmFilterDate === d.id
@@ -755,9 +834,26 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 ))}
               </div>
 
+              {/* Rows per page */}
+              <select
+                value={llmLimit}
+                onChange={(e) => {
+                  const next = Number(e.target.value)
+                  setLlmLimit(next)
+                  setLlmPage(1)
+                  fetchLlmLogs({ limit: next, page: 1 })
+                }}
+                className="px-3 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-zinc-300 light:text-zinc-700 font-mono focus:outline-none focus:border-indigo-500 cursor-pointer"
+                title="Rows per page"
+              >
+                <option value={25}>25 / page</option>
+                <option value={50}>50 / page</option>
+                <option value={100}>100 / page</option>
+              </select>
+
               {/* Refresh Button */}
               <button
-                onClick={() => fetchLlmLogs()}
+                onClick={() => fetchLlmLogs({ page: llmPage, limit: llmLimit })}
                 disabled={loadingLlmLogs}
                 className="px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
                 title="Refresh Telemetry"
@@ -778,7 +874,8 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                     key={i}
                     onClick={() => {
                       setLlmSearchQuery(tq.question)
-                      fetchLlmLogs({ search: tq.question })
+                      setLlmPage(1)
+                      fetchLlmLogs({ search: tq.question, page: 1 })
                     }}
                     className="px-2 py-0.5 rounded-md bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-200 text-[11px] font-mono truncate max-w-[260px] shrink-0 transition-colors cursor-pointer"
                     title={`Asked ${tq.count} times. Sample answer: ${tq.sample_answer}`}
@@ -801,7 +898,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 <Brain className="w-4 h-4 text-purple-400" />
                 <span className="font-bold text-sm text-white light:text-zinc-900">AI Q&amp;A &amp; Inference Telemetry Log</span>
                 <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 px-2 py-0.5 rounded-full">
-                  {llmLogs.length} records
+                  {llmTotal > 0 ? llmTotal : llmLogs.length} records
                 </span>
               </div>
               <button
@@ -825,6 +922,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
             )}
 
             {!llmTableCollapsed && (
+            <>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-300 light:text-zinc-700">
                 <thead
@@ -846,7 +944,7 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50 light:divide-zinc-200">
-                  {loadingLlmLogs ? (
+                  {loadingLlmLogs && llmLogs.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-14 text-center text-slate-400 light:text-zinc-500">
                         <RefreshCw className="w-5 h-5 mx-auto animate-spin mb-2 text-indigo-400" />
@@ -954,6 +1052,44 @@ export const LogsTab: React.FC<LogsTabProps> = ({
                 </tbody>
               </table>
             </div>
+            {/* Paginated footer — first page lazy, manual Refresh for fresh data */}
+            <div className="px-4 py-3 bg-slate-950 light:bg-white border-t border-slate-800 light:border-zinc-200 flex items-center justify-between flex-wrap gap-3 text-xs text-zinc-400 light:text-zinc-600">
+              <div>
+                Showing <strong className="text-white light:text-zinc-900">{llmLogs.length}</strong> of{' '}
+                <strong className="text-white light:text-zinc-900">{(llmTotal || llmLogs.length).toLocaleString()}</strong> inferences
+                {loadingLlmLogs && <span className="ml-2 text-indigo-400">· loading…</span>}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={llmPage <= 1 || loadingLlmLogs}
+                  onClick={() => {
+                    const next = Math.max(1, llmPage - 1)
+                    setLlmPage(next)
+                    fetchLlmLogs({ page: next, limit: llmLimit })
+                  }}
+                  className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 disabled:opacity-30 border border-zinc-800 light:border-zinc-200 cursor-pointer"
+                >
+                  <ChevronDown className="w-4 h-4 rotate-90" />
+                </button>
+                <span className="font-mono text-zinc-300 light:text-zinc-700 px-2">
+                  Page {llmPage} of {Math.max(1, Math.ceil((llmTotal || llmLogs.length) / llmLimit))}
+                </span>
+                <button
+                  type="button"
+                  disabled={loadingLlmLogs || llmLogs.length < llmLimit || (llmTotal > 0 && llmPage >= Math.ceil(llmTotal / llmLimit))}
+                  onClick={() => {
+                    const next = llmPage + 1
+                    setLlmPage(next)
+                    fetchLlmLogs({ page: next, limit: llmLimit })
+                  }}
+                  className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 disabled:opacity-30 border border-zinc-800 light:border-zinc-200 cursor-pointer"
+                >
+                  <ChevronDown className="w-4 h-4 -rotate-90" />
+                </button>
+              </div>
+            </div>
+            </>
             )}
           </div>
 

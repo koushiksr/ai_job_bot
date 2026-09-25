@@ -289,10 +289,13 @@ export default function AdminDashboard() {
   const [dispatchReportChannel, setDispatchReportChannel] = useState<'both' | 'email' | 'push'>('both')
   const [dispatchReportTarget, setDispatchReportTarget] = useState<string>('koushiksr1999@gmail.com')
 
-  // Activity Audit & Telemetry State
+  // Activity Audit & Telemetry State (paginated + lazy — first page only, manual refresh after)
   const [activityLogs, setActivityLogs] = useState<any[]>([])
   const [loadingActivity, setLoadingActivity] = useState<boolean>(false)
   const [activityFilter, setActivityFilter] = useState<string>('all')
+  const [activityPage, setActivityPage] = useState<number>(1)
+  const [activityLimit, setActivityLimit] = useState<number>(25)
+  const [activityTotal, setActivityTotal] = useState<number>(0)
   const [activityStats, setActivityStats] = useState<any>({
     total_logins: 0,
     total_profile_updates: 0,
@@ -318,6 +321,9 @@ export default function AdminDashboard() {
   const [logsSubTab, setLogsSubTab] = useState<'activity' | 'llm_telemetry' | 'job_history' | 'tickets' | 'notifications'>('activity')
   const [llmLogs, setLlmLogs] = useState<any[]>([])
   const [loadingLlmLogs, setLoadingLlmLogs] = useState<boolean>(false)
+  const [llmPage, setLlmPage] = useState<number>(1)
+  const [llmLimit, setLlmLimit] = useState<number>(25)
+  const [llmTotal, setLlmTotal] = useState<number>(0)
   const [llmStats, setLlmStats] = useState<{
     total_calls: number
     avg_duration_ms: number
@@ -676,12 +682,18 @@ export default function AdminDashboard() {
     try { localStorage.setItem('admin_assigned_offer_filter', filter) } catch {}
   }
 
+  // Lazy flags: Logs sub-tabs fetch only the first page on first open.
+  // Tab switches after that reuse cached rows — user hits Refresh for fresh data.
+  const hasLoadedActivityRef = React.useRef(false)
+  const hasLoadedLlmRef = React.useRef(false)
+
   const handleLogsSubTabChange = (tab: 'activity' | 'llm_telemetry' | 'job_history' | 'tickets' | 'notifications') => {
     setLogsSubTab(tab)
     try { localStorage.setItem('admin_logs_sub_tab', tab) } catch {}
-    if (tab === 'activity') fetchActivityLogs()
-    else if (tab === 'llm_telemetry') fetchLlmLogs()
-    else if (tab === 'tickets') fetchSupportTickets()
+    // Lazy: fetch only if this sub-tab has never loaded data in this session.
+    if (tab === 'activity' && !hasLoadedActivityRef.current) fetchActivityLogs()
+    else if (tab === 'llm_telemetry' && !hasLoadedLlmRef.current) fetchLlmLogs()
+    else if (tab === 'tickets' && supportTickets.length === 0) fetchSupportTickets()
   }
 
   const fetchOffersData = async () => {
@@ -1130,17 +1142,25 @@ export default function AdminDashboard() {
     }
   }
 
-  const fetchActivityLogs = async (type = activityFilter) => {
+  const fetchActivityLogs = async (type = activityFilter, page = activityPage, limit = activityLimit) => {
     setLoadingActivity(true)
     try {
-      const q = type && type !== 'all' ? `?event_type=${encodeURIComponent(type)}&limit=100` : '?limit=100'
-      const res = await fetch(`/api/admin/activity${q}`, {
+      const params = new URLSearchParams()
+      if (type && type !== 'all') params.set('event_type', type)
+      params.set('page', String(page))
+      params.set('limit', String(limit))
+      const res = await fetch(`/api/admin/activity?${params.toString()}`, {
         headers: getAdminHeaders()
       })
       if (res.ok) {
         const data = await res.json()
         setActivityLogs(data.logs || [])
+        if (data.pagination) {
+          setActivityTotal(data.pagination.total || 0)
+          if (typeof data.pagination.page === 'number') setActivityPage(data.pagination.page)
+        }
         if (data.stats) setActivityStats(data.stats)
+        hasLoadedActivityRef.current = true
       }
     } catch (e) {
       console.error('Failed to fetch activity logs:', e)
@@ -1149,15 +1169,17 @@ export default function AdminDashboard() {
     }
   }
 
-  const fetchLlmLogs = async (overrideParams?: { user?: string; provider?: string; date?: string; search?: string }) => {
+  const fetchLlmLogs = async (overrideParams?: { user?: string; provider?: string; date?: string; search?: string; page?: number; limit?: number }) => {
     setLoadingLlmLogs(true)
     try {
       const user = overrideParams?.user !== undefined ? overrideParams.user : llmFilterUser
       const prov = overrideParams?.provider !== undefined ? overrideParams.provider : llmFilterProvider
       const dt = overrideParams?.date !== undefined ? overrideParams.date : llmFilterDate
       const qSearch = overrideParams?.search !== undefined ? overrideParams.search : llmSearchQuery
+      const page = overrideParams?.page !== undefined ? overrideParams.page : llmPage
+      const limit = overrideParams?.limit !== undefined ? overrideParams.limit : llmLimit
 
-      const params = new URLSearchParams({ limit: '100' })
+      const params = new URLSearchParams({ limit: String(limit), skip: String((page - 1) * limit) })
       if (user && user !== 'all') params.set('user_id', user)
       if (prov && prov !== 'all') params.set('provider', prov)
       if (dt && dt !== 'all') params.set('date', dt)
@@ -1169,7 +1191,13 @@ export default function AdminDashboard() {
       if (res.ok) {
         const data = await res.json()
         setLlmLogs(data.logs || [])
+        if (data.pagination) {
+          setLlmTotal(data.pagination.total || 0)
+          const inferredPage = Math.floor((data.pagination.skip || 0) / (data.pagination.limit || limit)) + 1
+          setLlmPage(inferredPage)
+        }
         if (data.stats) setLlmStats(data.stats)
+        hasLoadedLlmRef.current = true
       }
     } catch (e) {
       console.error('Failed to fetch LLM telemetry logs:', e)
@@ -1426,6 +1454,16 @@ export default function AdminDashboard() {
     if (tab === 'enterprise_orgs') {
       fetchEnterpriseOrgs()
     }
+    // Lazy first-page load for Logs: switching tabs reuses cached rows,
+    // manual Refresh buttons fetch fresh data. No auto-refetch on every switch.
+    if (tab === 'logs') {
+      if (logsSubTab === 'activity' && !hasLoadedActivityRef.current) fetchActivityLogs()
+      else if (logsSubTab === 'llm_telemetry' && !hasLoadedLlmRef.current) fetchLlmLogs()
+      else if (logsSubTab === 'tickets' && supportTickets.length === 0) fetchSupportTickets()
+    }
+    // Visitors tab is self-contained (own fetch + pagination inside
+    // VisitorsTab): it lazy-loads its first page on mount with auto-refresh
+    // OFF by default, so tab switches stay cheap.
   }
 
   // Persist UI prefs to MongoDB (debounced, merge-safe) — survives logins & devices.
@@ -1888,6 +1926,11 @@ export default function AdminDashboard() {
             setActivityFilter={setActivityFilter}
             fetchActivityLogs={fetchActivityLogs}
             loadingActivity={loadingActivity}
+            activityPage={activityPage}
+            setActivityPage={setActivityPage}
+            activityLimit={activityLimit}
+            setActivityLimit={setActivityLimit}
+            activityTotal={activityTotal}
             activityTableCollapsed={activityTableCollapsed}
             toggleActivityTable={toggleActivityTable}
             formatTimestamp={formatTimestamp}
@@ -1903,6 +1946,11 @@ export default function AdminDashboard() {
             llmFilterDate={llmFilterDate}
             setLlmFilterDate={setLlmFilterDate}
             fetchLlmLogs={fetchLlmLogs}
+            llmPage={llmPage}
+            setLlmPage={setLlmPage}
+            llmLimit={llmLimit}
+            setLlmLimit={setLlmLimit}
+            llmTotal={llmTotal}
             usersList={usersList}
             llmTableCollapsed={llmTableCollapsed}
             toggleLlmTable={toggleLlmTable}
