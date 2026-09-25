@@ -537,11 +537,19 @@ export default function AdminDashboard() {
 
   const fetchOverviewAndUsers = async () => {
     // Instant paint: render last-known list from cache while fresh data loads.
+    // Cache carries a timestamp + IST date — anything older than 2 minutes or
+    // from a previous day is ignored so rows never show stale zeros.
     try {
-      const cached = localStorage.getItem('admin_cached_users')
-      if (cached) {
-        const users = JSON.parse(cached)
-        if (Array.isArray(users) && users.length > 0) applyUsersList(users)
+      const raw = localStorage.getItem('admin_cached_users')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        const users = Array.isArray(parsed) ? parsed : parsed.users
+        const at = Array.isArray(parsed) ? 0 : (parsed.at || 0)
+        const day = Array.isArray(parsed) ? '' : (parsed.date || '')
+        const istToday = new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().slice(0, 10)
+        if (Array.isArray(users) && users.length > 0 && day === istToday && Date.now() - at < 2 * 60 * 1000) {
+          applyUsersList(users)
+        }
       }
     } catch {}
     setLoadingUsers(true)
@@ -562,7 +570,10 @@ export default function AdminDashboard() {
       const uData = await uRes.json()
       const users = uData.users || []
       applyUsersList(users)
-      try { localStorage.setItem('admin_cached_users', JSON.stringify(users)) } catch {}
+      try {
+        const istToday = new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().slice(0, 10)
+        localStorage.setItem('admin_cached_users', JSON.stringify({ at: Date.now(), date: istToday, users }))
+      } catch {}
 
       // Fetch reviews metrics for tab badge
       try {
@@ -1465,6 +1476,21 @@ export default function AdminDashboard() {
     // VisitorsTab): it lazy-loads its first page on mount with auto-refresh
     // OFF by default, so tab switches stay cheap.
   }
+
+  // Live progress: while any candidate is applying, silently re-fetch the
+  // list every 15s so quota bars climb in real time. Skeleton only renders
+  // on an empty list, so in-place updates never flash or lose scroll.
+  const anyApplying = usersList.some(
+    (u: any) => u.execution_summary?.is_applying || u.current_execution?.status === 'applying'
+  )
+  useEffect(() => {
+    if (!anyApplying) return
+    const t = setInterval(() => {
+      fetchOverviewAndUsers()
+    }, 15000)
+    return () => clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anyApplying])
 
   // Persist UI prefs to MongoDB (debounced, merge-safe) — survives logins & devices.
   // Skipped until the server copy has loaded, so first paint never overwrites it.
