@@ -30,6 +30,8 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [isInAppBrowser, setIsInAppBrowser] = useState(false)
@@ -60,11 +62,36 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
 
     const cleanEmail = email.trim().toLowerCase()
     const cleanPwd = password.trim()
+    const cleanConfirmPwd = confirmPassword.trim()
 
     if (!cleanEmail || !cleanEmail.includes('@')) {
       setError('Please enter a valid email address.')
       setLoading(false)
       return
+    }
+
+    if (authMode === 'trial') {
+      if (!cleanPwd) {
+        setError('Please create a password for your account.')
+        setLoading(false)
+        return
+      }
+      if (cleanPwd.length < 6) {
+        setError('Password must be at least 6 characters long.')
+        setLoading(false)
+        return
+      }
+      if (cleanPwd !== cleanConfirmPwd) {
+        setError('Passwords do not match. Please verify both passwords.')
+        setLoading(false)
+        return
+      }
+    } else if (authMode === 'signin') {
+      if (!cleanPwd) {
+        setError('Please enter your password.')
+        setLoading(false)
+        return
+      }
     }
 
     // NOTE: no client-side admin shortcut — sign-in always goes through the
@@ -90,11 +117,13 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
         ? {
             name: name.trim() || cleanEmail.split('@')[0],
             email: cleanEmail,
-            password: undefined,
+            password: cleanPwd,
+            confirm_password: cleanConfirmPwd,
             plan: 'trial',
             ref: refCode,
             referral_code: refCode,
-            device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })()
+            device_id: getDeviceId(),
+            visitor_id: (() => { try { return getVisitorId() } catch { return '' } })()
           }
         : { email: cleanEmail, password: cleanPwd, device_id: getDeviceId(), visitor_id: (() => { try { return getVisitorId() } catch { return '' } })() }
 
@@ -235,6 +264,52 @@ export default function FuturisticHeroCockpit({ onSuccess, initialMode }: Futuri
                   autoComplete="email"
                   className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
                 />
+              </div>
+
+              {/* Password */}
+              <div className="relative">
+                <Lock className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Create password (min 6 chars)"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-zinc-500 light:text-zinc-600 hover:text-zinc-300 cursor-pointer"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* Confirm Password */}
+              <div className="relative">
+                <Lock className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3.5 top-3" />
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                  className="w-full bg-black light:bg-white border border-zinc-800 light:border-zinc-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white light:text-zinc-900 placeholder-zinc-600 light:placeholder-zinc-400 outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-3 text-zinc-500 light:text-zinc-600 hover:text-zinc-300 cursor-pointer"
+                  title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
               </div>
 
               {error && (

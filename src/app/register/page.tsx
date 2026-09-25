@@ -18,8 +18,8 @@ function RegisterRedirectContent() {
     }
 
     const targetUrl = ref 
-      ? `/?mode=free&ref=${encodeURIComponent(ref.trim().toUpperCase())}`
-      : '/?mode=free'
+      ? `/login?mode=signup&ref=${encodeURIComponent(ref.trim().toUpperCase())}`
+      : '/login?mode=signup'
 
     window.location.replace(targetUrl)
   }, [searchParams])

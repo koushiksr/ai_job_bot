@@ -15,18 +15,35 @@ export async function POST(req: NextRequest) {
     const name = (body.name || '').trim()
     const emailClean = (body.email || '').trim().toLowerCase()
     const targetRole = (body.target_role || '').trim()
-    let pwdClean = (body.password || '').trim()
+    const pwdClean = (body.password || '').trim()
+    const confirmPwdClean = (body.confirm_password || '').trim()
 
     if (!emailClean) {
       return NextResponse.json(
-        { detail: 'Email is required to activate free access.' },
+        { detail: 'Email is required to create your account.' },
         { status: 400 }
       )
     }
 
-    // Auto-generate secure password if user signed up via 1-click email activator
     if (!pwdClean) {
-      pwdClean = `JobFlux@${Math.floor(100000 + Math.random() * 900000)}`
+      return NextResponse.json(
+        { detail: 'Password is required to create your account.' },
+        { status: 400 }
+      )
+    }
+
+    if (pwdClean.length < 6) {
+      return NextResponse.json(
+        { detail: 'Password must be at least 6 characters long.' },
+        { status: 400 }
+      )
+    }
+
+    if (confirmPwdClean && pwdClean !== confirmPwdClean) {
+      return NextResponse.json(
+        { detail: 'Passwords do not match. Please ensure both passwords match.' },
+        { status: 400 }
+      )
     }
 
     const db = await getDb()
