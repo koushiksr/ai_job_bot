@@ -1487,7 +1487,7 @@ export default function AdminDashboard() {
     if (!anyApplying) return
     const t = setInterval(() => {
       fetchOverviewAndUsers()
-    }, 15000)
+    }, 10000)
     return () => clearInterval(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anyApplying])

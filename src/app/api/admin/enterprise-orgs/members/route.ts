@@ -35,9 +35,11 @@ export async function GET(req: NextRequest) {
     const memberIds = members.map(m => m.user_id).filter(Boolean)
     const statsDocs = await db.collection('user_stats').find({ user_id: { $in: memberIds } }).toArray()
     const statsMap = new Map(statsDocs.map(s => [s.user_id, s]))
+    const istToday = new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
     const list = members.map(m => {
       const s = statsMap.get(m.user_id) || {}
+      const todayCount = s.last_date === istToday ? (s.today || 0) : 0
       return {
         user_id: m.user_id,
         email: m.email,
@@ -48,7 +50,7 @@ export async function GET(req: NextRequest) {
         is_org_admin_only: m.is_org_admin_only || false,
         enabled_for_daily_run: m.enabled_for_daily_run !== false,
         plan: m.plan || 'enterprise',
-        applied_today: s.today || 0,
+        applied_today: todayCount,
         applied_total: s.total_applied || 0,
         created_at: m.created_at
       }

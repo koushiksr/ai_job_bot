@@ -251,7 +251,9 @@ export async function GET(req: NextRequest) {
       const isRunToday = p.last_automated_run_date === todayIst || p.daily_status === `completed_${todayIst}`
       const isStatsToday = s.last_date === todayIst
       const realTodayApplied = isStatsToday ? (s.today || 0) : 0
-      const isAppliedToday = !isApplying && (isRunToday || (isStatsToday && realTodayApplied > 0))
+      const liveRunApplied = Number(curExec.applied_today || curExec.applied_count || activeTask?.applied_count || activeTask?.stats?.today || 0)
+      const totalTodayApplied = Math.max(realTodayApplied, liveRunApplied)
+      const isAppliedToday = !isApplying && (isRunToday || totalTodayApplied > 0)
 
       if (isAppliedToday && !executionDevice) {
         executionDevice = lastExec.hostname || curExec.last_hostname || lastExec.worker_id || curExec.last_worker_id || null
@@ -379,8 +381,8 @@ export async function GET(req: NextRequest) {
         reminders_sent: (isAdminAccount || isOrgAdmin) ? [] : userReminders,
         is_vip: Boolean(p.is_vip || p.vip_access || p.free_privilege),
         apk_access: Boolean(p.apk_access),
-        total_applied: s.total_applied || 0,
-        applied_today: isAppliedToday ? realTodayApplied : 0,
+        total_applied: Math.max(s.total_applied || 0, totalTodayApplied),
+        applied_today: totalTodayApplied,
         daily_application_limit: dailyApplicationLimit,
         applied_this_week: s.this_week || 0,
         applied_this_month: s.this_month || 0,
