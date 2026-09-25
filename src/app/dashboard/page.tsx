@@ -270,11 +270,24 @@ export default function UserDashboard() {
         setActiveOfferBanner(null)
       }
 
-      // 3. Process any real-time push notifications dispatched by administrator
+      // 3. Process fresh, unexpired real-time push notifications
       const notifs = data.notifications || []
+      const nowMs = Date.now()
       for (const notif of notifs) {
+        // Expiration check: if notification has expired or is older than 6 hours, dismiss and skip
+        if (notif.expires_at && new Date(notif.expires_at).getTime() < nowMs) {
+          markNotificationAsRead(notif.id, userEmail)
+          continue
+        }
+        if (notif.created_at && (nowMs - new Date(notif.created_at).getTime()) > 6 * 3600 * 1000) {
+          markNotificationAsRead(notif.id, userEmail)
+          continue
+        }
+
         const notifKey = `jobflux_seen_notif_${notif.id}`
-        if (typeof window !== 'undefined' && !sessionStorage.getItem(notifKey)) {
+        // Use localStorage so closing and reopening tabs does NOT repeat old notifications
+        if (typeof window !== 'undefined' && !localStorage.getItem(notifKey)) {
+          localStorage.setItem(notifKey, String(nowMs))
           sessionStorage.setItem(notifKey, 'true')
 
           // Dispatch native OS browser push notification only if tab is hidden (avoid double alert with in-app toast)
@@ -631,6 +644,29 @@ export default function UserDashboard() {
     }, 30000)
     return () => clearInterval(interval)
   }, [userEmail])
+
+  // Listen for direct push messages delivered while user is actively in the dashboard
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+    const handleSwMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'JOBFLUX_ACTIVE_NOTIFICATION') {
+        const notifData = event.data.data
+        if (notifData) {
+          // If expired, skip
+          if (notifData.expires_at && notifData.expires_at < Date.now()) return
+
+          setInAppToast({
+            id: notifData.tag || `sw_${Date.now()}`,
+            title: notifData.title || 'JobFlux Priority Alert',
+            message: notifData.body || notifData.message,
+            claim_url: notifData.url
+          })
+        }
+      }
+    }
+    navigator.serviceWorker.addEventListener('message', handleSwMessage)
+    return () => navigator.serviceWorker.removeEventListener('message', handleSwMessage)
+  }, [])
 
   // If activeTab is set to 'profile', redirect to dedicated /profile route
   useEffect(() => {

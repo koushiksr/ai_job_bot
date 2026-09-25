@@ -39,17 +39,37 @@ export async function GET(req: NextRequest) {
       .sort({ created_at: -1 })
       .toArray()
 
-    // 2. Fetch unread notifications
+    const now = new Date()
+    const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+
+    // Auto-expire stale notifications in MongoDB so they never haunt candidates
+    await db.collection('user_notifications').updateMany(
+      {
+        email: cleanEmail,
+        read: false,
+        $or: [
+          { expires_at: { $lte: now } },
+          { expires_at: { $exists: false }, created_at: { $lte: cutoff24h } }
+        ]
+      },
+      {
+        $set: { read: true, expired: true, expired_at: now }
+      }
+    )
+
+    // 2. Fetch ONLY fresh, unexpired unread notifications
     const notifications = await db.collection('user_notifications')
       .find({
         email: cleanEmail,
-        read: false
+        read: false,
+        $or: [
+          { expires_at: { $gt: now } },
+          { expires_at: { $exists: false }, created_at: { $gt: cutoff24h } }
+        ]
       })
       .sort({ created_at: -1 })
       .limit(10)
       .toArray()
-
-    const now = new Date()
     const mappedOffers = assignedOffers.map(o => {
       const exp = o.expires_at ? new Date(o.expires_at) : null
       const isExpired = exp ? now > exp : false
@@ -93,7 +113,8 @@ export async function GET(req: NextRequest) {
         message: n.message,
         promo_code: n.promo_code,
         claim_url: n.claim_url,
-        created_at: n.created_at
+        created_at: n.created_at,
+        expires_at: n.expires_at || null
       }))
     })
   } catch (err: any) {

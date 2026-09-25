@@ -212,7 +212,9 @@ export async function dispatchDripPush(
     title: campaign.title,
     body: campaign.body,
     url: campaign.url,
-    tag: `${campaign.tag}_${Date.now()}`
+    tag: `${campaign.tag}_${Date.now()}`,
+    ttlSeconds: 6 * 3600, // 6 hours TTL in APNs/FCM
+    expiresAt: now.getTime() + 6 * 3600 * 1000
   }
 
   // Concurrently dispatch to batches of 15

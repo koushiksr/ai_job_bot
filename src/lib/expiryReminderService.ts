@@ -376,7 +376,9 @@ export async function checkAndDispatchExpiryReminders(
         title: pushTitle,
         body: pushBody,
         url: "/pricing",
-        tag: "jobflux_plan_expiry"
+        tag: "jobflux_plan_expiry",
+        ttlSeconds: Math.min(daysLeft * 24 * 3600, 24 * 3600),
+        expiresAt: expiresAt.getTime()
       })
       pushDelivered = pushRes.delivered
     } catch (pErr) {
@@ -405,7 +407,8 @@ export async function checkAndDispatchExpiryReminders(
       message: `Your ${planName} expires on ${expiresAt.toLocaleDateString()}. Tap to renew now.`,
       claim_url: "/pricing",
       read: false,
-      created_at: now
+      created_at: now,
+      expires_at: expiresAt
     })
 
     planRemindersSent++
@@ -501,7 +504,9 @@ export async function checkAndDispatchExpiryReminders(
         title: pushTitle,
         body: pushBody,
         url: `/pricing?promo=${encodeURIComponent(promoCode)}`,
-        tag: `jobflux_offer_${promoCode}`
+        tag: `jobflux_offer_${promoCode}`,
+        ttlSeconds: Math.min(daysLeft * 24 * 3600, 24 * 3600),
+        expiresAt: expiresAt.getTime()
       })
       pushDelivered = pushRes.delivered
     } catch (pErr) {

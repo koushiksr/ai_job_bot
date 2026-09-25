@@ -28,35 +28,68 @@ self.addEventListener('push', (event) => {
     }
   }
 
-  const origin = self.location.origin
-  const title = data.title || 'JobFlux AI'
+  const now = Date.now()
 
-  // Apple APNs & Google FCM require absolute URLs for icons
-  const iconUrl = data.icon 
-    ? (data.icon.startsWith('http') ? data.icon : new URL(data.icon, origin).href)
-    : new URL('/images/icon.png', origin).href
-
-  const badgeUrl = data.badge
-    ? (data.badge.startsWith('http') ? data.badge : new URL(data.badge, origin).href)
-    : new URL('/images/icon.png', origin).href
-
-  const imageUrl = data.image && data.image.startsWith('http') ? data.image : undefined
-
-  const options = {
-    body: data.body || data.message || 'You have a new priority alert from JobFlux AI.',
-    icon: iconUrl,
-    badge: badgeUrl,
-    ...(imageUrl ? { image: imageUrl } : {}),
-    vibrate: [200, 100, 200, 100, 200],
-    tag: data.tag || `jobflux_${Date.now()}`,
-    renotify: true,
-    data: {
-      url: data.url || data.claim_url || '/dashboard',
-      timestamp: Date.now()
-    }
+  // 1. Strict Expiry Enforcement: If notification has expired, drop it silently
+  if (data.expires_at && typeof data.expires_at === 'number' && now > data.expires_at) {
+    console.log('[SW] Push notification expired at', new Date(data.expires_at).toISOString(), 'Dropping.')
+    return
   }
 
-  event.waitUntil(self.registration.showNotification(title, options))
+  // 2. Fallback Stale Guard: Drop notifications created more than 6 hours ago
+  if (data.created_at && typeof data.created_at === 'number' && (now - data.created_at) > 6 * 60 * 60 * 1000) {
+    console.log('[SW] Push notification created >6h ago. Dropping stale notification.')
+    return
+  }
+
+  // 3. User Availability Check: If candidate is currently active & looking at JobFlux AI,
+  // notify the active tab directly and suppress intrusive OS desktop notification center alerts
+  const showPromise = self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+    const isUserActive = clientList.some(client => client.focused || client.visibilityState === 'visible')
+    if (isUserActive) {
+      clientList.forEach(client => {
+        client.postMessage({
+          type: 'JOBFLUX_ACTIVE_NOTIFICATION',
+          data: data
+        })
+      })
+      // Suppress OS notification banner since user is already available in the app
+      return
+    }
+
+    const origin = self.location.origin
+    const title = data.title || 'JobFlux AI'
+
+    // Apple APNs & Google FCM require absolute URLs for icons
+    const iconUrl = data.icon 
+      ? (data.icon.startsWith('http') ? data.icon : new URL(data.icon, origin).href)
+      : new URL('/images/icon.png', origin).href
+
+    const badgeUrl = data.badge
+      ? (data.badge.startsWith('http') ? data.badge : new URL(data.badge, origin).href)
+      : new URL('/images/icon.png', origin).href
+
+    const imageUrl = data.image && data.image.startsWith('http') ? data.image : undefined
+
+    const options = {
+      body: data.body || data.message || 'You have a new priority alert from JobFlux AI.',
+      icon: iconUrl,
+      badge: badgeUrl,
+      ...(imageUrl ? { image: imageUrl } : {}),
+      vibrate: [200, 100, 200, 100, 200],
+      tag: data.tag || `jobflux_${Date.now()}`,
+      renotify: true,
+      data: {
+        url: data.url || data.claim_url || '/dashboard',
+        timestamp: now,
+        expires_at: data.expires_at || null
+      }
+    }
+
+    return self.registration.showNotification(title, options)
+  })
+
+  event.waitUntil(showPromise)
 })
 
 // Handle user clicking on the notification banner

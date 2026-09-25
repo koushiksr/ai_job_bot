@@ -18,6 +18,8 @@ export interface WebPushPayload {
   badge?: string
   image?: string
   tag?: string
+  ttlSeconds?: number
+  expiresAt?: number
   data?: Record<string, any>
 }
 
@@ -53,7 +55,11 @@ export async function sendPushToSubscription(
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://jobfluxai.vercel.app'
     const fullUrl = payload.url?.startsWith('http') ? payload.url : `${baseUrl}${payload.url || '/dashboard'}`
     const fullIcon = payload.icon?.startsWith('http') ? payload.icon : `${baseUrl}/images/icon.png`
-    const fullBadge = payload.badge?.startsWith('http') ? payload.badge : `${baseUrl}/images/icon.png`
+    const now = Date.now()
+    // Strict cloud retention cap: default 4 hours (14,400s). Never linger for days in APNs/FCM!
+    const defaultTtlSeconds = 4 * 60 * 60
+    const ttl = Math.max(60, Math.min(payload.ttlSeconds || defaultTtlSeconds, 24 * 60 * 60))
+    const expiresAt = payload.expiresAt || (now + ttl * 1000)
 
     const jsonPayload = JSON.stringify({
       title: payload.title,
@@ -62,7 +68,9 @@ export async function sendPushToSubscription(
       icon: fullIcon,
       badge: fullBadge,
       ...(payload.image?.startsWith('http') ? { image: payload.image } : {}),
-      tag: payload.tag || `jobflux_${Date.now()}`
+      tag: payload.tag || `jobflux_${Date.now()}`,
+      created_at: now,
+      expires_at: expiresAt
     })
 
     // Sanitize topic for RFC 8030 standard (alphanumeric, -, _ max 32 chars)
@@ -74,8 +82,8 @@ export async function sendPushToSubscription(
       subscription as any,
       jsonPayload,
       {
-        TTL: 60 * 60 * 24 * 3, // 72 hours cloud retention in Apple APNs & Google FCM
-        urgency: 'high',       // Wake up sleeping mobile/desktop devices immediately
+        TTL: ttl,        // Expire in APNs/FCM after TTL so offline devices don't get flooded later
+        urgency: 'high', // Wake up sleeping mobile/desktop devices immediately
         topic: topicHeader || undefined
       }
     )

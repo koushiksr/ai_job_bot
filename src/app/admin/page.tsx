@@ -456,7 +456,8 @@ export default function AdminDashboard() {
           delaySeconds: 5,
           title: 'Desktop Alert Delivered',
           message: 'JobFlux background Web Push arrived on your desktop with this tab closed/minimized!',
-          claimUrl: '/dashboard'
+          claimUrl: '/dashboard',
+          validityHours: 1
         })
       })
 
@@ -799,7 +800,8 @@ export default function AdminDashboard() {
           targetEmail,
           title: customPushTitle.trim() || 'JobFlux AI Priority Alert',
           message: customPushMessage.trim() || 'You have a new update in your JobFlux AI Cockpit.',
-          claimUrl: customPushUrl.trim() || '/dashboard'
+          claimUrl: customPushUrl.trim() || '/dashboard',
+          validityHours: 4
         })
       })
 

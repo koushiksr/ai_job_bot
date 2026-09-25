@@ -184,6 +184,7 @@ export async function POST(req: NextRequest) {
         const triggerName = auth.email || 'your org admin'
         const startTitle = `Hi ${memberName}, an on-demand sweep just started`
         const startMsg = `${triggerName} started a live application sweep for you · queued #${queuePosition} · watch your dashboard for progress.`
+        const sweepExpiry = new Date(now.getTime() + 4 * 3600 * 1000)
         await db.collection('user_notifications').insertOne({
           user_email: (targetProfile.email || '').toLowerCase(),
           email: (targetProfile.email || '').toLowerCase(),
@@ -195,12 +196,15 @@ export async function POST(req: NextRequest) {
           task_id: taskId,
           triggered_by: auth.email || '',
           read: false,
-          created_at: now
+          created_at: now,
+          expires_at: sweepExpiry
         })
         await sendPushToUser((targetProfile.email || '').toLowerCase(), {
           title: startTitle,
           body: startMsg,
-          url: '/dashboard'
+          url: '/dashboard',
+          ttlSeconds: 4 * 3600,
+          expiresAt: sweepExpiry.getTime()
         })
       } catch {}
     }

@@ -68,6 +68,8 @@ export async function POST(req: NextRequest) {
     const message = (body.message || '').trim() || 'You have a new update in your JobFlux AI Cockpit.'
     const claimUrl = (body.claimUrl || '').trim() || '/dashboard'
     const delaySeconds = parseInt(body.delaySeconds || body.delay_seconds || '0', 10)
+    // Dynamic validity duration: default 6 hours (min 1h, max 24h)
+    const validityHours = Math.max(1, Math.min(parseInt(body.validityHours || body.validity_hours || '6', 10), 24))
 
     // Optional delay for closed-tab / minimized browser testing
     if (delaySeconds > 0) {
@@ -75,6 +77,8 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date()
+    const expiresAt = new Date(now.getTime() + validityHours * 3600 * 1000)
+    const ttlSeconds = validityHours * 3600
 
     if (targetType === 'all' || targetEmail === 'all') {
       // Query all candidate users
@@ -99,18 +103,22 @@ export async function POST(req: NextRequest) {
         message,
         claim_url: claimUrl,
         read: false,
-        created_at: now
+        created_at: now,
+        expires_at: expiresAt,
+        validity_hours: validityHours
       }))
 
       if (notifDocs.length > 0) {
         await db.collection('user_notifications').insertMany(notifDocs)
       }
 
-      // 1. Broadcast Web Push to all registered device subscriptions (delivers even when tab is closed)
+      // 1. Broadcast Web Push with strict 6h TTL (drops in FCM/APNs if device was offline >6h)
       const pushStats = await broadcastPush({
         title,
         body: message,
-        url: claimUrl
+        url: claimUrl,
+        ttlSeconds,
+        expiresAt: expiresAt.getTime()
       })
 
       await db.collection('admin_push_logs').insertOne({
@@ -124,6 +132,8 @@ export async function POST(req: NextRequest) {
         web_push_failed: pushStats.failed,
         dispatched_by: adminEmail || userId || 'admin',
         dispatched_at: now,
+        expires_at: expiresAt,
+        validity_hours: validityHours,
         status: 'delivered'
       })
 
@@ -152,14 +162,18 @@ export async function POST(req: NextRequest) {
           message,
           claim_url: claimUrl,
           read: false,
-          created_at: now
+          created_at: now,
+          expires_at: expiresAt,
+          validity_hours: validityHours
         })
 
         const pushStats = await sendPushToUser(email, {
           title,
           body: message,
           url: claimUrl,
-          tag: `jobflux_alert_${Date.now()}`
+          tag: `jobflux_alert_${Date.now()}`,
+          ttlSeconds,
+          expiresAt: expiresAt.getTime()
         })
         totalDelivered += pushStats.delivered
       }
@@ -174,6 +188,8 @@ export async function POST(req: NextRequest) {
         web_push_delivered: totalDelivered,
         dispatched_by: adminEmail || userId || 'admin',
         dispatched_at: now,
+        expires_at: expiresAt,
+        validity_hours: validityHours,
         status: 'delivered'
       })
 
@@ -196,14 +212,18 @@ export async function POST(req: NextRequest) {
         message,
         claim_url: claimUrl,
         read: false,
-        created_at: now
+        created_at: now,
+        expires_at: expiresAt,
+        validity_hours: validityHours
       })
 
       // 2. Dispatch real Web Push to candidate's registered background devices
       const pushStats = await sendPushToUser(targetEmail, {
         title,
         body: message,
-        url: claimUrl
+        url: claimUrl,
+        ttlSeconds,
+        expiresAt: expiresAt.getTime()
       })
 
       await db.collection('admin_push_logs').insertOne({
@@ -216,6 +236,8 @@ export async function POST(req: NextRequest) {
         web_push_delivered: pushStats.delivered,
         dispatched_by: adminEmail || userId || 'admin',
         dispatched_at: now,
+        expires_at: expiresAt,
+        validity_hours: validityHours,
         status: 'delivered'
       })
 

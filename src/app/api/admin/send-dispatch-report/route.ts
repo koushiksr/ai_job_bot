@@ -360,12 +360,20 @@ async function dispatchReportForCandidate(
       if (channel === 'both' || channel === 'push') {
         const emptyPushTitle = `Hi ${candidateName}, no new matches today`
         const emptyPushMsg = `Nothing new matched your filters today · ${totalAppliedCount} total active. We'll apply automatically when matches appear.`
+        const reportExpiry = new Date(Date.now() + 12 * 3600 * 1000)
         try {
-          await sendPushToUser(resolvedEmail, { title: emptyPushTitle, body: emptyPushMsg, url: '/dashboard' })
+          await sendPushToUser(resolvedEmail, {
+            title: emptyPushTitle,
+            body: emptyPushMsg,
+            url: '/dashboard',
+            ttlSeconds: 12 * 3600,
+            expiresAt: reportExpiry.getTime()
+          })
           await db.collection('user_notifications').insertOne({
             user_email: resolvedEmail, email: resolvedEmail, user_id: resolvedUserId || resolvedEmail,
             title: emptyPushTitle, message: emptyPushMsg, url: '/dashboard',
-            type: 'final_empty', read: false, created_at: new Date()
+            type: 'final_empty', read: false, created_at: new Date(),
+            expires_at: reportExpiry
           })
         } catch {}
       }
@@ -567,10 +575,13 @@ async function dispatchReportForCandidate(
     const pushUrl = '/dashboard'
 
     try {
+      const reportExpiry = new Date(Date.now() + 12 * 3600 * 1000)
       pushResult = await sendPushToUser(resolvedEmail, {
         title: pushTitle,
         body: pushMessage,
         url: pushUrl,
+        ttlSeconds: 12 * 3600,
+        expiresAt: reportExpiry.getTime(),
         ...(richImage ? { image: richImage } : {})
       })
 
@@ -583,7 +594,8 @@ async function dispatchReportForCandidate(
         url: pushUrl,
         type: 'dispatch_report',
         read: false,
-        created_at: new Date()
+        created_at: new Date(),
+        expires_at: reportExpiry
       })
     } catch (pushErr: any) {
       pushResult = { error: pushErr.message, delivered: 0 }

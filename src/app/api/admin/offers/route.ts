@@ -336,7 +336,9 @@ export async function POST(req: NextRequest) {
         promo_code: cleanPromoCode,
         claim_url: claimUrl,
         read: false,
-        created_at: new Date()
+        created_at: new Date(),
+        expires_at: expiresAt,
+        validity_hours: hours
       })
 
       // 4. Dispatch background Web Push (reaches candidate OS outside browser via Google FCM / Apple APNs)
@@ -345,7 +347,9 @@ export async function POST(req: NextRequest) {
           title: `🎁 Exclusive Offer: ${discountBadge}!`,
           body: `${offerTitle} (${originalPrice} → ${discountedPrice}). Code: ${cleanPromoCode}. Expires in ${hours}h.`,
           url: claimUrl,
-          tag: `jobflux_offer_${cleanPromoCode}`
+          tag: `jobflux_offer_${cleanPromoCode}`,
+          ttlSeconds: Math.min(hours * 3600, 24 * 3600),
+          expiresAt: expiresAt.getTime()
         })
         if (pushResult && pushResult.delivered > 0) {
           totalPushDelivered += pushResult.delivered
