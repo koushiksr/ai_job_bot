@@ -11,8 +11,7 @@ import {
   LogOut,
   Crown,
   ChevronRight,
-  ExternalLink,
-  Gift
+  ExternalLink
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
@@ -261,13 +260,6 @@ export default function CandidateProfilePage() {
 
         {/* Quick Section Anchor Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-          <a
-            href="#referrals"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 light:text-emerald-700 font-semibold hover:bg-emerald-500/20 transition-all shrink-0 shadow-sm"
-          >
-            <Gift className="w-3.5 h-3.5 text-emerald-400" />
-            <span>🎁 Refer & Earn ₹150 (Bank / UPI)</span>
-          </a>
           <a
             href="#editor"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 font-medium hover:border-zinc-700 transition-all shrink-0"
