@@ -64,6 +64,14 @@ interface Member {
   sweep_blockers?: string[]
 }
 
+// Legacy org SKUs (org_pro/org_pro_3m/org_starter) grandfather to current plans for display.
+const normalizeOrgPlanId = (id?: string | null): string => {
+  if (id === 'org_pro_3m') return 'elite'
+  if (id === 'org_pro' || id === 'pro') return 'pro'
+  if (id === 'org_starter' || id === 'starter') return 'starter'
+  return id || 'none'
+}
+
 interface OrgInfo {
   org_id: string
   name: string
@@ -428,9 +436,11 @@ export default function EnterpriseAdminPortal() {
 
             const verifyData = await verifyRes.json()
             if (verifyRes.ok && verifyData.verified) {
+              const confirmedPlan = ORG_PLANS.find(p => p.id === planId)
+              const confirmedTitle = confirmedPlan ? `${confirmedPlan.name} (${confirmedPlan.price})` : planId
               setFeedback({
                 type: 'success',
-                text: `Payment confirmed! ${planDisplayNames[planId]} successfully activated for ${member.name || member.email}.`
+                text: `Payment confirmed! ${confirmedTitle} successfully activated for ${member.name || member.email}.`
               })
               const uid = localStorage.getItem('user_id') || ''
               const em = localStorage.getItem('user_email') || ''
@@ -1502,9 +1512,10 @@ export default function EnterpriseAdminPortal() {
                                     </div>
 
                                     {ORG_PLANS.map(plan => {
-                                      const memberCurrentPlan = ORG_PLANS.find(p => p.id === member.plan)
+                                      const normPlan = normalizeOrgPlanId(member.plan)
+                                      const memberCurrentPlan = ORG_PLANS.find(p => p.id === normPlan)
                                       const memberCurrentAmount = member.plan_active && memberCurrentPlan ? memberCurrentPlan.amountPaise : 0
-                                      const isActive = !!(member.plan_active && member.plan === plan.id)
+                                      const isActive = !!(member.plan_active && normPlan === plan.id)
                                       const isLowerTier = !!(member.plan_active && memberCurrentAmount > plan.amountPaise)
                                       const isDisabled = isActive || isLowerTier
 
@@ -1531,7 +1542,7 @@ export default function EnterpriseAdminPortal() {
                                               )}
                                             </div>
                                             <div className="text-[10px] text-zinc-500 font-mono">
-                                              {plan.dailyLimit}/day · {plan.id === 'org_pro_3m' ? '90 days' : '30 days'}
+                                              {plan.dailyLimit ?? 55}/day · {plan.durationDays} days
                                               {isLowerTier && ' · (Included)'}
                                             </div>
                                           </div>
@@ -1543,6 +1554,8 @@ export default function EnterpriseAdminPortal() {
                                     })}
                                   </div>
 
+                                  <div className="px-2.5 py-1 text-[10px] font-mono text-zinc-500 light:text-zinc-600">Free Trial (3 days) · individuals only, not for org members</div>
+
                                   {/* Direct assign — SUPER ADMIN ONLY */}
                                   {isSuperAdmin && (
                                   <div className="pt-1.5 space-y-0.5 border-t border-zinc-800/80 light:border-zinc-200 mt-1">
@@ -1552,7 +1565,7 @@ export default function EnterpriseAdminPortal() {
                                     </div>
                                     <button
                                       type="button"
-                                      onClick={() => handleAssignPlan(member, 'org_pro')}
+                                      onClick={() => handleAssignPlan(member, 'pro')}
                                       className="w-full text-left px-2.5 py-1 rounded hover:bg-cyan-950/40 light:hover:bg-cyan-50 text-[11px] text-cyan-300 light:text-cyan-700 font-medium transition-colors cursor-pointer flex items-center justify-between"
                                     >
                                       <span>Grant Pro Privilege</span>
@@ -1560,7 +1573,7 @@ export default function EnterpriseAdminPortal() {
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => handleAssignPlan(member, 'org_pro_3m')}
+                                      onClick={() => handleAssignPlan(member, 'elite')}
                                       className="w-full text-left px-2.5 py-1 rounded hover:bg-zinc-900 light:hover:bg-zinc-100 text-[11px] text-zinc-300 light:text-zinc-700 hover:text-white transition-colors cursor-pointer flex items-center justify-between"
                                     >
                                       <span>Grant Pro · 3M Privilege</span>
@@ -1684,9 +1697,10 @@ export default function EnterpriseAdminPortal() {
                       <div className="rounded-xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 p-2 space-y-1">
                         <div className="px-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500">Pay per member</div>
                         {ORG_PLANS.map(plan => {
-                          const memberCurrentPlan = ORG_PLANS.find(p => p.id === member.plan)
+                          const normPlan = normalizeOrgPlanId(member.plan)
+                          const memberCurrentPlan = ORG_PLANS.find(p => p.id === normPlan)
                           const memberCurrentAmount = member.plan_active && memberCurrentPlan ? memberCurrentPlan.amountPaise : 0
-                          const isActive = !!(member.plan_active && member.plan === plan.id)
+                          const isActive = !!(member.plan_active && normPlan === plan.id)
                           const isLowerTier = !!(member.plan_active && memberCurrentAmount > plan.amountPaise)
                           const isDisabled = isActive || isLowerTier
 
@@ -1712,6 +1726,7 @@ export default function EnterpriseAdminPortal() {
                             </button>
                           )
                         })}
+                        <div className="px-2 py-1 text-[10px] font-mono text-zinc-500">Free Trial (3 days) · individuals only, not for org members</div>
                         {isSuperAdmin && (
                           <div className="pt-1.5 border-t border-zinc-800/80 light:border-zinc-200 space-y-1">
                             <div className="px-2 text-[10px] font-mono uppercase tracking-wider text-amber-400 light:text-amber-600 font-semibold flex items-center justify-between">
@@ -1719,8 +1734,8 @@ export default function EnterpriseAdminPortal() {
                               <span className="text-[9px] text-zinc-500">Free Grant</span>
                             </div>
                             {([
-                              { id: 'org_pro' as const, label: 'Grant Pro Privilege', duration: '30 days' },
-                              { id: 'org_pro_3m' as const, label: 'Grant Pro · 3M Privilege', duration: '90 days' }
+                              { id: 'pro' as const, label: 'Grant Pro Privilege', duration: '30 days' },
+                              { id: 'elite' as const, label: 'Grant Pro · 3M Privilege', duration: '90 days' }
                             ]).map(opt => (
                               <button
                                 key={opt.id}

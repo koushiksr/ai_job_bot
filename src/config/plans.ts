@@ -30,6 +30,8 @@ export interface PlanDefinition {
   cta: string
   highlight?: boolean
   popular?: boolean
+  /** Daily application cap shown in admin menus (enforcement lives server-side). */
+  dailyLimit?: number
 }
 
 export interface PromoDefinition {
@@ -414,21 +416,24 @@ export const MASTER_PROMOS: PromoDefinition[] = [
 export const PLANS = MASTER_PLANS
 
 /**
- * Organization-member exclusive plans (NOT shown on public pricing).
- * Sold only via the member dashboard upgrade banner to verified org members.
+ * Plans purchasable by organization members (same public pricing as
+ * individuals — Pro ₹499 / Pro 3-Month ₹1299). Sold via the member upgrade
+ * banner, the org-admin 3-dot menu and Super Admin assignment.
+ * There is deliberately NO trial here: free trial is individuals-only.
  */
 export const ORG_PLANS: PlanDefinition[] = [
   {
-    id: 'org_pro',
-    name: 'Org Pro (1 Month)',
-    subtitle: 'Maximum speed, higher volume, priority queue & institutional placement tracking.',
+    id: 'pro',
+    name: 'Pro (1 Month)',
+    subtitle: 'Full-speed daily auto-apply with on-demand sweeps, linked to your organization.',
     badge: 'POPULAR',
-    price: PRICING.orgPro1m.display,
-    originalPrice: PRICING.orgPro1m.originalDisplay,
-    amountPaise: PRICING.orgPro1m.amountPaise,
+    price: PRICING.pro1m.display,
+    originalPrice: PRICING.pro1m.originalDisplay,
+    amountPaise: PRICING.pro1m.amountPaise,
     period: '/ month',
     durationDays: 30,
-    featuresIntro: 'Everything in 1-Month Pro, with enhanced 15 sweeps/week and institutional sync...',
+    dailyLimit: 55,
+    featuresIntro: 'Everything in 1-Month Pro, staying linked to your organization & admin...',
     features: [
       { text: '30 Days of Continuous Daily Auto-Apply' },
       { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
@@ -437,28 +442,28 @@ export const ORG_PLANS: PlanDefinition[] = [
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
       { text: 'AI Tailored Responses for Recruiter Screening' },
       { text: 'Institutional Placement Coordinator & Admin Progress Sync' },
-      { text: 'Multi-Portal Placement Audit & Telemetry Report' },
       { text: 'Stays linked to your organization & admin' }
     ],
-    cta: 'Get Org Pro',
+    cta: 'Get Pro',
     highlight: true,
     popular: true
   },
   {
-    id: 'org_pro_3m',
-    name: 'Org Pro (3 Months)',
-    subtitle: 'Best value 90-day comprehensive pipeline with VIP placement guarantee support.',
+    id: 'elite',
+    name: 'Pro (3 Months)',
+    subtitle: 'Best value 90-day pipeline with VIP placement guarantee support.',
     badge: 'BEST VALUE',
-    price: PRICING.orgPro3m.display,
-    originalPrice: PRICING.orgPro3m.originalDisplay,
-    amountPaise: PRICING.orgPro3m.amountPaise,
+    price: PRICING.pro3m.display,
+    originalPrice: PRICING.pro3m.originalDisplay,
+    amountPaise: PRICING.pro3m.amountPaise,
     period: '/ 3 months',
     durationDays: 90,
-    featuresIntro: 'Everything in 3-Month Pro, with 20 sweeps/week, VIP queue & placement support...',
+    dailyLimit: 55,
+    featuresIntro: 'Everything in 3-Month Pro, staying linked to your organization & admin...',
     features: [
       { text: '90 Days of Continuous Daily Auto-Apply' },
       { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
-      { text: '20 Weekly On-Demand Sweeps (Highest Allowance)' },
+      { text: '15 Weekly On-Demand Sweeps (Included for Org Members)' },
       { text: 'VIP Priority Cloud Worker Queue Slot' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
       { text: 'Dedicated Recruiter Response & Interview Match Priority' },
@@ -466,7 +471,7 @@ export const ORG_PLANS: PlanDefinition[] = [
       { text: 'Continuous Applications Until Hired' },
       { text: 'Stays linked to your organization & admin' }
     ],
-    cta: 'Get Org Pro (3 Months)',
+    cta: 'Get Pro (3 Months)',
     highlight: false
   }
 ]
@@ -483,10 +488,16 @@ export function isOrgPlanId(planId?: string | null): boolean {
 /** Weekly on-demand run allowance per plan. */
 export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMember = false): number {
   const p = (planId || '').toLowerCase()
+  if (isEnterpriseMember) {
+    // Unified pricing: paid individual tiers ride Org-Pro quota in org context.
+    if (p === 'org_pro' || p === 'org_pro_3m' || p === 'pro' || p === 'elite' || p === 'professional' || p === 'vip') return 15
+    if (p === 'enterprise') return 10 // org base
+    return 0 // starter / unpaid org members get no on-demand sweeps
+  }
   if (p === 'org_pro_3m') return 20 // Institutional 3M VIP
   if (p === 'org_pro') return 15     // Institutional 1M Pro
   if (p === 'org_starter') return 5  // Institutional Starter includes 5 on-demand sweeps
-  if (p === 'enterprise' || (isEnterpriseMember && !p.startsWith('org_pro') && p !== 'org_starter')) return 0 // Unpaid enterprise member gets 0
+  if (p === 'enterprise') return 0
   if (p === 'elite' || p === 'professional') return 15
   if (p === 'pro') return 10
   if (p === 'starter') return 5
@@ -496,18 +507,18 @@ export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMembe
 /**
  * Daily application cap per plan.
  * If an enterprise member has NOT paid, they cannot apply even one job (0 applies/day).
- * Org Starter: 35 applies/day.
- * Org Pro (1m or 3m): 55 applies/day (Platform Maximum).
+ * Paid tiers (individual or legacy org): 55 applies/day (Platform Maximum).
+ * Starter: 20 applies/day.
  */
 export function getDailyAppLimit(planId?: string | null, isEnterpriseMember = false): number {
   const p = (planId || '').toLowerCase()
   if (isEnterpriseMember) {
-    if (p === 'org_pro' || p === 'org_pro_3m' || p === 'pro' || p === 'elite' || p === 'vip') return 55
-    if (p === 'org_starter' || p === 'starter') return 35
+    if (p === 'org_pro' || p === 'org_pro_3m' || p === 'pro' || p === 'elite' || p === 'professional' || p === 'vip') return 55
+    if (p === 'org_starter' || p === 'starter') return 20
     return 0 // Unpaid org member cannot apply even one job
   }
   if (p === 'trial') return 10
-  if (p === 'starter' || p === 'org_starter') return 25
+  if (p === 'starter' || p === 'org_starter') return 20
   if (p === 'none' || p === 'no_plan' || p === 'unpaid' || !p) return 0
   return 55
 }
@@ -518,7 +529,7 @@ export function getCapUpgradeHint(planId?: string | null, isEnterpriseMember = f
   if (isEnterpriseMember && (p === 'enterprise' || p === 'none' || p === 'unpaid' || !p)) {
     return 'Payment required to apply. Subscribe to an Organization Member Plan to begin automated applications.'
   }
-  if (p === 'org_starter') return 'Org Starter allows 35/day — upgrade to Org Pro for 55/day and 15 weekly sweeps.'
+  if (p === 'org_starter') return 'Starter allows 20/day — upgrade to Pro for 55/day and 15 weekly sweeps.'
   if (p === 'trial') return 'Free trial allows 10/day — upgrade to Pro for 55/day.'
   if (p === 'starter') return 'Starter allows 25/day — upgrade to Pro for 55/day.'
   return ''

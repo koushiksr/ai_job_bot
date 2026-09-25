@@ -92,10 +92,11 @@ export async function GET(req: NextRequest) {
       const todayCount = s.last_date === todayIstStr ? (s.today || 0) : 0
 
       // Resolve effective current plan:
-      // If an organization candidate has NOT paid anything, they cannot apply even one job.
-      // Must hold an active Org Starter (₹79), Org Pro (₹99 / ₹289), or VIP access.
+      // Unified pricing: Pro (1M ₹499) / Pro (3M ₹1299). Legacy org SKUs
+      // (org_pro/org_pro_3m/org_starter) are grandfathered, never sold new.
+      // No trial for org members — trial is individuals-only.
       const rawPlan = (m.plan || 'none').toLowerCase()
-      const isPaidOrgPro = (rawPlan === 'org_pro' || rawPlan === 'org_pro_3m' || rawPlan === 'pro')
+      const isPaidOrgPro = (rawPlan === 'org_pro' || rawPlan === 'org_pro_3m' || rawPlan === 'pro' || rawPlan === 'elite' || rawPlan === 'professional')
       const isPaidOrgStarter = (rawPlan === 'org_starter' || rawPlan === 'starter')
       const exp = m.plan_expires_at ? new Date(m.plan_expires_at) : null
       const isExpired = exp ? exp <= now : false
@@ -122,8 +123,11 @@ export async function GET(req: NextRequest) {
         effExpiresAt = m.plan_expires_at
         isPlanActive = true
       } else if (isPaidOrgPro && isPlanValid) {
-        effPlan = rawPlan === 'org_pro_3m' ? 'org_pro_3m' : 'org_pro'
-        effPlanName = rawPlan === 'org_pro_3m' ? 'Org Pro · 3 Months' : 'Org Pro'
+        effPlan = (rawPlan === 'org_pro_3m' || rawPlan === 'elite' || rawPlan === 'professional') ? 'org_pro_3m' : 'org_pro'
+        effPlanName = rawPlan === 'elite' || rawPlan === 'professional' ? 'Pro (3 Months)'
+          : rawPlan === 'pro' ? 'Pro (1 Month)'
+          : rawPlan === 'org_pro_3m' ? 'Org Pro · 3 Months'
+          : 'Org Pro'
         effExpiresAt = m.plan_expires_at
         isPlanActive = true
       } else if (isPaidOrgStarter && isPlanValid) {
@@ -247,7 +251,6 @@ export async function PATCH(req: NextRequest) {
 
     if (body.plan_id) {
       const planId = body.plan_id
-      const days = planId === 'org_pro_3m' ? 90 : 30
       const now = new Date()
       if (planId === 'none' || planId === 'unpaid') {
         updateFields.plan = 'none'
@@ -260,8 +263,13 @@ export async function PATCH(req: NextRequest) {
         updateFields.free_privilege = false
         updateFields.granted_by_super_admin = false
       } else {
-        const isPro = planId.startsWith('org_pro')
-        const planLabel = planId === 'org_starter'
+        const isPro = planId.startsWith('org_pro') || planId === 'pro' || planId === 'elite' || planId === 'professional'
+        const normDays = (planId === 'org_pro_3m' || planId === 'elite' || planId === 'professional') ? 90 : 30
+        const planLabel = planId === 'elite' || planId === 'professional'
+          ? 'Pro (3 Months)'
+          : planId === 'pro'
+          ? 'Pro (1 Month)'
+          : planId === 'org_starter'
           ? 'Org Starter (Privilege)'
           : planId === 'org_pro_3m'
           ? 'Org Pro · 3M (Privilege)'
@@ -269,7 +277,7 @@ export async function PATCH(req: NextRequest) {
 
         updateFields.plan = planId
         updateFields.plan_name = planLabel
-        updateFields.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+        updateFields.plan_expires_at = new Date(now.getTime() + normDays * 24 * 60 * 60 * 1000)
         updateFields.plan_activated_at = now
         updateFields.daily_application_limit = isPro ? 55 : 20
         updateFields.enabled_for_daily_run = true

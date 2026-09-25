@@ -1504,15 +1504,15 @@ export default function CandidatesTab({
                           >
                             {isOrgMemberUser(u) ? (
                               <>
-                                <optgroup label="🏢 Organization Tier Plans">
+                                <optgroup label="🏢 Organization Plans (unified pricing)">
                                   <option value="none">⚠️ Unpaid / Payment Required (0 applies)</option>
-                                  <option value="org_starter">🏢 Org Starter (30d · ₹79 · 20/d · No On-Demand)</option>
-                                  <option value="org_pro">⚡ Org Pro (30d · ₹99 · 55/d · 15 Sweeps/wk)</option>
-                                  <option value="org_pro_3m">🚀 Org Pro 3-Month (90d · ₹289 · 55/d · 15 Sweeps/wk)</option>
+                                  <option value="pro">⚡ Pro (30d · ₹499 · 55/d · 15 Sweeps/wk)</option>
+                                  <option value="elite">🚀 Pro 3-Month (90d · ₹1,299 · 55/d · 15 Sweeps/wk)</option>
                                 </optgroup>
-                                <optgroup label="Standard Paid Individual Plans">
-                                  <option value="pro">Pro (30d - ₹499 · 55/d)</option>
-                                  <option value="elite">Pro 3 Months (90d - ₹1,299 · 55/d)</option>
+                                <optgroup label="Legacy Org SKUs (grandfathered)">
+                                  <option value="org_starter">🏢 Org Starter (legacy)</option>
+                                  <option value="org_pro">⚡ Org Pro (legacy)</option>
+                                  <option value="org_pro_3m">🚀 Org Pro 3-Month (legacy)</option>
                                 </optgroup>
                               </>
                             ) : (
@@ -1524,11 +1524,10 @@ export default function CandidatesTab({
                                   <option value="pro">Pro (30d - ₹499 · 55/d)</option>
                                   <option value="elite">Pro 3 Months (90d - ₹1,299 · 55/d)</option>
                                 </optgroup>
-                                <optgroup label="🏢 Assign to Organization Tier">
+                                <optgroup label="🏢 Assign to Organization">
                                   <option value="none">⚠️ Org Unpaid (Payment Required - 0/d)</option>
-                                  <option value="org_starter">🏢 Org Starter (30d · ₹79 · 20/d)</option>
-                                  <option value="org_pro">⚡ Org Pro Member (30d · ₹99 · 55/d)</option>
-                                  <option value="org_pro_3m">🚀 Org Pro 3-Month (90d · ₹289 · 55/d)</option>
+                                  <option value="pro">⚡ Pro Member (30d · ₹499 · 55/d)</option>
+                                  <option value="elite">🚀 Pro 3-Month Member (90d · ₹1,299 · 55/d)</option>
                                 </optgroup>
                               </>
                             )}

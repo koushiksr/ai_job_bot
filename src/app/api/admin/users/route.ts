@@ -486,11 +486,9 @@ export async function PATCH(req: NextRequest) {
 
       let targetPlan = plan
       if (isOrgUser) {
-        if (targetPlan === 'pro') {
-          targetPlan = 'org_pro'
-        } else if (targetPlan === 'starter') {
-          targetPlan = 'org_starter'
-        } else if (targetPlan === 'trial') {
+        // Unified pricing: store individual SKUs as-is (pro/elite/starter).
+        // Only trial is rewritten — free trial is individuals-only, never org.
+        if (targetPlan === 'trial') {
           targetPlan = 'none'
         }
       }
@@ -509,7 +507,7 @@ export async function PATCH(req: NextRequest) {
         const days = extend_days || 90
         updates.plan_name = 'JobFlux PROFESSIONAL'
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
-        if (updates.daily_application_limit === undefined) updates.daily_application_limit = 150
+        if (updates.daily_application_limit === undefined) updates.daily_application_limit = isOrgUser ? 55 : 150
       } else if (targetPlan === 'org_pro_3m') {
         const days = extend_days || 90
         updates.plan = 'org_pro_3m'
@@ -553,7 +551,9 @@ export async function PATCH(req: NextRequest) {
         const days = extend_days || 30
         updates.plan_name = targetPlan === 'pro' ? 'JobFlux PRO' : 'JobFlux STARTER'
         updates.plan_expires_at = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
-        if (updates.daily_application_limit === undefined) updates.daily_application_limit = targetPlan === 'pro' ? 50 : 20
+        if (updates.daily_application_limit === undefined) {
+          updates.daily_application_limit = targetPlan === 'pro' ? 55 : 20
+        }
       } else if (targetPlan === 'trial') {
         updates.plan_name = 'JobFlux 3-Day Free Access'
         updates.trial_started_at = now
