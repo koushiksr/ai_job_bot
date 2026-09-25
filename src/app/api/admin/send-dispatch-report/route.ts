@@ -481,14 +481,27 @@ async function dispatchReportForCandidate(
 
   // 8. Dispatch Push Notification & In-App Notification (real numbers only)
   if (channel === 'both' || channel === 'push') {
-    const companySummary = topCompanies.slice(0, 2).map(c => c.name).join(', ')
+    const companyNames = topCompanies.map(c => c.name).filter(Boolean)
+    const companySummary = companyNames.slice(0, 2).join(' · ')
+    const extraCount = todayApplied - Math.min(todayApplied, 2)
     const pushTitle = todayApplied > 0
-      ? `🚀 ${todayApplied} Jobs Applied Today by JobFlux AI`
-      : `✨ Daily Recruiter Sweep Complete`
+      ? `Hi ${candidateName}, ${todayApplied} job${todayApplied === 1 ? '' : 's'} applied today`
+      : `Hi ${candidateName}, today's sweep is complete`
 
     const pushMessage = todayApplied > 0 && companySummary
-      ? `Latest: ${companySummary}${todayApplied > 2 ? ` +${todayApplied - 2} more today` : ' today'}.`
-      : `All active vacancies up to date (${totalAppliedCount} total applications).`
+      ? `${companySummary}${extraCount > 0 ? ` +${extraCount} more` : ''} · ${totalAppliedCount} total`
+      : `All active vacancies up to date · ${totalAppliedCount} total applications.`
+
+    // Rich image: top employer's logo via favicon service (brand icon stays
+    // as the notification icon; this renders as the large card picture).
+    let richImage = ''
+    try {
+      const withUrl = topCompanies.find(c => c.url && /^https?:\/\//i.test(c.url))
+      if (withUrl) {
+        const host = new URL(withUrl.url).hostname
+        if (host) richImage = `https://www.google.com/s2/favicons?domain=${host}&sz=128`
+      }
+    } catch {}
 
     const pushUrl = '/dashboard'
 
@@ -496,7 +509,8 @@ async function dispatchReportForCandidate(
       pushResult = await sendPushToUser(resolvedEmail, {
         title: pushTitle,
         body: pushMessage,
-        url: pushUrl
+        url: pushUrl,
+        ...(richImage ? { image: richImage } : {})
       })
 
       await db.collection('user_notifications').insertOne({

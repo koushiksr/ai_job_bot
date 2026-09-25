@@ -23,13 +23,13 @@ self.addEventListener('push', (event) => {
     }
   } catch (e) {
     data = {
-      title: '⚡ JobFlux AI Radar Alert',
+      title: 'JobFlux AI',
       body: event.data ? event.data.text() : 'You have a new update in your JobFlux AI Cockpit.'
     }
   }
 
   const origin = self.location.origin
-  const title = data.title || '⚡ JobFlux AI Radar Alert'
+  const title = data.title || 'JobFlux AI'
 
   // Apple APNs & Google FCM require absolute URLs for icons
   const iconUrl = data.icon 
@@ -40,10 +40,13 @@ self.addEventListener('push', (event) => {
     ? (data.badge.startsWith('http') ? data.badge : new URL(data.badge, origin).href)
     : new URL('/images/icon.png', origin).href
 
+  const imageUrl = data.image && data.image.startsWith('http') ? data.image : undefined
+
   const options = {
     body: data.body || data.message || 'You have a new priority alert from JobFlux AI.',
     icon: iconUrl,
     badge: badgeUrl,
+    ...(imageUrl ? { image: imageUrl } : {}),
     vibrate: [200, 100, 200, 100, 200],
     tag: data.tag || `jobflux_${Date.now()}`,
     renotify: true,

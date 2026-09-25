@@ -636,10 +636,10 @@ export function generateJobDispatchReportHtml({
     : (topCompanies.length > 0 ? 'Daily Recruiter Sweep Synchronized' : 'Autonomous Recruiter Sweep Queued')
 
   const emailOverview = appliedCount > 0
-    ? `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's scheduled recruiter sweep. Here is your individual application briefing:`
+    ? `Hi <strong class="em-title" style="color:#09090b;">${candidateName}</strong>, your autonomous agent completed today's scheduled recruiter sweep. Here is your individual application briefing:`
     : (topCompanies.length > 0
-        ? `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your autonomous agent completed today's recruiter sweep. All active matching vacancies are up-to-date (0 new applications required in this cycle; ${totalApplied} total applications active). Here are your recent verified dispatches:`
-        : `Hi <strong style="color:#f4f4f5;">${candidateName}</strong>, your candidate profile and Harvard-standard ATS resume are synchronized. Your next scheduled autonomous recruiter sweep will run at 06:00 AM IST.`
+        ? `Hi <strong class="em-title" style="color:#09090b;">${candidateName}</strong>, your autonomous agent completed today's recruiter sweep. All active matching vacancies are up-to-date (0 new applications required in this cycle; ${totalApplied} total applications active). Here are your recent verified dispatches:`
+        : `Hi <strong class="em-title" style="color:#09090b;">${candidateName}</strong>, your candidate profile and Harvard-standard ATS resume are synchronized. Your next scheduled autonomous recruiter sweep will run at 06:00 AM IST.`
       )
 
   const resolvedSectionTitle = sectionTitle || (appliedCount > 0
@@ -673,18 +673,41 @@ export function generateJobDispatchReportHtml({
       .mobile-logo { width: 64px !important; height: 64px !important; min-width: 64px !important; min-height: 64px !important; }
       .mobile-company-card { padding: 12px 12px !important; }
     }
+    /* Dark mode: light defaults above flip back for supporting clients
+       (Apple Mail, Outlook mobile). Gmail shows the light version. */
+    @media (prefers-color-scheme: dark) {
+      .em-bg { background-color: #0b0c0e !important; }
+      .em-container { background-color: #131416 !important; border-color: #222428 !important; }
+      .em-header { background-color: #16171a !important; border-color: #222428 !important; }
+      .em-brand { color: #ffffff !important; }
+      .em-badge { background-color: #1a1c20 !important; color: #94a3b8 !important; border-color: #2d3036 !important; }
+      .em-h1, .em-title, .em-co, .em-num { color: #ffffff !important; }
+      .em-numblue, .em-link { color: #38bdf8 !important; }
+      .em-muted, .em-slabel { color: #9ca3af !important; }
+      .em-card { background-color: #0b0c0e !important; border-color: #222428 !important; }
+      .em-box { background-color: #16171a !important; border-color: #26282d !important; }
+      .em-pill { background-color: #16171a !important; color: #38bdf8 !important; border-color: #26282d !important; }
+      .em-probox { background-color: #0b0c0e !important; }
+      .em-code { color: #94a3b8 !important; border-color: #2d3036 !important; }
+      .em-codeblue { color: #38bdf8 !important; border-color: #28303d !important; }
+      .em-activepill { background-color: #082f49 !important; color: #38bdf8 !important; border-color: #0369a1 !important; }
+      .em-track { background-color: #0b0c0e !important; }
+      .em-foot { background-color: #0e0f11 !important; border-color: #222428 !important; }
+      .em-ftitle { color: #e4e4e7 !important; }
+      .em-fmuted { color: #71717a !important; }
+    }
   </style>
 </head>
-<body style="margin:0;padding:0;background-color:#0b0c0e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e4e4e7;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#18181b;-webkit-font-smoothing:antialiased;">
   <!-- Hidden Preheader for Mobile Inbox Preview -->
-  <div style="display:none;font-size:1px;color:#0b0c0e;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+  <div style="display:none;font-size:1px;color:#f1f5f9;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
     ${previewText}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
 
-  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#0b0c0e;padding:24px 10px;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" class="em-bg" style="background-color:#f1f5f9;padding:24px 10px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" class="container-table" style="max-width:560px;background-color:#131416;border:1px solid #222428;border-radius:14px;overflow:hidden;box-shadow:0 20px 35px rgba(0,0,0,0.55);">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" class="container-table em-container" style="max-width:560px;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;box-shadow:0 20px 35px rgba(0,0,0,0.12);">
           
           <!-- Subtle Accent Line -->
           <tr>
@@ -693,7 +716,7 @@ export function generateJobDispatchReportHtml({
 
           <!-- Header Section with JobFlux AI Branding -->
           <tr>
-            <td class="mobile-header-padding" align="center" style="padding:26px 20px 18px 20px;background-color:#16171a;border-bottom:1px solid #222428;text-align:center;">
+            <td class="mobile-header-padding em-header" align="center" style="padding:26px 20px 18px 20px;background-color:#f8fafc;border-bottom:1px solid #e2e8f0;text-align:center;">
               <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin:0 auto;text-align:center;">
                 <tr>
                   <td align="center" style="padding-bottom:12px;">
@@ -704,14 +727,14 @@ export function generateJobDispatchReportHtml({
                 </tr>
                 <tr>
                   <td align="center">
-                    <div style="font-size:20px;font-weight:700;letter-spacing:-0.3px;color:#ffffff;line-height:1.2;">
-                      JobFlux <span style="color:#38bdf8;">AI</span>
+                    <div class="em-brand" style="font-size:20px;font-weight:700;letter-spacing:-0.3px;color:#09090b;line-height:1.2;">
+                      JobFlux <span style="color:#0284c7;">AI</span>
                     </div>
-                    <div style="font-size:11px;font-family:monospace;color:#9ca3af;letter-spacing:0.5px;margin-top:3px;">
+                    <div class="em-muted" style="font-size:11px;font-family:monospace;color:#64748b;letter-spacing:0.5px;margin-top:3px;">
                       Autonomous Career &amp; Recruitment Intelligence
                     </div>
                     <div style="margin-top:10px;">
-                      <span style="display:inline-block;font-size:10px;font-family:monospace;font-weight:600;background-color:#1a1c20;color:#94a3b8;border:1px solid #2d3036;padding:3px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:0.5px;">
+                      <span class="em-badge" style="display:inline-block;font-size:10px;font-family:monospace;font-weight:600;background-color:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:3px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:0.5px;">
                         ${isPaidPlan ? `👑 ${planName} Active` : 'Daily Dispatch Digest'} &bull; ${dateString}
                       </span>
                     </div>
@@ -726,10 +749,10 @@ export function generateJobDispatchReportHtml({
             <td class="mobile-padding" style="padding:28px 22px;">
               
               <!-- Greeting & Overview -->
-              <h1 class="mobile-title" style="margin:0 0 10px 0;font-size:21px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;line-height:1.25;">
+              <h1 class="mobile-title em-h1" style="margin:0 0 10px 0;font-size:21px;font-weight:700;color:#09090b;letter-spacing:-0.3px;line-height:1.25;">
                 ${emailHeadline}
               </h1>
-              <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#9ca3af;">
+              <p class="em-muted" style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#475569;">
                 ${emailOverview}
               </p>
 
@@ -737,11 +760,11 @@ export function generateJobDispatchReportHtml({
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:22px;">
                 <tr>
                   <td class="mobile-col-half" width="33%" valign="top" style="padding-right:4px;padding-bottom:10px;">
-                    <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:14px 8px;text-align:center;">
-                      <div style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+                    <div class="em-card" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 8px;text-align:center;">
+                      <div class="em-slabel" style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
                         Applied Today
                       </div>
-                      <div class="mobile-stat-number" style="font-size:28px;font-weight:700;color:#ffffff;font-family:monospace;line-height:1.1;">
+                      <div class="mobile-stat-number em-num" style="font-size:28px;font-weight:700;color:#09090b;font-family:monospace;line-height:1.1;">
                         ${appliedCount}
                       </div>
                       <div style="font-size:11px;color:#71717a;margin-top:3px;">
@@ -781,20 +804,20 @@ export function generateJobDispatchReportHtml({
 
               <!-- Verified Employers Section -->
               <div style="margin-bottom:24px;">
-                <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">
+                <div class="em-slabel" style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">
                   ${resolvedSectionTitle}
                 </div>
                 ${topCompanies.length > 0 ? `
-                <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;overflow:hidden;">
+                <div class="em-card" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
                   ${topCompanies.map((c, idx) => `
-                    <div class="mobile-company-card" style="padding:12px 16px;border-bottom:${idx === topCompanies.length - 1 ? 'none' : '1px solid #1a1b1f'};">
+                    <div class="mobile-company-card" style="padding:12px 16px;border-bottom:${idx === topCompanies.length - 1 ? 'none' : '1px solid #e2e8f0'};">
                       <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                         <tr>
                           <td valign="middle">
-                            <div style="font-size:13px;font-weight:600;color:#ffffff;margin-bottom:2px;">
-                              ${c.url ? `<a href="${c.url}" target="_blank" style="color:#ffffff;text-decoration:none;">${c.name} <span style="font-size:11px;color:#38bdf8;">&nearr;</span></a>` : c.name}
+                            <div class="em-co" style="font-size:13px;font-weight:600;color:#09090b;margin-bottom:2px;">
+                              ${c.url ? `<a href="${c.url}" target="_blank" style="color:#09090b;text-decoration:none;">${c.name} <span class="em-link" style="font-size:11px;color:#0284c7;">&nearr;</span></a>` : c.name}
                             </div>
-                            <div style="font-size:12px;color:#9ca3af;margin-bottom:2px;">
+                            <div class="em-muted" style="font-size:12px;color:#475569;margin-bottom:2px;">
                               ${c.role}
                             </div>
                             <div style="font-size:11px;color:#71717a;">
@@ -802,7 +825,7 @@ export function generateJobDispatchReportHtml({
                             </div>
                           </td>
                           <td align="right" valign="middle" style="white-space:nowrap;padding-left:10px;">
-                            <span style="display:inline-block;font-size:10px;font-weight:600;font-family:monospace;background-color:#16171a;color:${c.matchScore ? '#38bdf8' : '#94a3b8'};border:1px solid #26282d;padding:2px 8px;border-radius:4px;">
+                            <span class="em-pill" style="display:inline-block;font-size:10px;font-weight:600;font-family:monospace;background-color:#f0f9ff;color:#0284c7;border:1px solid #bae6fd;padding:2px 8px;border-radius:4px;">
                               ${c.matchScore ? `${c.matchScore}% ATS` : (c.tag || 'Dispatched')}
                             </span>
                           </td>
@@ -812,11 +835,11 @@ export function generateJobDispatchReportHtml({
                   `).join('')}
                 </div>
                 ` : `
-                <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:10px;padding:18px 16px;text-align:center;">
-                  <div style="font-size:13px;font-weight:600;color:#38bdf8;margin-bottom:4px;">
+                <div class="em-card" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:18px 16px;text-align:center;">
+                  <div class="em-numblue" style="font-size:13px;font-weight:600;color:#0284c7;margin-bottom:4px;">
                     ⏳ Daily Recruiter Sweep Queued
                   </div>
-                  <div style="font-size:12px;color:#9ca3af;line-height:1.5;max-width:440px;margin:0 auto;">
+                  <div class="em-muted" style="font-size:12px;color:#475569;line-height:1.5;max-width:440px;margin:0 auto;">
                     Your profile is queued for the automated <strong>06:00 AM IST</strong> morning run. Matched job openings will be scored against your Harvard ATS resume and dispatched automatically.
                   </div>
                 </div>
@@ -826,52 +849,52 @@ export function generateJobDispatchReportHtml({
               <!-- DYNAMIC PACKAGE STATUS & INTELLIGENT OFFER -->
               ${isPaidPlan ? `
               <!-- ALREADY HAS ACTIVE PACKAGE -->
-              <div style="background-color:#16171a;border:1px solid #26282d;border-radius:12px;padding:18px;margin-bottom:22px;">
+              <div class="em-box" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:22px;">
                 <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
                     <td valign="middle">
-                      <div style="font-size:11px;font-weight:700;font-family:monospace;color:#38bdf8;text-transform:uppercase;letter-spacing:0.5px;">
+                      <div class="em-numblue" style="font-size:11px;font-weight:700;font-family:monospace;color:#0284c7;text-transform:uppercase;letter-spacing:0.5px;">
                         👑 Active Membership Status
                       </div>
-                      <div style="font-size:16px;font-weight:700;color:#ffffff;margin:3px 0 4px 0;">
+                      <div class="em-title" style="font-size:16px;font-weight:700;color:#09090b;margin:3px 0 4px 0;">
                         ${planName}
                       </div>
-                      <div style="font-size:12px;color:#9ca3af;">
-                        Coverage active until <strong style="color:#ffffff;">${formattedExpiry}</strong> (${daysRemaining} days remaining)
+                      <div class="em-muted" style="font-size:12px;color:#475569;">
+                        Coverage active until <strong class="em-title" style="color:#09090b;">${formattedExpiry}</strong> (${daysRemaining} days remaining)
                       </div>
                     </td>
                     <td align="right" valign="middle">
-                      <span style="display:inline-block;font-size:10px;font-weight:700;font-family:monospace;color:#38bdf8;background-color:#082f49;border:1px solid #0369a1;padding:3px 8px;border-radius:4px;">
+                      <span class="em-activepill" style="display:inline-block;font-size:10px;font-weight:700;font-family:monospace;color:#0369a1;background-color:#e0f2fe;border:1px solid #7dd3fc;padding:3px 8px;border-radius:4px;">
                         ACTIVE PRO
                       </span>
                     </td>
                   </tr>
                 </table>
 
-                <div style="margin-top:14px;padding-top:12px;border-top:1px solid #222428;">
-                  <ul style="margin:0;padding-left:18px;font-size:12px;color:#9ca3af;line-height:1.8;">
-                    <li><strong style="color:#ffffff;">Daily Auto-Apply:</strong> Active (Dispatched ${appliedCount} jobs today${totalApplied > 0 ? `, ${totalApplied} total` : ''})</li>
-                    <li><strong style="color:#ffffff;">On-Demand Sweeps:</strong> Real-time radar sweeps unlocked</li>
-                    <li><strong style="color:#ffffff;">Harvard ATS Resume:</strong> PDF Print &amp; Export Unlocked</li>
-                    <li><strong style="color:#ffffff;">Recruiter Telemetry:</strong> Live recruiter application links enabled</li>
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0;">
+                  <ul class="em-muted" style="margin:0;padding-left:18px;font-size:12px;color:#475569;line-height:1.8;">
+                    <li><strong class="em-title" style="color:#09090b;">Daily Auto-Apply:</strong> Active (Dispatched ${appliedCount} jobs today${totalApplied > 0 ? `, ${totalApplied} total` : ''})</li>
+                    <li><strong class="em-title" style="color:#09090b;">On-Demand Sweeps:</strong> Real-time radar sweeps unlocked</li>
+                    <li><strong class="em-title" style="color:#09090b;">Harvard ATS Resume:</strong> PDF Print &amp; Export Unlocked</li>
+                    <li><strong class="em-title" style="color:#09090b;">Recruiter Telemetry:</strong> Live recruiter application links enabled</li>
                   </ul>
                 </div>
               </div>
               ` : `
               <!-- FREE TRIAL / EXPIRED USER -->
-              <div style="background-color:#16171a;border:1px solid #26282d;border-radius:12px;padding:18px;margin-bottom:22px;">
+              <div class="em-box" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:22px;">
                 <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                   <tr>
                     <td valign="middle">
-                      <div style="font-size:11px;font-weight:700;font-family:monospace;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;">
+                      <div class="em-slabel" style="font-size:11px;font-weight:700;font-family:monospace;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
                         Account Usage Status
                       </div>
-                      <div style="font-size:15px;font-weight:700;color:#ffffff;margin:3px 0 6px 0;">
+                      <div class="em-title" style="font-size:15px;font-weight:700;color:#09090b;margin:3px 0 6px 0;">
                         ${isStarterLevel ? 'Starter Plan · 20 applications/day' : `${freeTrialUsed} of ${freeTrialLimit} Free Applications Used`}
                       </div>
                     </td>
                     <td align="right" valign="middle">
-                      <span style="display:inline-block;font-size:11px;font-weight:700;font-family:monospace;color:#ffffff;background-color:#222428;border:1px solid #33363e;padding:3px 8px;border-radius:4px;">
+                      <span class="em-badge" style="display:inline-block;font-size:11px;font-weight:700;font-family:monospace;color:#475569;background-color:#f1f5f9;border:1px solid #cbd5e1;padding:3px 8px;border-radius:4px;">
                         ${remainingFree} REMAINING
                       </span>
                     </td>
@@ -880,56 +903,56 @@ export function generateJobDispatchReportHtml({
 
                 <!-- Clean Progress Bar (trial users only) -->
                 ${!isStarterLevel ? `
-                <div style="background-color:#0b0c0e;border-radius:9999px;height:6px;width:100%;overflow:hidden;margin:8px 0 10px 0;">
+                <div class="em-track" style="background-color:#e2e8f0;border-radius:9999px;height:6px;width:100%;overflow:hidden;margin:8px 0 10px 0;">
                   <div style="background-color:#38bdf8;width:${percentUsed}%;height:100%;border-radius:9999px;"></div>
                 </div>
 
-                <p style="margin:0 0 12px 0;font-size:12px;line-height:1.6;color:#9ca3af;">
+                <p class="em-muted" style="margin:0 0 12px 0;font-size:12px;line-height:1.6;color:#475569;">
                   <strong>Why morning continuity matters:</strong> Recruiters review inbound candidates between 9 AM and 11 AM. Once your remaining <strong>${remainingFree} free applications</strong> are completed, automatic daily sweeps pause, causing you to miss high-priority applicant windows.
                 </p>` : `
-                <p style="margin:0 0 12px 0;font-size:12px;line-height:1.6;color:#9ca3af;">
+                <p class="em-muted" style="margin:0 0 12px 0;font-size:12px;line-height:1.6;color:#475569;">
                   Your Starter plan runs scheduled morning sweeps. Upgrade to Professional for 55 applications/day plus on-demand radar sweeps.
                 </p>`}
 
                 <!-- Detailed Upgrade Options Breakdown -->
-                <div style="border-top:1px solid #222428;padding-top:12px;margin-top:10px;">
-                  <div style="font-size:11px;font-weight:700;color:#ffffff;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">
+                <div style="border-top:1px solid #e2e8f0;padding-top:12px;margin-top:10px;">
+                  <div class="em-title" style="font-size:11px;font-weight:700;color:#09090b;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">
                     Available Upgrade Tiers:
                   </div>
 
                   <!-- Tier 1: Essentials -->
-                  <div style="background-color:#0b0c0e;border:1px solid #222428;border-radius:8px;padding:12px;margin-bottom:8px;">
+                  <div class="em-card" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px;">
                     <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
                         <td valign="middle">
-                          <div style="font-size:13px;font-weight:700;color:#ffffff;">
+                          <div class="em-title" style="font-size:13px;font-weight:700;color:#09090b;">
                             JobFlux Essentials &bull; ₹99 <span style="font-size:11px;color:#71717a;text-decoration:line-through;">₹1,000</span>
                           </div>
-                          <div style="font-size:11px;color:#9ca3af;margin-top:2px;">
+                          <div class="em-muted" style="font-size:11px;color:#475569;margin-top:2px;">
                             30 Days &bull; 600+ Monthly Applications &bull; Daily Morning Automation
                           </div>
                         </td>
                         <td align="right" valign="middle">
-                          <span style="font-size:10px;font-family:monospace;color:#94a3b8;border:1px solid #2d3036;padding:2px 6px;border-radius:4px;">CODE: OFFER90</span>
+                          <span class="em-code" style="font-size:10px;font-family:monospace;color:#64748b;border:1px solid #cbd5e1;padding:2px 6px;border-radius:4px;">CODE: OFFER90</span>
                         </td>
                       </tr>
                     </table>
                   </div>
 
                   <!-- Tier 2: Professional (Recommended) -->
-                  <div style="background-color:#0b0c0e;border:1px solid #38bdf8;border-radius:8px;padding:12px;">
+                  <div class="em-card em-probox" style="background-color:#f0f9ff;border:1px solid #38bdf8;border-radius:8px;padding:12px;">
                     <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
                         <td valign="middle">
-                          <div style="font-size:13px;font-weight:700;color:#ffffff;">
+                          <div class="em-title" style="font-size:13px;font-weight:700;color:#09090b;">
                             JobFlux Professional &bull; ${discountedPrice} <span style="font-size:11px;color:#71717a;text-decoration:line-through;">${originalPrice}</span>
                           </div>
-                          <div style="font-size:11px;color:#9ca3af;margin-top:2px;">
+                          <div class="em-muted" style="font-size:11px;color:#475569;margin-top:2px;">
                             90 Days (~₹66/mo) &bull; 1,800+ Applications &bull; 5x/Wk On-Demand Sweeps &bull; <strong>Harvard ATS PDF Export</strong> &bull; Direct Job Links
                           </div>
                         </td>
                         <td align="right" valign="middle">
-                          <span style="font-size:10px;font-family:monospace;color:#38bdf8;border:1px solid #28303d;padding:2px 6px;border-radius:4px;">CODE: ${promoCode}</span>
+                          <span class="em-codeblue" style="font-size:10px;font-family:monospace;color:#0284c7;border:1px solid #7dd3fc;padding:2px 6px;border-radius:4px;">CODE: ${promoCode}</span>
                         </td>
                       </tr>
                     </table>
@@ -965,15 +988,15 @@ export function generateJobDispatchReportHtml({
 
           <!-- JobFlux AI Footer -->
           <tr>
-            <td style="padding:18px 22px;background-color:#0e0f11;border-top:1px solid #222428;text-align:center;">
-              <p style="margin:0 0 4px 0;font-size:12px;font-weight:600;color:#e4e4e7;">
+            <td class="em-foot" style="padding:18px 22px;background-color:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+              <p class="em-ftitle" style="margin:0 0 4px 0;font-size:12px;font-weight:600;color:#09090b;">
                 JobFlux AI
               </p>
               <p style="margin:0 0 6px 0;font-size:11px;color:#71717a;line-height:1.5;">
                 Autonomous Career &amp; Recruitment Intelligence &bull; Bengaluru, India
               </p>
               <p style="margin:0;font-size:11px;color:#52525b;">
-                Questions or Feedback: <a href="mailto:support@jobfluxai.com" style="color:#38bdf8;text-decoration:none;">support@jobfluxai.com</a> &bull; 
+                Questions or Feedback: <a href="mailto:support@jobfluxai.com" class="em-link" style="color:#0284c7;text-decoration:none;">support@jobfluxai.com</a> &bull; 
                 <a href="${dashboardUrl}" style="color:#71717a;text-decoration:underline;">Candidate Cockpit</a>
               </p>
             </td>

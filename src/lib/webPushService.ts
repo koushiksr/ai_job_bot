@@ -16,6 +16,7 @@ export interface WebPushPayload {
   url?: string
   icon?: string
   badge?: string
+  image?: string
   tag?: string
   data?: Record<string, any>
 }
@@ -60,6 +61,7 @@ export async function sendPushToSubscription(
       url: fullUrl,
       icon: fullIcon,
       badge: fullBadge,
+      ...(payload.image?.startsWith('http') ? { image: payload.image } : {}),
       tag: payload.tag || `jobflux_${Date.now()}`
     })
 
