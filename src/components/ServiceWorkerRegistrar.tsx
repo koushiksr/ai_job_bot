@@ -21,8 +21,8 @@ export default function ServiceWorkerRegistrar() {
 
         // 2. If user already granted notification permission, ensure device subscription is active
         if ('Notification' in window && Notification.permission === 'granted') {
-          const storedEmail = localStorage.getItem('user_email') || APP_CONFIG.supportEmail
-          const storedUid = localStorage.getItem('user_id') || undefined
+          const storedEmail = localStorage.getItem('user_email') || null
+          const storedUid = localStorage.getItem('user_id') || null
           subscribeDeviceToPush(storedEmail, storedUid).catch(() => {})
         }
       })

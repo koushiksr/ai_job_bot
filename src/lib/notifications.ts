@@ -88,8 +88,9 @@ export async function getDevicePushSubscription(): Promise<PushSubscription | nu
  * Automatically fetches the server VAPID key and registers the subscription in MongoDB.
  */
 export async function subscribeDeviceToPush(
-  userEmail: string,
-  userId?: string
+  userEmail?: string | null,
+  userId?: string | null,
+  visitorId?: string | null
 ): Promise<{ success: boolean; subscription?: PushSubscription; error?: string }> {
   if (typeof window === 'undefined') {
     return { success: false, error: 'Window not available' }
@@ -139,13 +140,15 @@ export async function subscribeDeviceToPush(
 
     // 5. Send subscription to MongoDB backend
     const subJson = subscription.toJSON()
+    const resolvedVid = visitorId || (typeof window !== 'undefined' ? localStorage.getItem('jobflux_visitor_id') || '' : '')
     const saveRes = await fetch('/api/notifications/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         subscription: subJson,
-        email: userEmail,
-        userId: userId || null
+        email: userEmail || null,
+        userId: userId || null,
+        visitorId: resolvedVid || null
       })
     })
 

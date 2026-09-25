@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
+import NotificationPermissionPrompt from "@/components/NotificationPermissionPrompt";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import VisitorTracker from "@/components/VisitorTracker";
 import TrackingScripts from "@/components/TrackingScripts";
@@ -210,6 +211,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <ServiceWorkerRegistrar />
+          <NotificationPermissionPrompt />
           <VisitorTracker />
           <TrackingScripts />
           <Analytics />

@@ -16,8 +16,10 @@ import {
   ArrowRight,
   Wallet,
   Smartphone,
-  Building
+  Building,
+  Bell
 } from 'lucide-react'
+import WebPushReengagementCard from './WebPushReengagementCard'
 
 interface PaymentsTabProps {
   paymentsList: any[]
@@ -62,7 +64,7 @@ export default function PaymentsTab({
   togglePaymentsTable,
   fetchPayments
 }: PaymentsTabProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'razorpay' | 'referrals'>('razorpay')
+  const [activeSubTab, setActiveSubTab] = useState<'razorpay' | 'referrals' | 'reengagement'>('razorpay')
   const [payoutsList, setPayoutsList] = useState<ReferralPayoutItem[]>([])
   const [loadingPayouts, setLoadingPayouts] = useState<boolean>(false)
   const [payoutStats, setPayoutStats] = useState({
@@ -133,8 +135,8 @@ export default function PaymentsTab({
   return (
     <div className="space-y-6">
       {/* Sub-Tab Navigation Switcher */}
-      <div className="flex items-center justify-between border-b border-zinc-800 light:border-zinc-200 pb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between border-b border-zinc-800 light:border-zinc-200 pb-3 flex-wrap gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setActiveSubTab('razorpay')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -162,6 +164,18 @@ export default function PaymentsTab({
                 {payoutStats.pending_count} pending
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => setActiveSubTab('reengagement')}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer relative ${
+              activeSubTab === 'reengagement'
+                ? 'bg-indigo-500/20 text-indigo-300 light:text-indigo-700 border border-indigo-500/40 shadow-sm'
+                : 'text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900'
+            }`}
+          >
+            <Bell className="w-4 h-4 text-indigo-400" />
+            <span>Web Push Drip (Unpaid &amp; Anonymous)</span>
           </button>
         </div>
 
@@ -543,6 +557,11 @@ export default function PaymentsTab({
             </div>
           </div>
         </div>
+      )}
+
+      {/* WEB PUSH DRIP RE-ENGAGEMENT VIEW */}
+      {activeSubTab === 'reengagement' && (
+        <WebPushReengagementCard />
       )}
 
       {/* Disbursal Confirmation Modal */}

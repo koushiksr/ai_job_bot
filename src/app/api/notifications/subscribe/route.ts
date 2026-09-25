@@ -51,6 +51,8 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanEmail = (email || '').toLowerCase().trim()
+    const visitorId = (body.visitorId || body.visitor_id || '').trim() || null
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('x-real-ip') || ''
     const now = new Date()
 
     // Upsert subscription into MongoDB push_subscriptions collection
@@ -63,13 +65,17 @@ export async function POST(req: NextRequest) {
             p256dh: subscription.keys.p256dh,
             auth: subscription.keys.auth
           },
-          email: cleanEmail,
+          email: cleanEmail || null,
           user_id: userId || null,
+          visitor_id: visitorId,
+          ip: ip,
           user_agent: req.headers.get('user-agent') || '',
           updated_at: now
         },
         $setOnInsert: {
-          created_at: now
+          created_at: now,
+          drip_count: 0,
+          last_drip_at: null
         }
       },
       { upsert: true }
