@@ -104,6 +104,12 @@ export async function GET(req: NextRequest) {
         effPlanName = 'Org Starter'
         effExpiresAt = m.plan_expires_at
         isPlanActive = true
+      } else if (rawPlan === 'enterprise' && (isVipUser || isPlanValid)) {
+        // Org base (covered by the organization) — active with base quotas.
+        effPlan = 'enterprise'
+        effPlanName = 'Enterprise Base'
+        effExpiresAt = m.plan_expires_at
+        isPlanActive = true
       }
 
       const activeDoc = activeTasks.find(t => t.user_id === m.user_id) || null
@@ -121,8 +127,8 @@ export async function GET(req: NextRequest) {
       if (!m.password || !String(m.password).trim()) blockers.push('Naukri password missing')
       if (!isPlanActive) blockers.push('No active plan')
 
-      const dailyLimit = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') ? 55 : 20)
-      const onDemandQuota = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') ? 15 : 0)
+      const dailyLimit = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') || effPlan === 'enterprise' ? 55 : 20)
+      const onDemandQuota = !isPlanActive ? 0 : (effPlan.startsWith('org_pro') ? 15 : effPlan === 'enterprise' ? 10 : 0)
 
       return {
         user_id: m.user_id,
