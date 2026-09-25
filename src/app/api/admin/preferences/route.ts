@@ -26,6 +26,7 @@ const ALLOWED_KEYS = [
   'c_acct',
   'c_sort',
   'c_order',
+  'c_page',
   // Visitors tab
   'v_event',
   'v_device',

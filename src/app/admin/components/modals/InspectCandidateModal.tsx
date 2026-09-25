@@ -131,7 +131,7 @@ export default function InspectCandidateModal({
               ['Trial started', fmtDate(t.trial_started_at)],
               ['Trial ends', fmtDate(t.trial_expires_at)],
               ['Plan activated', fmtDate(t.plan_activated_at)],
-              ['Logins', `${t.login_count ?? candidate.login_count ?? 0} total · last ${t.last_login_at ? fmtDate(t.last_login_at) : (candidate.last_login_at ? fmtDate(candidate.last_login_at) : '—')}`],
+              ['Logins', `${candidate.login_count ?? 0} total · last ${t.last_login_at ? fmtDate(t.last_login_at) : (candidate.last_login_at ? fmtDate(candidate.last_login_at) : '—')}`],
               ['Profile edits', `${t.profile_update_count ?? candidate.profile_update_count ?? 0} · last ${fmtDate(t.last_profile_updated_at || candidate.last_profile_updated_at)}`],
               ['Resume uploads', `${t.resume_upload_count ?? candidate.resume_upload_count ?? 0} · last ${fmtDate(t.last_resume_updated_at || candidate.last_resume_updated_at)}`],
               ['On-demand runs', `${t.on_demand_run_count ?? candidate.on_demand_run_count ?? 0} lifetime`]
@@ -146,6 +146,14 @@ export default function InspectCandidateModal({
                       <div className="font-semibold text-zinc-100 light:text-zinc-900 mt-0.5 truncate" title={value}>{value}</div>
                     </div>
                   ))}
+                </div>
+                <div className="mt-2 px-2 py-1.5 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800/70 light:border-zinc-200 text-[11px] font-mono text-zinc-400 light:text-zinc-600 flex items-center gap-x-4 gap-y-0.5 flex-wrap">
+                  <span className="uppercase text-[10px] text-zinc-500">Logins</span>
+                  <span title="Logins today">today <strong className="text-white light:text-zinc-900">{dossier?.logins?.today ?? '—'}</strong></span>
+                  <span title="Logins in the last 7 days">7d <strong className="text-white light:text-zinc-900">{dossier?.logins?.week ?? '—'}</strong></span>
+                  <span title="Logins this calendar month">30d <strong className="text-white light:text-zinc-900">{dossier?.logins?.month ?? '—'}</strong></span>
+                  <span title="Lifetime login count">total <strong className="text-white light:text-zinc-900">{dossier?.logins?.total ?? candidate.login_count ?? '—'}</strong></span>
+                  <span className="text-zinc-600" title="Applications today / this week / this month / lifetime">applies <strong className="text-emerald-400 light:text-emerald-600">{dossier?.stats ? `${dossier.stats.today}/${dossier.stats.this_week}/${dossier.stats.this_month}/${dossier.stats.total_applied}` : '—'}</strong></span>
                 </div>
                 <div className="mt-2 p-2 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800/70 light:border-zinc-200 text-xs">
                   <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 light:text-zinc-600 uppercase mb-1">

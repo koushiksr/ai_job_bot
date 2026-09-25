@@ -188,6 +188,18 @@ export default function CandidatesTab({
     } catch {}
   }
 
+  // Table pagination: user chooses how many rows to see (persisted per admin).
+  // Derived slice (totalPages/safePage/pagedUsers) lives below, after sortedUsers.
+  const [pageSize, setPageSize] = React.useState<number | 'all'>(() => {
+    try {
+      const v = localStorage.getItem('admin_candidate_page_size')
+      return v === 'all' ? 'all' : [10, 25, 50].includes(Number(v)) ? Number(v) : 25
+    } catch {
+      return 25
+    }
+  })
+  const [page, setPage] = React.useState(1)
+
   // Server-persisted filters (per admin user; localStorage is instant cache).
   // executionStatusFilter prop (from shell) wins when provided; otherwise internal.
   const serverPrefsReadyRef = React.useRef(false)
@@ -213,6 +225,10 @@ export default function CandidatesTab({
           setSortOrder(prefs.c_order)
           try { localStorage.setItem('admin_candidate_sort_order', prefs.c_order) } catch {}
         }
+        if (prefs.c_page && ['10', '25', '50', 'all'].includes(prefs.c_page)) {
+          setPageSize(prefs.c_page === 'all' ? 'all' : Number(prefs.c_page))
+          try { localStorage.setItem('admin_candidate_page_size', prefs.c_page) } catch {}
+        }
       } catch {}
       serverPrefsReadyRef.current = true
     }).catch(() => { serverPrefsReadyRef.current = true })
@@ -225,9 +241,10 @@ export default function CandidatesTab({
       c_exec: executionStatusFilter ?? internalExecFilter,
       c_acct: accountTypeFilter,
       c_sort: sortField,
-      c_order: sortOrder
+      c_order: sortOrder,
+      c_page: String(pageSize)
     })
-  }, [executionStatusFilter, internalExecFilter, accountTypeFilter, sortField, sortOrder])
+  }, [executionStatusFilter, internalExecFilter, accountTypeFilter, sortField, sortOrder, pageSize])
 
   // Filter menu popover state and click-outside handler
   const [showFilterMenu, setShowFilterMenu] = React.useState(false)
@@ -526,14 +543,27 @@ export default function CandidatesTab({
     return list
   }, [filteredUsers, sortField, sortOrder])
 
+  // Pagination slice (state declared above so the prefs loader can reach it)
+  React.useEffect(() => { setPage(1) }, [userSearch, activeExecFilter, candidateStatusFilter, accountTypeFilter, sortField, sortOrder])
+  const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(sortedUsers.length / (pageSize as number)))
+  const safePage = Math.min(page, totalPages)
+  const pagedUsers = pageSize === 'all' ? sortedUsers : sortedUsers.slice((safePage - 1) * (pageSize as number), safePage * (pageSize as number))
+
   return (
     <div className="space-y-4">
       {/* Search & Status Filters Header */}
       <div className="p-3.5 sm:p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 shadow-xl relative">
         {/* Main Toolbar Row */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          {/* Left: Search input + Quick Filter Tabs */}
+          {/* Left: Title + Search input */}
           <div className="flex items-center gap-2.5 flex-1 min-w-0 flex-wrap sm:flex-nowrap">
+            <div className="flex items-center gap-2 shrink-0" title="Live candidate profiles, automated apply status, ATS resumes, and daily job report actions.">
+              <Users className="w-4 h-4 text-sky-400" />
+              <span className="text-sm font-bold text-white light:text-zinc-900 whitespace-nowrap">Candidates</span>
+              <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
+                {filteredUsers.length}
+              </span>
+            </div>
             {/* Search Input */}
             <div className="relative flex-1 min-w-[200px] sm:max-w-xs">
               <Search className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3 top-2.5" />
@@ -566,93 +596,6 @@ export default function CandidatesTab({
               )}
             </div>
 
-            {/* Quick 1-Click Status Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5">
-              {[
-                {
-                  id: 'tab_candidates',
-                  label: 'Candidates',
-                  count: countCandidatesOnly,
-                  isActive: accountTypeFilter === 'candidates' && activeExecFilter === 'all',
-                  onClick: () => {
-                    handleSetAccountTypeFilter('candidates')
-                    handleSetExecFilter('all')
-                  }
-                },
-                {
-                  id: 'tab_live',
-                  label: 'Live',
-                  count: countApplying,
-                  color: 'text-sky-400 font-medium',
-                  pulse: true,
-                  isActive: activeExecFilter === 'applying',
-                  onClick: () => {
-                    handleSetExecFilter('applying')
-                    if (accountTypeFilter === 'admins') handleSetAccountTypeFilter('all')
-                  }
-                },
-                {
-                  id: 'tab_done',
-                  label: 'Done Today',
-                  count: countAppliedToday,
-                  color: 'text-emerald-400 light:text-emerald-700 font-medium',
-                  isActive: activeExecFilter === 'applied_today',
-                  onClick: () => {
-                    handleSetExecFilter('applied_today')
-                    if (accountTypeFilter === 'admins') handleSetAccountTypeFilter('all')
-                  }
-                },
-                {
-                  id: 'tab_needs_attention',
-                  label: 'Needs Attention',
-                  count: countPaymentRequired + countNotAppliedToday,
-                  color: 'text-amber-400 light:text-amber-700 font-medium',
-                  isActive: activeExecFilter === 'not_applied_today',
-                  onClick: () => {
-                    handleSetExecFilter('not_applied_today')
-                    if (accountTypeFilter === 'admins') handleSetAccountTypeFilter('all')
-                  }
-                },
-                {
-                  id: 'tab_admins',
-                  label: 'Admins & Orgs',
-                  count: countAdminsOnly,
-                  color: 'text-indigo-400 light:text-indigo-600 font-medium',
-                  isActive: accountTypeFilter === 'admins',
-                  onClick: () => {
-                    handleSetAccountTypeFilter('admins')
-                    handleSetExecFilter('all')
-                  }
-                },
-                {
-                  id: 'tab_all',
-                  label: 'All',
-                  count: usersList.length,
-                  isActive: accountTypeFilter === 'all' && activeExecFilter === 'all',
-                  onClick: () => {
-                    handleSetAccountTypeFilter('all')
-                    handleSetExecFilter('all')
-                  }
-                }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={tab.onClick}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
-                    tab.isActive
-                      ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 border border-zinc-700 light:border-zinc-300 font-semibold shadow-sm'
-                      : 'bg-zinc-950/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 border border-zinc-900 light:border-zinc-200'
-                  }`}
-                >
-                  {tab.pulse && tab.count > 0 && <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping mr-0.5" />}
-                  <span>{tab.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full bg-black/60 light:bg-white font-semibold ${tab.color || 'text-zinc-400 light:text-zinc-600'}`}>
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Right: Triple-Dot Filter Menu + Reset + Status Guide + Create Candidate */}
@@ -699,6 +642,16 @@ export default function CandidatesTab({
               title={showStatusGuide ? 'Hide Status Legend Guide' : 'Show Status Legend Guide'}
             >
               <HelpCircle className="w-3.5 h-3.5 text-zinc-400" />
+            </button>
+
+            {/* Collapse Table Toggle */}
+            <button
+              type="button"
+              onClick={toggleCandidatesTable}
+              className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-zinc-200 light:hover:text-zinc-800 transition-colors cursor-pointer"
+              title={candidatesTableCollapsed ? 'Expand candidate table' : 'Collapse candidate table'}
+            >
+              {candidatesTableCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
             </button>
 
             {/* Create Candidate Button */}
@@ -1024,45 +977,8 @@ export default function CandidatesTab({
         )}
       </div>
 
-      {/* Candidates Table */}
+      {/* Candidates Table (header merged into toolbar above) */}
       <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden shadow-xl">
-        <div 
-          onClick={toggleCandidatesTable}
-          className="px-4 py-2.5 bg-zinc-950 light:bg-white hover:bg-zinc-900/60 light:hover:bg-zinc-50 border-b border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none transition-colors"
-        >
-          <div title="Live candidate profiles, automated apply status, ATS resumes, and daily job report actions.">
-            <h4 className="text-sm font-bold text-white light:text-zinc-900 flex items-center gap-2">
-              <Users className="w-4 h-4 text-sky-400" />
-              <span>Candidate Profiles Directory</span>
-              <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
-                {filteredUsers.length} profiles
-              </span>
-            </h4>
-          </div>
-          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                toggleCandidatesTable()
-              }}
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-300 light:text-zinc-700 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              {candidatesTableCollapsed ? (
-                <>
-                  <ChevronDown className="w-3.5 h-3.5" />
-                  <span>Expand</span>
-                </>
-              ) : (
-                <>
-                  <ChevronUp className="w-3.5 h-3.5" />
-                  <span>Collapse</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
         {candidatesTableCollapsed && (
           <div 
             onClick={toggleCandidatesTable}
@@ -1170,7 +1086,7 @@ export default function CandidatesTab({
                     </td>
                   </tr>
                 ) : (
-                  sortedUsers.map((u, idx) => (
+                  pagedUsers.map((u, idx) => (
                     <tr
                       key={u.user_id || idx}
                       onClick={() => {
@@ -1890,6 +1806,60 @@ export default function CandidatesTab({
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination: user controls how many rows to see */}
+        {!candidatesTableCollapsed && sortedUsers.length > 0 && (
+          <div className="px-4 py-2.5 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between flex-wrap gap-2 text-[11px] font-mono text-zinc-400 light:text-zinc-600">
+            <span>
+              Showing{' '}
+              <strong className="text-white light:text-zinc-900">
+                {pageSize === 'all' ? sortedUsers.length : `${(safePage - 1) * (pageSize as number) + 1}–${Math.min(safePage * (pageSize as number), sortedUsers.length)}`}
+              </strong>{' '}
+              of <strong className="text-white light:text-zinc-900">{sortedUsers.length}</strong>
+            </span>
+            <div className="flex items-center gap-2">
+              <select
+                value={String(pageSize)}
+                onChange={(e) => {
+                  const v = e.target.value
+                  const next = v === 'all' ? 'all' : Number(v)
+                  setPageSize(next)
+                  setPage(1)
+                  try { localStorage.setItem('admin_candidate_page_size', v) } catch {}
+                  saveAdminPrefs({ c_page: v })
+                }}
+                className="px-2 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 focus:outline-none focus:border-cyan-500 cursor-pointer"
+                title="Rows per page"
+              >
+                <option value="10">10 / page</option>
+                <option value="25">25 / page</option>
+                <option value="50">50 / page</option>
+                <option value="all">All</option>
+              </select>
+              {totalPages > 1 && (
+                <>
+                  <button
+                    type="button"
+                    disabled={safePage <= 1}
+                    onClick={() => setPage(safePage - 1)}
+                    className="px-2 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 disabled:opacity-30 cursor-pointer"
+                  >
+                    ← Prev
+                  </button>
+                  <span>Page {safePage} / {totalPages}</span>
+                  <button
+                    type="button"
+                    disabled={safePage >= totalPages}
+                    onClick={() => setPage(safePage + 1)}
+                    className="px-2 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 disabled:opacity-30 cursor-pointer"
+                  >
+                    Next →
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

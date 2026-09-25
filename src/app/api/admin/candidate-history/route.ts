@@ -58,6 +58,21 @@ export async function GET(req: NextRequest) {
         )
       : null
 
+    // Login aggregates (local calendar boundaries) for the dossier stats row
+    const now = new Date()
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const weekStart = new Date(dayStart.getTime() - 6 * 24 * 60 * 60 * 1000)
+    const monthStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), 1)
+    const loginMatch: any = {
+      event_type: 'login',
+      $or: [{ user_id: userId }, { userId }, ...(email ? [{ email }] : [])]
+    }
+    const [loginsToday, loginsWeek, loginsMonth] = await Promise.all([
+      db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: dayStart } }),
+      db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: weekStart } }),
+      db.collection('user_activity_logs').countDocuments({ ...loginMatch, created_at: { $gte: monthStart } })
+    ])
+
     return NextResponse.json({
       status: 'success',
       timeline: {
@@ -122,7 +137,13 @@ export async function GET(req: NextRequest) {
         this_week: stats.this_week || 0,
         this_month: stats.this_month || 0,
         total_applied: stats.total_applied || 0
-      } : null
+      } : null,
+      logins: {
+        today: loginsToday,
+        week: loginsWeek,
+        month: loginsMonth,
+        total: profile.login_count || 0
+      }
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Failed to load history.' }, { status: 500 })
