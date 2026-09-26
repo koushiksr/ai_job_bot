@@ -213,6 +213,16 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ detail: 'user_id is required' }, { status: 400 })
     }
+    // Reject oversized photos with clean JSON (before Vercel's text 413).
+    const pic = body.picture || body.raw_json || ''
+    const picStr = typeof pic === 'string' ? pic : JSON.stringify(pic)
+    const picMatch = picStr.match(/"picture"\s*:\s*"([^"]{500000,})/)
+    if ((typeof body.picture === 'string' && body.picture.length > 500 * 1024) || picMatch) {
+      return NextResponse.json(
+        { detail: 'Profile photo too large (over 500KB). Re-upload your photo in the editor — it auto-compresses — then save again.' },
+        { status: 413 }
+      )
+    }
     if (!(await isSelfOrAdmin(req, userId))) {
       return NextResponse.json({ detail: 'Forbidden.' }, { status: 403 })
     }

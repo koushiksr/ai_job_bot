@@ -30,6 +30,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'user_id and picture are required.' }, { status: 400 })
     }
 
+    // Hard cap well under the serverless body limit — the editor downscales
+    // to ~20KB, so anything near this is a bypass attempt, not a photo.
+    if (pictureDataUrl.length > 500 * 1024) {
+      return NextResponse.json(
+        { detail: 'Photo too large (over 500KB). Please upload a smaller image — photos are auto-compressed in the editor.' },
+        { status: 413 }
+      )
+    }
+
     const db = await getDb()
     if (!db) {
       return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })

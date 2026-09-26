@@ -53,6 +53,49 @@ interface EmploymentItem {
   is_current?: boolean
 }
 
+// Vercel 413s ("Request Entity Too Large") and other non-JSON error pages
+// must never surface as "Unexpected token 'R' ... is not valid JSON".
+async function parseJsonSafe(r: Response): Promise<any> {
+  const text = await r.text()
+  try {
+    return text ? JSON.parse(text) : {}
+  } catch {
+    return { detail: text.slice(0, 200) || `Request failed (HTTP ${r.status}).` }
+  }
+}
+
+// Downscale photos client-side (max 256px JPEG) so a profile picture can
+// never inflate saves past the serverless body limit (~2.3MB today).
+function downscalePhoto(file: File, maxDim = 256, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
+        const w = Math.max(1, Math.round(img.width * scale))
+        const h = Math.max(1, Math.round(img.height * scale))
+        const canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) throw new Error('Canvas unavailable')
+        ctx.drawImage(img, 0, 0, w, h)
+        URL.revokeObjectURL(url)
+        resolve(canvas.toDataURL('image/jpeg', quality))
+      } catch (e) {
+        URL.revokeObjectURL(url)
+        reject(e)
+      }
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Could not read image file.'))
+    }
+    img.src = url
+  })
+}
+
 export default function CandidateProfileEditor({
   userId = '',
   isNew = false,
@@ -771,7 +814,7 @@ export default function CandidateProfileEditor({
       } else if (res.status === 401 || res.status === 403) {
         window.location.href = '/login?error=' + encodeURIComponent('Session expired. Please sign in again, then retry saving.')
       } else {
-        const data = await res.json()
+        const data = await parseJsonSafe(res)
         setSaveError(data.detail || 'Failed to save profile.')
       }
     } catch (e: any) {
@@ -957,31 +1000,37 @@ export default function CandidateProfileEditor({
     setPhotoError('')
 
     try {
-      const reader = new FileReader()
-      reader.onload = async () => {
-        const base64DataUrl = reader.result as string
-        setCandidatePicture(base64DataUrl)
-        if (typeof window !== 'undefined' && effectiveUserId === localStorage.getItem('user_id')) {
-          localStorage.setItem('user_picture', base64DataUrl)
-        }
-        // Sync to MongoDB backend
-        try {
-          await fetch('/api/profile/picture', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              user_id: effectiveUserId,
-              picture: base64DataUrl
-            })
-          })
-        } catch (err) {
-          console.warn('Cloud picture sync error:', err)
-        }
+      const base64DataUrl = await downscalePhoto(file)
+      if (base64DataUrl.length > 300 * 1024) {
+        setPhotoError('Image is still too large after compression. Please use a smaller photo.')
         setUploadingPhoto(false)
+        return
       }
-      reader.readAsDataURL(file)
+      setCandidatePicture(base64DataUrl)
+      if (typeof window !== 'undefined' && effectiveUserId === localStorage.getItem('user_id')) {
+        try { localStorage.setItem('user_picture', base64DataUrl) } catch {}
+      }
+      // Sync to MongoDB backend (now a ~20KB thumbnail, never megabytes)
+      try {
+        const picRes = await fetch('/api/profile/picture', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: effectiveUserId,
+            picture: base64DataUrl
+          })
+        })
+        if (!picRes.ok) {
+          const picErr = await parseJsonSafe(picRes)
+          throw new Error(picErr.detail || `Photo sync failed (HTTP ${picRes.status}).`)
+        }
+      } catch (err: any) {
+        setPhotoError(err.message || 'Cloud photo sync failed.')
+        console.warn('Cloud picture sync error:', err)
+      }
+      setUploadingPhoto(false)
     } catch (err: any) {
-      setPhotoError('Failed to read image file.')
+      setPhotoError(err.message || 'Failed to read image file.')
       setUploadingPhoto(false)
     }
   }
