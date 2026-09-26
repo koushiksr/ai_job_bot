@@ -2,7 +2,7 @@
  * Shared OpenAI chat helper (primary LLM provider).
  *
  * Requires OPENAI_API_KEY in the environment (set it in Vercel dashboard).
- * Optional OPENAI_MODEL override, defaults to gpt-4o-mini (cheapest).
+ * Optional OPENAI_MODEL override, defaults to gpt-4.1-nano (cheapest).
  *
  * Includes a small in-memory response cache keyed by model + messages so
  * repeated identical requests (retries, re-renders, same resume analyzed
@@ -65,7 +65,7 @@ function setCached(key: string, content: string, usage: OpenAIChatResult['usage'
 }
 
 export function getOpenAIModel(): string {
-  return process.env.OPENAI_MODEL || 'gpt-5.4-nano-2026-03-17'
+  return process.env.OPENAI_MODEL || 'gpt-4.1-nano'
 }
 
 export async function openaiChatCompletion(opts: OpenAIChatOptions): Promise<OpenAIChatResult | null> {
