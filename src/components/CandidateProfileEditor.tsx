@@ -122,6 +122,14 @@ export default function CandidateProfileEditor({
   const [currentCtcLpa, setCurrentCtcLpa] = useState<number | string>(0)
   const [expectedCtcLpa, setExpectedCtcLpa] = useState<number | string>(0)
 
+  // Freshers (0 years): experience + CTC + current company are all optional.
+  const isFresherExp = Number(experienceYears) === 0
+  // Junk company guard: numeric-only/short garbage from bad AI fills (e.g. "00")
+  const isJunkCompany = (v: string) => {
+    const t = (v || '').trim()
+    return t.length > 0 && (t.length < 2 || /^[\d\W]+$/.test(t))
+  }
+
   // 3. Target Job Filters
   const [targetRoles, setTargetRoles] = useState<string[]>([])
   const [newRoleInput, setNewRoleInput] = useState<string>('')
@@ -593,7 +601,7 @@ export default function CandidateProfileEditor({
       email: naukriEmail,
       password: naukriPassword,
       current_location: currentLocation,
-      current_company: currentCompany,
+      current_company: (isFresherExp && isJunkCompany(currentCompany)) ? '' : currentCompany,
       experience: Number(experienceYears) || 0,
       current_ctc: ctcCurrentNum,
       expected_ctc: ctcExpectedNum,
@@ -757,29 +765,34 @@ export default function CandidateProfileEditor({
       errs.location = 'Current base location is required (e.g. Bangalore).'
     }
 
-    // 6. Current Company
-    if (!currentCompany.trim()) {
+    // 6. Current Company (optional for freshers; junk guard for bad AI fills)
+    const companyTrimmed = currentCompany.trim()
+    if (!isFresherExp && !companyTrimmed) {
       errs.company = 'Current company name is required.'
+    } else if (companyTrimmed && isJunkCompany(companyTrimmed) && !isFresherExp) {
+      errs.company = 'Company name looks invalid — please correct it.'
     }
 
-    // 7. Experience
+    // 7. Experience (0 = fresher, explicitly allowed)
     const expNum = Number(experienceYears)
     if (isNaN(expNum) || expNum < 0) {
-      errs.experience = 'Experience must be a positive number.'
+      errs.experience = 'Experience must be 0 or more (0 for freshers).'
     } else if (expNum > 45) {
       errs.experience = 'Experience cannot exceed 45 years.'
     }
 
-    // 8. Compensation (CTC)
+    // 8. Compensation (CTC) — optional for freshers
     const curCtc = Number(currentCtcLpa)
     const expCtc = Number(expectedCtcLpa)
-    if (isNaN(curCtc) || curCtc <= 0) {
-      errs.currentCtc = 'Please enter your current CTC in LPA (e.g. 15 for 15 LPA).'
-    }
-    if (isNaN(expCtc) || expCtc <= 0) {
-      errs.expectedCtc = 'Please enter your expected CTC in LPA (e.g. 20 for 20 LPA).'
-    } else if (curCtc > 0 && expCtc > 0 && expCtc < curCtc * 0.5) {
-      errs.expectedCtc = 'Expected CTC is unusually lower than Current CTC. Please verify.'
+    if (!isFresherExp) {
+      if (isNaN(curCtc) || curCtc <= 0) {
+        errs.currentCtc = 'Please enter your current CTC in LPA (e.g. 15 for 15 LPA).'
+      }
+      if (isNaN(expCtc) || expCtc <= 0) {
+        errs.expectedCtc = 'Please enter your expected CTC in LPA (e.g. 20 for 20 LPA).'
+      } else if (curCtc > 0 && expCtc > 0 && expCtc < curCtc * 0.5) {
+        errs.expectedCtc = 'Expected CTC is unusually lower than Current CTC. Please verify.'
+      }
     }
 
     // 9. Target Roles (Critical for Naukri search)
@@ -1836,14 +1849,14 @@ export default function CandidateProfileEditor({
                 <AlertCircle className="w-3 h-3 shrink-0" /> {errors.experience}
               </span>
             ) : (
-              <span className="text-[10px] text-zinc-500 light:text-zinc-600 mt-1 block">e.g. 6.0 years</span>
+              <span className="text-[10px] text-zinc-500 light:text-zinc-600 mt-1 block">e.g. 6.0 years · 0 for freshers</span>
             )}
           </div>
 
           {/* Current Company */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 light:text-zinc-700 mb-1.5">
-              Current Company <span className="text-rose-400 light:text-rose-600">*</span>
+              Current Company {isFresherExp ? <span className="text-[10px] font-normal text-zinc-500 light:text-zinc-600">(optional for freshers)</span> : <span className="text-rose-400 light:text-rose-600">*</span>}
             </label>
             <div className="relative">
               <Building2 className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600 absolute left-3 top-3" />
@@ -1869,7 +1882,7 @@ export default function CandidateProfileEditor({
           {/* Current CTC (LPA) */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 light:text-zinc-700 mb-1.5">
-              Current CTC (₹ in LPA) <span className="text-rose-400 light:text-rose-600">*</span>
+              Current CTC (₹ in LPA) {isFresherExp ? <span className="text-[10px] font-normal text-zinc-500 light:text-zinc-600">(optional for freshers)</span> : <span className="text-rose-400 light:text-rose-600">*</span>}
             </label>
             <div className="relative">
               <IndianRupee className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600 absolute left-3 top-3" />
@@ -1902,7 +1915,7 @@ export default function CandidateProfileEditor({
           {/* Expected CTC (LPA) */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 light:text-zinc-700 mb-1.5">
-              Expected CTC (₹ in LPA) <span className="text-rose-400 light:text-rose-600">*</span>
+              Expected CTC (₹ in LPA) {isFresherExp ? <span className="text-[10px] font-normal text-zinc-500 light:text-zinc-600">(optional for freshers)</span> : <span className="text-rose-400 light:text-rose-600">*</span>}
             </label>
             <div className="relative">
               <IndianRupee className="w-3.5 h-3.5 text-zinc-500 light:text-zinc-600 absolute left-3 top-3" />
