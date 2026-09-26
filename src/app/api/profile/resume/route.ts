@@ -73,6 +73,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ detail: 'user_id and resume PDF are required' }, { status: 400 })
     }
 
+    // Clean JSON 413 before doing any work (Vercel's own limit is text-only).
+    if (file_base64.length > 4 * 1024 * 1024 || (file_size_bytes || 0) > 3 * 1024 * 1024) {
+      return NextResponse.json(
+        { detail: 'Resume PDF too large (over 3MB). Please upload a smaller, text-based PDF and try again.' },
+        { status: 413 }
+      )
+    }
+
     const db = await getDb()
     if (!db) {
       return NextResponse.json({ detail: 'Database unavailable' }, { status: 503 })

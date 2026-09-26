@@ -924,13 +924,20 @@ export default function CandidateProfileEditor({
     }
   }
 
-  // Resume Upload Handler
+  // Resume Upload Handler (3MB cap: base64 inflates ~37%, Vercel caps bodies ~4.5MB)
   const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     if (!file.name.toLowerCase().endsWith('.pdf')) {
       alert('Please select a valid PDF file.')
+      e.target.value = ''
+      return
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      setResumeError('Resume PDF is over 3MB — please upload a smaller / text-based PDF (scanned image PDFs are usually the heavy ones).')
+      setTimeout(() => setResumeError(''), 7000)
       e.target.value = ''
       return
     }
