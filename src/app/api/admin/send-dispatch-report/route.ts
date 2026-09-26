@@ -268,46 +268,55 @@ async function dispatchReportForCandidate(
     }).sort({ applied_at: -1, created_at: -1 }).toArray()
   }
 
-  // B. Today's true rows — ALWAYS queried. This is the single source of truth
-  // for the headline count (never stats counters, never Math.max merges).
-  const todayJobs = await db.collection('applied_jobs').find({
-    $and: [
-      candidateCondition,
-      notJobUrlCondition,
-      countedStatuses,
-      {
-        $or: [
-          { applied_date: todayIstStr },
-          { applied_at: { $gte: startOfTodayUtc } }
-        ]
-      }
-    ]
-  }).sort({ applied_at: -1, created_at: -1 }).toArray()
+  // B. Headline count: the user_stats.today counter — the exact number the
+  // dashboard shows and the cap enforces. (Row date-ranges lie: re-applying
+  // an old job refreshes its applied_at, sweeping it into "today".)
+  // Fallback to a row count only when no fresh counter exists.
+  let todayApplied = 0
+  if (stats?.today && stats?.last_date === todayIstStr) {
+    todayApplied = stats.today
+  } else {
+    todayApplied = await db.collection('applied_jobs').countDocuments({
+      $and: [
+        candidateCondition,
+        notJobUrlCondition,
+        countedStatuses,
+        {
+          $or: [
+            { applied_date: todayIstStr },
+            { applied_at: { $gte: startOfTodayUtc } }
+          ]
+        }
+      ]
+    })
+  }
 
-  // External direct submissions today (shown separately, never in the cap).
+  // External direct submissions today (display suffix only, never in the cap).
+  // IST applied_date match: re-touched old rows must not leak in via applied_at.
   const externalToday = await db.collection('applied_jobs').countDocuments({
     $and: [
       candidateCondition,
       notJobUrlCondition,
       { status: 'external' },
-      {
-        $or: [
-          { applied_date: todayIstStr },
-          { applied_at: { $gte: startOfTodayUtc } }
-        ]
-      }
+      { applied_date: todayIstStr }
     ]
   })
 
-  if (runJobs.length === 0) runJobs = todayJobs
+  // "New this run" is truthful only from the task-scoped query (empty = 0 new).
+  const newThisRun = candidateInput.taskId ? runJobs.length : todayApplied
+
+  // List fallback: this run stamped nothing (or no task) → latest applied rows.
+  if (runJobs.length === 0) {
+    runJobs = await db.collection('applied_jobs').find({
+      $and: [candidateCondition, notJobUrlCondition, countedStatuses]
+    }).sort({ applied_at: -1, created_at: -1 }).limit(5).toArray()
+  }
 
   const totalAppliedCount = stats?.total_applied || (await db.collection('applied_jobs').countDocuments({
     $and: [candidateCondition, notJobUrlCondition, countedStatuses]
   })) || 0
 
-  // Headline = actual rows applied today. List = this run's rows.
-  const todayApplied = todayJobs.length
-  const newThisRun = candidateInput.taskId ? runJobs.length : todayApplied
+  // Headline = counter value computed above (same as dashboard + cap).
 
   // 4. Deduplication Check: If already mailed today, do NOT mail again unless triggered on-demand
   const isOnDemand = options.isOnDemand ?? (options.force || ['on_demand', 'web_dashboard_on_demand', 'manual_cli_on_demand', 'admin_on_demand'].includes(options.source || ''))

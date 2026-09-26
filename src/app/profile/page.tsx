@@ -11,7 +11,8 @@ import {
   LogOut,
   Crown,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Gift
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
@@ -42,6 +43,18 @@ export default function CandidateProfilePage() {
   // Save Notification
   const [showSaveBanner, setShowSaveBanner] = useState<boolean>(false)
 
+  // Section menu: profile editor vs referral — referral lives in the menu
+  // only (lazy), not inline inside the candidate profile.
+  const [activeSection, setActiveSection] = useState<'profile' | 'referrals'>('profile')
+
+  const selectSection = (section: 'profile' | 'referrals') => {
+    setActiveSection(section)
+    try {
+      const url = section === 'referrals' ? '#referrals' : '#editor'
+      window.history.replaceState(null, '', `${window.location.pathname}${url}`)
+    } catch {}
+  }
+
   useEffect(() => {
     const storedUid = localStorage.getItem('user_id')
     const storedEmail = localStorage.getItem('user_email')
@@ -69,6 +82,11 @@ export default function CandidateProfilePage() {
     setUserPlan(storedPlan || 'free')
     setIsVip(storedVip)
     if (storedPicture) setUserPicture(storedPicture)
+
+    // Deep link: /profile#referrals (dashboard menus) opens the referral menu tab.
+    try {
+      if (window.location.hash === '#referrals') setActiveSection('referrals')
+    } catch {}
 
     // Load candidate info & picture (target account when viewing-as)
     const effectiveUid = viewTarget || storedUid
@@ -258,33 +276,55 @@ export default function CandidateProfilePage() {
           </div>
         )}
 
-        {/* Quick Section Anchor Pills */}
+        {/* Section Menu — Candidate Profile vs Refer & Earn */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-          <a
-            href="#editor"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 font-medium hover:border-zinc-700 transition-all shrink-0"
+          <button
+            type="button"
+            onClick={() => selectSection('profile')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all shrink-0 cursor-pointer ${
+              activeSection === 'profile'
+                ? 'bg-zinc-800 light:bg-zinc-900 text-white light:text-white border-zinc-700 light:border-zinc-900 shadow-sm'
+                : 'bg-zinc-900 light:bg-zinc-100 border-zinc-800 light:border-zinc-200 text-zinc-300 light:text-zinc-700 hover:border-zinc-700'
+            }`}
           >
             <User className="w-3.5 h-3.5 text-zinc-400" />
             <span>Candidate Resume & Credentials</span>
-          </a>
+          </button>
+          <button
+            type="button"
+            onClick={() => selectSection('referrals')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all shrink-0 cursor-pointer ${
+              activeSection === 'referrals'
+                ? 'bg-emerald-600 light:bg-emerald-600 text-white border-emerald-500 shadow-sm'
+                : 'bg-emerald-950/30 border-emerald-800/50 text-emerald-300 light:text-emerald-700 hover:bg-emerald-950/50'
+            }`}
+          >
+            <Gift className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Refer & Earn</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 light:text-emerald-700 border border-emerald-700 font-bold">₹150</span>
+          </button>
         </div>
 
-        {/* Viral Referral Program & Cash Payout Settings (Top Prominence) */}
-        <div id="referrals" className="scroll-mt-6">
-          <ReferralPayoutSection userId={userId} />
-        </div>
+        {/* Refer & Earn — menu-only view (lazy, not inline in the profile) */}
+        {activeSection === 'referrals' && (
+          <div id="referrals" className="scroll-mt-6">
+            <ReferralPayoutSection userId={userId} />
+          </div>
+        )}
 
         {/* Full Visual Candidate Profile & Credentials Builder */}
-        <div id="editor" className="scroll-mt-6">
-          <CandidateProfileEditor
-            userId={userId}
-            isAdmin={false}
-            onSaveSuccess={() => {
-              setShowSaveBanner(true)
-              window.scrollTo({ top: 0, behavior: 'smooth' })
-            }}
-          />
-        </div>
+        {activeSection === 'profile' && (
+          <div id="editor" className="scroll-mt-6">
+            <CandidateProfileEditor
+              userId={userId}
+              isAdmin={false}
+              onSaveSuccess={() => {
+                setShowSaveBanner(true)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+            />
+          </div>
+        )}
 
         {/* Bottom Navigation Helper */}
         <div className="p-4 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
