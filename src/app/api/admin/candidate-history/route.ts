@@ -31,6 +31,18 @@ export async function GET(req: NextRequest) {
 
     const email = (profile.email || '').toLowerCase()
 
+    // Naukri snapshot summary: what was fetched, how much exists per field
+    const snap = (profile as any).naukri_snapshot || null
+    const snapFields: Record<string, number> = {}
+    let snapRawChars = 0
+    if (snap && typeof snap.fields === 'object') {
+      for (const [k, v] of Object.entries(snap.fields)) {
+        const s = typeof v === 'string' ? v : JSON.stringify(v ?? '')
+        if (k === 'raw_text') snapRawChars = s.length
+        else snapFields[k] = s.length
+      }
+    }
+
     const [payments, runs, invites, activity, stats] = await Promise.all([
       db.collection('payments').find(
         { $or: [{ user_id: userId }, ...(email ? [{ email }] : [])] },
@@ -158,6 +170,11 @@ export async function GET(req: NextRequest) {
         week: loginsWeek,
         month: loginsMonth,
         total: profile.login_count || 0
+      },
+      naukri: {
+        snapshot_at: (profile as any).naukri_snapshot_at || snap?.snapshot_at || null,
+        fields: snapFields,
+        raw_chars: snapRawChars
       },
       sweeps: {
         used_today: sweepsToday,

@@ -183,6 +183,18 @@ export async function GET(req: NextRequest) {
       last_scout_run_at: profile.last_scout_run_at || null,
       on_demand_run_count: profile.on_demand_run_count || 0,
       naukri_snapshot_at: profile.naukri_snapshot_at || null,
+      naukri_snapshot_summary: (() => {
+        try {
+          const f = (profile as any).naukri_snapshot?.fields
+          if (!f || typeof f !== 'object') return null
+          const names = Object.keys(f).filter(k => {
+            const v = (f as any)[k]
+            const s = typeof v === 'string' ? v : JSON.stringify(v ?? '')
+            return s.length > 0
+          })
+          return names.length ? names : null
+        } catch { return null }
+      })(),
       raw_json: JSON.stringify(profile, null, 2),
       version_hash: versionHash
     }

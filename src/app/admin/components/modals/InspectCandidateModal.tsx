@@ -122,6 +122,61 @@ export default function InspectCandidateModal({
           </button>
         </div>
 
+        {/* AI Merge Inputs & Output: Naukri snapshot + resume + saved JSON = filled fields */}
+        <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-2">
+          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>AI Merge: Naukri + Resume + Saved → Filled Fields</span>
+            {dossierLoading && <RefreshCw className="w-3 h-3 animate-spin text-sky-400" />}
+          </h4>
+          {(() => {
+            const nk = dossier?.naukri || {}
+            const fieldEntries: Array<[string, number]> = Object.entries(nk.fields || {})
+            const finalRows: Array<[string, string]> = [
+              ['Name', candidate.name || '—'],
+              ['Email', candidate.email || '—'],
+              ['Experience', `${candidate.experience ?? '—'} yrs`],
+              ['Company', candidate.current_company || '—'],
+              ['CTC', `${candidate.current_ctc ?? '—'} / ${candidate.expected_ctc ?? '—'} LPA`],
+              ['Location', candidate.current_location || '—'],
+              ['Skills', Array.isArray(candidate.skills) ? `${candidate.skills.length} (${candidate.skills.slice(0, 5).join(', ') || '—'})` : '—'],
+              ['Roles', Array.isArray(candidate.job_filters?.roles) ? candidate.job_filters.roles.slice(0, 3).join(', ') || '—' : '—']
+            ]
+            return (
+              <div className="space-y-2 text-[11px]">
+                <div className="p-2 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800/70 light:border-zinc-200">
+                  <div className="font-mono text-zinc-300 light:text-zinc-700 mb-1">
+                    Naukri snapshot {nk.snapshot_at ? `· ${fmtDate(nk.snapshot_at)}` : '· not captured yet'}
+                    {nk.raw_chars ? ` · ${Math.round(nk.raw_chars / 1024 * 10) / 10}k chars profile text` : ''}
+                  </div>
+                  {fieldEntries.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {fieldEntries.map(([k, n]) => (
+                        <span key={k} className="px-1.5 py-0.5 rounded bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 font-mono text-zinc-400 light:text-zinc-600" title={`${n} characters captured`}>
+                          {k} · {n > 1024 ? `${Math.round(n / 1024 * 10) / 10}k` : n}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-zinc-500">No Naukri data yet — queue a snapshot, then fills merge 2 sources until it lands.</div>
+                  )}
+                </div>
+                <div className="p-2 rounded-lg bg-zinc-950 light:bg-zinc-50 border border-zinc-800/70 light:border-zinc-200">
+                  <div className="font-mono text-zinc-300 light:text-zinc-700 mb-1">Final merged fields (what fills the form)</div>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-zinc-400 light:text-zinc-600">
+                    {finalRows.map(([k, v]) => (
+                      <div key={k} className="truncate" title={`${k}: ${v}`}>
+                        <span className="text-zinc-500">{k}:</span> <span className="text-zinc-200 light:text-zinc-800">{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-[10px] font-mono text-zinc-500">Rule: Naukri wins current facts · resume wins skills/history depth · saved JSON keeps bot config (filters, passwords, plan).</div>
+              </div>
+            )
+          })()}
+        </div>
+
         {/* Account Timeline & Org Journey (full history, fetched on open) */}
         <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3">
           <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">

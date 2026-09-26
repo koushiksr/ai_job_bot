@@ -55,6 +55,7 @@ interface CandidatesTabProps {
   setShowStatusGuide: (val: boolean) => void
   candidatesTableCollapsed: boolean
   toggleCandidatesTable: () => void
+  onBulkComplete?: () => void | Promise<void>
   selectedCandidateId: string | null
   setSelectedCandidateId: (id: string | null) => void
   formatTimestamp: (ts: any) => string
@@ -83,6 +84,7 @@ export default function CandidatesTab({
   setShowStatusGuide,
   candidatesTableCollapsed,
   toggleCandidatesTable,
+  onBulkComplete,
   selectedCandidateId,
   setSelectedCandidateId,
   formatTimestamp,
@@ -284,6 +286,47 @@ export default function CandidatesTab({
     try {
       localStorage.removeItem('admin_candidate_search')
     } catch {}
+  }
+
+  // Bulk AI refresh: loop server batches with live progress (idempotent)
+  const [bulkRunning, setBulkRunning] = React.useState(false)
+  const [bulkProgress, setBulkProgress] = React.useState('')
+  const [bulkDoneMsg, setBulkDoneMsg] = React.useState('')
+  const handleBulkRefresh = async () => {
+    if (bulkRunning) return
+    if (!window.confirm('Run the OpenAI 3-way merge (resume + Naukri snapshot + saved data) for ALL candidates? Each profile saves immediately; you can close this tab anytime.')) return
+    setBulkRunning(true)
+    setBulkDoneMsg('')
+    let offset: number | null = 0
+    let okCount = 0
+    let failCount = 0
+    const failed: string[] = []
+    try {
+      while (offset !== null) {
+        setBulkProgress(`${offset}…`)
+        const res: any = await fetch('/api/admin/bulk-refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ offset, batch_size: 2 })
+        })
+        const data: any = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`)
+        for (const r of data.results || []) {
+          if (r.ok) okCount++
+          else { failCount++; failed.push(`${r.user_id} (${r.detail || 'failed'})`) }
+        }
+        setBulkProgress(`${data.processed || offset}/${data.total || '?'}`)
+        offset = data.next_offset ?? null
+      }
+      setBulkDoneMsg(`Done: ${okCount} refreshed${failCount ? `, ${failCount} skipped: ${failed.slice(0, 4).join('; ')}${failed.length > 4 ? '…' : ''}` : ''}. Table reloaded.`)
+    } catch (e: any) {
+      setBulkDoneMsg(`Stopped: ${e.message} (${okCount} done before the stop). Re-run to continue.`)
+    } finally {
+      setBulkRunning(false)
+      setBulkProgress('')
+      try { await onBulkComplete?.() } catch {}
+    }
   }
 
   const getSortLabel = (field: SortField): string => {
@@ -681,6 +724,19 @@ export default function CandidatesTab({
               {candidatesTableCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
             </button>
 
+            {/* AI Refresh All: 3-way nano merge for every candidate */}
+            <button
+              type="button"
+              onClick={handleBulkRefresh}
+              disabled={bulkRunning}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 font-semibold text-xs transition-all shadow-sm cursor-pointer disabled:opacity-60"
+              title={bulkProgress ? `Refreshing… ${bulkProgress}` : 'Run OpenAI 3-way merge (resume + Naukri + saved data) for ALL candidates, batched'}
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${bulkRunning ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{bulkRunning ? (bulkProgress || 'Refreshing…') : 'AI Refresh All'}</span>
+              <span className="sm:hidden">{bulkRunning ? '…' : 'Refresh'}</span>
+            </button>
+
             {/* Create Candidate Button */}
             <button
               type="button"
@@ -693,6 +749,14 @@ export default function CandidatesTab({
             </button>
           </div>
         </div>
+
+        {/* Bulk refresh result */}
+        {bulkDoneMsg && (
+          <div className="px-3 py-2 rounded-xl bg-cyan-950/40 border border-cyan-800/50 text-[11px] font-mono text-cyan-300 light:text-cyan-700 flex items-center justify-between gap-2">
+            <span className="truncate">{bulkDoneMsg}</span>
+            <button type="button" onClick={() => setBulkDoneMsg('')} className="shrink-0 hover:text-white cursor-pointer">✕</button>
+          </div>
+        )}
 
         {/* TRIPLE-DOT FILTER & SORT POPOVER MENU */}
         {showFilterMenu && (

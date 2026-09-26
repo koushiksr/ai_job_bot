@@ -1710,6 +1710,7 @@ export default function AdminDashboard() {
             setShowStatusGuide={setShowStatusGuide}
             candidatesTableCollapsed={candidatesTableCollapsed}
             toggleCandidatesTable={toggleCandidatesTable}
+            onBulkComplete={fetchOverviewAndUsers}
             selectedCandidateId={selectedCandidateId}
             setSelectedCandidateId={setSelectedCandidateId}
             formatTimestamp={formatTimestamp}

@@ -191,6 +191,7 @@ export default function CandidateProfileEditor({
   const [naukriSyncing, setNaukriSyncing] = useState<boolean>(false)
   const [naukriSyncMsg, setNaukriSyncMsg] = useState<string>('')
   const [snapshotAt, setSnapshotAt] = useState<string | null>(null)
+  const [snapshotFields, setSnapshotFields] = useState<string[]>([])
 
   const handleNaukriSync = async () => {
     if (!effectiveUserId) {
@@ -718,6 +719,7 @@ export default function CandidateProfileEditor({
         const data = await res.json()
         setResumeFilename(data.resume_filename || `${uid}_Resume.pdf`)
         setSnapshotAt(data.naukri_snapshot_at || null)
+        if (Array.isArray((data as any).naukri_snapshot_summary)) setSnapshotFields((data as any).naukri_snapshot_summary)
         setResumeVersion(Date.now())
         setHasResumeUploaded(Boolean(data.has_resume || data.last_resume_updated_at || (data.resume_filename && !data.resume_filename.includes('_Resume.pdf') && data.resume_filename !== 'Candidate_Resume.pdf')))
         populateStateFromObject(data)
@@ -1531,8 +1533,8 @@ export default function CandidateProfileEditor({
         {naukriSyncMsg ? (
           <p className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 -mt-2">{naukriSyncMsg}</p>
         ) : snapshotAt ? (
-          <p className="text-[11px] font-mono text-zinc-500 light:text-zinc-600 -mt-2" title="Captured once from the live Naukri profile — reused instantly by every AI fill, no repeated logins">
-            Naukri snapshot {new Date(snapshotAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} — merged on every fill
+          <p className="text-[11px] font-mono text-zinc-500 light:text-zinc-600 -mt-2" title={snapshotFields.length ? `Naukri fields captured: ${snapshotFields.join(', ')}` : 'Captured once from the live Naukri profile — reused instantly by every AI fill, no repeated logins'}>
+            Naukri snapshot {new Date(snapshotAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}{snapshotFields.length ? ` · ${snapshotFields.length} fields (${snapshotFields.slice(0, 4).join(', ')})` : ''} — merged on every fill
           </p>
         ) : null}
 
