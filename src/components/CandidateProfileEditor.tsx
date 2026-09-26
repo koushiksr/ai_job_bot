@@ -34,7 +34,8 @@ import {
   Coffee,
   Zap,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  Globe
 } from 'lucide-react'
 import ProfileSaveCelebrationModal from '@/components/ProfileSaveCelebrationModal'
 
@@ -178,6 +179,40 @@ export default function CandidateProfileEditor({
   const [showAiPrompt, setShowAiPrompt] = useState<boolean>(false)
   const [aiPrompt, setAiPrompt] = useState<string>('')
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
+  // Naukri one-time snapshot sync (captured at credential save, reused by fills)
+  const [naukriSyncing, setNaukriSyncing] = useState<boolean>(false)
+  const [naukriSyncMsg, setNaukriSyncMsg] = useState<string>('')
+  const [snapshotAt, setSnapshotAt] = useState<string | null>(null)
+
+  const handleNaukriSync = async () => {
+    if (!effectiveUserId) {
+      setNaukriSyncMsg('Save the profile with Naukri credentials first.')
+      return
+    }
+    setNaukriSyncing(true)
+    setNaukriSyncMsg('Snapshot queued — the worker logs in once and captures the live Naukri profile…')
+    try {
+      const res = await fetch('/api/profile/naukri-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: effectiveUserId })
+      })
+      const data = await parseJsonSafe(res)
+      if (res.ok) {
+        if (data.status === 'active') {
+          setNaukriSyncMsg('A snapshot is already queued/running — it will land here automatically.')
+        } else {
+          setNaukriSyncMsg('Snapshot queued. It lands in ~1 min — then Auto-Fill merges resume + Naukri + saved data.')
+        }
+      } else {
+        setNaukriSyncMsg(data.detail || 'Could not queue snapshot.')
+      }
+    } catch (e: any) {
+      setNaukriSyncMsg(`Sync failed: ${e.message}`)
+    } finally {
+      setNaukriSyncing(false)
+    }
+  }
 
   // Save / status state
   const [savingProfile, setSavingProfile] = useState<boolean>(false)
@@ -665,6 +700,7 @@ export default function CandidateProfileEditor({
       if (res.ok) {
         const data = await res.json()
         setResumeFilename(data.resume_filename || `${uid}_Resume.pdf`)
+        setSnapshotAt(data.naukri_snapshot_at || null)
         setResumeVersion(Date.now())
         setHasResumeUploaded(Boolean(data.has_resume || data.last_resume_updated_at || (data.resume_filename && !data.resume_filename.includes('_Resume.pdf') && data.resume_filename !== 'Candidate_Resume.pdf')))
         populateStateFromObject(data)
@@ -805,7 +841,10 @@ export default function CandidateProfileEditor({
       })
 
       if (res.ok) {
-        setSaveSuccess('Profile saved successfully and synced with the JobFlux Bot!')
+        const savedData = await parseJsonSafe(res)
+        setSaveSuccess(savedData.snapshot_queued
+          ? 'Profile saved! Fresh Naukri credentials detected — a one-time profile snapshot is queued and lands in ~1 min.'
+          : 'Profile saved successfully and synced with the JobFlux Bot!')
         setErrors({})
         setShowCelebrationModal(true)
         if (!isNew && userId) loadProfileData(userId)
@@ -901,7 +940,10 @@ export default function CandidateProfileEditor({
         setErrors({})
         setShowAiPrompt(false)
         setAiPrompt('')
-        setSaveSuccess('✨ AI successfully analyzed your resume and updated your profile! All fields synced.')
+        setSaveSuccess(result.naukri_merged
+          ? `✨ AI merged resume + live Naukri profile + saved data and updated your profile!${result.naukri_snapshot_at ? ` (Naukri synced ${new Date(result.naukri_snapshot_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})` : ''} All fields synced.`
+          : '✨ AI successfully analyzed your resume and updated your profile! All fields synced.')
+        if (result.naukri_snapshot_at) setSnapshotAt(result.naukri_snapshot_at)
         if (onSaveSuccess) onSaveSuccess()
         setTimeout(() => setSaveSuccess(''), 7000)
       } else {
@@ -1437,7 +1479,7 @@ export default function CandidateProfileEditor({
             <button
               type="button"
               onClick={() => setShowAiPrompt(!showAiPrompt)}
-              disabled={savingProfile || isAnalyzing || uploadingResume}
+              disabled={savingProfile || isAnalyzing || uploadingResume || naukriSyncing}
               className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-white light:bg-white light:ring-1 light:ring-zinc-300 hover:bg-zinc-200 light:hover:bg-zinc-100 text-black light:text-zinc-900 transition-all cursor-pointer shadow-sm disabled:opacity-50"
             >
               {isAnalyzing ? (
@@ -1447,8 +1489,30 @@ export default function CandidateProfileEditor({
               )}
               <span>{isAnalyzing ? 'Extracting...' : 'Auto-Fill with AI'}</span>
             </button>
+            {/* NAUKRI SYNC BUTTON — one read-only capture, reused by every later fill */}
+            <button
+              type="button"
+              onClick={handleNaukriSync}
+              disabled={savingProfile || isAnalyzing || uploadingResume || naukriSyncing}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-200 transition-colors cursor-pointer disabled:opacity-50"
+              title="Log in once and capture the live Naukri profile — later AI fills reuse it instantly without another login"
+            >
+              {naukriSyncing ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Globe className="w-3.5 h-3.5" />
+              )}
+              <span>{naukriSyncing ? 'Syncing…' : 'Sync Naukri'}</span>
+            </button>
           </div>
         </div>
+        {naukriSyncMsg ? (
+          <p className="text-[11px] font-mono text-zinc-400 light:text-zinc-600 -mt-2">{naukriSyncMsg}</p>
+        ) : snapshotAt ? (
+          <p className="text-[11px] font-mono text-zinc-500 light:text-zinc-600 -mt-2" title="Captured once from the live Naukri profile — reused instantly by every AI fill, no repeated logins">
+            Naukri snapshot {new Date(snapshotAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} — merged on every fill
+          </p>
+        ) : null}
 
         {/* AI Optional Prompt Popover / Dropdown */}
         {showAiPrompt && (

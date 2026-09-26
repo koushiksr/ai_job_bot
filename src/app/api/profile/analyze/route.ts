@@ -260,6 +260,20 @@ Keyword rules (these drive job matching — be strict):
     if (existingProfileJson) {
       userMessage += `\n\nPreviously Saved Profile Data (use as reference to preserve existing non-empty fields):\n${existingProfileJson}`
     }
+    // Third source: Naukri live-profile snapshot (captured once at credential
+    // save, reused instantly — no browser login needed for this fill).
+    let naukriSnapshotAt: string | null = null
+    try {
+      const snap = (existingProfile as any)?.naukri_snapshot
+      if (snap && typeof snap === 'object') {
+        naukriSnapshotAt = (existingProfile as any)?.naukri_snapshot_at || snap.snapshot_at || null
+        const fields = snap.fields && typeof snap.fields === 'object' ? snap.fields : {}
+        const snapText = JSON.stringify(fields).slice(0, 4000)
+        if (snapText && snapText.length > 10) {
+          userMessage += `\n\nLive Naukri Profile Snapshot${naukriSnapshotAt ? ` (captured ${naukriSnapshotAt})` : ''} — freshest source for CURRENT facts:\n${snapText}\n\nSOURCE PRIORITY (resolve conflicts this way):\n1. Naukri snapshot wins for: current employer/title, salary/CTC, notice period, location, phone/email.\n2. Resume wins for: skills list, projects, education, full work history depth.\n3. Saved profile wins for: bot config only (job_filters, credentials, passwords, plan fields) — never overwrite those from resume/Naukri.\n4. Merge skills as a union (resume ∪ Naukri), deduplicated.`
+        }
+      }
+    } catch {}
     userMessage += `\n\nOutput only valid JSON.`
 
     let resultText = ''
@@ -628,7 +642,9 @@ Keyword rules (these drive job matching — be strict):
     return NextResponse.json({
       status: 'success',
       source: extractionSource,
-      data: mergedProfile
+      data: mergedProfile,
+      naukri_snapshot_at: naukriSnapshotAt,
+      naukri_merged: Boolean(naukriSnapshotAt)
     })
   } catch (err: any) {
     console.error("Analyze error:", err)

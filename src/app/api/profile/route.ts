@@ -182,6 +182,7 @@ export async function GET(req: NextRequest) {
       resume_upload_count: profile.resume_upload_count || 0,
       last_scout_run_at: profile.last_scout_run_at || null,
       on_demand_run_count: profile.on_demand_run_count || 0,
+      naukri_snapshot_at: profile.naukri_snapshot_at || null,
       raw_json: JSON.stringify(profile, null, 2),
       version_hash: versionHash
     }
@@ -320,6 +321,35 @@ export async function POST(req: NextRequest) {
       await db.collection('users').updateMany({ user_id: userId }, { $inc: { session_v: 1 } })
     }
 
+    // Fresh Naukri credentials → queue a one-time read-only profile snapshot
+    // so later AI fills reuse it instantly (dedupe: skip if one is queued).
+    let snapshotQueued = false
+    if (updateDoc.password && updateDoc.password !== existing?.password) {
+      try {
+        const pending = await db.collection('tasks').findOne({
+          user_id: userId,
+          action: 'naukri_snapshot',
+          status: { $in: ['pending', 'running'] }
+        })
+        if (!pending) {
+          const nowSnap = new Date()
+          await db.collection('tasks').insertOne({
+            task_id: `task_${userId}_snapshot_${nowSnap.getTime()}`,
+            user_id: userId,
+            action: 'naukri_snapshot',
+            status: 'pending',
+            headless: false,
+            source: 'snapshot_request',
+            triggered_by: 'profile_save',
+            date_ist: '',
+            created_at: nowSnap,
+            logs: [`[${nowSnap.toLocaleTimeString()}] Snapshot queued after credential save (read-only, no applications).`]
+          })
+          snapshotQueued = true
+        }
+      } catch {}
+    }
+
     // Log profile update activity
     const { ip, userAgent } = getClientInfo(req)
     await logUserActivity(db, {
@@ -340,7 +370,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       status: 'success',
       profile: updateDoc,
-      version_hash: versionHash
+      version_hash: versionHash,
+      snapshot_queued: snapshotQueued
     })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message }, { status: 500 })

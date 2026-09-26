@@ -1362,21 +1362,8 @@ export default function UserDashboard() {
                       </Link>
                     </div>
 
-                    {/* Navigation Items */}
+                    {/* Navigation Items (single profile entry — Naukri creds live inside the profile form) */}
                     <div className="py-1">
-                      <Link
-                        href={profileHref}
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
-                      >
-                        <User className="w-3.5 h-3.5 text-zinc-400 light:text-zinc-600 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium">Naukri Login & Credentials</div>
-                          <div className="text-[10px] text-zinc-500 light:text-zinc-600">Resume, password & targeting filters</div>
-                        </div>
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 light:bg-zinc-200 text-zinc-300 light:text-zinc-700 border border-zinc-700 light:border-zinc-300">1-Time</span>
-                      </Link>
-
                       <Link
                         href="/resume-builder"
                         onClick={() => setIsUserMenuOpen(false)}
@@ -1754,18 +1741,8 @@ export default function UserDashboard() {
               <span>Edit Profile &amp; Credentials ↗</span>
             </Link>
 
-            {/* Quick Actions List */}
+            {/* Quick Actions List (single profile entry — creds live inside the profile form) */}
             <div className="space-y-1 text-xs">
-              <Link
-                href={profileHref}
-                onClick={() => setIsMobileNavOpen(false)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors"
-              >
-                <User className="w-4 h-4 text-zinc-400 light:text-zinc-600 shrink-0" />
-                <span>Candidate Profile &amp; Credentials</span>
-                <span className="text-[10px] text-zinc-400 light:text-zinc-600 font-mono ml-auto">1-Time</span>
-              </Link>
-
               <button
                 onClick={() => {
                   setIsMobileNavOpen(false)
