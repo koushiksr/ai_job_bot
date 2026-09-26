@@ -197,6 +197,15 @@ export default function CandidateProfileEditor({
       setNaukriSyncMsg('Save the profile with Naukri credentials first.')
       return
     }
+    // Prerequisites: Naukri creds + resume are mandatory (checked first, above).
+    // Existing JSON data is a bonus — fine either way.
+    const missing: string[] = []
+    if (!naukriEmail.trim() || !naukriPassword.trim()) missing.push('Naukri email & password')
+    if (!resumeFilename || !hasResumeUploaded) missing.push('resume PDF')
+    if (missing.length > 0) {
+      setNaukriSyncMsg(`Enter ${missing.join(' + ')} above first — both are mandatory for the Naukri sync to fetch.`)
+      return
+    }
     setNaukriSyncing(true)
     setNaukriSyncMsg('Snapshot queued — the worker logs in once and captures the live Naukri profile…')
     try {

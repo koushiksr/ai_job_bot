@@ -32,8 +32,14 @@ export async function POST(req: NextRequest) {
 
     const profile = await db.collection('profiles').findOne({ user_id: userId })
     if (!profile) return NextResponse.json({ detail: 'Profile not found.' }, { status: 404 })
-    if (!profile.password || !String(profile.password).trim()) {
-      return NextResponse.json({ detail: 'Save your Naukri password in the profile first.' }, { status: 400 })
+    // Prerequisites: Naukri creds + resume are mandatory. Stored JSON is optional.
+    if (!profile.password || !String(profile.password).trim() || !profile.email) {
+      return NextResponse.json({ detail: 'Save your Naukri email & password in the profile first.' }, { status: 400 })
+    }
+    const resumeDoc = await db.collection('resumes').findOne({ user_id: userId }, { projection: { _id: 1 } })
+    const hasResume = Boolean(resumeDoc) || Boolean(profile.has_resume || profile.last_resume_updated_at || profile.resume_filename)
+    if (!hasResume) {
+      return NextResponse.json({ detail: 'Upload the resume PDF first — it is mandatory for the Naukri sync.' }, { status: 400 })
     }
 
     const existing = await db.collection('tasks').findOne({
