@@ -624,18 +624,18 @@ export default function CandidatesTab({
       {/* Search & Status Filters Header */}
       <div className="p-3.5 sm:p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3 shadow-xl relative">
         {/* Main Toolbar Row */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 sm:gap-3">
           {/* Left: Title + Search input */}
-          <div className="flex items-center gap-2.5 flex-1 min-w-0 flex-wrap sm:flex-nowrap">
-            <div className="flex items-center gap-2 shrink-0" title="Live candidate profiles, automated apply status, ATS resumes, and daily job report actions.">
-              <Users className="w-4 h-4 text-sky-400" />
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0" title="Live candidate profiles, automated apply status, ATS resumes, and daily job report actions.">
+              <Users className="w-4 h-4 text-sky-400 shrink-0" />
               <span className="text-sm font-bold text-white light:text-zinc-900 whitespace-nowrap">Candidates</span>
-              <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-2 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
+              <span className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-800 light:border-zinc-200">
                 {filteredUsers.length}
               </span>
             </div>
             {/* Search Input */}
-            <div className="relative flex-1 min-w-[200px] sm:max-w-xs">
+            <div className="relative flex-1 min-w-0">
               <Search className="w-4 h-4 text-zinc-500 light:text-zinc-600 absolute left-3 top-2.5" />
               <input
                 type="text"
@@ -665,30 +665,32 @@ export default function CandidatesTab({
                 </button>
               )}
             </div>
-
           </div>
 
           {/* Right: Triple-Dot Filter Menu + Reset + Status Guide + Create Candidate */}
-          <div className="flex items-center gap-2 shrink-0 justify-end">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-end flex-wrap sm:flex-nowrap">
             {/* TRIPLE-DOT FILTER & SORT MENU BUTTON */}
             <button
               type="button"
               onClick={() => setShowFilterMenu(!showFilterMenu)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-mono transition-all flex items-center gap-2 cursor-pointer shadow-sm ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0 ${
                 showFilterMenu || activeFilterCount > 0
                   ? 'bg-zinc-800 light:bg-zinc-200 border-zinc-700 light:border-zinc-300 text-white light:text-zinc-900'
                   : 'bg-zinc-950 light:bg-zinc-100 border-zinc-800 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:bg-zinc-900 light:hover:bg-zinc-200'
               }`}
               title="Open Filter & Sort Options Menu"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400" />
-              <span className="font-semibold">Filters &amp; Sort</span>
+              <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+              <span className="font-semibold text-[11px] sm:text-xs">
+                <span className="hidden sm:inline">Filters &amp; Sort</span>
+                <span className="sm:hidden">Filters</span>
+              </span>
               {activeFilterCount > 0 ? (
                 <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-zinc-700 light:bg-zinc-300 text-white light:text-zinc-900">
                   {activeFilterCount}
                 </span>
               ) : (
-                <MoreHorizontal className="w-3.5 h-3.5 text-zinc-500" />
+                <MoreHorizontal className="w-3.5 h-3.5 text-zinc-500 hidden sm:inline shrink-0" />
               )}
             </button>
 
@@ -697,7 +699,7 @@ export default function CandidatesTab({
               <button
                 type="button"
                 onClick={handleClearAllFilters}
-                className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer shrink-0"
                 title="Reset all filters and sorting to defaults"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -708,7 +710,7 @@ export default function CandidatesTab({
             <button
               type="button"
               onClick={() => setShowStatusGuide(!showStatusGuide)}
-              className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-zinc-200 light:hover:text-zinc-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-zinc-200 light:hover:text-zinc-800 transition-colors cursor-pointer shrink-0"
               title={showStatusGuide ? 'Hide Status Legend Guide' : 'Show Status Legend Guide'}
             >
               <HelpCircle className="w-3.5 h-3.5 text-zinc-400" />
@@ -718,7 +720,7 @@ export default function CandidatesTab({
             <button
               type="button"
               onClick={toggleCandidatesTable}
-              className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-zinc-200 light:hover:text-zinc-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-zinc-950 light:bg-zinc-100 hover:bg-zinc-900 light:hover:bg-zinc-200 border border-zinc-800 light:border-zinc-300 text-zinc-400 hover:text-zinc-200 light:hover:text-zinc-800 transition-colors cursor-pointer shrink-0"
               title={candidatesTableCollapsed ? 'Expand candidate table' : 'Collapse candidate table'}
             >
               {candidatesTableCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
@@ -729,11 +731,11 @@ export default function CandidatesTab({
               type="button"
               onClick={handleBulkRefresh}
               disabled={bulkRunning}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 font-semibold text-xs transition-all shadow-sm cursor-pointer disabled:opacity-60"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 font-semibold text-xs transition-all shadow-sm cursor-pointer disabled:opacity-60 shrink-0"
               title={bulkProgress ? `Refreshing… ${bulkProgress}` : 'Run OpenAI 3-way merge (resume + Naukri + saved data) for ALL candidates, batched'}
             >
-              <Sparkles className={`w-3.5 h-3.5 ${bulkRunning ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{bulkRunning ? (bulkProgress || 'Refreshing…') : 'AI Refresh All'}</span>
+              <Sparkles className={`w-3.5 h-3.5 shrink-0 ${bulkRunning ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{bulkProgress ? (bulkProgress || 'Refreshing…') : 'AI Refresh All'}</span>
               <span className="sm:hidden">{bulkRunning ? '…' : 'Refresh'}</span>
             </button>
 
@@ -741,9 +743,9 @@ export default function CandidatesTab({
             <button
               type="button"
               onClick={() => setEditingUser({ isNew: true, user_id: '' })}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-900 light:bg-zinc-900 light:hover:bg-zinc-800 light:text-white font-semibold text-xs transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-900 light:bg-zinc-900 light:hover:bg-zinc-800 light:text-white font-semibold text-xs transition-all shadow-sm cursor-pointer shrink-0"
             >
-              <User className="w-3.5 h-3.5" />
+              <User className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">Create Candidate</span>
               <span className="sm:hidden">Create</span>
             </button>
@@ -760,7 +762,7 @@ export default function CandidatesTab({
 
         {/* TRIPLE-DOT FILTER & SORT POPOVER MENU */}
         {showFilterMenu && (
-          <div className="absolute top-full right-4 mt-2 w-[340px] sm:w-[500px] p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 space-y-4 animate-fadeIn">
+          <div className="absolute top-full left-2 right-2 sm:left-auto sm:right-4 mt-2 sm:w-[500px] max-w-[calc(100vw-2rem)] p-3.5 sm:p-4 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 space-y-4 animate-fadeIn">
             {/* Popover Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800 light:border-zinc-200">
               <div className="flex items-center gap-2">
