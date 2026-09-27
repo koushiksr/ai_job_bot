@@ -185,7 +185,19 @@ export async function GET(req: NextRequest) {
         daily_application_limit: dailyLimit,
         match_status: poolStateByUser[m.user_id] || 'matching',
         last_applied_at: s.last_applied_at || null,
-        created_at: m.created_at || null
+        created_at: m.created_at || null,
+        current_execution: m.current_execution || null,
+        last_execution: m.last_execution || null,
+        execution_summary: {
+          is_applying: activeDoc?.status === 'running' || m.current_execution?.status === 'applying',
+          is_in_queue: activeDoc?.status === 'pending',
+          is_applied_today: todayCount > 0,
+          device: m.current_execution?.hostname || m.last_execution?.hostname || activeDoc?.hostname || null,
+          device_brand: m.current_execution?.device_brand || m.last_execution?.device_brand || null,
+          hardware_model: m.current_execution?.hardware_model || m.last_execution?.hardware_model || null,
+          worker_id: m.current_execution?.worker_id || m.last_execution?.worker_id || activeDoc?.worker_id || null,
+          pid: m.current_execution?.pid || m.last_execution?.pid || null
+        }
       }
     })
 

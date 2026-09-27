@@ -33,7 +33,10 @@ import {
   CreditCard,
   Crown,
   RotateCcw,
-  UserPlus
+  UserPlus,
+  Laptop,
+  Server,
+  User
 } from 'lucide-react'
 import { APP_CONFIG, isAdminUser } from '@/config/appConfig'
 import { ORG_PLANS } from '@/config/plans'
@@ -59,9 +62,33 @@ interface Member {
   daily_application_limit: number
   last_applied_at: string | null
   created_at: string | null
-  active_task?: { task_id: string; status: string; queue_position: number | null } | null
+  active_task?: { task_id: string; status: string; queue_position: number | null; hostname?: string; worker_id?: string } | null
   sweep_eligible?: boolean
   sweep_blockers?: string[]
+  match_status?: string
+  current_execution?: any
+  last_execution?: any
+  execution_summary?: {
+    is_applying?: boolean
+    is_in_queue?: boolean
+    is_applied_today?: boolean
+    device?: string | null
+    device_brand?: string | null
+    hardware_model?: string | null
+    worker_id?: string | null
+    pid?: number | string | null
+    status?: string
+  }
+}
+
+const getInitials = (name?: string, userId?: string) => {
+  if (name && name.trim()) {
+    const parts = name.trim().split(/\s+/)
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    return name.slice(0, 2).toUpperCase()
+  }
+  if (userId) return userId.slice(0, 2).toUpperCase()
+  return 'U'
 }
 
 // Legacy org SKUs (org_pro/org_pro_3m/org_starter) grandfather to current plans for display.
@@ -552,17 +579,20 @@ export default function EnterpriseAdminPortal() {
     return () => clearInterval(timer)
   }, [selectedLiveLog?.task_id, selectedLiveLog?.status])
 
-  // Silent queue-status refresh while any member has an active task
-  const hasActiveQueue = members.some(m => m.active_task)
+  // Live queue-status & bot telemetry refresh
+  const hasActiveRuns = members.some(m => 
+    Boolean(m.active_task || m.execution_summary?.is_applying || m.current_execution?.status === 'applying')
+  )
   useEffect(() => {
-    if (!hasActiveQueue) return
+    // If active execution or queued task, poll every 5s; otherwise every 30s for fresh updates
+    const pollInterval = hasActiveRuns ? 5000 : 30000
     const timer = setInterval(() => {
       const uid = localStorage.getItem('user_id') || ''
       const em = localStorage.getItem('user_email') || ''
       loadAllPortalData(uid, em, true)
-    }, 15000)
+    }, pollInterval)
     return () => clearInterval(timer)
-  }, [hasActiveQueue])
+  }, [hasActiveRuns])
 
   // Open Live Log Stream Modal for a Candidate
   const handleOpenLiveLog = async (member: Member) => {
@@ -1251,18 +1281,17 @@ export default function EnterpriseAdminPortal() {
             <table className="w-full text-left text-xs">
               <thead className="bg-zinc-900/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 font-mono uppercase text-[10px] tracking-wider border-b border-zinc-900 light:border-zinc-200">
                 <tr>
-                  <th className="py-3 px-4">Candidate</th>
+                  <th className="py-3 px-4 min-w-[240px]">Candidate &amp; Quota</th>
                   <th className="py-3 px-4">Plan</th>
-                  <th className="py-3 px-4 text-center">Today</th>
+                  <th className="py-3 px-4">Bot &amp; Telemetry</th>
                   <th className="py-3 px-4 text-center">On-Demand</th>
-                  <th className="py-3 px-4 text-center">Status</th>
                   <th className="py-3 px-4 text-right">Controls</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900 light:divide-zinc-200">
                 {filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-zinc-500 light:text-zinc-600">
+                    <td colSpan={5} className="py-8 text-center text-zinc-500 light:text-zinc-600">
                       No organization members found matching "{searchQuery}"
                     </td>
                   </tr>
@@ -1274,27 +1303,107 @@ export default function EnterpriseAdminPortal() {
                     const isActionMenuOpen = openActionMenuUserId === memberKey
                     const isPaying = paymentProcessingUserId === memberKey
 
+                    const summary = member.execution_summary || {}
+                    const isApplying = Boolean(
+                      summary.is_applying || 
+                      member.current_execution?.status === 'applying' ||
+                      member.active_task?.status === 'running'
+                    )
+                    const isInQueue = Boolean(
+                      summary.is_in_queue || 
+                      member.active_task?.status === 'pending'
+                    )
+                    const appliedToday = member.applied_today || 0
+                    const memberCap = member.daily_application_limit ?? 0
+                    const limit = memberCap > 0 ? memberCap : (member.plan === 'org_pro' || member.plan === 'org_pro_3m' || member.plan === 'pro' ? 55 : 20)
+                    const totalApplied = member.total_applied || 0
+                    const pct = Math.min(100, Math.round((appliedToday / Math.max(1, limit)) * 100))
+                    const isQuotaMet = appliedToday >= limit && limit > 0
+                    const isNoMatch = (member as any).match_status === 'exhausted'
+                    const device = summary.device || member.active_task?.hostname || member.current_execution?.hostname || member.last_execution?.hostname
+                    const workerId = summary.worker_id || member.active_task?.worker_id || member.current_execution?.worker_id || member.last_execution?.worker_id
+                    const hardwareModel = summary.hardware_model || summary.device_brand || member.current_execution?.hardware_model || member.last_execution?.hardware_model || (device ? 'Cloud Worker' : null)
+                    const pidVal = summary.pid || member.last_execution?.pid || member.current_execution?.pid
+
                     return (
                       <tr key={memberKey} className="hover:bg-zinc-900/30 light:hover:bg-zinc-50 transition-colors">
-                        {/* Candidate Identity */}
-                        <td className="py-3.5 px-4">
-                          <div className="font-semibold text-white light:text-zinc-900">
-                            {member.name || member.user_id}
-                          </div>
-                          <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono">
-                            {member.email}
+                        {/* Candidate Identity & Live Quota Progress */}
+                        <td className="py-3.5 px-4 font-bold text-white light:text-zinc-900">
+                          <div className="flex flex-col gap-2 min-w-[230px] max-w-[300px]">
+                            {/* User Identity */}
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-xl bg-zinc-800 light:bg-zinc-200 border border-zinc-700/60 light:border-zinc-300 flex items-center justify-center text-xs font-bold text-zinc-200 light:text-zinc-800 shrink-0 shadow-sm">
+                                {getInitials(member.name, member.user_id)}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-bold text-white light:text-zinc-900 flex items-center gap-1.5 flex-wrap">
+                                  <span className="truncate">{member.name || member.user_id}</span>
+                                  {member.enterprise_role === 'admin' && (
+                                    <span className="px-1.5 py-0.2 rounded text-[9px] bg-cyan-950/80 text-cyan-300 light:bg-cyan-50 light:text-cyan-700 border border-cyan-800/50 light:border-cyan-300 font-mono font-semibold">
+                                      ADMIN
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[11px] font-mono truncate" title={`${member.user_id} · ${member.email}`}>
+                                  <span className="text-zinc-500">@{member.user_id}</span>
+                                  <span className="text-zinc-600"> · </span>
+                                  <span className="text-zinc-400 light:text-zinc-600">{member.email}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Live Animated Application Progress Meter */}
+                            <div className="pt-1.5 border-t border-zinc-800/60 light:border-zinc-200/80 space-y-1">
+                              <div className="flex items-center justify-between text-[10px] font-mono">
+                                <span className="flex items-center gap-1.5">
+                                  {isApplying ? (
+                                    <span className="flex items-center gap-1 text-sky-400 font-semibold animate-pulse">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                                      Applying:
+                                    </span>
+                                  ) : isQuotaMet ? (
+                                    <span className="flex items-center gap-1 text-emerald-400 light:text-emerald-700 font-semibold">
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
+                                      Quota Met:
+                                    </span>
+                                  ) : (
+                                    <span className="text-zinc-400 light:text-zinc-600 flex items-center gap-1">
+                                      Today:
+                                    </span>
+                                  )}
+                                  <strong className={appliedToday > 0 ? "text-emerald-400 light:text-emerald-700 font-semibold" : "text-zinc-300 light:text-zinc-700"}>
+                                    {appliedToday}/{limit}
+                                  </strong>
+                                  <span className="text-zinc-500 text-[9px]">({pct}%)</span>
+                                </span>
+                                <span className="text-zinc-500 light:text-zinc-500 text-[10px]" title="Lifetime Total Applications">
+                                  Total: {totalApplied}
+                                </span>
+                              </div>
+
+                              {/* Symbolic Animated Progress Track */}
+                              <div className="w-full h-1.5 rounded-full bg-zinc-900 light:bg-zinc-200 overflow-hidden relative border border-zinc-800/80 light:border-zinc-300">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    isApplying
+                                      ? 'bg-sky-500 animate-pulse'
+                                      : isQuotaMet
+                                      ? 'bg-emerald-500'
+                                      : appliedToday > 0
+                                      ? 'bg-emerald-500/80'
+                                      : 'bg-transparent'
+                                  }`}
+                                  style={{ width: `${Math.max(appliedToday > 0 ? 5 : 0, pct)}%` }}
+                                />
+                              </div>
+                            </div>
                           </div>
                         </td>
 
                         {/* Plan */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            {member.enterprise_role === 'admin' && (
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 light:bg-cyan-50 text-cyan-300 light:text-cyan-700 border border-cyan-800/50 light:border-cyan-300 font-semibold">
-                                Org Admin
-                              </span>
-                            )}
-                            <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded border font-semibold ${
                               !member.plan_active
                                 ? 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-700/60 light:border-zinc-300'
                                 : member.plan === 'org_pro' || member.plan === 'org_pro_3m'
@@ -1312,20 +1421,115 @@ export default function EnterpriseAdminPortal() {
                           )}
                         </td>
 
-                        {/* Today's Applications */}
-                        <td className="py-3.5 px-4 text-center">
+                        {/* Bot Execution & Server Identity Status */}
+                        <td className="py-3.5 px-4">
                           {(() => {
-                            const memberCap = member.daily_application_limit ?? 0
+                            if (isApplying) {
+                              return (
+                                <div 
+                                  className="space-y-1 cursor-pointer group" 
+                                  onClick={() => handleOpenLiveLog(member)} 
+                                  title="Bot is applying live now! Click to watch real-time execution stream"
+                                >
+                                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_8px_rgba(56,189,248,0.3)] animate-pulse">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                                    <Sparkles className="w-3 h-3 text-sky-400" />
+                                    <span>APPLYING NOW</span>
+                                  </div>
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center gap-1 text-[11px] font-bold text-white light:text-zinc-900 group-hover:text-sky-300 transition-colors">
+                                      <Laptop className="w-3 h-3 text-sky-400 shrink-0" />
+                                      <span className="truncate max-w-[150px]">{hardwareModel || 'Dell PC'}</span>
+                                    </div>
+                                    {device && (
+                                      <div
+                                        className="flex items-center gap-1 text-[10px] font-mono text-sky-200/80"
+                                        title={`Host: ${device}\nWorker: ${workerId || 'N/A'}${pidVal ? `\nPID: ${pidVal}` : ''}`}
+                                      >
+                                        <Server className="w-2.5 h-2.5 text-sky-400 shrink-0" />
+                                        <span className="truncate max-w-[150px]">{device}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            }
+
+                            if (isInQueue) {
+                              return (
+                                <div className="space-y-1">
+                                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 light:text-amber-700 border border-amber-500/30 light:border-amber-300">
+                                    <Clock className="w-3 h-3 text-amber-400 animate-spin" />
+                                    <span>IN QUEUE {member.active_task?.queue_position ? `#${member.active_task.queue_position}` : ''}</span>
+                                  </div>
+                                  <div className="text-[10px] font-mono text-zinc-500">
+                                    Awaiting worker slot...
+                                  </div>
+                                </div>
+                              )
+                            }
+
+                            if (isQuotaMet) {
+                              return (
+                                <div className="space-y-1">
+                                  <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950/40 text-emerald-300 light:text-emerald-700 border border-emerald-800/60 light:border-emerald-300 shadow-sm">
+                                    <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
+                                    <span>CAPPED</span>
+                                  </div>
+                                  {hardwareModel && (
+                                    <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-400 light:text-zinc-600">
+                                      <Laptop className="w-3 h-3 text-emerald-400 shrink-0" />
+                                      <span className="truncate max-w-[140px]">{hardwareModel}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            }
+
+                            if (isNoMatch) {
+                              return (
+                                <div className="space-y-1">
+                                  <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/40 text-amber-300 light:text-amber-700 border border-amber-800/60 light:border-amber-300 shadow-sm">
+                                    <AlertCircle className="w-3 h-3 text-amber-400 light:text-amber-600 shrink-0" />
+                                    <span>NO MATCH</span>
+                                  </div>
+                                  <div className="text-[10px] font-mono text-zinc-500 truncate max-w-[140px]">
+                                    Pool exhausted today
+                                  </div>
+                                </div>
+                              )
+                            }
+
                             return (
-                              <>
-                                <span className={`font-mono font-bold ${
-                                  !member.plan_active ? 'text-zinc-500' :
-                                  member.applied_today >= memberCap && memberCap > 0 ? 'text-amber-400 light:text-amber-600' : 'text-cyan-300 light:text-cyan-700'
-                                }`}>
-                                  {member.applied_today}
-                                </span>
-                                <span className="text-zinc-600 font-mono"> / {memberCap}</span>
-                              </>
+                              <div className="space-y-1">
+                                {!member.plan_active ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/60 light:bg-zinc-100 border border-zinc-700/60 light:border-zinc-300 text-zinc-400 light:text-zinc-600 text-[10px] font-mono">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                                    No Plan
+                                  </span>
+                                ) : isEnabled ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/60 light:bg-emerald-50 border border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700 text-[10px] font-mono">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                    Active Runs
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/80 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-400 light:text-zinc-600 text-[10px] font-mono">
+                                    <Pause className="w-2.5 h-2.5 text-zinc-400 light:text-zinc-600" />
+                                    Paused
+                                  </span>
+                                )}
+                                <div className="text-[10px] font-mono truncate max-w-[150px]">
+                                  {!member.plan_active ? (
+                                    <span className="text-zinc-500 light:text-zinc-600">No active plan</span>
+                                  ) : member.sweep_eligible === false ? (
+                                    <span className="text-amber-300 light:text-amber-700">
+                                      {(member.sweep_blockers || ['blocked'])[0]}
+                                    </span>
+                                  ) : (
+                                    <span className="text-emerald-400/80">In daily sweep</span>
+                                  )}
+                                </div>
+                              </div>
                             )
                           })()}
                         </td>
@@ -1336,41 +1540,6 @@ export default function EnterpriseAdminPortal() {
                             {member.on_demand_runs_used}
                           </span>
                           <span className="text-zinc-600 font-mono"> / {member.on_demand_quota || 0}</span>
-                        </td>
-
-                        {/* Automated Run Status */}
-                        <td className="py-3.5 px-4 text-center">
-                          {!member.plan_active ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/60 light:bg-zinc-100 border border-zinc-700/60 light:border-zinc-300 text-zinc-400 light:text-zinc-600 text-[10px] font-mono">
-                              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-                              No Plan
-                            </span>
-                          ) : isEnabled ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/60 light:bg-emerald-50 border border-emerald-800/60 light:border-emerald-300 text-emerald-300 light:text-emerald-700 text-[10px] font-mono">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                              Active Runs
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/80 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 text-zinc-400 light:text-zinc-600 text-[10px] font-mono">
-                              <Pause className="w-2.5 h-2.5 text-zinc-400 light:text-zinc-600" />
-                              Paused
-                            </span>
-                          )}
-                          <div className="text-[10px] font-mono mt-1 truncate max-w-[180px] mx-auto" title={(member.sweep_blockers || []).join('; ')}>
-                            {!member.plan_active ? (
-                              <span className="text-zinc-500 light:text-zinc-600">No active plan</span>
-                            ) : (member as any).match_status === 'exhausted' ? (
-                              <span className="text-amber-300 light:text-amber-700" title="2 consecutive runs found 0 new matching jobs today — pool exhausted for current filters. Top-ups keep watching.">
-                                No new matches
-                              </span>
-                            ) : member.sweep_eligible === false ? (
-                              <span className="text-amber-300 light:text-amber-700">
-                                {(member.sweep_blockers || ['blocked'])[0]}
-                              </span>
-                            ) : (
-                              <span className="text-emerald-400/80">In daily sweep</span>
-                            )}
-                          </div>
                         </td>
 
                         {/* Action Buttons: Enable/Disable + Trigger On-Demand + Three-Dots Menu */}
@@ -1614,17 +1783,50 @@ export default function EnterpriseAdminPortal() {
                 const isEnabled = member.enabled_for_daily_run
                 const isProcessing = actionLoadingId === member.user_id || (member.email && actionLoadingId === member.email)
                 const isActionMenuOpen = openActionMenuUserId === memberKey
+
+                const summary = member.execution_summary || {}
+                const isApplying = Boolean(
+                  summary.is_applying || 
+                  member.current_execution?.status === 'applying' ||
+                  member.active_task?.status === 'running'
+                )
+                const isInQueue = Boolean(
+                  summary.is_in_queue || 
+                  member.active_task?.status === 'pending'
+                )
+                const appliedToday = member.applied_today || 0
+                const memberCap = member.daily_application_limit ?? 0
+                const limit = memberCap > 0 ? memberCap : (member.plan === 'org_pro' || member.plan === 'org_pro_3m' || member.plan === 'pro' ? 55 : 20)
+                const totalApplied = member.total_applied || 0
+                const pct = Math.min(100, Math.round((appliedToday / Math.max(1, limit)) * 100))
+                const isQuotaMet = appliedToday >= limit && limit > 0
+                const isNoMatch = (member as any).match_status === 'exhausted'
+                const device = summary.device || member.active_task?.hostname || member.current_execution?.hostname || member.last_execution?.hostname
+                const hardwareModel = summary.hardware_model || summary.device_brand || member.current_execution?.hardware_model || member.last_execution?.hardware_model || (device ? 'Cloud Worker' : null)
+
                 return (
-                  <div key={memberKey} className="p-3.5 rounded-2xl bg-zinc-900/40 light:bg-zinc-50 border border-zinc-800/80 light:border-zinc-200 space-y-2.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="font-semibold text-sm text-white light:text-zinc-900 truncate">
-                          {member.name || member.user_id}
+                  <div key={memberKey} className="p-3.5 rounded-2xl bg-zinc-900/40 light:bg-zinc-50 border border-zinc-800/80 light:border-zinc-200 space-y-3">
+                    {/* Candidate Top Header: Avatar, Name/Email, and Plan Pill */}
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-zinc-800 light:bg-zinc-200 border border-zinc-700/60 light:border-zinc-300 flex items-center justify-center text-xs font-bold text-zinc-200 light:text-zinc-800 shrink-0 shadow-sm">
+                          {getInitials(member.name, member.user_id)}
                         </div>
-                        <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono truncate">
-                          {member.email}
+                        <div className="min-w-0">
+                          <div className="font-semibold text-sm text-white light:text-zinc-900 truncate flex items-center gap-1.5">
+                            <span className="truncate">{member.name || member.user_id}</span>
+                            {member.enterprise_role === 'admin' && (
+                              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/50">
+                                ADMIN
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono truncate">
+                            {member.email}
+                          </div>
                         </div>
                       </div>
+
                       <div className="shrink-0 flex flex-col items-end">
                         <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full border font-semibold ${
                           !member.plan_active
@@ -1643,12 +1845,97 @@ export default function EnterpriseAdminPortal() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-[11px] font-mono text-zinc-400 light:text-zinc-600">
-                      <span>Today <strong className="text-white light:text-zinc-900">{member.applied_today}/{member.daily_application_limit ?? 0}</strong></span>
-                      <span>On-demand <strong className="text-white light:text-zinc-900">{member.on_demand_runs_used}/{member.on_demand_quota || 0}</strong></span>
-                      <span className={isEnabled && member.plan_active ? 'text-emerald-400' : 'text-zinc-500'}>
-                        {member.plan_active ? (isEnabled ? '● Active' : '● Paused') : '○ No plan'}
-                      </span>
+
+                    {/* Live Animated Application Progress Track */}
+                    <div className="pt-2 border-t border-zinc-800/60 light:border-zinc-200/80 space-y-1">
+                      <div className="flex items-center justify-between text-[11px] font-mono">
+                        <span className="flex items-center gap-1.5">
+                          {isApplying ? (
+                            <span className="flex items-center gap-1 text-sky-400 font-semibold animate-pulse">
+                              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                              Applying:
+                            </span>
+                          ) : isQuotaMet ? (
+                            <span className="flex items-center gap-1 text-emerald-400 light:text-emerald-700 font-semibold">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
+                              Quota Met:
+                            </span>
+                          ) : (
+                            <span className="text-zinc-400 light:text-zinc-600 flex items-center gap-1">
+                              Today:
+                            </span>
+                          )}
+                          <strong className={appliedToday > 0 ? "text-emerald-400 light:text-emerald-700 font-semibold" : "text-zinc-300 light:text-zinc-700"}>
+                            {appliedToday}/{limit}
+                          </strong>
+                          <span className="text-zinc-500 text-[9px]">({pct}%)</span>
+                        </span>
+                        <span className="text-zinc-500 light:text-zinc-500 text-[10px]" title="Lifetime Total Applications">
+                          Total: {totalApplied}
+                        </span>
+                      </div>
+
+                      {/* Symbolic Animated Progress Track */}
+                      <div className="w-full h-1.5 rounded-full bg-zinc-900 light:bg-zinc-200 overflow-hidden relative border border-zinc-800/80 light:border-zinc-300">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            isApplying
+                              ? 'bg-sky-500 animate-pulse'
+                              : isQuotaMet
+                              ? 'bg-emerald-500'
+                              : appliedToday > 0
+                              ? 'bg-emerald-500/80'
+                              : 'bg-transparent'
+                          }`}
+                          style={{ width: `${Math.max(appliedToday > 0 ? 5 : 0, pct)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Active Worker Telemetry & Status Badges */}
+                    <div className="flex items-center justify-between gap-2 text-[10px] font-mono flex-wrap">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {isApplying ? (
+                          <div 
+                            onClick={() => handleOpenLiveLog(member)}
+                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 animate-pulse cursor-pointer shadow-[0_0_8px_rgba(56,189,248,0.2)]"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                            <Sparkles className="w-2.5 h-2.5 text-sky-400" />
+                            <span>APPLYING NOW</span>
+                          </div>
+                        ) : isInQueue ? (
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            <Clock className="w-2.5 h-2.5 text-amber-400 animate-spin" />
+                            <span>IN QUEUE {member.active_task?.queue_position ? `#${member.active_task.queue_position}` : ''}</span>
+                          </div>
+                        ) : isQuotaMet ? (
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold bg-emerald-950/40 text-emerald-300 border border-emerald-800/60">
+                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                            <span>CAPPED</span>
+                          </div>
+                        ) : isNoMatch ? (
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold bg-amber-950/40 text-amber-300 border border-amber-800/60">
+                            <AlertCircle className="w-2.5 h-2.5 text-amber-400" />
+                            <span>NO MATCH</span>
+                          </div>
+                        ) : (
+                          <span className={isEnabled && member.plan_active ? 'text-emerald-400 font-semibold' : 'text-zinc-500'}>
+                            {member.plan_active ? (isEnabled ? '● Active' : '● Paused') : '○ No plan'}
+                          </span>
+                        )}
+
+                        {hardwareModel && (
+                          <div className="flex items-center gap-1 text-zinc-300 light:text-zinc-700 bg-zinc-800/60 light:bg-zinc-200/60 px-1.5 py-0.5 rounded border border-zinc-700/50">
+                            <Laptop className="w-2.5 h-2.5 text-sky-400" />
+                            <span className="truncate max-w-[110px]">{hardwareModel}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-zinc-400 light:text-zinc-600">
+                        On-demand <strong className="text-white light:text-zinc-900">{member.on_demand_runs_used}/{member.on_demand_quota || 0}</strong>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
