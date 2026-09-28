@@ -159,6 +159,11 @@ export async function GET(req: NextRequest) {
         summary: t.summary || '',
         jobs_applied: t.jobs_applied || (t.stats?.total_applied) || 0,
         stop_requested: Boolean(t.stop_requested),
+        worker_id: t.worker_id || null,
+        worker_host: t.worker_host || t.worker_hostname || t.hostname || null,
+        worker_device_brand: t.worker_device_brand || t.device_brand || null,
+        worker_hardware_model: t.worker_hardware_model || t.hardware_model || null,
+        worker_platform: t.worker_platform || t.platform || null,
         logs_count: Array.isArray(t.logs) ? t.logs.length : 0,
         logs_preview: Array.isArray(t.logs) ? (searchQuery ? t.logs.slice(-200) : t.logs.slice(-60)) : []
       }

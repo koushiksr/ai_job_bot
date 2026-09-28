@@ -17,6 +17,12 @@ import {
   Trash2,
   Zap,
   FileText,
+  Info,
+  Laptop,
+  Server,
+  Sparkles,
+  Clock,
+  Cpu
 } from 'lucide-react'
 import { AdminQueueMetrics, AdminWorkerStatus } from '../../types'
 
@@ -102,7 +108,8 @@ export default function QueueTab({
   const [page, setPage] = React.useState<number>(1)
   const [perPage, setPerPage] = React.useState<number>(15)
 
-  const [fleet, setFleet] = React.useState<{ online_count: number; total_seen: number; pending_tasks: number; workers: any[] } | null>(null)
+  const [fleet, setFleet] = React.useState<any | null>(null)
+  const [showFleetModal, setShowFleetModal] = React.useState<boolean>(false)
   React.useEffect(() => {
     let alive = true
     const load = () => {
@@ -115,6 +122,33 @@ export default function QueueTab({
     const t = setInterval(load, 15000)
     return () => { alive = false; clearInterval(t) }
   }, [])
+
+  const serverGroups = React.useMemo(() => {
+    if (!fleet) return []
+    if (fleet.servers && fleet.servers.length > 0) return fleet.servers
+    // Fallback: group workers by hostname
+    const map = new Map<string, any>()
+    for (const w of (fleet.workers || [])) {
+      const host = w.hostname || 'Unknown Host'
+      if (!map.has(host)) {
+        const isDarwin = w.platform?.includes('Darwin') || w.device_brand?.includes('Mac')
+        const isWindows = w.platform?.includes('Windows')
+        const defBrand = isDarwin ? 'Apple Mac' : isWindows ? (host.toLowerCase().includes('dell') ? 'Dell PC' : host.toLowerCase().includes('hp') ? 'HP PC' : 'Windows PC') : 'Linux Server'
+        map.set(host, {
+          hostname: host,
+          device_brand: w.device_brand || defBrand,
+          hardware_model: w.hardware_model || defBrand,
+          platform: w.platform,
+          active_count: 0,
+          workers: []
+        })
+      }
+      const s = map.get(host)
+      s.workers.push(w)
+      if (w.current_task_id) s.active_count++
+    }
+    return Array.from(map.values())
+  }, [fleet])
 
   const candidateOptions = React.useMemo(() => {
     const list = [...(usersList || [])]
@@ -182,17 +216,29 @@ export default function QueueTab({
         <div className="flex items-center gap-2 min-w-0 mr-auto">
           <span className={`w-2 h-2 rounded-full shrink-0 ${workerStatus.is_busy ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-600'}`} />
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-white light:text-zinc-900 truncate">
-              Queue
-              <span className="ml-1.5 font-mono font-normal text-[11px] text-zinc-500">
+            <div className="text-xs font-semibold text-white light:text-zinc-900 truncate flex items-center gap-1.5 flex-wrap">
+              <span>Queue</span>
+              <span className="font-mono font-normal text-[11px] text-zinc-500">
                 {queueMetrics.pending + queueMetrics.running} active · {queueMetrics.total} total
               </span>
               {fleet && (
-                <span className="ml-1.5 font-mono font-normal text-[11px] text-zinc-500" title={(fleet.workers || []).map((w: any) => `${w.hostname || w.worker_id}: ${w.online ? (w.current_task_user ? `running ${w.current_task_user}` : 'idle') : 'offline'}`).join('\n')}>
-                  · {fleet.online_count} worker{fleet.online_count === 1 ? '' : 's'}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowFleetModal(true)}
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-800/80 hover:bg-zinc-700/80 light:bg-zinc-100 light:hover:bg-zinc-200 border border-zinc-700/60 light:border-zinc-300 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 transition-all cursor-pointer font-mono text-[11px] group shadow-xs ml-0.5"
+                  title="Click to view connected servers & worker hardware telemetry"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-semibold">{fleet.online_count} workers</span>
+                  <span className="text-zinc-500 font-normal">
+                    ({fleet.servers_count || serverGroups.length || 1} machine{(fleet.servers_count || serverGroups.length || 1) === 1 ? '' : 's'})
+                  </span>
+                  <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-sky-500/20 text-sky-400 text-[10px] font-bold group-hover:bg-sky-500 group-hover:text-black transition-colors" title="Inspect worker servers">
+                    i
+                  </span>
+                </button>
               )}
-            </p>
+            </div>
             {workerStatus.is_busy ? (
               <p className="text-[11px] text-zinc-500 truncate">
                 Running <span className="text-zinc-300 light:text-zinc-700 font-mono">{workerStatus.active_user_id}</span>
@@ -369,6 +415,27 @@ export default function QueueTab({
                           {t.is_vip ? <span className="ml-1 text-amber-400 font-sans font-semibold">VIP</span> : t.candidate_plan ? ` · ${t.candidate_plan}` : ''}
                           {' · '}{shortSource(t.source)}{t.headless ? '' : ' · headed'}
                         </div>
+                        {/* Server & Worker Hardware Telemetry Badge */}
+                        {(t.worker_host || t.worker_device_brand || t.worker_id) && (
+                          <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                            <span 
+                              className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800/80 light:bg-zinc-100 text-zinc-300 light:text-zinc-700 border border-zinc-700/60 light:border-zinc-300 shadow-xs"
+                              title={`Executed on:\nServer: ${t.worker_host || 'N/A'}\nDevice: ${t.worker_hardware_model || t.worker_device_brand || 'N/A'}\nWorker: ${t.worker_id || 'N/A'}\nOS: ${t.worker_platform || 'N/A'}`}
+                            >
+                              <Laptop className="w-2.5 h-2.5 text-sky-400 shrink-0" />
+                              <span className="font-semibold text-white light:text-zinc-900">
+                                {t.worker_device_brand || (t.worker_platform?.includes('Darwin') ? 'Apple Mac' : (t.worker_platform?.includes('Windows') ? 'Windows PC' : 'Server'))}
+                              </span>
+                              <span className="text-zinc-500">·</span>
+                              <span className="text-zinc-400 light:text-zinc-600 truncate max-w-[130px]">{t.worker_host}</span>
+                            </span>
+                            {t.worker_id && (
+                              <span className="text-[10px] font-mono text-zinc-500" title={`Worker Slot: ${t.worker_id}`}>
+                                [{t.worker_id.split('_').pop()}]
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="py-2 px-3 hidden lg:table-cell whitespace-nowrap text-[11px] font-mono text-zinc-500">
                         {fmtTime(t.created_at)}
@@ -492,6 +559,162 @@ export default function QueueTab({
         >
           Table collapsed by preference — click to expand
         </button>
+      )}
+
+      {/* ── Connected Server Fleet & Hardware Telemetry Modal ── */}
+      {showFleetModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 light:bg-white/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowFleetModal(false)
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl bg-zinc-950 light:bg-white border border-zinc-800 light:border-zinc-200 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200"
+          >
+            {/* Modal Header */}
+            <div className="p-4 bg-zinc-900/90 light:bg-zinc-100 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0 shadow-xs">
+                  <Server className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-white light:text-zinc-900">
+                      Active Worker Fleet &amp; Server Telemetry
+                    </h3>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/20 text-emerald-300 light:text-emerald-700 border border-emerald-500/40">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      {fleet?.online_count || 0} Online
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 light:text-zinc-600 font-mono mt-0.5">
+                    Live background execution daemons and hardware servers
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFleetModal(false)}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-white light:hover:text-zinc-900 hover:bg-zinc-800 light:hover:bg-zinc-200 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body: Server Machines */}
+            <div className="p-4 overflow-y-auto space-y-4">
+              {serverGroups.length === 0 ? (
+                <div className="py-8 text-center text-zinc-500 text-xs font-mono">
+                  No active workers detected. Start a worker daemon with `python run.py --worker`.
+                </div>
+              ) : (
+                serverGroups.map((srv: any, idx: number) => {
+                  const isDarwin = srv.platform?.includes('Darwin') || srv.device_brand?.includes('Mac')
+                  const isWindows = srv.platform?.includes('Windows')
+                  const brandName = srv.device_brand || (isDarwin ? 'Apple Mac' : isWindows ? 'Windows PC' : 'Linux Server')
+
+                  return (
+                    <div
+                      key={srv.hostname || idx}
+                      className="rounded-xl bg-zinc-900/60 light:bg-zinc-50 border border-zinc-800 light:border-zinc-200 overflow-hidden"
+                    >
+                      {/* Server Machine Card Header */}
+                      <div className="px-3.5 py-3 border-b border-zinc-800/80 light:border-zinc-200 bg-zinc-900/40 light:bg-zinc-100 flex items-center justify-between gap-3 flex-wrap">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+                            isDarwin 
+                              ? 'bg-sky-500/10 border-sky-500/30 text-sky-400' 
+                              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                          }`}>
+                            <Laptop className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-xs text-white light:text-zinc-900 flex items-center gap-1.5 flex-wrap">
+                              <span className="text-sm">{brandName}</span>
+                              <span className="text-zinc-400 font-mono text-[11px]">({srv.hostname})</span>
+                            </div>
+                            <div className="text-[10px] font-mono text-zinc-400 light:text-zinc-600 flex items-center gap-1.5 flex-wrap">
+                              <span>{srv.hardware_model || brandName}</span>
+                              <span className="text-zinc-600">·</span>
+                              <span className="text-zinc-500">{srv.platform}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 flex items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold border ${
+                            srv.active_count > 0 
+                              ? 'bg-sky-500/15 border-sky-500/40 text-sky-300 light:text-sky-700 animate-pulse' 
+                              : 'bg-zinc-800/80 border-zinc-700 text-zinc-300 light:text-zinc-600'
+                          }`}>
+                            {srv.workers.length} Slots · {srv.active_count > 0 ? `${srv.active_count} Busy` : 'All Idle'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Workers under this server */}
+                      <div className="p-3 divide-y divide-zinc-800/60 light:divide-zinc-200">
+                        {srv.workers.map((w: any) => {
+                          const isBusy = Boolean(w.current_task_id || w.current_task_user)
+                          return (
+                            <div
+                              key={w.worker_id}
+                              className="py-2 first:pt-0 last:pb-0 flex items-center justify-between gap-3 text-xs"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className={`w-2 h-2 rounded-full shrink-0 ${
+                                  isBusy ? 'bg-sky-400 animate-ping' : 'bg-emerald-400'
+                                }`} />
+                                <div className="min-w-0">
+                                  <div className="font-mono text-[11px] font-semibold text-zinc-200 light:text-zinc-800 flex items-center gap-1.5">
+                                    <span>Slot #{w.pool_slot}</span>
+                                    <span className="text-zinc-500 font-normal">({w.worker_id})</span>
+                                    {w.pid && <span className="text-zinc-500 font-normal text-[10px]">PID: {w.pid}</span>}
+                                  </div>
+                                  <div className="text-[11px] font-mono">
+                                    {isBusy ? (
+                                      <span className="text-sky-300 light:text-sky-700 font-semibold flex items-center gap-1">
+                                        <Sparkles className="w-3 h-3 text-sky-400" />
+                                        Applying for {w.current_task_user}
+                                      </span>
+                                    ) : (
+                                      <span className="text-zinc-500">Idle · Ready for queue tasks</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="shrink-0 text-right font-mono text-[10px] text-zinc-500">
+                                <div>Pulse: {w.heartbeat_age_s}s ago</div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 bg-zinc-900/60 light:bg-zinc-100 border-t border-zinc-800 light:border-zinc-200 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-zinc-400" />
+                Refreshed every 15s via Atlas broker
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowFleetModal(false)}
+                className="px-3 py-1 rounded-lg bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700 light:hover:bg-zinc-300 text-zinc-200 light:text-zinc-800 cursor-pointer font-sans text-xs"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
