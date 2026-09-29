@@ -10,22 +10,27 @@ export interface VisitorIdentity {
   email: string | null
   user_id: string | null
   manual: boolean
+  tag_name?: string | null
 }
 
 export async function getIdentityMap(db: Db, visitorIds: string[]): Promise<Map<string, VisitorIdentity>> {
   const map = new Map<string, VisitorIdentity>()
-  const ids = [...new Set((visitorIds || []).filter(Boolean))].slice(0, 200)
+  const ids = [...new Set((visitorIds || []).filter(Boolean))].slice(0, 300)
   if (ids.length === 0) return map
   try {
     const docs = await db.collection('visitors_summary')
-      .find({ visitor_id: { $in: ids } }, { projection: { visitor_id: 1, identified_email: 1, identified_user_id: 1, manual_tag: 1 } })
+      .find(
+        { visitor_id: { $in: ids } },
+        { projection: { visitor_id: 1, identified_email: 1, identified_user_id: 1, manual_tag: 1, tag_name: 1, alias: 1 } }
+      )
       .toArray()
     for (const d of docs) {
-      if (d.identified_email) {
+      if (d.identified_email || d.tag_name || d.alias) {
         map.set(d.visitor_id, {
-          email: d.identified_email,
+          email: d.identified_email || null,
           user_id: d.identified_user_id || null,
-          manual: d.manual_tag === true
+          manual: d.manual_tag === true,
+          tag_name: d.tag_name || d.alias || null
         })
       }
     }
@@ -63,33 +68,52 @@ export async function linkVisitorToUser(
   }
 }
 
-/** Super-admin manual tag: this browser IS this person. Wins over auto-learning. */
+/** Super-admin manual tag: this browser IS this person/name. Wins over auto-learning. */
 export async function tagVisitorManually(
   db: Db,
-  opts: { visitor_id: string; email: string; user_id?: string | null; taggedBy: string }
+  opts: { visitor_id: string; email?: string | null; tag_name?: string | null; user_id?: string | null; taggedBy: string }
 ): Promise<boolean> {
   const vid = (opts.visitor_id || '').trim()
   const email = (opts.email || '').trim().toLowerCase()
-  if (!vid || !email || !email.includes('@')) return false
+  const tagName = (opts.tag_name || '').trim()
+  if (!vid) return false
+  if (!email && !tagName) return false
   try {
     try {
       await db.collection('visitors_summary').createIndex({ visitor_id: 1 }, { unique: true })
     } catch {}
+
+    const setOps: Record<string, any> = {
+      visitor_id: vid,
+      manual_tag: true,
+      tagged_by: opts.taggedBy,
+      tagged_at: new Date(),
+      last_seen_at: new Date()
+    }
+    if (email) {
+      setOps.identified_email = email
+      setOps.manual_email = email
+    }
+    if (tagName) {
+      setOps.tag_name = tagName
+    }
+    if (opts.user_id) {
+      setOps.identified_user_id = opts.user_id
+    }
+
+    const unsetOps: Record<string, ''> = {}
+    if (opts.tag_name === '') {
+      unsetOps.tag_name = ''
+    }
+
+    const updateDoc: Record<string, any> = { $set: setOps }
+    if (Object.keys(unsetOps).length > 0) {
+      updateDoc.$unset = unsetOps
+    }
+
     await db.collection('visitors_summary').updateOne(
       { visitor_id: vid },
-      {
-        $set: {
-          visitor_id: vid,
-          identified_email: email,
-          manual_email: email,
-          ...(opts.user_id ? { identified_user_id: opts.user_id } : {}),
-          manual_tag: true,
-          tagged_by: opts.taggedBy,
-          tagged_at: new Date(),
-          last_seen_at: new Date()
-        },
-        $setOnInsert: { first_seen_at: new Date() }
-      },
+      updateDoc,
       { upsert: true }
     )
     return true
@@ -105,8 +129,7 @@ export async function untagVisitor(db: Db, visitorId: string): Promise<boolean> 
   try {
     const doc = await db.collection('visitors_summary').findOne({ visitor_id: vid })
     if (!doc) return false
-    const unset: Record<string, ''> = { manual_tag: '', tagged_by: '', tagged_at: '' }
-    // If the displayed email came only from the manual tag, clear it too.
+    const unset: Record<string, ''> = { manual_tag: '', tagged_by: '', tagged_at: '', tag_name: '' }
     if (doc.manual_email && doc.identified_email === doc.manual_email) {
       unset.identified_email = ''
       unset.manual_email = ''

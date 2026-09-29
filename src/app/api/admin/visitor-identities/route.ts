@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 /**
  * Super-admin manual browser↔identity tags.
- * POST { visitor_id, email } — this browser IS this person (wins over auto-learning).
+ * POST { visitor_id, email, tag_name } — this browser IS this person / short name tag.
  * DELETE ?visitor_id= — remove the manual tag.
  */
 export async function POST(req: NextRequest) {
@@ -22,26 +22,44 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}))
     const visitorId = (body.visitor_id || '').trim()
     const email = (body.email || '').trim().toLowerCase()
-    if (!visitorId || !email || !email.includes('@')) {
-      return NextResponse.json({ detail: 'visitor_id and a valid email are required.' }, { status: 400 })
+    const tagName = (body.tag_name || body.name || body.alias || '').trim()
+
+    if (!visitorId) {
+      return NextResponse.json({ detail: 'visitor_id is required.' }, { status: 400 })
+    }
+    if (!email && !tagName) {
+      return NextResponse.json({ detail: 'Please provide a short name / tag or email.' }, { status: 400 })
+    }
+    if (email && !email.includes('@')) {
+      return NextResponse.json({ detail: 'Please provide a valid email with @.' }, { status: 400 })
     }
 
-    const userDoc = await db.collection('profiles').findOne(
-      { email: exactMatchCI(email) },
-      { projection: { user_id: 1 } }
-    ) || await db.collection('users').findOne(
-      { email: exactMatchCI(email) },
-      { projection: { user_id: 1 } }
-    )
+    let userDoc: any = null
+    if (email) {
+      userDoc = await db.collection('profiles').findOne(
+        { email: exactMatchCI(email) },
+        { projection: { user_id: 1, name: 1 } }
+      ) || await db.collection('users').findOne(
+        { email: exactMatchCI(email) },
+        { projection: { user_id: 1, name: 1 } }
+      )
+    }
 
     const ok = await tagVisitorManually(db, {
       visitor_id: visitorId,
-      email,
+      email: email || null,
+      tag_name: tagName || null,
       user_id: userDoc?.user_id || null,
       taggedBy: userId
     })
     if (!ok) return NextResponse.json({ detail: 'Failed to tag visitor.' }, { status: 500 })
-    return NextResponse.json({ status: 'success', visitor_id: visitorId, email, user_id: userDoc?.user_id || null })
+    return NextResponse.json({
+      status: 'success',
+      visitor_id: visitorId,
+      email: email || null,
+      tag_name: tagName || null,
+      user_id: userDoc?.user_id || null
+    })
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Failed to tag visitor.' }, { status: 500 })
   }

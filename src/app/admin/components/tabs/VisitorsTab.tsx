@@ -68,16 +68,23 @@ export default function VisitorsTab() {
   const [inspectEvent, setInspectEvent] = useState<VisitorEventRecord | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  // Manual browser→identity tagging
+  // Manual browser→identity tagging (Short Name / Alias and/or Email)
+  const [tagName, setTagName] = useState<string>('')
   const [tagEmail, setTagEmail] = useState<string>('')
+  const [isEditingTag, setIsEditingTag] = useState<boolean>(false)
   const [tagBusy, setTagBusy] = useState<boolean>(false)
   const [tagNotice, setTagNotice] = useState<string | null>(null)
 
   const submitTag = async () => {
     if (!inspectEvent || tagBusy) return
-    const clean = tagEmail.trim().toLowerCase()
-    if (!clean || !clean.includes('@')) {
-      setTagNotice('Enter a valid email to tag this browser.')
+    const cleanName = tagName.trim()
+    const cleanEmail = tagEmail.trim().toLowerCase()
+    if (!cleanName && !cleanEmail) {
+      setTagNotice('Enter a short name / tag or an email.')
+      return
+    }
+    if (cleanEmail && !cleanEmail.includes('@')) {
+      setTagNotice('Please enter a valid email address with @.')
       return
     }
     setTagBusy(true)
@@ -87,13 +94,51 @@ export default function VisitorsTab() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ visitor_id: inspectEvent.visitor_id, email: clean })
+        body: JSON.stringify({
+          visitor_id: inspectEvent.visitor_id,
+          tag_name: cleanName || null,
+          email: cleanEmail || null
+        })
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.detail || 'Tagging failed.')
-      setInspectEvent({ ...inspectEvent, linked: { email: clean, user_id: data.user_id || inspectEvent.linked?.user_id || null, manual: true } })
-      setTagEmail('')
-      setTagNotice(`Tagged — this browser now resolves to ${clean}.`)
+
+      const updatedLinked = {
+        email: cleanEmail || inspectEvent.linked?.email || inspectEvent.email || null,
+        user_id: data.user_id || inspectEvent.linked?.user_id || inspectEvent.user_id || null,
+        tag_name: cleanName || null,
+        manual: true
+      }
+
+      setInspectEvent({
+        ...inspectEvent,
+        tag_name: cleanName || null,
+        linked: updatedLinked
+      })
+
+      // Immediately sync with the active events list so table rows reflect the change
+      setEvents((prevEvents) =>
+        prevEvents.map((e) =>
+          e.visitor_id === inspectEvent.visitor_id
+            ? {
+                ...e,
+                tag_name: cleanName || null,
+                linked: {
+                  ...(e.linked || {}),
+                  email: cleanEmail || e.linked?.email || e.email || null,
+                  tag_name: cleanName || null,
+                  manual: true
+                }
+              }
+            : e
+        )
+      )
+
+      setIsEditingTag(false)
+      const noticeParts = []
+      if (cleanName) noticeParts.push(`name '${cleanName}'`)
+      if (cleanEmail) noticeParts.push(`email '${cleanEmail}'`)
+      setTagNotice(`✅ Tag saved: ${noticeParts.join(' & ')}.`)
     } catch (err: any) {
       setTagNotice(err.message || 'Tagging failed.')
     } finally {
@@ -110,7 +155,17 @@ export default function VisitorsTab() {
         method: 'DELETE',
         credentials: 'same-origin'
       })
-      setInspectEvent({ ...inspectEvent, linked: null })
+      setInspectEvent({ ...inspectEvent, tag_name: null, linked: null })
+      setEvents((prevEvents) =>
+        prevEvents.map((e) =>
+          e.visitor_id === inspectEvent.visitor_id
+            ? { ...e, tag_name: null, linked: null }
+            : e
+        )
+      )
+      setTagName('')
+      setTagEmail('')
+      setIsEditingTag(false)
       setTagNotice('Manual tag removed.')
     } catch (err: any) {
       setTagNotice(err.message || 'Untag failed.')
@@ -768,6 +823,13 @@ export default function VisitorsTab() {
 
                       {/* Visitor / Identity */}
                       <td className="py-3 px-4">
+                        {(evt.tag_name || evt.linked?.tag_name) && (
+                          <div className="mb-1">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 light:text-violet-700 border border-violet-500/40 text-[11px] font-bold shadow-xs">
+                              🏷️ {evt.tag_name || evt.linked?.tag_name}
+                            </span>
+                          </div>
+                        )}
                         {hasEmail ? (
                           <div className="space-y-0.5">
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 light:text-emerald-700 border border-emerald-800 text-[11px] font-medium">
@@ -800,11 +862,11 @@ export default function VisitorsTab() {
                                 🔗 {evt.linked.email}
                                 {evt.linked.manual ? ' · tagged' : ''}
                               </span>
-                            ) : (
+                            ) : !(evt.tag_name || evt.linked?.tag_name) ? (
                               <span className="text-[10px] text-zinc-600 block">
                                 Anonymous Visitor
                               </span>
-                            )}
+                            ) : null}
                           </div>
                         )}
                       </td>
@@ -919,7 +981,13 @@ export default function VisitorsTab() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
-                            onClick={() => { setInspectEvent(evt); setTagEmail(''); setTagNotice(null) }}
+                            onClick={() => {
+                              setInspectEvent(evt)
+                              setTagName(evt.tag_name || evt.linked?.tag_name || '')
+                              setTagEmail(evt.linked?.email || '')
+                              setTagNotice(null)
+                              setIsEditingTag(false)
+                            }}
                             className="px-2.5 py-1 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-white light:hover:text-zinc-900 border border-zinc-800 light:border-zinc-200 text-[11px] font-medium transition-colors cursor-pointer"
                           >
                             Inspect
@@ -1028,8 +1096,15 @@ export default function VisitorsTab() {
 
               <div className="p-3 rounded-xl bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200">
                 <span className="text-[10px] text-zinc-500 light:text-zinc-600 uppercase font-semibold block">Visitor Identity</span>
-                <div className="text-xs font-medium text-emerald-400 light:text-emerald-600 mt-1">
-                  {inspectEvent.email || 'Anonymous (Unauthenticated)'}
+                {(inspectEvent.tag_name || inspectEvent.linked?.tag_name) && (
+                  <div className="mt-1">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 light:text-violet-700 border border-violet-500/40 text-[11px] font-bold">
+                      🏷️ {inspectEvent.tag_name || inspectEvent.linked?.tag_name}
+                    </span>
+                  </div>
+                )}
+                <div className={`text-xs font-medium mt-1 ${inspectEvent.email ? 'text-emerald-400 light:text-emerald-600' : 'text-zinc-300 light:text-zinc-700'}`}>
+                  {inspectEvent.email || (inspectEvent.linked?.email ? `🔗 ${inspectEvent.linked.email}` : 'Anonymous (Unauthenticated)')}
                 </div>
                 <div className="text-[10px] font-mono text-zinc-500 light:text-zinc-600 mt-0.5 truncate">
                   VID: {inspectEvent.visitor_id}
@@ -1057,52 +1132,120 @@ export default function VisitorsTab() {
               </div>
             </div>
 
-            {/* Identity: stored, linked, or taggable */}
-            <div className="p-3 rounded-xl bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 mb-4">
-              <span className="text-[10px] text-zinc-500 light:text-zinc-600 uppercase font-semibold block mb-1.5">Browser Identity</span>
-              {inspectEvent.email ? (
-                <div className="text-xs font-medium text-emerald-400 light:text-emerald-600">
-                  {inspectEvent.email} <span className="text-zinc-500 font-normal">(signed-in on this event)</span>
-                </div>
-              ) : inspectEvent.linked?.email ? (
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="text-xs font-medium text-cyan-300 light:text-cyan-700">
-                    🔗 {inspectEvent.linked.email}
-                    <span className="text-zinc-500 font-normal"> ({inspectEvent.linked.manual ? 'tagged by you' : 'auto-mapped at login'})</span>
-                  </div>
-                  {inspectEvent.linked.manual && (
+            {/* Identity: stored, linked, or taggable with Short Name and/or Email */}
+            <div className="p-3.5 rounded-xl bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-zinc-500 light:text-zinc-600 uppercase font-semibold">
+                  Browser Identity &amp; Short Name Tag
+                </span>
+                {!isEditingTag && (inspectEvent.tag_name || inspectEvent.linked?.tag_name || inspectEvent.linked?.manual) ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTagName(inspectEvent.tag_name || inspectEvent.linked?.tag_name || '')
+                        setTagEmail(inspectEvent.linked?.email || '')
+                        setIsEditingTag(true)
+                      }}
+                      className="text-[11px] text-cyan-400 hover:text-cyan-300 cursor-pointer font-medium"
+                    >
+                      Edit Tag
+                    </button>
                     <button
                       type="button"
                       onClick={removeTag}
                       disabled={tagBusy}
-                      className="text-[11px] text-zinc-400 hover:text-rose-300 cursor-pointer disabled:opacity-50"
+                      className="text-[11px] text-zinc-500 hover:text-rose-400 cursor-pointer disabled:opacity-50"
                     >
-                      Untag
+                      Remove
                     </button>
-                  )}
+                  </div>
+                ) : !isEditingTag && (
+                  <span className="text-[10px] text-zinc-500">Assign recognizable nickname</span>
+                )}
+              </div>
+
+              {!isEditingTag && (inspectEvent.tag_name || inspectEvent.linked?.tag_name || inspectEvent.linked?.email) ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {(inspectEvent.tag_name || inspectEvent.linked?.tag_name) && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-500/20 text-violet-300 light:text-violet-700 border border-violet-500/30 text-xs font-bold">
+                        🏷️ {inspectEvent.tag_name || inspectEvent.linked?.tag_name}
+                      </span>
+                    )}
+                    {inspectEvent.linked?.email && (
+                      <span className="inline-flex items-center gap-1 text-xs text-cyan-300 light:text-cyan-700 font-mono">
+                        🔗 {inspectEvent.linked.email}
+                      </span>
+                    )}
+                    {inspectEvent.email && (
+                      <span className="text-[11px] text-emerald-400 light:text-emerald-600 font-medium">
+                        ({inspectEvent.email})
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[10px] text-zinc-500">
+                    This visitor is now easily recognized by this short name tag across the dashboard.
+                  </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="email"
-                    value={tagEmail}
-                    onChange={(e) => setTagEmail(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') submitTag() }}
-                    placeholder="Tag this browser to an email…"
-                    className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-200 text-xs text-zinc-200 light:text-zinc-800 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={submitTag}
-                    disabled={tagBusy}
-                    className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 shrink-0"
-                  >
-                    {tagBusy ? '…' : 'Tag'}
-                  </button>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-zinc-400 light:text-zinc-600 block mb-1 font-medium">
+                        Short Name / Tag <span className="text-zinc-500 font-normal">(e.g. Rohan, Recruiter A, VIP Friend)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={tagName}
+                        onChange={(e) => setTagName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') submitTag() }}
+                        placeholder="e.g. Rohan (Lead)"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-300 text-xs text-zinc-200 light:text-zinc-800 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-zinc-400 light:text-zinc-600 block mb-1 font-medium">
+                        Link Email <span className="text-zinc-500 font-normal">(Optional — if known)</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={tagEmail}
+                        onChange={(e) => setTagEmail(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') submitTag() }}
+                        placeholder={inspectEvent.email || "email@example.com"}
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-black light:bg-white border border-zinc-800 light:border-zinc-300 text-xs text-zinc-200 light:text-zinc-800 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <p className="text-[11px] text-zinc-500 light:text-zinc-600">
+                      Tag any unregistered visitor or registered user with a short name for instant recognition.
+                    </p>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isEditingTag && (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingTag(false)}
+                          className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={submitTag}
+                        disabled={tagBusy}
+                        className="px-3.5 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {tagBusy ? 'Saving…' : 'Save Tag'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
               {tagNotice && (
-                <div className="text-[11px] text-zinc-400 light:text-zinc-600 mt-1.5">{tagNotice}</div>
+                <div className="text-[11px] text-cyan-400 light:text-cyan-600 mt-2 font-medium">{tagNotice}</div>
               )}
             </div>
 

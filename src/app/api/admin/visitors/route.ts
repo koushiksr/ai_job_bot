@@ -118,14 +118,24 @@ export async function GET(req: NextRequest) {
       query.created_at = { $gte: past30d }
     }
 
-    // Search query across email, IP, path, visitor_id, user_id
+    // Search query across email, IP, path, visitor_id, user_id, tag_name
     if (search) {
       const regex = new RegExp(escapeRegExp(search), 'i')
+      let matchingVids: string[] = []
+      try {
+        const matchingSummaries = await db.collection('visitors_summary').find(
+          { $or: [{ tag_name: regex }, { alias: regex }, { identified_email: regex }] },
+          { projection: { visitor_id: 1 } }
+        ).limit(100).toArray()
+        matchingVids = matchingSummaries.map((s: any) => s.visitor_id).filter(Boolean)
+      } catch {}
+
       query.$or = [
         { email: regex },
         { ip_address: regex },
         { user_id: regex },
         { visitor_id: regex },
+        ...(matchingVids.length > 0 ? [{ visitor_id: { $in: matchingVids } }] : []),
         { path: regex },
         { referrer: regex },
         { city: regex },
@@ -147,49 +157,53 @@ export async function GET(req: NextRequest) {
       db.collection('visitor_events').countDocuments(query)
     ])
 
-    // Resolve stored-email-less rows to known browsers (auto-learned at login
-    // or manually tagged) so they don't read as anonymous strangers.
-    let identityMap = new Map<string, { email: string | null; user_id: string | null; manual: boolean }>()
+    // Resolve all visitor IDs to known tags and identities
+    let identityMap = new Map<string, { email: string | null; user_id: string | null; manual: boolean; tag_name?: string | null }>()
     try {
       const { getIdentityMap } = await import('@/lib/visitorIdentity')
-      const anonVids = [...new Set(
-        rawEvents.filter((e: any) => !e.email).map((e: any) => e.visitor_id).filter(Boolean)
+      const allVids = [...new Set(
+        rawEvents.map((e: any) => e.visitor_id).filter(Boolean)
       )]
-      identityMap = await getIdentityMap(db, anonVids)
+      identityMap = await getIdentityMap(db, allVids)
     } catch {}
 
-    const formattedEvents = rawEvents.map((evt) => ({
-      id: evt._id.toString(),
-      visitor_id: evt.visitor_id,
-      session_id: evt.session_id,
-      event_type: evt.event_type,
-      path: evt.path,
-      full_url: evt.full_url,
-      referrer: evt.referrer,
-      title: evt.title,
-      email: evt.email,
-      user_id: evt.user_id,
-      user_name: evt.user_name,
-      is_authenticated: Boolean(evt.email || evt.user_id),
-      ip_address: evt.ip_address,
-      country: evt.country,
-      country_name: evt.country_name,
-      city: evt.city,
-      region: evt.region,
-      user_agent: evt.user_agent,
-      device_type: evt.device_type,
-      os: evt.os,
-      browser: evt.browser,
-      screen_resolution: evt.screen_resolution,
-      language: evt.language,
-      metadata: evt.metadata || {},
-      created_at: evt.created_at,
-      linked: (() => {
-        if (evt.email) return null
-        const hit = identityMap.get(evt.visitor_id)
-        return hit ? { email: hit.email, user_id: hit.user_id, manual: hit.manual } : null
-      })()
-    }))
+    const formattedEvents = rawEvents.map((evt) => {
+      const hit = identityMap.get(evt.visitor_id)
+      return {
+        id: evt._id.toString(),
+        visitor_id: evt.visitor_id,
+        session_id: evt.session_id,
+        event_type: evt.event_type,
+        path: evt.path,
+        full_url: evt.full_url,
+        referrer: evt.referrer,
+        title: evt.title,
+        email: evt.email,
+        user_id: evt.user_id,
+        user_name: evt.user_name,
+        tag_name: hit?.tag_name || null,
+        is_authenticated: Boolean(evt.email || evt.user_id),
+        ip_address: evt.ip_address,
+        country: evt.country,
+        country_name: evt.country_name,
+        city: evt.city,
+        region: evt.region,
+        user_agent: evt.user_agent,
+        device_type: evt.device_type,
+        os: evt.os,
+        browser: evt.browser,
+        screen_resolution: evt.screen_resolution,
+        language: evt.language,
+        metadata: evt.metadata || {},
+        created_at: evt.created_at,
+        linked: hit ? {
+          email: hit.email || evt.email || null,
+          user_id: hit.user_id || evt.user_id || null,
+          tag_name: hit.tag_name || null,
+          manual: hit.manual
+        } : null
+      }
+    })
 
     // Calculate system-wide telemetry metrics
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())

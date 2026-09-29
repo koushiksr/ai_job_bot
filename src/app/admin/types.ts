@@ -236,9 +236,10 @@ export interface VisitorEventRecord {
   browser: string
   screen_resolution?: string
   language?: string
+  tag_name?: string | null
   metadata: Record<string, any>
   created_at: string
-  linked?: { email: string | null; user_id: string | null; manual: boolean } | null
+  linked?: { email: string | null; user_id: string | null; manual: boolean; tag_name?: string | null } | null
 }
 
 export interface VisitorMetrics {
