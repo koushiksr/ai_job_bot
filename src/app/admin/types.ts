@@ -102,6 +102,9 @@ export interface CandidateUser {
   last_automated_run_date?: string | null
   last_automated_run_at?: string | null
   daily_status?: string | null
+  naukri_daily_limit_reached?: boolean
+  naukri_daily_limit_date?: string | null
+  naukri_daily_limit_reason?: string | null
   current_execution?: any
   last_execution?: any
   execution_summary?: CandidateExecutionInfo

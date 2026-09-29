@@ -152,6 +152,8 @@ export async function GET(req: NextRequest) {
 
       // Sweep eligibility: member must have active paid subscription to be queued
       const blockers: string[] = []
+      const isNaukriLimitReached = m.naukri_daily_limit_date === todayIstStr
+      if (isNaukriLimitReached) blockers.push('Naukri daily limit reached')
       if (orgDisabled) blockers.push('Org disabled by Super Admin')
       if (m.enabled_for_daily_run === false) blockers.push('Daily run paused')
       if ((m.enterprise_status || 'active') === 'disabled') blockers.push('Member disabled')
@@ -169,6 +171,9 @@ export async function GET(req: NextRequest) {
         enterprise_role: m.enterprise_role || (m.email === 'koushiksrmedala@gmail.com' ? 'admin' : 'member'),
         enterprise_status: m.enterprise_status || 'active',
         enabled_for_daily_run: m.enabled_for_daily_run !== false && isPlanActive,
+        naukri_daily_limit_reached: isNaukriLimitReached,
+        naukri_daily_limit_date: m.naukri_daily_limit_date || null,
+        naukri_daily_limit_reason: m.naukri_daily_limit_reason || null,
         plan: effPlan,
         plan_name: effPlanName,
         plan_active: isPlanActive,

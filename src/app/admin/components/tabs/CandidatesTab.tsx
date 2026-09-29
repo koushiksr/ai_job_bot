@@ -1310,6 +1310,22 @@ export default function CandidatesTab({
                       {/* Bot Execution & Server Identity Status */}
                       <td className="py-3 px-3">
                         {(() => {
+                          const isNaukriLimit = Boolean(
+                            u.naukri_daily_limit_reached ||
+                            u.automation_status === 'naukri_limit_reached' ||
+                            (u.daily_status && u.daily_status.startsWith('naukri_limit_reached'))
+                          );
+                          if (isNaukriLimit) {
+                            return (
+                              <div
+                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-rose-950/40 text-rose-300 light:text-rose-700 border border-rose-800/60 light:border-rose-300 shadow-sm"
+                                title={`Naukri daily application limit reached today ("${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}"). Further runs paused until tomorrow.`}
+                              >
+                                <AlertCircle className="w-3 h-3 text-rose-400 light:text-rose-600 shrink-0" />
+                                <span>NAUKRI LIMIT</span>
+                              </div>
+                            );
+                          }
                           const capped = isCandidateCapped(u);
                           const noMatch = isCandidateNoMatch(u);
                           if (capped) {
@@ -1745,30 +1761,44 @@ export default function CandidatesTab({
                       <td className="py-3 px-3.5 text-right relative">
                         <div className="flex items-center justify-end gap-1.5" ref={openRowActionMenuId === u.user_id ? rowActionMenuRef : undefined}>
                           {/* Primary Quick Action: Zap Sweep (Candidates Only) */}
-                          {!isAdministrativeUser(u) && onTriggerOnDemand && (
-                            <button
-                              type="button"
-                              disabled={Boolean(
-                                u.execution_summary?.is_applying ||
-                                u.current_execution?.status === 'applying' ||
-                                actionProcessingId === u.user_id
-                              )}
-                              onClick={async (e) => {
-                                e.stopPropagation()
-                                if (confirm(`Trigger immediate on-demand application for "${u.name || u.user_id}"?\n(Bypasses daily lock to run on next available server)`)) {
-                                  await onTriggerOnDemand(u.user_id, true)
+                          {!isAdministrativeUser(u) && onTriggerOnDemand && (() => {
+                            const isNaukriLimit = Boolean(
+                              u.naukri_daily_limit_reached ||
+                              u.automation_status === 'naukri_limit_reached' ||
+                              (u.daily_status && u.daily_status.startsWith('naukri_limit_reached'))
+                            );
+                            return (
+                              <button
+                                type="button"
+                                disabled={Boolean(
+                                  u.execution_summary?.is_applying ||
+                                  u.current_execution?.status === 'applying' ||
+                                  actionProcessingId === u.user_id ||
+                                  isNaukriLimit
+                                )}
+                                onClick={async (e) => {
+                                  e.stopPropagation()
+                                  if (confirm(`Trigger immediate on-demand application for "${u.name || u.user_id}"?\n(Bypasses daily lock to run on next available server)`)) {
+                                    await onTriggerOnDemand(u.user_id, true)
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white transition-colors border border-cyan-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                title={
+                                  isNaukriLimit
+                                    ? `Naukri daily application limit reached for today ("${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}"). Sweeps paused until tomorrow.`
+                                    : actionProcessingId === u.user_id
+                                    ? 'Queuing on-demand run…'
+                                    : 'Trigger immediate on-demand bot run for this candidate'
                                 }
-                              }}
-                              className="p-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white transition-colors border border-cyan-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                              title={actionProcessingId === u.user_id ? 'Queuing on-demand run…' : 'Trigger immediate on-demand bot run for this candidate'}
-                            >
-                              {actionProcessingId === u.user_id ? (
-                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                              ) : (
-                                <Zap className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-                          )}
+                              >
+                                {actionProcessingId === u.user_id ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Zap className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            );
+                          })()}
 
                           {/* Quick Inspect Button */}
                           <button
@@ -1807,26 +1837,36 @@ export default function CandidatesTab({
                                 onClick={(e) => e.stopPropagation()}
                                 className="absolute right-0 top-full mt-1 w-52 p-1.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 text-left space-y-0.5 animate-fadeIn"
                               >
-                                {!isAdministrativeUser(u) && onTriggerOnDemand && (
-                                  <button
-                                    type="button"
-                                    disabled={Boolean(
-                                      u.execution_summary?.is_applying ||
-                                      u.current_execution?.status === 'applying' ||
-                                      actionProcessingId === u.user_id
-                                    )}
-                                    onClick={async () => {
-                                      setOpenRowActionMenuId(null)
-                                      if (confirm(`Trigger immediate on-demand application for "${u.name || u.user_id}"?\n(Bypasses daily lock to run on next available server)`)) {
-                                        await onTriggerOnDemand(u.user_id, true)
-                                      }
-                                    }}
-                                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-cyan-300 hover:bg-cyan-950/50 light:hover:bg-cyan-50 transition-colors cursor-pointer disabled:opacity-40"
-                                  >
-                                    <Zap className="w-3.5 h-3.5 shrink-0" />
-                                    <span>Run On-Demand Sweep</span>
-                                  </button>
-                                )}
+                                {!isAdministrativeUser(u) && onTriggerOnDemand && (() => {
+                                  const isNaukriLimit = Boolean(
+                                    u.naukri_daily_limit_reached ||
+                                    u.automation_status === 'naukri_limit_reached' ||
+                                    (u.daily_status && u.daily_status.startsWith('naukri_limit_reached'))
+                                  );
+                                  return (
+                                    <button
+                                      type="button"
+                                      disabled={Boolean(
+                                        u.execution_summary?.is_applying ||
+                                        u.current_execution?.status === 'applying' ||
+                                        actionProcessingId === u.user_id ||
+                                        isNaukriLimit
+                                      )}
+                                      title={isNaukriLimit ? `Naukri limit reached: ${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}` : undefined}
+                                      onClick={async () => {
+                                        setOpenRowActionMenuId(null)
+                                        if (confirm(`Trigger immediate on-demand application for "${u.name || u.user_id}"?\n(Bypasses daily lock to run on next available server)`)) {
+                                          await onTriggerOnDemand(u.user_id, true)
+                                        }
+                                      }}
+                                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-cyan-300 hover:bg-cyan-950/50 light:hover:bg-cyan-50 transition-colors cursor-pointer disabled:opacity-40"
+                                    >
+                                      <Zap className="w-3.5 h-3.5 shrink-0" />
+                                      <span>Run On-Demand Sweep</span>
+                                    </button>
+                                  );
+                                })()}
+
 
                                 <button
                                   type="button"

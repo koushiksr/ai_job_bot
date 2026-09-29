@@ -65,6 +65,9 @@ interface Member {
   active_task?: { task_id: string; status: string; queue_position: number | null; hostname?: string; worker_id?: string } | null
   sweep_eligible?: boolean
   sweep_blockers?: string[]
+  naukri_daily_limit_reached?: boolean
+  naukri_daily_limit_date?: string | null
+  naukri_daily_limit_reason?: string | null
   match_status?: string
   current_execution?: any
   last_execution?: any
@@ -1502,7 +1505,12 @@ export default function EnterpriseAdminPortal() {
 
                             return (
                               <div className="space-y-1">
-                                {!member.plan_active ? (
+                                {member.naukri_daily_limit_reached ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-950/60 light:bg-rose-50 border border-rose-800/60 light:border-rose-300 text-rose-300 light:text-rose-700 text-[10px] font-mono" title={member.naukri_daily_limit_reason || "Naukri daily limit reached"}>
+                                    <AlertCircle className="w-2.5 h-2.5 text-rose-400 light:text-rose-600" />
+                                    Naukri Limit
+                                  </span>
+                                ) : !member.plan_active ? (
                                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/60 light:bg-zinc-100 border border-zinc-700/60 light:border-zinc-300 text-zinc-400 light:text-zinc-600 text-[10px] font-mono">
                                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
                                     No Plan
@@ -1519,7 +1527,11 @@ export default function EnterpriseAdminPortal() {
                                   </span>
                                 )}
                                 <div className="text-[10px] font-mono truncate max-w-[150px]">
-                                  {!member.plan_active ? (
+                                  {member.naukri_daily_limit_reached ? (
+                                    <span className="text-rose-400/90 light:text-rose-600" title={member.naukri_daily_limit_reason || 'Naukri limit reached'}>
+                                      Limit reached today
+                                    </span>
+                                  ) : !member.plan_active ? (
                                     <span className="text-zinc-500 light:text-zinc-600">No active plan</span>
                                   ) : member.sweep_eligible === false ? (
                                     <span className="text-amber-300 light:text-amber-700">
@@ -1609,10 +1621,12 @@ export default function EnterpriseAdminPortal() {
                             ) : (
                               <button
                                 onClick={() => handleTriggerOnDemand(member)}
-                                disabled={isProcessing || !isEnabled || org?.status === 'disabled' || !member.plan_active || (member.on_demand_quota || 0) === 0}
+                                disabled={isProcessing || !isEnabled || org?.status === 'disabled' || !member.plan_active || (member.on_demand_quota || 0) === 0 || member.naukri_daily_limit_reached}
                                 className="px-2.5 py-1 rounded-lg bg-cyan-950/60 light:bg-cyan-50 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
                                 title={
-                                  !member.plan_active
+                                  member.naukri_daily_limit_reached
+                                    ? `Naukri daily application limit reached for today ("${member.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}"). Sweeps paused until tomorrow.`
+                                    : !member.plan_active
                                     ? 'No active plan — assign or pay for a plan'
                                     : (member.on_demand_quota || 0) === 0
                                     ? 'Org Starter plan includes scheduled morning sweeps only (upgrade to Org Pro for on-demand)'

@@ -213,6 +213,19 @@ export async function POST(req: NextRequest) {
     const role = profile?.role || 'user'
     const plan = (profile?.plan || 'trial').toLowerCase()
     const now = new Date()
+
+    // 0. Check Naukri platform daily application limit for today
+    const istNow = new Date(now.getTime() + 5.5 * 60 * 60 * 1000)
+    const todayIstStr = istNow.toISOString().slice(0, 10)
+    if (profile?.naukri_daily_limit_date === todayIstStr) {
+      const reason = profile.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'
+      return NextResponse.json({
+        detail: `Naukri daily application limit reached for today ("${reason}"). You cannot apply to jobs today anymore. On-demand sweeps are paused and will resume tomorrow.`,
+        code: 'NAUKRI_DAILY_LIMIT_REACHED',
+        reason
+      }, { status: 400 })
+    }
+
     const isSuperUser = role === 'admin' || user_id === 'admin' || user_id === 'technohmsit'
     const isVip = Boolean(profile?.is_vip || profile?.vip_access || profile?.free_privilege)
     const isEnterpriseMember = profile?.enterprise_role === 'member' || Boolean(profile?.enterprise_org_id || profile?.org_id) || ['enterprise', 'org_starter', 'org_pro', 'org_pro_3m'].includes(plan)

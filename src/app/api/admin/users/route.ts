@@ -399,6 +399,9 @@ export async function GET(req: NextRequest) {
         last_scout_run_at: p.last_scout_run_at || null,
         last_automated_run_date: p.last_automated_run_date || null,
         daily_status: p.daily_status || null,
+        naukri_daily_limit_reached: p.naukri_daily_limit_date === todayIst,
+        naukri_daily_limit_date: p.naukri_daily_limit_date || null,
+        naukri_daily_limit_reason: p.naukri_daily_limit_reason || null,
         current_execution: p.current_execution || null,
         last_execution: p.last_execution || null,
         match_status: poolStateByUser[p.user_id] || (
