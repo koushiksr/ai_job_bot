@@ -7,31 +7,129 @@ import { logUserActivity, getClientInfo } from '@/lib/activityLogger'
 export const dynamic = 'force-dynamic'
 
 /**
- * Auto-heal tasks stuck in 'running' status with stale heartbeats (> 10 minutes)
+ * Auto-heal tasks stuck in 'running' status with stale heartbeats (> 90 seconds).
+ * If retries < 2, auto-re-queue to 'pending' so other active workers can claim them.
+ * Always releases orphaned candidate locks so other workers can process candidates without delays.
  */
 async function autoHealStaleTasks(db: any): Promise<number> {
-  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000)
+  const ninetySecondsAgo = new Date(Date.now() - 90 * 1000)
   try {
-    const res = await db.collection('tasks').updateMany(
+    const staleRunning = await db.collection('tasks').find({
+      status: 'running',
+      $or: [
+        { heartbeat_at: { $lt: ninetySecondsAgo } },
+        { heartbeat_at: { $exists: false }, started_at: { $lt: ninetySecondsAgo } }
+      ]
+    }).toArray()
+
+    let healedCount = 0
+    const now = new Date()
+
+    for (const t of staleRunning) {
+      const retries = Number(t.retry_count || 0)
+      const stopRequested = Boolean(t.stop_requested || t.status === 'stopped' || t.status === 'stop_requested')
+      const targetUserId = t.user_id
+
+      if (stopRequested) {
+        await db.collection('tasks').updateOne(
+          { _id: t._id },
+          {
+            $set: {
+              status: 'stopped',
+              stop_requested: true,
+              completed_at: now,
+              summary: 'Task stopped by user or administrator'
+            },
+            $push: {
+              logs: `[${now.toLocaleTimeString()}] 🛑 Task stopped cleanly.`
+            } as any
+          }
+        )
+      } else if (retries < 2) {
+        // Return to pending queue for other active workers
+        await db.collection('tasks').updateOne(
+          { _id: t._id },
+          {
+            $set: {
+              status: 'pending',
+              started_at: null,
+              heartbeat_at: null,
+              worker_id: null,
+              worker_host: null,
+              worker_pid: null
+            },
+            $inc: { retry_count: 1 },
+            $push: {
+              logs: `[${now.toLocaleTimeString()}] ⚠️ Worker disconnected (>90s silence). Task auto-returned to queue for other active workers (attempt ${retries + 1}/2).`
+            } as any
+          }
+        )
+      } else {
+        await db.collection('tasks').updateOne(
+          { _id: t._id },
+          {
+            $set: {
+              status: 'failed',
+              completed_at: now,
+              summary: 'Worker disconnected (>90s silence) - exceeded max retries',
+              error: 'Worker process heartbeat timed out (>90s) without recovery'
+            },
+            $push: {
+              logs: `[${now.toLocaleTimeString()}] ❌ Marked as failed due to repeated worker heartbeat timeout (>90s).`
+            } as any
+          }
+        )
+      }
+
+      // Always release candidate lock for this user
+      if (targetUserId) {
+        await db.collection('profiles').updateMany(
+          { user_id: targetUserId },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+        )
+        await db.collection('users').updateMany(
+          { user_id: targetUserId },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+        )
+      }
+      healedCount++
+    }
+
+    // Also auto-reclaim orphaned candidate locks across profiles and users
+    await db.collection('profiles').updateMany(
       {
-        status: 'running',
+        'current_execution.status': 'applying',
         $or: [
-          { heartbeat_at: { $lt: tenMinutesAgo } },
-          { heartbeat_at: { $exists: false }, started_at: { $lt: tenMinutesAgo } }
+          { 'current_execution.heartbeat_at': { $lt: ninetySecondsAgo } },
+          { 'current_execution.heartbeat_at': { $exists: false }, 'current_execution.locked_at': { $lt: ninetySecondsAgo } }
         ]
       },
       {
         $set: {
-          status: 'failed',
-          summary: 'Session timed out or worker process was interrupted (Heartbeat lost)',
-          completed_at: new Date()
-        },
-        $push: {
-          logs: `[${new Date().toLocaleTimeString()}] ⚠️ Marked as failed due to worker heartbeat timeout.`
-        } as any
+          'current_execution.status': 'idle',
+          'current_execution.worker_id': null,
+          automation_status: 'idle'
+        }
       }
     )
-    return res.modifiedCount || 0
+    await db.collection('users').updateMany(
+      {
+        'current_execution.status': 'applying',
+        $or: [
+          { 'current_execution.heartbeat_at': { $lt: ninetySecondsAgo } },
+          { 'current_execution.heartbeat_at': { $exists: false }, 'current_execution.locked_at': { $lt: ninetySecondsAgo } }
+        ]
+      },
+      {
+        $set: {
+          'current_execution.status': 'idle',
+          'current_execution.worker_id': null,
+          automation_status: 'idle'
+        }
+      }
+    )
+
+    return healedCount
   } catch (err) {
     console.error('Error auto-healing stale tasks:', err)
     return 0
@@ -320,6 +418,17 @@ export async function POST(req: NextRequest) {
         } as any
       })
 
+      if (task.user_id) {
+        await db.collection('profiles').updateMany(
+          { user_id: task.user_id },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+        )
+        await db.collection('users').updateMany(
+          { user_id: task.user_id },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+        )
+      }
+
       await logUserActivity(db, {
         userId: adminId || 'admin',
         email: adminEmail || 'admin@jobfluxai.com',
@@ -365,12 +474,26 @@ export async function POST(req: NextRequest) {
         $unset: {
           started_at: '',
           completed_at: '',
-          heartbeat_at: ''
+          heartbeat_at: '',
+          worker_id: '',
+          worker_host: '',
+          worker_pid: ''
         },
         $push: {
           logs: `[${now.toLocaleTimeString()}] 🔄 Task restored to pending queue by Administrator.`
         } as any
       })
+
+      if (task.user_id) {
+        await db.collection('profiles').updateMany(
+          { user_id: task.user_id },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+        )
+        await db.collection('users').updateMany(
+          { user_id: task.user_id },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+        )
+      }
 
       await logUserActivity(db, {
         userId: adminId || 'admin',
@@ -436,7 +559,19 @@ export async function POST(req: NextRequest) {
         idQuery = { $or: [{ _id: taskId }, { task_id: taskId }] }
       }
 
+      const taskToDelete = await db.collection('tasks').findOne(idQuery)
       await db.collection('tasks').deleteOne(idQuery)
+
+      if (taskToDelete?.user_id) {
+        await db.collection('profiles').updateMany(
+          { user_id: taskToDelete.user_id },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+        )
+        await db.collection('users').updateMany(
+          { user_id: taskToDelete.user_id },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+        )
+      }
 
       return NextResponse.json({
         status: 'success',

@@ -404,6 +404,27 @@ export default function QueueTab({
                           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotFor(t)}`} />
                           {labelFor(t)}
                         </span>
+                        {isRunning && (
+                          <div className="mt-0.5">
+                            {t.heartbeat_seconds_ago !== null && t.heartbeat_seconds_ago !== undefined ? (
+                              t.heartbeat_seconds_ago <= 30 ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400">
+                                  <span>💓</span> {t.heartbeat_seconds_ago}s ago
+                                </span>
+                              ) : t.heartbeat_seconds_ago <= 90 ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-amber-400">
+                                  <span>⚠️</span> Silent {t.heartbeat_seconds_ago}s
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-rose-400 font-semibold animate-pulse">
+                                  <span>🔴</span> Disconnected &gt;90s
+                                </span>
+                              )
+                            ) : (
+                              <span className="text-[10px] font-mono text-zinc-500">Live</span>
+                            )}
+                          </div>
+                        )}
                         {t.jobs_applied > 0 && (
                           <span className="ml-1.5 font-mono text-[10px] text-sky-400">· {t.jobs_applied} applied</span>
                         )}
@@ -456,6 +477,17 @@ export default function QueueTab({
                           >
                             <FileText className="w-3.5 h-3.5" />
                           </button>
+                          {isRunning && t.heartbeat_seconds_ago && t.heartbeat_seconds_ago > 90 && (
+                            <button
+                              type="button"
+                              onClick={() => handleQueueAction('requeue', t.task_id)}
+                              disabled={busy}
+                              className="px-2 py-1 rounded-md text-[11px] font-semibold text-amber-300 hover:text-amber-200 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 cursor-pointer disabled:opacity-50"
+                              title="Worker disconnected >90s. Reclaim and put back in queue for other workers"
+                            >
+                              {busy ? '…' : 'Reclaim'}
+                            </button>
+                          )}
                           {(isPending || isRunning) && (
                             <button
                               type="button"

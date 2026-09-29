@@ -7,25 +7,78 @@ import { getWeeklyOnDemandLimit } from '@/config/plans'
 export const dynamic = 'force-dynamic'
 
 async function healStaleUserTasks(db: any, userId: string) {
-  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000)
+  const ninetySecondsAgo = new Date(Date.now() - 90 * 1000)
   try {
-    await db.collection('tasks').updateMany(
-      {
-        user_id: userId,
-        status: 'running',
-        $or: [
-          { heartbeat_at: { $lt: tenMinutesAgo } },
-          { heartbeat_at: { $exists: false }, started_at: { $lt: tenMinutesAgo } }
-        ]
-      },
-      {
-        $set: {
-          status: 'failed',
-          summary: 'Session timed out or worker process was interrupted',
-          completed_at: new Date()
-        }
+    const staleTasks = await db.collection('tasks').find({
+      user_id: userId,
+      status: 'running',
+      $or: [
+        { heartbeat_at: { $lt: ninetySecondsAgo } },
+        { heartbeat_at: { $exists: false }, started_at: { $lt: ninetySecondsAgo } }
+      ]
+    }).toArray()
+
+    const now = new Date()
+    for (const t of staleTasks) {
+      const retries = Number(t.retry_count || 0)
+      const stopRequested = Boolean(t.stop_requested || t.status === 'stopped' || t.status === 'stop_requested')
+
+      if (stopRequested) {
+        await db.collection('tasks').updateOne(
+          { _id: t._id },
+          {
+            $set: {
+              status: 'stopped',
+              stop_requested: true,
+              completed_at: now,
+              summary: 'Task stopped by user or administrator'
+            }
+          }
+        )
+      } else if (retries < 2) {
+        await db.collection('tasks').updateOne(
+          { _id: t._id },
+          {
+            $set: {
+              status: 'pending',
+              started_at: null,
+              heartbeat_at: null,
+              worker_id: null,
+              worker_host: null,
+              worker_pid: null
+            },
+            $inc: { retry_count: 1 },
+            $push: {
+              logs: `[${now.toLocaleTimeString()}] ⚠️ Worker disconnected (>90s silence). Task auto-returned to queue for other active workers (attempt ${retries + 1}/2).`
+            } as any
+          }
+        )
+      } else {
+        await db.collection('tasks').updateOne(
+          { _id: t._id },
+          {
+            $set: {
+              status: 'failed',
+              completed_at: now,
+              summary: 'Worker disconnected (>90s silence) - exceeded max retries',
+              error: 'Worker process heartbeat timed out (>90s) without recovery'
+            },
+            $push: {
+              logs: `[${now.toLocaleTimeString()}] ❌ Task marked as failed due to repeated worker heartbeat timeout (>90s).`
+            } as any
+          }
+        )
       }
-    )
+
+      await db.collection('profiles').updateMany(
+        { user_id: userId },
+        { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+      )
+      await db.collection('users').updateMany(
+        { user_id: userId },
+        { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+      )
+    }
   } catch (err) {
     console.error('Error auto-healing stale tasks:', err)
   }

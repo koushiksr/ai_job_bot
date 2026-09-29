@@ -305,6 +305,11 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ detail: 'task_id required' }, { status: 400 })
     }
 
+    const task = await db.collection('tasks').findOne({ task_id: taskId })
+    if (!task) {
+      return NextResponse.json({ detail: 'Task not found' }, { status: 404 })
+    }
+
     const res = await db.collection('tasks').updateOne(
       { task_id: taskId, status: { $in: ['pending', 'running'] } },
       {
@@ -320,8 +325,19 @@ export async function DELETE(req: NextRequest) {
       }
     )
 
-    if (res.matchedCount === 0) {
+    if (res.matchedCount === 0 && task.status !== 'cancelled' && task.status !== 'stopped') {
       return NextResponse.json({ detail: 'Task not found or not in active state' }, { status: 404 })
+    }
+
+    if (task.user_id) {
+      await db.collection('profiles').updateMany(
+        { user_id: task.user_id },
+        { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+      )
+      await db.collection('users').updateMany(
+        { user_id: task.user_id },
+        { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null, automation_status: 'idle' } }
+      )
     }
 
     return NextResponse.json({
