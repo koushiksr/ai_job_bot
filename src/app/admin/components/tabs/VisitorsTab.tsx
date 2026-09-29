@@ -560,7 +560,7 @@ export default function VisitorsTab() {
                 setSearch(e.target.value)
                 setPage(1)
               }}
-              placeholder="Search by Email, IP, Visitor ID, URL, or Plan..."
+              placeholder="Search by Short Name / Tag, Email, IP, Visitor ID, URL, or Plan..."
               className="w-full pl-9 pr-3 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 text-zinc-200 light:text-zinc-800 placeholder-zinc-500 light:placeholder-zinc-400 text-xs focus:outline-none focus:border-cyan-500 transition-colors"
             />
             {search && (
@@ -748,6 +748,7 @@ export default function VisitorsTab() {
           {[
             { id: 'all', label: 'Everyone' },
             { id: 'known', label: 'Identified (email)' },
+            { id: 'tagged', label: 'Tagged by Name' },
             { id: 'anonymous', label: 'Anonymous lurkers' }
           ].map((pill) => (
             <button
@@ -825,9 +826,20 @@ export default function VisitorsTab() {
                       <td className="py-3 px-4">
                         {(evt.tag_name || evt.linked?.tag_name) && (
                           <div className="mb-1">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 light:text-violet-700 border border-violet-500/40 text-[11px] font-bold shadow-xs">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setInspectEvent(evt)
+                                setTagName(evt.tag_name || evt.linked?.tag_name || '')
+                                setTagEmail(evt.linked?.email || evt.email || '')
+                                setTagNotice(null)
+                                setIsEditingTag(true)
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 light:text-violet-700 border border-violet-500/40 hover:border-violet-400 text-[11px] font-bold shadow-xs transition-colors cursor-pointer"
+                              title="Click to edit short name tag"
+                            >
                               🏷️ {evt.tag_name || evt.linked?.tag_name}
-                            </span>
+                            </button>
                           </div>
                         )}
                         {hasEmail ? (
@@ -984,7 +996,25 @@ export default function VisitorsTab() {
                             onClick={() => {
                               setInspectEvent(evt)
                               setTagName(evt.tag_name || evt.linked?.tag_name || '')
-                              setTagEmail(evt.linked?.email || '')
+                              setTagEmail(evt.linked?.email || evt.email || '')
+                              setTagNotice(null)
+                              setIsEditingTag(true)
+                            }}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
+                              evt.tag_name || evt.linked?.tag_name
+                                ? 'bg-violet-950/40 text-violet-300 light:text-violet-700 border-violet-800/60 light:border-violet-300 hover:bg-violet-900/50'
+                                : 'bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-400 light:text-zinc-600 hover:text-zinc-200 border border-zinc-800 light:border-zinc-200'
+                            }`}
+                            title="Assign or edit friendly short name tag for this visitor"
+                          >
+                            <span>🏷️ {evt.tag_name || evt.linked?.tag_name ? 'Edit' : 'Tag'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInspectEvent(evt)
+                              setTagName(evt.tag_name || evt.linked?.tag_name || '')
+                              setTagEmail(evt.linked?.email || evt.email || '')
                               setTagNotice(null)
                               setIsEditingTag(false)
                             }}

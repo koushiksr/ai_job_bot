@@ -51,11 +51,23 @@ export async function GET(req: NextRequest) {
       andClauses.push({ visitor_id: { $ne: excludeVisitorId } })
     }
 
-    // Identity: identified (linked email) vs anonymous lurkers
+    // Identity: identified (linked email) vs anonymous lurkers vs tagged by name
     if (identity === 'known') {
       andClauses.push({ email: { $exists: true, $nin: [null, ''] } })
     } else if (identity === 'anonymous') {
       andClauses.push({ $or: [{ email: { $exists: false } }, { email: null }, { email: '' }] })
+    } else if (identity === 'tagged') {
+      try {
+        const taggedDocs = await db.collection('visitors_summary')
+          .find(
+            { $or: [{ tag_name: { $exists: true, $nin: [null, ''] } }, { alias: { $exists: true, $nin: [null, ''] } }, { manual_tag: true }] },
+            { projection: { visitor_id: 1 } }
+          )
+          .limit(1000)
+          .toArray()
+        const taggedVids = taggedDocs.map((d: any) => d.visitor_id).filter(Boolean)
+        andClauses.push({ visitor_id: { $in: taggedVids } })
+      } catch {}
     }
 
     // Country (matches full name or code)
