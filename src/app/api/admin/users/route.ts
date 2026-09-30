@@ -95,6 +95,42 @@ export async function GET(req: NextRequest) {
     const istNow = new Date(now.getTime() + istOffsetMs)
     const todayIst = istNow.toISOString().slice(0, 10)
 
+    // Midnight rollover: Auto-clean stale Naukri limits from previous days (limits reset at midnight IST)
+    try {
+      db.collection('users').updateMany(
+        {
+          naukri_daily_limit_date: { $exists: true, $ne: todayIst },
+          $or: [
+            { naukri_daily_limit_reached: true },
+            { automation_status: 'naukri_limit_reached' },
+            { daily_status: { $regex: '^naukri_limit_reached_' } }
+          ]
+        },
+        {
+          $set: {
+            naukri_daily_limit_reached: false,
+            automation_status: 'ready'
+          }
+        }
+      ).catch(() => {})
+      db.collection('profiles').updateMany(
+        {
+          naukri_daily_limit_date: { $exists: true, $ne: todayIst },
+          $or: [
+            { naukri_daily_limit_reached: true },
+            { automation_status: 'naukri_limit_reached' },
+            { daily_status: { $regex: '^naukri_limit_reached_' } }
+          ]
+        },
+        {
+          $set: {
+            naukri_daily_limit_reached: false,
+            automation_status: 'ready'
+          }
+        }
+      ).catch(() => {})
+    } catch {}
+
     const statsMap: Record<string, any> = {}
     statsList.forEach(s => {
       statsMap[s.user_id] = s
@@ -398,14 +434,18 @@ export async function GET(req: NextRequest) {
         on_demand_run_count: p.on_demand_run_count || 0,
         last_scout_run_at: p.last_scout_run_at || null,
         last_automated_run_date: p.last_automated_run_date || null,
-        daily_status: p.daily_status || null,
+        daily_status: (p.daily_status && (p.daily_status.endsWith(todayIst) || p.daily_status === todayIst)) ? p.daily_status : null,
         naukri_daily_limit_reached: p.naukri_daily_limit_date === todayIst,
         naukri_daily_limit_date: p.naukri_daily_limit_date || null,
-        naukri_daily_limit_reason: p.naukri_daily_limit_reason || null,
+        naukri_daily_limit_reason: p.naukri_daily_limit_date === todayIst ? (p.naukri_daily_limit_reason || null) : null,
         current_execution: p.current_execution || null,
         naukri_login_fail_count: Number(p.naukri_login_fail_count || 0),
         last_automation_issue: p.last_automation_issue || null,
-        automation_status: p.automation_status || (p.enabled_for_daily_run === false ? 'disabled' : 'ready'),
+        automation_status: (p.automation_status === 'naukri_limit_reached' && p.naukri_daily_limit_date !== todayIst)
+          ? (p.enabled_for_daily_run === false ? 'disabled' : 'ready')
+          : (p.automation_status && p.automation_status.startsWith('completed_') && !p.automation_status.endsWith(todayIst))
+          ? (p.enabled_for_daily_run === false ? 'disabled' : 'ready')
+          : (p.automation_status || (p.enabled_for_daily_run === false ? 'disabled' : 'ready')),
         is_circuit_breaker: Number(p.naukri_login_fail_count || 0) >= 3 || p.last_automation_issue?.code === 'CIRCUIT_BREAKER_PAUSED',
         match_status: poolStateByUser[p.user_id] || (
           totalTodayApplied >= dailyApplicationLimit && dailyApplicationLimit > 0

@@ -1319,11 +1319,7 @@ export default function CandidatesTab({
                       {/* Bot Execution & Server Identity Status */}
                       <td className="py-3 px-3">
                         {(() => {
-                          const isNaukriLimit = Boolean(
-                            u.naukri_daily_limit_reached ||
-                            u.automation_status === 'naukri_limit_reached' ||
-                            (u.daily_status && u.daily_status.startsWith('naukri_limit_reached'))
-                          );
+                          const isNaukriLimit = Boolean(u.naukri_daily_limit_reached);
                           if (isNaukriLimit) {
                             return (
                               <div
@@ -1793,11 +1789,7 @@ export default function CandidatesTab({
                         <div className="flex items-center justify-end gap-1.5" ref={openRowActionMenuId === u.user_id ? rowActionMenuRef : undefined}>
                           {/* Primary Quick Action: Zap Sweep (Candidates Only) */}
                           {!isAdministrativeUser(u) && onTriggerOnDemand && (() => {
-                            const isNaukriLimit = Boolean(
-                              u.naukri_daily_limit_reached ||
-                              u.automation_status === 'naukri_limit_reached' ||
-                              (u.daily_status && u.daily_status.startsWith('naukri_limit_reached'))
-                            );
+                            const isNaukriLimit = Boolean(u.naukri_daily_limit_reached);
                             return (
                               <button
                                 type="button"
@@ -1869,11 +1861,7 @@ export default function CandidatesTab({
                                 className="absolute right-0 top-full mt-1 w-52 p-1.5 rounded-xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 shadow-2xl z-50 text-left space-y-0.5 animate-fadeIn"
                               >
                                 {!isAdministrativeUser(u) && onTriggerOnDemand && (() => {
-                                  const isNaukriLimit = Boolean(
-                                    u.naukri_daily_limit_reached ||
-                                    u.automation_status === 'naukri_limit_reached' ||
-                                    (u.daily_status && u.daily_status.startsWith('naukri_limit_reached'))
-                                  );
+                                  const isNaukriLimit = Boolean(u.naukri_daily_limit_reached);
                                   return (
                                     <button
                                       type="button"
