@@ -177,6 +177,16 @@ function dispatchAdPixels(payload: TrackEventPayload): void {
     const hasFbq = typeof window.fbq === 'function'
     const hasGtag = typeof window.gtag === 'function'
 
+    // Synchronize cross-device User-ID with Google Analytics & Meta Advanced Matching
+    if (payload.user_id && hasGtag) {
+      window.gtag!('set', { user_id: payload.user_id })
+    }
+    if (payload.email && hasFbq) {
+      window.fbq!('setUserProperties', {
+        email: payload.email.trim().toLowerCase()
+      })
+    }
+
     if (payload.event_type === 'page_view') {
       if (hasFbq) {
         window.fbq!('track', 'PageView')
