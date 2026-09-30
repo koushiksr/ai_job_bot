@@ -195,6 +195,12 @@ export async function GET(req: NextRequest) {
           return names.length ? names : null
         } catch { return null }
       })(),
+      last_automation_issue: profile.last_automation_issue || null,
+      automation_status: profile.automation_status || 'ready',
+      naukri_login_fail_count: profile.naukri_login_fail_count || 0,
+      naukri_daily_limit_reached: Boolean(profile.naukri_daily_limit_reached),
+      naukri_daily_limit_reason: profile.naukri_daily_limit_reason || null,
+      naukri_daily_limit_date: profile.naukri_daily_limit_date || null,
       raw_json: JSON.stringify(profile, null, 2),
       version_hash: versionHash
     }
@@ -277,12 +283,31 @@ export async function POST(req: NextRequest) {
 
     if (body.password || parsedRaw.password) {
       updateDoc.password = body.password || parsedRaw.password
+      if (typeof updateDoc.password === 'string' && updateDoc.password.trim().length > 0) {
+        const currentIssueCode = existing?.last_automation_issue?.code
+        if (!currentIssueCode || currentIssueCode === 'CREDS_MISSING' || currentIssueCode === 'CREDS_INVALID' || currentIssueCode === 'CIRCUIT_BREAKER_PAUSED') {
+          updateDoc.last_automation_issue = null
+          updateDoc.naukri_login_fail_count = 0
+          updateDoc.automation_status = 'ready'
+        }
+      }
     } else if (existing?.password) {
       updateDoc.password = existing.password
     }
 
+    if (body.clear_automation_issue === true) {
+      updateDoc.last_automation_issue = null
+      updateDoc.naukri_login_fail_count = 0
+      updateDoc.automation_status = 'ready'
+    }
+
     if (body.enabled_for_daily_run !== undefined) {
       updateDoc.enabled_for_daily_run = Boolean(body.enabled_for_daily_run)
+      if (updateDoc.enabled_for_daily_run === true && existing?.last_automation_issue?.code === 'CIRCUIT_BREAKER_PAUSED') {
+        updateDoc.last_automation_issue = null
+        updateDoc.naukri_login_fail_count = 0
+        updateDoc.automation_status = 'ready'
+      }
     } else if (existing?.enabled_for_daily_run !== undefined) {
       updateDoc.enabled_for_daily_run = existing.enabled_for_daily_run
     }

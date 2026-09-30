@@ -58,6 +58,7 @@ import BeginnerOnboardingGuide, { ProfileCompleteness } from '@/components/Begin
 import CandidateOfferModal from '@/components/CandidateOfferModal'
 import PwaInstallPromptModal from '@/components/PwaInstallPromptModal'
 import OrgPlansModal from '@/components/OrgPlansModal'
+import AutomationIssueAlertModal, { AutomationHealthData } from '@/components/AutomationIssueAlertModal'
 import { sendBrowserNotification, subscribeDeviceToPush, registerServiceWorker } from '@/lib/notifications'
 import { fetchCandidateOffers, markNotificationAsRead } from '@/lib/candidateOffers'
 import { checkIsPwaInstalled, shouldShowPwaAutoPrompt, markPwaAsDismissed } from '@/lib/pwaHelper'
@@ -168,6 +169,10 @@ export default function UserDashboard() {
   const [isOfferModalOpen, setIsOfferModalOpen] = useState<boolean>(false)
   const [isPwaModalOpen, setIsPwaModalOpen] = useState<boolean>(false)
   const [isAppInstalled, setIsAppInstalled] = useState<boolean>(false)
+
+  // Intelligent Automation Blocker Diagnosis State
+  const [automationHealth, setAutomationHealth] = useState<AutomationHealthData | null>(null)
+  const [isAutomationAlertOpen, setIsAutomationAlertOpen] = useState<boolean>(false)
   const [inAppToast, setInAppToast] = useState<{
     id?: string
     title: string
@@ -427,6 +432,36 @@ export default function UserDashboard() {
       }
     } catch {
       // silent
+    }
+  }
+
+  const loadAutomationHealth = async (uid: string, email?: string) => {
+    if (!uid && !email) return
+    try {
+      const res = await fetch(`/api/user/automation-health?user_id=${encodeURIComponent(uid)}&email=${encodeURIComponent(email || '')}&t=${Date.now()}`)
+      if (res.ok) {
+        const data: AutomationHealthData = await res.json()
+        setAutomationHealth(data)
+
+        // Intelligently prompt modal on login if there is an unresolved critical blocker
+        if (data.needs_attention && data.has_critical_blocker) {
+          if (typeof window !== 'undefined' && !sessionStorage.getItem('jobflux_automation_alert_dismissed')) {
+            sessionStorage.setItem('jobflux_automation_alert_active', 'true')
+            setTimeout(() => {
+              setIsAutomationAlertOpen(true)
+            }, 600)
+          }
+        }
+      }
+    } catch {
+      // silent
+    }
+  }
+
+  const handleAutomationResolved = () => {
+    if (userId) {
+      loadAutomationHealth(userId, userEmail)
+      loadUserData(userId)
     }
   }
 
@@ -1050,6 +1085,9 @@ export default function UserDashboard() {
           total_applied: sData.total_applied || 0
         })
       }
+
+      // Diagnose automation health and blockers
+      loadAutomationHealth(uid, userEmail)
     } catch (e) {
       console.error('Failed to load user data:', e)
     }
@@ -2309,6 +2347,44 @@ export default function UserDashboard() {
           </div>
         )}
 
+        {/* Intelligent Automation Blocker Diagnostic Banner */}
+        {userRole !== 'admin' && automationHealth?.needs_attention && automationHealth.has_critical_blocker && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-rose-950/80 via-zinc-950 to-amber-950/60 light:from-rose-50 light:via-white light:to-amber-50 border-2 border-rose-500/50 shadow-[0_12px_40px_rgba(244,63,94,0.18)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+            <div className="flex items-start sm:items-center gap-3.5 z-10">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0 shadow-sm">
+                <AlertTriangle className="w-5 h-5 text-rose-400 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-300 light:text-rose-700 border border-rose-500/30 tracking-wide">
+                    Automation Blocker Detected
+                  </span>
+                  <span className="text-xs font-mono text-zinc-400 light:text-zinc-600">
+                    Daily Applications Paused
+                  </span>
+                </div>
+                <h4 className="text-sm sm:text-base font-bold text-white light:text-zinc-900 mt-1">
+                  {automationHealth.primary_issue?.title || 'Action Required to Enable Applications'}
+                </h4>
+                <p className="text-xs text-zinc-300 light:text-zinc-700 mt-0.5 leading-relaxed max-w-2xl">
+                  {automationHealth.primary_issue?.message || 'Your autonomous applications cannot run until your Naukri credentials or ATS resume are configured.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 z-10 shrink-0 self-stretch sm:self-auto justify-end">
+              <button
+                type="button"
+                onClick={() => setIsAutomationAlertOpen(true)}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-rose-400 hover:from-amber-400 hover:to-rose-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+              >
+                <span>⚡ Fix Blocker Now</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Candidate Plan Expiry Warning Banner (1-Day / 2-Day Pre-Expiry Alert) */}
         {userRole !== 'admin' && (isPlanExpiringSoon || isPlanExpired) && (
           <div className={`p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border shadow-lg ${
@@ -3504,6 +3580,22 @@ export default function UserDashboard() {
         initialUserId={userId}
         onTicketSubmitted={() => loadUserTickets(userId)}
       />
+
+      {/* Intelligent Candidate Automation Blocker Diagnosis & Fix Modal */}
+      {userRole !== 'admin' && (
+        <AutomationIssueAlertModal
+          isOpen={isAutomationAlertOpen}
+          onClose={() => {
+            setIsAutomationAlertOpen(false)
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem('jobflux_automation_alert_active')
+            }
+          }}
+          healthData={automationHealth}
+          onResolved={handleAutomationResolved}
+          onTriggerOnDemand={isProfessional ? handleTriggerOnDemandScout : undefined}
+        />
+      )}
 
       {/* Exclusive Candidate Promotional Offer Popup Modal */}
       {userRole !== 'admin' && (

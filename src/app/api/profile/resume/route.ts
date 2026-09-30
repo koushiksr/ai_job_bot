@@ -111,31 +111,30 @@ export async function POST(req: NextRequest) {
     )
 
     // 2. Update profile and user metadata
+    const existingProfile = await db.collection('profiles').findOne({ user_id })
+    const isResumeIssue = existingProfile?.last_automation_issue?.code === 'RESUME_MISSING'
+
+    const metaUpdate: any = {
+      resume_filename: cleanFilename,
+      resume_size_bytes: size,
+      has_resume: true,
+      last_resume_updated_at: now,
+      updated_at: now
+    }
+    if (isResumeIssue) {
+      metaUpdate.last_automation_issue = null
+      metaUpdate.automation_status = 'ready'
+    }
+
     await db.collection('profiles').updateOne(
       { user_id },
-      {
-        $set: {
-          resume_filename: cleanFilename,
-          resume_size_bytes: size,
-          has_resume: true,
-          last_resume_updated_at: now,
-          updated_at: now
-        }
-      },
+      { $set: metaUpdate },
       { upsert: true }
     )
 
     await db.collection('users').updateOne(
       { user_id },
-      {
-        $set: {
-          resume_filename: cleanFilename,
-          resume_size_bytes: size,
-          has_resume: true,
-          last_resume_updated_at: now,
-          updated_at: now
-        }
-      },
+      { $set: metaUpdate },
       { upsert: true }
     )
 

@@ -52,6 +52,32 @@ export async function GET(req: NextRequest) {
     const failCount = Number(profile.naukri_login_fail_count || 0)
     const enabled = profile.enabled_for_daily_run !== false
 
+    // 0a. Missing Naukri Password / Credentials
+    const hasPassword = Boolean(profile.password && profile.password.trim().length > 0)
+    if (!hasPassword) {
+      alerts.push({
+        type: 'error',
+        code: 'CREDS_MISSING',
+        title: 'Naukri password missing',
+        message: 'Your automation cannot run because your Naukri account password is not configured. Save it to enable automatic applications.',
+        actionLabel: 'Add Credentials',
+        actionHref: '/profile'
+      })
+    }
+
+    // 0b. Missing Resume PDF
+    const hasResume = Boolean(profile.has_resume || profile.last_resume_updated_at || (profile.resume_upload_count && profile.resume_upload_count > 0))
+    if (!hasResume) {
+      alerts.push({
+        type: 'error',
+        code: 'RESUME_MISSING',
+        title: 'Resume PDF missing',
+        message: 'Autonomous job applications require an ATS-formatted resume PDF. Upload your resume to start applying.',
+        actionLabel: 'Upload Resume',
+        actionHref: '/profile'
+      })
+    }
+
     // 1. Daily runs paused
     if (!enabled) {
       alerts.push({
@@ -109,6 +135,16 @@ export async function GET(req: NextRequest) {
         message: `Your plan allows ${weeklyLimit} on-demand sweeps per week. Resets on a rolling 7-day basis — daily morning sweeps continue regardless.${plan === 'enterprise' ? ' Upgrade to Org Pro (₹99/mo) for 15/week.' : ''}`,
         actionLabel: plan === 'enterprise' ? 'See Org Pro' : undefined,
         actionHref: plan === 'enterprise' ? '/dashboard' : undefined
+      })
+    }
+
+    // 3b. Naukri platform 50/50 daily limit reached
+    if (profile.naukri_daily_limit_reached && profile.naukri_daily_limit_date === todayIst) {
+      alerts.push({
+        type: 'info',
+        code: 'NAUKRI_LIMIT_REACHED',
+        title: 'Naukri 50-application daily cap reached',
+        message: profile.naukri_daily_limit_reason || 'Naukri limits each account to 50 applies/day. Your daily limit resets at midnight IST, and morning sweeps will automatically resume tomorrow.'
       })
     }
 
