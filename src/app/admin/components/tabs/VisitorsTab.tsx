@@ -881,6 +881,16 @@ export default function VisitorsTab() {
                             ) : null}
                           </div>
                         )}
+                        {evt.linked?.known_emails && evt.linked.known_emails.length > 1 && (
+                          <div className="mt-1">
+                            <span
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-950/70 light:bg-amber-100 text-amber-300 light:text-amber-800 border border-amber-800/60 light:border-amber-300 text-[10px] font-medium"
+                              title={`Shared browser profile used across multiple accounts: ${evt.linked.known_emails.join(', ')}`}
+                            >
+                              👥 Shared ({evt.linked.known_emails.length} accounts)
+                            </span>
+                          </div>
+                        )}
                       </td>
 
                       {/* Event Type */}
@@ -969,6 +979,16 @@ export default function VisitorsTab() {
                             {evt.city ? `${evt.city}, ` : ''}{evt.country_name || evt.country || 'Unknown Location'}
                           </span>
                         </div>
+                        {evt.linked?.known_ips && evt.linked.known_ips.length > 1 && (
+                          <div className="mt-1">
+                            <span
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-950/70 light:bg-blue-100 text-blue-300 light:text-blue-800 border border-blue-800/60 light:border-blue-300 text-[9px] font-medium"
+                              title={`Multi-IP / VPN detected (${evt.linked.known_ips.length} IPs): ${evt.linked.known_ips.join(', ')}`}
+                            >
+                              🛡️ Multi-IP ({evt.linked.known_ips.length})
+                            </span>
+                          </div>
+                        )}
                       </td>
 
                       {/* Device & OS */}
@@ -1161,6 +1181,77 @@ export default function VisitorsTab() {
                 </div>
               </div>
             </div>
+
+            {/* Multi-Account / Shared System Alert */}
+            {inspectEvent.linked?.known_emails && inspectEvent.linked.known_emails.length > 1 && (
+              <div className="p-3.5 rounded-xl bg-amber-950/40 light:bg-amber-50 border border-amber-800/60 light:border-amber-300 mb-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-sm">👥</span>
+                  <span className="text-xs font-bold text-amber-300 light:text-amber-800 uppercase tracking-wide">
+                    Shared System / Multi-Account Detected
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-900/60 text-amber-200 light:bg-amber-200 light:text-amber-900 font-mono font-bold">
+                    {inspectEvent.linked.known_emails.length} accounts
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-300 light:text-zinc-700 mb-2">
+                  Multiple distinct user accounts have logged in from this identical browser profile:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {inspectEvent.linked.known_emails.map((em) => (
+                    <span
+                      key={em}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-medium ${
+                        em.toLowerCase() === (inspectEvent.email || '').toLowerCase()
+                          ? 'bg-amber-500/20 text-amber-300 light:text-amber-900 border border-amber-500/50 font-bold'
+                          : 'bg-zinc-900 light:bg-zinc-200 text-zinc-300 light:text-zinc-800 border border-zinc-800 light:border-zinc-300'
+                      }`}
+                    >
+                      {em.toLowerCase() === (inspectEvent.email || '').toLowerCase() && <span>👉 (This Event)</span>}
+                      {em}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* VPN / Dynamic IP / Multi-Location Alert */}
+            {inspectEvent.linked?.known_ips && inspectEvent.linked.known_ips.length > 1 && (
+              <div className="p-3.5 rounded-xl bg-blue-950/40 light:bg-blue-50 border border-blue-800/60 light:border-blue-300 mb-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-sm">🛡️</span>
+                  <span className="text-xs font-bold text-blue-300 light:text-blue-800 uppercase tracking-wide">
+                    VPN / Dynamic IP / Multi-Location Detected
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-200 light:bg-blue-200 light:text-blue-900 font-mono font-bold">
+                    {inspectEvent.linked.known_ips.length} IPs recorded
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-300 light:text-zinc-700 mb-2">
+                  This visitor&apos;s persistent browser session has routed through multiple networks or VPN servers:
+                </p>
+                <div className="flex flex-wrap gap-1.5 mb-1.5">
+                  {inspectEvent.linked.known_ips.map((ip) => (
+                    <span
+                      key={ip}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono ${
+                        ip === inspectEvent.ip_address
+                          ? 'bg-blue-500/20 text-blue-300 light:text-blue-900 border border-blue-500/50 font-bold'
+                          : 'bg-zinc-900 light:bg-zinc-200 text-zinc-400 light:text-zinc-700 border border-zinc-800 light:border-zinc-300'
+                      }`}
+                    >
+                      {ip === inspectEvent.ip_address && <span>📍 Current:</span>}
+                      {ip}
+                    </span>
+                  ))}
+                </div>
+                {inspectEvent.linked.known_countries && inspectEvent.linked.known_countries.length > 0 && (
+                  <div className="text-[10px] text-zinc-400 light:text-zinc-600">
+                    Locations observed: {inspectEvent.linked.known_countries.join(' • ')}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Identity: stored, linked, or taggable with Short Name and/or Email */}
             <div className="p-3.5 rounded-xl bg-zinc-900/80 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 mb-4">

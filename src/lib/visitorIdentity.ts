@@ -11,6 +11,9 @@ export interface VisitorIdentity {
   user_id: string | null
   manual: boolean
   tag_name?: string | null
+  known_emails?: string[]
+  known_ips?: string[]
+  known_countries?: string[]
 }
 
 export async function getIdentityMap(db: Db, visitorIds: string[]): Promise<Map<string, VisitorIdentity>> {
@@ -21,18 +24,37 @@ export async function getIdentityMap(db: Db, visitorIds: string[]): Promise<Map<
     const docs = await db.collection('visitors_summary')
       .find(
         { visitor_id: { $in: ids } },
-        { projection: { visitor_id: 1, identified_email: 1, identified_user_id: 1, manual_tag: 1, tag_name: 1, alias: 1 } }
+        {
+          projection: {
+            visitor_id: 1,
+            identified_email: 1,
+            identified_user_id: 1,
+            manual_tag: 1,
+            tag_name: 1,
+            alias: 1,
+            known_emails: 1,
+            known_ips: 1,
+            known_countries: 1
+          }
+        }
       )
       .toArray()
     for (const d of docs) {
-      if (d.identified_email || d.tag_name || d.alias) {
-        map.set(d.visitor_id, {
-          email: d.identified_email || null,
-          user_id: d.identified_user_id || null,
-          manual: d.manual_tag === true,
-          tag_name: d.tag_name || d.alias || null
-        })
-      }
+      const knownEmails: string[] = Array.isArray(d.known_emails) && d.known_emails.length > 0
+        ? d.known_emails
+        : (d.identified_email ? [d.identified_email] : [])
+      const knownIps: string[] = Array.isArray(d.known_ips) ? d.known_ips : []
+      const knownCountries: string[] = Array.isArray(d.known_countries) ? d.known_countries : []
+
+      map.set(d.visitor_id, {
+        email: d.identified_email || null,
+        user_id: d.identified_user_id || null,
+        manual: d.manual_tag === true,
+        tag_name: d.tag_name || d.alias || null,
+        known_emails: knownEmails,
+        known_ips: knownIps,
+        known_countries: knownCountries
+      })
     }
   } catch {}
   return map
@@ -57,6 +79,9 @@ export async function linkVisitorToUser(
           identified_email: email,
           ...(opts.user_id ? { identified_user_id: opts.user_id } : {}),
           last_seen_at: new Date()
+        },
+        $addToSet: {
+          known_emails: email
         },
         $setOnInsert: { visitor_id: vid, first_seen_at: new Date() }
       },
@@ -107,6 +132,9 @@ export async function tagVisitorManually(
     }
 
     const updateDoc: Record<string, any> = { $set: setOps }
+    if (email) {
+      updateDoc.$addToSet = { known_emails: email }
+    }
     if (Object.keys(unsetOps).length > 0) {
       updateDoc.$unset = unsetOps
     }

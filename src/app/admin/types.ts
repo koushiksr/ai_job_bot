@@ -239,7 +239,15 @@ export interface VisitorEventRecord {
   tag_name?: string | null
   metadata: Record<string, any>
   created_at: string
-  linked?: { email: string | null; user_id: string | null; manual: boolean; tag_name?: string | null } | null
+  linked?: {
+    email: string | null
+    user_id: string | null
+    manual: boolean
+    tag_name?: string | null
+    known_emails?: string[]
+    known_ips?: string[]
+    known_countries?: string[]
+  } | null
 }
 
 export interface VisitorMetrics {

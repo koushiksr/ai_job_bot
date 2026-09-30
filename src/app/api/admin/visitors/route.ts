@@ -170,7 +170,7 @@ export async function GET(req: NextRequest) {
     ])
 
     // Resolve all visitor IDs to known tags and identities
-    let identityMap = new Map<string, { email: string | null; user_id: string | null; manual: boolean; tag_name?: string | null }>()
+    let identityMap = new Map<string, { email: string | null; user_id: string | null; manual: boolean; tag_name?: string | null; known_emails?: string[]; known_ips?: string[]; known_countries?: string[] }>()
     try {
       const { getIdentityMap } = await import('@/lib/visitorIdentity')
       const allVids = [...new Set(
@@ -212,7 +212,10 @@ export async function GET(req: NextRequest) {
           email: hit.email || evt.email || null,
           user_id: hit.user_id || evt.user_id || null,
           tag_name: hit.tag_name || null,
-          manual: hit.manual
+          manual: hit.manual,
+          known_emails: hit.known_emails || (hit.email ? [hit.email] : (evt.email ? [evt.email] : [])),
+          known_ips: hit.known_ips || (evt.ip_address ? [evt.ip_address] : []),
+          known_countries: hit.known_countries || (evt.country_name ? [evt.country_name] : [])
         } : null
       }
     })

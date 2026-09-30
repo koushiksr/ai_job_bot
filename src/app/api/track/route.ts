@@ -173,6 +173,21 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      // Track multi-IP (VPN detection) and multi-account signals
+      const addToSetOps: Record<string, any> = {}
+      if (ip && ip !== '127.0.0.1' && ip !== 'unknown') {
+        addToSetOps.known_ips = ip
+      }
+      if (countryName && countryName !== 'Unknown' && countryName !== 'Local Development') {
+        addToSetOps.known_countries = countryName
+      }
+      if (email) {
+        addToSetOps.known_emails = email
+      }
+      if (Object.keys(addToSetOps).length > 0) {
+        summaryUpdate.$addToSet = addToSetOps
+      }
+
       // NOTE: identified_email/user_id are maintained by linkVisitorToUser()
       // below (manual-tag aware) — never $set them here, or a later login on
       // the same browser would silently clobber a super-admin manual tag.
