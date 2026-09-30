@@ -403,7 +403,10 @@ export async function GET(req: NextRequest) {
         naukri_daily_limit_date: p.naukri_daily_limit_date || null,
         naukri_daily_limit_reason: p.naukri_daily_limit_reason || null,
         current_execution: p.current_execution || null,
-        last_execution: p.last_execution || null,
+        naukri_login_fail_count: Number(p.naukri_login_fail_count || 0),
+        last_automation_issue: p.last_automation_issue || null,
+        automation_status: p.automation_status || (p.enabled_for_daily_run === false ? 'disabled' : 'ready'),
+        is_circuit_breaker: Number(p.naukri_login_fail_count || 0) >= 3 || p.last_automation_issue?.code === 'CIRCUIT_BREAKER_PAUSED',
         match_status: poolStateByUser[p.user_id] || (
           totalTodayApplied >= dailyApplicationLimit && dailyApplicationLimit > 0
             ? 'capped'
@@ -421,7 +424,8 @@ export async function GET(req: NextRequest) {
       in_queue: users.filter(u => u.execution_summary?.status === 'in_queue').length,
       not_applied_today: users.filter(u => !u.is_admin && !u.is_org_admin && u.execution_summary?.status === 'not_applied_today').length,
       disabled: users.filter(u => !u.is_admin && !u.is_org_admin && u.execution_summary?.status === 'disabled').length,
-      payment_required: users.filter(u => !u.is_admin && !u.is_org_admin && u.execution_summary?.status === 'payment_required').length
+      payment_required: users.filter(u => !u.is_admin && !u.is_org_admin && u.execution_summary?.status === 'payment_required').length,
+      circuit_breaker: users.filter(u => !u.is_admin && !u.is_org_admin && (u.is_circuit_breaker || Number(u.naukri_login_fail_count || 0) >= 3 || u.last_automation_issue?.code === 'CIRCUIT_BREAKER_PAUSED')).length
     }
 
     return NextResponse.json({
@@ -471,8 +475,36 @@ export async function PATCH(req: NextRequest) {
         updates.daily_application_limit = 150
       }
     }
-    if (typeof enabled_for_daily_run === 'boolean') {
+    if (body.reset_circuit_breaker === true) {
+      updates.naukri_login_fail_count = 0
+      updates.last_automation_issue = null
+      updates.automation_status = 'ready'
+      updates.enabled_for_daily_run = true
+    } else if (typeof enabled_for_daily_run === 'boolean') {
       updates.enabled_for_daily_run = enabled_for_daily_run
+      if (enabled_for_daily_run === false) {
+        updates.automation_status = 'manually_paused'
+        // Immediately halt any active or queued tasks for this user
+        await db.collection('tasks').updateMany(
+          { user_id, status: { $in: ['pending', 'running'] } },
+          {
+            $set: {
+              status: 'stopped',
+              stop_requested: true,
+              completed_at: now,
+              summary: 'Task stopped by administrator (daily automation paused).'
+            }
+          }
+        )
+        await db.collection('profiles').updateOne(
+          { user_id },
+          { $set: { 'current_execution.status': 'idle', 'current_execution.worker_id': null } }
+        )
+      } else {
+        updates.automation_status = 'ready'
+        updates.naukri_login_fail_count = 0
+        updates.last_automation_issue = null
+      }
     }
     if (typeof body.apk_access === 'boolean') {
       updates.apk_access = body.apk_access

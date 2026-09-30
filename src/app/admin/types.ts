@@ -88,6 +88,10 @@ export interface CandidateUser {
   max_experience_years?: number
   expected_salary?: string
   enabled_for_daily_run?: boolean
+  naukri_login_fail_count?: number
+  last_automation_issue?: any
+  automation_status?: string
+  is_circuit_breaker?: boolean
   last_login_at?: string
   applied_count?: number
   total_applied?: number

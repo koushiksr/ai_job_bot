@@ -450,6 +450,10 @@ export default function CandidatesTab({
   const countInQueue = usersList.filter(u => u.execution_summary?.status === 'in_queue' || u.execution_summary?.is_in_queue).length
   const countEnabled = usersList.filter(u => !isAdministrativeUser(u) && u.enabled_for_daily_run !== false).length
   const countDisabled = usersList.filter(u => !isAdministrativeUser(u) && u.enabled_for_daily_run === false).length
+  const countCircuitBreaker = usersList.filter(u => {
+    if (isAdministrativeUser(u)) return false
+    return u.is_circuit_breaker || Number(u.naukri_login_fail_count || 0) >= 3 || u.last_automation_issue?.code === 'CIRCUIT_BREAKER_PAUSED'
+  }).length
   const countPaymentRequired = usersList.filter(u => {
     if (isAdministrativeUser(u)) return false
     return u.execution_summary?.status === 'payment_required' || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan'
@@ -516,6 +520,10 @@ export default function CandidatesTab({
       if (activeExecFilter === 'in_queue' && !isQueued) return false
       if (activeExecFilter === 'enabled' && u.enabled_for_daily_run === false) return false
       if (activeExecFilter === 'disabled' && u.enabled_for_daily_run !== false) return false
+      if (activeExecFilter === 'circuit_breaker') {
+        const isCb = u.is_circuit_breaker || Number(u.naukri_login_fail_count || 0) >= 3 || u.last_automation_issue?.code === 'CIRCUIT_BREAKER_PAUSED'
+        if (!isCb) return false
+      }
       if (activeExecFilter === 'payment_required' && u.plan_expiry_status !== 'expired' && u.plan_expiry_status !== 'no_plan' && summary?.status !== 'payment_required') return false
       if (activeExecFilter === 'not_applied_today') {
         if (isApp || isDone || isQueued || u.enabled_for_daily_run === false || u.plan_expiry_status === 'expired' || u.plan_expiry_status === 'no_plan') {
@@ -842,6 +850,7 @@ export default function CandidatesTab({
                   { key: 'in_queue', label: 'In Queue', count: countInQueue, color: 'text-zinc-400' },
                   { key: 'enabled', label: 'Bot Active', count: countEnabled, color: 'text-zinc-300 light:text-zinc-700' },
                   { key: 'disabled', label: 'Bot Off', count: countDisabled, color: 'text-zinc-500' },
+                  { key: 'circuit_breaker', label: 'Circuit Breaker', count: countCircuitBreaker, color: 'text-rose-400 font-bold' },
                   { key: 'not_applied_today', label: 'Not Applied', count: countNotAppliedToday, color: 'text-amber-400 light:text-amber-700' },
                   { key: 'payment_required', label: 'Payment Req.', count: countPaymentRequired, color: 'text-rose-400 light:text-rose-600' }
                 ].map(f => (
@@ -1444,11 +1453,33 @@ export default function CandidatesTab({
                             )
                           }
 
+                          if (u.is_circuit_breaker || Number(u.naukri_login_fail_count || 0) >= 3 || u.last_automation_issue?.code === 'CIRCUIT_BREAKER_PAUSED') {
+                            return (
+                              <div className="space-y-0.5">
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-rose-300 light:text-rose-700 bg-rose-950/80 light:bg-rose-100 border border-rose-800 light:border-rose-300 font-semibold" title={u.last_automation_issue?.message || `Circuit breaker tripped after ${u.naukri_login_fail_count || 3} failed logins`}>
+                                  <ShieldAlert className="w-3 h-3 text-rose-400 shrink-0" />
+                                  <span>CIRCUIT BREAKER ({u.naukri_login_fail_count || 3} fails)</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleToggleDaily(u.user_id, false)
+                                  }}
+                                  className="text-[10px] text-cyan-400 hover:text-cyan-300 hover:underline block font-mono cursor-pointer"
+                                  title="Reset failure count to 0 and re-enable daily runs"
+                                >
+                                  ⚡ Reset &amp; Unpause
+                                </button>
+                              </div>
+                            )
+                          }
+
                           if (u.enabled_for_daily_run === false) {
                             return (
                               <div className="space-y-0.5">
-                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-500 light:text-zinc-600 bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200" title="Daily bot disabled for this candidate">
-                                  <AlertCircle className="w-3 h-3 text-zinc-500 light:text-zinc-600" />
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-amber-300 light:text-amber-700 bg-amber-950/60 light:bg-amber-100 border border-amber-800/80 light:border-amber-300 font-medium" title="Daily runs disabled for this candidate">
+                                  <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" />
                                   <span>AUTO-APPLY OFF</span>
                                 </div>
                               </div>

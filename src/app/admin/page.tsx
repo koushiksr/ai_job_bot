@@ -1522,14 +1522,25 @@ export default function AdminDashboard() {
   const handleToggleDaily = async (userId: string, currentStatus: boolean) => {
     const newStatus = !currentStatus
     setUsersList(prev =>
-      prev.map(u => (u.user_id === userId ? { ...u, enabled_for_daily_run: newStatus } : u))
+      prev.map(u => (u.user_id === userId ? {
+        ...u,
+        enabled_for_daily_run: newStatus,
+        naukri_login_fail_count: newStatus ? 0 : u.naukri_login_fail_count,
+        automation_status: newStatus ? 'ready' : 'manually_paused',
+        is_circuit_breaker: newStatus ? false : u.is_circuit_breaker
+      } : u))
     )
     try {
-      await fetch('/api/profile', {
-        method: 'POST',
+      await fetch('/api/admin/users', {
+        method: 'PATCH',
         headers: getAdminHeaders(),
-        body: JSON.stringify({ user_id: userId, enabled_for_daily_run: newStatus })
+        body: JSON.stringify({
+          user_id: userId,
+          enabled_for_daily_run: newStatus,
+          reset_circuit_breaker: newStatus ? true : undefined
+        })
       })
+      await fetchOverviewAndUsers()
     } catch {
       fetchOverviewAndUsers()
     }
