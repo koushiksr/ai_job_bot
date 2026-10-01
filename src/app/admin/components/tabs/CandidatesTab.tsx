@@ -62,6 +62,7 @@ interface CandidatesTabProps {
   handleChangePlan: (userId: string, plan: string) => Promise<void>
   handleToggleVip: (userId: string, isVip: boolean) => Promise<void>
   handleToggleDaily: (userId: string, currentState: boolean) => Promise<void>
+  handleToggleApplyAll?: (userId: string, currentApplyAll: boolean) => Promise<void>
   handleInspectCandidate: (candidate: any) => void
   handleDeleteUser: (userId: string) => Promise<void>
   setEditingUser: (u: any) => void
@@ -91,6 +92,7 @@ export default function CandidatesTab({
   handleChangePlan,
   handleToggleVip,
   handleToggleDaily,
+  handleToggleApplyAll,
   handleInspectCandidate,
   handleDeleteUser,
   setEditingUser,
@@ -467,6 +469,8 @@ export default function CandidatesTab({
 
   const countCandidatesOnly = usersList.filter(u => !isAdministrativeUser(u)).length
   const countAdminsOnly = usersList.filter(u => isAdministrativeUser(u)).length
+  const countApplyAll = usersList.filter(u => !isAdministrativeUser(u) && Boolean(u.apply_all_jobs)).length
+  const countFilteredMode = usersList.filter(u => !isAdministrativeUser(u) && !u.apply_all_jobs).length
 
   const countElite = usersList.filter(u => (u.plan || '').toLowerCase().includes('elite') || (u.plan || '').toLowerCase().includes('professional')).length
   const countPro = usersList.filter(u => !isOrgMemberUser(u) && (u.plan || '').toLowerCase() === 'pro').length
@@ -530,6 +534,8 @@ export default function CandidatesTab({
           return false
         }
       }
+      if (activeExecFilter === 'apply_all' && !u.apply_all_jobs) return false
+      if (activeExecFilter === 'filtered_mode' && Boolean(u.apply_all_jobs)) return false
     }
 
     // 3. Plan & Expiry Status Filter
@@ -852,7 +858,9 @@ export default function CandidatesTab({
                   { key: 'disabled', label: 'Bot Off', count: countDisabled, color: 'text-zinc-500' },
                   { key: 'circuit_breaker', label: 'Circuit Breaker', count: countCircuitBreaker, color: 'text-rose-400 font-bold' },
                   { key: 'not_applied_today', label: 'Not Applied', count: countNotAppliedToday, color: 'text-amber-400 light:text-amber-700' },
-                  { key: 'payment_required', label: 'Payment Req.', count: countPaymentRequired, color: 'text-rose-400 light:text-rose-600' }
+                  { key: 'payment_required', label: 'Payment Req.', count: countPaymentRequired, color: 'text-rose-400 light:text-rose-600' },
+                  { key: 'apply_all', label: '⚡ Apply All', count: countApplyAll, color: 'text-amber-400 font-bold' },
+                  { key: 'filtered_mode', label: '🎯 Filtered', count: countFilteredMode, color: 'text-sky-400' }
                 ].map(f => (
                   <button
                     key={f.key}
@@ -1746,25 +1754,59 @@ export default function CandidatesTab({
                             Exempt (Admin)
                           </span>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleToggleDaily(u.user_id, u.enabled_for_daily_run !== false)}
-                            className="text-xs transition-colors cursor-pointer"
-                            title="Toggle automated daily apply"
-                          >
-                            {u.enabled_for_daily_run !== false ? (
-                              <span
-                                className="relative inline-flex w-9 h-5 rounded-full bg-emerald-500/25 border border-emerald-500/50 cursor-pointer shrink-0"
-                                title="Auto-apply ON — click to pause this candidate"
+                          <div className="flex flex-col items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleDaily(u.user_id, u.enabled_for_daily_run !== false)}
+                              className="text-xs transition-colors cursor-pointer"
+                              title="Toggle automated daily apply"
+                            >
+                              {u.enabled_for_daily_run !== false ? (
+                                <span
+                                  className="relative inline-flex w-9 h-5 rounded-full bg-emerald-500/25 border border-emerald-500/50 cursor-pointer shrink-0"
+                                  title="Auto-apply ON — click to pause this candidate"
+                                >
+                                  <span className="absolute right-0.5 top-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-sm" />
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300">
+                                  <ToggleLeft className="w-4 h-4 text-zinc-500 light:text-zinc-600" /> DISABLED
+                                </span>
+                              )}
+                            </button>
+
+                            {handleToggleApplyAll && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleToggleApplyAll(u.user_id, Boolean(u.apply_all_jobs))
+                                }}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-tight transition-all cursor-pointer border ${
+                                  u.apply_all_jobs
+                                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
+                                    : 'bg-zinc-800/60 light:bg-zinc-100 text-zinc-400 light:text-zinc-600 border-zinc-700/60 light:border-zinc-300 hover:text-zinc-200'
+                                }`}
+                                title={
+                                  u.apply_all_jobs
+                                    ? 'Apply-All Mode ACTIVE: Bypasses role/skill filtering so user applies to all visible feed jobs up to daily limit. Click to switch to Filtered Mode.'
+                                    : 'Filtered Mode ACTIVE: Only applies if job strictly matches role/skills. Click to switch to Apply-All Mode.'
+                                }
                               >
-                                <span className="absolute right-0.5 top-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-sm" />
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-800 light:bg-zinc-200 text-zinc-400 light:text-zinc-600 border border-zinc-700 light:border-zinc-300">
-                                <ToggleLeft className="w-4 h-4 text-zinc-500 light:text-zinc-600" /> DISABLED
-                              </span>
+                                {u.apply_all_jobs ? (
+                                  <>
+                                    <Zap className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                                    <span>APPLY ALL</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Filter className="w-2.5 h-2.5 text-zinc-400" />
+                                    <span>FILTERED</span>
+                                  </>
+                                )}
+                              </button>
                             )}
-                          </button>
+                          </div>
                         )}
                       </td>
                       <td className="py-3 px-3">
@@ -1898,6 +1940,29 @@ export default function CandidatesTab({
                                   <Eye className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                                   <span>Inspect Telemetry &amp; Plan</span>
                                 </button>
+
+                                {!isAdministrativeUser(u) && handleToggleApplyAll && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenRowActionMenuId(null)
+                                      handleToggleApplyAll(u.user_id, Boolean(u.apply_all_jobs))
+                                    }}
+                                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-200 light:text-zinc-800 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer"
+                                  >
+                                    {u.apply_all_jobs ? (
+                                      <>
+                                        <Filter className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                                        <span>Switch to Filtered Matching</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                        <span>Switch to Apply-All Mode</span>
+                                      </>
+                                    )}
+                                  </button>
+                                )}
 
                                 {!isAdministrativeUser(u) && (
                                   <button

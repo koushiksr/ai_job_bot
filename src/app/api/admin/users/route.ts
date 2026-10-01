@@ -63,7 +63,8 @@ export async function GET(req: NextRequest) {
         last_automated_run_date: pDoc.last_automated_run_date || uDoc.last_automated_run_date || null,
         last_automated_run_at: pDoc.last_automated_run_at || uDoc.last_automated_run_at || null,
         daily_status: pDoc.daily_status || uDoc.daily_status || null,
-        enabled_for_daily_run: pDoc.enabled_for_daily_run !== undefined ? pDoc.enabled_for_daily_run : (uDoc.enabled_for_daily_run !== undefined ? uDoc.enabled_for_daily_run : true)
+        enabled_for_daily_run: pDoc.enabled_for_daily_run !== undefined ? pDoc.enabled_for_daily_run : (uDoc.enabled_for_daily_run !== undefined ? uDoc.enabled_for_daily_run : true),
+        apply_all_jobs: Boolean(pDoc.apply_all_jobs !== undefined ? pDoc.apply_all_jobs : uDoc.apply_all_jobs)
       }
     })
 
@@ -434,6 +435,7 @@ export async function GET(req: NextRequest) {
         on_demand_run_count: p.on_demand_run_count || 0,
         last_scout_run_at: p.last_scout_run_at || null,
         last_automated_run_date: p.last_automated_run_date || null,
+        apply_all_jobs: Boolean(p.apply_all_jobs || false),
         daily_status: (p.daily_status && (p.daily_status.endsWith(todayIst) || p.daily_status === todayIst)) ? p.daily_status : null,
         naukri_daily_limit_reached: p.naukri_daily_limit_date === todayIst,
         naukri_daily_limit_date: p.naukri_daily_limit_date || null,
@@ -548,6 +550,9 @@ export async function PATCH(req: NextRequest) {
     }
     if (typeof body.apk_access === 'boolean') {
       updates.apk_access = body.apk_access
+    }
+    if (typeof body.apply_all_jobs === 'boolean') {
+      updates.apply_all_jobs = body.apply_all_jobs
     }
     if (plan) {
       const existingUser = await db.collection('profiles').findOne({ user_id }) ||

@@ -1546,6 +1546,26 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleToggleApplyAll = async (userId: string, currentApplyAll: boolean) => {
+    const newApplyAll = !currentApplyAll
+    setUsersList(prev =>
+      prev.map(u => (u.user_id === userId ? { ...u, apply_all_jobs: newApplyAll } : u))
+    )
+    try {
+      await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          user_id: userId,
+          apply_all_jobs: newApplyAll
+        })
+      })
+      await fetchOverviewAndUsers()
+    } catch {
+      fetchOverviewAndUsers()
+    }
+  }
+
   const handleToggleVip = async (userId: string, currentVip: boolean) => {
     const newVip = !currentVip
     setUsersList(prev =>
@@ -1728,6 +1748,7 @@ export default function AdminDashboard() {
             handleChangePlan={handleChangePlan}
             handleToggleVip={handleToggleVip}
             handleToggleDaily={handleToggleDaily}
+            handleToggleApplyAll={handleToggleApplyAll}
             handleInspectCandidate={handleInspectCandidate}
             handleDeleteUser={handleDeleteUser}
             setEditingUser={setEditingUser}
