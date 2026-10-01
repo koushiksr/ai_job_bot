@@ -27,6 +27,7 @@ import {
   LogsSubTabType,
   SupportTicket
 } from '../../types'
+import CandidateApplicationLogsView from './CandidateApplicationLogsView'
 
 interface LogsTabProps {
   logsSubTab: LogsSubTabType
@@ -1220,60 +1221,14 @@ export const LogsTab: React.FC<LogsTabProps> = ({
         </div>
       )}
 
-      {/* VIEW 2: JOB APPLICATION RECORDS */}
+      {/* VIEW 2: JOB APPLICATION RECORDS & REAL-TIME EXECUTION LOGS */}
       {logsSubTab === 'job_history' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 p-4 space-y-2 h-[600px] overflow-y-auto">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 light:text-zinc-600 mb-3">
-              Select Candidate
-            </h3>
-            {usersList.map((u: any) => (
-              <button
-                key={u.user_id}
-                onClick={() => loadSystemLogContent(u.user_id)}
-                className={`w-full text-left p-3 rounded-xl text-xs font-mono transition-all flex items-center justify-between cursor-pointer ${
-                  selectedSystemLog === u.user_id
-                    ? 'bg-zinc-800 light:bg-zinc-200 text-white light:text-zinc-900 shadow-md border border-zinc-700 light:border-zinc-300'
-                    : 'bg-black light:bg-white hover:bg-zinc-900 light:hover:bg-zinc-100 text-slate-300 light:text-zinc-700 border border-zinc-800 light:border-zinc-200'
-                }`}
-              >
-                <span className="truncate">{u.name || u.user_id}</span>
-                <span className="text-[10px] opacity-75">{u.total_applied || 0} applied</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="md:col-span-2 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 overflow-hidden flex flex-col h-[600px]">
-            <div className="bg-black light:bg-white px-4 py-3 border-b border-zinc-800 light:border-zinc-200 flex items-center justify-between">
-              <span className="text-xs font-mono text-white light:text-zinc-900">
-                {selectedSystemLog ? `Application Log for ${selectedSystemLog}` : 'Select a candidate on the left'}
-              </span>
-              {selectedSystemLog && (
-                <button
-                  onClick={() => loadSystemLogContent(selectedSystemLog)}
-                  className="text-xs text-slate-400 light:text-zinc-500 hover:text-white light:hover:text-zinc-900 cursor-pointer"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-            <div className="p-4 flex-1 overflow-y-auto font-mono text-xs text-slate-300 light:text-zinc-700 space-y-1">
-              {loadingLogContent ? (
-                <div className="h-full flex items-center justify-center text-slate-500 light:text-zinc-500">Loading activity...</div>
-              ) : selectedLogContent.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-slate-500 light:text-zinc-500">
-                  Click a candidate on the left to view their applied job activity.
-                </div>
-              ) : (
-                selectedLogContent.map((line, i) => (
-                  <div key={i} className="leading-relaxed whitespace-pre-wrap">
-                    {line}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
+        <CandidateApplicationLogsView
+          usersList={usersList}
+          selectedCandidateId={selectedSystemLog}
+          onSelectCandidate={(uid) => loadSystemLogContent(uid)}
+          formatTimestamp={formatTimestamp}
+        />
       )}
 
       {/* VIEW 3: INBOUND SUPPORT TICKETS */}

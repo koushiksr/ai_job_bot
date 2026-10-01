@@ -37,7 +37,8 @@ import {
   MoreHorizontal,
   MoreVertical,
   RotateCcw,
-  Check
+  Check,
+  Terminal
 } from 'lucide-react'
 import { CandidateUser } from '../../types'
 import { loadAdminPrefs, saveAdminPrefs } from '@/lib/adminPrefs'
@@ -70,6 +71,7 @@ interface CandidatesTabProps {
   onOpenDispatchReportForUser: (email: string) => void
   onTriggerOnDemand?: (userId: string, force: boolean) => Promise<void>
   actionProcessingId?: string | null
+  onViewCandidateLogs?: (userId: string) => void
 }
 
 export default function CandidatesTab({
@@ -99,7 +101,8 @@ export default function CandidatesTab({
   dispatchReportLoading,
   onOpenDispatchReportForUser,
   onTriggerOnDemand,
-  actionProcessingId
+  actionProcessingId,
+  onViewCandidateLogs
 }: CandidatesTabProps) {
   // Execution status filter state
   const [internalExecFilter, setInternalExecFilter] = React.useState<string>(() => {
@@ -1330,37 +1333,52 @@ export default function CandidatesTab({
                           const isNaukriLimit = Boolean(u.naukri_daily_limit_reached);
                           if (isNaukriLimit) {
                             return (
-                              <div
-                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-rose-950/40 text-rose-300 light:text-rose-700 border border-rose-800/60 light:border-rose-300 shadow-sm"
-                                title={`Naukri daily application limit reached today ("${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}"). Further runs paused until tomorrow.`}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (onViewCandidateLogs) onViewCandidateLogs(u.user_id)
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-rose-950/60 hover:bg-rose-900 text-rose-300 light:text-rose-700 border border-rose-800/80 light:border-rose-300 shadow-sm cursor-pointer transition-colors"
+                                title={`Naukri daily application limit reached today ("${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}"). Click to inspect full execution logs & application records.`}
                               >
                                 <AlertCircle className="w-3 h-3 text-rose-400 light:text-rose-600 shrink-0" />
-                                <span>NAUKRI LIMIT</span>
-                              </div>
+                                <span>NAUKRI LIMIT ↗</span>
+                              </button>
                             );
                           }
                           const capped = isCandidateCapped(u);
                           const noMatch = isCandidateNoMatch(u);
                           if (capped) {
                             return (
-                              <div
-                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-emerald-950/40 text-emerald-300 light:text-emerald-700 border border-emerald-800/60 light:border-emerald-300 shadow-sm"
-                                title={`Daily application quota fully reached (${u.applied_today || 0} applied). Automated sweeps completed for today.`}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (onViewCandidateLogs) onViewCandidateLogs(u.user_id)
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 light:text-emerald-700 border border-emerald-800/80 light:border-emerald-300 shadow-sm cursor-pointer transition-colors"
+                                title={`Daily application quota fully reached (${u.applied_today || 0} applied). Click to inspect full execution logs & application records.`}
                               >
                                 <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
-                                <span>CAPPED</span>
-                              </div>
+                                <span>CAPPED ↗</span>
+                              </button>
                             );
                           }
                           if (noMatch) {
                             return (
-                              <div
-                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-amber-950/40 text-amber-300 light:text-amber-700 border border-amber-800/60 light:border-amber-300 shadow-sm"
-                                title={`Matching pool exhausted: applied ${u.applied_today || 0} jobs today. No more matching jobs found on Naukri for current profile filters.`}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (onViewCandidateLogs) onViewCandidateLogs(u.user_id)
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-amber-950/60 hover:bg-amber-900 text-amber-300 light:text-amber-700 border border-amber-800/80 light:border-amber-300 shadow-sm cursor-pointer transition-colors"
+                                title={`Matching pool exhausted: applied ${u.applied_today || 0} jobs today. Click to inspect full execution logs & application records.`}
                               >
                                 <AlertCircle className="w-3 h-3 text-amber-400 light:text-amber-600 shrink-0" />
-                                <span>NO MATCH</span>
-                              </div>
+                                <span>NO MATCH ↗</span>
+                              </button>
                             );
                           }
                           return null;
@@ -1961,6 +1979,20 @@ export default function CandidatesTab({
                                         <span>Switch to Apply-All Mode</span>
                                       </>
                                     )}
+                                  </button>
+                                )}
+
+                                {onViewCandidateLogs && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenRowActionMenuId(null)
+                                      onViewCandidateLogs(u.user_id)
+                                    }}
+                                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-cyan-300 hover:bg-zinc-900 light:hover:bg-zinc-100 transition-colors cursor-pointer"
+                                  >
+                                    <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                                    <span>Inspect Job &amp; Bot Logs</span>
                                   </button>
                                 )}
 

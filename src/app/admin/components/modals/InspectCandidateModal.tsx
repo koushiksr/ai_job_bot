@@ -32,6 +32,7 @@ interface InspectCandidateModalProps {
   onDispatchCareerReport: (email: string, channel: 'both' | 'email' | 'push') => Promise<void>
   loadingExpirySweep: boolean
   onRunExpirySweep: (email: string) => Promise<void>
+  onViewCandidateLogs?: (userId: string) => void
 }
 
 export default function InspectCandidateModal({
@@ -43,7 +44,8 @@ export default function InspectCandidateModal({
   dispatchReportLoading,
   onDispatchCareerReport,
   loadingExpirySweep,
-  onRunExpirySweep
+  onRunExpirySweep,
+  onViewCandidateLogs
 }: InspectCandidateModalProps) {
   useEffect(() => {
     if (!candidate) return
@@ -588,11 +590,26 @@ export default function InspectCandidateModal({
 
         {/* Run History + Recent Activity (fetched on open) */}
         <div className="p-4 rounded-xl bg-black light:bg-white border border-zinc-800 light:border-zinc-200 space-y-3">
-          <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
-            <History className="w-3.5 h-3.5 text-sky-400" />
-            <span>Run History ({dossier ? dossier.runs.length : 0})</span>
-            {dossierLoading && <RefreshCw className="w-3 h-3 animate-spin text-sky-400" />}
-          </h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-zinc-400 light:text-zinc-600 uppercase tracking-wider flex items-center gap-1.5">
+              <History className="w-3.5 h-3.5 text-sky-400" />
+              <span>Run History ({dossier ? dossier.runs.length : 0})</span>
+              {dossierLoading && <RefreshCw className="w-3 h-3 animate-spin text-sky-400" />}
+            </h4>
+            {onViewCandidateLogs && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose()
+                  onViewCandidateLogs(candidate.user_id)
+                }}
+                className="text-[10px] text-cyan-400 hover:text-cyan-300 font-mono hover:underline flex items-center gap-1 cursor-pointer"
+                title="Inspect real-time terminal logs and all applied job records with infinite scroll"
+              >
+                <span>Inspect Full Logs &amp; Records →</span>
+              </button>
+            )}
+          </div>
           {!dossier ? (
             <p className="text-xs text-zinc-500 light:text-zinc-600">Loading run records…</p>
           ) : dossier.runs.length === 0 ? (

@@ -1519,6 +1519,16 @@ export default function AdminDashboard() {
     } catch {}
   }
 
+  const handleViewCandidateLogs = (userId: string) => {
+    setSelectedSystemLog(userId)
+    setActiveAdminTab('logs')
+    setLogsSubTab('job_history')
+    try {
+      localStorage.setItem('admin_logs_sub_tab', 'job_history')
+      localStorage.setItem('admin_selected_candidate_id', userId)
+    } catch {}
+  }
+
   const handleToggleDaily = async (userId: string, currentStatus: boolean) => {
     const newStatus = !currentStatus
     setUsersList(prev =>
@@ -1761,6 +1771,7 @@ export default function AdminDashboard() {
               await handleQueueAction('trigger_on_demand', undefined, { user_id: userId, force })
             }}
             actionProcessingId={actionProcessingId}
+            onViewCandidateLogs={handleViewCandidateLogs}
           />
         )}
 
@@ -2045,6 +2056,7 @@ export default function AdminDashboard() {
         onDispatchCareerReport={handleDispatchCareerReport}
         loadingExpirySweep={loadingExpirySweep}
         onRunExpirySweep={handleRunExpirySweep}
+        onViewCandidateLogs={handleViewCandidateLogs}
       />
 
       <CandidateProfileEditModal

@@ -522,6 +522,11 @@ export async function PATCH(req: NextRequest) {
       updates.last_automation_issue = null
       updates.automation_status = 'ready'
       updates.enabled_for_daily_run = true
+    }
+    if (body.reset_naukri_limit === true) {
+      updates.naukri_daily_limit_reached = false
+      updates.naukri_daily_limit_date = null
+      updates.naukri_daily_limit_reason = null
     } else if (typeof enabled_for_daily_run === 'boolean') {
       updates.enabled_for_daily_run = enabled_for_daily_run
       if (enabled_for_daily_run === false) {
