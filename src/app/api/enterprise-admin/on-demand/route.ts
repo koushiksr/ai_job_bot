@@ -67,14 +67,18 @@ export async function POST(req: NextRequest) {
     const todayStart = new Date(new Date(todayIstStr + 'T00:00:00+05:30').getTime())
     const todayEnd   = new Date(new Date(todayIstStr + 'T23:59:59+05:30').getTime())
 
-    // 0. Check Naukri platform daily application limit for today
+    // 0. Reset transient limit flags on explicit on-demand trigger so worker can attempt fresh applications
     if (targetProfile.naukri_daily_limit_date === todayIstStr) {
-      const reason = targetProfile.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'
-      return NextResponse.json({
-        detail: `Naukri daily application limit reached for today ("${reason}"). You cannot apply to jobs today anymore. On-demand sweeps are paused and will resume tomorrow.`,
-        code: 'NAUKRI_DAILY_LIMIT_REACHED',
-        reason
-      }, { status: 400 })
+      await Promise.all([
+        db.collection('profiles').updateOne(
+          { user_id: targetUserId },
+          { $set: { naukri_daily_limit_reached: false, naukri_daily_limit_date: null, naukri_daily_limit_reason: null } }
+        ),
+        db.collection('users').updateOne(
+          { user_id: targetUserId },
+          { $set: { naukri_daily_limit_reached: false, naukri_daily_limit_date: null, naukri_daily_limit_reason: null } }
+        )
+      ])
     }
 
     // ── Daily progress info (on-demand ALWAYS runs, even if swept today) ─

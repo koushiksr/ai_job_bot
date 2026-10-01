@@ -1856,8 +1856,7 @@ export default function CandidatesTab({
                                 disabled={Boolean(
                                   u.execution_summary?.is_applying ||
                                   u.current_execution?.status === 'applying' ||
-                                  actionProcessingId === u.user_id ||
-                                  isNaukriLimit
+                                  actionProcessingId === u.user_id
                                 )}
                                 onClick={async (e) => {
                                   e.stopPropagation()
@@ -1867,10 +1866,10 @@ export default function CandidatesTab({
                                 }}
                                 className="p-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white transition-colors border border-cyan-500/30 shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                                 title={
-                                  isNaukriLimit
-                                    ? `Naukri daily application limit reached for today ("${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}"). Sweeps paused until tomorrow.`
-                                    : actionProcessingId === u.user_id
+                                  actionProcessingId === u.user_id
                                     ? 'Queuing on-demand run…'
+                                    : isNaukriLimit
+                                    ? `Naukri limit noted today ("${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}"). Click to force on-demand retry sweep now.`
                                     : 'Trigger immediate on-demand bot run for this candidate'
                                 }
                               >
@@ -1928,10 +1927,9 @@ export default function CandidatesTab({
                                       disabled={Boolean(
                                         u.execution_summary?.is_applying ||
                                         u.current_execution?.status === 'applying' ||
-                                        actionProcessingId === u.user_id ||
-                                        isNaukriLimit
+                                        actionProcessingId === u.user_id
                                       )}
-                                      title={isNaukriLimit ? `Naukri limit reached: ${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}` : undefined}
+                                      title={isNaukriLimit ? `Naukri limit noted: ${u.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}. Click to force on-demand retry.` : undefined}
                                       onClick={async () => {
                                         setOpenRowActionMenuId(null)
                                         if (confirm(`Trigger immediate on-demand application for "${u.name || u.user_id}"?\n(Bypasses daily lock to run on next available server)`)) {

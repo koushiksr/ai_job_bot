@@ -322,17 +322,19 @@ export async function POST(req: NextRequest) {
       // Check if candidate hit Naukri daily limit today
       const istNow = new Date(now.getTime() + 5.5 * 60 * 60 * 1000)
       const todayIstStr = istNow.toISOString().slice(0, 10)
+      // When admin triggers on-demand sweep, clear previous transient limit flags
+      // so the candidate's worker actively attempts fresh applications
       if (targetUserId !== 'admin') {
-        const prof = await db.collection('profiles').findOne({ user_id: targetUserId }) ||
-                     await db.collection('users').findOne({ user_id: targetUserId })
-        if (prof?.naukri_daily_limit_date === todayIstStr && !body.force) {
-          const reason = prof.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'
-          return NextResponse.json({
-            status: 'naukri_limit_reached',
-            detail: `Naukri daily application limit reached for today ("${reason}"). You cannot apply to jobs today anymore. On-demand sweeps are paused until tomorrow.`,
-            reason
-          }, { status: 400 })
-        }
+        await Promise.all([
+          db.collection('profiles').updateOne(
+            { user_id: targetUserId },
+            { $set: { naukri_daily_limit_reached: false, naukri_daily_limit_date: null, naukri_daily_limit_reason: null } }
+          ),
+          db.collection('users').updateOne(
+            { user_id: targetUserId },
+            { $set: { naukri_daily_limit_reached: false, naukri_daily_limit_date: null, naukri_daily_limit_reason: null } }
+          )
+        ])
       }
 
       // Check if candidate already has an active pending/running task unless force is requested

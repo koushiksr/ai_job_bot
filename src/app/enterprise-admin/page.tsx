@@ -1621,11 +1621,11 @@ export default function EnterpriseAdminPortal() {
                             ) : (
                               <button
                                 onClick={() => handleTriggerOnDemand(member)}
-                                disabled={isProcessing || !isEnabled || org?.status === 'disabled' || !member.plan_active || (member.on_demand_quota || 0) === 0 || member.naukri_daily_limit_reached}
+                                disabled={isProcessing || !isEnabled || org?.status === 'disabled' || !member.plan_active || (member.on_demand_quota || 0) === 0}
                                 className="px-2.5 py-1 rounded-lg bg-cyan-950/60 light:bg-cyan-50 hover:bg-cyan-900/60 border border-cyan-800/60 light:border-cyan-300 text-cyan-300 light:text-cyan-700 hover:text-white light:hover:text-zinc-900 text-xs font-medium flex items-center gap-1 transition-colors disabled:opacity-40 cursor-pointer"
                                 title={
                                   member.naukri_daily_limit_reached
-                                    ? `Naukri daily application limit reached for today ("${member.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'}"). Sweeps paused until tomorrow.`
+                                    ? `Naukri daily application limit noted today ("${member.naukri_daily_limit_reason || 'Naukri limit'}"). Click to force retry on-demand sweep now.`
                                     : !member.plan_active
                                     ? 'No active plan — assign or pay for a plan'
                                     : (member.on_demand_quota || 0) === 0
