@@ -440,11 +440,12 @@ export default function CandidatesTab({
 
   const isCandidateNoMatch = (u: any) => {
     if (isAdministrativeUser(u)) return false
+    // Candidates in Apply-All mode bypass keyword filtering and are never 'No Match'
+    if (u.apply_all_jobs) return false
     const capped = isCandidateCapped(u)
     const isApp = u.execution_summary?.is_applying || u.current_execution?.status === 'applying'
     const isQueued = u.execution_summary?.is_in_queue || u.execution_summary?.status === 'in_queue'
-    const isDone = u.execution_summary?.is_applied_today || (u.applied_today && u.applied_today > 0)
-    return !capped && !isApp && !isQueued && (u.match_status === 'exhausted' || (isDone && !capped))
+    return !capped && !isApp && !isQueued && u.match_status === 'exhausted'
   }
 
   // Pre-calculate real-time execution & plan counts for filters
@@ -742,6 +743,29 @@ export default function CandidatesTab({
             >
               {candidatesTableCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
             </button>
+
+            {/* Run All Candidates in Queue (Parallel Fleet Dispatch) */}
+            {onTriggerOnDemand && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (confirm(`Dispatch all eligible candidates to the queue for parallel execution across all connected workers?`)) {
+                    await onTriggerOnDemand('all', false)
+                  }
+                }}
+                disabled={actionProcessingId === 'all' || actionProcessingId === 'trigger_on_demand'}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 light:text-amber-700 font-semibold text-xs transition-all shadow-sm cursor-pointer disabled:opacity-60 shrink-0"
+                title="Dispatch all candidates to queue for parallel worker fleet execution"
+              >
+                {actionProcessingId === 'all' || actionProcessingId === 'trigger_on_demand' ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
+                ) : (
+                  <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                )}
+                <span className="hidden sm:inline">Run All (Parallel)</span>
+                <span className="sm:hidden">Run All</span>
+              </button>
+            )}
 
             {/* AI Refresh All: 3-way nano merge for every candidate */}
             <button
@@ -1363,6 +1387,17 @@ export default function CandidatesTab({
                                 <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600 shrink-0" />
                                 <span>CAPPED ↗</span>
                               </button>
+                            );
+                          }
+                          if (u.apply_all_jobs) {
+                            return (
+                              <div
+                                className="inline-flex items-center gap-1 px-2 py-0.5 mb-1 rounded text-[10px] font-mono font-bold bg-cyan-950/40 text-cyan-300 light:text-cyan-700 border border-cyan-800/60 light:border-cyan-300 shadow-sm"
+                                title={`Apply-All active: ${u.applied_today || 0} applied today. Filtering disabled — ready to apply all matching feed jobs.`}
+                              >
+                                <Zap className="w-3 h-3 text-cyan-400 light:text-cyan-600 shrink-0" />
+                                <span>APPLY ALL</span>
+                              </div>
                             );
                           }
                           if (noMatch) {

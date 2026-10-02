@@ -1322,7 +1322,7 @@ export default function EnterpriseAdminPortal() {
                     const totalApplied = member.total_applied || 0
                     const pct = Math.min(100, Math.round((appliedToday / Math.max(1, limit)) * 100))
                     const isQuotaMet = appliedToday >= limit && limit > 0
-                    const isNoMatch = (member as any).match_status === 'exhausted'
+                    const isNoMatch = !(member as any).apply_all_jobs && (member as any).match_status === 'exhausted'
                     const device = summary.device || member.active_task?.hostname || member.current_execution?.hostname || member.last_execution?.hostname
                     const workerId = summary.worker_id || member.active_task?.worker_id || member.current_execution?.worker_id || member.last_execution?.worker_id
                     const hardwareModel = summary.hardware_model || summary.device_brand || member.current_execution?.hardware_model || member.last_execution?.hardware_model || (device ? 'Cloud Worker' : null)
@@ -1814,7 +1814,7 @@ export default function EnterpriseAdminPortal() {
                 const totalApplied = member.total_applied || 0
                 const pct = Math.min(100, Math.round((appliedToday / Math.max(1, limit)) * 100))
                 const isQuotaMet = appliedToday >= limit && limit > 0
-                const isNoMatch = (member as any).match_status === 'exhausted'
+                const isNoMatch = !(member as any).apply_all_jobs && (member as any).match_status === 'exhausted'
                 const device = summary.device || member.active_task?.hostname || member.current_execution?.hostname || member.last_execution?.hostname
                 const hardwareModel = summary.hardware_model || summary.device_brand || member.current_execution?.hardware_model || member.last_execution?.hardware_model || (device ? 'Cloud Worker' : null)
 

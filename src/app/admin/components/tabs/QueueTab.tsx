@@ -316,7 +316,7 @@ export default function QueueTab({
             className="flex-1 min-w-[200px] px-2.5 py-1.5 rounded-lg bg-black light:bg-zinc-50 border border-zinc-700 light:border-zinc-300 text-white light:text-zinc-900 text-xs font-mono focus:outline-none focus:border-sky-500 cursor-pointer"
           >
             <option value="">Select candidate… ({candidateOptions.length})</option>
-            <option value="admin">All candidates (sequential sweep)</option>
+            <option value="all">⚡ All Candidates (Parallel Worker Fleet Dispatch)</option>
             {candidateOptions.map((u: any) => {
               const active = queueTasks.some((t) => t.user_id === u.user_id && (t.status === 'pending' || t.status === 'running'))
               return (
@@ -326,7 +326,7 @@ export default function QueueTab({
               )
             })}
           </select>
-          <label className="flex items-center gap-1.5 text-[11px] text-zinc-500 cursor-pointer select-none">
+          <label className="flex items-center gap-1.5 text-[11px] text-zinc-500 cursor-pointer select-none" title="Force enqueue even if candidate already has a task or daily limit">
             <input type="checkbox" checked={forceTrigger} onChange={(e) => setForceTrigger(e.target.checked)} className="accent-sky-500 w-3.5 h-3.5" />
             Force
           </label>
@@ -337,7 +337,7 @@ export default function QueueTab({
             className="px-3 py-1.5 rounded-lg bg-white light:bg-zinc-900 text-black light:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
           >
             {actionProcessingId === 'trigger_on_demand' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-            Enqueue
+            {selectedCandidate === 'all' || selectedCandidate === 'admin' ? `Dispatch All (${candidateOptions.length} Parallel)` : 'Enqueue'}
           </button>
         </div>
       )}

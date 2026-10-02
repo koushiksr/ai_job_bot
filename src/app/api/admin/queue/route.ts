@@ -319,12 +319,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ detail: 'Target candidate user_id is required.' }, { status: 400 })
       }
 
-      // Check if candidate hit Naukri daily limit today
       const istNow = new Date(now.getTime() + 5.5 * 60 * 60 * 1000)
       const todayIstStr = istNow.toISOString().slice(0, 10)
       // When admin triggers on-demand sweep, clear previous transient limit flags
       // so the candidate's worker actively attempts fresh applications
-      if (targetUserId !== 'admin') {
+      if (targetUserId !== 'admin' && targetUserId !== 'all') {
         await Promise.all([
           db.collection('profiles').updateOne(
             { user_id: targetUserId },
@@ -335,6 +334,143 @@ export async function POST(req: NextRequest) {
             { $set: { naukri_daily_limit_reached: false, naukri_daily_limit_date: null, naukri_daily_limit_reason: null } }
           )
         ])
+      }
+
+      const aheadPendingCount = await db.collection('tasks').countDocuments({ status: 'pending' })
+
+      const isAllCandidates = targetUserId === 'all' || targetUserId === 'admin'
+
+      if (isAllCandidates) {
+        // Query users, profiles, and active tasks to construct individual parallel tasks
+        const [userDocs, profileDocs, activeTasksDocs] = await Promise.all([
+          db.collection('users').find({}, { projection: { user_id: 1, email: 1, name: 1, role: 1, is_admin: 1, is_org_admin: 1, is_org_admin_only: 1, enterprise_role: 1, enabled_for_daily_run: 1, naukri_daily_limit_date: 1, naukri_daily_limit_reason: 1 } }).toArray(),
+          db.collection('profiles').find({}, { projection: { user_id: 1, email: 1, name: 1, role: 1, is_admin: 1, is_org_admin: 1, is_org_admin_only: 1, enterprise_role: 1, enabled_for_daily_run: 1, naukri_daily_limit_date: 1, naukri_daily_limit_reason: 1 } }).toArray(),
+          db.collection('tasks').find({ status: { $in: ['pending', 'running'] } }, { projection: { user_id: 1, task_id: 1, status: 1 } }).toArray()
+        ])
+
+        const isAdministrativeAccount = (u: any): boolean => {
+          if (!u) return false
+          const uid = (u.user_id || '').toLowerCase()
+          const email = (u.email || '').toLowerCase()
+          const role = (u.role || '').toLowerCase()
+          const entRole = (u.enterprise_role || '').toLowerCase()
+          if (uid === 'technohmsit' || uid === 'admin') return true
+          if (email === 'technohmsit@gmail.com' || email === 'ranganathat32@gmail.com' || email === 'koushiksrmedala@gmail.com') return true
+          if (role === 'admin' || role === 'enterprise_admin') return true
+          if (entRole === 'admin' || entRole === 'super_admin') return true
+          if (u.is_admin || u.is_org_admin || u.is_org_admin_only) return true
+          return false
+        }
+
+        const profileMap = new Map<string, any>()
+        profileDocs.forEach(p => { if (p.user_id) profileMap.set(p.user_id, p) })
+        userDocs.forEach(u => {
+          if (u.user_id && !profileMap.has(u.user_id)) {
+            profileMap.set(u.user_id, u)
+          } else if (u.user_id && profileMap.has(u.user_id)) {
+            profileMap.set(u.user_id, { ...u, ...profileMap.get(u.user_id) })
+          }
+        })
+
+        const activeUserTaskMap = new Map<string, any>()
+        activeTasksDocs.forEach(t => {
+          if (t.user_id) activeUserTaskMap.set(t.user_id, t)
+        })
+
+        const candidates = Array.from(profileMap.values()).filter(p => !isAdministrativeAccount(p))
+        const newTasks: any[] = []
+        let skippedAlreadyActive = 0
+        let skippedNaukriLimit = 0
+        let skippedDisabled = 0
+
+        for (let i = 0; i < candidates.length; i++) {
+          const cand = candidates[i]
+          const uid = cand.user_id
+
+          // Check if candidate hit Naukri daily limit today (unless force)
+          if (cand.naukri_daily_limit_date === todayIstStr && !body.force) {
+            skippedNaukriLimit++
+            continue
+          }
+
+          // Check if candidate is manually paused / disabled for daily run (unless force)
+          if (cand.enabled_for_daily_run === false && !body.force) {
+            skippedDisabled++
+            continue
+          }
+
+          // Check if candidate already has an active pending/running task (unless force)
+          if (activeUserTaskMap.has(uid) && !body.force) {
+            skippedAlreadyActive++
+            continue
+          }
+
+          const candidateTaskId = `task_${uid}_admin_${Date.now()}_${i}`
+          const candLabel = cand.name ? `${cand.name} (${cand.email || uid})` : uid
+          const queuePosition = aheadPendingCount + newTasks.length + 1
+
+          newTasks.push({
+            task_id: candidateTaskId,
+            user_id: uid,
+            status: 'pending',
+            headless: false,
+            source: 'admin_on_demand',
+            created_at: new Date(now.getTime() + i * 50),
+            logs: [
+              `[${now.toLocaleTimeString()}] 🚀 Enqueued for parallel worker fleet execution by Administrator (${adminEmail || adminId}) for '${candLabel}'.`,
+              `[${now.toLocaleTimeString()}] ⏳ Ready in queue (position #${queuePosition}). Awaiting worker pickup...`
+            ]
+          })
+        }
+
+        if (newTasks.length > 0) {
+          await db.collection('tasks').insertMany(newTasks)
+
+          // Batch update profiles & users current_execution status to 'in_queue'
+          const enqueuedUids = newTasks.map(t => t.user_id)
+          await Promise.all([
+            db.collection('profiles').updateMany(
+              { user_id: { $in: enqueuedUids } },
+              { $set: { 'current_execution.status': 'in_queue', automation_status: 'queued' } }
+            ),
+            db.collection('users').updateMany(
+              { user_id: { $in: enqueuedUids } },
+              { $set: { 'current_execution.status': 'in_queue', automation_status: 'queued' } }
+            )
+          ])
+        }
+
+        await logUserActivity(db, {
+          userId: adminId || 'admin',
+          email: adminEmail || 'admin@jobfluxai.com',
+          eventType: 'task_run',
+          description: `Administrator triggered parallel fleet run for all candidates (${newTasks.length} enqueued, ${skippedAlreadyActive} already active, ${skippedNaukriLimit} limit-paused)`,
+          ipAddress: ip,
+          userAgent: userAgent,
+          metadata: { action: 'trigger_all_candidates_parallel', enqueuedCount: newTasks.length }
+        })
+
+        return NextResponse.json({
+          status: 'success',
+          message: `Dispatched ${newTasks.length} candidate tasks to the queue for parallel worker execution! (${skippedAlreadyActive} already active, ${skippedNaukriLimit} limit-paused)`,
+          enqueuedCount: newTasks.length,
+          skippedActive: skippedAlreadyActive,
+          skippedLimit: skippedNaukriLimit,
+          skippedDisabled
+        })
+      }
+
+      // Single Candidate Trigger
+      const prof = await db.collection('profiles').findOne({ user_id: targetUserId }) ||
+                   await db.collection('users').findOne({ user_id: targetUserId })
+
+      if (prof?.naukri_daily_limit_date === todayIstStr && !body.force) {
+        const reason = prof.naukri_daily_limit_reason || 'There was an error while processing your request, please try again later'
+        return NextResponse.json({
+          status: 'naukri_limit_reached',
+          detail: `Naukri daily application limit reached for today ("${reason}"). You cannot apply to jobs today anymore. On-demand sweeps are paused until tomorrow.`,
+          reason
+        }, { status: 400 })
       }
 
       // Check if candidate already has an active pending/running task unless force is requested
@@ -352,21 +488,11 @@ export async function POST(req: NextRequest) {
         }, { status: 409 })
       }
 
-      const aheadPendingCount = await db.collection('tasks').countDocuments({ status: 'pending' })
       const queuePosition = aheadPendingCount + 1
       const taskId = `task_${targetUserId}_admin_${Date.now()}`
 
       // Resolve candidate label for logging
-      let candidateLabel = targetUserId
-      if (targetUserId === 'admin') {
-        candidateLabel = 'All Candidates (Admin Autopilot Controller)'
-      } else {
-        const prof = await db.collection('profiles').findOne({ user_id: targetUserId }) ||
-                     await db.collection('users').findOne({ user_id: targetUserId })
-        if (prof) {
-          candidateLabel = `${prof.name || targetUserId} (${prof.email || targetUserId})`
-        }
-      }
+      const candidateLabel = prof ? `${prof.name || targetUserId} (${prof.email || targetUserId})` : targetUserId
 
       const newTask = {
         task_id: taskId,
@@ -384,6 +510,17 @@ export async function POST(req: NextRequest) {
       }
 
       await db.collection('tasks').insertOne(newTask)
+
+      await Promise.all([
+        db.collection('profiles').updateOne(
+          { user_id: targetUserId },
+          { $set: { 'current_execution.status': 'in_queue', 'current_execution.task_id': taskId, automation_status: 'queued' } }
+        ),
+        db.collection('users').updateOne(
+          { user_id: targetUserId },
+          { $set: { 'current_execution.status': 'in_queue', 'current_execution.task_id': taskId, automation_status: 'queued' } }
+        )
+      ])
 
       await logUserActivity(db, {
         userId: adminId || 'admin',

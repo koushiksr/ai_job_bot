@@ -449,13 +449,15 @@ export async function GET(req: NextRequest) {
           ? (p.enabled_for_daily_run === false ? 'disabled' : 'ready')
           : (p.automation_status || (p.enabled_for_daily_run === false ? 'disabled' : 'ready')),
         is_circuit_breaker: Number(p.naukri_login_fail_count || 0) >= 3 || p.last_automation_issue?.code === 'CIRCUIT_BREAKER_PAUSED',
-        match_status: poolStateByUser[p.user_id] || (
-          totalTodayApplied >= dailyApplicationLimit && dailyApplicationLimit > 0
-            ? 'capped'
-            : isAppliedToday && totalTodayApplied < dailyApplicationLimit && !isApplying && !isInQueue
-            ? 'exhausted'
-            : 'matching'
-        ),
+        match_status: p.apply_all_jobs
+          ? (totalTodayApplied >= dailyApplicationLimit && dailyApplicationLimit > 0 ? 'capped' : 'ready')
+          : (poolStateByUser[p.user_id] || (
+              totalTodayApplied >= dailyApplicationLimit && dailyApplicationLimit > 0
+                ? 'capped'
+                : isAppliedToday && totalTodayApplied < dailyApplicationLimit && !isApplying && !isInQueue
+                ? 'exhausted'
+                : 'matching'
+            )),
       }
     })
 
@@ -558,6 +560,9 @@ export async function PATCH(req: NextRequest) {
     }
     if (typeof body.apply_all_jobs === 'boolean') {
       updates.apply_all_jobs = body.apply_all_jobs
+      if (body.apply_all_jobs) {
+        updates.match_status = 'ready'
+      }
     }
     if (plan) {
       const existingUser = await db.collection('profiles').findOne({ user_id }) ||
