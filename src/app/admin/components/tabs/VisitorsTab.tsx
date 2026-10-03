@@ -27,12 +27,16 @@ import {
   Compass,
   ArrowUpRight,
   Layers,
-  Code
+  Code,
+  Activity,
+  UserCheck
 } from 'lucide-react'
-import { VisitorEventRecord, VisitorMetrics } from '../../types'
+import { VisitorEventRecord, VisitorMetrics, UniqueVisitorRecord } from '../../types'
 import { loadAdminPrefs, saveAdminPrefs } from '@/lib/adminPrefs'
 
 export default function VisitorsTab() {
+  const [viewMode, setViewMode] = useState<'unique_visitors' | 'events'>('unique_visitors')
+  const [uniqueVisitors, setUniqueVisitors] = useState<UniqueVisitorRecord[]>([])
   const [events, setEvents] = useState<VisitorEventRecord[]>([])
   const [metrics, setMetrics] = useState<VisitorMetrics | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
@@ -66,6 +70,8 @@ export default function VisitorsTab() {
 
   // Inspect Modal state
   const [inspectEvent, setInspectEvent] = useState<VisitorEventRecord | null>(null)
+  const [inspectVisitor, setInspectVisitor] = useState<UniqueVisitorRecord | null>(null)
+  const [taggingVid, setTaggingVid] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Manual browser→identity tagging (Short Name / Alias and/or Email)
@@ -76,7 +82,8 @@ export default function VisitorsTab() {
   const [tagNotice, setTagNotice] = useState<string | null>(null)
 
   const submitTag = async () => {
-    if (!inspectEvent || tagBusy) return
+    const targetVid = taggingVid || inspectVisitor?.visitor_id || inspectEvent?.visitor_id
+    if (!targetVid || tagBusy) return
     const cleanName = tagName.trim()
     const cleanEmail = tagEmail.trim().toLowerCase()
     if (!cleanName && !cleanEmail) {
@@ -95,7 +102,7 @@ export default function VisitorsTab() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
         body: JSON.stringify({
-          visitor_id: inspectEvent.visitor_id,
+          visitor_id: targetVid,
           tag_name: cleanName || null,
           email: cleanEmail || null
         })
@@ -104,22 +111,41 @@ export default function VisitorsTab() {
       if (!res.ok) throw new Error(data.detail || 'Tagging failed.')
 
       const updatedLinked = {
-        email: cleanEmail || inspectEvent.linked?.email || inspectEvent.email || null,
-        user_id: data.user_id || inspectEvent.linked?.user_id || inspectEvent.user_id || null,
+        email: cleanEmail || inspectEvent?.linked?.email || inspectEvent?.email || null,
+        user_id: data.user_id || inspectEvent?.linked?.user_id || inspectEvent?.user_id || null,
         tag_name: cleanName || null,
         manual: true
       }
 
-      setInspectEvent({
-        ...inspectEvent,
-        tag_name: cleanName || null,
-        linked: updatedLinked
-      })
+      if (inspectEvent && inspectEvent.visitor_id === targetVid) {
+        setInspectEvent({
+          ...inspectEvent,
+          tag_name: cleanName || null,
+          linked: updatedLinked
+        })
+      }
 
-      // Immediately sync with the active events list so table rows reflect the change
+      if (inspectVisitor && inspectVisitor.visitor_id === targetVid) {
+        setInspectVisitor({
+          ...inspectVisitor,
+          tag_name: cleanName || null,
+          email: cleanEmail || inspectVisitor.email,
+          manual: true
+        })
+      }
+
+      // Immediately sync with the active lists
+      setUniqueVisitors((prev) =>
+        prev.map((v) =>
+          v.visitor_id === targetVid
+            ? { ...v, tag_name: cleanName || null, email: cleanEmail || v.email, manual: true }
+            : v
+        )
+      )
+
       setEvents((prevEvents) =>
         prevEvents.map((e) =>
-          e.visitor_id === inspectEvent.visitor_id
+          e.visitor_id === targetVid
             ? {
                 ...e,
                 tag_name: cleanName || null,
@@ -135,6 +161,7 @@ export default function VisitorsTab() {
       )
 
       setIsEditingTag(false)
+      setTaggingVid(null)
       const noticeParts = []
       if (cleanName) noticeParts.push(`name '${cleanName}'`)
       if (cleanEmail) noticeParts.push(`email '${cleanEmail}'`)
@@ -146,19 +173,32 @@ export default function VisitorsTab() {
     }
   }
 
-  const removeTag = async () => {
-    if (!inspectEvent || tagBusy) return
+  const removeTag = async (overrideVid?: string) => {
+    const targetVid = overrideVid || taggingVid || inspectVisitor?.visitor_id || inspectEvent?.visitor_id
+    if (!targetVid || tagBusy) return
     setTagBusy(true)
     setTagNotice(null)
     try {
-      await fetch(`/api/admin/visitor-identities?visitor_id=${encodeURIComponent(inspectEvent.visitor_id)}`, {
+      await fetch(`/api/admin/visitor-identities?visitor_id=${encodeURIComponent(targetVid)}`, {
         method: 'DELETE',
         credentials: 'same-origin'
       })
-      setInspectEvent({ ...inspectEvent, tag_name: null, linked: null })
+      if (inspectEvent && inspectEvent.visitor_id === targetVid) {
+        setInspectEvent({ ...inspectEvent, tag_name: null, linked: null })
+      }
+      if (inspectVisitor && inspectVisitor.visitor_id === targetVid) {
+        setInspectVisitor({ ...inspectVisitor, tag_name: null, manual: false })
+      }
+      setUniqueVisitors((prev) =>
+        prev.map((v) =>
+          v.visitor_id === targetVid
+            ? { ...v, tag_name: null, manual: false }
+            : v
+        )
+      )
       setEvents((prevEvents) =>
         prevEvents.map((e) =>
-          e.visitor_id === inspectEvent.visitor_id
+          e.visitor_id === targetVid
             ? { ...e, tag_name: null, linked: null }
             : e
         )
@@ -166,6 +206,7 @@ export default function VisitorsTab() {
       setTagName('')
       setTagEmail('')
       setIsEditingTag(false)
+      setTaggingVid(null)
       setTagNotice('Manual tag removed.')
     } catch (err: any) {
       setTagNotice(err.message || 'Untag failed.')
@@ -199,13 +240,14 @@ export default function VisitorsTab() {
     fetchVisitors(false)
   }
 
-  const ignoreTrail = (evt: { email?: string | null; visitor_id?: string; ip_address?: string }, includeIp = false) => {
+  const ignoreTrail = (evt: { email?: string | null; visitor_id?: string; ip_address?: string; last_ip?: string }, includeIp = false) => {
     const emails = [...ignored.emails]
     const vids = [...ignored.vids]
     const ips = [...ignored.ips]
+    const ip = evt.ip_address || evt.last_ip
     if (evt.email && !emails.map((e) => e.toLowerCase()).includes(evt.email.toLowerCase())) emails.push(evt.email.toLowerCase())
     if (evt.visitor_id && !vids.includes(evt.visitor_id)) vids.push(evt.visitor_id)
-    if (includeIp && evt.ip_address && !ips.includes(evt.ip_address)) ips.push(evt.ip_address)
+    if (includeIp && ip && !ips.includes(ip)) ips.push(ip)
     saveIgnoreLists({ emails: emails.slice(0, 50), vids: vids.slice(0, 50), ips: ips.slice(0, 50) })
   }
 
@@ -285,6 +327,7 @@ export default function VisitorsTab() {
       const uEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') || '' : ''
 
       const params = new URLSearchParams()
+      params.set('view_mode', viewMode)
       params.set('page', String(page))
       params.set('limit', String(limit))
       params.set('time_range', timeRange)
@@ -322,6 +365,9 @@ export default function VisitorsTab() {
       }
 
       const data = await res.json()
+      if (Array.isArray(data.visitors)) {
+        setUniqueVisitors(data.visitors)
+      }
       setEvents(data.events || [])
       setMetrics(data.metrics || null)
       if (Array.isArray(data.countries)) setCountries(data.countries)
@@ -337,7 +383,7 @@ export default function VisitorsTab() {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [page, limit, timeRange, debouncedSearch, eventTypeFilter, deviceFilter, selectedVisitorId, identityFilter, countryFilter, hideMine])
+  }, [viewMode, page, limit, timeRange, debouncedSearch, eventTypeFilter, deviceFilter, selectedVisitorId, identityFilter, countryFilter, hideMine])
 
   // Lazy first-page load on mount; tab switches remount cheaply (25 rows, no auto-poll).
   useEffect(() => {
@@ -545,6 +591,47 @@ export default function VisitorsTab() {
             Top URL: <span className="text-zinc-300 light:text-zinc-700 font-mono">{metrics?.top_pages[0]?.path || '/'}</span>
           </div>
         </div>
+      </div>
+
+      {/* 2.5 View Mode Switcher: Unique Visitors Directory vs Live Event Telemetry */}
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-zinc-950/80 light:bg-zinc-100 border border-zinc-800/80 light:border-zinc-200">
+        <button
+          type="button"
+          onClick={() => {
+            setViewMode('unique_visitors')
+            setPage(1)
+          }}
+          className={`flex-1 flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            viewMode === 'unique_visitors'
+              ? 'bg-zinc-800 light:bg-white text-white light:text-zinc-900 shadow-md border border-zinc-700/80 light:border-zinc-300'
+              : 'text-zinc-400 light:text-zinc-600 hover:text-zinc-200 light:hover:text-zinc-900 hover:bg-zinc-900/50'
+          }`}
+        >
+          <Users className="w-4 h-4 text-cyan-400 light:text-cyan-600" />
+          <span>Unique Visitors Directory</span>
+          <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-cyan-950 light:bg-cyan-100 text-cyan-300 light:text-cyan-800 border border-cyan-800/60 light:border-cyan-200 font-bold">
+            {(metrics?.total_unique_visitors || 0).toLocaleString()}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setViewMode('events')
+            setPage(1)
+          }}
+          className={`flex-1 flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            viewMode === 'events'
+              ? 'bg-zinc-800 light:bg-white text-white light:text-zinc-900 shadow-md border border-zinc-700/80 light:border-zinc-300'
+              : 'text-zinc-400 light:text-zinc-600 hover:text-zinc-200 light:hover:text-zinc-900 hover:bg-zinc-900/50'
+          }`}
+        >
+          <Activity className="w-4 h-4 text-purple-400 light:text-purple-600" />
+          <span>Live Event Telemetry</span>
+          <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-purple-950 light:bg-purple-100 text-purple-300 light:text-purple-800 border border-purple-800/60 light:border-purple-200 font-bold">
+            {(metrics?.total_page_views || 0).toLocaleString()}
+          </span>
+        </button>
       </div>
 
       {/* 3. Search & Interactive Filter Controls */}
@@ -767,15 +854,305 @@ export default function VisitorsTab() {
         </div>
       </div>
 
-      {/* 4. Live Chronological Events Table */}
+      {/* 4. Live Chronological Events & Unique Visitors Directory */}
       <div className="rounded-2xl bg-zinc-950 light:bg-white border border-zinc-800/80 light:border-zinc-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-zinc-300 light:text-zinc-700 border-collapse">
-            <thead className="bg-zinc-900/80 light:bg-zinc-100 text-[11px] font-semibold text-zinc-400 light:text-zinc-600 uppercase tracking-wider border-b border-zinc-800 light:border-zinc-200">
-              <tr>
-                <th className="py-3 px-4">Time &amp; Recency</th>
-                <th className="py-3 px-4">Visitor / Identity</th>
-                <th className="py-3 px-4">Event Type</th>
+        {selectedVisitorId && viewMode === 'events' && (
+          <div className="p-3 bg-purple-950/40 border-b border-purple-800/80 flex items-center justify-between flex-wrap gap-2 text-xs text-purple-200">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-purple-400" />
+              <span>
+                Filtering chronological event stream for Visitor: <strong className="font-mono text-purple-300">{selectedVisitorId}</strong>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedVisitorId(null)
+                  setViewMode('unique_visitors')
+                  setPage(1)
+                }}
+                className="px-2.5 py-1 rounded-lg bg-purple-900 hover:bg-purple-800 text-white font-medium border border-purple-700 cursor-pointer text-xs transition-colors"
+              >
+                ← Return to Unique Visitors Directory
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedVisitorId(null)
+                  setPage(1)
+                }}
+                className="px-2 py-1 text-purple-400 hover:text-white text-xs cursor-pointer"
+              >
+                ✕ Clear Drilldown
+              </button>
+            </div>
+          </div>
+        )}
+
+        {viewMode === 'unique_visitors' ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-zinc-300 light:text-zinc-700 border-collapse">
+              <thead className="bg-zinc-900/80 light:bg-zinc-100 text-[11px] font-semibold text-zinc-400 light:text-zinc-600 uppercase tracking-wider border-b border-zinc-800 light:border-zinc-200">
+                <tr>
+                  <th className="py-3 px-4">Last Seen &amp; Recency</th>
+                  <th className="py-3 px-4">Visitor / Identity</th>
+                  <th className="py-3 px-4">Location &amp; Network</th>
+                  <th className="py-3 px-4">Device &amp; OS</th>
+                  <th className="py-3 px-4 text-center">Engagement</th>
+                  <th className="py-3 px-4">Landing &amp; Latest Page</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-900 light:divide-zinc-200">
+                {loading && uniqueVisitors.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-12 text-zinc-500 light:text-zinc-600">
+                      <RefreshCw className="w-6 h-6 animate-spin mx-auto text-cyan-400 light:text-cyan-600 mb-2" />
+                      Loading unique visitors directory...
+                    </td>
+                  </tr>
+                ) : uniqueVisitors.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-12 text-zinc-500 light:text-zinc-600">
+                      No unique visitors found matching current criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  uniqueVisitors.map((v) => {
+                    const hasEmail = Boolean(v.email)
+                    const hasPayment = Boolean(v.has_payment_intent || v.total_payment_clicks > 0)
+
+                    return (
+                      <tr
+                        key={v.id}
+                        className={`hover:bg-zinc-900/40 light:hover:bg-zinc-50 transition-colors ${
+                          hasPayment ? 'bg-amber-500/5' : ''
+                        }`}
+                      >
+                        {/* Last Seen */}
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <div className="font-mono text-zinc-200 light:text-zinc-800 font-semibold">
+                            {formatTimeExact(v.last_seen_at)}
+                          </div>
+                          <div className="text-[10px] text-zinc-500 light:text-zinc-600 flex items-center gap-1.5 mt-0.5">
+                            <span>{formatDateExact(v.last_seen_at)}</span>
+                            <span className="text-cyan-400 light:text-cyan-600 font-mono font-medium">
+                              • {formatRelativeTime(v.last_seen_at)}
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-zinc-600 font-mono mt-0.5">
+                            First: {formatDateExact(v.first_seen_at)}
+                          </div>
+                        </td>
+
+                        {/* Visitor / Identity */}
+                        <td className="py-3 px-4">
+                          {v.tag_name && (
+                            <div className="mb-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setTaggingVid(v.visitor_id)
+                                  setTagName(v.tag_name || '')
+                                  setTagEmail(v.email || '')
+                                  setTagNotice(null)
+                                  setIsEditingTag(true)
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 light:text-violet-700 border border-violet-500/40 hover:border-violet-400 text-[11px] font-bold shadow-xs transition-colors cursor-pointer"
+                                title="Click to edit short name tag"
+                              >
+                                🏷️ {v.tag_name}
+                              </button>
+                            </div>
+                          )}
+                          {hasEmail ? (
+                            <div className="space-y-0.5">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 light:text-emerald-700 border border-emerald-800 text-[11px] font-medium">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-400 light:text-emerald-600" />
+                                {v.email}
+                              </span>
+                              {v.user_id && (
+                                <div className="text-[10px] text-zinc-400 light:text-zinc-600 font-mono">
+                                  UID: {v.user_id}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1 font-mono text-[11px] text-zinc-400 light:text-zinc-600">
+                                <span>{v.visitor_id.slice(0, 14)}...</span>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(v.visitor_id, `vid-${v.id}`)}
+                                  className="text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                                  title="Copy Full Visitor ID"
+                                >
+                                  {copiedId === `vid-${v.id}` ? (
+                                    <Check className="w-3 h-3 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="w-3 h-3" />
+                                  )}
+                                </button>
+                              </div>
+                              <span className="text-[10px] text-zinc-600 block">
+                                Anonymous Visitor
+                              </span>
+                            </div>
+                          )}
+                          {v.known_emails && v.known_emails.length > 1 && (
+                            <div className="mt-1">
+                              <span
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-950/70 light:bg-amber-100 text-amber-300 light:text-amber-800 border border-amber-800/60 light:border-amber-300 text-[10px] font-medium"
+                                title={`Shared browser profile used across accounts: ${v.known_emails.join(', ')}`}
+                              >
+                                👥 Shared ({v.known_emails.length} accounts)
+                              </span>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Location & Network */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1 text-zinc-200 light:text-zinc-800 font-medium">
+                            <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
+                            <span className="truncate max-w-[150px]">
+                              {v.last_city ? `${v.last_city}, ` : ''}{v.last_country || 'Unknown'}
+                            </span>
+                          </div>
+                          <div className="text-[11px] font-mono text-zinc-400 light:text-zinc-500 mt-0.5 flex items-center gap-1">
+                            <span>{v.last_ip}</span>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(v.last_ip, `ip-${v.id}`)}
+                              className="text-zinc-600 hover:text-zinc-400 cursor-pointer"
+                              title="Copy IP"
+                            >
+                              {copiedId === `ip-${v.id}` ? (
+                                <Check className="w-2.5 h-2.5 text-emerald-400" />
+                              ) : (
+                                <Copy className="w-2.5 h-2.5" />
+                              )}
+                            </button>
+                          </div>
+                          {v.known_ips && v.known_ips.length > 1 && (
+                            <div className="text-[10px] font-mono text-blue-400 light:text-blue-600 mt-0.5" title={`Observed IPs: ${v.known_ips.join(', ')}`}>
+                              🛡️ Multi-IP ({v.known_ips.length} IPs)
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Device & Browser */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1.5 text-zinc-200 light:text-zinc-800">
+                            {v.last_device === 'mobile' ? (
+                              <Smartphone className="w-3.5 h-3.5 text-purple-400" />
+                            ) : (
+                              <Laptop className="w-3.5 h-3.5 text-cyan-400" />
+                            )}
+                            <span className="font-medium capitalize">{v.last_device}</span>
+                            <span className="text-zinc-500">•</span>
+                            <span>{v.last_os}</span>
+                          </div>
+                          <div className="text-[11px] text-zinc-400 light:text-zinc-500 mt-0.5 truncate max-w-[140px]" title={v.last_browser}>
+                            {v.last_browser}
+                          </div>
+                        </td>
+
+                        {/* Engagement */}
+                        <td className="py-3 px-4 text-center">
+                          <div className="inline-flex flex-col items-center gap-1">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-950/80 light:bg-cyan-100 text-cyan-300 light:text-cyan-800 border border-cyan-800/60 light:border-cyan-300 font-mono text-[11px] font-bold">
+                              <Eye className="w-3 h-3" />
+                              {v.total_page_views} {v.total_page_views === 1 ? 'view' : 'views'}
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-500 light:text-zinc-600">
+                              {v.total_events} raw events
+                            </span>
+                            {hasPayment && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-950 light:bg-amber-100 text-amber-300 light:text-amber-800 border border-amber-800 light:border-amber-300 text-[10px] font-bold">
+                                <CreditCard className="w-2.5 h-2.5" />
+                                Checkout ({v.total_payment_clicks || 1})
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Landing & Latest Page */}
+                        <td className="py-3 px-4">
+                          <div className="space-y-0.5 max-w-[180px]">
+                            <div className="font-mono text-zinc-200 light:text-zinc-800 truncate text-[11px]" title={v.last_path}>
+                              {v.last_path}
+                            </div>
+                            <div className="text-[10px] text-zinc-500 truncate" title={v.first_referrer}>
+                              Ref: {v.first_referrer || 'Direct'}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Tag button */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTaggingVid(v.visitor_id)
+                                setTagName(v.tag_name || '')
+                                setTagEmail(v.email || '')
+                                setTagNotice(null)
+                                setIsEditingTag(true)
+                              }}
+                              className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-zinc-800 light:hover:bg-zinc-200 text-zinc-300 light:text-zinc-700 hover:text-cyan-300 border border-zinc-800 light:border-zinc-200 transition-colors cursor-pointer"
+                              title={v.tag_name ? `Edit Tag (${v.tag_name})` : 'Assign short name / tag'}
+                            >
+                              🏷️
+                            </button>
+
+                            {/* View Live Events Stream for this visitor */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedVisitorId(v.visitor_id)
+                                setViewMode('events')
+                                setPage(1)
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-purple-950/60 hover:bg-purple-900/80 text-purple-300 light:text-purple-700 border border-purple-800/80 text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Drilldown into this visitor's chronological clickstream"
+                            >
+                              <Activity className="w-3 h-3 text-purple-400" />
+                              <span>Events</span>
+                            </button>
+
+                            {/* Ignore Button */}
+                            <button
+                              type="button"
+                              disabled={ignoreBusy}
+                              onClick={() => {
+                                ignoreTrail({ email: v.email, visitor_id: v.visitor_id, last_ip: v.last_ip })
+                              }}
+                              className="p-1.5 rounded-lg bg-zinc-900 light:bg-zinc-100 hover:bg-rose-950/50 text-zinc-500 hover:text-rose-300 border border-zinc-800 light:border-zinc-200 transition-colors cursor-pointer disabled:opacity-50"
+                              title={v.email ? `Never show ${v.email} or this browser again` : 'Never show this browser again'}
+                            >
+                              <Ban className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-zinc-300 light:text-zinc-700 border-collapse">
+              <thead className="bg-zinc-900/80 light:bg-zinc-100 text-[11px] font-semibold text-zinc-400 light:text-zinc-600 uppercase tracking-wider border-b border-zinc-800 light:border-zinc-200">
+                <tr>
+                  <th className="py-3 px-4">Time &amp; Recency</th>
+                  <th className="py-3 px-4">Visitor / Identity</th>
+                  <th className="py-3 px-4">Event Type</th>
                 <th className="py-3 px-4">Page &amp; Referrer</th>
                 <th className="py-3 px-4">IP &amp; Geolocation</th>
                 <th className="py-3 px-4">Device &amp; OS</th>
@@ -1060,18 +1437,19 @@ export default function VisitorsTab() {
             </tbody>
           </table>
         </div>
+      )}
 
-        {/* Table Footer / Pagination */}
-        <div className="p-4 bg-zinc-950 light:bg-white border-t border-zinc-900 light:border-zinc-200 flex items-center justify-between flex-wrap gap-3 text-xs text-zinc-400 light:text-zinc-600">
-          <div>
-            Showing <strong className="text-white light:text-zinc-900">{events.length}</strong> of{' '}
-            <strong className="text-white light:text-zinc-900">{totalRecords.toLocaleString()}</strong> events
-            {selectedVisitorId && (
-              <span className="ml-2 text-purple-400">
-                (Filtered for single visitor)
-              </span>
-            )}
-          </div>
+      {/* Table Footer / Pagination */}
+      <div className="p-4 bg-zinc-950 light:bg-white border-t border-zinc-900 light:border-zinc-200 flex items-center justify-between flex-wrap gap-3 text-xs text-zinc-400 light:text-zinc-600">
+        <div>
+          Showing <strong className="text-white light:text-zinc-900">{viewMode === 'unique_visitors' ? uniqueVisitors.length : events.length}</strong> of{' '}
+          <strong className="text-white light:text-zinc-900">{totalRecords.toLocaleString()}</strong> {viewMode === 'unique_visitors' ? 'unique visitors' : 'events'}
+          {selectedVisitorId && (
+            <span className="ml-2 text-purple-400">
+              (Filtered for single visitor)
+            </span>
+          )}
+        </div>
 
           <div className="flex items-center gap-2">
             <button
@@ -1096,6 +1474,89 @@ export default function VisitorsTab() {
           </div>
         </div>
       </div>
+
+      {/* 4.5 Standalone Tagging Modal for Directory / Events */}
+      {isEditingTag && taggingVid && !inspectEvent && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 light:bg-black/50 backdrop-blur-md animate-in fade-in"
+          onClick={() => { setIsEditingTag(false); setTaggingVid(null) }}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl bg-[#0d1017] light:bg-white border border-zinc-800 light:border-zinc-200 text-white light:text-zinc-900 p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => { setIsEditingTag(false); setTaggingVid(null) }}
+              className="absolute top-4 right-4 text-zinc-500 hover:text-white light:hover:text-zinc-900"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <h3 className="text-sm font-bold flex items-center gap-2 mb-1">
+              🏷️ Tag Visitor Identity
+            </h3>
+            <p className="text-xs text-zinc-400 light:text-zinc-600 mb-4">
+              Assign a recognizable nickname or link an email to visitor <code className="text-cyan-400 font-mono">{taggingVid.slice(0, 14)}...</code>
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-zinc-400 light:text-zinc-600 block mb-1 font-medium">Short Name / Tag</label>
+                <input
+                  type="text"
+                  value={tagName}
+                  onChange={(e) => setTagName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitTag() }}
+                  placeholder="e.g. Rohan (Lead), VIP Recruiter, Friend"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 text-xs text-zinc-200 light:text-zinc-800 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-zinc-400 light:text-zinc-600 block mb-1 font-medium">Linked Email (Optional)</label>
+                <input
+                  type="email"
+                  value={tagEmail}
+                  onChange={(e) => setTagEmail(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitTag() }}
+                  placeholder="email@example.com"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 text-xs text-zinc-200 light:text-zinc-800 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              {tagNotice && (
+                <div className="text-xs text-cyan-400 light:text-cyan-600 font-medium">{tagNotice}</div>
+              )}
+              <div className="flex items-center justify-between pt-2">
+                {tagName || tagEmail ? (
+                  <button
+                    type="button"
+                    onClick={() => removeTag(taggingVid)}
+                    disabled={tagBusy}
+                    className="text-xs text-rose-400 hover:underline cursor-pointer disabled:opacity-50"
+                  >
+                    Remove Tag
+                  </button>
+                ) : <span />}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setIsEditingTag(false); setTaggingVid(null) }}
+                    className="px-3 py-1.5 rounded-lg bg-zinc-800 light:bg-zinc-200 hover:bg-zinc-700 text-xs font-medium cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={submitTag}
+                    disabled={tagBusy}
+                    className="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {tagBusy ? 'Saving…' : 'Save Tag'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 5. Inspection Modal / Drawer */}
       {inspectEvent && (

@@ -266,3 +266,29 @@ export interface VisitorMetrics {
   top_pages: Array<{ path: string; count: number }>
   devices_breakdown: { desktop: number; mobile: number; tablet: number }
 }
+
+export interface UniqueVisitorRecord {
+  id: string
+  visitor_id: string
+  email: string | null
+  user_id: string | null
+  tag_name: string | null
+  manual: boolean
+  total_page_views: number
+  total_events: number
+  total_payment_clicks: number
+  has_payment_intent: boolean
+  first_seen_at: string
+  last_seen_at: string
+  last_ip: string
+  last_city: string | null
+  last_country: string
+  last_device: string
+  last_os: string
+  last_browser: string
+  last_path: string
+  first_referrer: string
+  known_emails: string[]
+  known_ips: string[]
+  known_countries: string[]
+}
