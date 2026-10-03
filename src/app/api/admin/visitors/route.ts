@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
     const viewMode = searchParams.get('view_mode') || searchParams.get('mode') || 'unique_visitors' // 'unique_visitors' | 'events'
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10), 1), 200)
+    const skip = (page - 1) * limit
     const search = (searchParams.get('search') || '').trim()
     const eventType = searchParams.get('event_type')
     const deviceType = searchParams.get('device_type')
