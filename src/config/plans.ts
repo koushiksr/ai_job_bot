@@ -143,7 +143,7 @@ export const MASTER_PLANS: PlanDefinition[] = [
   },
   {
     id: 'pro',
-    name: 'Pro (1 Month)',
+    name: '1-Month Plan',
     subtitle: 'Maximum speed, automated daily applies, and priority queue.',
     badge: 'POPULAR',
     price: PRICING.pro1m.display,
@@ -151,23 +151,24 @@ export const MASTER_PLANS: PlanDefinition[] = [
     amountPaise: PRICING.pro1m.amountPaise,
     period: PRICING.pro1m.period,
     durationDays: 30,
-    featuresIntro: 'Everything in Free, with 55 daily applications and priority queue...',
+    dailyLimit: 30,
+    featuresIntro: 'Everything in Free, with 30 daily applications (15/session) and priority queue...',
     features: [
       { text: '30 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
+      { text: 'Up to 30 Verified Job Applications / Day (15 / session stealth pace)' },
       { text: 'On-Demand Real-Time Sweeps (Up to 10x / week)' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
       { text: 'AI Tailored Responses for Recruiter Screening' },
       { text: 'Priority Cloud Worker Queue Slot' },
       { text: 'Live Application History & Recruiter Links' }
     ],
-    cta: 'Get Pro (1 Month)',
+    cta: 'Get 1-Month Plan',
     popular: true,
     highlight: true
   },
   {
     id: 'elite',
-    name: 'Pro (3 Months)',
+    name: '3-Month Plan',
     subtitle: 'Best value 90-day comprehensive pipeline until you sign an offer.',
     badge: 'BEST VALUE',
     price: PRICING.pro3m.display,
@@ -175,17 +176,18 @@ export const MASTER_PLANS: PlanDefinition[] = [
     amountPaise: PRICING.pro3m.amountPaise,
     period: PRICING.pro3m.period,
     durationDays: 90,
-    featuresIntro: 'Everything in 1-Month Pro, with extended 90-day pipeline, plus...',
+    dailyLimit: 30,
+    featuresIntro: 'Everything in 1-Month Plan, with extended 90-day pipeline, plus...',
     features: [
       { text: '90 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
+      { text: 'Up to 30 Verified Job Applications / Day (15 / session stealth pace)' },
       { text: 'VIP Priority Server Queue Slot' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
       { text: 'On-Demand Real-Time Sweeps (Up to 15x / week)' },
       { text: 'Continuous Applications Until Hired' },
       { text: 'Dedicated Recruiter Response Priority' }
     ],
-    cta: 'Get Pro (3 Months)',
+    cta: 'Get 3-Month Plan',
     highlight: false
   },
   {
@@ -424,7 +426,7 @@ export const PLANS = MASTER_PLANS
 export const ORG_PLANS: PlanDefinition[] = [
   {
     id: 'pro',
-    name: 'Pro (1 Month)',
+    name: '1-Month Plan',
     subtitle: 'Full-speed daily auto-apply with on-demand sweeps, linked to your organization.',
     badge: 'POPULAR',
     price: PRICING.pro1m.display,
@@ -432,11 +434,11 @@ export const ORG_PLANS: PlanDefinition[] = [
     amountPaise: PRICING.pro1m.amountPaise,
     period: '/ month',
     durationDays: 30,
-    dailyLimit: 55,
-    featuresIntro: 'Everything in 1-Month Pro, staying linked to your organization & admin...',
+    dailyLimit: 30,
+    featuresIntro: 'Everything in 1-Month Plan, staying linked to your organization & admin...',
     features: [
       { text: '30 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
+      { text: 'Up to 30 Verified Job Applications / Day (15 / session stealth pace)' },
       { text: '15 Weekly On-Demand Sweeps (Included for Org Members)' },
       { text: 'Priority Cloud Worker Queue Slot & Fast-Path Submission' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
@@ -444,13 +446,13 @@ export const ORG_PLANS: PlanDefinition[] = [
       { text: 'Institutional Placement Coordinator & Admin Progress Sync' },
       { text: 'Stays linked to your organization & admin' }
     ],
-    cta: 'Get Pro',
+    cta: 'Get 1-Month Plan',
     highlight: true,
     popular: true
   },
   {
     id: 'elite',
-    name: 'Pro (3 Months)',
+    name: '3-Month Plan',
     subtitle: 'Best value 90-day pipeline with VIP placement guarantee support.',
     badge: 'BEST VALUE',
     price: PRICING.pro3m.display,
@@ -458,11 +460,11 @@ export const ORG_PLANS: PlanDefinition[] = [
     amountPaise: PRICING.pro3m.amountPaise,
     period: '/ 3 months',
     durationDays: 90,
-    dailyLimit: 55,
-    featuresIntro: 'Everything in 3-Month Pro, staying linked to your organization & admin...',
+    dailyLimit: 30,
+    featuresIntro: 'Everything in 3-Month Plan, staying linked to your organization & admin...',
     features: [
       { text: '90 Days of Continuous Daily Auto-Apply' },
-      { text: 'Up to 55 Verified Job Applications / Day (Platform Max)' },
+      { text: 'Up to 30 Verified Job Applications / Day (15 / session stealth pace)' },
       { text: '15 Weekly On-Demand Sweeps (Included for Org Members)' },
       { text: 'VIP Priority Cloud Worker Queue Slot' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
@@ -471,7 +473,7 @@ export const ORG_PLANS: PlanDefinition[] = [
       { text: 'Continuous Applications Until Hired' },
       { text: 'Stays linked to your organization & admin' }
     ],
-    cta: 'Get Pro (3 Months)',
+    cta: 'Get 3-Month Plan',
     highlight: false
   }
 ]
@@ -507,20 +509,18 @@ export function getWeeklyOnDemandLimit(planId?: string | null, isEnterpriseMembe
 /**
  * Daily application cap per plan.
  * If an enterprise member has NOT paid, they cannot apply even one job (0 applies/day).
- * Paid tiers (individual or legacy org): 55 applies/day (Platform Maximum).
- * Starter: 20 applies/day.
+ * Paid active plans: 30 applies/day (15/session stealth pace across 2 sweeps).
+ * Trial: 10 applies/day.
  */
 export function getDailyAppLimit(planId?: string | null, isEnterpriseMember = false): number {
   const p = (planId || '').toLowerCase()
   if (isEnterpriseMember) {
-    if (p === 'org_pro' || p === 'org_pro_3m' || p === 'pro' || p === 'elite' || p === 'professional' || p === 'vip') return 55
-    if (p === 'org_starter' || p === 'starter') return 20
+    if (p === 'org_pro' || p === 'org_pro_3m' || p === 'pro' || p === 'elite' || p === 'professional' || p === 'vip' || p === 'org_starter' || p === 'starter') return 30
     return 0 // Unpaid org member cannot apply even one job
   }
   if (p === 'trial') return 10
-  if (p === 'starter' || p === 'org_starter') return 20
   if (p === 'none' || p === 'no_plan' || p === 'unpaid' || !p) return 0
-  return 55
+  return 30
 }
 
 /** Upgrade nudge for capped tiers. Empty string when nothing to upsell. */
@@ -529,9 +529,7 @@ export function getCapUpgradeHint(planId?: string | null, isEnterpriseMember = f
   if (isEnterpriseMember && (p === 'enterprise' || p === 'none' || p === 'unpaid' || !p)) {
     return 'Payment required to apply. Subscribe to an Organization Member Plan to begin automated applications.'
   }
-  if (p === 'org_starter') return 'Starter allows 20/day — upgrade to Pro for 55/day and 15 weekly sweeps.'
-  if (p === 'trial') return 'Free trial allows 10/day — upgrade to Pro for 55/day.'
-  if (p === 'starter') return 'Starter allows 25/day — upgrade to Pro for 55/day.'
+  if (p === 'trial') return 'Free trial allows 10/day — subscribe to 1-Month or 3-Month Plan for full 30/day (15/session).'
   return ''
 }
 

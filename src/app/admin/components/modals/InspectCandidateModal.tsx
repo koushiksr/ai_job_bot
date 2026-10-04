@@ -376,11 +376,11 @@ export default function InspectCandidateModal({
               <div className="font-mono text-xs font-bold">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
-                  const isVipPro = Boolean(candidate.is_vip || candidate.plan_expiry_status === 'vip_lifetime')
-                  const isOrgPro = isOrg && (candidate.plan === 'org_pro' || candidate.plan === 'org_pro_3m' || candidate.plan === 'pro' || isVipPro)
-                  const limit = isOrg 
-                    ? (isOrgPro ? 55 : (candidate.daily_application_limit ? Math.min(20, Number(candidate.daily_application_limit)) : 20))
-                    : (candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20)))
+                  const planLc = (candidate.plan || 'trial').toLowerCase()
+                  const isUnpaidOrg = isOrg && (planLc === 'unpaid' || planLc === 'enterprise' || planLc === 'none')
+                  const tierCap = planLc === 'trial' ? 10 : isUnpaidOrg ? 0 : 30
+                  const customLim = Number(candidate.daily_application_limit)
+                  const limit = (candidate.daily_application_limit != null && !isNaN(customLim) && customLim > 0) ? Math.min(tierCap, customLim) : tierCap
                   const todayCount = candidate.applied_today || 0
                   return (
                     <span className={todayCount > 0 ? 'text-emerald-300 light:text-emerald-700' : 'text-zinc-400 light:text-zinc-600'}>
@@ -414,10 +414,11 @@ export default function InspectCandidateModal({
               <div className="font-bold text-white light:text-zinc-900 uppercase">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
-                  if (candidate.plan === 'org_pro' || candidate.plan === 'org_pro_3m' || (isOrg && candidate.plan === 'pro') || (isOrg && (candidate.is_vip || candidate.plan_expiry_status === 'vip_lifetime'))) return 'Org Pro (55/d · 15 Sweeps/wk)'
-                  if (candidate.plan_expiry_status === 'expired' || candidate.plan_expiry_status === 'no_plan' || candidate.plan === 'unpaid') return 'No Plan (Payment Required)'
-                  if (candidate.plan === 'org_starter' || (isOrg && candidate.plan === 'starter')) return 'Org Starter (20/d)'
-                  if (candidate.plan === 'enterprise' || isOrg) return 'Enterprise Base (55/d)'
+                  const planLc = (candidate.plan || '').toLowerCase()
+                  if (candidate.plan_expiry_status === 'expired' || candidate.plan_expiry_status === 'no_plan' || planLc === 'unpaid' || planLc === 'none') return 'No Plan (Payment Required)'
+                  if (planLc.includes('3m') || planLc.includes('elite') || planLc.includes('professional')) return '3-Month Plan (90d · 30/d · 15/sess)'
+                  if (planLc.includes('pro') || planLc.includes('starter') || planLc.includes('month') || planLc.includes('org_')) return '1-Month Plan (30d · 30/d · 15/sess)'
+                  if (planLc === 'trial') return 'Free Trial (3d · 10/d)'
                   return candidate.plan || 'Free'
                 })()}
               </div>
@@ -427,12 +428,12 @@ export default function InspectCandidateModal({
               <div className="font-mono font-bold text-amber-300 light:text-amber-700">
                 {(() => {
                   const isOrg = Boolean(candidate.org_id || candidate.enterprise_org_id || candidate.enterprise_role === 'member' || candidate.plan === 'enterprise' || candidate.plan === 'org_pro')
-                  const isVipPro = Boolean(candidate.is_vip || candidate.plan_expiry_status === 'vip_lifetime')
-                  const isOrgPro = isOrg && (candidate.plan === 'org_pro' || candidate.plan === 'org_pro_3m' || candidate.plan === 'pro' || isVipPro)
-                  const limit = isOrg 
-                    ? (isOrgPro ? 55 : (candidate.daily_application_limit ? Math.min(20, Number(candidate.daily_application_limit)) : 20))
-                    : (candidate.daily_application_limit || (candidate.is_vip || candidate.plan === 'elite' || candidate.plan === 'vip' ? 150 : (candidate.plan === 'pro' || candidate.plan === 'starter' ? 50 : 20)))
-                  return `${limit}/day ${limit >= 150 ? '(150 Max)' : ''}`
+                  const planLc = (candidate.plan || 'trial').toLowerCase()
+                  const isUnpaidOrg = isOrg && (planLc === 'unpaid' || planLc === 'enterprise' || planLc === 'none')
+                  const tierCap = planLc === 'trial' ? 10 : isUnpaidOrg ? 0 : 30
+                  const customLim = Number(candidate.daily_application_limit)
+                  const limit = (candidate.daily_application_limit != null && !isNaN(customLim) && customLim > 0) ? Math.min(tierCap, customLim) : tierCap
+                  return `${limit}/day`
                 })()}
               </div>
             </div>
