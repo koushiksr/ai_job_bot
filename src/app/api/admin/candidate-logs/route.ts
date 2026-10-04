@@ -238,25 +238,65 @@ export async function GET(req: NextRequest) {
       remedy = 'Review candidate experience settings, preferred locations, and target keywords to expand match pool.'
     }
 
+    // 7. Fetch Candidate Screening Q&A Records
+    const qaRecords = await db.collection('screening_qa_logs')
+      .find({ user_id: resolvedUserId })
+      .sort({ created_at: -1 })
+      .limit(100)
+      .toArray()
+
+    const formattedQa = qaRecords.map((q: any) => {
+      let dateStr = ''
+      if (q.created_at_ist) {
+        dateStr = q.created_at_ist
+      } else if (q.created_at) {
+        try {
+          dateStr = new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          }).format(new Date(q.created_at))
+        } catch {
+          dateStr = String(q.created_at)
+        }
+      }
+      return {
+        id: String(q._id),
+        question: q.question || '',
+        answer: q.answer || '',
+        source: q.source || 'ai',
+        q_type: q.q_type || 'text',
+        options: Array.isArray(q.options) ? q.options : [],
+        job_title: q.job_title || '',
+        company: q.company || '',
+        confidence: typeof q.confidence === 'number' ? q.confidence : 1.0,
+        applied_successfully: q.applied_successfully !== false,
+        created_at: dateStr || 'Recently'
+      }
+    })
+
+    const candidateObj = {
+      user_id: resolvedUserId,
+      name: profile.name || resolvedUserId,
+      email: email || '',
+      plan: profile.plan || 'trial',
+      plan_name: profile.plan_name || profile.plan || 'Free Trial',
+      daily_application_limit: dailyLimit,
+      applied_today: todayApplied,
+      total_applied: totalAppliedCount,
+      enabled_for_daily_run: profile.enabled_for_daily_run !== false,
+      naukri_daily_limit_reached: isNaukriLimitHitToday,
+      naukri_daily_limit_date: profile.naukri_daily_limit_date || null,
+      naukri_daily_limit_reason: profile.naukri_daily_limit_reason || null,
+      naukri_login_fail_count: Number(profile.naukri_login_fail_count || 0),
+      last_automation_issue: profile.last_automation_issue || null,
+      current_execution: profile.current_execution || null
+    }
+
     return NextResponse.json({
       status: 'success',
-      candidate: {
-        user_id: resolvedUserId,
-        name: profile.name || resolvedUserId,
-        email: email || '',
-        plan: profile.plan || 'trial',
-        plan_name: profile.plan_name || 'Standard',
-        daily_application_limit: dailyLimit,
-        applied_today: todayApplied,
-        total_applied: totalAppliedCount,
-        enabled_for_daily_run: profile.enabled_for_daily_run !== false,
-        naukri_daily_limit_reached: isNaukriLimitHitToday,
-        naukri_daily_limit_date: profile.naukri_daily_limit_date || null,
-        naukri_daily_limit_reason: profile.naukri_daily_limit_reason || null,
-        naukri_login_fail_count: Number(profile.naukri_login_fail_count || 0),
-        last_automation_issue: profile.last_automation_issue || null,
-        current_execution: profile.current_execution || null
-      },
+      candidate: candidateObj,
+      profile: candidateObj,
       diagnostic: {
         status: diagnosticStatus,
         headline,
@@ -279,7 +319,8 @@ export async function GET(req: NextRequest) {
       },
       tasks: tasksMetadata,
       selected_task_id: selectedTaskDoc?.task_id || null,
-      selected_task_logs: selectedTaskLogs
+      selected_task_logs: selectedTaskLogs,
+      qa_records: formattedQa
     })
   } catch (err: any) {
     console.error('Error in /api/admin/candidate-logs GET:', err)
@@ -322,6 +363,45 @@ export async function PATCH(req: NextRequest) {
 
     if (typeof body.daily_application_limit === 'number') {
       updates.daily_application_limit = Math.min(150, Math.max(1, body.daily_application_limit))
+    }
+
+    if (body.update_qa && body.update_qa.question && body.update_qa.answer) {
+      const qText = String(body.update_qa.question).trim()
+      const aText = String(body.update_qa.answer).trim()
+      const crypto = await import('crypto')
+      const qHash = crypto.createHash('md5').update(qText).digest('hex')
+      const now = new Date()
+
+      await db.collection('qa_cache').updateOne(
+        { user_id: userId, question_hash: qHash },
+        {
+          $set: {
+            user_id: userId,
+            question_hash: qHash,
+            question_text: qText,
+            answer: aText,
+            updated_at: now
+          }
+        },
+        { upsert: true }
+      )
+
+      await db.collection('screening_qa_logs').insertOne({
+        user_id: userId,
+        question: qText,
+        question_hash: qHash,
+        answer: aText,
+        source: 'manual_override',
+        q_type: 'text',
+        confidence: 1.0,
+        applied_successfully: true,
+        created_at: now,
+        created_at_ist: new Intl.DateTimeFormat('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }).format(now)
+      })
     }
 
     await db.collection('profiles').updateOne({ user_id: userId }, { $set: updates })

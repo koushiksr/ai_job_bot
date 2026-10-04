@@ -77,6 +77,20 @@ interface DiagnosticInfo {
   is_circuit_breaker: boolean
 }
 
+interface ScreeningQaRecord {
+  id: string
+  question: string
+  answer: string
+  source: string
+  q_type: string
+  options: string[]
+  job_title: string
+  company: string
+  confidence: number
+  applied_successfully: boolean
+  created_at: string
+}
+
 interface CandidateProfileDetail {
   user_id: string
   name: string
@@ -106,11 +120,19 @@ export default function CandidateApplicationLogsView({
   const [candidateFilter, setCandidateFilter] = useState<'all' | 'naukri_limit' | 'capped' | 'circuit_breaker' | 'applying'>('all')
 
   // Main Audit View State
-  const [activeTab, setActiveTab] = useState<'jobs' | 'console'>('jobs')
+  const [activeTab, setActiveTab] = useState<'jobs' | 'console' | 'qa'>('jobs')
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const [resettingLimit, setResettingLimit] = useState(false)
   const [resettingBreaker, setResettingBreaker] = useState(false)
+
+  // Screening Q&A State
+  const [qaRecords, setQaRecords] = useState<ScreeningQaRecord[]>([])
+  const [qaSearchQuery, setQaSearchQuery] = useState('')
+  const [editingQa, setEditingQa] = useState<ScreeningQaRecord | null>(null)
+  const [editAnswerText, setEditAnswerText] = useState('')
+  const [savingQa, setSavingQa] = useState(false)
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState('')
 
   // Data State
   const [candidateData, setCandidateData] = useState<CandidateProfileDetail | null>(null)
@@ -215,6 +237,10 @@ export default function CandidateApplicationLogsView({
         }
 
         setJobsPagination(data.pagination || { page: 1, limit: 50, total: 0, has_more: false })
+
+        if (data.qa_records) {
+          setQaRecords(data.qa_records)
+        }
       }
     } catch (err) {
       console.error('Error loading candidate logs:', err)
@@ -223,6 +249,37 @@ export default function CandidateApplicationLogsView({
       setLoadingMore(false)
     }
   }, [jobStatusFilter, jobSearchQuery])
+
+  // Save updated Q&A answer directly into candidate's AI memory
+  const handleSaveQa = async () => {
+    if (!editingQa || !selectedCandidateId || !editAnswerText.trim()) return
+    setSavingQa(true)
+    setSaveSuccessMsg('')
+    try {
+      const res = await fetch('/api/admin/candidate-logs', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: selectedCandidateId,
+          update_qa: {
+            question: editingQa.question,
+            answer: editAnswerText.trim()
+          }
+        })
+      })
+      if (!res.ok) throw new Error('Failed to update answer')
+      setQaRecords(prev => prev.map(q => q.id === editingQa.id ? { ...q, answer: editAnswerText.trim(), source: 'manual_override' } : q))
+      setSaveSuccessMsg('Saved to candidate AI memory!')
+      setTimeout(() => {
+        setEditingQa(null)
+        setSaveSuccessMsg('')
+      }, 1200)
+    } catch (e: any) {
+      alert(e.message || 'Error saving answer')
+    } finally {
+      setSavingQa(false)
+    }
+  }
 
   // Initial load when selectedCandidateId changes
   useEffect(() => {
@@ -641,6 +698,18 @@ export default function CandidateApplicationLogsView({
               <Terminal className="w-3.5 h-3.5 text-emerald-400" />
               <span>Engine Execution Console Logs ({selectedTaskLogs.length})</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('qa')}
+              className={`px-4 py-2 font-mono text-xs font-semibold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === 'qa'
+                  ? 'border-amber-400 text-white bg-zinc-900/60 rounded-t-lg'
+                  : 'border-transparent text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Screening Q&A Memory ({qaRecords.length})</span>
+            </button>
           </div>
         </div>
 
@@ -1006,6 +1075,179 @@ export default function CandidateApplicationLogsView({
                 })
               )}
             </div>
+          </div>
+        )}
+
+        {/* =====================================================================
+            TAB 3: CANDIDATE SCREENING QUESTIONNAIRE & AI MEMORY
+        ===================================================================== */}
+        {activeTab === 'qa' && (
+          <div className="rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 p-4 shadow-xl space-y-4">
+            {/* QA Header & Filter */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  Candidate Screening Questionnaire Memory
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Every screening question asked on Naukri is recorded here with its source. High-confidence answers are automatically memorized in MongoDB Atlas.
+                </p>
+              </div>
+
+              <div className="relative min-w-[240px]">
+                <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={qaSearchQuery}
+                  onChange={(e) => setQaSearchQuery(e.target.value)}
+                  placeholder="Search questions, answers, companies..."
+                  className="w-full pl-8 pr-7 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/60"
+                />
+                {qaSearchQuery && (
+                  <button
+                    onClick={() => setQaSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* QA List */}
+            {qaRecords.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-zinc-800 rounded-xl">
+                <Sparkles className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                <p className="text-sm text-zinc-400 font-medium">No screening questions recorded yet</p>
+                <p className="text-xs text-zinc-600 mt-1 max-w-sm mx-auto">
+                  When the automated worker answers chatbot screening questions (notice period, skill years, CTC, etc.), they will appear here live.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {qaRecords
+                  .filter(q => {
+                    if (!qaSearchQuery.trim()) return true
+                    const s = qaSearchQuery.toLowerCase()
+                    return (
+                      (q.question && q.question.toLowerCase().includes(s)) ||
+                      (q.answer && q.answer.toLowerCase().includes(s)) ||
+                      (q.company && q.company.toLowerCase().includes(s)) ||
+                      (q.job_title && q.job_title.toLowerCase().includes(s)) ||
+                      (q.source && q.source.toLowerCase().includes(s))
+                    )
+                  })
+                  .map((record) => {
+                    const isEditing = editingQa?.id === record.id
+                    return (
+                      <div
+                        key={record.id}
+                        className="p-3.5 rounded-xl bg-zinc-950/70 border border-zinc-800/80 hover:border-zinc-700/80 transition-all space-y-2.5"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-1 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700">
+                                {record.q_type}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${
+                                record.source.includes('deterministic') || record.source === 'predefined'
+                                  ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                                  : record.source.includes('openai') || record.source.includes('groq')
+                                  ? 'bg-cyan-950 text-cyan-300 border border-cyan-800'
+                                  : record.source === 'manual_override'
+                                  ? 'bg-purple-950 text-purple-300 border border-purple-800'
+                                  : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
+                              }`}>
+                                {record.source}
+                              </span>
+                              {record.company && (
+                                <span className="text-[11px] text-zinc-400 flex items-center gap-1 font-mono">
+                                  <Building2 className="w-3 h-3 text-zinc-500" />
+                                  {record.company}
+                                </span>
+                              )}
+                              {record.job_title && (
+                                <span className="text-[11px] text-zinc-500 font-mono truncate max-w-[200px]">
+                                  • {record.job_title}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs font-semibold text-zinc-100">
+                              {record.question}
+                            </p>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <span className="text-[10px] font-mono text-zinc-500">
+                              {record.created_at}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Answer Display / Edit Box */}
+                        <div className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-black/60 border border-zinc-900">
+                          {isEditing ? (
+                            <div className="flex-1 flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={editAnswerText}
+                                onChange={(e) => setEditAnswerText(e.target.value)}
+                                className="flex-1 px-3 py-1 text-xs rounded bg-zinc-900 border border-amber-500/80 text-white focus:outline-none"
+                                placeholder="Enter updated answer..."
+                                autoFocus
+                              />
+                              <button
+                                type="button"
+                                onClick={handleSaveQa}
+                                disabled={savingQa}
+                                className="px-3 py-1 rounded text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-black cursor-pointer transition-colors"
+                              >
+                                {savingQa ? 'Saving...' : 'Save to AI Memory'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingQa(null)}
+                                className="px-2 py-1 rounded text-xs text-zinc-400 hover:text-white cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                              {saveSuccessMsg && (
+                                <span className="text-xs text-emerald-400 font-mono">
+                                  {saveSuccessMsg}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] uppercase tracking-wider text-zinc-500 font-mono">
+                                  Answer:
+                                </span>
+                                <span className="text-xs font-mono font-bold text-emerald-400">
+                                  {record.answer}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingQa(record)
+                                  setEditAnswerText(record.answer)
+                                  setSaveSuccessMsg('')
+                                }}
+                                className="text-[11px] font-mono text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+                              >
+                                Edit Answer
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+            )}
           </div>
         )}
       </div>
