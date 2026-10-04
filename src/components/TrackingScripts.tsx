@@ -52,8 +52,8 @@ export default function TrackingScripts() {
         </>
       )}
 
-      {/* Google Analytics 4 (GA4) / Google Ads Tag */}
-      {gaMeasurementId && (
+      {/* Google Analytics 4 (GA4) / Google Ads Tag (Only if not already included in root layout) */}
+      {gaMeasurementId && gaMeasurementId !== 'G-DDZJVV80DM' && gaMeasurementId !== 'AW-825590065' && (
         <>
           <Script
             strategy="afterInteractive"

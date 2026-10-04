@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
-import { motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import {
   Mail,
   Lock,
@@ -27,19 +27,25 @@ import {
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
-import AiEngineVisualizer from '@/components/AiEngineVisualizer'
-import HomeInteractiveToolsCard from '@/components/HomeInteractiveToolsCard'
-import JobFluxHelpModal from '@/components/JobFluxHelpModal'
 import HeroReviewCarousel from '@/components/HeroReviewCarousel'
-import CandidateReviewModal from '@/components/CandidateReviewModal'
-import HeroCareerLeapWidget from '@/components/HeroCareerLeapWidget'
-import JobFluxFourPillars from '@/components/JobFluxFourPillars'
 import FuturisticHeroCockpit from '@/components/FuturisticHeroCockpit'
 import EmployerProofMarquee from '@/components/EmployerProofMarquee'
 import TrustBadgesBar from '@/components/TrustBadgesBar'
 import Footer from '@/components/Footer'
 import { validatedIdentity, getDeviceId } from '@/lib/sessionClient'
 import { trackSignUp, getVisitorId } from '@/lib/tracker'
+
+// Dynamic code-splitting for below-the-fold and modal components to maximize LCP and minimize bundle size
+const AiEngineVisualizer = dynamic(() => import('@/components/AiEngineVisualizer'), {
+  loading: () => <div className="h-64 rounded-2xl bg-zinc-900/40 animate-pulse border border-zinc-800/50" />
+})
+const HomeInteractiveToolsCard = dynamic(() => import('@/components/HomeInteractiveToolsCard'), {
+  loading: () => <div className="h-48 rounded-xl bg-zinc-900/40 animate-pulse border border-zinc-800/50" />
+})
+const HeroCareerLeapWidget = dynamic(() => import('@/components/HeroCareerLeapWidget'))
+const JobFluxFourPillars = dynamic(() => import('@/components/JobFluxFourPillars'))
+const JobFluxHelpModal = dynamic(() => import('@/components/JobFluxHelpModal'), { ssr: false })
+const CandidateReviewModal = dynamic(() => import('@/components/CandidateReviewModal'), { ssr: false })
 
 const FAQS = [
   {
@@ -448,13 +454,8 @@ export default function Home() {
         {/* Main Hero Section */}
         <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 md:py-16 flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 z-10">
           
-          {/* Left Column: Clean Value Proposition */}
-          <motion.div 
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex-1 w-full text-center lg:text-left space-y-6"
-          >
+          {/* Left Column: Clean Value Proposition (Rendered immediately for instant LCP) */}
+          <div className="flex-1 w-full text-center lg:text-left space-y-6">
             <div>
               {/* Futuristic Cyber Badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-cyan-950/80 via-zinc-900/90 to-purple-950/80 light:from-cyan-50 light:via-white light:to-cyan-50 border border-cyan-500/40 light:border-cyan-300 text-zinc-200 light:text-zinc-800 text-xs font-mono mb-4 sm:mb-5 shadow-lg shadow-cyan-950/40">
@@ -526,15 +527,12 @@ export default function Home() {
             <div className="pt-4 sm:pt-6 border-t border-zinc-900/80 light:border-zinc-200">
               <HeroReviewCarousel onOpenReviewModal={() => setIsReviewModalOpen(true)} />
             </div>
-          </motion.div>
+          </div>
           
           {/* Right Column: Futuristic Hero Cockpit or Active Session Card */}
-          <motion.div 
+          <div 
             ref={authCardRef}
             id="auth-card"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
             className="w-full lg:w-[460px] xl:w-[490px] shrink-0 scroll-mt-24"
           >
             {existingUser ? (
@@ -575,7 +573,7 @@ export default function Home() {
             ) : (
               <FuturisticHeroCockpit />
             )}
-          </motion.div>
+          </div>
         </main>
 
         {/* Premier Tech Employer Hiring & Interview Proof Marquee */}
@@ -909,6 +907,14 @@ export default function Home() {
           onClose={() => setIsHelpOpen(false)}
           showFloatingTrigger={true}
         />
+
+        {/* Candidate Review Modal (loaded on-demand only when opened) */}
+        {isReviewModalOpen && (
+          <CandidateReviewModal
+            isOpen={isReviewModalOpen}
+            onClose={() => setIsReviewModalOpen(false)}
+          />
+        )}
       </div>
 
       {/* Google Identity Services SDK Script */}

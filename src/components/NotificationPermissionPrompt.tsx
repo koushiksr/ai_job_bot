@@ -36,10 +36,10 @@ export default function NotificationPermissionPrompt() {
       }
     } catch {}
 
-    // 5. Reveal prompt after 1.2s delay for seamless UX
+    // 5. Reveal prompt after 5s delay so it does not interfere with critical LCP measurement
     const timer = setTimeout(() => {
       setShowPrompt(true)
-    }, 1200)
+    }, 5000)
 
     return () => clearTimeout(timer)
   }, [])

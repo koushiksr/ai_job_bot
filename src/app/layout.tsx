@@ -8,14 +8,18 @@ import TrackingScripts from "@/components/TrackingScripts";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
+import Script from "next/script";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://jobfluxai.vercel.app";
@@ -183,16 +187,24 @@ export default function RootLayout({
             __html: `try{if(localStorage.getItem('jf-theme')==='light'){document.documentElement.classList.add('light')}}catch(e){}`
           }}
         />
-        {/* Google tag (gtag.js) - Google Ads & Google Analytics */}
-        <script
-          async
+        {/* Preconnect to external third-party origins to speed up connection setup */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
+
+        {/* Google tag (gtag.js) - Google Ads & Google Analytics loaded non-blocking after interactive */}
+        <Script
+          strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=AW-825590065"
         />
-        <script
-          async
+        <Script
+          strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=G-DDZJVV80DM"
         />
-        <script
+        <Script
+          id="google-gtag-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
