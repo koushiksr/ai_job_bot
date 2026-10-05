@@ -49,8 +49,8 @@ const CandidateReviewModal = dynamic(() => import('@/components/CandidateReviewM
 
 const FAQS = [
   {
-    q: 'How does the JobFlux autonomous auto-apply bot work?',
-    a: 'JobFlux AI scans active employer listings matching your target roles, skills, and preferences, accurately completes recruiter questionnaires using your background context, and submits verified applications directly to hiring managers.'
+    q: 'How does JobFlux get me recruiter shortlists and interviews?',
+    a: 'JobFlux AI operates a triple-threat recruiter engine: (1) Daily Profile & Resume Freshness Updates to rank you on Page 1 of recruiter searches (Resdex) as "Active Just Now", (2) Direct "Share Interest" outreach to approved hiring companies on early-access openings, and (3) Sweet-Spot Stealth Auto-Apply timed right before peak HR desk hours (09:45 AM & 02:00 PM IST) with custom AI answers to recruiter screening questions.'
   },
   {
     q: 'What makes the Harvard & FAANG ATS resume standard different?',

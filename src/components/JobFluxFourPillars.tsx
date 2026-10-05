@@ -51,17 +51,17 @@ export default function JobFluxFourPillars({
               PILLAR 1: THE BURNING NEED
             </span>
             <h3 className="text-lg sm:text-xl font-bold text-white light:text-zinc-900">
-              Beat The Recruiter Black Hole (First 10 Rule)
+              Triple-Threat Recruiter Discovery: Freshness + Outreach + Sweet-Spot
             </h3>
             <p className="text-xs sm:text-sm text-zinc-400 light:text-zinc-600 leading-relaxed">
-              Recruiters receive 400+ applications per job listing and only review the first 15–20 candidates before closing the tab. If you apply manually at 9 PM after work, your resume is buried on Page 14.
+              Recruiters don&apos;t just read applications—they search Resdex and shortlist &quot;Active Just Now&quot; profiles. JobFlux silently updates your profile &amp; resume regularly so you rank on <strong className="text-amber-300 light:text-amber-700">Page 1 of recruiter searches</strong>, and dispatches applications right before HR opens their inbox (09:45 AM &amp; 02:00 PM IST).
             </p>
           </div>
 
           <div className="pt-2 border-t border-zinc-800/60 light:border-zinc-200 flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5 text-amber-300 light:text-amber-700 font-mono text-[11px] font-semibold">
               <Zap className="w-3.5 h-3.5" />
-              <span>Applied at 6 AM IST = #1 on Recruiter Desk</span>
+              <span>Resdex Page 1 Rank + Peak HR Sweet-Spot = Top of Desk</span>
             </div>
           </div>
         </div>
@@ -76,20 +76,20 @@ export default function JobFluxFourPillars({
 
           <div className="space-y-2">
             <span className="text-[10px] font-mono uppercase tracking-widest text-sky-400 font-bold">
-              PILLAR 2: THE CAREER STATUS
+              PILLAR 2: DIRECT OUTREACH &amp; STATUS
             </span>
             <h3 className="text-lg sm:text-xl font-bold text-white light:text-zinc-900">
-              Target High-Growth Product Companies (₹20L–₹75L CTC)
+              Early &quot;Share Interest&quot; with Approved Employers (₹20L–₹75L CTC)
             </h3>
             <p className="text-xs sm:text-sm text-zinc-400 light:text-zinc-600 leading-relaxed">
-              Stop competing in low-paying 3–6 LPA body shops. JobFlux includes 1-tap blacklist filters for mass IT consultancies (TCS, Infosys, Wipro, Cognizant, Accenture) and targets tier-1 product MNCs and venture-backed startups.
+              Don&apos;t wait in a line of 500 applicants. JobFlux automatically shares interest on early-access openings with top verified product MNCs and startups before jobs go viral, while blacklisting spam consultancies (TCS, Infosys, Wipro, Cognizant, Accenture).
             </p>
           </div>
 
           <div className="pt-2 border-t border-zinc-800/60 light:border-zinc-200 flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5 text-sky-300 font-mono text-[11px] font-semibold">
               <Target className="w-3.5 h-3.5" />
-              <span>Direct access to Tier-1 product tech hiring</span>
+              <span>Early access direct employer handshake + consultancy blocker</span>
             </div>
           </div>
         </div>

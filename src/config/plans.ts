@@ -129,13 +129,14 @@ export const MASTER_PLANS: PlanDefinition[] = [
     amountPaise: 0,
     period: 'free to start',
     durationDays: 3,
-    featuresIntro: 'Daily morning sweep, automated applying, zero card required...',
+    featuresIntro: 'Daily peak-window sweep, profile freshness bump, early outreach, zero card required...',
     features: [
-      { text: 'Autonomous Daily Auto-Apply' },
-      { text: 'Daily Morning Sweep (6:00 AM IST)' },
+      { text: 'Daily Morning Sweep (Peak HR Login Window)' },
+      { text: 'Autonomous Daily Auto-Apply (10 Jobs/Day)' },
+      { text: 'Daily Profile & Resume Freshness Update (Page 1 Resdex Boost)' },
+      { text: 'Early Access "Share Interest" with Verified Approved Companies' },
       { text: 'Automated screening questions answered' },
       { text: 'Real-time application telemetry dashboard' },
-      { text: 'Daily email dispatch reports' },
       { text: 'Zero credit card required' }
     ],
     cta: 'Start for Free',
@@ -144,7 +145,7 @@ export const MASTER_PLANS: PlanDefinition[] = [
   {
     id: 'pro',
     name: '1-Month Plan',
-    subtitle: 'Maximum speed, automated daily applies, and priority queue.',
+    subtitle: 'Triple-threat recruiter visibility: daily auto-apply, profile freshness, & early outreach.',
     badge: 'POPULAR',
     price: PRICING.pro1m.display,
     originalPrice: PRICING.pro1m.originalDisplay,
@@ -152,15 +153,17 @@ export const MASTER_PLANS: PlanDefinition[] = [
     period: PRICING.pro1m.period,
     durationDays: 30,
     dailyLimit: 30,
-    featuresIntro: 'Everything in Free, with 30 daily applications (15/session) and priority queue...',
+    featuresIntro: 'Everything in Free, with 30 daily applications, profile freshness bumps, and priority outreach...',
     features: [
       { text: '30 Days of Continuous Daily Auto-Apply' },
       { text: 'Up to 30 Verified Job Applications / Day (15 / session stealth pace)' },
+      { text: 'Daily Profile & Resume Freshness Updates (Rank Top of Recruiter Resdex Searches)' },
+      { text: 'Direct Recruiter Outreach (Early Access "Share Interest" with Approved Companies)' },
+      { text: 'Peak HR Sweet-Spot Applying (09:45 AM & 02:00 PM — Top of Recruiter Inbox)' },
       { text: 'On-Demand Real-Time Sweeps (Up to 10x / week)' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
       { text: 'AI Tailored Responses for Recruiter Screening' },
-      { text: 'Priority Cloud Worker Queue Slot' },
-      { text: 'Live Application History & Recruiter Links' }
+      { text: 'Priority Cloud Worker Queue Slot' }
     ],
     cta: 'Get 1-Month Plan',
     popular: true,
@@ -181,9 +184,11 @@ export const MASTER_PLANS: PlanDefinition[] = [
     features: [
       { text: '90 Days of Continuous Daily Auto-Apply' },
       { text: 'Up to 30 Verified Job Applications / Day (15 / session stealth pace)' },
+      { text: 'Continuous Profile & Resume Freshness Pulse (Page 1 Recruiter Ranking)' },
+      { text: 'Automated Early Access Outreach ("Share Interest" with Approved Employers)' },
+      { text: 'Dual Peak-Window Application Runs (Morning & Post-Lunch Sweet Spots)' },
       { text: 'VIP Priority Server Queue Slot' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
-      { text: 'On-Demand Real-Time Sweeps (Up to 15x / week)' },
       { text: 'Continuous Applications Until Hired' },
       { text: 'Dedicated Recruiter Response Priority' }
     ],
@@ -439,10 +444,11 @@ export const ORG_PLANS: PlanDefinition[] = [
     features: [
       { text: '30 Days of Continuous Daily Auto-Apply' },
       { text: 'Up to 30 Verified Job Applications / Day (15 / session stealth pace)' },
+      { text: 'Daily Profile & Resume Freshness Updates (Rank Top of Recruiter Resdex)' },
+      { text: 'Early Access Outreach ("Share Interest" with Verified Approved Companies)' },
       { text: '15 Weekly On-Demand Sweeps (Included for Org Members)' },
       { text: 'Priority Cloud Worker Queue Slot & Fast-Path Submission' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },
-      { text: 'AI Tailored Responses for Recruiter Screening' },
       { text: 'Institutional Placement Coordinator & Admin Progress Sync' },
       { text: 'Stays linked to your organization & admin' }
     ],
@@ -465,6 +471,8 @@ export const ORG_PLANS: PlanDefinition[] = [
     features: [
       { text: '90 Days of Continuous Daily Auto-Apply' },
       { text: 'Up to 30 Verified Job Applications / Day (15 / session stealth pace)' },
+      { text: 'Continuous Profile & Resume Freshness Pulse (Page 1 Recruiter Ranking)' },
+      { text: 'Automated Early Access Outreach ("Share Interest" with Approved Employers)' },
       { text: '15 Weekly On-Demand Sweeps (Included for Org Members)' },
       { text: 'VIP Priority Cloud Worker Queue Slot' },
       { text: 'Harvard ATS Resume Optimization & Keyword Match' },

@@ -732,8 +732,44 @@ export default function PricingPage() {
           })}
         </div>
 
-        {/* Risk Reversal & Interview Assurance Banner */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* The 3-in-1 Recruiter Engine & Interview Assurance Banner */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-sky-500/30 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 light:text-cyan-600 shrink-0">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 text-xs">
+              <h3 className="font-bold text-white light:text-zinc-900 text-sm">Resdex Freshness Boost</h3>
+              <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
+                Silently refreshes your profile &amp; resume regularly so Naukri ranks you as &quot;Active Just Now&quot; on <strong className="text-sky-300 light:text-cyan-700">Page 1 of recruiter searches</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-emerald-500/30 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 light:text-emerald-600 shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 text-xs">
+              <h3 className="font-bold text-white light:text-zinc-900 text-sm">Direct &quot;Share Interest&quot;</h3>
+              <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
+                Pre-approves and shares interest with verified hiring companies on early-access openings <strong className="text-emerald-300 light:text-emerald-700">before thousands apply</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-cyan-500/30 flex items-start gap-4 shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 light:text-cyan-600 shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 text-xs">
+              <h3 className="font-bold text-white light:text-zinc-900 text-sm">Sweet-Spot HR Delivery</h3>
+              <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
+                Stealth applies timed at <strong className="text-cyan-300 light:text-cyan-700">09:45 AM &amp; 02:00 PM IST</strong> so you land at the top of the recruiter inbox right as they open their laptop.
+              </p>
+            </div>
+          </div>
+
           <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-zinc-800 light:border-zinc-200 flex items-start gap-4 shadow-xl">
             <div className="w-10 h-10 rounded-xl bg-zinc-900 light:bg-zinc-100 border border-zinc-800 light:border-zinc-200 flex items-center justify-center text-zinc-300 light:text-zinc-700 shrink-0">
               <ShieldCheck className="w-5 h-5" />
@@ -742,30 +778,6 @@ export default function PricingPage() {
               <h3 className="font-bold text-white light:text-zinc-900 text-sm">14-Day Interview Guarantee</h3>
               <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
                 If you don&apos;t receive at least 3 recruiter profile shortlists or calls in 14 days, get a 100% full refund immediately.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-sky-500/30 flex items-start gap-4 shadow-xl">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 light:text-cyan-600 shrink-0">
-              <Zap className="w-5 h-5" />
-            </div>
-            <div className="space-y-1 text-xs">
-              <h3 className="font-bold text-white light:text-zinc-900 text-sm">9 AM Resdex Freshness Bump</h3>
-              <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
-                Silently touches your profile daily, placing you on Page 1 of recruiter searches (worth ₹15,000 in placement consulting).
-              </p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-[#09090b] light:bg-white border border-cyan-500/30 flex items-start gap-4 shadow-xl">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 light:text-cyan-600 shrink-0">
-              <Lock className="w-5 h-5" />
-            </div>
-            <div className="space-y-1 text-xs">
-              <h3 className="font-bold text-white light:text-zinc-900 text-sm">100% Local Stealth & 0 Bans</h3>
-              <p className="text-zinc-400 light:text-zinc-600 leading-relaxed text-[11px]">
-                Runs using your real home IP address and human-like delays. Completely undetectable by Cloudflare or bot protection firewalls.
               </p>
             </div>
           </div>
