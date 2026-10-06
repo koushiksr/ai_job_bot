@@ -179,6 +179,7 @@ export async function GET(req: NextRequest) {
       last_profile_updated_at: profile.last_profile_updated_at || profile.updated_at || null,
       profile_update_count: profile.profile_update_count || 0,
       last_resume_updated_at: profile.last_resume_updated_at || null,
+      last_resume_bump_at: profile.last_resume_bump_at || null,
       resume_upload_count: profile.resume_upload_count || 0,
       last_scout_run_at: profile.last_scout_run_at || null,
       on_demand_run_count: profile.on_demand_run_count || 0,

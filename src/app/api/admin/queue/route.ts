@@ -248,6 +248,7 @@ export async function GET(req: NextRequest) {
         status: isCancelled ? 'cancelled' : t.status,
         queue_position: queuePos,
         source: t.source || 'on_demand',
+        action: t.action || null,
         headless: Boolean(t.headless),
         created_at: t.created_at,
         started_at: t.started_at || null,

@@ -431,6 +431,7 @@ export async function GET(req: NextRequest) {
         last_profile_updated_at: p.last_profile_updated_at || p.updated_at || null,
         resume_upload_count: p.resume_upload_count || 0,
         last_resume_updated_at: p.last_resume_updated_at || null,
+        last_resume_bump_at: p.last_resume_bump_at || null,
         resume_filename: p.resume_filename || null,
         on_demand_run_count: p.on_demand_run_count || 0,
         last_scout_run_at: p.last_scout_run_at || null,

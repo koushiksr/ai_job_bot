@@ -1873,6 +1873,12 @@ export default function CandidatesTab({
                               · {u.last_resume_updated_at ? formatTimestamp(u.last_resume_updated_at) : (u.last_profile_updated_at ? formatTimestamp(u.last_profile_updated_at) : 'synced')}
                             </span>
                           </div>
+                          {u.last_resume_bump_at && (
+                            <div className="flex items-center gap-1 text-[10px] text-emerald-400 light:text-emerald-600 font-mono mt-0.5">
+                              <span className="text-[9px]">⚡</span>
+                              <span>Resdex Fresh: {formatTimestamp(u.last_resume_bump_at)}</span>
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="py-3 px-3.5 text-right relative">

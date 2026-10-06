@@ -197,6 +197,7 @@ export default function InspectCandidateModal({
               ['Logins', `${candidate.login_count ?? 0} total · last ${t.last_login_at ? fmtDate(t.last_login_at) : (candidate.last_login_at ? fmtDate(candidate.last_login_at) : '—')}`],
               ['Profile edits', `${t.profile_update_count ?? candidate.profile_update_count ?? 0} · last ${fmtDate(t.last_profile_updated_at || candidate.last_profile_updated_at)}`],
               ['Resume uploads', `${t.resume_upload_count ?? candidate.resume_upload_count ?? 0} · last ${fmtDate(t.last_resume_updated_at || candidate.last_resume_updated_at)}`],
+              ['Resdex Freshness', (candidate.last_resume_bump_at || t.last_resume_bump_at) ? `${fmtDate(candidate.last_resume_bump_at || t.last_resume_bump_at)} (Active Just Now)` : 'Every 30m during day'],
               ['On-demand runs', `${t.on_demand_run_count ?? candidate.on_demand_run_count ?? 0} lifetime`]
             ]
             const invites = dossier?.invites || []

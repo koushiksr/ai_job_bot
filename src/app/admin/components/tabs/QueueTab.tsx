@@ -63,7 +63,8 @@ function countFor(m: AdminQueueMetrics, key: string): number {
   return (m as any)[key] ?? 0
 }
 
-function shortSource(src: string): string {
+function shortSource(src: string, action?: string): string {
+  if (action === 'resume_bump' || src === 'resume_freshness_sweep') return '📄 30m Resume Bump'
   if (!src) return '—'
   if (src === 'web_dashboard_on_demand') return 'On-demand'
   if (src === 'daily_cron') return 'Auto-sweep'
@@ -434,7 +435,7 @@ export default function QueueTab({
                         <div className="text-[11px] text-zinc-500 font-mono truncate max-w-[220px]">
                           {t.candidate_email || t.user_id}
                           {t.is_vip ? <span className="ml-1 text-amber-400 font-sans font-semibold">VIP</span> : t.candidate_plan ? ` · ${t.candidate_plan}` : ''}
-                          {' · '}{shortSource(t.source)}{t.headless ? '' : ' · headed'}
+                          {' · '}{shortSource(t.source, t.action)}{t.headless ? '' : ' · headed'}
                         </div>
                         {/* Server & Worker Hardware Telemetry Badge */}
                         {(t.worker_host || t.worker_device_brand || t.worker_id) && (
