@@ -56,8 +56,8 @@ export async function GET(req: NextRequest) {
     const todayIstStr = istNow.toISOString().slice(0, 10)
     const todayStartUtc = new Date(new Date(todayIstStr + 'T00:00:00+05:30').getTime())
 
-    // 3. Count Today's Applications
-    const [todayApplied, totalStatsDoc] = await Promise.all([
+    // 3. Count Today's Applications (Count ONLY verified applied/success, NEVER external redirects)
+    const [todayCountFromRows, totalStatsDoc] = await Promise.all([
       db.collection('applied_jobs').countDocuments({
         $or: [{ user_id: resolvedUserId }, ...(email ? [{ user_email: email }, { email }] : [])],
         $and: [
@@ -67,11 +67,15 @@ export async function GET(req: NextRequest) {
               { applied_at: { $gte: todayStartUtc } }
             ]
           },
-          { status: { $in: ['applied', 'external'] } }
+          { status: { $in: ['applied', 'success'] } }
         ]
       }),
       db.collection('user_stats').findOne({ user_id: resolvedUserId })
     ])
+
+    const todayApplied = (totalStatsDoc?.last_date === todayIstStr && typeof totalStatsDoc?.today === 'number')
+      ? totalStatsDoc.today
+      : todayCountFromRows
 
     const totalAppliedCount = totalStatsDoc?.total_applied || profile.total_applied || (
       await db.collection('applied_jobs').countDocuments({
@@ -352,6 +356,7 @@ export async function PATCH(req: NextRequest) {
       updates.naukri_daily_limit_reached = false
       updates.naukri_daily_limit_date = null
       updates.naukri_daily_limit_reason = null
+      updates.daily_status = 'ready'
     }
 
     if (body.reset_circuit_breaker === true) {
