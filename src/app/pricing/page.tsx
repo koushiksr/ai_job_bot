@@ -23,7 +23,8 @@ import {
   LogOut,
   ShieldCheck,
   Lock,
-  Gift
+  Gift,
+  Clock
 } from 'lucide-react'
 import JobFluxLogo from '@/components/JobFluxLogo'
 import { ThemeToggle } from '@/components/ThemeProvider'
